@@ -1,0 +1,85 @@
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Space+Grotesk:wght@300;400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
+@import "tailwindcss";
+
+:root {
+  --brand-navy: #1F2335;
+  --brand-periwinkle: #A7ACD9;
+  --background: #131316;
+  --surface: #1F2335;
+  --surface-container: #1F1F22;
+  --on-surface: #E4E1E5;
+  --on-surface-variant: #C7C5CF;
+  --outline: #919099;
+}
+
+@theme {
+  --color-brand-navy: #1F2335;
+  --color-brand-periwinkle: #A7ACD9;
+  --color-surface-container: #1F1F22;
+  --color-on-surface: #E4E1E5;
+  --color-on-surface-variant: #C7C5CF;
+  --color-outline: #919099;
+  --font-h1: 'Sora', sans-serif;
+  --font-body: 'Space Grotesk', sans-serif;
+}
+
+body {
+  background-color: #1F2335;
+  color: #E4E1E5;
+  font-family: 'Space Grotesk', sans-serif;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Sora', sans-serif;
+}
+
+.glass-container {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  border-left: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3), 
+              0 0 30px rgba(167, 172, 217, 0.1);
+}
+
+.periwinkle-glow:focus-within {
+  box-shadow: 0 0 15px rgba(167, 172, 217, 0.3);
+  border-color: #A7ACD9;
+}
+
+.primary-glow:hover {
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+}
+
+.floating-bg {
+  filter: blur(80px);
+  z-index: -1;
+  opacity: 0.15;
+}
+
+.watermark {
+  opacity: 0.03;
+  pointer-events: none;
+  user-select: none;
+  font-family: 'Sora', sans-serif;
+  font-weight: 800;
+}
+
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined', sans-serif;
+  font-weight: normal;
+  font-style: normal;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
+  font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+}
