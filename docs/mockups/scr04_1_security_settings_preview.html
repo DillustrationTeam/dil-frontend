@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Figure 16 - SCR-04.1 Change Password Panel & Security Settings</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+  <style>
+    :root {
+      --color-primary: #A7ACD9;
+      --color-secondary: #78767A;
+      --color-tertiary: #C6AC6D;
+      --color-neutral: #78767A;
+    }
+
+    body {
+      font-family: 'Space Grotesk', sans-serif;
+      background: radial-gradient(circle at 50% 30%, #252A40 0%, #161826 100%);
+      color: #e4e1e5;
+    }
+
+    h1,
+    h2,
+    h3,
+    .font-h1 {
+      font-family: 'Sora', sans-serif;
+    }
+
+    .glass-card {
+      background: rgba(30, 34, 52, 0.7);
+      backdrop-filter: blur(32px);
+      -webkit-backdrop-filter: blur(32px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 30px 70px rgba(0, 0, 0, 0.45);
+    }
+
+    .input-field {
+      background: rgba(16, 18, 28, 0.7);
+      border: 1px solid rgba(120, 118, 122, 0.3);
+      transition: all 0.2s ease-in-out;
+    }
+
+    .input-field:focus-within {
+      border-color: #A7ACD9;
+      box-shadow: 0 0 14px rgba(167, 172, 217, 0.25);
+      background: rgba(20, 23, 36, 0.85);
+    }
+
+    .btn-primary {
+      background: #A7ACD9;
+      color: #161826;
+      box-shadow: 0 4px 20px rgba(167, 172, 217, 0.25);
+      transition: all 0.2s ease-in-out;
+    }
+
+    .btn-primary:hover {
+      background: #ffffff;
+      box-shadow: 0 0 30px rgba(255, 255, 255, 0.4);
+      transform: translateY(-1px);
+    }
+
+    .nav-tab-active {
+      background: rgba(167, 172, 217, 0.15);
+      border-color: #A7ACD9;
+      color: #A7ACD9;
+    }
+  </style>
+</head>
+
+<body class="min-h-screen w-full p-6 md:p-10 relative overflow-hidden flex flex-col justify-between">
+
+  <!-- Ambient Glows -->
+  <div class="fixed top-0 left-0 w-full h-full -z-10 pointer-events-none">
+    <div class="absolute top-[-15%] left-[-15%] w-[55%] h-[55%] bg-[#A7ACD9]/10 rounded-full blur-[140px]"></div>
+    <div class="absolute bottom-[-10%] right-[-10%] w-[45%] h-[45%] bg-[#C6AC6D]/10 rounded-full blur-[120px]"></div>
+  </div>
+
+  <!-- Top Navigation Header -->
+  <header class="w-full max-w-6xl mx-auto flex items-center justify-between mb-8 z-10">
+    <div class="flex items-center gap-3">
+      <svg class="h-8 w-auto text-white" viewBox="0 0 48 48" fill="none">
+        <path d="M24 4L28 10H20L24 4Z" fill="#A7ACD9" />
+        <rect x="21" y="10" width="6" height="12" rx="2" fill="#A7ACD9" />
+        <path d="M16 22H32V25C32 29.4183 28.4183 33 24 33C19.5817 33 16 29.4183 16 25V22Z" fill="white"
+          fill-opacity="0.9" />
+        <rect x="22.5" y="33" width="3" height="11" rx="1.5" fill="#A7ACD9" />
+      </svg>
+      <span class="text-2xl font-extrabold font-h1 tracking-tight text-white">dillustration</span>
+    </div>
+    <div class="flex items-center gap-4 text-xs">
+      <span class="text-[#78767A]">Signed in as <strong class="text-white font-medium">Claude Monet</strong></span>
+      <div class="w-9 h-9 rounded-full bg-[#A7ACD9] text-[#161826] font-bold flex items-center justify-center font-h1">
+        CM</div>
+    </div>
+  </header>
+
+  <!-- Main Settings Container -->
+  <main class="w-full max-w-6xl mx-auto z-10 flex-grow">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+
+      <!-- Sidebar Navigation Tabs -->
+      <aside class="md:col-span-1 space-y-2">
+        <div class="px-3 pb-3">
+          <p class="text-xs uppercase tracking-[0.15em] text-[#78767A] font-semibold">Account Settings</p>
+        </div>
+        <a href="scr04_profile_settings_preview.html"
+          class="flex items-center gap-3 px-4 py-3 rounded-2xl border border-transparent text-[#78767A] hover:bg-white/5 hover:text-white text-sm font-semibold transition-all">
+          <span class="material-symbols-outlined text-lg">person</span>
+          <span>Profile Info</span>
+        </a>
+        <a href="#"
+          class="nav-tab-active flex items-center gap-3 px-4 py-3 rounded-2xl border text-sm font-semibold transition-all">
+          <span class="material-symbols-outlined text-lg">shield</span>
+          <span>Security & Password</span>
+        </a>
+        <a href="#"
+          class="flex items-center gap-3 px-4 py-3 rounded-2xl border border-transparent text-[#78767A] hover:bg-white/5 hover:text-white text-sm font-semibold transition-all">
+          <span class="material-symbols-outlined text-lg">notifications</span>
+          <span>Notifications</span>
+        </a>
+        <a href="#"
+          class="flex items-center gap-3 px-4 py-3 rounded-2xl border border-transparent text-[#78767A] hover:bg-white/5 hover:text-white text-sm font-semibold transition-all">
+          <span class="material-symbols-outlined text-lg">account_balance_wallet</span>
+          <span>Payout & Wallet</span>
+        </a>
+      </aside>
+
+      <!-- Main Security Settings Panel -->
+      <section class="md:col-span-3 space-y-8">
+
+        <!-- Change Password Card (SCR-04.1) -->
+        <div class="glass-card rounded-[28px] p-8 md:p-10 relative overflow-hidden">
+
+          <div class="flex justify-between items-start mb-6 pb-6 border-b border-white/10">
+            <div>
+              <h1 class="font-h1 text-2xl font-bold text-white mb-1"> Change Password</h1>
+              <p class="text-xs text-[#78767A]">Update your password to keep your account and wallet secure.</p>
+            </div>
+            <span
+              class="text-[10px] px-3 py-1 rounded-full bg-[#A7ACD9]/20 border border-[#A7ACD9]/40 text-[#A7ACD9] font-mono font-bold">SECURITY
+              POLICY</span>
+          </div>
+
+          <form class="space-y-5" onsubmit="event.preventDefault()">
+
+            <!-- Current Password -->
+            <div class="space-y-1.5">
+              <label class="text-[11px] uppercase tracking-[0.12em] text-[#78767A] font-semibold block ml-1">CURRENT
+                PASSWORD</label>
+              <div class="input-field rounded-xl flex items-center px-4 py-3 text-white">
+                <span class="material-symbols-outlined text-[#78767A] text-lg mr-3">lock</span>
+                <input type="password" value="••••••••••••"
+                  class="w-full bg-transparent text-sm text-white focus:outline-none placeholder-[#78767A]"
+                  placeholder="Enter current password" />
+                <span
+                  class="material-symbols-outlined text-[#78767A] text-lg cursor-pointer hover:text-white">visibility</span>
+              </div>
+            </div>
+
+            <!-- New Password & Confirm Password Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div class="space-y-1.5">
+                <label class="text-[11px] uppercase tracking-[0.12em] text-[#78767A] font-semibold block ml-1">NEW
+                  PASSWORD</label>
+                <div class="input-field rounded-xl flex items-center px-4 py-3 text-white">
+                  <span class="material-symbols-outlined text-[#78767A] text-lg mr-3">key</span>
+                  <input type="password" value="••••••••••••"
+                    class="w-full bg-transparent text-sm text-white focus:outline-none placeholder-[#78767A]"
+                    placeholder="Enter new password" />
+                  <span
+                    class="material-symbols-outlined text-[#78767A] text-lg cursor-pointer hover:text-white">visibility</span>
+                </div>
+              </div>
+              <div class="space-y-1.5">
+                <label class="text-[11px] uppercase tracking-[0.12em] text-[#78767A] font-semibold block ml-1">CONFIRM
+                  NEW PASSWORD</label>
+                <div class="input-field rounded-xl flex items-center px-4 py-3 text-white">
+                  <span class="material-symbols-outlined text-[#78767A] text-lg mr-3">check_circle</span>
+                  <input type="password" value="••••••••••••"
+                    class="w-full bg-transparent text-sm text-white focus:outline-none placeholder-[#78767A]"
+                    placeholder="Re-enter new password" />
+                  <span
+                    class="material-symbols-outlined text-[#78767A] text-lg cursor-pointer hover:text-white">visibility</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Password Policy Checklist -->
+            <div class="p-3.5 rounded-xl bg-white/[0.03] border border-white/5 space-y-1 text-xs text-[#78767A]">
+              <div class="flex items-center gap-2 text-[#A7ACD9]">
+                <span class="material-symbols-outlined text-sm">check</span>
+                <span>Minimum 6 characters required</span>
+              </div>
+              <div class="flex items-center gap-2 text-[#A7ACD9]">
+                <span class="material-symbols-outlined text-sm">check</span>
+                <span>Must be different from previous password</span>
+              </div>
+              <div class="flex items-center gap-2 text-[#78767A]">
+                <span class="material-symbols-outlined text-sm">info</span>
+                <span>Updating password revokes active JWT session tokens on all other devices (BR-10)</span>
+              </div>
+            </div>
+
+            <div class="flex justify-end pt-2">
+              <button type="button"
+                class="btn-primary px-7 py-3 rounded-xl font-bold text-sm flex items-center gap-2 cursor-pointer">
+                <span>Update Password</span>
+                <span class="material-symbols-outlined text-base">security</span>
+              </button>
+            </div>
+
+          </form>
+
+        </div>
+
+        <!-- Active Sessions Card -->
+        <div class="glass-card rounded-[28px] p-8 md:p-10 relative overflow-hidden">
+          <div class="flex justify-between items-center mb-6 pb-4 border-b border-white/10">
+            <div>
+              <h2 class="font-h1 text-lg font-bold text-white mb-1">Active Devices & Sessions</h2>
+              <p class="text-xs text-[#78767A]">Sessions logged into your dillustration account.</p>
+            </div>
+            <button type="button"
+              class="text-xs font-semibold px-4 py-2 rounded-xl border border-[#78767A]/30 text-[#78767A] hover:text-red-400 hover:border-red-400/50 transition-all cursor-pointer">
+              Revoke All Other Sessions
+            </button>
+          </div>
+
+          <div class="space-y-3">
+            <div class="p-4 rounded-xl bg-white/5 border border-white/10 flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-xl text-[#A7ACD9]">desktop_windows</span>
+                <div>
+                  <p class="text-xs font-bold text-white">Windows PC · Chrome Browser</p>
+                  <p class="text-[11px] text-[#78767A]">Active Now · Ho Chi Minh City, Vietnam (113.161.xx.xx)</p>
+                </div>
+              </div>
+              <span class="text-[10px] px-2.5 py-1 rounded-full bg-[#A7ACD9]/20 text-[#A7ACD9] font-semibold">Current
+                Device</span>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Page Footer -->
+  <footer class="w-full max-w-6xl mx-auto flex justify-between items-center text-xs text-[#78767A] z-10 pt-8">
+    <div>© 2026 dillustration. Digital Etherealism Art Collective.</div>
+    <div class="flex gap-6">
+      <a href="#" class="hover:text-white">Privacy</a>
+      <a href="#" class="hover:text-white">Guidelines</a>
+    </div>
+  </footer>
+
+</body>
+
+</html>

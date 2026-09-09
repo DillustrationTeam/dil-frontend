@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Artwork Details (SCR-07) - dillustration</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+  <style>
+    body { font-family: 'Space Grotesk', sans-serif; background: radial-gradient(circle at 50% 15%, #1d2133 0%, #0d0e15 100%); color: #e4e1e5; }
+    h1, h2, h3, .font-h1 { font-family: 'Sora', sans-serif; }
+    .glass-card { background: rgba(22, 25, 38, 0.85); backdrop-filter: blur(32px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 28px; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between pb-24">
+
+  <!-- Header Navigation -->
+  <header class="w-full border-b border-white/10 bg-[#0f1017]/90 backdrop-blur-md px-8 py-4 sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto flex justify-between items-center">
+      <a href="scr05_marketplace_feed_preview.html" class="text-2xl font-black font-h1 text-white">dillustration</a>
+      
+      <div class="hidden md:flex gap-6 items-center text-xs font-bold">
+        <a href="scr05_marketplace_feed_preview.html" class="text-[#8A8FA9] hover:text-white">Marketplace</a>
+        <a href="scr08_creator_profile_preview.html" class="text-[#8A8FA9] hover:text-white">Artists</a>
+        <a href="scr25_client_dashboard_preview.html" class="text-[#8A8FA9] hover:text-white">My Dashboard</a>
+        <a href="scr16_wallet_transaction_history_preview.html" class="text-[#8A8FA9] hover:text-white">Wallet</a>
+      </div>
+
+      <div class="flex items-center gap-4 text-xs">
+        <a href="global_notification_center_preview.html" class="p-2 bg-white/5 rounded-full hover:bg-white/10 text-white flex items-center">
+          <span class="material-symbols-outlined text-lg">notifications</span>
+        </a>
+        <a href="scr01_login_preview.html" class="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-full font-bold">Sign In</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl w-full mx-auto px-6 py-10 flex-grow space-y-8">
+    
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-8">
+      
+      <!-- Left Artwork Preview -->
+      <div class="md:col-span-8 glass-card p-6 space-y-4">
+        <div class="aspect-[16/10] rounded-2xl overflow-hidden relative">
+          <img src="https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?q=80&w=1000&auto=format&fit=crop" class="w-full h-full object-cover" />
+          <div class="absolute inset-0 bg-black/30 pointer-events-none flex items-center justify-center">
+            <span class="text-white/20 font-black text-4xl font-h1 rotate-12 select-none uppercase tracking-widest">WATERMARKED PREVIEW</span>
+          </div>
+        </div>
+        <div class="flex justify-between items-center text-xs text-[#8A8FA9]">
+          <span>Resolution: 3840 x 2160 (4K Master)</span>
+          <span>Presigned S3 Master Package Available</span>
+        </div>
+      </div>
+
+      <!-- Right Details & Creator CTA Sidebar -->
+      <div class="md:col-span-4 space-y-6">
+        
+        <div class="glass-card p-6 space-y-6">
+          <div>
+            <span class="text-[10px] text-[#C5C9F8] font-bold uppercase tracking-wider">COMMISSION CATALOG ITEM</span>
+            <h1 class="font-h1 text-2xl font-extrabold text-white mt-1">Cyberpunk Bounty Hunter</h1>
+            <p class="text-xs text-[#8A8FA9]">Character concept art & key visual illustration tier.</p>
+          </div>
+
+          <!-- Creator Mini Profile -->
+          <a href="scr08_creator_profile_preview.html" class="flex items-center gap-3 p-3 bg-white/5 rounded-2xl border border-white/5 hover:border-[#C5C9F8]/40 transition-all">
+            <div class="w-11 h-11 rounded-full bg-[#C5C9F8] text-[#0f1017] font-bold flex items-center justify-center font-h1 text-sm">
+              EV
+            </div>
+            <div>
+              <h4 class="font-bold text-white text-xs">@Etherea_Vox</h4>
+              <p class="text-[10px] text-[#C5C9F8]">Senior Concept Artist • ★ 4.95 Rating</p>
+            </div>
+          </a>
+
+          <!-- Price & CTA -->
+          <div class="space-y-3 pt-2">
+            <div class="flex justify-between items-end">
+              <span class="text-xs text-[#8A8FA9]">Starting Rate</span>
+              <span class="font-h1 text-2xl font-extrabold text-white">0.45 ETH</span>
+            </div>
+
+            <a href="scr10_commission_request_brief_preview.html" class="block w-full py-4 bg-white hover:bg-[#C5C9F8] text-[#0f1017] text-center font-extrabold rounded-2xl text-xs transition-all shadow-xl">
+              Request Commission From Creator
+            </a>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- FLOATING SYSTEM SCREEN QUICK NAVIGATOR BAR -->
+  <div id="quickNavigator" class="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 bg-[#0f1017]/95 backdrop-blur-xl border border-white/20 p-3 rounded-full shadow-[0_10px_30px_rgba(0,0,0,0.8)] flex items-center gap-3 text-xs max-w-5xl w-[92%] mx-auto justify-between px-6">
+    <div class="flex items-center gap-2 font-bold font-h1 text-[#C5C9F8] shrink-0">
+      <span class="material-symbols-outlined text-base">explore</span>
+      <span class="hidden sm:inline">Screen Navigator</span>
+    </div>
+    
+    <div class="flex items-center gap-2 overflow-x-auto py-1 text-[11px]">
+      <a href="scr05_marketplace_feed_preview.html" class="px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold whitespace-nowrap">Marketplace (SCR-05)</a>
+      <a href="scr07_artwork_details_preview.html" class="px-3 py-1 rounded-full bg-[#C5C9F8] text-[#0f1017] font-bold whitespace-nowrap">Artwork (SCR-07)</a>
+      <a href="scr08_creator_profile_preview.html" class="px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold whitespace-nowrap">Profile (SCR-08)</a>
+      <a href="scr10_commission_request_brief_preview.html" class="px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold whitespace-nowrap">Request Brief (SCR-10)</a>
+      <a href="scr12_commission_request_review_preview.html" class="px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold whitespace-nowrap">Review (SCR-12)</a>
+      <a href="scr11_escrow_checkout_preview.html" class="px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold whitespace-nowrap">Escrow (SCR-11)</a>
+      <a href="scr13_commission_workroom_unified_preview.html" class="px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold whitespace-nowrap">Workroom (SCR-13)</a>
+      <a href="scr15_order_completed_download_preview.html" class="px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold whitespace-nowrap">Download (SCR-15)</a>
+      <a href="scr16_wallet_transaction_history_preview.html" class="px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold whitespace-nowrap">Wallet (SCR-16)</a>
+      <a href="scr25_client_dashboard_preview.html" class="px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold whitespace-nowrap">Client (SCR-25)</a>
+      <a href="scr26_creator_dashboard_analytics_preview.html" class="px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold whitespace-nowrap">Creator (SCR-26)</a>
+      <a href="scr24_admin_dashboard_kpi_preview.html" class="px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold whitespace-nowrap">Admin (SCR-24)</a>
+    </div>
+  </div>
+
+</body>
+</html>

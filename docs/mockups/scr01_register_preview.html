@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register - dillustration</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Space+Grotesk:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+  <style>
+    body { font-family: 'Space Grotesk', sans-serif; background-color: #1F2335; color: #e4e1e5; }
+    h1, h2, h3, .font-h1 { font-family: 'Sora', sans-serif; }
+    .glass-container {
+      background: rgba(31, 35, 53, 0.75);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+    }
+  </style>
+</head>
+<body class="min-h-screen w-full flex items-center justify-center p-6 relative overflow-hidden">
+
+  <!-- Atmospheric Background Glows -->
+  <div class="fixed top-[-10%] left-[-10%] w-[50%] h-[50%] bg-[#c2c7f6]/10 rounded-full blur-[120px] pointer-events-none animate-pulse"></div>
+  <div class="fixed bottom-[-5%] right-[-5%] w-[40%] h-[40%] bg-[#A7ACD9]/5 rounded-full blur-[100px] pointer-events-none"></div>
+
+  <!-- Main Registration Shell -->
+  <main class="w-full max-w-xl z-10">
+    
+    <!-- Brand Identity Header -->
+    <div class="flex flex-col items-center mb-8">
+      <a href="scr05_marketplace_feed_preview.html" class="mb-2">
+        <span class="text-3xl font-black font-h1 tracking-tight text-white drop-shadow-[0_0_20px_rgba(194,199,246,0.4)]">dillustration</span>
+      </a>
+      <p class="text-xs text-[#c7c5cf] uppercase tracking-widest font-medium">
+        Digital Etherealism Collective
+      </p>
+    </div>
+
+    <!-- Glassmorphic Form Card -->
+    <div class="glass-container rounded-3xl p-8 md:p-12 relative overflow-hidden">
+      
+      <div class="relative z-10">
+        <h1 class="font-h1 text-3xl font-bold mb-2 text-white">Create Account</h1>
+        <p class="text-sm text-[#c7c5cf] mb-8">
+          Join the curated gallery of ethereal digital artists.
+        </p>
+
+        <form class="space-y-6" onsubmit="handleRegister(event)">
+          
+          <!-- Full Name -->
+          <div class="space-y-2">
+            <label class="text-xs uppercase tracking-widest text-[#919099] ml-1 font-medium block">
+              Full Name
+            </label>
+            <input
+              type="text"
+              required
+              placeholder="Claude Monet"
+              value="Claude Monet"
+              class="w-full bg-[#0e0e11]/50 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-[#A7ACD9] text-sm"
+            />
+          </div>
+
+          <!-- Email Address -->
+          <div class="space-y-2">
+            <label class="text-xs uppercase tracking-widest text-[#919099] ml-1 font-medium block">
+              Email Address
+            </label>
+            <div class="relative">
+              <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-white/40 text-xl">
+                alternate_email
+              </span>
+              <input
+                type="email"
+                required
+                placeholder="curator@ethereal.art"
+                value="curator@ethereal.art"
+                class="w-full bg-[#0e0e11]/50 border border-white/10 rounded-xl pl-12 pr-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-[#A7ACD9] text-sm"
+              />
+            </div>
+          </div>
+
+          <!-- Password -->
+          <div class="space-y-2">
+            <label class="text-xs uppercase tracking-widest text-[#919099] ml-1 font-medium block">
+              Password
+            </label>
+            <div class="relative">
+              <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-white/40 text-xl">
+                lock_open
+              </span>
+              <input
+                type="password"
+                required
+                placeholder="••••••••••••"
+                value="securepassword123"
+                class="w-full bg-[#0e0e11]/50 border border-white/10 rounded-xl pl-12 pr-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-[#A7ACD9] text-sm"
+              />
+            </div>
+          </div>
+
+          <!-- Terms Checkbox -->
+          <div class="flex items-start gap-3 pt-2">
+            <input
+              id="terms"
+              type="checkbox"
+              checked
+              required
+              class="mt-1 rounded border-white/10 bg-[#0e0e11] text-[#A7ACD9] focus:ring-[#A7ACD9] cursor-pointer"
+            />
+            <label for="terms" class="text-xs text-[#c7c5cf] leading-relaxed cursor-pointer">
+              I agree to the <span class="text-[#A7ACD9] underline hover:text-white">Digital Etherealism Guidelines</span> and community standards for artistic integrity.
+            </label>
+          </div>
+
+          <!-- Primary Action Button -->
+          <button
+            type="submit"
+            class="w-full py-4 bg-white text-[#1F2335] font-bold text-base rounded-xl transition-all duration-300 active:scale-95 mt-4 flex items-center justify-center gap-2 group cursor-pointer shadow-xl hover:bg-[#c2c7f6]"
+          >
+            <span>Begin Journey</span>
+            <span class="material-symbols-outlined transition-transform duration-300 group-hover:translate-x-1">
+              arrow_forward
+            </span>
+          </button>
+        </form>
+
+        <!-- Social Proof / Footer -->
+        <div class="mt-8 pt-6 border-t border-white/10 flex flex-col items-center gap-6">
+          <p class="text-sm text-[#c7c5cf]">
+            Already part of the collective? 
+            <a href="scr01_login_preview.html" class="text-[#A7ACD9] hover:underline font-bold ml-1">
+              Sign In
+            </a>
+          </p>
+
+          <div class="grid grid-cols-2 gap-4 w-full text-xs font-semibold text-[#c7c5cf]">
+            <button onclick="alert('Google Signup')" class="flex items-center justify-center gap-2 py-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 cursor-pointer">
+              <span>Google</span>
+            </button>
+            <button onclick="alert('Pixiv Signup')" class="flex items-center justify-center gap-2 py-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 cursor-pointer">
+              <span>Pixiv</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Status Footer -->
+    <div class="mt-8 flex justify-between items-center px-4 text-xs text-[#919099]">
+      <div class="flex items-center gap-3">
+        <span class="w-2 h-2 rounded-full bg-[#E3C786] shadow-[0_0_8px_#E3C786]"></span>
+        <span class="uppercase tracking-wider">Gallery Servers Online</span>
+      </div>
+      <span>v2.04</span>
+    </div>
+
+  </main>
+
+  <script>
+    function handleRegister(e) {
+      e.preventDefault();
+      alert('Account Created Successfully! Redirecting to email OTP verification...');
+      window.location.href = 'scr01_verify_otp_preview.html';
+    }
+  </script>
+
+</body>
+</html>

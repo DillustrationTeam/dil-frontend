@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Figure 21 - SCR-08 Follow / Following Button Toggle (Use Case 3.3.5)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Space+Grotesk:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+  <style>
+    :root {
+      --color-primary: #C5C9F8;
+      --color-secondary: #8A8FA9;
+      --color-tertiary: #C6AC6D;
+      --color-bg-dark: #151724;
+    }
+    body {
+      font-family: 'Space Grotesk', sans-serif;
+      background: radial-gradient(circle at 50% 20%, #252A42 0%, #151724 100%);
+      color: #e4e1e5;
+    }
+    h1, h2, h3, .font-h1 {
+      font-family: 'Sora', sans-serif;
+    }
+    .profile-card {
+      background: rgba(30, 34, 53, 0.65);
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 28px;
+    }
+    .btn-follow-active {
+      background: #C5C9F8;
+      color: #151724;
+      font-weight: 700;
+      box-shadow: 0 0 20px rgba(197, 201, 248, 0.3);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .btn-follow-active:hover {
+      background: #ffffff;
+      box-shadow: 0 0 25px rgba(255, 255, 255, 0.45);
+    }
+    .btn-following-active {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(197, 201, 248, 0.5);
+      color: #C5C9F8;
+      font-weight: 700;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .btn-following-active:hover {
+      background: rgba(239, 68, 68, 0.2);
+      border-color: rgba(239, 68, 68, 0.5);
+      color: #f87171;
+    }
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #ffffff;
+      font-weight: 600;
+      transition: all 0.2s ease-in-out;
+    }
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+    .state-btn-active {
+      background: #C5C9F8;
+      color: #151724;
+      font-weight: 700;
+    }
+    .state-btn-inactive {
+      background: rgba(255, 255, 255, 0.05);
+      color: #8A8FA9;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .state-btn-inactive:hover {
+      background: rgba(255, 255, 255, 0.12);
+      color: #ffffff;
+    }
+  </style>
+</head>
+<body class="min-h-screen w-full flex flex-col justify-between relative overflow-x-hidden">
+
+  <!-- Ambient Background Glows -->
+  <div class="fixed top-0 left-0 w-full h-full -z-10 pointer-events-none">
+    <div class="absolute top-[-15%] left-[-15%] w-[55%] h-[55%] bg-[#C5C9F8]/10 rounded-full blur-[140px]"></div>
+    <div class="absolute bottom-[-10%] right-[-10%] w-[45%] h-[45%] bg-[#C6AC6D]/10 rounded-full blur-[120px]"></div>
+  </div>
+
+  <!-- Top Navigation Header -->
+  <header class="w-full border-b border-white/10 bg-[#151724]/90 backdrop-blur-md sticky top-0 z-50 px-6 py-4">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      
+      <!-- Brand Logo & Navigation Links -->
+      <div class="flex items-center gap-10">
+        <a href="scr05_marketplace_feed_preview.html" class="text-2xl font-extrabold font-h1 tracking-tight text-white">dillustration</a>
+        <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-[#8A8FA9]">
+          <a href="scr05_marketplace_feed_preview.html" class="hover:text-white transition-colors">Marketplace</a>
+          <a href="scr08_creator_profile_preview.html" class="text-white border-b-2 border-[#C5C9F8] pb-1 font-semibold">Artists</a>
+          <a href="#" class="hover:text-white transition-colors">Dashboard</a>
+        </nav>
+      </div>
+
+      <!-- Right Header Tools -->
+      <div class="flex items-center gap-4">
+        <button class="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/80 hover:text-white cursor-pointer relative">
+          <span class="material-symbols-outlined text-lg">notifications</span>
+          <span class="absolute top-1 right-1 w-2.5 h-2.5 bg-[#C5C9F8] rounded-full"></span>
+        </button>
+        <button class="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/80 hover:text-white cursor-pointer">
+          <span class="material-symbols-outlined text-lg">shopping_bag</span>
+        </button>
+        <div class="w-9 h-9 rounded-full bg-[#C5C9F8] text-[#151724] font-bold flex items-center justify-center font-h1 text-xs cursor-pointer">
+          CM
+        </div>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Interactive Specification State Switcher Bar (For Testing Use Case 3.3.5) -->
+  <div class="w-full bg-[#181A28]/90 border-b border-white/10 py-3 px-6 text-xs sticky top-[73px] z-40">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div class="flex items-center gap-2 text-[#8A8FA9]">
+        <span class="material-symbols-outlined text-base text-[#C5C9F8]">tune</span>
+        <span class="font-semibold text-white">UC 3.3.5 Scenario Switcher:</span>
+      </div>
+      <div class="flex flex-wrap items-center gap-2">
+        <button id="btnRoleClient" onclick="switchUserRole('client')" class="state-btn-active px-3 py-1.5 rounded-lg text-[11px] uppercase tracking-wider cursor-pointer flex items-center gap-1">
+          <span class="material-symbols-outlined text-sm">person</span>
+          <span>Normal Flow (Authenticated Client)</span>
+        </button>
+        <button id="btnRoleGuest" onclick="switchUserRole('guest')" class="state-btn-inactive px-3 py-1.5 rounded-lg text-[11px] uppercase tracking-wider cursor-pointer flex items-center gap-1">
+          <span class="material-symbols-outlined text-sm">no_accounts</span>
+          <span>BR-20 (Unauthenticated Guest)</span>
+        </button>
+        <button id="btnRoleSelf" onclick="switchUserRole('self')" class="state-btn-inactive px-3 py-1.5 rounded-lg text-[11px] uppercase tracking-wider cursor-pointer flex items-center gap-1">
+          <span class="material-symbols-outlined text-sm">block</span>
+          <span>BR-19 (Self-Follow Validation)</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Alert (Follow Action Feedback) -->
+  <div id="followToast" class="hidden fixed bottom-6 right-6 z-50 bg-[#C5C9F8] text-[#151724] px-5 py-3.5 rounded-2xl shadow-2xl font-semibold text-xs flex items-center gap-3 border border-white">
+    <span class="material-symbols-outlined text-xl">notifications_active</span>
+    <div>
+      <p id="toastTitle" class="font-bold text-sm">Now Following Etherea_Vox</p>
+      <p id="toastSub" class="text-[11px] opacity-80">You will receive real-time alerts when new artworks or slots open.</p>
+    </div>
+  </div>
+
+  <!-- Validation Error Alert Banner (BR-19 Self Follow Prevention) -->
+  <div id="selfFollowAlert" class="hidden max-w-7xl mx-auto px-6 mt-4">
+    <div class="bg-red-500/20 border border-red-500/40 text-red-300 px-5 py-3 rounded-2xl text-xs flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <span class="material-symbols-outlined text-lg text-red-400">warning</span>
+        <div>
+          <span class="font-bold text-white">BR-19 Rule Enforced:</span>
+          <span>Follower ID equals Following ID. You cannot follow your own creator profile.</span>
+        </div>
+      </div>
+      <span class="text-[10px] uppercase font-bold tracking-wider px-2.5 py-1 rounded bg-red-500/30 text-white">Validation Error</span>
+    </div>
+  </div>
+
+  <!-- GUEST LOGIN PROMPT MODAL (BR-20 Abnormal Case 2.a1) -->
+  <div id="guestLoginModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-md z-50 flex items-center justify-center p-4">
+    <div class="bg-[#181A28] border border-white/10 rounded-3xl p-8 max-w-md w-full text-center space-y-6 shadow-2xl relative">
+      
+      <button onclick="closeGuestModal()" class="absolute top-4 right-4 text-[#8A8FA9] hover:text-white">
+        <span class="material-symbols-outlined text-xl">close</span>
+      </button>
+
+      <div class="w-16 h-16 rounded-full bg-[#C5C9F8]/10 text-[#C5C9F8] border border-[#C5C9F8]/30 mx-auto flex items-center justify-center">
+        <span class="material-symbols-outlined text-3xl">lock</span>
+      </div>
+
+      <div class="space-y-2">
+        <span class="text-[10px] uppercase tracking-widest font-extrabold text-[#C5C9F8]">BR-20 REQUIREMENT</span>
+        <h3 class="font-h1 text-xl font-bold text-white">Please login to follow creators.</h3>
+        <p class="text-xs text-[#8A8FA9] leading-relaxed">
+          Sign in to your Client account to follow your favorite artists, get custom notifications for new portfolio drops, and unlock instant commission booking.
+        </p>
+      </div>
+
+      <div class="space-y-3 pt-2">
+        <a href="scr02_login_preview.html" class="btn-follow-active w-full py-3.5 rounded-full text-xs text-center font-bold block cursor-pointer">
+          Sign In Now
+        </a>
+        <button onclick="closeGuestModal()" class="btn-secondary w-full py-3 rounded-full text-xs text-center font-semibold cursor-pointer">
+          Continue Browsing as Guest
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Main Profile Page Container -->
+  <main class="max-w-7xl w-full mx-auto px-6 py-8 flex-grow space-y-8">
+    
+    <!-- Hero Banner Wrapper -->
+    <div class="relative w-full rounded-[32px] overflow-hidden bg-[#181A28] border border-white/10">
+      
+      <!-- Cover Banner Artwork Image -->
+      <div class="h-64 md:h-80 w-full bg-cover bg-center relative" style="background-image: url('https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=1400&q=80');">
+        <div class="absolute inset-0 bg-gradient-to-t from-[#151724] via-[#151724]/40 to-transparent"></div>
+      </div>
+
+      <!-- Profile Header Content Over Banner -->
+      <div class="p-6 md:p-8 -mt-24 md:-mt-28 relative z-10 flex flex-col md:flex-row items-start md:items-end justify-between gap-6">
+        
+        <!-- Avatar & Bio Details -->
+        <div class="flex flex-col md:flex-row items-start gap-6 max-w-3xl">
+          <!-- Avatar Frame -->
+          <div class="relative shrink-0">
+            <div class="w-28 h-28 md:w-32 md:h-32 rounded-2xl overflow-hidden border-4 border-[#151724] bg-cover bg-center shadow-2xl" style="background-image: url('https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&q=80');"></div>
+            <div class="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-[#C5C9F8] text-[#151724] border-2 border-[#151724] flex items-center justify-center shadow-md">
+              <span class="material-symbols-outlined text-sm font-bold">check</span>
+            </div>
+          </div>
+
+          <!-- Name, Bio, Stats & Follower Counter -->
+          <div class="space-y-3 pt-2">
+            <div class="flex flex-wrap items-center gap-3">
+              <h1 class="font-h1 text-3xl font-extrabold text-white tracking-tight">Etherea_Vox</h1>
+              <span class="text-xs px-3 py-1 rounded-full bg-[#C6AC6D]/20 text-[#C6AC6D] border border-[#C6AC6D]/40 font-semibold flex items-center gap-1">
+                <span>★ 4.9</span>
+                <span class="text-[#8A8FA9] text-[10px]">(48 Reviews)</span>
+              </span>
+              <span class="text-xs px-3 py-1 rounded-full bg-[#C5C9F8]/20 text-[#C5C9F8] border border-[#C5C9F8]/30 font-semibold">
+                3 / 5 Slots Open
+              </span>
+            </div>
+
+            <!-- Follower Count Widget (UC 3.3.5 Dynamic Metric) -->
+            <div class="flex items-center gap-4 text-xs font-semibold">
+              <div class="flex items-center gap-1.5 text-white">
+                <span class="material-symbols-outlined text-base text-[#C5C9F8]">group</span>
+                <span id="followerCountDisplay" class="font-h1 font-bold text-sm text-[#C5C9F8]">1,420</span>
+                <span class="text-[#8A8FA9] font-normal">Followers</span>
+              </div>
+              <span class="text-white/20">•</span>
+              <div class="text-[#8A8FA9]">
+                <span class="text-white font-bold">84</span> Artworks
+              </div>
+            </div>
+
+            <p class="text-sm text-[#8A8FA9] leading-relaxed">
+              Digital Etherealist & Character Concept Artist. Specializing in high-fidelity glassmorphic designs and luminous portraiture.
+            </p>
+          </div>
+        </div>
+
+        <!-- HEADER ACTION BUTTONS (TARGET FUNCTIONALITY OF UC 3.3.5) -->
+        <div class="flex items-center gap-3 shrink-0">
+          
+          <!-- FOLLOW / FOLLOWING BUTTON TOGGLE (UC 3.3.5) -->
+          <button id="btnFollowToggle" onclick="handleFollowToggle()" class="btn-follow-active px-6 py-3 rounded-full text-xs font-bold flex items-center gap-2 cursor-pointer transition-all">
+            <span id="followIcon" class="material-symbols-outlined text-base">person_add</span>
+            <span id="followText">Follow Creator</span>
+          </button>
+
+          <!-- Hire Me CTA Button -->
+          <a href="scr07_creator_commission_sidebar_preview.html" class="btn-secondary px-5 py-3 rounded-full text-xs font-semibold flex items-center gap-2 cursor-pointer">
+            <span class="material-symbols-outlined text-base">mail</span>
+            <span>Request Commission</span>
+          </a>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Navigation Tabs Row -->
+    <div class="border-b border-white/10 flex items-center justify-between text-base">
+      <div class="flex items-center gap-8">
+        <a href="#" class="color-white font-bold border-b-2 border-[#C5C9F8] pb-4 flex items-center gap-2">
+          <span class="material-symbols-outlined text-lg text-[#C5C9F8]">grid_view</span>
+          <span>Portfolio Gallery</span>
+        </a>
+        <a href="scr08_rate_card_preview.html" class="text-[#8A8FA9] hover:text-white pb-4 flex items-center gap-2">
+          <span class="material-symbols-outlined text-lg">sell</span>
+          <span>Rate Card</span>
+        </a>
+      </div>
+
+      <a href="scr08_follower_notification_alert_preview.html" class="text-xs text-[#C5C9F8] hover:underline font-semibold pb-4 flex items-center gap-1">
+        <span>View Follower Notification Alert Screen (Layout 2)</span>
+        <span class="material-symbols-outlined text-sm">arrow_forward</span>
+      </a>
+    </div>
+
+    <!-- Portfolio Gallery Grid Preview -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 opacity-90">
+      
+      <div class="profile-card rounded-[24px] overflow-hidden group cursor-pointer h-80 relative">
+        <div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105" style="background-image: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&q=80');"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+        <div class="absolute bottom-4 left-4">
+          <span class="text-[10px] uppercase tracking-widest text-[#C5C9F8] font-bold">CONCEPT ART</span>
+          <h3 class="font-h1 text-lg font-bold text-white">Luminous Astral Being</h3>
+        </div>
+      </div>
+
+      <div class="profile-card rounded-[24px] overflow-hidden group cursor-pointer h-80 relative">
+        <div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105" style="background-image: url('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=600&q=80');"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+        <div class="absolute bottom-4 left-4">
+          <span class="text-[10px] uppercase tracking-widest text-[#C5C9F8] font-bold">CYBER</span>
+          <h3 class="font-h1 text-lg font-bold text-white">Cyber City Skyline</h3>
+        </div>
+      </div>
+
+      <div class="profile-card rounded-[24px] overflow-hidden group cursor-pointer h-80 relative">
+        <div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105" style="background-image: url('https://images.unsplash.com/photo-1563089145-599997674d42?w=600&q=80');"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+        <div class="absolute bottom-4 left-4">
+          <span class="text-[10px] uppercase tracking-widest text-[#C5C9F8] font-bold">ETHEREAL</span>
+          <h3 class="font-h1 text-lg font-bold text-white">Orb of Eternity</h3>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="w-full border-t border-white/10 py-8 px-6 bg-[#0E101A] text-xs text-[#8A8FA9] mt-12">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+      <div>
+        <span class="text-lg font-bold font-h1 text-white block mb-1">dillustration</span>
+        <p>© 2026 dillustration. Digital Etherealism Art Collective.</p>
+      </div>
+      <div class="flex gap-8">
+        <a href="#" class="hover:text-white">Privacy</a>
+        <a href="#" class="hover:text-white">Terms</a>
+        <a href="#" class="hover:text-white">Contact</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Interactive JavaScript for UC 3.3.5 State Logic -->
+  <script>
+    let currentRole = 'client'; // 'client', 'guest', 'self'
+    let isFollowing = false;
+    let baseFollowers = 1420;
+
+    function updateFollowerDisplay() {
+      const display = document.getElementById('followerCountDisplay');
+      const count = isFollowing ? baseFollowers + 1 : baseFollowers;
+      display.innerText = count.toLocaleString();
+    }
+
+    function renderButtonState() {
+      const btn = document.getElementById('btnFollowToggle');
+      const icon = document.getElementById('followIcon');
+      const text = document.getElementById('followText');
+      const selfAlert = document.getElementById('selfFollowAlert');
+
+      if (currentRole === 'self') {
+        btn.disabled = true;
+        btn.className = 'bg-white/5 border border-white/10 text-[#8A8FA9] px-6 py-3 rounded-full text-xs font-semibold cursor-not-allowed opacity-60';
+        icon.innerText = 'block';
+        text.innerText = 'Cannot Follow Self';
+        selfAlert.classList.remove('hidden');
+      } else {
+        btn.disabled = false;
+        selfAlert.classList.add('hidden');
+
+        if (isFollowing) {
+          btn.className = 'btn-following-active px-6 py-3 rounded-full text-xs font-bold flex items-center gap-2 cursor-pointer';
+          icon.innerText = 'check';
+          text.innerText = 'Following Creator';
+        } else {
+          btn.className = 'btn-follow-active px-6 py-3 rounded-full text-xs font-bold flex items-center gap-2 cursor-pointer';
+          icon.innerText = 'person_add';
+          text.innerText = 'Follow Creator';
+        }
+      }
+      updateFollowerDisplay();
+    }
+
+    function handleFollowToggle() {
+      if (currentRole === 'guest') {
+        // BR-20 Abnormal case 2.a1
+        document.getElementById('guestLoginModal').classList.remove('hidden');
+        return;
+      }
+
+      if (currentRole === 'self') {
+        // BR-19 Validation
+        alert('Validation Error: Follower ID equals Following ID. You cannot follow yourself.');
+        return;
+      }
+
+      // Normal Flow
+      isFollowing = !isFollowing;
+      renderButtonState();
+
+      const toast = document.getElementById('followToast');
+      const toastTitle = document.getElementById('toastTitle');
+      const toastSub = document.getElementById('toastSub');
+
+      if (isFollowing) {
+        toastTitle.innerText = 'Now Following Etherea_Vox';
+        toastSub.innerText = 'Follow relationship created. Creator notified: "User X started following you".';
+      } else {
+        toastTitle.innerText = 'Unfollowed Etherea_Vox';
+        toastSub.innerText = 'Follow relationship record removed from database.';
+      }
+
+      toast.classList.remove('hidden');
+      setTimeout(() => {
+        toast.classList.add('hidden');
+      }, 4000);
+    }
+
+    function closeGuestModal() {
+      document.getElementById('guestLoginModal').classList.add('hidden');
+    }
+
+    function switchUserRole(role) {
+      currentRole = role;
+      
+      const btnClient = document.getElementById('btnRoleClient');
+      const btnGuest = document.getElementById('btnRoleGuest');
+      const btnSelf = document.getElementById('btnRoleSelf');
+
+      [btnClient, btnGuest, btnSelf].forEach(btn => {
+        btn.className = 'state-btn-inactive px-3 py-1.5 rounded-lg text-[11px] uppercase tracking-wider cursor-pointer flex items-center gap-1';
+      });
+
+      if (role === 'client') {
+        btnClient.className = 'state-btn-active px-3 py-1.5 rounded-lg text-[11px] uppercase tracking-wider cursor-pointer flex items-center gap-1';
+      } else if (role === 'guest') {
+        btnGuest.className = 'state-btn-active px-3 py-1.5 rounded-lg text-[11px] uppercase tracking-wider cursor-pointer flex items-center gap-1';
+      } else if (role === 'self') {
+        btnSelf.className = 'state-btn-active px-3 py-1.5 rounded-lg text-[11px] uppercase tracking-wider cursor-pointer flex items-center gap-1';
+      }
+
+      renderButtonState();
+    }
+  </script>
+
+</body>
+</html>

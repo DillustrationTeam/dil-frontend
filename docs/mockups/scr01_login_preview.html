@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - dillustration</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Space+Grotesk:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+  <style>
+    body { font-family: 'Space Grotesk', sans-serif; background-color: #1F2335; color: #e4e1e5; }
+    h1, h2, h3, .font-h1 { font-family: 'Sora', sans-serif; }
+    .glass-container {
+      background: rgba(31, 35, 53, 0.75);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+    }
+    .watermark {
+      color: rgba(255, 255, 255, 0.02);
+      font-family: 'Sora', sans-serif;
+      font-weight: 800;
+      user-select: none;
+    }
+    .periwinkle-glow:focus-within {
+      border-color: #A7ACD9;
+      box-shadow: 0 0 20px rgba(167, 172, 217, 0.3);
+    }
+    .primary-glow {
+      box-shadow: 0 0 25px rgba(255, 255, 255, 0.3);
+    }
+    .primary-glow:hover {
+      box-shadow: 0 0 35px rgba(167, 172, 217, 0.5);
+    }
+  </style>
+</head>
+<body class="min-h-screen w-full flex items-center justify-center relative px-6 py-12 overflow-hidden">
+
+  <!-- Ambient Decorative Background Elements -->
+  <div class="fixed top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-[#A7ACD9]/10 blur-[120px] pointer-events-none animate-pulse"></div>
+  <div class="fixed bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-[#c2c7f6]/10 blur-[100px] pointer-events-none"></div>
+
+  <!-- Background Watermarks -->
+  <div class="absolute inset-0 flex items-center justify-center overflow-hidden pointer-events-none">
+    <div class="watermark text-[20rem] absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 rotate-12">dill</div>
+    <div class="watermark text-[20rem] absolute bottom-0 right-0 translate-x-1/3 translate-y-1/3 -rotate-12">art</div>
+  </div>
+
+  <!-- Main Login Shell -->
+  <div class="w-full max-w-lg z-10">
+    <div class="glass-container rounded-[32px] p-8 md:p-12 relative overflow-hidden">
+      
+      <!-- Brand Logo Section -->
+      <header class="mb-10 text-center">
+        <div class="flex justify-center mb-6">
+          <a href="scr05_marketplace_feed_preview.html">
+            <span class="text-3xl font-black font-h1 tracking-tight text-white drop-shadow-[0_0_20px_rgba(194,199,246,0.4)]">dillustration</span>
+          </a>
+        </div>
+        <p class="text-[#C7C5CF] text-sm">
+          Enter the digital gallery of etherealism.
+        </p>
+      </header>
+
+      <!-- Login Form -->
+      <form class="space-y-6" onsubmit="handleLogin(event)">
+        
+        <!-- Email Input -->
+        <div class="space-y-2">
+          <label class="text-xs text-[#C7C5CF] uppercase tracking-widest block ml-1 font-medium" for="email">
+            Email Address
+          </label>
+          <div class="relative group periwinkle-glow rounded-xl transition-all duration-300 border border-white/10 bg-white/5">
+            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <span class="material-symbols-outlined text-[#919099] text-xl">alternate_email</span>
+            </div>
+            <input
+              id="email"
+              type="email"
+              required
+              value="artist@dillustration.com"
+              placeholder="artist@dillustration.com"
+              class="block w-full bg-transparent border-none py-4 pl-12 pr-4 text-[#E4E1E5] focus:outline-none placeholder-white/20 text-sm"
+            />
+          </div>
+        </div>
+
+        <!-- Password Input -->
+        <div class="space-y-2">
+          <div class="flex justify-between items-center px-1">
+            <label class="text-xs text-[#C7C5CF] uppercase tracking-widest block font-medium" for="password">
+              Password
+            </label>
+            <a href="scr01_forgot_password_preview.html" class="text-xs text-[#A7ACD9] hover:text-white transition-colors">
+              Forgot Password?
+            </a>
+          </div>
+          <div class="relative group periwinkle-glow rounded-xl transition-all duration-300 border border-white/10 bg-white/5">
+            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <span class="material-symbols-outlined text-[#919099] text-xl">lock</span>
+            </div>
+            <input
+              id="password"
+              type="password"
+              required
+              value="password123"
+              placeholder="••••••••••••"
+              class="block w-full bg-transparent border-none py-4 pl-12 pr-12 text-[#E4E1E5] focus:outline-none placeholder-white/20 text-sm"
+            />
+            <div class="absolute inset-y-0 right-0 pr-4 flex items-center">
+              <button type="button" onclick="togglePasswordVisibility()" class="text-[#919099] hover:text-white cursor-pointer">
+                <span id="passIcon" class="material-symbols-outlined text-xl">visibility</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Keep me signed in -->
+        <div class="flex items-center space-x-2 px-1">
+          <input
+            id="remember"
+            type="checkbox"
+            checked
+            class="w-4 h-4 rounded border-white/10 bg-white/5 text-[#A7ACD9] focus:ring-[#A7ACD9] cursor-pointer"
+          />
+          <label class="text-sm text-[#C7C5CF] cursor-pointer select-none" for="remember">
+            Keep me signed in
+          </label>
+        </div>
+
+        <!-- Submit Button -->
+        <button
+          type="submit"
+          class="w-full bg-white text-[#1F2335] font-bold text-base py-4 rounded-xl transition-all duration-300 active:scale-[0.98] primary-glow flex items-center justify-center space-x-3 group cursor-pointer"
+        >
+          <span>Enter Gallery</span>
+          <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">
+            arrow_forward
+          </span>
+        </button>
+
+      </form>
+
+      <!-- Social Login Divider -->
+      <div class="relative my-8">
+        <div class="absolute inset-0 flex items-center">
+          <div class="w-full border-t border-white/10"></div>
+        </div>
+        <div class="relative flex justify-center text-xs uppercase tracking-widest">
+          <span class="bg-[#1F2335]/80 px-4 text-[#919099] backdrop-blur-sm">
+            Or Curate via
+          </span>
+        </div>
+      </div>
+
+      <!-- Social Buttons -->
+      <div class="grid grid-cols-2 gap-4">
+        <button type="button" onclick="alert('Google Auth Initiated')" class="flex items-center justify-center space-x-2 py-3 border border-white/10 rounded-xl hover:bg-white/5 transition-all text-xs font-medium cursor-pointer">
+          <span class="material-symbols-outlined text-lg">public</span>
+          <span>Google</span>
+        </button>
+        <button type="button" onclick="alert('Web3 Wallet Auth Initiated')" class="flex items-center justify-center space-x-2 py-3 border border-white/10 rounded-xl hover:bg-white/5 transition-all text-xs font-medium cursor-pointer">
+          <span class="material-symbols-outlined text-lg">token</span>
+          <span>Web3</span>
+        </button>
+      </div>
+
+      <!-- Footer Link -->
+      <div class="mt-8 text-center">
+        <p class="text-sm text-[#C7C5CF]">
+          New to the collective?
+          <a href="scr01_register_preview.html" class="text-white font-bold hover:text-[#A7ACD9] transition-colors ml-1">
+            Register Now
+          </a>
+        </p>
+      </div>
+
+    </div>
+
+    <!-- Decorative Featured Curator Snippet -->
+    <div class="mt-8 flex justify-between items-center opacity-60 px-2 text-xs">
+      <div class="flex items-center space-x-3">
+        <div class="w-9 h-9 rounded-full bg-[#A7ACD9] text-[#1F2335] font-bold flex items-center justify-center">
+          EV
+        </div>
+        <div>
+          <p class="text-[10px] uppercase text-[#919099] tracking-wider font-semibold">Featured Curator</p>
+          <p class="text-white font-medium">Ethereal_Visions</p>
+        </div>
+      </div>
+      <div class="flex items-center space-x-2">
+        <div class="w-2 h-2 rounded-full bg-[#A7ACD9] animate-ping"></div>
+        <p class="text-[10px] uppercase text-[#A7ACD9] tracking-wider font-semibold">1.2k Artists Online</p>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    function togglePasswordVisibility() {
+      const input = document.getElementById('password');
+      const icon = document.getElementById('passIcon');
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.innerText = 'visibility_off';
+      } else {
+        input.type = 'password';
+        icon.innerText = 'visibility';
+      }
+    }
+    function handleLogin(e) {
+      e.preventDefault();
+      alert('Authentication Successful! Welcome back, Ethereal Curator.');
+      window.location.href = 'scr05_marketplace_feed_preview.html';
+    }
+  </script>
+
+</body>
+</html>

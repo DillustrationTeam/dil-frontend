@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Artwork Search & Advanced Filter (SCR-06) - dillustration</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+  <style>
+    body { font-family: 'Space Grotesk', sans-serif; background: radial-gradient(circle at 50% 15%, #1d2133 0%, #0d0e15 100%); color: #e4e1e5; }
+    h1, h2, h3, .font-h1 { font-family: 'Sora', sans-serif; }
+    .glass-card { background: rgba(22, 25, 38, 0.85); backdrop-filter: blur(32px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 28px; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between pb-24">
+
+  <!-- Header Navigation -->
+  <header class="w-full border-b border-white/10 bg-[#0f1017]/90 backdrop-blur-md px-8 py-4 sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto flex justify-between items-center">
+      <a href="scr05_marketplace_feed_preview.html" class="text-2xl font-black font-h1 text-white">dillustration</a>
+      
+      <div class="hidden md:flex items-center gap-4 bg-black/40 px-4 py-2 rounded-full border border-white/10 w-96">
+        <span class="material-symbols-outlined text-[#8A8FA9] text-sm">search</span>
+        <input type="text" value="Cyberpunk" class="bg-transparent text-white text-xs focus:outline-none w-full font-medium" />
+      </div>
+
+      <div class="flex items-center gap-4 text-xs font-bold">
+        <a href="global_notification_center_preview.html" class="p-2 bg-white/5 rounded-full hover:bg-white/10 text-white flex items-center">
+          <span class="material-symbols-outlined text-lg">notifications</span>
+        </a>
+        <a href="scr25_client_dashboard_preview.html" class="w-8 h-8 rounded-full bg-[#C5C9F8] text-black font-extrabold flex items-center justify-center font-h1 text-xs">
+          EV
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Layout: 2-Column Search & Filter (Left 25% Filter Sidebar vs Right 75% Bento Grid) -->
+  <main class="max-w-7xl w-full mx-auto px-6 py-8 flex-grow grid grid-cols-1 lg:grid-cols-12 gap-8">
+    
+    <!-- LEFT SIDEBAR: ADVANCED FILTER CONTROLS (25% WIDTH) -->
+    <aside class="lg:col-span-3 glass-card p-6 space-y-6 flex flex-col justify-between h-fit">
+      <div class="space-y-6">
+        <div class="border-b border-white/10 pb-3 flex justify-between items-center">
+          <h3 class="font-h1 font-bold text-white text-sm">Filter Artworks</h3>
+          <button onclick="alert('Filters Reset');" class="text-[10px] text-[#C5C9F8] font-bold hover:underline">Reset All</button>
+        </div>
+
+        <!-- Keyword Search Input -->
+        <div class="space-y-2 text-xs">
+          <label class="block font-bold text-white text-[10px] uppercase tracking-wider">SEARCH KEYWORD</label>
+          <input type="text" value="Cyberpunk" class="w-full px-4 py-2.5 bg-black/40 rounded-xl border border-white/10 text-white text-xs focus:outline-none focus:border-[#C5C9F8]" />
+        </div>
+
+        <!-- Price Range Slider -->
+        <div class="space-y-2 text-xs">
+          <div class="flex justify-between items-center">
+            <label class="font-bold text-white text-[10px] uppercase tracking-wider">PRICE RANGE ($USD)</label>
+            <span class="text-emerald-400 font-mono font-bold text-[11px]">$100 - $1,500</span>
+          </div>
+          <input type="range" min="0" max="2000" value="1500" class="w-full" />
+        </div>
+
+        <!-- Art Styles Checkboxes -->
+        <div class="space-y-2 text-xs">
+          <label class="block font-bold text-white text-[10px] uppercase tracking-wider">ART STYLES</label>
+          <div class="space-y-2 text-[11px]">
+            <label class="flex items-center gap-2 text-white">
+              <input type="checkbox" checked class="rounded border-white/20 bg-black/40 text-[#C5C9F8]" />
+              <span>Anime & Manga</span>
+            </label>
+            <label class="flex items-center gap-2 text-white">
+              <input type="checkbox" checked class="rounded border-white/20 bg-black/40 text-[#C5C9F8]" />
+              <span>Digital Painting</span>
+            </label>
+            <label class="flex items-center gap-2 text-[#8A8FA9] hover:text-white">
+              <input type="checkbox" class="rounded border-white/20 bg-black/40" />
+              <span>Pixel Art</span>
+            </label>
+            <label class="flex items-center gap-2 text-[#8A8FA9] hover:text-white">
+              <input type="checkbox" class="rounded border-white/20 bg-black/40" />
+              <span>Chibi</span>
+            </label>
+            <label class="flex items-center gap-2 text-[#8A8FA9] hover:text-white">
+              <input type="checkbox" class="rounded border-white/20 bg-black/40" />
+              <span>Concept Art</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- AI Toggle Switch -->
+        <div class="pt-2 border-t border-white/10 text-xs space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-white text-[11px]">Hide AI-Generated Art</span>
+            <input type="checkbox" checked class="w-4 h-4 rounded text-purple-400" />
+          </div>
+          <p class="text-[9px] text-[#8A8FA9]">Filters out artworks flagged with Tag.IsAiGenerated = true.</p>
+        </div>
+
+        <button onclick="alert('Filters Applied!');" class="w-full py-3 bg-[#C5C9F8] text-black font-extrabold rounded-xl text-xs shadow-lg hover:bg-white transition-all">
+          Apply Filters
+        </button>
+      </div>
+    </aside>
+
+    <!-- RIGHT CONTENT: RESULTS GRID (75% WIDTH) -->
+    <div class="lg:col-span-9 space-y-6">
+      
+      <!-- Results Header & Sort Selector -->
+      <div class="glass-card p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h1 class="font-h1 text-xl font-extrabold text-white">Artwork Search Results (SCR-06)</h1>
+          <p class="text-xs text-[#8A8FA9]">Showing <strong class="text-emerald-400 font-mono">24 Artworks</strong> matching keyword <strong class="text-white">"Cyberpunk"</strong></p>
+        </div>
+
+        <div class="flex items-center gap-2 text-xs">
+          <span class="text-[#8A8FA9] font-bold">Sort By:</span>
+          <select class="px-3 py-2 bg-black/40 border border-white/10 rounded-xl text-white font-bold">
+            <option>Most Relevant</option>
+            <option>Newest Uploads</option>
+            <option>Price: Low to High</option>
+            <option>Price: High to Low</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Bento Grid of Artwork Cards (6 Cards) -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        
+        <!-- Card 1 -->
+        <a href="scr07_artwork_details_preview.html" class="glass-card p-4 space-y-3 block group hover:border-[#C5C9F8] transition-all">
+          <div class="w-full h-48 bg-black/50 rounded-2xl border border-white/10 flex items-center justify-center relative overflow-hidden">
+            <span class="material-symbols-outlined text-4xl text-[#C5C9F8]">palette</span>
+            <span class="absolute top-2 right-2 px-2.5 py-1 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[9px] font-bold rounded-full">
+              Hand-Drawn Verified
+            </span>
+          </div>
+          <div>
+            <h4 class="font-bold text-white text-xs group-hover:text-[#C5C9F8] transition-colors">Lumina Cyber Sequence</h4>
+            <p class="text-[10px] text-[#8A8FA9]">By @Kuro_Concept</p>
+          </div>
+          <div class="flex justify-between items-center pt-1 text-xs">
+            <span class="font-h1 font-extrabold text-[#C5C9F8]">$300.00</span>
+            <span class="text-[10px] text-[#8A8FA9] flex items-center gap-1 font-bold">
+              <span class="material-symbols-outlined text-xs text-red-400">favorite</span> 142
+            </span>
+          </div>
+        </a>
+
+        <!-- Card 2 -->
+        <a href="scr07_artwork_details_preview.html" class="glass-card p-4 space-y-3 block group hover:border-[#C5C9F8] transition-all">
+          <div class="w-full h-48 bg-black/50 rounded-2xl border border-white/10 flex items-center justify-center relative overflow-hidden">
+            <span class="material-symbols-outlined text-4xl text-[#C5C9F8]">draw</span>
+            <span class="absolute top-2 right-2 px-2.5 py-1 bg-purple-500/20 text-purple-300 border border-purple-500/30 text-[9px] font-bold rounded-full">
+              ★4.95 Rating
+            </span>
+          </div>
+          <div>
+            <h4 class="font-bold text-white text-xs group-hover:text-[#C5C9F8] transition-colors">Neon Samurai Warrior</h4>
+            <p class="text-[10px] text-[#8A8FA9]">By @Etherea_Vox</p>
+          </div>
+          <div class="flex justify-between items-center pt-1 text-xs">
+            <span class="font-h1 font-extrabold text-[#C5C9F8]">$450.00</span>
+            <span class="text-[10px] text-[#8A8FA9] flex items-center gap-1 font-bold">
+              <span class="material-symbols-outlined text-xs text-red-400">favorite</span> 289
+            </span>
+          </div>
+        </a>
+
+        <!-- Card 3 -->
+        <a href="scr07_artwork_details_preview.html" class="glass-card p-4 space-y-3 block group hover:border-[#C5C9F8] transition-all">
+          <div class="w-full h-48 bg-black/50 rounded-2xl border border-white/10 flex items-center justify-center relative overflow-hidden">
+            <span class="material-symbols-outlined text-4xl text-[#C5C9F8]">brush</span>
+          </div>
+          <div>
+            <h4 class="font-bold text-white text-xs group-hover:text-[#C5C9F8] transition-colors">Ethereal Astral Dragon</h4>
+            <p class="text-[10px] text-[#8A8FA9]">By @Astra_Art</p>
+          </div>
+          <div class="flex justify-between items-center pt-1 text-xs">
+            <span class="font-h1 font-extrabold text-[#C5C9F8]">$600.00</span>
+            <span class="text-[10px] text-[#8A8FA9] flex items-center gap-1 font-bold">
+              <span class="material-symbols-outlined text-xs text-red-400">favorite</span> 95
+            </span>
+          </div>
+        </a>
+
+        <!-- Card 4 -->
+        <a href="scr07_artwork_details_preview.html" class="glass-card p-4 space-y-3 block group hover:border-[#C5C9F8] transition-all">
+          <div class="w-full h-48 bg-black/50 rounded-2xl border border-white/10 flex items-center justify-center relative overflow-hidden">
+            <span class="material-symbols-outlined text-4xl text-[#C5C9F8]">face</span>
+          </div>
+          <div>
+            <h4 class="font-bold text-white text-xs group-hover:text-[#C5C9F8] transition-colors">Chibi Mecha Pilot</h4>
+            <p class="text-[10px] text-[#8A8FA9]">By @Chibi_Master</p>
+          </div>
+          <div class="flex justify-between items-center pt-1 text-xs">
+            <span class="font-h1 font-extrabold text-[#C5C9F8]">$150.00</span>
+            <span class="text-[10px] text-[#8A8FA9] flex items-center gap-1 font-bold">
+              <span class="material-symbols-outlined text-xs text-red-400">favorite</span> 310
+            </span>
+          </div>
+        </a>
+
+        <!-- Card 5 -->
+        <a href="scr07_artwork_details_preview.html" class="glass-card p-4 space-y-3 block group hover:border-[#C5C9F8] transition-all">
+          <div class="w-full h-48 bg-black/50 rounded-2xl border border-white/10 flex items-center justify-center relative overflow-hidden">
+            <span class="material-symbols-outlined text-4xl text-[#C5C9F8]">location_city</span>
+          </div>
+          <div>
+            <h4 class="font-bold text-white text-xs group-hover:text-[#C5C9F8] transition-colors">Future Tokyo Rain</h4>
+            <p class="text-[10px] text-[#8A8FA9]">By @Cyber_City</p>
+          </div>
+          <div class="flex justify-between items-center pt-1 text-xs">
+            <span class="font-h1 font-extrabold text-[#C5C9F8]">$350.00</span>
+            <span class="text-[10px] text-[#8A8FA9] flex items-center gap-1 font-bold">
+              <span class="material-symbols-outlined text-xs text-red-400">favorite</span> 180
+            </span>
+          </div>
+        </a>
+
+        <!-- Card 6 -->
+        <a href="scr07_artwork_details_preview.html" class="glass-card p-4 space-y-3 block group hover:border-[#C5C9F8] transition-all">
+          <div class="w-full h-48 bg-black/50 rounded-2xl border border-white/10 flex items-center justify-center relative overflow-hidden">
+            <span class="material-symbols-outlined text-4xl text-[#C5C9F8]">grid_view</span>
+          </div>
+          <div>
+            <h4 class="font-bold text-white text-xs group-hover:text-[#C5C9F8] transition-colors">Retro Pixel Knight</h4>
+            <p class="text-[10px] text-[#8A8FA9]">By @Pixel_King</p>
+          </div>
+          <div class="flex justify-between items-center pt-1 text-xs">
+            <span class="font-h1 font-extrabold text-[#C5C9F8]">$200.00</span>
+            <span class="text-[10px] text-[#8A8FA9] flex items-center gap-1 font-bold">
+              <span class="material-symbols-outlined text-xs text-red-400">favorite</span> 420
+            </span>
+          </div>
+        </a>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- FLOATING SYSTEM SCREEN QUICK NAVIGATOR BAR -->
+  <div id="quickNavigator" class="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 bg-[#0f1017]/95 backdrop-blur-xl border border-white/20 p-3 rounded-full shadow-[0_10px_30px_rgba(0,0,0,0.8)] flex items-center gap-3 text-xs max-w-5xl w-[92%] mx-auto justify-between px-6">
+    <div class="flex items-center gap-2 font-bold font-h1 text-[#C5C9F8] shrink-0">
+      <span class="material-symbols-outlined text-base">explore</span>
+      <span class="hidden sm:inline">Screen Navigator</span>
+    </div>
+    
+    <div class="flex items-center gap-2 overflow-x-auto py-1 text-[11px]">
+      <a href="scr05_marketplace_feed_preview.html" class="px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold whitespace-nowrap">Marketplace (SCR-05)</a>
+      <a href="scr06_artwork_search_filter_preview.html" class="px-3 py-1 rounded-full bg-[#C5C9F8] text-[#0f1017] font-bold whitespace-nowrap">Search & Filter (SCR-06)</a>
+      <a href="scr07_artwork_details_preview.html" class="px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold whitespace-nowrap">Artwork (SCR-07)</a>
+      <a href="scr08_creator_profile_preview.html" class="px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold whitespace-nowrap">Profile (SCR-08)</a>
+      <a href="scr25_client_dashboard_preview.html" class="px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold whitespace-nowrap">Client (SCR-25)</a>
+    </div>
+  </div>
+
+</body>
+</html>

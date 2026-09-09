@@ -22,10 +22,9 @@
 *.tsbuildinfo
 next-env.d.ts
 
-# raw design zips & temporary skills
-stitch_dillustration_marketplace_design_suite/
-stitch_dillustration_marketplace_design_suite.zip
-719883205_*.png
+# raw design assets & temporary skills
+docs/design-suite/
 .agents/
 skills-lock.json
 CLAUDE.md
+
