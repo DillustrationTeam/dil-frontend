@@ -57,8 +57,9 @@ export default function RegisterPage() {
       setAuth(authResponse);
       toast.success(`Account created! Welcome to the collective, ${authResponse.user.fullName}!`);
       router.push('/');
-    } catch (err: any) {
-      toast.error(err.message || 'Registration failed. Email might already be registered.');
+    } catch (err: unknown) {
+      const errorObj = err as { message?: string };
+      toast.error(errorObj.message || 'Registration failed. Email might already be registered.');
     } finally {
       setIsLoading(false);
     }

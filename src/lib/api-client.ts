@@ -31,7 +31,7 @@ let failedQueue: Array<{
   reject: (reason?: unknown) => void;
 }> = [];
 
-const processQueue = (error: AxiosError | null, token: string | null = null) => {
+const processQueue = (error: AxiosError | null) => {
   failedQueue.forEach((prom) => {
     if (error) {
       prom.reject(error);
@@ -82,16 +82,16 @@ apiClient.interceptors.response.use(
             originalRequest.headers.Authorization = `Bearer ${newAuthData.tokens.accessToken}`;
           }
 
-          processQueue(null, newAuthData.tokens.accessToken);
+          processQueue(null);
           return apiClient(originalRequest);
         } else {
           useAuthStore.getState().clearAuth();
-          processQueue(error, null);
+          processQueue(error);
           return Promise.reject(error);
         }
       } catch (refreshErr) {
         useAuthStore.getState().clearAuth();
-        processQueue(refreshErr as AxiosError, null);
+        processQueue(refreshErr as AxiosError);
         return Promise.reject(refreshErr);
       } finally {
         isRefreshing = false;

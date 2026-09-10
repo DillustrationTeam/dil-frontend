@@ -37,7 +37,7 @@ export const useAuthStore = create<AuthState>()(
         }),
 
       setTokens: (tokens) =>
-        set((state) => ({
+        set(() => ({
           accessToken: tokens.accessToken,
           refreshToken: tokens.refreshToken,
           isAuthenticated: true,

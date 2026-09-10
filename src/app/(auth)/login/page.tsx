@@ -42,8 +42,9 @@ export default function LoginPage() {
       setAuth(authResponse);
       toast.success(`Welcome back, ${authResponse.user.fullName}!`);
       router.push('/');
-    } catch (err: any) {
-      toast.error(err.message || 'Login failed. Please check your credentials.');
+    } catch (err: unknown) {
+      const errorObj = err as { message?: string };
+      toast.error(errorObj.message || 'Login failed. Please check your credentials.');
     } finally {
       setIsLoading(false);
     }

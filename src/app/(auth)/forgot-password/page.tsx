@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -25,14 +26,14 @@ export default function ForgotPasswordPage() {
     resolver: zodResolver(forgotPasswordSchema),
   });
 
-  const onSubmit = async (data: ForgotPasswordFormValues) => {
+  const onSubmit = async () => {
     setIsLoading(true);
     try {
       // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1000));
       setIsSubmitted(true);
       toast.success('Reset link dispatched! Please check your email inbox.');
-    } catch (err: any) {
+    } catch {
       toast.error('Failed to send reset link. Please try again.');
     } finally {
       setIsLoading(false);
@@ -50,7 +51,7 @@ export default function ForgotPasswordPage() {
       {/* Header */}
       <header className="w-full flex justify-between items-center z-10">
         <Link href="/" className="flex items-center gap-3">
-          <img src="/weblogo.png" alt="dillustration" className="h-10 w-auto object-contain" />
+          <Image src="/weblogo.png" alt="dillustration" width={160} height={40} className="h-10 w-auto object-contain" />
         </Link>
       </header>
 
@@ -65,7 +66,7 @@ export default function ForgotPasswordPage() {
           <div className="relative z-10">
             <h1 className="font-h1 text-3xl font-bold text-white mb-2">Recover access</h1>
             <p className="text-sm text-[#78767A] mb-8 leading-relaxed">
-              Enter the email associated with your account and we'll send a magic link to reset your password.
+              Enter the email associated with your account and we&apos;ll send a magic link to reset your password.
             </p>
 
             {isSubmitted ? (

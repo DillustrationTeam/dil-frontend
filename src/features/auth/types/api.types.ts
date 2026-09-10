@@ -3,8 +3,8 @@ export interface ApiErrorDetails {
   details?: string[];
 }
 
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   data: T | null;
-  meta: Record<string, any> | null;
+  meta: Record<string, unknown> | null;
   error: ApiErrorDetails | null;
 }

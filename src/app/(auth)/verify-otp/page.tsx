@@ -23,12 +23,16 @@ export default function VerifyOtpPage() {
   }, []);
 
   useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (timer > 0) {
-      interval = setInterval(() => setTimer((prev) => prev - 1), 1000);
-    } else {
-      setCanResend(true);
-    }
+    if (timer <= 0) return;
+    const interval = setInterval(() => {
+      setTimer((prev) => {
+        if (prev <= 1) {
+          setCanResend(true);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
     return () => clearInterval(interval);
   }, [timer]);
 
@@ -70,7 +74,7 @@ export default function VerifyOtpPage() {
       await new Promise((resolve) => setTimeout(resolve, 1200));
       toast.success('Email verified successfully! Welcome to the collective.');
       router.push('/');
-    } catch (err: any) {
+    } catch {
       toast.error('Invalid OTP code. Please try again.');
     } finally {
       setIsLoading(false);
@@ -148,7 +152,7 @@ export default function VerifyOtpPage() {
 
               {/* Resend Code Section */}
               <div className="flex items-center justify-between text-xs text-[#9EA4C1] pt-2">
-                <span>Didn't receive the code?</span>
+                <span>Didn&apos;t receive the code?</span>
                 <button
                   type="button"
                   onClick={handleResend}
