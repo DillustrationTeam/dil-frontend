@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verify Email OTP - dillustration</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+  <style>
+    body {
+      font-family: 'Space Grotesk', sans-serif;
+      background: radial-gradient(circle at 50% 30%, #252A40 0%, #161826 100%);
+      color: #e4e1e5;
+    }
+    h1, h2, h3, .font-h1 {
+      font-family: 'Sora', sans-serif;
+    }
+    .glass-card {
+      background: rgba(30, 34, 52, 0.65);
+      backdrop-filter: blur(32px);
+      -webkit-backdrop-filter: blur(32px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 30px 70px rgba(0, 0, 0, 0.45);
+    }
+    .otp-field {
+      background: rgba(16, 18, 28, 0.65);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      transition: all 0.2s ease-in-out;
+    }
+    .otp-field:focus, .otp-field.active {
+      border-color: #A7ACD9;
+      box-shadow: 0 0 14px rgba(167, 172, 217, 0.25);
+      background: rgba(20, 23, 36, 0.85);
+    }
+    .primary-btn {
+      background: #FFFFFF;
+      color: #171A27;
+      box-shadow: 0 4px 20px rgba(255, 255, 255, 0.15);
+      transition: all 0.2s ease-in-out;
+    }
+    .primary-btn:hover {
+      box-shadow: 0 0 30px rgba(255, 255, 255, 0.35);
+      transform: translateY(-1px);
+    }
+  </style>
+</head>
+<body class="min-h-screen w-full flex items-center justify-center p-6 relative overflow-hidden">
+  
+  <!-- Ambient Atmospheric Glows -->
+  <div class="fixed top-0 left-0 w-full h-full -z-10 pointer-events-none">
+    <div class="absolute top-[-15%] left-[-15%] w-[55%] h-[55%] bg-[#A7ACD9]/10 rounded-full blur-[140px] pointer-events-none"></div>
+    <div class="absolute bottom-[-10%] right-[-10%] w-[45%] h-[45%] bg-[#252A40]/40 rounded-full blur-[120px] pointer-events-none"></div>
+  </div>
+
+  <main class="w-full max-w-xl z-10">
+    <!-- Brand Identity Logo Matching media__1787540357065.png -->
+    <div class="flex flex-col items-center mb-8">
+      <div class="flex flex-col items-center gap-1.5 mb-2">
+        <!-- dillustration Syringe/Dropper Brand Icon -->
+        <svg class="h-10 w-auto text-white" viewBox="0 0 48 48" fill="none">
+          <path d="M24 4L28 10H20L24 4Z" fill="#A7ACD9"/>
+          <rect x="21" y="10" width="6" height="12" rx="2" fill="#A7ACD9"/>
+          <path d="M16 22H32V25C32 29.4183 28.4183 33 24 33C19.5817 33 16 29.4183 16 25V22Z" fill="white" fill-opacity="0.9"/>
+          <rect x="22.5" y="33" width="3" height="11" rx="1.5" fill="#A7ACD9"/>
+        </svg>
+        <span class="text-3xl font-extrabold font-h1 tracking-tight text-white">dillustration</span>
+      </div>
+      <p class="text-[11px] text-[#7B819F] uppercase tracking-[0.2em] font-medium">
+        DIGITAL ETHEREALISM COLLECTIVE
+      </p>
+    </div>
+
+    <!-- Glassmorphic Card Container -->
+    <div class="glass-card rounded-[28px] p-8 md:p-12 relative overflow-hidden">
+      <!-- Background Decorative Grid Icon -->
+      <div class="absolute top-0 right-0 p-6 opacity-[0.04] pointer-events-none text-white">
+        <span class="material-symbols-outlined text-9xl">grid_view</span>
+      </div>
+
+      <div class="relative z-10">
+        <h1 class="font-h1 text-3xl font-bold mb-2 text-white">Verify Your Email</h1>
+        <p class="text-sm text-[#9EA4C1] mb-8 leading-relaxed">
+          We have sent a 6-digit verification code to <span class="text-[#A7ACD9] font-semibold">curator@ethereal.art</span>. Please enter the code below.
+        </p>
+
+        <form class="space-y-6" onsubmit="event.preventDefault()">
+          <label class="text-[11px] uppercase tracking-[0.12em] text-[#7B819F] ml-1 font-semibold block">
+            VERIFICATION CODE (6-DIGITS)
+          </label>
+
+          <!-- 6 OTP Inputs Grid -->
+          <div class="grid grid-cols-6 gap-2.5 md:gap-3.5">
+            <input type="text" value="8" class="otp-field active w-full h-14 md:h-16 text-center text-xl md:text-2xl font-bold font-h1 rounded-xl text-white focus:outline-none" />
+            <input type="text" value="4" class="otp-field active w-full h-14 md:h-16 text-center text-xl md:text-2xl font-bold font-h1 rounded-xl text-white focus:outline-none" />
+            <input type="text" value="9" class="otp-field active w-full h-14 md:h-16 text-center text-xl md:text-2xl font-bold font-h1 rounded-xl text-white focus:outline-none" />
+            <input type="text" value="2" class="otp-field active w-full h-14 md:h-16 text-center text-xl md:text-2xl font-bold font-h1 rounded-xl text-white focus:outline-none" />
+            <input type="text" value="7" class="otp-field active w-full h-14 md:h-16 text-center text-xl md:text-2xl font-bold font-h1 rounded-xl text-white focus:outline-none" />
+            <input type="text" value="1" class="otp-field active w-full h-14 md:h-16 text-center text-xl md:text-2xl font-bold font-h1 rounded-xl text-white focus:outline-none" />
+          </div>
+
+          <!-- Resend Code Section -->
+          <div class="flex items-center justify-between text-xs text-[#9EA4C1] pt-1">
+            <span>Didn't receive the code?</span>
+            <button type="button" class="text-[#A7ACD9] font-semibold hover:underline">Resend in 48s</button>
+          </div>
+
+          <!-- Primary Submit Button -->
+          <button type="button" class="primary-btn w-full py-4 font-bold text-base rounded-xl mt-4 flex items-center justify-center gap-2 group cursor-pointer">
+            <span>Verify & Continue</span>
+            <span class="material-symbols-outlined text-xl transition-transform duration-300 group-hover:translate-x-1">arrow_forward</span>
+          </button>
+        </form>
+
+        <!-- Footer Link -->
+        <div class="mt-8 pt-6 border-t border-white/[0.08] text-center">
+          <a href="#" class="text-xs text-[#9EA4C1] hover:text-[#A7ACD9] transition-colors">
+            ← Wrong email address? Sign up again
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Status Footer -->
+    <div class="mt-8 flex justify-between items-center px-4 text-xs text-[#7B819F]">
+      <div class="flex items-center gap-2.5">
+        <span class="w-2 h-2 rounded-full bg-[#E3C786] shadow-[0_0_8px_#E3C786]"></span>
+        <span class="uppercase tracking-wider">GALLERY SERVERS ONLINE</span>
+      </div>
+      <div class="flex gap-6">
+        <a href="#" class="hover:text-[#A7ACD9]">Privacy</a>
+        <span>v2.04</span>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

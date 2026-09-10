@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Account - dillustration</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+  <style>
+    body {
+      font-family: 'Space Grotesk', sans-serif;
+      background-color: #1F2335;
+      color: #e4e1e5;
+    }
+    h1, h2, h3, .font-h1 {
+      font-family: 'Sora', sans-serif;
+    }
+    .glass-container {
+      background: rgba(19, 19, 22, 0.75);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+    }
+    .primary-glow-hover:hover {
+      box-shadow: 0 0 25px rgba(255, 255, 255, 0.4);
+    }
+  </style>
+</head>
+<div class="min-h-screen w-full flex items-center justify-center p-6 bg-[#1F2335] text-[#e4e1e5] relative overflow-hidden">
+  
+  <!-- Ambient Background Glows -->
+  <div class="fixed top-0 left-0 w-full h-full -z-10 pointer-events-none">
+    <div class="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-[#c2c7f6]/10 rounded-full blur-[120px] opacity-40"></div>
+    <div class="absolute bottom-[-5%] right-[-5%] w-[40%] h-[40%] bg-[#A7ACD9]/5 rounded-full blur-[100px] opacity-30"></div>
+  </div>
+
+  <main class="w-full max-w-xl z-10">
+    <!-- Header Brand Logo -->
+    <div class="flex flex-col items-center mb-8">
+      <div class="flex items-center gap-3 mb-2">
+        <svg class="h-10 w-auto text-[#A7ACD9]" viewBox="0 0 40 40" fill="none">
+          <rect width="40" height="40" rx="10" fill="#A7ACD9" fill-opacity="0.15"/>
+          <path d="M12 28L28 12M28 12H18M28 12V22" stroke="#A7ACD9" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="text-3xl font-extrabold font-h1 tracking-tight text-white">dillustration</span>
+      </div>
+      <p class="text-xs text-[#c7c5cf] uppercase tracking-widest font-medium">
+        DIGITAL ETHEREALISM COLLECTIVE
+      </p>
+    </div>
+
+    <!-- Glassmorphism Card -->
+    <div class="glass-container rounded-3xl p-8 md:p-12 relative overflow-hidden">
+      <!-- Decorative Grid Icon Background -->
+      <div class="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
+        <span class="material-symbols-outlined text-9xl text-white">grid_view</span>
+      </div>
+
+      <div class="relative z-10">
+        <h1 class="font-h1 text-3xl font-bold mb-2 text-white">Create Account</h1>
+        <p class="text-sm text-[#c7c5cf] mb-8">
+          Join the curated gallery of ethereal digital artists.
+        </p>
+
+        <form class="space-y-5" onsubmit="event.preventDefault()">
+          <!-- First Name & Last Name -->
+          <div class="grid grid-cols-2 gap-4">
+            <div class="space-y-1.5">
+              <label class="text-[11px] uppercase tracking-widest text-[#919099] ml-1 font-medium block">First Name</label>
+              <input type="text" value="Claude" class="w-full bg-[#0e0e11]/60 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/30 text-sm focus:outline-none focus:border-[#A7ACD9]" />
+            </div>
+            <div class="space-y-1.5">
+              <label class="text-[11px] uppercase tracking-widest text-[#919099] ml-1 font-medium block">Last Name</label>
+              <input type="text" value="Monet" class="w-full bg-[#0e0e11]/60 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/30 text-sm focus:outline-none focus:border-[#A7ACD9]" />
+            </div>
+          </div>
+
+          <!-- Email Address -->
+          <div class="space-y-1.5">
+            <label class="text-[11px] uppercase tracking-widest text-[#919099] ml-1 font-medium block">Email Address</label>
+            <div class="relative">
+              <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-white/40 text-lg">alternate_email</span>
+              <input type="email" value="curator@ethereal.art" class="w-full bg-[#0e0e11]/60 border border-white/10 rounded-xl pl-11 pr-4 py-3 text-white placeholder-white/30 text-sm focus:outline-none focus:border-[#A7ACD9]" />
+            </div>
+          </div>
+
+          <!-- Password -->
+          <div class="space-y-1.5">
+            <label class="text-[11px] uppercase tracking-widest text-[#919099] ml-1 font-medium block">Password</label>
+            <div class="relative">
+              <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-white/40 text-lg">lock</span>
+              <input type="password" value="••••••••••••" class="w-full bg-[#0e0e11]/60 border border-white/10 rounded-xl pl-11 pr-4 py-3 text-white placeholder-white/30 text-sm focus:outline-none focus:border-[#A7ACD9]" />
+            </div>
+          </div>
+
+          <!-- Role Selector Pills -->
+          <div class="space-y-1.5 pt-1">
+            <label class="text-[11px] uppercase tracking-widest text-[#919099] ml-1 font-medium block">I am a...</label>
+            <div class="grid grid-cols-3 gap-2">
+              <button type="button" class="py-2.5 rounded-xl bg-[#A7ACD9]/20 border border-[#A7ACD9] text-[#A7ACD9] font-bold text-xs">ARTIST</button>
+              <button type="button" class="py-2.5 rounded-xl bg-white/5 border border-white/10 text-white/40 text-xs">COLLECTOR</button>
+              <button type="button" class="py-2.5 rounded-xl bg-white/5 border border-white/10 text-white/40 text-xs">CURATOR</button>
+            </div>
+          </div>
+
+          <!-- Terms Checkbox -->
+          <div class="flex items-start gap-3 pt-2">
+            <input type="checkbox" checked id="terms" class="mt-1 rounded border-white/10 bg-[#0e0e11] text-[#A7ACD9]" />
+            <label for="terms" class="text-xs text-[#c7c5cf] leading-relaxed">
+              I agree to the <span class="text-[#A7ACD9] font-semibold underline">Digital Etherealism Guidelines</span> and community standards for artistic integrity.
+            </label>
+          </div>
+
+          <!-- Primary Submit Button -->
+          <button type="button" class="w-full py-3.5 bg-white text-[#1F2335] font-bold text-sm rounded-xl transition-all duration-300 primary-glow-hover mt-3 flex items-center justify-center gap-2">
+            <span>Begin Journey</span>
+            <span class="material-symbols-outlined text-base">arrow_forward</span>
+          </button>
+        </form>
+
+        <!-- Social Auth Divider & Buttons -->
+        <div class="mt-8 pt-6 border-t border-white/10 flex flex-col items-center gap-5">
+          <p class="text-xs text-[#c7c5cf]">
+            Already part of the collective? <a href="#" class="text-[#A7ACD9] font-bold hover:underline">Sign In</a>
+          </p>
+
+          <div class="flex items-center gap-4 w-full">
+            <div class="h-[1px] flex-grow bg-white/10"></div>
+            <span class="text-[10px] text-[#919099] uppercase tracking-widest font-semibold">OR CONTINUE WITH</span>
+            <div class="h-[1px] flex-grow bg-white/10"></div>
+          </div>
+
+          <!-- Google & Pixiv SSO Buttons -->
+          <div class="grid grid-cols-2 gap-4 w-full">
+            <button type="button" class="flex items-center justify-center gap-3 py-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-xs font-semibold text-[#c7c5cf] hover:text-white">
+              <svg class="w-4 h-4" viewBox="0 0 24 24">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+              </svg>
+              <span>Google</span>
+            </button>
+            
+            <button type="button" class="flex items-center justify-center gap-3 py-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-xs font-semibold text-[#c7c5cf] hover:text-[#0096FA]">
+              <svg class="w-4 h-4 fill-[#0096FA]" viewBox="0 0 24 24">
+                <path d="M12.238 2C6.609 2 2 6.609 2 12.238c0 5.63 4.609 10.238 10.238 10.238 5.63 0 10.238-4.609 10.238-10.238C22.476 6.609 17.868 2 12.238 2zm3.895 10.665c-1.127 1.551-2.903 2.502-4.697 2.502h-1.921v2.793H7.554V6.993h4.341c2.723 0 4.796 1.666 4.796 4.093 0 1.002-.276 1.956-.558 2.579z"/>
+              </svg>
+              <span>Pixiv</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Status Footer -->
+    <div class="mt-6 flex justify-between items-center px-4 text-xs text-[#919099]">
+      <div class="flex items-center gap-2.5">
+        <span class="w-2 h-2 rounded-full bg-[#e3c786] shadow-[0_0_8px_#e3c786]"></span>
+        <span class="uppercase tracking-wider">GALLERY SERVERS ONLINE</span>
+      </div>
+      <div class="flex gap-6">
+        <a href="#" class="hover:text-[#A7ACD9]">Privacy</a>
+        <span>v2.04</span>
+      </div>
+    </div>
+  </main>
+</div>
+</html>

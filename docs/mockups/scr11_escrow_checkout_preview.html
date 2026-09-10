@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Escrow Payment Checkout - dillustration</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+  <style>
+    body { font-family: 'Space Grotesk', sans-serif; background: radial-gradient(circle at 50% 15%, #1d2133 0%, #0d0e15 100%); color: #e4e1e5; }
+    h1, h2, h3, .font-h1 { font-family: 'Sora', sans-serif; }
+    .glass-card { background: rgba(22, 25, 38, 0.85); backdrop-filter: blur(32px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 28px; }
+    .btn-pill-primary { background: #ffffff; color: #0f1017; font-weight: 700; transition: all 0.2s; }
+    .btn-pill-primary:hover { background: #C5C9F8; box-shadow: 0 0 25px rgba(197, 201, 248, 0.4); transform: translateY(-1px); }
+    .gateway-option { background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; transition: all 0.2s; }
+    .gateway-option:hover { border-color: #C5C9F8; background: rgba(197, 201, 248, 0.08); }
+    .gateway-selected { border-color: #C5C9F8 !important; background: rgba(197, 201, 248, 0.15) !important; box-shadow: 0 0 15px rgba(197, 201, 248, 0.2); }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between">
+
+  <!-- Navigation -->
+  <header class="w-full border-b border-white/10 bg-[#0f1017]/90 backdrop-blur-md px-8 py-5">
+    <div class="max-w-7xl mx-auto flex justify-between items-center">
+      <a href="scr05_marketplace_feed_preview.html" class="text-2xl font-black font-h1 text-white">dillustration</a>
+      <span class="text-xs px-3 py-1 rounded-full bg-[#C5C9F8]/20 text-[#C5C9F8] border border-[#C5C9F8]/30 font-bold uppercase">
+        Secure Escrow Checkout
+      </span>
+    </div>
+  </header>
+
+  <!-- Main Body Container -->
+  <main class="max-w-4xl w-full mx-auto px-6 py-10 flex-grow space-y-8">
+    
+    <div class="glass-card p-8 space-y-8 shadow-2xl">
+      
+      <!-- Page Header -->
+      <div class="border-b border-white/10 pb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <span class="text-xs text-[#C5C9F8] font-mono font-bold">/payment/checkout/CMD-8492</span>
+          <h1 class="font-h1 text-2xl md:text-3xl font-extrabold text-white">Deposit Escrow Funds</h1>
+          <p class="text-xs text-[#8A8FA9]">Lock order funds safely into Platform Escrow before artwork production begins.</p>
+        </div>
+        <div class="flex items-center gap-2 bg-emerald-500/20 text-emerald-400 px-3.5 py-1.5 rounded-full border border-emerald-500/30 text-xs font-bold">
+          <span class="material-symbols-outlined text-base">lock</span>
+          <span>Escrow Protected Order</span>
+        </div>
+      </div>
+
+      <!-- 1. ORDER SUMMARY CARD -->
+      <div class="bg-[#121420] border border-white/10 p-6 rounded-2xl space-y-4">
+        <span class="text-[10px] font-extrabold uppercase tracking-wider text-[#8A8FA9]">ORDER SUMMARY</span>
+        
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div class="space-y-1">
+            <span class="text-xs text-[#C5C9F8] font-mono font-bold">#CMD-8492</span>
+            <h2 class="font-h1 text-xl font-bold text-white">Cyberpunk Bounty Hunter Character Concept</h2>
+            <p class="text-xs text-[#8A8FA9]">Creator Artist: <span class="text-[#C5C9F8] font-bold">@Etherea_Vox ★4.9</span></p>
+          </div>
+
+          <div class="text-left sm:text-right bg-white/5 p-4 rounded-xl border border-white/5">
+            <span class="text-[10px] text-[#8A8FA9] font-bold uppercase block">TOTAL ESCROW DEPOSIT</span>
+            <span class="font-h1 text-2xl font-extrabold text-white">0.45 ETH</span>
+            <span class="text-xs text-[#8A8FA9] block">(~$1,200.00 USD)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. PAYMENT GATEWAY SELECTOR -->
+      <div class="space-y-3">
+        <label class="font-h1 font-extrabold text-xs uppercase tracking-wider text-[#8A8FA9]">
+          SELECT PAYMENT GATEWAY
+        </label>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+          
+          <!-- Option 1: VNPay QR -->
+          <div id="optVNPay" onclick="selectGateway('vnpay')" class="gateway-option gateway-selected p-4 cursor-pointer flex flex-col justify-between h-28">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-white">VNPay Banking QR</span>
+              <span class="material-symbols-outlined text-[#C5C9F8] text-base">qr_code_2</span>
+            </div>
+            <p class="text-[10px] text-[#8A8FA9]">Scan QR code via banking app (VietQR)</p>
+          </div>
+
+          <!-- Option 2: MoMo Wallet -->
+          <div id="optMoMo" onclick="selectGateway('momo')" class="gateway-option p-4 cursor-pointer flex flex-col justify-between h-28">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-white">MoMo E-Wallet</span>
+              <span class="material-symbols-outlined text-purple-400 text-base">account_balance_wallet</span>
+            </div>
+            <p class="text-[10px] text-[#8A8FA9]">Instant mobile wallet payment</p>
+          </div>
+
+          <!-- Option 3: Dillustration Wallet Balance -->
+          <div id="optWallet" onclick="selectGateway('wallet')" class="gateway-option p-4 cursor-pointer flex flex-col justify-between h-28">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-white">Dillustration Wallet</span>
+              <span class="material-symbols-outlined text-emerald-400 text-base">wallet</span>
+            </div>
+            <p class="text-[10px] text-[#8A8FA9]">Balance: $4,850.00 (Instant Lock)</p>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- 3. PLATFORM SECURITY COMMITMENT BOX -->
+      <div class="bg-gradient-to-r from-[#1E2235] to-[#161826] border border-[#C5C9F8]/30 p-5 rounded-2xl flex items-start gap-4 text-xs">
+        <div class="w-10 h-10 rounded-xl bg-[#C5C9F8]/20 text-[#C5C9F8] flex items-center justify-center shrink-0 mt-0.5 border border-[#C5C9F8]/30">
+          <span class="material-symbols-outlined text-xl">verified_user</span>
+        </div>
+        <div class="space-y-1">
+          <h4 class="font-h1 font-bold text-white text-sm">Escrow Protection Guarantee</h4>
+          <p class="text-[#8A8FA9] leading-relaxed">
+            Your money will be held safely in the Escrow Wallet and only released when you approve each milestone output.
+          </p>
+        </div>
+      </div>
+
+      <!-- 4. PRIMARY CTA BUTTON -->
+      <button onclick="confirmEscrowPayment()" class="btn-pill-primary w-full py-4 rounded-2xl text-xs font-extrabold flex items-center justify-center gap-2 cursor-pointer shadow-2xl">
+        <span class="material-symbols-outlined text-lg">lock</span>
+        <span>Confirm Escrow Payment ($1,200.00 / 0.45 ETH)</span>
+      </button>
+
+      <!-- Webhook IPN Verification Status Indicator -->
+      <div class="p-4 bg-black/40 border border-white/5 rounded-xl text-[11px] text-[#8A8FA9] flex items-center justify-between font-mono">
+        <span>API Webhook Status: <strong class="text-emerald-400">RESTful HTTPS + HMAC-SHA256 Verified</strong></span>
+        <span>EscrowTransaction: <strong id="escrowStatusText" class="text-amber-300">PENDING_DEPOSIT</strong></span>
+      </div>
+
+    </div>
+
+  </main>
+
+  <script>
+    let selectedGW = 'vnpay';
+
+    function selectGateway(gw) {
+      selectedGW = gw;
+      ['vnpay', 'momo', 'wallet'].forEach(item => {
+        const el = document.getElementById('opt' + item.charAt(0).toUpperCase() + item.slice(1));
+        if (item === gw) {
+          el.className = 'gateway-option gateway-selected p-4 cursor-pointer flex flex-col justify-between h-28';
+        } else {
+          el.className = 'gateway-option p-4 cursor-pointer flex flex-col justify-between h-28';
+        }
+      });
+    }
+
+    function confirmEscrowPayment() {
+      document.getElementById('escrowStatusText').innerText = 'HELD (100% Escrow Locked)';
+      document.getElementById('escrowStatusText').className = 'text-emerald-400';
+      alert(`HMAC-SHA256 Webhook IPN Verified! Escrow payment of 0.45 ETH locked into EscrowTransaction (status = HELD). Order #CMD-8492 activated! Redirecting to Workroom...`);
+      window.location.href = 'scr13_commission_workroom_unified_preview.html';
+    }
+  </script>
+
+</body>
+</html>

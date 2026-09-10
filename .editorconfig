@@ -1,0 +1,36 @@
+root = true
+
+# ============================================================
+# .editorconfig — dil-frontend (dillustration Frontend Next.js)
+# Áp dụng cho TOÀN BỘ thành viên, mọi editor (VS Code / WebStorm / Cursor)
+# ============================================================
+
+# Mặc định cho tất cả file
+[*]
+indent_style = space
+indent_size = 2
+end_of_line = lf
+charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+# TypeScript / JavaScript / JSX / TSX
+[*.{ts,tsx,js,jsx,mjs,cjs}]
+indent_size = 2
+
+# JSON & config files
+[*.{json,jsonc}]
+indent_size = 2
+
+# CSS / PostCSS / SCSS
+[*.{css,scss,postcss}]
+indent_size = 2
+
+# Markdown — không trim trailing spaces (dòng có 2 space = newline)
+[*.md]
+trim_trailing_whitespace = false
+insert_final_newline = true
+
+# YAML (GitHub Actions)
+[*.{yml,yaml}]
+indent_size = 2
