@@ -1,15 +1,18 @@
 'use client';
 
+import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useAuthStore } from '@/store/use-auth-store';
 import { authService } from '@/services/auth.service';
+import { marketplaceService, MarketplaceArtwork } from '@/features/marketplace/services/marketplace.service';
 import toast from 'react-hot-toast';
 
 export default function MarketplaceHomePage() {
   const { user, roles, refreshToken, isAuthenticated, clearAuth, setUser } = useAuthStore();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 });
+  const [marketplaceArtworks, setMarketplaceArtworks] = useState<MarketplaceArtwork[]>([]);
 
   useEffect(() => {
     if (isAuthenticated && !user) {
@@ -33,6 +36,19 @@ export default function MarketplaceHomePage() {
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
+  useEffect(() => {
+    const loadArtworks = async () => {
+      try {
+        const artworks = await marketplaceService.getArtworks();
+        setMarketplaceArtworks(artworks.slice(0, 6));
+      } catch (error) {
+        console.error('Failed to load marketplace feed', error);
+      }
+    };
+
+    loadArtworks();
+  }, []);
+
   const handleLogout = async () => {
     if (refreshToken) {
       await authService.revokeToken(refreshToken);
@@ -54,9 +70,11 @@ export default function MarketplaceHomePage() {
         <nav className="flex justify-between items-center w-full px-6 max-w-7xl mx-auto h-20">
           <div className="flex items-center gap-12">
             <Link href="/" className="flex items-center space-x-2 group">
-              <img
+              <Image
                 src="/weblogo.png"
                 alt="dillustration"
+                width={120}
+                height={56}
                 className="h-14 md:h-16 w-auto object-contain hover:scale-105 transition-transform"
               />
             </Link>
@@ -209,10 +227,12 @@ export default function MarketplaceHomePage() {
           <div className="md:col-span-7 relative">
             <div className="animate-float relative z-10 p-4 glass-container rounded-[32px] periwinkle-glow">
               <div className="aspect-[16/10] overflow-hidden rounded-2xl relative group">
-                <img
+                <Image
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   alt="Digital Etherealism Landscape"
                   src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1200&auto=format&fit=crop"
+                  fill
+                  unoptimized
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#131316]/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col justify-end p-8">
                   <div className="space-y-1">
@@ -281,12 +301,13 @@ export default function MarketplaceHomePage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
-            {/* Main Bento Item */}
             <div className="md:col-span-8 group relative aspect-[16/9] overflow-hidden rounded-[28px] glass-container border border-white/10 periwinkle-glow cursor-pointer">
-              <img
+              <Image
                 className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
                 alt="Neural Horizons Collection"
                 src="https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?q=80&w=1200&auto=format&fit=crop"
+                fill
+                unoptimized
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#131316]/90 via-[#131316]/20 to-transparent p-10 flex flex-col justify-end">
                 <span className="text-xs text-[#A7ACD9] uppercase tracking-widest font-semibold mb-2">
@@ -299,13 +320,14 @@ export default function MarketplaceHomePage() {
               </div>
             </div>
 
-            {/* Secondary Bento Items */}
             <div className="md:col-span-4 flex flex-col gap-8">
               <div className="h-1/2 group relative overflow-hidden rounded-[28px] glass-container border border-white/10 periwinkle-glow cursor-pointer min-h-[200px]">
-                <img
+                <Image
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                   alt="Crystal Flow Collection"
                   src="https://images.unsplash.com/photo-1579783902614-a3fb3927b675?q=80&w=800&auto=format&fit=crop"
+                  fill
+                  unoptimized
                 />
                 <div className="absolute inset-0 bg-[#131316]/50 p-6 flex flex-col justify-end">
                   <h4 className="font-h1 text-xl font-bold text-white">Crystal Flow</h4>
@@ -313,16 +335,66 @@ export default function MarketplaceHomePage() {
               </div>
 
               <div className="h-1/2 group relative overflow-hidden rounded-[28px] glass-container border border-white/10 periwinkle-glow cursor-pointer min-h-[200px]">
-                <img
+                <Image
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                   alt="Viscosity Genesis Collection"
                   src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800&auto=format&fit=crop"
+                  fill
+                  unoptimized
                 />
                 <div className="absolute inset-0 bg-[#131316]/50 p-6 flex flex-col justify-end">
                   <h4 className="font-h1 text-xl font-bold text-white">Viscosity Genesis</h4>
                 </div>
               </div>
             </div>
+          </div>
+        </section>
+
+        <section className="max-w-7xl mx-auto px-6 pb-16">
+          <div className="mb-6 flex items-center justify-between gap-4">
+            <div>
+              <p className="text-xs uppercase tracking-[0.2em] text-[#A7ACD9]">Marketplace Feed</p>
+              <h2 className="font-h1 text-3xl font-bold text-white">Fresh from creators</h2>
+            </div>
+            <Link href="/creator-setup" className="text-sm text-[#A7ACD9] hover:underline">
+              Set up your studio
+            </Link>
+          </div>
+
+          <div className="grid gap-6 md:grid-cols-3">
+            {marketplaceArtworks.length ? (
+              marketplaceArtworks.map((artwork) => (
+                <Link key={artwork.id} href={`/artworks/${artwork.id}`} className="group overflow-hidden rounded-[24px] border border-white/10 bg-[#1b1d29]">
+                  <div className="relative aspect-[4/5] overflow-hidden">
+                    <Image
+                      src={artwork.imageUrl}
+                      alt={artwork.title}
+                      fill
+                      unoptimized
+                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                  </div>
+                  <div className="space-y-3 p-4">
+                    <div className="flex items-center justify-between gap-3">
+                      <h3 className="text-lg font-semibold text-white">{artwork.title}</h3>
+                      <span className="text-xs text-[#A7ACD9]">New</span>
+                    </div>
+                    <p className="text-sm text-[#C7C5CF]">{artwork.creatorName ?? 'Verified creator'}</p>
+                    <div className="flex flex-wrap gap-2">
+                      {(artwork.tags ?? []).slice(0, 3).map((tag) => (
+                        <span key={tag} className="rounded-full border border-white/10 bg-white/5 px-2 py-1 text-[10px] uppercase tracking-wider text-[#C7C5CF]">
+                          #{tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </Link>
+              ))
+            ) : (
+              <div className="md:col-span-3 rounded-[24px] border border-dashed border-white/10 bg-white/5 p-10 text-center text-[#C7C5CF]">
+                Loading marketplace feed...
+              </div>
+            )}
           </div>
         </section>
 
@@ -354,9 +426,11 @@ export default function MarketplaceHomePage() {
         <div className="flex flex-col md:flex-row justify-between items-center py-16 px-6 max-w-7xl mx-auto gap-10">
           <div className="space-y-3 text-center md:text-left">
             <Link href="/">
-              <img
+              <Image
                 src="/weblogo.png"
                 alt="dillustration"
+                width={100}
+                height={48}
                 className="h-12 md:h-14 w-auto object-contain hover:opacity-80 transition-opacity"
               />
             </Link>

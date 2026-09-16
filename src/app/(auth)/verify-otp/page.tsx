@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -100,9 +101,11 @@ export default function VerifyOtpPage() {
         {/* Brand Identity Floating Above */}
         <div className="flex flex-col items-center mb-8">
           <Link href="/" className="mb-2 group">
-            <img
+            <Image
               src="/weblogo.png"
               alt="dillustration"
+              width={180}
+              height={90}
               className="h-24 md:h-28 w-auto object-contain drop-shadow-[0_0_20px_rgba(194,199,246,0.4)] group-hover:scale-105 transition-transform"
             />
           </Link>

@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -74,9 +75,11 @@ export default function LoginPage() {
           <header className="mb-10 text-center">
             <div className="flex justify-center mb-6">
               <Link href="/">
-                <img
+                <Image
                   src="/weblogo.png"
                   alt="dillustration"
+                  width={180}
+                  height={90}
                   className="h-24 md:h-28 w-auto object-contain drop-shadow-[0_0_20px_rgba(194,199,246,0.4)] hover:scale-105 transition-transform"
                 />
               </Link>
