@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -74,6 +75,11 @@ export default function LoginPage() {
           <header className="mb-10 text-center">
             <div className="flex justify-center mb-6">
               <Link href="/">
+                <Image
+                  src="/weblogo.png"
+                  alt="dillustration"
+                  width={180}
+                  height={90}
                 <img
                   src="/weblogo.png"
                   alt="dillustration"
