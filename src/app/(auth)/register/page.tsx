@@ -90,6 +90,9 @@ export default function RegisterPage() {
               alt="dillustration"
               width={180}
               height={90}
+            <img
+              src="/weblogo.png"
+              alt="dillustration"
               className="h-24 md:h-28 w-auto object-contain drop-shadow-[0_0_20px_rgba(194,199,246,0.4)] group-hover:scale-105 transition-transform"
             />
           </Link>
