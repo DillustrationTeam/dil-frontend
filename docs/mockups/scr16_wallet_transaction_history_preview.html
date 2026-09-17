@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wallet & Financial Ledger (SCR-16) - dillustration</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+  <style>
+    body { font-family: 'Space Grotesk', sans-serif; background: radial-gradient(circle at 50% 15%, #1d2133 0%, #0d0e15 100%); color: #e4e1e5; }
+    h1, h2, h3, .font-h1 { font-family: 'Sora', sans-serif; }
+    .glass-card { background: rgba(22, 25, 38, 0.85); backdrop-filter: blur(32px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 28px; }
+    .neon-purple-text { color: #C5C9F8; text-shadow: 0 0 25px rgba(197, 201, 248, 0.5); }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between pb-24">
+
+  <!-- Header Navigation -->
+  <header class="w-full border-b border-white/10 bg-[#0f1017]/90 backdrop-blur-md px-8 py-4 sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto flex justify-between items-center">
+      <a href="scr05_marketplace_feed_preview.html" class="text-2xl font-black font-h1 text-white">dillustration</a>
+      <a href="scr17_payout_request_preview.html" class="px-4 py-2 bg-white text-[#0f1017] rounded-full text-xs font-extrabold">Bank Payout (SCR-17)</a>
+    </div>
+  </header>
+
+  <!-- Main Layout: Persistent Sidebar + Content -->
+  <main class="max-w-7xl w-full mx-auto px-6 py-8 flex-grow grid grid-cols-1 lg:grid-cols-12 gap-8">
+    
+    <!-- LEFT SIDEBAR: CLIENT / CREATOR SHARED SIDEBAR -->
+    <aside class="lg:col-span-3 glass-card p-6 space-y-6 flex flex-col justify-between h-fit">
+      <div class="space-y-6">
+        <div class="flex items-center gap-3 border-b border-white/10 pb-4">
+          <div class="w-12 h-12 rounded-full bg-[#C5C9F8] text-black font-extrabold flex items-center justify-center font-h1 text-sm">
+            EV
+          </div>
+          <div>
+            <h4 class="font-bold text-white text-xs">@Etherea_Vox</h4>
+            <span class="text-[10px] text-[#C5C9F8] font-bold uppercase">WALLET MANAGEMENT</span>
+          </div>
+        </div>
+
+        <nav class="space-y-1 text-xs">
+          <a href="scr25_client_dashboard_preview.html" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-[#8A8FA9] hover:text-white font-bold">
+            <span class="material-symbols-outlined text-lg">dashboard</span>
+            <span>Client Dashboard</span>
+          </a>
+          <a href="scr26_creator_dashboard_analytics_preview.html" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-[#8A8FA9] hover:text-white font-bold">
+            <span class="material-symbols-outlined text-lg">analytics</span>
+            <span>Creator Studio</span>
+          </a>
+          <a href="scr16_wallet_transaction_history_preview.html" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#C5C9F8]/20 text-[#C5C9F8] font-bold border border-[#C5C9F8]/40">
+            <span class="material-symbols-outlined text-lg">account_balance_wallet</span>
+            <span>Wallet Ledger</span>
+          </a>
+          <a href="scr17_payout_request_preview.html" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-[#8A8FA9] hover:text-white font-bold">
+            <span class="material-symbols-outlined text-lg">account_balance</span>
+            <span>Bank Payout Form</span>
+          </a>
+        </nav>
+      </div>
+    </aside>
+
+    <!-- RIGHT CONTENT: WALLET METRICS & LEDGER -->
+    <div class="lg:col-span-9 space-y-6">
+      <div class="flex justify-between items-center">
+        <div>
+          <h1 class="font-h1 text-2xl font-extrabold text-white">My Wallet & Cashflow Ledger (SCR-16)</h1>
+          <p class="text-xs text-[#8A8FA9]">Overview of available balance, escrow held funds, and payout requests.</p>
+        </div>
+
+        <a href="scr17_payout_request_preview.html" class="px-6 py-3.5 bg-white text-[#0f1017] rounded-full text-xs font-extrabold flex items-center gap-2 transition-all shadow-xl hover:bg-[#C5C9F8]">
+          <span class="material-symbols-outlined text-base">account_balance</span>
+          <span>Request Bank Payout</span>
+        </a>
+      </div>
+
+      <!-- 3 Metric Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+        <div class="glass-card p-5 space-y-1 border-l-4 border-l-[#C5C9F8]">
+          <span class="text-[10px] text-[#8A8FA9] font-bold uppercase">AVAILABLE BALANCE (WALLET.BALANCE)</span>
+          <h2 class="font-h1 text-3xl font-extrabold neon-purple-text">$4,850.00</h2>
+          <p class="text-[10px] text-[#8A8FA9]">0.15 ETH Available</p>
+        </div>
+
+        <div class="glass-card p-5 space-y-1 border-l-4 border-l-amber-400">
+          <span class="text-[10px] text-[#8A8FA9] font-bold uppercase">PENDING ESCROW HELD</span>
+          <h2 class="font-h1 text-3xl font-extrabold text-white">$1,200.00</h2>
+          <p class="text-[10px] text-amber-400 font-semibold">3 Active Milestones Locked</p>
+        </div>
+
+        <div class="glass-card p-5 space-y-1 border-l-4 border-l-emerald-400">
+          <span class="text-[10px] text-[#8A8FA9] font-bold uppercase">TOTAL WITHDRAWN REVENUE</span>
+          <h2 class="font-h1 text-3xl font-extrabold text-white">$18,420.00</h2>
+          <p class="text-[10px] text-emerald-400 font-semibold">42 Bank Payouts Processed</p>
+        </div>
+      </div>
+
+      <!-- Transaction Log Table -->
+      <div class="glass-card p-6 space-y-4 text-xs">
+        <h3 class="font-h1 text-base font-bold text-white">Financial Transaction Ledger</h3>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left">
+            <thead class="text-[10px] uppercase font-bold text-[#8A8FA9] border-b border-white/10">
+              <tr>
+                <th class="py-3 px-4">Transaction ID</th>
+                <th class="py-3 px-4">Timestamp</th>
+                <th class="py-3 px-4">Type</th>
+                <th class="py-3 px-4">Description</th>
+                <th class="py-3 px-4 text-right">Amount Change</th>
+                <th class="py-3 px-4 text-center">Status</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-white/5 text-white/90">
+              <tr>
+                <td class="py-3.5 px-4 font-mono text-[#C5C9F8]">#TXN-8801</td>
+                <td class="py-3.5 px-4 text-[#8A8FA9]">Today, 10:45 AM</td>
+                <td class="py-3.5 px-4"><span class="px-2.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold">Milestone Release</span></td>
+                <td class="py-3.5 px-4">Stage 1 Sketch Approval (#CMD-8492)</td>
+                <td class="py-3.5 px-4 text-right font-bold text-emerald-400 font-mono">+$135.00</td>
+                <td class="py-3.5 px-4 text-center"><span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold text-[10px]">COMPLETED</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- FLOATING SYSTEM SCREEN QUICK NAVIGATOR BAR -->
+  <div id="quickNavigator" class="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 bg-[#0f1017]/95 backdrop-blur-xl border border-white/20 p-3 rounded-full shadow-[0_10px_30px_rgba(0,0,0,0.8)] flex items-center gap-3 text-xs max-w-5xl w-[92%] mx-auto justify-between px-6">
+    <div class="flex items-center gap-2 font-bold font-h1 text-[#C5C9F8] shrink-0">
+      <span class="material-symbols-outlined text-base">explore</span>
+      <span class="hidden sm:inline">Screen Navigator</span>
+    </div>
+    
+    <div class="flex items-center gap-2 overflow-x-auto py-1 text-[11px]">
+      <a href="scr05_marketplace_feed_preview.html" class="px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold whitespace-nowrap">Marketplace (SCR-05)</a>
+      <a href="scr16_wallet_transaction_history_preview.html" class="px-3 py-1 rounded-full bg-[#C5C9F8] text-[#0f1017] font-bold whitespace-nowrap">Wallet (SCR-16)</a>
+      <a href="scr17_payout_request_preview.html" class="px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold whitespace-nowrap">Payout (SCR-17)</a>
+      <a href="scr25_client_dashboard_preview.html" class="px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold whitespace-nowrap">Client (SCR-25)</a>
+      <a href="scr26_creator_dashboard_analytics_preview.html" class="px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold whitespace-nowrap">Creator (SCR-26)</a>
+      <a href="scr24_admin_dashboard_kpi_preview.html" class="px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold whitespace-nowrap">Admin (SCR-24)</a>
+    </div>
+  </div>
+
+</body>
+</html>

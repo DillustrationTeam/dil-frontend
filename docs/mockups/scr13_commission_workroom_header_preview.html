@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Figure 37 - SCR-13 Commission Workroom Header & Stepper</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Space+Grotesk:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+  <style>
+    :root {
+      --color-primary: #C5C9F8;
+      --color-secondary: #8A8FA9;
+      --color-tertiary: #C6AC6D;
+      --color-bg-dark: #0f1017;
+    }
+    body {
+      font-family: 'Space Grotesk', sans-serif;
+      background: radial-gradient(circle at 50% 15%, #1d2133 0%, #0d0e15 100%);
+      color: #e4e1e5;
+    }
+    h1, h2, h3, .font-h1 {
+      font-family: 'Sora', sans-serif;
+    }
+    .glass-card {
+      background: rgba(22, 25, 38, 0.85);
+      backdrop-filter: blur(32px);
+      -webkit-backdrop-filter: blur(32px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 28px;
+    }
+    .stepper-stage-active {
+      background: rgba(197, 201, 248, 0.15);
+      border: 2px solid #C5C9F8;
+      color: #C5C9F8;
+      box-shadow: 0 0 20px rgba(197, 201, 248, 0.25);
+    }
+    .stepper-stage-locked {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: #8A8FA9;
+      opacity: 0.6;
+    }
+    .btn-pill-primary {
+      background: #ffffff;
+      color: #0f1017;
+      font-weight: 700;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .btn-pill-primary:hover {
+      background: #C5C9F8;
+      box-shadow: 0 0 25px rgba(197, 201, 248, 0.4);
+      transform: translateY(-1px);
+    }
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #ffffff;
+      font-weight: 600;
+      transition: all 0.2s ease-in-out;
+    }
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+  </style>
+</head>
+<body class="min-h-screen w-full flex flex-col justify-between relative overflow-x-hidden">
+
+  <!-- Ambient Glows -->
+  <div class="fixed top-0 left-0 w-full h-full -z-10 pointer-events-none">
+    <div class="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-[#C5C9F8]/10 rounded-full blur-[140px]"></div>
+    <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-[#252A42]/50 rounded-full blur-[120px]"></div>
+  </div>
+
+  <!-- Top Navigation Header -->
+  <header class="w-full border-b border-white/10 bg-[#0f1017]/90 backdrop-blur-md sticky top-0 z-50 px-8 py-5">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      
+      <div class="flex items-center gap-12">
+        <a href="scr05_marketplace_feed_preview.html" class="text-2xl font-black font-h1 tracking-tight text-white">dillustration</a>
+        <nav class="hidden md:flex items-center gap-8 text-xs font-extrabold tracking-wider uppercase text-[#8A8FA9]">
+          <a href="scr05_marketplace_feed_preview.html" class="hover:text-white transition-colors">MARKETPLACE</a>
+          <a href="scr08_creator_profile_preview.html" class="hover:text-white transition-colors">ARTISTS</a>
+          <a href="#" class="text-white border-b-2 border-white pb-1 tracking-widest">DASHBOARD</a>
+        </nav>
+      </div>
+
+      <div class="flex items-center gap-5">
+        <span class="text-xs px-3 py-1 rounded-full bg-[#C6AC6D]/20 text-[#C6AC6D] border border-[#C6AC6D]/30 font-bold uppercase tracking-wider">
+          Workroom Dashboard (SCR-13)
+        </span>
+        <button class="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/80 hover:text-white cursor-pointer relative">
+          <span class="material-symbols-outlined text-lg">notifications</span>
+        </button>
+        <div class="w-9 h-9 rounded-full bg-[#C5C9F8] text-[#151724] font-bold flex items-center justify-center font-h1 text-xs cursor-pointer border border-white/20">
+          CM
+        </div>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Main Workroom Header & Stepper Content -->
+  <main class="max-w-6xl w-full mx-auto px-6 py-10 flex-grow space-y-8">
+    
+    <!-- FIGURE 37 HEADER BANNER -->
+    <div class="glass-card p-6 md:p-8 space-y-6">
+      
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-white/10 pb-6">
+        <div class="space-y-1">
+          <div class="flex items-center gap-3">
+            <span class="text-xs text-[#C5C9F8] font-mono font-bold">#CMD-8492</span>
+            <span class="text-[10px] uppercase font-bold px-2.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+              IN_PROGRESS
+            </span>
+            <span class="text-[10px] uppercase font-bold px-2.5 py-0.5 rounded bg-[#C5C9F8]/20 text-[#C5C9F8] border border-[#C5C9F8]/30">
+              🔒 ESCROW LOCKED (100%)
+            </span>
+          </div>
+          <h1 class="font-h1 text-2xl md:text-3xl font-extrabold text-white">Figure 37 — Commission Workroom Header & Stepper</h1>
+          <p class="text-xs text-[#8A8FA9]">Project: <span class="text-white font-semibold">Cyberpunk Bounty Hunter Character Concept</span></p>
+        </div>
+
+        <!-- Participants Badges (BR-34 Restricted Access) -->
+        <div class="flex items-center gap-3 text-xs bg-white/5 border border-white/10 p-3 rounded-2xl">
+          <div class="flex flex-col">
+            <span class="text-[9px] text-[#8A8FA9] uppercase font-bold">CLIENT</span>
+            <span class="text-white font-semibold">@CyberClient</span>
+          </div>
+          <span class="text-[#8A8FA9]">/</span>
+          <div class="flex flex-col">
+            <span class="text-[9px] text-[#8A8FA9] uppercase font-bold">CREATOR</span>
+            <span class="text-[#C5C9F8] font-bold">@Etherea_Vox ★4.9</span>
+          </div>
+          <span class="text-[#8A8FA9]">/</span>
+          <div class="flex flex-col">
+            <span class="text-[9px] text-[#8A8FA9] uppercase font-bold">MODERATOR</span>
+            <span class="text-[#C6AC6D] font-semibold">@DilMod_01</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- COUNTDOWN TIMER BANNER -->
+      <div class="bg-gradient-to-r from-amber-500/15 via-amber-500/10 to-transparent border border-amber-500/30 p-4 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-3 text-xs">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/40 flex items-center justify-center font-bold">
+            <span class="material-symbols-outlined text-xl animate-pulse">hourglass_top</span>
+          </div>
+          <div>
+            <h3 class="font-h1 font-bold text-white text-sm">Milestone 1 Deadline Countdown</h3>
+            <p class="text-[#8A8FA9]">Expected Stage 1 Draft Delivery: <span class="text-white font-semibold">Sept 09, 2026</span></p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 bg-black/40 px-4 py-2 rounded-xl border border-amber-500/30">
+          <span class="material-symbols-outlined text-amber-400 text-base">timer</span>
+          <span id="liveCountdown" class="font-mono font-extrabold text-amber-300 text-sm">04 Days : 18 Hours : 32 Mins</span>
+        </div>
+      </div>
+
+      <!-- FIGURE 37 MILESTONE STATUS STEPPER BAR -->
+      <div class="space-y-4 pt-2">
+        <div class="flex justify-between items-center text-xs">
+          <h3 class="font-h1 font-extrabold uppercase tracking-wider text-[#8A8FA9] text-[11px]">Milestone Stepper Progress</h3>
+          <span class="text-xs text-[#C5C9F8] font-bold">Current Active: Stage 1 (30% Escrow Tranche)</span>
+        </div>
+
+        <!-- 3 STAGES STEPPER GRID -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          
+          <!-- STAGE 1: IN PROGRESS -->
+          <div class="stepper-stage-active p-5 rounded-2xl space-y-3 relative overflow-hidden">
+            <div class="flex items-center justify-between">
+              <span class="w-7 h-7 rounded-lg bg-[#C5C9F8]/20 text-[#C5C9F8] font-bold text-xs flex items-center justify-center">1</span>
+              <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-[#C5C9F8] text-[#151724]">IN_PROGRESS</span>
+            </div>
+            <div>
+              <h4 class="font-h1 font-bold text-white text-sm">Stage 1: Sketch & Composition</h4>
+              <p class="text-[11px] text-[#8A8FA9]">WIP preview deliverable: Thumbnail sketch pass</p>
+            </div>
+            <div class="flex justify-between items-center text-[11px] pt-2 border-t border-white/10">
+              <span class="text-[#8A8FA9]">Escrow Tranche:</span>
+              <span class="font-bold text-[#C5C9F8]">0.135 ETH (30%)</span>
+            </div>
+          </div>
+
+          <!-- STAGE 2: LOCKED -->
+          <div class="stepper-stage-locked p-5 rounded-2xl space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="w-7 h-7 rounded-lg bg-white/5 text-[#8A8FA9] font-bold text-xs flex items-center justify-center">2</span>
+              <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-white/5 text-[#8A8FA9] border border-white/10">🔒 LOCKED</span>
+            </div>
+            <div>
+              <h4 class="font-h1 font-bold text-white text-sm">Stage 2: Base Color & Lighting</h4>
+              <p class="text-[11px] text-[#8A8FA9]">Unlocks after Stage 1 sketch approval</p>
+            </div>
+            <div class="flex justify-between items-center text-[11px] pt-2 border-t border-white/10">
+              <span class="text-[#8A8FA9]">Escrow Tranche:</span>
+              <span class="font-bold text-white">0.135 ETH (30%)</span>
+            </div>
+          </div>
+
+          <!-- STAGE 3: LOCKED -->
+          <div class="stepper-stage-locked p-5 rounded-2xl space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="w-7 h-7 rounded-lg bg-white/5 text-[#8A8FA9] font-bold text-xs flex items-center justify-center">3</span>
+              <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-white/5 text-[#8A8FA9] border border-white/10">🔒 LOCKED</span>
+            </div>
+            <div>
+              <h4 class="font-h1 font-bold text-white text-sm">Stage 3: High-Res Polish</h4>
+              <p class="text-[11px] text-[#8A8FA9]">Final deliverable: High-Res PNG + PSD</p>
+            </div>
+            <div class="flex justify-between items-center text-[11px] pt-2 border-t border-white/10">
+              <span class="text-[#8A8FA9]">Escrow Tranche:</span>
+              <span class="font-bold text-white">0.180 ETH (40%)</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- WORKROOM ACTION BAR -->
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-white/10 text-xs">
+        <div class="flex items-center gap-3">
+          <button class="btn-secondary px-4 py-2.5 rounded-xl font-semibold flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-sm">description</span>
+            <span>View Rate Package Contract</span>
+          </button>
+          <button class="btn-secondary px-4 py-2.5 rounded-xl font-semibold flex items-center gap-1.5 text-amber-300">
+            <span class="material-symbols-outlined text-sm">shield</span>
+            <span>Request Moderator Support</span>
+          </button>
+        </div>
+
+        <a href="scr13_milestone_progress_chat_preview.html" class="btn-pill-primary px-8 py-3.5 rounded-full font-bold flex items-center gap-2 cursor-pointer shadow-xl">
+          <span>Open Workroom Chat & WIP Panel (Figure 38)</span>
+          <span class="material-symbols-outlined text-base">arrow_forward</span>
+        </a>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="w-full border-t border-white/10 py-8 px-8 bg-[#0b0c12] text-[11px] text-[#8A8FA9]">
+    <div class="max-w-7xl mx-auto flex justify-between items-center">
+      <p>© 2026 dillustration. Digital Etherealism Art Collective.</p>
+      <div class="flex gap-6">
+        <a href="#" class="hover:text-white">Privacy</a>
+        <a href="#" class="hover:text-white">Terms</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Countdown Script -->
+  <script>
+    let secondsLeft = 414752; // 4 days 18 hrs 32 mins
+    setInterval(() => {
+      if (secondsLeft > 0) {
+        secondsLeft--;
+        const days = Math.floor(secondsLeft / (3600 * 24));
+        const hrs = Math.floor((secondsLeft % (3600 * 24)) / 3600);
+        const mins = Math.floor((secondsLeft % 3600) / 60);
+        document.getElementById('liveCountdown').innerText = 
+          `${days < 10 ? '0' : ''}${days} Days : ${hrs < 10 ? '0' : ''}${hrs} Hours : ${mins < 10 ? '0' : ''}${mins} Mins`;
+      }
+    }, 1000);
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Figure 18 - SCR-05 Category Recommendation Tabs & Curated Collections - dillustration</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,400;1,600&family=Sora:wght@400;600;700;800&family=Space+Grotesk:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+  <style>
+    body { font-family: 'Space Grotesk', sans-serif; background: #131522; color: #e4e1e5; }
+    h1, h2, h3, .font-h1 { font-family: 'Sora', sans-serif; }
+    .font-serif-italic { font-family: 'Playfair Display', serif; font-style: italic; }
+    .hero-card {
+      background: rgba(30, 34, 53, 0.65);
+      backdrop-filter: blur(28px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 28px;
+    }
+    .collection-card {
+      background: rgba(30, 34, 53, 0.65);
+      backdrop-filter: blur(28px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 24px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .collection-card:hover {
+      border-color: rgba(197, 201, 248, 0.4);
+      transform: translateY(-4px);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between pb-24">
+
+  <!-- Top Navbar Header (Interconnected to System Screens) -->
+  <header class="w-full border-b border-white/10 bg-[#131522]/90 backdrop-blur-md sticky top-0 z-50 px-8 py-4">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      
+      <!-- Brand Logo & Nav -->
+      <div class="flex items-center gap-10">
+        <a href="scr05_marketplace_feed_preview.html" class="text-2xl font-black font-h1 tracking-tight text-white">DILLUSTRATION</a>
+        <nav class="hidden md:flex items-center gap-8 text-xs font-bold tracking-wide">
+          <a href="scr05_marketplace_feed_preview.html" class="text-[#8A8FA9] hover:text-white transition-colors">Marketplace</a>
+          <a href="scr05_category_tabs_preview.html" class="text-white border-b-2 border-white pb-1">Category Tabs & Collections</a>
+          <a href="scr08_creator_profile_preview.html" class="text-[#8A8FA9] hover:text-white transition-colors">Artists</a>
+          <a href="scr25_client_dashboard_preview.html" class="text-[#8A8FA9] hover:text-white transition-colors">Dashboard</a>
+        </nav>
+      </div>
+
+      <!-- Right Header Actions (Search Input, Bell, Profile Pill) -->
+      <div class="flex items-center gap-4">
+        <a href="scr06_artwork_search_filter_preview.html" class="hidden sm:flex items-center justify-between gap-3 bg-black/40 border border-white/10 rounded-full px-5 py-2.5 text-xs w-64 text-white hover:border-[#C5C9F8] transition-all">
+          <span class="text-[#8A8FA9] text-xs font-medium">Search curated art...</span>
+          <span class="material-symbols-outlined text-base text-[#8A8FA9]">search</span>
+        </a>
+
+        <a href="global_notification_center_preview.html" class="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/80 hover:text-white cursor-pointer">
+          <span class="material-symbols-outlined text-lg">notifications</span>
+        </a>
+
+        <a href="scr25_client_dashboard_preview.html" class="flex items-center gap-3 bg-black/30 border border-white/10 px-3 py-1.5 rounded-full hover:border-white/20 transition-all">
+          <div class="w-7 h-7 rounded-full bg-slate-300 text-black font-extrabold flex items-center justify-center font-h1 text-xs">
+            M
+          </div>
+          <div class="text-left pr-1">
+            <h4 class="font-bold text-white text-[11px] leading-tight">Mou Glanzudlii</h4>
+            <span class="text-[9px] text-[#8A8FA9] font-bold block uppercase tracking-wider">CLIENT ▾</span>
+          </div>
+        </a>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Main Homepage Content Area -->
+  <main class="max-w-7xl w-full mx-auto px-6 py-8 flex-grow space-y-16">
+    
+    <!-- Hero Showcase Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center pt-4">
+      
+      <!-- Left Hero Banner Text -->
+      <div class="lg:col-span-5 space-y-6">
+        <span class="text-[11px] uppercase tracking-[0.2em] font-semibold text-[#8A8FA9]">CURATED COLLECTIVE</span>
+        <h1 class="font-h1 text-4xl md:text-5xl font-extrabold text-white leading-tight">
+          Where the Deep Blue meets the <em class="font-serif-italic text-[#C5C9F8] font-normal">Vast Stillness</em>
+        </h1>
+        <p class="text-xs text-[#8A8FA9] leading-relaxed">
+          Experience the weightless world of Digital Etherealism. A gallery for the modern collector seeking high-performance serenity.
+        </p>
+
+        <!-- Hero Action Buttons -->
+        <div class="flex items-center gap-4 text-xs pt-2">
+          <a href="scr06_artwork_search_filter_preview.html" class="px-7 py-3.5 bg-[#C5C9F8] hover:bg-white text-black font-extrabold rounded-full transition-all shadow-xl flex items-center gap-2">
+            <span>Explore Gallery</span>
+            <span class="material-symbols-outlined text-base">arrow_forward</span>
+          </a>
+          <a href="scr10_commission_request_brief_preview.html" class="px-7 py-3.5 bg-black/30 hover:bg-white/10 text-white font-bold rounded-full border border-white/15 transition-all">
+            Learn More
+          </a>
+        </div>
+
+        <!-- Hero Stats Row -->
+        <div class="grid grid-cols-3 gap-6 pt-6 border-t border-white/10 text-xs">
+          <div>
+            <p class="font-h1 text-lg font-bold text-white">1.2k</p>
+            <p class="text-[#8A8FA9] uppercase text-[10px] tracking-wider font-semibold">ARTWORKS</p>
+          </div>
+          <div>
+            <p class="font-h1 text-lg font-bold text-white">450</p>
+            <p class="text-[#8A8FA9] uppercase text-[10px] tracking-wider font-semibold">ARTISTS</p>
+          </div>
+          <div>
+            <p class="font-h1 text-lg font-bold text-white font-mono">0.4 ETH</p>
+            <p class="text-[#8A8FA9] uppercase text-[10px] tracking-wider font-semibold">FLOOR PRICE</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Hero Image Card -->
+      <div class="lg:col-span-7">
+        <div class="hero-card p-4 relative overflow-hidden group">
+          <div class="relative h-96 w-full rounded-2xl overflow-hidden bg-[#1A1D2E]">
+            <div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105" style="background-image: url('https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=1000&q=80');"></div>
+            
+            <!-- Current Bid Overlay Badge -->
+            <div class="absolute bottom-4 right-4 px-4 py-2.5 rounded-2xl bg-black/60 backdrop-blur-md border border-white/10 text-xs flex items-center gap-3">
+              <div class="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center text-[#C5C9F8]">
+                <span class="material-symbols-outlined text-sm">auto_awesome</span>
+              </div>
+              <div>
+                <p class="text-[#8A8FA9] uppercase text-[9px] tracking-wider font-semibold">CURRENT BID</p>
+                <p class="text-white font-bold text-sm font-mono">2.45 ETH</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Slider Bar -->
+        <div class="flex items-center gap-3 mt-4 text-xs font-mono text-[#8A8FA9]">
+          <span class="text-white font-bold">01</span>
+          <div class="h-0.5 bg-white/20 flex-1 relative rounded-full">
+            <div class="h-0.5 bg-[#C5C9F8] w-1/4 rounded-full"></div>
+          </div>
+          <span>02 — 03 — 04 — 05 — 06 — 07 — 08 — 09 — 10</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Curated Collections Section (Linked to SCR-07) -->
+    <div class="space-y-6 pt-8">
+      <div class="flex justify-between items-center">
+        <div>
+          <span class="text-[11px] uppercase tracking-[0.2em] font-semibold text-[#8A8FA9]">MARKET TRENDS</span>
+          <h2 class="font-h1 text-2xl font-bold text-white">Curated Collections</h2>
+        </div>
+        <a href="scr06_artwork_search_filter_preview.html" class="text-xs text-[#C5C9F8] hover:underline font-semibold flex items-center gap-1">
+          <span>View All Collections</span>
+          <span class="material-symbols-outlined text-sm">arrow_forward</span>
+        </a>
+      </div>
+
+      <!-- Collections Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- Large Featured Collection (Left - 8 Cols) -->
+        <a href="scr07_artwork_details_preview.html" class="lg:col-span-8 collection-card p-6 relative overflow-hidden h-96 flex flex-col justify-end group block">
+          <div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105" style="background-image: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&q=80');"></div>
+          <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
+          
+          <div class="relative z-10 space-y-2">
+            <span class="text-[10px] uppercase tracking-widest text-[#C5C9F8] font-bold">Featured Collection</span>
+            <h3 class="font-h1 text-2xl font-bold text-white group-hover:text-[#C5C9F8] transition-colors">Neural Horizons</h3>
+            <p class="text-xs text-[#8A8FA9] max-w-md">Exploring the intersection of artificial cognition and organic serenity.</p>
+          </div>
+        </a>
+
+        <!-- Right Stacked Collections (Right - 4 Cols) -->
+        <div class="lg:col-span-4 space-y-6 flex flex-col justify-between">
+          
+          <a href="scr07_artwork_details_preview.html" class="collection-card p-6 relative overflow-hidden h-44 flex flex-col justify-end group block">
+            <div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105" style="background-image: url('https://images.unsplash.com/photo-1563089145-599997674d42?w=500&q=80');"></div>
+            <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+            <h3 class="font-h1 text-lg font-bold text-white relative z-10 group-hover:text-[#C5C9F8] transition-colors">Crystal Flow</h3>
+          </a>
+
+          <a href="scr07_artwork_details_preview.html" class="collection-card p-6 relative overflow-hidden h-44 flex flex-col justify-end group block">
+            <div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105" style="background-image: url('https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?w=500&q=80');"></div>
+            <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+            <h3 class="font-h1 text-lg font-bold text-white relative z-10 group-hover:text-[#C5C9F8] transition-colors">Viscosity Genesis</h3>
+          </a>
+
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Newsletter Banner: Join the Ethereal Wave -->
+    <div class="hero-card p-12 text-center relative overflow-hidden my-12">
+      <div class="max-w-md mx-auto space-y-4">
+        <h2 class="font-h1 text-3xl font-bold text-white">Join the Ethereal Wave</h2>
+        <p class="text-xs text-[#8A8FA9]">Receive exclusive access to drop schedules and private curation events.</p>
+
+        <form class="flex items-center gap-3 pt-2" onsubmit="event.preventDefault(); alert('Subscribed to Ethereal Wave Newsletter!');">
+          <input type="email" placeholder="Enter your email" class="w-full bg-[#151724] border border-white/10 rounded-full px-5 py-3 text-xs text-white focus:outline-none focus:border-[#C5C9F8]" />
+          <button type="submit" class="px-6 py-3 bg-[#C5C9F8] hover:bg-white text-black font-extrabold rounded-full text-xs shrink-0 transition-all shadow-lg">
+            Subscribe
+          </button>
+        </form>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="w-full border-t border-white/10 py-10 px-6 bg-[#0E101A] text-xs text-[#8A8FA9]">
+    <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+      <div class="space-y-2">
+        <span class="text-xl font-bold font-h1 text-white block">dillustration</span>
+        <p class="text-[#8A8FA9] leading-relaxed">Curating the future of digital etherealism for a new generation of collectors.</p>
+      </div>
+      <div>
+        <p class="font-bold text-white uppercase text-[10px] tracking-wider mb-3">NAVIGATION</p>
+        <div class="space-y-2 text-[#8A8FA9]">
+          <a href="scr05_marketplace_feed_preview.html" class="block hover:text-white">Marketplace Feed</a>
+          <a href="scr06_artwork_search_filter_preview.html" class="block hover:text-white">Search & Filter</a>
+          <a href="scr08_creator_profile_preview.html" class="block hover:text-white">Artists</a>
+        </div>
+      </div>
+      <div>
+        <p class="font-bold text-white uppercase text-[10px] tracking-wider mb-3">LEGAL</p>
+        <div class="space-y-2 text-[#8A8FA9]">
+          <a href="#" class="block hover:text-white">Privacy Policy</a>
+          <a href="#" class="block hover:text-white">Terms of Service</a>
+        </div>
+      </div>
+      <div>
+        <p class="font-bold text-white uppercase text-[10px] tracking-wider mb-3">SUPPORT</p>
+        <div class="space-y-2 text-[#8A8FA9]">
+          <a href="#" class="block hover:text-white">Contact Us</a>
+          <a href="#" class="block hover:text-white">Help Center</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- FLOATING SYSTEM SCREEN QUICK NAVIGATOR BAR -->
+  <div id="quickNavigator" class="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 bg-[#0f1017]/95 backdrop-blur-xl border border-white/20 p-3 rounded-full shadow-[0_10px_30px_rgba(0,0,0,0.8)] flex items-center gap-3 text-xs max-w-5xl w-[92%] mx-auto justify-between px-6">
+    <div class="flex items-center gap-2 font-bold font-h1 text-[#C5C9F8] shrink-0">
+      <span class="material-symbols-outlined text-base">explore</span>
+      <span class="hidden sm:inline">Screen Navigator</span>
+    </div>
+    
+    <div class="flex items-center gap-2 overflow-x-auto py-1 text-[11px]">
+      <a href="scr05_marketplace_feed_preview.html" class="px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold whitespace-nowrap">Marketplace Feed (SCR-05)</a>
+      <a href="scr05_category_tabs_preview.html" class="px-3 py-1 rounded-full bg-[#C5C9F8] text-[#0f1017] font-bold whitespace-nowrap">Category Tabs (SCR-05)</a>
+      <a href="scr06_artwork_search_filter_preview.html" class="px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold whitespace-nowrap">Search & Filter (SCR-06)</a>
+      <a href="scr07_artwork_details_preview.html" class="px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold whitespace-nowrap">Artwork (SCR-07)</a>
+      <a href="scr08_creator_profile_preview.html" class="px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold whitespace-nowrap">Profile (SCR-08)</a>
+      <a href="scr25_client_dashboard_preview.html" class="px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold whitespace-nowrap">Client (SCR-25)</a>
+      <a href="scr26_creator_dashboard_analytics_preview.html" class="px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold whitespace-nowrap">Creator (SCR-26)</a>
+    </div>
+  </div>
+
+</body>
+</html>

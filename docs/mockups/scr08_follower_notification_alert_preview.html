@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Figure 22 - SCR-08 Follower Notification Alert (Use Case 3.3.5)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Space+Grotesk:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+  <style>
+    :root {
+      --color-primary: #C5C9F8;
+      --color-secondary: #8A8FA9;
+      --color-tertiary: #C6AC6D;
+      --color-bg-dark: #151724;
+    }
+    body {
+      font-family: 'Space Grotesk', sans-serif;
+      background: radial-gradient(circle at 50% 20%, #252A42 0%, #151724 100%);
+      color: #e4e1e5;
+    }
+    h1, h2, h3, .font-h1 {
+      font-family: 'Sora', sans-serif;
+    }
+    .glass-card {
+      background: rgba(30, 34, 53, 0.65);
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 24px;
+    }
+    .notification-card {
+      background: rgba(30, 34, 53, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .notification-card:hover {
+      border-color: rgba(197, 201, 248, 0.4);
+      background: rgba(35, 40, 62, 0.85);
+    }
+    .notification-unread {
+      border-left: 4px solid #C5C9F8;
+      background: rgba(197, 201, 248, 0.08);
+    }
+    .btn-primary {
+      background: #C5C9F8;
+      color: #151724;
+      font-weight: 700;
+      transition: all 0.2s ease-in-out;
+    }
+    .btn-primary:hover {
+      background: #ffffff;
+      box-shadow: 0 0 25px rgba(255, 255, 255, 0.35);
+    }
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #ffffff;
+      font-weight: 600;
+      transition: all 0.2s ease-in-out;
+    }
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+  </style>
+</head>
+<body class="min-h-screen w-full flex flex-col justify-between relative overflow-x-hidden">
+
+  <!-- Ambient Background Glows -->
+  <div class="fixed top-0 left-0 w-full h-full -z-10 pointer-events-none">
+    <div class="absolute top-[-15%] left-[-15%] w-[55%] h-[55%] bg-[#C5C9F8]/10 rounded-full blur-[140px]"></div>
+    <div class="absolute bottom-[-10%] right-[-10%] w-[45%] h-[45%] bg-[#C6AC6D]/10 rounded-full blur-[120px]"></div>
+  </div>
+
+  <!-- Top Navigation Header -->
+  <header class="w-full border-b border-white/10 bg-[#151724]/90 backdrop-blur-md sticky top-0 z-50 px-6 py-4">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      
+      <!-- Brand Logo & Navigation Links -->
+      <div class="flex items-center gap-10">
+        <a href="scr05_marketplace_feed_preview.html" class="text-2xl font-extrabold font-h1 tracking-tight text-white">dillustration</a>
+        <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-[#8A8FA9]">
+          <a href="scr05_marketplace_feed_preview.html" class="hover:text-white transition-colors">Marketplace</a>
+          <a href="scr08_creator_profile_preview.html" class="text-white border-b-2 border-[#C5C9F8] pb-1 font-semibold">Artists</a>
+          <a href="#" class="hover:text-white transition-colors">Dashboard</a>
+        </nav>
+      </div>
+
+      <!-- Right Header Tools -->
+      <div class="flex items-center gap-4">
+        <button class="w-9 h-9 rounded-full bg-[#C5C9F8]/20 border border-[#C5C9F8]/40 flex items-center justify-center text-[#C5C9F8] cursor-pointer relative">
+          <span class="material-symbols-outlined text-lg">notifications</span>
+          <span class="absolute top-0 right-0 w-2.5 h-2.5 bg-[#C5C9F8] rounded-full animate-ping"></span>
+        </button>
+        <div class="w-9 h-9 rounded-full bg-[#C5C9F8] text-[#151724] font-bold flex items-center justify-center font-h1 text-xs cursor-pointer">
+          EV
+        </div>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Interactive Test Toolbar (UC 3.3.5 Step 5 Notification Trigger) -->
+  <div class="w-full bg-[#181A28]/90 border-b border-white/10 py-3 px-6 text-xs sticky top-[73px] z-40">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-3">
+      <div class="flex items-center gap-2 text-[#8A8FA9]">
+        <span class="material-symbols-outlined text-base text-[#C5C9F8]">notifications_active</span>
+        <span class="font-semibold text-white">UC 3.3.5 Notification Simulation:</span>
+        <span class="hidden md:inline text-[#8A8FA9]">Test Creator notification delivery when Client follows</span>
+      </div>
+      <button onclick="triggerFollowerAlert()" class="btn-primary px-4 py-1.5 rounded-lg text-[11px] uppercase tracking-wider cursor-pointer flex items-center gap-1.5">
+        <span class="material-symbols-outlined text-sm">person_add</span>
+        <span>Simulate New Follower Alert (Step 5)</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Real-Time Toast Alert Component -->
+  <div id="liveFollowerAlert" class="hidden fixed bottom-6 right-6 z-50 bg-[#1E2235] text-white p-4 rounded-2xl shadow-2xl border border-[#C5C9F8]/40 max-w-sm flex items-start gap-3 animate-bounce">
+    <div class="w-10 h-10 rounded-full bg-cover bg-center border-2 border-[#C5C9F8] shrink-0" style="background-image: url('https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&q=80');"></div>
+    <div class="space-y-1">
+      <div class="flex items-center justify-between">
+        <span class="text-[10px] font-extrabold uppercase tracking-wider text-[#C5C9F8]">NEW FOLLOWER ALERT</span>
+        <span class="text-[10px] text-[#8A8FA9]">Just Now</span>
+      </div>
+      <p class="text-xs font-bold text-white"><span class="text-[#C5C9F8]">Alex Rivera</span> started following you.</p>
+      <p class="text-[11px] text-[#8A8FA9]">They will now receive updates on your artwork uploads & commission slots.</p>
+    </div>
+  </div>
+
+  <!-- Main Body Content -->
+  <main class="max-w-5xl w-full mx-auto px-6 py-8 flex-grow space-y-8">
+    
+    <!-- Page Header & Breadcrumb -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-white/10 pb-6">
+      <div>
+        <div class="flex items-center gap-2 text-xs text-[#8A8FA9] mb-1">
+          <a href="scr08_follow_toggle_preview.html" class="hover:text-white flex items-center gap-1">
+            <span class="material-symbols-outlined text-sm">arrow_back</span>
+            <span>Back to Creator Profile Header (Layout 1)</span>
+          </a>
+        </div>
+        <h1 class="font-h1 text-2xl md:text-3xl font-extrabold text-white">Creator Notification Center</h1>
+        <p class="text-xs text-[#8A8FA9]">Real-time alerts for new followers, artwork feedback, and commission slot subscriptions.</p>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <span class="px-3 py-1 rounded-full bg-[#C5C9F8]/10 text-[#C5C9F8] border border-[#C5C9F8]/30 text-xs font-bold flex items-center gap-1">
+          <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+          <span>Notification Service Active</span>
+        </span>
+      </div>
+    </div>
+
+    <!-- Filter Tabs -->
+    <div class="flex items-center gap-3 text-xs font-semibold overflow-x-auto pb-2">
+      <button class="px-4 py-2 rounded-full bg-[#C5C9F8] text-[#151724] font-bold">All Alerts (5)</button>
+      <button class="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-white hover:bg-white/10">Followers (3)</button>
+      <button class="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-[#8A8FA9] hover:text-white">Commission Slots (1)</button>
+      <button class="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-[#8A8FA9] hover:text-white">Artwork Likes (1)</button>
+    </div>
+
+    <!-- NOTIFICATION CARDS LIST (TARGET LAYOUT FOR UC 3.3.5 STEP 5) -->
+    <div class="space-y-4">
+
+      <!-- ALERT CARD 1: NEW FOLLOWER (TARGET OF USE CASE 3.3.5) -->
+      <div class="notification-card notification-unread p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        
+        <div class="flex items-start gap-4">
+          <!-- Follower Avatar -->
+          <div class="relative shrink-0">
+            <div class="w-12 h-12 rounded-2xl bg-cover bg-center border-2 border-[#C5C9F8]" style="background-image: url('https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&q=80');"></div>
+            <div class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-[#C5C9F8] text-[#151724] flex items-center justify-center">
+              <span class="material-symbols-outlined text-xs font-bold">person_add</span>
+            </div>
+          </div>
+
+          <!-- Notification Details -->
+          <div class="space-y-1">
+            <div class="flex items-center gap-2">
+              <h3 class="font-h1 text-sm font-bold text-white">Alex Rivera</h3>
+              <span class="text-[10px] px-2 py-0.5 rounded bg-[#C5C9F8]/20 text-[#C5C9F8] font-bold">Client</span>
+              <span class="text-[11px] text-[#8A8FA9]">• 2 mins ago</span>
+            </div>
+            
+            <p class="text-xs text-[#e4e1e5]">
+              started following your creator profile <span class="font-bold text-white">@Etherea_Vox</span>.
+            </p>
+            
+            <p class="text-[11px] text-[#8A8FA9] flex items-center gap-1 pt-1">
+              <span class="material-symbols-outlined text-xs text-[#C6AC6D]">notifications_active</span>
+              <span>Subscribed to receive alerts for your new artwork drops & slot openings.</span>
+            </p>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex items-center gap-2 shrink-0 pt-2 md:pt-0">
+          <button class="btn-primary px-4 py-2 rounded-xl text-xs font-bold cursor-pointer">
+            Follow Back
+          </button>
+          <button class="btn-secondary px-3 py-2 rounded-xl text-xs font-semibold cursor-pointer">
+            View Profile
+          </button>
+        </div>
+
+      </div>
+
+      <!-- ALERT CARD 2: NEW FOLLOWER 2 -->
+      <div class="notification-card p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        
+        <div class="flex items-start gap-4">
+          <div class="relative shrink-0">
+            <div class="w-12 h-12 rounded-2xl bg-cover bg-center border border-white/10" style="background-image: url('https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&q=80');"></div>
+            <div class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-[#C5C9F8] text-[#151724] flex items-center justify-center">
+              <span class="material-symbols-outlined text-xs font-bold">person_add</span>
+            </div>
+          </div>
+
+          <div class="space-y-1">
+            <div class="flex items-center gap-2">
+              <h3 class="font-h1 text-sm font-bold text-white">Sophia Chen</h3>
+              <span class="text-[10px] px-2 py-0.5 rounded bg-[#C6AC6D]/20 text-[#C6AC6D] font-bold">Art Collector</span>
+              <span class="text-[11px] text-[#8A8FA9]">• 1 hour ago</span>
+            </div>
+            
+            <p class="text-xs text-[#e4e1e5]">
+              started following your creator profile <span class="font-bold text-white">@Etherea_Vox</span>.
+            </p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 shrink-0">
+          <button class="btn-secondary px-4 py-2 rounded-xl text-xs font-semibold cursor-pointer">
+            Followed
+          </button>
+        </div>
+
+      </div>
+
+      <!-- ALERT CARD 3: COMMISSION SLOT INQUIRY -->
+      <div class="notification-card p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        
+        <div class="flex items-start gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-[#C6AC6D]/10 border border-[#C6AC6D]/30 text-[#C6AC6D] flex items-center justify-center shrink-0">
+            <span class="material-symbols-outlined text-xl">palette</span>
+          </div>
+
+          <div class="space-y-1">
+            <div class="flex items-center gap-2">
+              <h3 class="font-h1 text-sm font-bold text-white">Commission Slot Subscription</h3>
+              <span class="text-[11px] text-[#8A8FA9]">• 3 hours ago</span>
+            </div>
+            
+            <p class="text-xs text-[#e4e1e5]">
+              You opened <span class="text-[#C6AC6D] font-bold">3 / 5 Commission Slots</span>. 42 followers were automatically notified via push & email.
+            </p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 shrink-0">
+          <a href="scr07_creator_commission_sidebar_preview.html" class="btn-secondary px-4 py-2 rounded-xl text-xs font-semibold cursor-pointer">
+            Manage Slots
+          </a>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- FOLLOWER NOTIFICATION PREFERENCES CONTROL PANEL -->
+    <div class="glass-card p-6 space-y-4">
+      <div class="flex items-center justify-between border-b border-white/10 pb-3">
+        <h3 class="font-h1 text-base font-bold text-white flex items-center gap-2">
+          <span class="material-symbols-outlined text-lg text-[#C5C9F8]">settings_suggest</span>
+          <span>Follower Broadcast Notification Preferences</span>
+        </h3>
+        <span class="text-xs text-[#8A8FA9]">Creator Configuration</span>
+      </div>
+
+      <div class="space-y-4 text-xs">
+        
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-white font-semibold">Notify followers when I publish a new artwork</p>
+            <p class="text-[#8A8FA9] text-[11px]">Send instant activity feed update to all followers upon uploading portfolio items.</p>
+          </div>
+          <div class="w-10 h-5 bg-[#C5C9F8] rounded-full p-0.5 flex items-center justify-end cursor-pointer">
+            <div class="w-4 h-4 rounded-full bg-[#151724]"></div>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between pt-2 border-t border-white/5">
+          <div>
+            <p class="text-white font-semibold">Notify followers when I open new commission slots</p>
+            <p class="text-[#8A8FA9] text-[11px]">Broadcast priority notification to followers when available slots change from 0.</p>
+          </div>
+          <div class="w-10 h-5 bg-[#C5C9F8] rounded-full p-0.5 flex items-center justify-end cursor-pointer">
+            <div class="w-4 h-4 rounded-full bg-[#151724]"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="w-full border-t border-white/10 py-8 px-6 bg-[#0E101A] text-xs text-[#8A8FA9] mt-12">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+      <div>
+        <span class="text-lg font-bold font-h1 text-white block mb-1">dillustration</span>
+        <p>© 2026 dillustration. Digital Etherealism Art Collective.</p>
+      </div>
+      <div class="flex gap-8">
+        <a href="#" class="hover:text-white">Privacy</a>
+        <a href="#" class="hover:text-white">Terms</a>
+        <a href="#" class="hover:text-white">Contact</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Simulation JavaScript -->
+  <script>
+    function triggerFollowerAlert() {
+      const alert = document.getElementById('liveFollowerAlert');
+      alert.classList.remove('hidden');
+      setTimeout(() => {
+        alert.classList.add('hidden');
+      }, 5000);
+    }
+  </script>
+
+</body>
+</html>

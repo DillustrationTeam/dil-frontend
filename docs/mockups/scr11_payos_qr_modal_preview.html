@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PayOS Banking QR Payment - dillustration</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Space+Grotesk:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+  <style>
+    :root {
+      --color-primary: #C5C9F8;
+      --color-secondary: #8A8FA9;
+      --color-tertiary: #C6AC6D;
+      --color-bg-dark: #0f1017;
+    }
+    body {
+      font-family: 'Space Grotesk', sans-serif;
+      background: radial-gradient(circle at 50% 15%, #1d2133 0%, #0d0e15 100%);
+      color: #e4e1e5;
+    }
+    h1, h2, h3, .font-h1 {
+      font-family: 'Sora', sans-serif;
+    }
+    .glass-modal {
+      background: rgba(22, 25, 38, 0.95);
+      backdrop-filter: blur(36px);
+      -webkit-backdrop-filter: blur(36px);
+      border: 1px solid rgba(197, 201, 248, 0.25);
+    }
+    .btn-pill-primary {
+      background: #ffffff;
+      color: #0f1017;
+      font-weight: 700;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .btn-pill-primary:hover {
+      background: #C5C9F8;
+      box-shadow: 0 0 25px rgba(197, 201, 248, 0.4);
+      transform: translateY(-1px);
+    }
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #ffffff;
+      font-weight: 600;
+      transition: all 0.2s ease-in-out;
+    }
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+    .state-btn-active {
+      background: #C5C9F8;
+      color: #151724;
+      font-weight: 700;
+    }
+    .state-btn-inactive {
+      background: rgba(255, 255, 255, 0.05);
+      color: #8A8FA9;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .state-btn-inactive:hover {
+      background: rgba(255, 255, 255, 0.12);
+      color: #ffffff;
+    }
+  </style>
+</head>
+<body class="min-h-screen w-full flex flex-col justify-between relative overflow-x-hidden">
+
+  <!-- Ambient Glows -->
+  <div class="fixed top-0 left-0 w-full h-full -z-10 pointer-events-none">
+    <div class="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-[#C5C9F8]/10 rounded-full blur-[140px]"></div>
+    <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-[#252A42]/50 rounded-full blur-[120px]"></div>
+  </div>
+
+  <!-- Interactive Test Scenario Switcher Bar -->
+  <div class="w-full bg-[#161826]/95 border-b border-white/10 py-3 px-6 text-xs sticky top-0 z-50">
+    <div class="max-w-4xl mx-auto flex items-center justify-between gap-3">
+      <div class="flex items-center gap-2 text-[#8A8FA9]">
+        <span class="material-symbols-outlined text-base text-[#C5C9F8]">bolt</span>
+        <span class="font-semibold text-white">Payment Webhook Simulator:</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <button onclick="simulateWebhookSuccess()" class="state-btn-active px-3.5 py-1.5 rounded-lg text-[11px] uppercase tracking-wider cursor-pointer flex items-center gap-1">
+          <span class="material-symbols-outlined text-sm">check_circle</span>
+          <span>Simulate Payment Webhook Verified</span>
+        </button>
+        <button onclick="simulateWebhookFailure()" class="state-btn-inactive px-3.5 py-1.5 rounded-lg text-[11px] uppercase tracking-wider cursor-pointer flex items-center gap-1">
+          <span class="material-symbols-outlined text-sm">error</span>
+          <span>Simulate Timeout Error (5.a1)</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ABNORMAL CASE 5.a1 TIMEOUT ERROR BANNER -->
+  <div id="errorAlertBox" class="hidden max-w-2xl mx-auto px-6 mt-4 z-40">
+    <div class="bg-red-500/20 border border-red-500/40 text-red-300 p-4 rounded-2xl text-xs flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <span class="material-symbols-outlined text-2xl text-red-400">error</span>
+        <div>
+          <h4 class="font-bold text-white text-sm">Payment Transaction Failed</h4>
+          <p>Payment transaction failed or timed out. Escrow funds not locked. Please try again.</p>
+        </div>
+      </div>
+      <button onclick="resetModalState()" class="btn-secondary px-3 py-1.5 rounded-lg text-[11px]">Retry Payment</button>
+    </div>
+  </div>
+
+  <!-- SUCCESS MODAL OVERLAY (POST ESCROW LOCK) -->
+  <div id="escrowSuccessModal" class="hidden fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4">
+    <div class="bg-[#181A28] border border-[#C5C9F8]/30 rounded-3xl p-8 max-w-md w-full text-center space-y-6 shadow-2xl relative">
+      
+      <div class="w-16 h-16 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 mx-auto flex items-center justify-center">
+        <span class="material-symbols-outlined text-4xl">lock_clock</span>
+      </div>
+
+      <div class="space-y-2">
+        <span class="text-[10px] uppercase tracking-widest font-extrabold text-emerald-400">ESCROW FUNDS LOCKED</span>
+        <h3 class="font-h1 text-2xl font-bold text-white">Payment Verified!</h3>
+        <p class="text-xs text-[#8A8FA9] leading-relaxed">
+          100% of commission funds locked into Platform Escrow. Commission status updated to <span class="text-white font-bold">IN_PROGRESS</span>.
+        </p>
+      </div>
+
+      <div class="bg-[#121420] p-4 rounded-2xl text-left text-xs space-y-2 border border-white/10">
+        <div class="flex justify-between text-[#8A8FA9]"><span>Escrow Status:</span><span class="text-emerald-400 font-bold">🔒 LOCKED (100%)</span></div>
+        <div class="flex justify-between text-[#8A8FA9]"><span>Order Status:</span><span class="text-[#C5C9F8] font-bold">IN_PROGRESS</span></div>
+        <div class="flex justify-between text-[#8A8FA9]"><span>Milestone 1 Status:</span><span class="text-white font-bold">🔓 Unlocked for Creator</span></div>
+      </div>
+
+      <div class="space-y-3 pt-2">
+        <a href="scr05_marketplace_feed_preview.html" class="btn-pill-primary w-full py-3.5 rounded-full text-xs text-center font-bold block cursor-pointer">
+          Go to Commission Workroom
+        </a>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- BACKGROUND BACKDROP WITH CENTERED PAYOS QR CODE MODAL (FIGURE 36) -->
+  <div class="flex-grow flex items-center justify-center p-6 py-12">
+    
+    <!-- PAYOS BANKING QR MODAL CONTAINER -->
+    <div class="glass-modal max-w-2xl w-full rounded-3xl p-6 md:p-8 space-y-6 shadow-2xl relative">
+      
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between border-b border-white/10 pb-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-[#C5C9F8]/20 text-[#C5C9F8] border border-[#C5C9F8]/40 flex items-center justify-center">
+            <span class="material-symbols-outlined text-xl">qr_code_2</span>
+          </div>
+          <div>
+            <h2 class="font-h1 text-lg font-bold text-white">PayOS Banking QR Payment</h2>
+            <p class="text-xs text-[#8A8FA9]">Scan VietQR with any Mobile Banking app to deposit escrow</p>
+          </div>
+        </div>
+
+        <a href="scr11_escrow_checkout_preview.html" title="Cancel Checkout" class="w-8 h-8 rounded-full bg-white/5 hover:bg-white/15 flex items-center justify-center text-[#8A8FA9] hover:text-white">
+          <span class="material-symbols-outlined text-base">close</span>
+        </a>
+      </div>
+
+      <!-- Modal Body (2 Columns Layout) -->
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+        
+        <!-- LEFT: VietQR Code Container -->
+        <div class="md:col-span-5 flex flex-col items-center justify-center space-y-3 bg-[#121420] p-5 rounded-2xl border border-white/10">
+          
+          <div class="relative w-48 h-48 bg-white p-3 rounded-2xl shadow-xl border border-white flex items-center justify-center">
+            <!-- VietQR Image Placeholder -->
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=DIL80912_PAYOS_ESCROW_31500000" alt="VietQR PayOS Code" class="w-full h-full object-contain" />
+            <div class="absolute inset-0 border-2 border-[#C5C9F8] rounded-2xl pointer-events-none opacity-50"></div>
+          </div>
+
+          <!-- Countdown Timer -->
+          <div class="flex items-center gap-1.5 text-xs text-amber-400 font-semibold bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20">
+            <span class="material-symbols-outlined text-sm animate-spin">timer</span>
+            <span id="countdownTimer">14:58 remaining</span>
+          </div>
+        </div>
+
+        <!-- RIGHT: Bank Transfer Details -->
+        <div class="md:col-span-7 space-y-3 text-xs">
+          
+          <div class="bg-[#121420] p-3.5 rounded-xl border border-white/5 space-y-1">
+            <span class="text-[10px] text-[#8A8FA9] uppercase font-semibold">BANK NAME</span>
+            <p class="font-bold text-white text-xs">VietinBank (NH TMCP Cong Thuong Viet Nam)</p>
+          </div>
+
+          <div class="bg-[#121420] p-3.5 rounded-xl border border-white/5 space-y-1">
+            <span class="text-[10px] text-[#8A8FA9] uppercase font-semibold">ACCOUNT HOLDER</span>
+            <p class="font-bold text-[#C5C9F8] text-xs">DILLUSTRATION PLATFORM ESCROW</p>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div class="bg-[#121420] p-3 rounded-xl border border-white/5 space-y-1">
+              <span class="text-[10px] text-[#8A8FA9] uppercase font-semibold">ACCOUNT NUMBER</span>
+              <div class="flex items-center justify-between">
+                <span class="font-mono font-bold text-white text-xs">108872938409</span>
+                <button onclick="copyToClipboard('108872938409')" title="Copy" class="text-[#8A8FA9] hover:text-white"><span class="material-symbols-outlined text-sm">content_copy</span></button>
+              </div>
+            </div>
+
+            <div class="bg-[#121420] p-3 rounded-xl border border-white/5 space-y-1">
+              <span class="text-[10px] text-[#8A8FA9] uppercase font-semibold">AMOUNT</span>
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-white text-xs">31,500,000 VND</span>
+                <button onclick="copyToClipboard('31500000')" title="Copy" class="text-[#8A8FA9] hover:text-white"><span class="material-symbols-outlined text-sm">content_copy</span></button>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-gradient-to-r from-[#1E2235] to-[#252A42] p-3.5 rounded-xl border border-[#C5C9F8]/30 space-y-1">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] text-[#C6AC6D] font-extrabold uppercase">TRANSFER MEMO CODE (REQUIRED)</span>
+              <button onclick="copyToClipboard('DIL80912')" class="text-xs text-[#C5C9F8] hover:underline font-bold">Copy Code</button>
+            </div>
+            <p class="font-mono font-extrabold text-base text-white">DIL80912</p>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Real-Time Webhook Verification Listener Bar -->
+      <div class="bg-[#121420] p-3.5 rounded-2xl border border-white/5 flex items-center justify-between text-xs">
+        <div class="flex items-center gap-2 text-emerald-400 font-semibold">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+          <span>Listening for PayOS IPN webhook callback...</span>
+        </div>
+        <span class="text-[11px] text-[#8A8FA9]">Auto-verifies upon payment</span>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <footer class="w-full border-t border-white/10 py-8 px-8 bg-[#0b0c12] text-[11px] text-[#8A8FA9]">
+    <div class="max-w-7xl mx-auto flex justify-between items-center">
+      <p>© 2026 dillustration. Digital Etherealism Art Collective.</p>
+      <div class="flex gap-6">
+        <a href="#" class="hover:text-white">Privacy</a>
+        <a href="#" class="hover:text-white">Terms</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Interactive JavaScript -->
+  <script>
+    // 15-minute countdown timer
+    let secondsLeft = 898;
+    setInterval(() => {
+      if (secondsLeft > 0) {
+        secondsLeft--;
+        const mins = Math.floor(secondsLeft / 60);
+        const secs = secondsLeft % 60;
+        document.getElementById('countdownTimer').innerText = `${mins}:${secs < 10 ? '0' : ''}${secs} remaining`;
+      }
+    }, 1000);
+
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text);
+      alert(`Copied '${text}' to clipboard.`);
+    }
+
+    function simulateWebhookSuccess() {
+      document.getElementById('errorAlertBox').classList.add('hidden');
+      document.getElementById('escrowSuccessModal').classList.remove('hidden');
+    }
+
+    function simulateWebhookFailure() {
+      document.getElementById('escrowSuccessModal').classList.add('hidden');
+      document.getElementById('errorAlertBox').classList.remove('hidden');
+    }
+
+    function resetModalState() {
+      document.getElementById('errorAlertBox').classList.add('hidden');
+      document.getElementById('escrowSuccessModal').classList.add('hidden');
+    }
+  </script>
+
+</body>
+</html>

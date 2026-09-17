@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Client Dashboard (SCR-25) - dillustration</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+  <style>
+    body { font-family: 'Space Grotesk', sans-serif; background: radial-gradient(circle at 50% 15%, #1d2133 0%, #0d0e15 100%); color: #e4e1e5; }
+    h1, h2, h3, .font-h1 { font-family: 'Sora', sans-serif; }
+    .glass-card { background: rgba(22, 25, 38, 0.85); backdrop-filter: blur(32px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 28px; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between pb-24">
+
+  <!-- Header Navigation -->
+  <header class="w-full border-b border-white/10 bg-[#0f1017]/90 backdrop-blur-md px-8 py-4 sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto flex justify-between items-center">
+      <a href="scr05_marketplace_feed_preview.html" class="text-2xl font-black font-h1 text-white">dillustration</a>
+      
+      <div class="flex items-center gap-4 text-xs">
+        <a href="global_notification_center_preview.html" class="p-2 bg-white/5 rounded-full hover:bg-white/10 text-white flex items-center">
+          <span class="material-symbols-outlined text-lg">notifications</span>
+        </a>
+        <a href="scr10_commission_request_brief_preview.html" class="px-4 py-2 bg-emerald-400 text-black font-extrabold rounded-full">+ Request Commission</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Layout: Sidebar + Dashboard Content -->
+  <main class="max-w-7xl w-full mx-auto px-6 py-8 flex-grow grid grid-cols-1 lg:grid-cols-12 gap-8">
+    
+    <!-- LEFT SIDEBAR: CLIENT SIDEBAR (NAVY - GREEN THEME) -->
+    <aside class="lg:col-span-3 glass-card p-6 space-y-6 flex flex-col justify-between h-fit">
+      
+      <div class="space-y-6">
+        <!-- Client Profile Badge -->
+        <div class="flex items-center gap-3 border-b border-white/10 pb-4">
+          <div class="w-12 h-12 rounded-full bg-emerald-400 text-black font-extrabold flex items-center justify-center font-h1 text-sm">
+            CC
+          </div>
+          <div>
+            <h4 class="font-bold text-white text-xs">@CyberClient</h4>
+            <span class="text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold uppercase border border-emerald-500/30">
+              CLIENT MODE
+            </span>
+          </div>
+        </div>
+
+        <!-- Sidebar Navigation Links -->
+        <nav class="space-y-1 text-xs">
+          <a href="scr25_client_dashboard_preview.html" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30">
+            <span class="material-symbols-outlined text-lg">dashboard</span>
+            <span>Client Dashboard</span>
+          </a>
+          <a href="scr13_commission_workroom_client_preview.html" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-[#8A8FA9] hover:text-white font-bold">
+            <span class="material-symbols-outlined text-lg">draw</span>
+            <span>My Commissions</span>
+          </a>
+          <a href="scr13_commission_workroom_client_preview.html" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-[#8A8FA9] hover:text-white font-bold">
+            <span class="material-symbols-outlined text-lg">forum</span>
+            <span>Active Workroom</span>
+          </a>
+          <a href="scr08_creator_profile_preview.html" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-[#8A8FA9] hover:text-white font-bold">
+            <span class="material-symbols-outlined text-lg">favorite</span>
+            <span>Following Creators</span>
+          </a>
+          <a href="scr16_wallet_transaction_history_preview.html" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-[#8A8FA9] hover:text-white font-bold">
+            <span class="material-symbols-outlined text-lg">account_balance_wallet</span>
+            <span>Wallet & Payments</span>
+          </a>
+        </nav>
+      </div>
+
+      <!-- DUAL-ROLE SWITCHER BUTTON -->
+      <div class="pt-4 border-t border-white/10 space-y-2">
+        <span class="text-[9px] text-[#8A8FA9] uppercase font-bold tracking-wider block">DUAL-ROLE MODE SWITCHER</span>
+        <a href="scr26_creator_dashboard_analytics_preview.html" class="w-full py-3 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-extrabold flex items-center justify-center gap-2 transition-all">
+          <span class="material-symbols-outlined text-base">cached</span>
+          <span>Switch to Creator Mode</span>
+        </a>
+      </div>
+
+    </aside>
+
+    <!-- RIGHT CONTENT: CLIENT DASHBOARD METRICS & WIDGETS -->
+    <div class="lg:col-span-9 space-y-6">
+      
+      <!-- Page Header -->
+      <div class="flex justify-between items-center">
+        <div>
+          <h1 class="font-h1 text-2xl font-extrabold text-white">Client Dashboard (/client/dashboard)</h1>
+          <p class="text-xs text-[#8A8FA9]">Track active commissions, milestone approval deadlines, and escrow spending.</p>
+        </div>
+      </div>
+
+      <!-- 1. METRIC CARDS (4 CARDS) -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-xs">
+        <div class="glass-card p-5 space-y-1 border-l-4 border-l-emerald-400">
+          <span class="text-[10px] text-[#8A8FA9] font-bold uppercase">ACTIVE COMMISSIONS</span>
+          <h3 class="font-h1 text-2xl font-extrabold text-white">3 Orders</h3>
+          <p class="text-[10px] text-emerald-400">2 In Progress • 1 Review</p>
+        </div>
+
+        <div class="glass-card p-5 space-y-1 border-l-4 border-l-[#C5C9F8]">
+          <span class="text-[10px] text-[#8A8FA9] font-bold uppercase">TOTAL ESCROW SPENT</span>
+          <h3 class="font-h1 text-2xl font-extrabold text-[#C5C9F8]">$1,200.00</h3>
+          <p class="text-[10px] text-[#8A8FA9]">Equivalent: 0.45 ETH</p>
+        </div>
+
+        <div class="glass-card p-5 space-y-1 border-l-4 border-l-purple-400">
+          <span class="text-[10px] text-[#8A8FA9] font-bold uppercase">FOLLOWING CREATORS</span>
+          <h3 class="font-h1 text-2xl font-extrabold text-white">12 Artists</h3>
+          <p class="text-[10px] text-purple-300">2 Opened New Slots</p>
+        </div>
+
+        <div class="glass-card p-5 space-y-1 border-l-4 border-l-amber-400">
+          <span class="text-[10px] text-[#8A8FA9] font-bold uppercase">PENDING APPROVALS</span>
+          <h3 class="font-h1 text-2xl font-extrabold text-amber-300">1 WIP Item</h3>
+          <p class="text-[10px] text-amber-400">Action Required</p>
+        </div>
+      </div>
+
+      <!-- 2. ACTIVE ORDERS WIDGET WITH MINI STEPPER -->
+      <div class="glass-card p-6 space-y-4 text-xs">
+        <h3 class="font-h1 font-bold text-white text-sm">Active Orders & Milestone Stepper</h3>
+        
+        <div class="p-5 bg-black/40 rounded-2xl border border-white/5 space-y-4">
+          <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+              <span class="text-[#C5C9F8] font-mono font-bold">#CMD-8492</span>
+              <h4 class="font-bold text-white text-sm">Cyberpunk Bounty Hunter Character Concept</h4>
+              <p class="text-[10px] text-[#8A8FA9]">Creator Artist: @Etherea_Vox ★4.95</p>
+            </div>
+            
+            <a href="scr13_commission_workroom_client_preview.html" class="px-5 py-2.5 bg-emerald-400 hover:bg-emerald-300 text-black font-extrabold rounded-xl transition-all">
+              Open Workroom (SCR-13 Client)
+            </a>
+          </div>
+
+          <!-- Mini Stepper Indicator -->
+          <div class="grid grid-cols-4 gap-2 text-center text-[10px] font-bold">
+            <div class="p-2 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">1. Sketch 🟢</div>
+            <div class="p-2 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 animate-pulse">2. Lineart 🟡 (Review)</div>
+            <div class="p-2 rounded bg-white/5 text-[#8A8FA9]">3. Color ⚪</div>
+            <div class="p-2 rounded bg-white/5 text-[#8A8FA9]">4. Master Delivery ⚪</div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- FLOATING SYSTEM SCREEN QUICK NAVIGATOR BAR -->
+  <div id="quickNavigator" class="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 bg-[#0f1017]/95 backdrop-blur-xl border border-white/20 p-3 rounded-full shadow-[0_10px_30px_rgba(0,0,0,0.8)] flex items-center gap-3 text-xs max-w-5xl w-[92%] mx-auto justify-between px-6">
+    <div class="flex items-center gap-2 font-bold font-h1 text-[#C5C9F8] shrink-0">
+      <span class="material-symbols-outlined text-base">explore</span>
+      <span class="hidden sm:inline">Screen Navigator</span>
+    </div>
+    
+    <div class="flex items-center gap-2 overflow-x-auto py-1 text-[11px]">
+      <a href="scr05_marketplace_feed_preview.html" class="px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold whitespace-nowrap">Marketplace (SCR-05)</a>
+      <a href="scr13_commission_workroom_client_preview.html" class="px-3 py-1 rounded-full bg-emerald-400 text-black font-bold whitespace-nowrap">Client Workroom (SCR-13)</a>
+      <a href="scr13_commission_workroom_creator_preview.html" class="px-3 py-1 rounded-full bg-amber-400 text-black font-bold whitespace-nowrap">Creator Workroom (SCR-13)</a>
+      <a href="scr25_client_dashboard_preview.html" class="px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold whitespace-nowrap">Client (SCR-25)</a>
+      <a href="scr26_creator_dashboard_analytics_preview.html" class="px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold whitespace-nowrap">Creator (SCR-26)</a>
+      <a href="scr24_admin_dashboard_kpi_preview.html" class="px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold whitespace-nowrap">Admin (SCR-24)</a>
+    </div>
+  </div>
+
+</body>
+</html>

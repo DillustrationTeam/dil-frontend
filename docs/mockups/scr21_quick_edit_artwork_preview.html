@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Figure 23 - SCR-21 Portfolio Inventory Grid & Quick Edit Artwork Modal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Space+Grotesk:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+  <style>
+    :root {
+      --color-primary: #C5C9F8;
+      --color-secondary: #8A8FA9;
+      --color-tertiary: #C6AC6D;
+      --color-bg-dark: #151724;
+    }
+    body {
+      font-family: 'Space Grotesk', sans-serif;
+      background: radial-gradient(circle at 50% 20%, #252A42 0%, #151724 100%);
+      color: #e4e1e5;
+    }
+    h1, h2, h3, .font-h1 {
+      font-family: 'Sora', sans-serif;
+    }
+    .glass-card {
+      background: rgba(30, 34, 53, 0.65);
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 24px;
+    }
+    .inventory-card {
+      background: rgba(30, 34, 53, 0.65);
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .inventory-card:hover {
+      border-color: rgba(197, 201, 248, 0.4);
+      transform: translateY(-4px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    }
+    .btn-primary {
+      background: #C5C9F8;
+      color: #151724;
+      font-weight: 700;
+      transition: all 0.2s ease-in-out;
+    }
+    .btn-primary:hover {
+      background: #ffffff;
+      box-shadow: 0 0 25px rgba(255, 255, 255, 0.35);
+    }
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #ffffff;
+      font-weight: 600;
+      transition: all 0.2s ease-in-out;
+    }
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+    .state-btn-active {
+      background: #C5C9F8;
+      color: #151724;
+      font-weight: 700;
+    }
+    .state-btn-inactive {
+      background: rgba(255, 255, 255, 0.05);
+      color: #8A8FA9;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .state-btn-inactive:hover {
+      background: rgba(255, 255, 255, 0.12);
+      color: #ffffff;
+    }
+  </style>
+</head>
+<body class="min-h-screen w-full flex flex-col justify-between relative overflow-x-hidden">
+
+  <!-- Ambient Glows -->
+  <div class="fixed top-0 left-0 w-full h-full -z-10 pointer-events-none">
+    <div class="absolute top-[-15%] left-[-15%] w-[55%] h-[55%] bg-[#C5C9F8]/10 rounded-full blur-[140px]"></div>
+    <div class="absolute bottom-[-10%] right-[-10%] w-[45%] h-[45%] bg-[#C6AC6D]/10 rounded-full blur-[120px]"></div>
+  </div>
+
+  <!-- Top Navigation Header -->
+  <header class="w-full border-b border-white/10 bg-[#151724]/90 backdrop-blur-md sticky top-0 z-50 px-6 py-4">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      
+      <!-- Brand Logo & Studio Links -->
+      <div class="flex items-center gap-10">
+        <a href="scr05_marketplace_feed_preview.html" class="text-2xl font-extrabold font-h1 tracking-tight text-white">dillustration</a>
+        <span class="text-xs px-3 py-1 rounded-full bg-[#C5C9F8]/20 text-[#C5C9F8] border border-[#C5C9F8]/30 font-bold uppercase tracking-wider">
+          Creator Studio
+        </span>
+        <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-[#8A8FA9]">
+          <a href="#" class="text-white border-b-2 border-[#C5C9F8] pb-1 font-semibold">Portfolio Inventory</a>
+          <a href="scr08_rate_card_preview.html" class="hover:text-white transition-colors">Rate Card</a>
+          <a href="#" class="hover:text-white transition-colors">Commissions Queue</a>
+          <a href="#" class="hover:text-white transition-colors">Analytics</a>
+        </nav>
+      </div>
+
+      <!-- Right Header Tools -->
+      <div class="flex items-center gap-4">
+        <button class="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/80 hover:text-white cursor-pointer">
+          <span class="material-symbols-outlined text-lg">notifications</span>
+        </button>
+        <div class="w-9 h-9 rounded-full bg-[#C5C9F8] text-[#151724] font-bold flex items-center justify-center font-h1 text-xs cursor-pointer">
+          EV
+        </div>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Interactive Scenario Switcher Bar (For Testing SCR-21 Functionality) -->
+  <div class="w-full bg-[#181A28]/90 border-b border-white/10 py-3 px-6 text-xs sticky top-[73px] z-40">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div class="flex items-center gap-2 text-[#8A8FA9]">
+        <span class="material-symbols-outlined text-base text-[#C5C9F8]">tune</span>
+        <span class="font-semibold text-white">SCR-21 Scenario Switcher:</span>
+      </div>
+      <div class="flex flex-wrap items-center gap-2">
+        <button id="btnScenarioNormal" onclick="switchScenario('normal')" class="state-btn-active px-3 py-1.5 rounded-lg text-[11px] uppercase tracking-wider cursor-pointer flex items-center gap-1">
+          <span class="material-symbols-outlined text-sm">edit</span>
+          <span>Normal Flow (Inventory & Quick Edit)</span>
+        </button>
+        <button id="btnScenarioDelete" onclick="switchScenario('delete')" class="state-btn-inactive px-3 py-1.5 rounded-lg text-[11px] uppercase tracking-wider cursor-pointer flex items-center gap-1">
+          <span class="material-symbols-outlined text-sm">delete</span>
+          <span>Abnormal 2.a1 (BR-28 Delete Confirmation)</span>
+        </button>
+        <button id="btnScenario403" onclick="switchScenario('403')" class="state-btn-inactive px-3 py-1.5 rounded-lg text-[11px] uppercase tracking-wider cursor-pointer flex items-center gap-1">
+          <span class="material-symbols-outlined text-sm">block</span>
+          <span>Validation (403 Forbidden Access)</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Alert -->
+  <div id="statusToast" class="hidden fixed bottom-6 right-6 z-50 bg-[#C5C9F8] text-[#151724] px-5 py-3.5 rounded-2xl shadow-2xl font-semibold text-xs flex items-center gap-3 border border-white">
+    <span class="material-symbols-outlined text-xl">check_circle</span>
+    <div>
+      <p id="toastMessage" class="font-bold text-sm">Artwork Status Updated</p>
+      <p id="toastSubMessage" class="text-[11px] opacity-80">Artwork status updated to Private (BR-27 applied).</p>
+    </div>
+  </div>
+
+  <!-- ================================================================= -->
+  <!-- QUICK EDIT ARTWORK MODAL (TARGET COMPONENT OF SCR-21) -->
+  <!-- ================================================================= -->
+  <div id="quickEditModal" class="hidden fixed inset-0 bg-black/75 backdrop-blur-md z-50 flex items-center justify-center p-4">
+    <div class="bg-[#181A28] border border-white/15 rounded-3xl p-6 md:p-8 max-w-xl w-full space-y-6 shadow-2xl relative">
+      
+      <!-- Close Button -->
+      <button onclick="closeQuickEditModal()" class="absolute top-5 right-5 text-[#8A8FA9] hover:text-white">
+        <span class="material-symbols-outlined text-xl">close</span>
+      </button>
+
+      <!-- Modal Header -->
+      <div class="flex items-center gap-3 border-b border-white/10 pb-4">
+        <div class="w-10 h-10 rounded-xl bg-[#C5C9F8]/10 text-[#C5C9F8] border border-[#C5C9F8]/30 flex items-center justify-center">
+          <span class="material-symbols-outlined text-xl">edit_note</span>
+        </div>
+        <div>
+          <h2 class="font-h1 text-lg font-bold text-white">Quick Edit Artwork</h2>
+          <p class="text-xs text-[#8A8FA9]">Manage metadata, tags, and public/private visibility status.</p>
+        </div>
+      </div>
+
+      <!-- Edit Form Body -->
+      <div class="space-y-4 text-xs">
+        
+        <!-- Artwork Preview Row -->
+        <div class="flex items-center gap-4 bg-white/5 p-3 rounded-2xl border border-white/5">
+          <img id="editModalThumb" src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=200&q=80" alt="Thumb" class="w-16 h-16 rounded-xl object-cover border border-white/10" />
+          <div class="space-y-1">
+            <span id="editModalStatusBadge" class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold uppercase tracking-wider">
+              🟢 PUBLISHED
+            </span>
+            <p id="editModalTitleText" class="font-h1 font-bold text-white text-sm">Glitch Horizon #01</p>
+            <p class="text-[11px] text-[#8A8FA9]">ID: ART-8092 • 1,482 Public Views</p>
+          </div>
+        </div>
+
+        <!-- Input 1: Title -->
+        <div class="space-y-1.5">
+          <label class="font-semibold text-white uppercase tracking-wider text-[10px]">ARTWORK TITLE</label>
+          <input id="inputTitle" type="text" value="Glitch Horizon #01" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-[#C5C9F8] text-xs" />
+        </div>
+
+        <!-- Input 2: Style Category -->
+        <div class="space-y-1.5">
+          <label class="font-semibold text-white uppercase tracking-wider text-[10px]">STYLE CATEGORY</label>
+          <select id="selectStyle" class="w-full bg-[#1F2335] border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-[#C5C9F8] text-xs">
+            <option value="Cyberpunk" selected>Cyberpunk / Ethereal</option>
+            <option value="Abstract">Abstract</option>
+            <option value="Minimal">Minimal</option>
+            <option value="Generative">Generative</option>
+          </select>
+        </div>
+
+        <!-- Input 3: Tags -->
+        <div class="space-y-1.5">
+          <label class="font-semibold text-white uppercase tracking-wider text-[10px]">TAGS (COMMA SEPARATED)</label>
+          <input id="inputTags" type="text" value="Cyberpunk, DigitalEtherealism, ConceptArt, NeonPulse" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-[#C5C9F8] text-xs" />
+        </div>
+
+        <!-- Visibility Status Toggle (BR-27) -->
+        <div class="bg-black/30 p-4 rounded-2xl border border-white/10 space-y-2">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="font-bold text-white text-xs flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-sm text-[#C5C9F8]">visibility</span>
+                <span>Public Marketplace Visibility (BR-27)</span>
+              </p>
+              <p class="text-[11px] text-[#8A8FA9]">Toggle between Published feed display and Private mode.</p>
+            </div>
+            
+            <div id="toggleVisibilitySwitch" onclick="toggleModalVisibility()" class="w-12 h-6 bg-[#C5C9F8] rounded-full p-0.5 flex items-center justify-end cursor-pointer transition-colors">
+              <div class="w-5 h-5 rounded-full bg-[#151724] shadow-md"></div>
+            </div>
+          </div>
+
+          <div class="text-[11px] text-[#8A8FA9] border-t border-white/5 pt-2">
+            <span class="text-[#C6AC6D] font-bold">BR-27 Rule:</span> Hiding an artwork removes it from public search & feed, but preserves direct link access if tied to past client commission transactions.
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer Action Buttons -->
+      <div class="flex items-center justify-end gap-3 pt-2 border-t border-white/10">
+        <button onclick="closeQuickEditModal()" class="btn-secondary px-5 py-2.5 rounded-xl text-xs cursor-pointer">
+          Cancel
+        </button>
+        <button onclick="saveQuickEdit()" class="btn-primary px-6 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 cursor-pointer">
+          <span class="material-symbols-outlined text-base">save</span>
+          <span>Save Changes</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================================================================= -->
+  <!-- DELETE CONFIRMATION MODAL (BR-28 ABNORMAL CASE 2.a1) -->
+  <!-- ================================================================= -->
+  <div id="deleteModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+    <div class="bg-[#181A28] border border-red-500/30 rounded-3xl p-8 max-w-md w-full text-center space-y-6 shadow-2xl relative">
+      
+      <div class="w-16 h-16 rounded-full bg-red-500/10 text-red-400 border border-red-500/30 mx-auto flex items-center justify-center">
+        <span class="material-symbols-outlined text-3xl">warning</span>
+      </div>
+
+      <div class="space-y-2">
+        <span class="text-[10px] uppercase tracking-widest font-extrabold text-red-400">BR-28 CONFIRMATION REQUIRED</span>
+        <h3 class="font-h1 text-xl font-bold text-white">Delete Artwork Permanently?</h3>
+        <p class="text-xs text-[#8A8FA9] leading-relaxed">
+          Are you sure you want to delete <span id="deleteArtworkName" class="text-white font-bold">'Glitch Horizon #01'</span>? This action cannot be undone. Associated high-res files will be permanently purged from Cloud Storage.
+        </p>
+      </div>
+
+      <div class="space-y-3 pt-2">
+        <button onclick="confirmPermanentDelete()" class="w-full py-3.5 rounded-full bg-red-500 text-white font-bold text-xs hover:bg-red-600 transition-all cursor-pointer shadow-lg">
+          Yes, Confirm Permanent Deletion
+        </button>
+        <button onclick="closeDeleteModal()" class="btn-secondary w-full py-3 rounded-full text-xs font-semibold cursor-pointer">
+          Cancel & Keep Artwork
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================================================================= -->
+  <!-- 403 FORBIDDEN VALIDATION BANNER -->
+  <!-- ================================================================= -->
+  <div id="forbiddenBanner" class="hidden max-w-7xl mx-auto px-6 mt-4">
+    <div class="bg-amber-500/20 border border-amber-500/40 text-amber-300 px-5 py-4 rounded-2xl text-xs flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <span class="material-symbols-outlined text-2xl text-amber-400">gavel</span>
+        <div>
+          <h4 class="font-bold text-white text-sm">403 Forbidden Access Error</h4>
+          <p>Creator User ID does not match Artwork Owner ID. You are not authorized to edit, hide, or delete this artwork.</p>
+        </div>
+      </div>
+      <button onclick="switchScenario('normal')" class="btn-secondary px-3 py-1.5 rounded-lg text-[11px]">
+        Reset to Owner View
+      </button>
+    </div>
+  </div>
+
+  <!-- MAIN SCR-21 PORTFOLIO INVENTORY GRID CONTENT -->
+  <main class="max-w-7xl w-full mx-auto px-6 py-8 flex-grow space-y-8">
+    
+    <!-- Page Header & Metrics Summary -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div>
+        <h1 class="font-h1 text-3xl font-extrabold text-white">Portfolio Inventory (SCR-21)</h1>
+        <p class="text-xs text-[#8A8FA9]">Manage public visibility, edit metadata, or archive portfolio items.</p>
+      </div>
+
+      <div class="flex items-center gap-4 bg-white/5 border border-white/10 rounded-2xl px-5 py-3 text-xs">
+        <div>
+          <span class="text-[10px] text-[#8A8FA9] uppercase font-semibold">Total Uploads</span>
+          <p class="font-h1 font-bold text-white text-base">84 Artworks</p>
+        </div>
+        <div class="w-px h-8 bg-white/10"></div>
+        <div>
+          <span class="text-[10px] text-emerald-400 uppercase font-semibold">Published</span>
+          <p class="font-h1 font-bold text-emerald-400 text-base">80</p>
+        </div>
+        <div class="w-px h-8 bg-white/10"></div>
+        <div>
+          <span class="text-[10px] text-amber-400 uppercase font-semibold">Hidden / Private</span>
+          <p class="font-h1 font-bold text-amber-400 text-base">4</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Inventory Filter Bar -->
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-white/10 pb-4">
+      <div class="flex items-center gap-2 text-xs font-semibold">
+        <button class="px-4 py-2 rounded-full bg-[#C5C9F8] text-[#151724] font-bold">All Artworks (84)</button>
+        <button class="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-white hover:bg-white/10">Published (80)</button>
+        <button class="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-[#8A8FA9] hover:text-white">Hidden / Private (4)</button>
+      </div>
+
+      <div class="flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-4 py-1.5 text-xs text-white w-64">
+        <input type="text" placeholder="Search inventory..." class="bg-transparent w-full focus:outline-none placeholder-[#8A8FA9]" />
+        <span class="material-symbols-outlined text-base text-[#8A8FA9]">search</span>
+      </div>
+    </div>
+
+    <!-- INVENTORY GRID SECTION -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      
+      <!-- CARD 1: Glitch Horizon #01 (Published) -->
+      <div id="card1" class="inventory-card overflow-hidden group flex flex-col justify-between">
+        <div>
+          <div class="relative h-56 w-full bg-[#1A1D2E] overflow-hidden">
+            <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600&q=80" alt="Glitch Horizon #01" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+            
+            <div class="absolute top-3 left-3">
+              <span id="card1Badge" class="text-[10px] px-2.5 py-1 rounded-full bg-emerald-500/80 backdrop-blur-md text-white font-bold uppercase tracking-wider">
+                🟢 PUBLISHED
+              </span>
+            </div>
+
+            <div class="absolute bottom-3 right-3 bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-full text-[11px] text-white flex items-center gap-1">
+              <span class="material-symbols-outlined text-xs text-[#C5C9F8]">visibility</span>
+              <span>1,482</span>
+            </div>
+          </div>
+
+          <div class="p-4 space-y-2">
+            <div class="flex justify-between items-center text-[10px] uppercase font-semibold text-[#8A8FA9]">
+              <span>CYBERPUNK</span>
+              <span class="text-white font-bold">0.45 ETH</span>
+            </div>
+            <h3 id="card1Title" class="font-h1 text-sm font-bold text-white truncate">Glitch Horizon #01</h3>
+          </div>
+        </div>
+
+        <!-- Inventory Actions Bar -->
+        <div class="p-4 pt-0 border-t border-white/5 space-y-2">
+          <div class="grid grid-cols-2 gap-2 text-xs">
+            <button onclick="openQuickEditModal('Glitch Horizon #01', 'Cyberpunk', 'Published')" class="btn-secondary py-2 rounded-xl text-[11px] font-semibold flex items-center justify-center gap-1 cursor-pointer">
+              <span class="material-symbols-outlined text-sm">edit</span>
+              <span>Quick Edit</span>
+            </button>
+            <button id="card1ToggleBtn" onclick="toggleCardStatus('card1')" class="btn-secondary py-2 rounded-xl text-[11px] font-semibold flex items-center justify-center gap-1 cursor-pointer hover:border-amber-500/50">
+              <span class="material-symbols-outlined text-sm text-amber-400">visibility_off</span>
+              <span>Hide Art</span>
+            </button>
+          </div>
+          
+          <button onclick="openDeleteModal('Glitch Horizon #01')" class="w-full py-1.5 text-[11px] text-[#8A8FA9] hover:text-red-400 transition-colors flex items-center justify-center gap-1 cursor-pointer font-medium">
+            <span class="material-symbols-outlined text-xs">delete</span>
+            <span>Delete Artwork</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- CARD 2: Crystal Entity (Hidden / Private - BR-27) -->
+      <div id="card2" class="inventory-card overflow-hidden group flex flex-col justify-between border-amber-500/30">
+        <div>
+          <div class="relative h-56 w-full bg-[#1A1D2E] overflow-hidden">
+            <img src="https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=600&q=80" alt="Crystal Entity" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 opacity-60" />
+            
+            <div class="absolute top-3 left-3">
+              <span id="card2Badge" class="text-[10px] px-2.5 py-1 rounded-full bg-amber-500/80 backdrop-blur-md text-white font-bold uppercase tracking-wider">
+                🔒 HIDDEN / PRIVATE
+              </span>
+            </div>
+
+            <div class="absolute bottom-3 right-3 bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-full text-[11px] text-white flex items-center gap-1">
+              <span class="material-symbols-outlined text-xs text-[#8A8FA9]">lock</span>
+              <span>Private</span>
+            </div>
+          </div>
+
+          <div class="p-4 space-y-2">
+            <div class="flex justify-between items-center text-[10px] uppercase font-semibold text-[#8A8FA9]">
+              <span>CYBER</span>
+              <span class="text-white font-bold">0.89 ETH</span>
+            </div>
+            <h3 id="card2Title" class="font-h1 text-sm font-bold text-white truncate">Crystal Entity</h3>
+          </div>
+        </div>
+
+        <div class="p-4 pt-0 border-t border-white/5 space-y-2">
+          <div class="grid grid-cols-2 gap-2 text-xs">
+            <button onclick="openQuickEditModal('Crystal Entity', 'Cyberpunk', 'Hidden')" class="btn-secondary py-2 rounded-xl text-[11px] font-semibold flex items-center justify-center gap-1 cursor-pointer">
+              <span class="material-symbols-outlined text-sm">edit</span>
+              <span>Quick Edit</span>
+            </button>
+            <button id="card2ToggleBtn" onclick="toggleCardStatus('card2')" class="btn-secondary py-2 rounded-xl text-[11px] font-semibold flex items-center justify-center gap-1 cursor-pointer hover:border-emerald-500/50">
+              <span class="material-symbols-outlined text-sm text-emerald-400">public</span>
+              <span>Publish</span>
+            </button>
+          </div>
+          
+          <button onclick="openDeleteModal('Crystal Entity')" class="w-full py-1.5 text-[11px] text-[#8A8FA9] hover:text-red-400 transition-colors flex items-center justify-center gap-1 cursor-pointer font-medium">
+            <span class="material-symbols-outlined text-xs">delete</span>
+            <span>Delete Artwork</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- CARD 3: Fluid Core (Published) -->
+      <div id="card3" class="inventory-card overflow-hidden group flex flex-col justify-between">
+        <div>
+          <div class="relative h-56 w-full bg-[#1A1D2E] overflow-hidden">
+            <img src="https://images.unsplash.com/photo-1563089145-599997674d42?w=600&q=80" alt="Fluid Core" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+            <div class="absolute top-3 left-3">
+              <span class="text-[10px] px-2.5 py-1 rounded-full bg-emerald-500/80 backdrop-blur-md text-white font-bold uppercase tracking-wider">
+                🟢 PUBLISHED
+              </span>
+            </div>
+          </div>
+
+          <div class="p-4 space-y-2">
+            <div class="flex justify-between items-center text-[10px] uppercase font-semibold text-[#8A8FA9]">
+              <span>MINIMAL</span>
+              <span class="text-white font-bold">0.90 ETH</span>
+            </div>
+            <h3 class="font-h1 text-sm font-bold text-white truncate">Fluid Core</h3>
+          </div>
+        </div>
+
+        <div class="p-4 pt-0 border-t border-white/5 space-y-2">
+          <div class="grid grid-cols-2 gap-2 text-xs">
+            <button onclick="openQuickEditModal('Fluid Core', 'Minimal', 'Published')" class="btn-secondary py-2 rounded-xl text-[11px] font-semibold flex items-center justify-center gap-1 cursor-pointer">
+              <span class="material-symbols-outlined text-sm">edit</span>
+              <span>Quick Edit</span>
+            </button>
+            <button onclick="toggleCardStatus('card3')" class="btn-secondary py-2 rounded-xl text-[11px] font-semibold flex items-center justify-center gap-1 cursor-pointer">
+              <span class="material-symbols-outlined text-sm text-amber-400">visibility_off</span>
+              <span>Hide Art</span>
+            </button>
+          </div>
+          
+          <button onclick="openDeleteModal('Fluid Core')" class="w-full py-1.5 text-[11px] text-[#8A8FA9] hover:text-red-400 transition-colors flex items-center justify-center gap-1 cursor-pointer font-medium">
+            <span class="material-symbols-outlined text-xs">delete</span>
+            <span>Delete Artwork</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- CARD 4: Void Geometry (Published) -->
+      <div id="card4" class="inventory-card overflow-hidden group flex flex-col justify-between">
+        <div>
+          <div class="relative h-56 w-full bg-[#1A1D2E] overflow-hidden">
+            <img src="https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?w=600&q=80" alt="Void Geometry" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+            <div class="absolute top-3 left-3">
+              <span class="text-[10px] px-2.5 py-1 rounded-full bg-emerald-500/80 backdrop-blur-md text-white font-bold uppercase tracking-wider">
+                🟢 PUBLISHED
+              </span>
+            </div>
+          </div>
+
+          <div class="p-4 space-y-2">
+            <div class="flex justify-between items-center text-[10px] uppercase font-semibold text-[#8A8FA9]">
+              <span>GENERATIVE</span>
+              <span class="text-white font-bold">1.20 ETH</span>
+            </div>
+            <h3 class="font-h1 text-sm font-bold text-white truncate">Void Geometry</h3>
+          </div>
+        </div>
+
+        <div class="p-4 pt-0 border-t border-white/5 space-y-2">
+          <div class="grid grid-cols-2 gap-2 text-xs">
+            <button onclick="openQuickEditModal('Void Geometry', 'Generative', 'Published')" class="btn-secondary py-2 rounded-xl text-[11px] font-semibold flex items-center justify-center gap-1 cursor-pointer">
+              <span class="material-symbols-outlined text-sm">edit</span>
+              <span>Quick Edit</span>
+            </button>
+            <button onclick="toggleCardStatus('card4')" class="btn-secondary py-2 rounded-xl text-[11px] font-semibold flex items-center justify-center gap-1 cursor-pointer">
+              <span class="material-symbols-outlined text-sm text-amber-400">visibility_off</span>
+              <span>Hide Art</span>
+            </button>
+          </div>
+          
+          <button onclick="openDeleteModal('Void Geometry')" class="w-full py-1.5 text-[11px] text-[#8A8FA9] hover:text-red-400 transition-colors flex items-center justify-center gap-1 cursor-pointer font-medium">
+            <span class="material-symbols-outlined text-xs">delete</span>
+            <span>Delete Artwork</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="w-full border-t border-white/10 py-8 px-6 bg-[#0E101A] text-xs text-[#8A8FA9] mt-16">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+      <div>
+        <span class="text-lg font-bold font-h1 text-white block mb-1">dillustration</span>
+        <p>© 2026 dillustration. Digital Etherealism Art Collective. All rights reserved.</p>
+      </div>
+      <div class="flex gap-8">
+        <a href="#" class="hover:text-white">Privacy</a>
+        <a href="#" class="hover:text-white">Terms</a>
+        <a href="#" class="hover:text-white">Contact</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Interactive Logic JavaScript -->
+  <script>
+    let isModalPublic = true;
+    let activeCardId = 'card1';
+
+    function openQuickEditModal(title, style, status) {
+      document.getElementById('inputTitle').value = title;
+      document.getElementById('editModalTitleText').innerText = title;
+      document.getElementById('selectStyle').value = style;
+
+      const switchEl = document.getElementById('toggleVisibilitySwitch');
+      const badge = document.getElementById('editModalStatusBadge');
+
+      if (status === 'Published') {
+        isModalPublic = true;
+        switchEl.className = 'w-12 h-6 bg-[#C5C9F8] rounded-full p-0.5 flex items-center justify-end cursor-pointer transition-colors';
+        badge.className = 'text-[10px] px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold uppercase tracking-wider';
+        badge.innerText = '🟢 PUBLISHED';
+      } else {
+        isModalPublic = false;
+        switchEl.className = 'w-12 h-6 bg-white/10 rounded-full p-0.5 flex items-center justify-start cursor-pointer transition-colors';
+        badge.className = 'text-[10px] px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30 font-bold uppercase tracking-wider';
+        badge.innerText = '🔒 HIDDEN / PRIVATE';
+      }
+
+      document.getElementById('quickEditModal').classList.remove('hidden');
+    }
+
+    function closeQuickEditModal() {
+      document.getElementById('quickEditModal').classList.add('hidden');
+    }
+
+    function toggleModalVisibility() {
+      isModalPublic = !isModalPublic;
+      const switchEl = document.getElementById('toggleVisibilitySwitch');
+      const badge = document.getElementById('editModalStatusBadge');
+
+      if (isModalPublic) {
+        switchEl.className = 'w-12 h-6 bg-[#C5C9F8] rounded-full p-0.5 flex items-center justify-end cursor-pointer transition-colors';
+        badge.className = 'text-[10px] px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold uppercase tracking-wider';
+        badge.innerText = '🟢 PUBLISHED';
+      } else {
+        switchEl.className = 'w-12 h-6 bg-white/10 rounded-full p-0.5 flex items-center justify-start cursor-pointer transition-colors';
+        badge.className = 'text-[10px] px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30 font-bold uppercase tracking-wider';
+        badge.innerText = '🔒 HIDDEN / PRIVATE';
+      }
+    }
+
+    function saveQuickEdit() {
+      closeQuickEditModal();
+      showToast('Artwork Metadata Updated', isModalPublic ? 'Status set to Published. Displayed in public feed.' : 'Status updated to Private (BR-27 applied). Removed from public feed.');
+    }
+
+    function toggleCardStatus(cardId) {
+      const badge = document.getElementById(cardId + 'Badge');
+      const btn = document.getElementById(cardId + 'ToggleBtn');
+
+      if (badge && badge.innerText.includes('PUBLISHED')) {
+        badge.className = 'text-[10px] px-2.5 py-1 rounded-full bg-amber-500/80 backdrop-blur-md text-white font-bold uppercase tracking-wider';
+        badge.innerText = '🔒 HIDDEN / PRIVATE';
+        if (btn) btn.innerHTML = '<span class="material-symbols-outlined text-sm text-emerald-400">public</span><span>Publish</span>';
+        showToast('Artwork Status Updated', 'Artwork status updated to Private (BR-27 applied).');
+      } else if (badge) {
+        badge.className = 'text-[10px] px-2.5 py-1 rounded-full bg-emerald-500/80 backdrop-blur-md text-white font-bold uppercase tracking-wider';
+        badge.innerText = '🟢 PUBLISHED';
+        if (btn) btn.innerHTML = '<span class="material-symbols-outlined text-sm text-amber-400">visibility_off</span><span>Hide Art</span>';
+        showToast('Artwork Status Updated', 'Artwork published back to public marketplace feed.');
+      }
+    }
+
+    function openDeleteModal(title) {
+      document.getElementById('deleteArtworkName').innerText = `'${title}'`;
+      document.getElementById('deleteModal').classList.remove('hidden');
+    }
+
+    function closeDeleteModal() {
+      document.getElementById('deleteModal').classList.add('hidden');
+    }
+
+    function confirmPermanentDelete() {
+      closeDeleteModal();
+      showToast('Artwork Permanently Deleted', 'BR-28 Confirmed: Artwork and associated files purged from Cloud Storage.');
+    }
+
+    function showToast(title, msg) {
+      document.getElementById('toastMessage').innerText = title;
+      document.getElementById('toastSubMessage').innerText = msg;
+      const toast = document.getElementById('statusToast');
+      toast.classList.remove('hidden');
+      setTimeout(() => {
+        toast.classList.add('hidden');
+      }, 4500);
+    }
+
+    function switchScenario(scenario) {
+      const btnNormal = document.getElementById('btnScenarioNormal');
+      const btnDelete = document.getElementById('btnScenarioDelete');
+      const btn403 = document.getElementById('btnScenario403');
+      const forbiddenBanner = document.getElementById('forbiddenBanner');
+
+      [btnNormal, btnDelete, btn403].forEach(btn => {
+        btn.className = 'state-btn-inactive px-3 py-1.5 rounded-lg text-[11px] uppercase tracking-wider cursor-pointer flex items-center gap-1';
+      });
+
+      if (scenario === 'normal') {
+        btnNormal.className = 'state-btn-active px-3 py-1.5 rounded-lg text-[11px] uppercase tracking-wider cursor-pointer flex items-center gap-1';
+        forbiddenBanner.classList.add('hidden');
+        openQuickEditModal('Glitch Horizon #01', 'Cyberpunk', 'Published');
+      } else if (scenario === 'delete') {
+        btnDelete.className = 'state-btn-active px-3 py-1.5 rounded-lg text-[11px] uppercase tracking-wider cursor-pointer flex items-center gap-1';
+        forbiddenBanner.classList.add('hidden');
+        openDeleteModal('Glitch Horizon #01');
+      } else if (scenario === '403') {
+        btn403.className = 'state-btn-active px-3 py-1.5 rounded-lg text-[11px] uppercase tracking-wider cursor-pointer flex items-center gap-1';
+        forbiddenBanner.classList.remove('hidden');
+      }
+    }
+  </script>
+
+</body>
+</html>
