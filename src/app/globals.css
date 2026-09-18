@@ -25,7 +25,7 @@
 }
 
 body {
-  background-color: #1F2335;
+  background: radial-gradient(circle at 50% 15%, #181b29 0%, #0d0e15 100%);
   color: #E4E1E5;
   font-family: 'Space Grotesk', sans-serif;
   overflow-x: hidden;
