@@ -3,12 +3,11 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { commissionService } from '@/services/commission.service';
-import { MilestoneType } from '@/types/commission.types';
 
 export default function CreateCommissionPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [creatorId, setCreatorId] = useState('Etherea_Vox');
+  const [creatorId, setCreatorId] = useState('');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState<number>(0);
@@ -17,16 +16,17 @@ export default function CreateCommissionPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      const commission = await commissionService.create({
+      await commissionService.create({
         creatorId,
         title,
         description,
+        totalPrice: price,
         milestones: [
-          { type: 'Final' as MilestoneType, price: price }
+          { sequence: 1, title: 'Final delivery', price }
         ]
       });
-      router.push(`/workroom/${commission.id}`);
-    } catch (err) {
+      router.push('/client/commissions');
+    } catch {
       alert('Error creating commission');
     } finally {
       setLoading(false);

@@ -62,7 +62,7 @@ export default function TopNavbar({
 
         {/* Quick Search Input */}
         <div className="hidden md:flex items-center relative w-64 lg:w-80">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 pointer-events-none" />
+          <Search className="pointer-events-none absolute left-3.5 h-4 w-4 text-[#A7ACD9]" />
           <input
             type="text"
             value={searchQuery}
@@ -81,21 +81,21 @@ export default function TopNavbar({
             <button
               onClick={() => onRoleChange && onRoleChange('client')}
               className={`px-3 py-1.5 rounded-lg text-xs font-sora font-medium flex items-center gap-1.5 transition-all ${currentRole === 'client'
-                  ? 'bg-[#A7ACD9] text-[#1F2335] shadow-md shadow-[#A7ACD9]/20'
+                  ? 'bg-[#A7ACD9]/20 text-white border border-[#A7ACD9]/40 shadow-md shadow-[#A7ACD9]/10'
                   : 'text-[#919099] hover:text-white'
                 }`}
             >
-              <Briefcase className="w-3.5 h-3.5" />
+              <Briefcase className="h-3.5 w-3.5 text-[#A7ACD9]" />
               Client Mode
             </button>
             <button
               onClick={() => onRoleChange && onRoleChange('creator')}
               className={`px-3 py-1.5 rounded-lg text-xs font-sora font-medium flex items-center gap-1.5 transition-all ${currentRole === 'creator'
-                  ? 'bg-[#c2c7f6] text-[#1F2335] shadow-md shadow-[#c2c7f6]/20'
+                  ? 'bg-[#A7ACD9]/20 text-white border border-[#A7ACD9]/40 shadow-md shadow-[#A7ACD9]/10'
                   : 'text-[#919099] hover:text-white'
                 }`}
             >
-              <Palette className="w-3.5 h-3.5" />
+              <Palette className="h-3.5 w-3.5 text-[#A7ACD9]" />
               Creator Studio
             </button>
           </div>
@@ -105,16 +105,16 @@ export default function TopNavbar({
         {onOpenCreateModal && (
           <button
             onClick={onOpenCreateModal}
-            className="hidden sm:flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white text-xs font-sora font-semibold rounded-xl shadow-lg shadow-emerald-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
+            className="hidden items-center gap-2 rounded-xl border border-[#A7ACD9]/40 bg-[#A7ACD9]/20 px-4 py-2 text-xs font-sora font-semibold text-white shadow-md shadow-[#A7ACD9]/10 transition-all hover:bg-[#A7ACD9]/30 hover:scale-[1.02] active:scale-[0.98] sm:flex"
           >
-            <PlusCircle className="w-4 h-4" />
+            <PlusCircle className="h-4 w-4 text-[#A7ACD9]" />
             New Commission
           </button>
         )}
 
         {/* Notifications */}
         <button className="relative w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-300 hover:text-white hover:bg-[#c2c7f6]/10 transition-colors">
-          <Bell className="w-4 h-4" />
+          <Bell className="h-4 w-4 text-[#A7ACD9]" />
           <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#A7ACD9] ring-2 ring-[#1F2335] animate-ping" />
           <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#A7ACD9] ring-2 ring-[#1F2335]" />
         </button>
@@ -132,7 +132,7 @@ export default function TopNavbar({
                 className="w-full h-full object-cover rounded-[7px]"
               />
             </div>
-            <ChevronDown className="w-3.5 h-3.5 text-slate-400 mr-1" />
+            <ChevronDown className="mr-1 h-3.5 w-3.5 text-[#A7ACD9]" />
           </button>
 
           {/* Profile Dropdown Menu */}
@@ -142,7 +142,7 @@ export default function TopNavbar({
                 <p className="text-xs font-bold text-white">{user?.fullName || 'Guest'}</p>
                 <p className="text-[11px] text-slate-400">{user?.email || 'No email'}</p>
                 <span className="inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-medium border border-emerald-500/30">
-                  <ShieldCheck className="w-3 h-3" /> Escrow Verified
+                  <ShieldCheck className="h-3 w-3 text-[#A7ACD9]" /> Escrow Verified
                 </span>
               </div>
               <Link
@@ -156,21 +156,21 @@ export default function TopNavbar({
                   href="/creator/commissions"
                   className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs text-[#e4e1e5] hover:text-white hover:bg-white/5 transition-colors"
                 >
-                  <Palette className="w-4 h-4 text-[#c2c7f6]" /> Creator Dashboard
+                  <Palette className="w-4 h-4 text-[#A7ACD9]" /> Creator Dashboard
                 </Link>
               )}
               <Link
                 href="/settings"
                 className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs text-slate-300 hover:text-white hover:bg-white/5 transition-colors"
               >
-                <Settings className="w-4 h-4 text-slate-400" /> Account Settings
+                <Settings className="w-4 h-4 text-[#A7ACD9]" /> Account Settings
               </Link>
               <div className="border-t border-white/10 my-1" />
               <button
                 onClick={handleSignOut}
                 className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs text-rose-400 hover:bg-rose-500/10 transition-colors"
               >
-                <LogOut className="w-4 h-4" /> Sign Out
+                <LogOut className="w-4 h-4 text-[#A7ACD9]" /> Sign Out
               </button>
             </div>
           )}

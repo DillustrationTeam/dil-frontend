@@ -13,7 +13,7 @@ interface ReviewRatingModalProps {
 export default function ReviewRatingModal({
   isOpen,
   onClose,
-  creatorName = 'Kaelen Voss',
+  creatorName = 'Creator',
   onReviewSubmitted,
 }: ReviewRatingModalProps) {
   const [rating, setRating] = useState(5);

@@ -1,122 +1,26 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import { ArrowRight, CircleDollarSign, Clock, FolderKanban, LoaderCircle, Wallet } from 'lucide-react';
 import { commissionService } from '@/services/commission.service';
 import { Commission } from '@/types/commission.types';
-import { Palette, Wallet, Clock, ArrowRight, ShieldCheck, Upload, Award } from 'lucide-react';
-import FileUploadModal from '@/components/modals/FileUploadModal';
+
+const money = (value?: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value ?? 0);
 
 export default function CreatorDashboardPage() {
   const [commissions, setCommissions] = useState<Commission[]>([]);
+  const [requests, setRequests] = useState<Commission[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
-
-  useEffect(() => {
-    commissionService.getByCreator()
-      .then(setCommissions)
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  }, []);
-
-  return (
-    <div className="max-w-7xl w-full mx-auto space-y-6">
-      {/* Dashboard Top Header Banner */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-[#161926]/85 backdrop-blur-[32px] border border-white/10 rounded-[28px] p-6 shadow-xl">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="px-2.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 font-sora text-[11px] font-bold border border-purple-500/30 flex items-center gap-1">
-              <Palette className="w-3.5 h-3.5" /> Creator Studio Workspace
-            </span>
-          </div>
-          <h1 className="text-2xl font-space-grotesk font-bold text-white">Creator Studio Dashboard</h1>
-          <p className="text-xs text-slate-400">Manage incoming requests, upload deliverables, and track escrow payouts.</p>
-        </div>
-
-        <button
-          onClick={() => setIsUploadModalOpen(true)}
-          className="px-5 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-sora font-semibold text-xs rounded-xl shadow-lg shadow-purple-500/25 flex items-center gap-2 transition-all hover:scale-[1.02]"
-        >
-          <Upload className="w-4 h-4" /> Upload Deliverable
-        </button>
-      </div>
-
-      {/* METRIC STAT CARDS */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
-        <div className="bg-[#161926]/85 backdrop-blur-[32px] border border-white/10 rounded-[24px] p-5 space-y-2 border-l-4 border-l-purple-500 shadow-lg">
-          <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">ACTIVE CREATIONS</span>
-          <h3 className="font-space-grotesk text-2xl font-bold text-white">4 Orders</h3>
-        </div>
-
-        <div className="bg-[#161926]/85 backdrop-blur-[32px] border border-white/10 rounded-[24px] p-5 space-y-2 border-l-4 border-l-emerald-400 shadow-lg">
-          <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">ESCROW BALANCE</span>
-          <h3 className="font-space-grotesk text-2xl font-bold text-emerald-400">$3,850.00</h3>
-        </div>
-
-        <div className="bg-[#161926]/85 backdrop-blur-[32px] border border-white/10 rounded-[24px] p-5 space-y-2 border-l-4 border-l-amber-400 shadow-lg">
-          <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">PENDING REQUESTS</span>
-          <h3 className="font-space-grotesk text-2xl font-bold text-amber-300">2 Requests</h3>
-        </div>
-
-        <div className="bg-[#161926]/85 backdrop-blur-[32px] border border-white/10 rounded-[24px] p-5 space-y-2 border-l-4 border-l-indigo-400 shadow-lg">
-          <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">SATISFACTION RATING</span>
-          <h3 className="font-space-grotesk text-2xl font-bold text-indigo-300 flex items-center gap-1.5">
-            4.9 <Award className="w-5 h-5 text-amber-400" />
-          </h3>
-        </div>
-      </div>
-
-      {/* ACTIVE CREATOR WORKROOMS */}
-      <div className="bg-[#161926]/85 backdrop-blur-[32px] border border-white/10 rounded-[28px] p-6 space-y-5 shadow-xl">
-        <div className="flex items-center justify-between border-b border-white/10 pb-4">
-          <h3 className="font-space-grotesk font-bold text-white text-base flex items-center gap-2">
-            <Palette className="w-5 h-5 text-purple-400" /> Studio Workrooms
-          </h3>
-        </div>
-        
-        {loading ? (
-          <div className="py-8 text-center text-slate-400 font-mono text-xs">Loading studio workrooms...</div>
-        ) : (
-          <div className="grid gap-4">
-            {/* Active Order Item 1 */}
-            <div className="p-5 bg-white/5 border border-white/10 rounded-2xl space-y-4 hover:border-purple-500/40 transition-all">
-              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className="text-purple-400 font-space-grotesk text-xs font-bold">#CMD-8842</span>
-                    <span className="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-[10px] font-bold border border-amber-500/30 flex items-center gap-1">
-                      <Clock className="w-3 h-3" /> Awaiting Client Review (Stage 1)
-                    </span>
-                  </div>
-                  <h4 className="font-bold text-white text-sm">Cyberpunk Character Fullbody Artwork</h4>
-                  <p className="text-xs text-slate-400">Client: @AlexMorgan • Locked Escrow: $450 USD</p>
-                </div>
-                
-                <Link
-                  href="/workroom/1"
-                  className="px-5 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-sora font-bold text-xs rounded-xl shadow-lg shadow-purple-500/20 flex items-center gap-1.5 transition-all"
-                >
-                  Open Workroom <ArrowRight className="w-4 h-4" />
-                </Link>
-              </div>
-
-              {/* Milestone Tracker */}
-              <div className="grid grid-cols-4 gap-2 text-center text-[11px] font-bold">
-                <div className="p-2.5 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/40">1. Sketch (Uploaded)</div>
-                <div className="p-2.5 rounded-xl bg-white/5 text-slate-500 border border-white/5">2. Lineart</div>
-                <div className="p-2.5 rounded-xl bg-white/5 text-slate-500 border border-white/5">3. Color</div>
-                <div className="p-2.5 rounded-xl bg-white/5 text-slate-500 border border-white/5">4. Delivery</div>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-
-      <FileUploadModal
-        isOpen={isUploadModalOpen}
-        onClose={() => setIsUploadModalOpen(false)}
-        milestoneTitle="Studio Workroom Deliverable"
-      />
-    </div>
-  );
+  const [error, setError] = useState<string | null>(null);
+  useEffect(() => { Promise.all([commissionService.getByCreator(), commissionService.getCreatorRequests()]).then(([creatorCommissions, incomingRequests]) => { setCommissions(creatorCommissions); setRequests(incomingRequests); }).catch(() => setError('Unable to load your studio data.')).finally(() => setLoading(false)); }, []);
+  const metrics = useMemo(() => ({ active: commissions.filter((commission) => commission.status === 'InProgress').length, escrow: commissions.reduce((total, commission) => total + (commission.escrowHeldAmount ?? 0), 0) }), [commissions]);
+  return <div className="mx-auto w-full max-w-7xl space-y-6">
+    <section className="flex flex-col justify-between gap-4 md:flex-row md:items-center"><div><h1 className="font-h1 text-2xl font-bold text-white">Studio overview</h1></div><Link href="/creator/requests" className="commission-primary rounded-xl px-5 py-2.5 text-center text-xs font-bold">Review requests</Link></section>
+    <div className="grid grid-cols-1 gap-3 text-xs sm:grid-cols-3"><Metric label="Active commissions" value={`${metrics.active} orders`} icon={<FolderKanban className="h-4 w-4" />} /><Metric label="Escrow held" value={money(metrics.escrow)} icon={<Wallet className="h-4 w-4" />} /><Metric label="Requests to review" value={`${requests.length} requests`} icon={<Clock className="h-4 w-4" />} /></div>
+    <section id="workrooms" className="rounded-2xl border border-white/10 bg-white/[0.035] p-5 sm:p-6"><div className="flex items-center justify-between border-b border-white/10 pb-4"><h2 className="font-h1 text-base font-bold text-white">Studio workrooms</h2><span className="text-xs text-slate-400">{commissions.length} total</span></div>{loading ? <div className="flex min-h-48 items-center justify-center text-sm text-slate-400"><LoaderCircle className="mr-2 h-4 w-4 animate-spin" /> Loading workrooms…</div> : error ? <p className="py-12 text-center text-sm text-red-300">{error}</p> : commissions.length === 0 ? <EmptyState /> : <div className="mt-5">{commissions.map((commission) => <WorkroomCard key={commission.id} commission={commission} />)}</div>}</section>
+  </div>;
 }
+function Metric({ label, value, icon }: { label: string; value: string; icon: React.ReactNode }) { return <div className="rounded-2xl border border-white/10 bg-white/[0.035] p-4"><div className="flex items-center justify-between text-[11px] font-medium text-slate-400"><span>{label}</span><span className="text-[#A7ACD9]">{icon}</span></div><p className="mt-2 font-h1 text-xl font-bold text-white">{value}</p></div>; }
+function WorkroomCard({ commission }: { commission: Commission }) { const value = commission.finalPrice ?? commission.totalPrice ?? commission.price; return <div className="border-b border-white/10 py-5 last:border-0 last:pb-0 first:pt-0"><div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between"><div><div className="flex gap-2"><span className="font-mono text-xs font-bold text-[#A7ACD9]">#CMD-{commission.id.slice(0, 8).toUpperCase()}</span><span className="rounded-full bg-white/[0.07] px-2 py-0.5 text-[10px] font-bold text-slate-300">{commission.status}</span></div><h3 className="mt-2 text-sm font-bold text-white">{commission.title}</h3><p className="mt-1 text-xs text-slate-400">@{commission.clientName || commission.clientId} · Escrow {money(commission.escrowHeldAmount)} · Total {money(value)}</p></div><Link href={`/workroom/${commission.id}`} className="commission-primary inline-flex items-center justify-center gap-1.5 rounded-xl px-5 py-2.5 text-xs font-bold">Open workroom <ArrowRight className="h-4 w-4" /></Link></div></div>; }
+function EmptyState() { return <div className="py-14 text-center"><CircleDollarSign className="mx-auto h-9 w-9 text-[#A7ACD9]" /><h2 className="mt-3 font-h1 font-bold text-white">No studio workrooms yet</h2><p className="mt-1 text-sm text-slate-400">Accepted commission requests will appear here.</p></div>; }
