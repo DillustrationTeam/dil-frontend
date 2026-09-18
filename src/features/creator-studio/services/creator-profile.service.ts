@@ -9,7 +9,7 @@ import {
 
 export const creatorProfileService = {
   async getMyProfile(): Promise<CreatorProfileDto> {
-    const response = await apiClient.get<ApiResponse<CreatorProfileDto>>('/creator-profiles/me');
+    const response = await apiClient.get<ApiResponse<CreatorProfileDto>>('/creator/me');
     if (response.data.error || !response.data.data) {
       throw new Error(response.data.error?.details?.join(', ') || 'Failed to load creator profile.');
     }
@@ -17,7 +17,7 @@ export const creatorProfileService = {
   },
 
   async createProfile(data: CreateCreatorProfileRequest): Promise<CreatorProfileDto> {
-    const response = await apiClient.post<ApiResponse<CreatorProfileDto>>('/creator-profiles', data);
+    const response = await apiClient.post<ApiResponse<CreatorProfileDto>>('/profile/setup', data);
     if (response.data.error || !response.data.data) {
       throw new Error(response.data.error?.details?.join(', ') || 'Failed to create creator profile.');
     }
@@ -25,7 +25,7 @@ export const creatorProfileService = {
   },
 
   async uploadArtwork(data: CreateArtworkRequest): Promise<ArtworkDto> {
-    const response = await apiClient.post<ApiResponse<ArtworkDto>>('/creator-profiles/artworks', data);
+    const response = await apiClient.post<ApiResponse<ArtworkDto>>('/artworks', data);
     if (response.data.error || !response.data.data) {
       throw new Error(response.data.error?.details?.join(', ') || 'Failed to upload artwork.');
     }
