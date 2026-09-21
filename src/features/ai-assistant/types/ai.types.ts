@@ -1,0 +1,5 @@
+export interface AiConversationDto { aiConversationId: string; topic: string; contextType: 'General' | 'Commission' | 'Artwork'; contextId: string | null; createdAt: string; lastMessageAt: string | null; messageCount: number }
+export interface AiMessageDto { aiMessageId: string; conversationId: string; role: 'user' | 'assistant' | 'system'; content: string; helpful: boolean | null; note: string | null; modelVersion: string | null; createdAt: string }
+export interface DeadlineReminderDto { deadlineReminderId: string; commissionId: string; milestoneId: string | null; remindAt: string; channel: string; sentAt: string | null; riskScore: number; isManual: boolean }
+export interface DeadlineRiskDto { commissionId: string; riskScore: number; riskLevel: 'low' | 'medium' | 'high' | 'critical'; deadline: string | null; currentStage: number; predictedAt: string | null; nextRemindAt: string | null; modelVersion: string | null; reminders: DeadlineReminderDto[] }
+export interface AiPage<T> { items: T[]; nextCursor: string | null }
