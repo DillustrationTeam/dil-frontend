@@ -123,14 +123,21 @@ export function NotificationBell({
 
   // Badge làm mới mỗi 60 giây (lưới an toàn khi WebSocket bị chặn), và mỗi lần mở panel.
   useEffect(() => {
-    refreshBadge();
+    // Chờ 1 microtask: tránh setState đồng bộ trong effect (react-hooks/set-state-in-effect).
+    void (async () => {
+      await Promise.resolve();
+      await refreshBadge();
+    })();
     if (!userId) return;
     const timer = setInterval(refreshBadge, 60000);
     return () => clearInterval(timer);
   }, [userId, refreshBadge]);
 
   useEffect(() => {
-    if (open) loadPreview();
+    void (async () => {
+      await Promise.resolve();
+      if (open) await loadPreview();
+    })();
   }, [open, loadPreview]);
 
   // Đóng panel khi bấm ra ngoài hoặc nhấn Escape.

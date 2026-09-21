@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, CircleAlert, Gavel, HelpCircle, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, CircleAlert, Gavel, ShieldCheck } from 'lucide-react';
 import { auctionService } from '../services/auction.service';
 import type { AuctionRequest } from '../types/auction.types';
 
@@ -13,14 +13,19 @@ function formatVnd(value: number) {
 
 export function AuctionCreateScreen({ userId }: { userId: string | null }) {
   const router = useRouter();
-  const [form, setForm] = useState<AuctionRequest>({
-    artworkId: '',
-    startPrice: 500000,
-    bidStep: 50000,
-    reservePrice: null,
-    buyNowPrice: null,
-    startAt: new Date().toISOString().slice(0, 16),
-    endAt: new Date(Date.now() + 3 * 86400000).toISOString().slice(0, 16),
+  // Khởi tạo trong lazy initializer: `Date.now()` là hàm không thuần khiết,
+  // gọi thẳng trong thân render sẽ bị react-hooks/purity chặn.
+  const [form, setForm] = useState<AuctionRequest>(() => {
+    const now = new Date();
+    return {
+      artworkId: '',
+      startPrice: 500000,
+      bidStep: 50000,
+      reservePrice: null,
+      buyNowPrice: null,
+      startAt: now.toISOString().slice(0, 16),
+      endAt: new Date(now.getTime() + 3 * 86400000).toISOString().slice(0, 16),
+    };
   });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);

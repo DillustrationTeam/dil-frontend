@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, CheckCircle2, CircleAlert, Clock, Download, Eye, Gavel, Heart, RefreshCw, ShieldCheck, Sparkles, User, Zap } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, CircleAlert, Clock, Download, Gavel, Heart, RefreshCw, ShieldCheck, User, Zap } from 'lucide-react';
 import { auctionService } from '../services/auction.service';
-import { auctionStatusLabels, type AuctionDetailDto, type AuctionSettlementDto, type BidDto } from '../types/auction.types';
+import { auctionStatusLabels, type AuctionDetailDto, type BidDto } from '../types/auction.types';
 import { PageLoader } from '@/features/navigation';
 
 function formatVnd(value: number) {
@@ -14,7 +14,6 @@ function formatVnd(value: number) {
 export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; userId: string | null }) {
   const [auction, setAuction] = useState<AuctionDetailDto | null>(null);
   const [bids, setBids] = useState<BidDto[]>([]);
-  const [settlement, setSettlement] = useState<AuctionSettlementDto | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -41,11 +40,6 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
 
       const minNext = res.auction.currentPrice + res.auction.bidStep;
       setBidAmount(minNext.toString());
-
-      if (res.auction.auctionStatus === 'Settled' || res.auction.auctionStatus === 'Ended') {
-        const sRes = await auctionService.settlement(auctionId).catch(() => null);
-        if (sRes) setSettlement(sRes);
-      }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Không tải được chi tiết phiên đấu giá.');
     } finally {
@@ -53,8 +47,19 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
     }
   }
 
+  // Giữ loader trong ref: effect chỉ chạy lại theo `auctionId`, không phụ thuộc
+  // identity của hàm (tránh react-hooks/exhaustive-deps).
+  const loadDetailRef = useRef(loadDetail);
   useEffect(() => {
-    loadDetail();
+    loadDetailRef.current = loadDetail;
+  });
+
+  useEffect(() => {
+    // Chờ 1 microtask: tránh setState đồng bộ trong effect (react-hooks/set-state-in-effect).
+    void (async () => {
+      await Promise.resolve();
+      await loadDetailRef.current();
+    })();
   }, [auctionId]);
 
   async function handleToggleWatch() {
@@ -152,7 +157,6 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
   }
 
   const isLive = auction.auctionStatus === 'Active';
-  const isSettled = auction.auctionStatus === 'Settled';
   const isWinner = userId && auction.winnerId === userId;
   const statusLabel = auctionStatusLabels[auction.auctionStatus] || auction.auctionStatus;
 

@@ -35,6 +35,15 @@ export function SiteHeader() {
   const [keyword, setKeyword] = useState('');
   const [menuOpen, setMenuOpen] = useState(false);
 
+  // Đổi trang thì đóng hết lớp phủ: điều chỉnh state ngay trong render khi `pathname`
+  // đổi, thay vì setState trong useEffect (react-hooks/set-state-in-effect).
+  const [lastPathname, setLastPathname] = useState(pathname);
+  if (lastPathname !== pathname) {
+    setLastPathname(pathname);
+    setSearchOpen(false);
+    setMenuOpen(false);
+  }
+
   const searchRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -64,12 +73,6 @@ export function SiteHeader() {
   useEffect(() => {
     if (searchOpen) searchInputRef.current?.focus();
   }, [searchOpen]);
-
-  // Đổi trang thì đóng hết lớp phủ.
-  useEffect(() => {
-    setSearchOpen(false);
-    setMenuOpen(false);
-  }, [pathname]);
 
   async function handleLogout() {
     setMenuOpen(false);

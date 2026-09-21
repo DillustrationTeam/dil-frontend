@@ -1,9 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
-import { Clock, Eye, Gavel, Plus, RefreshCw, Search, ShieldCheck } from 'lucide-react';
+import { Clock, Eye, Gavel, Plus, RefreshCw, Search } from 'lucide-react';
 import { auctionService } from '../services/auction.service';
 import { auctionStatusLabels, type AuctionFilters, type AuctionListItemDto } from '../types/auction.types';
 
@@ -67,8 +66,19 @@ export function AuctionListScreen({ userId }: { userId: string | null }) {
     }
   }
 
+  // Giữ loader trong ref: effect chỉ chạy lại theo bộ lọc, không phụ thuộc
+  // identity của hàm (tránh react-hooks/exhaustive-deps).
+  const loadAuctionsRef = useRef(loadAuctions);
   useEffect(() => {
-    loadAuctions(true);
+    loadAuctionsRef.current = loadAuctions;
+  });
+
+  useEffect(() => {
+    // Chờ 1 microtask: tránh setState đồng bộ trong effect (react-hooks/set-state-in-effect).
+    void (async () => {
+      await Promise.resolve();
+      await loadAuctionsRef.current(true);
+    })();
   }, [status, sort]);
 
   const filteredAuctions = keyword.trim()
@@ -86,12 +96,15 @@ export function AuctionListScreen({ userId }: { userId: string | null }) {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <Link
-            href="/auctions/create"
-            className="inline-flex items-center gap-2 rounded-full bg-brand-periwinkle px-5 py-2.5 font-h1 text-xs font-bold text-brand-navy shadow-lg transition hover:brightness-110"
-          >
-            <Plus size={16} /> Mở phiên đấu giá
-          </Link>
+          {/* Mở phiên đấu giá cần đăng nhập — ẩn với khách. */}
+          {userId && (
+            <Link
+              href="/auctions/create"
+              className="inline-flex items-center gap-2 rounded-full bg-brand-periwinkle px-5 py-2.5 font-h1 text-xs font-bold text-brand-navy shadow-lg transition hover:brightness-110"
+            >
+              <Plus size={16} /> Mở phiên đấu giá
+            </Link>
+          )}
           <button
             type="button"
             onClick={() => loadAuctions(true)}

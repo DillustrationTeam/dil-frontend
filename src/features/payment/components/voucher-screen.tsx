@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, CheckCircle2, CircleAlert, Percent, Plus, RefreshCw, Tag, Trash2 } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, CircleAlert, Plus, RefreshCw, Tag, Trash2 } from 'lucide-react';
 import { paymentService } from '../services/payment.service';
 import type { VoucherDto, VoucherRequest } from '../types/payment.types';
 import { VoucherApplyPanel } from './voucher-apply-panel';
@@ -23,18 +23,23 @@ export function VoucherScreen({ userId }: { userId: string | null }) {
 
   // Create voucher
   const [showCreate, setShowCreate] = useState(false);
-  const [createForm, setCreateForm] = useState<VoucherRequest>({
-    voucherCode: '',
-    name: '',
-    discountType: 'Percent',
-    discountValue: 10,
-    minOrderAmount: 100000,
-    maxDiscountAmount: 50000,
-    scope: ['Commission', 'Auction'],
-    startDate: new Date().toISOString().slice(0, 16),
-    endDate: new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 16),
-    usageLimit: 100,
-    isActive: true,
+  // Khởi tạo trong lazy initializer: `Date.now()` là hàm không thuần khiết,
+  // gọi thẳng trong thân render sẽ bị react-hooks/purity chặn.
+  const [createForm, setCreateForm] = useState<VoucherRequest>(() => {
+    const now = new Date();
+    return {
+      voucherCode: '',
+      name: '',
+      discountType: 'Percent',
+      discountValue: 10,
+      minOrderAmount: 100000,
+      maxDiscountAmount: 50000,
+      scope: ['Commission', 'Auction'],
+      startDate: now.toISOString().slice(0, 16),
+      endDate: new Date(now.getTime() + 7 * 86400000).toISOString().slice(0, 16),
+      usageLimit: 100,
+      isActive: true,
+    };
   });
   const [submitting, setSubmitting] = useState(false);
 
@@ -51,8 +56,19 @@ export function VoucherScreen({ userId }: { userId: string | null }) {
     }
   }
 
+  // Giữ loader trong ref: effect chỉ chạy lại theo bộ lọc trạng thái, không phụ
+  // thuộc identity của hàm (tránh react-hooks/exhaustive-deps).
+  const loadVouchersRef = useRef(loadVouchers);
   useEffect(() => {
-    loadVouchers();
+    loadVouchersRef.current = loadVouchers;
+  });
+
+  useEffect(() => {
+    // Chờ 1 microtask: tránh setState đồng bộ trong effect (react-hooks/set-state-in-effect).
+    void (async () => {
+      await Promise.resolve();
+      await loadVouchersRef.current();
+    })();
   }, [statusFilter]);
 
   async function handleCreateVoucher(e: React.FormEvent) {
@@ -110,13 +126,16 @@ export function VoucherScreen({ userId }: { userId: string | null }) {
         <Link href="/wallet" className="inline-flex items-center gap-2 text-sm text-brand-periwinkle hover:underline">
           <ArrowLeft size={16} /> Quay lại ví
         </Link>
-        <button
-          type="button"
-          onClick={() => setShowCreate(!showCreate)}
-          className="inline-flex items-center gap-2 rounded-full bg-brand-periwinkle px-5 py-2 font-h1 text-xs font-bold text-brand-navy shadow hover:brightness-110"
-        >
-          <Plus size={16} /> Tạo mã giảm giá mới
-        </button>
+        {/* Quản lý voucher cần đăng nhập — ẩn với khách. */}
+        {userId && (
+          <button
+            type="button"
+            onClick={() => setShowCreate(!showCreate)}
+            className="inline-flex items-center gap-2 rounded-full bg-brand-periwinkle px-5 py-2 font-h1 text-xs font-bold text-brand-navy shadow hover:brightness-110"
+          >
+            <Plus size={16} /> Tạo mã giảm giá mới
+          </button>
+        )}
       </div>
 
       <h1 className="mb-2 font-h1 text-2xl font-bold">Trung tâm mã giảm giá</h1>

@@ -2,11 +2,11 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, CheckCircle2, Copy, ExternalLink, QrCode, RefreshCw, ShieldCheck, Wallet } from 'lucide-react';
+import { CheckCircle2, Copy, ExternalLink, QrCode, RefreshCw, ShieldCheck } from 'lucide-react';
 import { paymentService } from '../services/payment.service';
 import type { PaymentOrderDto } from '../types/payment.types';
 import { AccountPageFooter, AccountPageHeading, AccountShell } from './account-shell';
-import { InlineLoader, PageLoader } from '@/features/navigation';
+import { InlineLoader } from '@/features/navigation';
 
 const quickAmounts = [50000, 100000, 200000, 500000, 1000000, 2000000];
 

@@ -15,5 +15,5 @@ export function WalletEntry() {
   const user = useAuthStore((state) => state.user);
   const accessToken = useAuthStore((state) => state.accessToken);
 
-  return <WalletScreen key={user?.id ?? 'khach'} ready={ready} userId={ready && accessToken ? user?.id ?? null : null} fullName={ready ? user?.fullName ?? null : null} />;
+  return <WalletScreen key={user?.id ?? 'khach'} ready={ready} userId={ready && accessToken ? user?.id ?? null : null} />;
 }

@@ -1,8 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { ArrowLeft, Building2, CheckCircle2, CircleAlert, Clock, CreditCard, Plus, RefreshCw, Trash2 } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { Building2, CheckCircle2, CircleAlert, Plus, RefreshCw, Trash2 } from 'lucide-react';
 import { paymentService } from '../services/payment.service';
 import { walletService } from '../services/wallet.service';
 import type { BankAccountDto, BankAccountRequest, PayoutDto } from '../types/payment.types';
@@ -70,8 +69,19 @@ export function PayoutScreen({ userId }: { userId: string | null }) {
     }
   }
 
+  // Giữ loader trong ref: effect chỉ chạy lại theo `userId`, không phụ thuộc
+  // identity của hàm (tránh react-hooks/exhaustive-deps).
+  const loadDataRef = useRef(loadData);
   useEffect(() => {
-    loadData();
+    loadDataRef.current = loadData;
+  });
+
+  useEffect(() => {
+    // Chờ 1 microtask: tránh setState đồng bộ trong effect (react-hooks/set-state-in-effect).
+    void (async () => {
+      await Promise.resolve();
+      await loadDataRef.current();
+    })();
   }, [userId]);
 
   async function handleAddBank(e: React.FormEvent) {

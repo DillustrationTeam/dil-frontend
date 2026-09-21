@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { Bell, Check, CheckCheck, CircleAlert, Clock, ExternalLink, Gavel, Info, Megaphone, RefreshCw, ShieldAlert, Wallet } from 'lucide-react';
 import { notificationService } from '../services/notification.service';
@@ -90,8 +90,19 @@ export function NotificationScreen({ userId }: { userId: string | null }) {
     });
   });
 
+  // Giữ loader trong ref: effect chỉ chạy lại theo bộ lọc, không phụ thuộc
+  // identity của hàm (tránh react-hooks/exhaustive-deps).
+  const loadDataRef = useRef(loadData);
   useEffect(() => {
-    loadData(true);
+    loadDataRef.current = loadData;
+  });
+
+  useEffect(() => {
+    // Chờ 1 microtask: tránh setState đồng bộ trong effect (react-hooks/set-state-in-effect).
+    void (async () => {
+      await Promise.resolve();
+      await loadDataRef.current(true);
+    })();
   }, [activeTab, unreadOnly, userId]);
 
   async function handleMarkRead(id: string) {

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { AlertTriangle, ArrowLeft, Bot, Check, CheckCircle2, CircleAlert, Clock, MessageSquare, Plus, RefreshCw, Send, ShieldAlert, Sparkles, ThumbsDown, ThumbsUp, User } from 'lucide-react';
+import { ArrowLeft, Bot, CircleAlert, Clock, Plus, Send, Sparkles, ThumbsDown, ThumbsUp, User } from 'lucide-react';
 import { AiMarkdown } from './ai-markdown';
 import { aiService } from '../services/ai.service';
 import type { AiConversationDto, AiMessageDto, DeadlineRiskDto } from '../types/ai.types';
@@ -19,7 +19,6 @@ export function AiChatScreen({ userId }: { userId: string | null }) {
   const [conversations, setConversations] = useState<AiConversationDto[]>([]);
   const [currentConvo, setCurrentConvo] = useState<AiConversationDto | null>(null);
   const [messages, setMessages] = useState<AiMessageDto[]>([]);
-  const [loadingList, setLoadingList] = useState(true);
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [sending, setSending] = useState(false);
   const [inputPrompt, setInputPrompt] = useState('');
@@ -37,7 +36,6 @@ export function AiChatScreen({ userId }: { userId: string | null }) {
 
   async function loadConversations() {
     if (!userId) return;
-    setLoadingList(true);
     setError(null);
     try {
       const res = await aiService.conversations();
@@ -47,13 +45,22 @@ export function AiChatScreen({ userId }: { userId: string | null }) {
       }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Không tải được danh sách hội thoại.');
-    } finally {
-      setLoadingList(false);
     }
   }
 
+  // Giữ loader trong ref: effect chỉ chạy lại theo `userId`, không phụ thuộc
+  // identity của hàm (tránh react-hooks/exhaustive-deps).
+  const loadConversationsRef = useRef(loadConversations);
   useEffect(() => {
-    loadConversations();
+    loadConversationsRef.current = loadConversations;
+  });
+
+  useEffect(() => {
+    // Chờ 1 microtask: tránh setState đồng bộ trong effect (react-hooks/set-state-in-effect).
+    void (async () => {
+      await Promise.resolve();
+      await loadConversationsRef.current();
+    })();
   }, [userId]);
 
   async function selectConversation(convo: AiConversationDto) {

@@ -61,7 +61,7 @@ function TransactionRow({ transaction, currency }: { transaction: WalletTransact
   </tr>;
 }
 
-export function WalletScreen({ userId, fullName, ready }: { userId: string | null; fullName: string | null; ready: boolean }) {
+export function WalletScreen({ userId, ready }: { userId: string | null; ready: boolean }) {
   const { overview, transactions, filters, applyFilters, refresh, next, previous, hasPrevious } = useWallet(userId);
   const authenticated = Boolean(userId);
   const busy = !ready || overview.loading || transactions.loading;

@@ -55,8 +55,12 @@ export const walletService = {
       signal,
       timeout: 15000,
     });
-    const raw = payload(response.data);
-    const items = Array.isArray(raw) ? raw : (Array.isArray((raw as any)?.items) ? (raw as any).items : []);
+    const raw: unknown = payload(response.data);
+    const items: WalletTransactionDto[] = Array.isArray(raw)
+      ? (raw as WalletTransactionDto[])
+      : isRecord(raw) && Array.isArray(raw.items)
+        ? (raw.items as WalletTransactionDto[])
+        : [];
     const meta = response.data.meta;
     return {
       items,

@@ -16,16 +16,23 @@ async function call<T>(method: 'get' | 'post' | 'put' | 'delete', url: string, d
     return { data: response.data.data, meta: response.data.meta };
   } catch (error) { throw new Error(auctionError(error)); }
 }
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
 async function list<T>(url: string, params: object, signal?: AbortSignal): Promise<AuctionPage<T>> {
-  const r = await call<any>('get', url, undefined, params, signal);
+  const r = await call<unknown>('get', url, undefined, params, signal);
   const raw = r.data;
-  const items: T[] = Array.isArray(raw) ? raw : (Array.isArray(raw?.items) ? raw.items : []);
+  const items: T[] = Array.isArray(raw)
+    ? (raw as T[])
+    : isRecord(raw) && Array.isArray(raw.items)
+      ? (raw.items as T[])
+      : [];
   const nextCursor = typeof r.meta?.nextCursor === 'string'
     ? r.meta.nextCursor
-    : (typeof raw?.nextCursor === 'string' ? raw.nextCursor : null);
+    : (isRecord(raw) && typeof raw.nextCursor === 'string' ? raw.nextCursor : null);
   const total = typeof r.meta?.total === 'number'
     ? r.meta.total
-    : (typeof raw?.total === 'number' ? raw.total : null);
+    : (isRecord(raw) && typeof raw.total === 'number' ? raw.total : null);
   return { items, nextCursor, total };
 }
 export const auctionService = {

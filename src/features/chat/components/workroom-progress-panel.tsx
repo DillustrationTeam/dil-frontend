@@ -106,7 +106,12 @@ export function WorkroomProgressPanel({ commissionId }: { commissionId: string }
 
   useEffect(() => {
     const controller = new AbortController();
-    void load(controller.signal);
+    // Chờ 1 microtask: tránh setState đồng bộ trong effect (react-hooks/set-state-in-effect).
+    void (async () => {
+      await Promise.resolve();
+      if (controller.signal.aborted) return;
+      await load(controller.signal);
+    })();
     return () => controller.abort();
   }, [load]);
 

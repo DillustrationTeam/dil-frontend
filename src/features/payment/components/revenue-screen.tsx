@@ -1,8 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { ArrowLeft, BarChart3, Calendar, CircleAlert, DollarSign, Download, Layers, PieChart, RefreshCw, TrendingUp } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { BarChart3, CircleAlert, DollarSign, Layers, RefreshCw, TrendingUp } from 'lucide-react';
 import { paymentService } from '../services/payment.service';
 import type { RevenueBreakdownDto, RevenuePointDto, RevenueSnapshotDto, RevenueSummaryDto } from '../types/payment.types';
 import { RevenueChart } from './revenue-chart';
@@ -48,8 +47,19 @@ export function RevenueScreen({ userId }: { userId: string | null }) {
     }
   }
 
+  // Giữ loader trong ref: effect chỉ chạy lại theo `rangeDays`, không phụ thuộc
+  // identity của hàm (tránh react-hooks/exhaustive-deps).
+  const loadDataRef = useRef(loadData);
   useEffect(() => {
-    loadData();
+    loadDataRef.current = loadData;
+  });
+
+  useEffect(() => {
+    // Chờ 1 microtask: tránh setState đồng bộ trong effect (react-hooks/set-state-in-effect).
+    void (async () => {
+      await Promise.resolve();
+      await loadDataRef.current();
+    })();
   }, [rangeDays, userId]);
 
   return (

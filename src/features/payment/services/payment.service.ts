@@ -13,13 +13,20 @@ async function call<T>(method: 'get' | 'post' | 'put' | 'delete', url: string, d
     return { data: response.data.data, meta: response.data.meta };
   } catch (error) { throw new Error(getWalletErrorMessage(error)); }
 }
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
 async function list<T>(url: string, params: object, signal?: AbortSignal): Promise<PaymentPage<T>> {
-  const response = await call<any>('get', url, undefined, params, signal);
+  const response = await call<unknown>('get', url, undefined, params, signal);
   const raw = response.data;
-  const items: T[] = Array.isArray(raw) ? raw : (Array.isArray(raw?.items) ? raw.items : []);
+  const items: T[] = Array.isArray(raw)
+    ? (raw as T[])
+    : isRecord(raw) && Array.isArray(raw.items)
+      ? (raw.items as T[])
+      : [];
   const nextCursor = typeof response.meta?.nextCursor === 'string'
     ? response.meta.nextCursor
-    : (typeof raw?.nextCursor === 'string' ? raw.nextCursor : null);
+    : (isRecord(raw) && typeof raw.nextCursor === 'string' ? raw.nextCursor : null);
   return { items, nextCursor };
 }
 

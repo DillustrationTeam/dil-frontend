@@ -58,7 +58,11 @@ export function AiFloatingWidget({ userId }: { userId: string | null }) {
 
   // Nạp lần đầu để nút có sẵn nội dung khi người dùng mở.
   useEffect(() => {
-    if (userId) loadConversation();
+    // Chờ 1 microtask: tránh setState đồng bộ trong effect (react-hooks/set-state-in-effect).
+    void (async () => {
+      await Promise.resolve();
+      if (userId) await loadConversation();
+    })();
   }, [userId, loadConversation]);
 
   useEffect(() => {

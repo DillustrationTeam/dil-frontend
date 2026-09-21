@@ -184,7 +184,11 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
   }, [loadData]);
 
   useEffect(() => {
-    void loadData();
+    // Chờ 1 microtask: tránh setState đồng bộ trong effect (react-hooks/set-state-in-effect).
+    void (async () => {
+      await Promise.resolve();
+      await loadData();
+    })();
   }, [loadData]);
 
   useEffect(() => {
