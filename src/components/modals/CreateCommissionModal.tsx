@@ -1,337 +1,92 @@
 'use client';
 
-import React, { useState } from 'react';
-import { X, ArrowRight, ArrowLeft, Upload, CheckCircle2, ShieldCheck, DollarSign, Calendar } from 'lucide-react';
-import CommissionStepper from '../commission/CommissionStepper';
-
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { X } from 'lucide-react';
+import axios from 'axios';
 import { commissionService } from '@/services/commission.service';
+import { creatorRateCardService, RateCardPackage } from '@/features/creator-studio/services/creator-rate-card.service';
 
-interface CreateCommissionModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSubmitSuccess?: () => void;
-  creatorId?: string;
-  creatorName?: string;
-}
+const schema = z.object({
+  title: z.string().trim().min(1, 'Nhập tên dự án.').max(200),
+  description: z.string().trim().min(1, 'Nhập mô tả yêu cầu.'),
+  deadlineAt: z.string().optional(),
+});
+type Form = z.infer<typeof schema>;
 
-export default function CreateCommissionModal({
-  isOpen,
-  onClose,
-  onSubmitSuccess,
-  creatorId,
-  creatorName,
-}: CreateCommissionModalProps) {
-  const [step, setStep] = useState(1);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formData, setFormData] = useState({
-    title: '',
-    category: 'Illustration',
-    usageType: 'Personal',
-    description: '',
-    deadline: '',
-    budget: 0,
-    referenceFiles: [] as string[],
-    agreedTerms: false,
+const money = (value: number) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
+const field = 'w-full px-4 py-3.5 bg-black/40 rounded-xl border border-white/10 text-white text-xs font-semibold focus:outline-none focus:border-[#C5C9F8] transition-colors';
+const label = 'block text-[10px] uppercase font-bold tracking-wider text-[#8A8FA9]';
+
+export default function CreateCommissionModal({ creatorId, creatorName, onClose }: { creatorId: string; creatorName: string; onClose: () => void }) {
+  const router = useRouter();
+  const [packages, setPackages] = useState<RateCardPackage[]>([]);
+  const [loadingPackages, setLoadingPackages] = useState(true);
+  const [selectedPackageId, setSelectedPackageId] = useState('');
+  const [error, setError] = useState('');
+  const [busy, setBusy] = useState(false);
+  const { register, handleSubmit, formState: { errors } } = useForm<Form>({
+    resolver: zodResolver(schema),
+    defaultValues: { title: '', description: '', deadlineAt: '' },
   });
+  const selectedPackage = packages.find(item => item.id === selectedPackageId);
 
-  if (!isOpen) return null;
+  useEffect(() => {
+    creatorRateCardService.get(creatorId).then(setPackages)
+      .catch(() => setError('Không tải được bảng giá Creator.'))
+      .finally(() => setLoadingPackages(false));
+  }, [creatorId]);
 
-  const handleNext = () => {
-    if (step < 4) setStep(step + 1);
-  };
+  useEffect(() => {
+    const priorOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const onKeyDown = (event: KeyboardEvent) => { if (event.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', onKeyDown);
+    return () => { document.body.style.overflow = priorOverflow; window.removeEventListener('keydown', onKeyDown); };
+  }, [onClose]);
 
-  const handlePrev = () => {
-    if (step > 1) setStep(step - 1);
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    try {
-      const m1Price = formData.budget * 0.3;
-      const m2Price = formData.budget * 0.3;
-      const m3Price = formData.budget * 0.4;
-
-      await commissionService.create({
-        creatorId: creatorId!,
-        title: formData.title,
-        description: formData.description,
-        deadlineAt: formData.deadline || undefined,
-        totalPrice: formData.budget,
-        milestones: [
-          { sequence: 1, title: 'Sketch', price: m1Price },
-          { sequence: 2, title: 'Lineart', price: m2Price },
-          { sequence: 3, title: 'Final', price: m3Price },
-        ]
-      });
-      
-      if (onSubmitSuccess) onSubmitSuccess();
-      onClose();
-    } catch (error) {
-      console.error('Failed to create commission:', error);
-      alert('Failed to create commission. Please check console for details.');
-    } finally {
-      setIsSubmitting(false);
+  const submit = async (values: Form) => {
+    setError('');
+    if (!selectedPackage) {
+      setError('Chọn một gói trong bảng giá Creator.');
+      return;
     }
+    setBusy(true);
+    try {
+      const created = await commissionService.create({
+        creatorId,
+        packageId: selectedPackage.id,
+        ...values,
+        deadlineAt: values.deadlineAt ? new Date(values.deadlineAt).toISOString() : undefined,
+      });
+      onClose();
+      router.push(`/client/requests/${created.id}`);
+    } catch (cause) {
+      const details = axios.isAxiosError(cause) ? cause.response?.data?.error?.details : undefined;
+      setError(Array.isArray(details) && details.length > 0
+        ? details.join(' ')
+        : 'Không tạo được đơn. Vui lòng thử lại.');
+    }
+    finally { setBusy(false); }
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
-      {/* Modal Container */}
-      <div className="relative flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#1a1d2b] shadow-2xl shadow-black/20">
-        {/* Header with Title & Close Button */}
-        <div className="flex items-center justify-between border-b border-white/10 bg-[#1F2335]/70 px-8 pb-4 pt-6">
-          <div>
-            <div>
-              <h2 className="text-lg font-space-grotesk font-bold text-white">{creatorName ? `Request for ${creatorName}` : 'Choose a creator first'}</h2>
-              {!creatorName && <p className="text-xs text-slate-400">Open a creator profile and select Commission this artist.</p>}
-            </div>
-          </div>
-          <button
-            onClick={onClose}
-            aria-label="Close commission request"
-            className="w-9 h-9 rounded-full bg-white/5 border border-white/10 text-slate-400 hover:text-white hover:bg-white/10 flex items-center justify-center transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        {/* Stepper Progress Bar Header */}
-        <div className="border-b border-white/10 bg-[#1F2335]/70 px-6 py-2">
-          <CommissionStepper currentStep={step} onStepClick={(s) => setStep(s)} />
-        </div>
-
-        {/* Modal Form Body */}
-        <div className="p-8 overflow-y-auto flex-1 space-y-6">
-          {/* STEP 1: PROJECT DETAILS */}
-          {step === 1 && (
-            <div className="space-y-5 animate-fadeIn">
-              <div>
-                <label className="block text-xs font-space-grotesk font-bold text-slate-300 uppercase tracking-wider mb-2">
-                  Commission Title *
-                </label>
-                <input
-                  type="text"
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  placeholder="e.g. Cyberpunk Character Fullbody Artwork"
-                  className="commission-input h-12 w-full rounded-2xl px-4 text-sm placeholder-slate-500 transition-all"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-space-grotesk font-bold text-slate-300 uppercase tracking-wider mb-2">
-                    Artwork Category
-                  </label>
-                  <select
-                    value={formData.category}
-                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                    className="commission-input h-12 w-full rounded-2xl px-4 text-sm"
-                  >
-                    <option value="Illustration">Digital Illustration</option>
-                    <option value="Character Design">Character Concept Art</option>
-                    <option value="Vtuber Model">Live2D Vtuber Model</option>
-                    <option value="3D Avatar">3D Asset / Avatar</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-space-grotesk font-bold text-slate-300 uppercase tracking-wider mb-2">
-                    Usage Rights
-                  </label>
-                  <div className="grid grid-cols-2 gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setFormData({ ...formData, usageType: 'Personal' })}
-                      className={`h-12 rounded-2xl text-xs font-sora font-semibold border transition-all ${
-                        formData.usageType === 'Personal'
-                          ? 'bg-[#A7ACD9]/20 border-[#A7ACD9]/60 text-white'
-                          : 'bg-white/5 border-white/10 text-slate-400 hover:bg-white/10'
-                      }`}
-                    >
-                      Personal Use
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setFormData({ ...formData, usageType: 'Commercial' })}
-                      className={`h-12 rounded-2xl text-xs font-sora font-semibold border transition-all ${
-                        formData.usageType === 'Commercial'
-                          ? 'bg-[#A7ACD9]/20 border-[#A7ACD9]/60 text-white'
-                          : 'bg-white/5 border-white/10 text-slate-400 hover:bg-white/10'
-                      }`}
-                    >
-                      Commercial (+50%)
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-space-grotesk font-bold text-slate-300 uppercase tracking-wider mb-2">
-                  Detailed Brief Description *
-                </label>
-                <textarea
-                  rows={4}
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="Describe your vision, character details, color palette, mood, and references..."
-                  className="commission-input w-full rounded-2xl p-4 text-sm placeholder-slate-500 transition-all"
-                />
-              </div>
-            </div>
-          )}
-
-          {/* STEP 2: TIMELINE & BUDGET */}
-          {step === 2 && (
-            <div className="space-y-6 animate-fadeIn">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-xs font-space-grotesk font-bold text-slate-300 uppercase tracking-wider mb-2">
-                    Target Completion Date
-                  </label>
-                  <div className="relative">
-                    <Calendar className="w-4 h-4 text-slate-400 absolute left-4 top-4 pointer-events-none" />
-                    <input
-                      type="date"
-                      value={formData.deadline}
-                      onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
-                      className="commission-input h-12 w-full rounded-2xl py-0 pl-11 pr-4 text-sm"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-space-grotesk font-bold text-slate-300 uppercase tracking-wider mb-2">
-                    Total Estimated Budget ($ USD)
-                  </label>
-                  <div className="relative">
-                    <DollarSign className="w-4 h-4 text-slate-400 absolute left-4 top-4 pointer-events-none" />
-                    <input
-                      type="number"
-                      value={formData.budget}
-                      onChange={(e) => setFormData({ ...formData, budget: Number(e.target.value) })}
-                      className="commission-input h-12 w-full rounded-2xl py-0 pl-11 pr-4 text-sm"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Milestone Breakdown Preview */}
-              <div className="p-5 bg-white/5 border border-white/10 rounded-2xl space-y-3">
-                <h4 className="text-xs font-space-grotesk font-bold uppercase tracking-wider text-[#A7ACD9]">
-                  Automated Milestone Escrow Schedule
-                </h4>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-xs text-slate-300 p-2.5 rounded-xl bg-black/20 border border-white/5">
-                    <span>Stage 1: Rough Sketch & Concept (30%)</span>
-                    <span className="font-bold text-emerald-400">${(formData.budget * 0.3).toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between text-xs text-slate-300 p-2.5 rounded-xl bg-black/20 border border-white/5">
-                    <span>Stage 2: Lineart & Base Colors (30%)</span>
-                    <span className="font-bold text-emerald-400">${(formData.budget * 0.3).toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between text-xs text-slate-300 p-2.5 rounded-xl bg-black/20 border border-white/5">
-                    <span>Stage 3: High-Res Render & Deliverables (40%)</span>
-                    <span className="font-bold text-emerald-400">${(formData.budget * 0.4).toFixed(2)}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* STEP 3: ASSETS & REFERENCES */}
-          {step === 3 && (
-            <div className="space-y-5 animate-fadeIn">
-              <label className="block text-xs font-space-grotesk font-bold text-slate-300 uppercase tracking-wider">
-                Upload Reference Files / Character Sheets
-              </label>
-              <div className="group cursor-pointer rounded-3xl border-2 border-dashed border-white/20 bg-white/5 p-8 text-center transition-all hover:border-[#A7ACD9]/60">
-                <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#A7ACD9]/15 text-[#A7ACD9] transition-transform group-hover:scale-110">
-                  <Upload className="w-6 h-6" />
-                </div>
-                <p className="text-sm font-semibold text-white">Click or Drag & Drop reference images</p>
-                <p className="text-xs text-slate-400 mt-1">PNG, JPG, PSD up to 50MB per file</p>
-              </div>
-
-            </div>
-          )}
-
-          {/* STEP 4: REVIEW & SUBMIT */}
-          {step === 4 && (
-            <div className="space-y-6 animate-fadeIn">
-              <div className="space-y-4 rounded-2xl bg-white/[0.04] p-5">
-                <div className="flex items-center justify-between border-b border-white/10 pb-4">
-                  <div>
-                    <h3 className="text-base font-bold text-white">{formData.title || 'Untitled Request'}</h3>
-                    <p className="text-xs text-slate-400">{formData.category} • {formData.usageType} Use</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-xs text-slate-400">Total Escrow Budget</p>
-                    <p className="text-xl font-bold font-space-grotesk text-emerald-400">${formData.budget} USD</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3 text-xs text-slate-300">
-                  <ShieldCheck className="w-5 h-5 shrink-0 text-[#A7ACD9]" />
-                  <span>100% Escrow Protection: Funds will be safely locked in DIL Escrow Vault until you approve each milestone.</span>
-                </div>
-
-                <label className="flex items-center gap-3 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={formData.agreedTerms}
-                    onChange={(e) => setFormData({ ...formData, agreedTerms: e.target.checked })}
-                    className="h-4 w-4 rounded border-white/20 bg-white/10 text-[#A7ACD9] focus:ring-[#A7ACD9]"
-                  />
-                  <span className="text-xs text-slate-300">
-                    I agree to the DIL Artist Commission Terms & Escrow Guarantee Policy.
-                  </span>
-                </label>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Modal Footer Controls */}
-        <div className="flex items-center justify-between border-t border-white/10 bg-[#1F2335]/70 px-8 py-5">
-          <button
-            type="button"
-            onClick={handlePrev}
-            disabled={step === 1}
-            className={`px-5 py-2.5 rounded-xl text-xs font-sora font-semibold flex items-center gap-2 border transition-all ${
-              step === 1
-                ? 'opacity-40 border-white/5 text-slate-500 cursor-not-allowed'
-                : 'border-white/10 bg-white/5 text-white hover:bg-white/10'
-            }`}
-          >
-            <ArrowLeft className="w-4 h-4" /> Previous
-          </button>
-
-          {step < 4 ? (
-            <button
-              type="button"
-              onClick={handleNext}
-              className="commission-primary flex items-center gap-2 rounded-xl px-6 py-2.5 text-xs font-sora font-semibold transition-all hover:scale-[1.02] active:scale-[0.98]"
-            >
-              Next Step <ArrowRight className="w-4 h-4" />
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={handleSubmit}
-              disabled={!creatorId || !formData.agreedTerms || isSubmitting}
-              className={`px-6 py-2.5 rounded-xl text-xs font-sora font-semibold flex items-center gap-2 transition-all ${
-                creatorId && formData.agreedTerms && !isSubmitting
-                  ? 'commission-primary hover:scale-[1.02]'
-                  : 'bg-white/10 text-slate-500 cursor-not-allowed'
-              }`}
-            >
-              <CheckCircle2 className="w-4 h-4" /> {!creatorId ? 'Select a creator first' : isSubmitting ? 'Submitting...' : 'Submit & Deposit Escrow'}
-            </button>
-          )}
-        </div>
-      </div>
+  return <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-3 sm:p-4" onMouseDown={event => { if (event.target === event.currentTarget && !busy) onClose(); }}>
+    <div role="dialog" aria-modal="true" aria-labelledby="commission-modal-title" className="flex max-h-[92vh] w-full max-w-3xl flex-col overflow-hidden rounded-[28px] border border-white/10 bg-[#141722] shadow-2xl shadow-black/30">
+      <header className="flex items-start justify-between gap-4 border-b border-white/10 bg-[#1F2335]/70 px-5 py-5 sm:px-8">
+        <div><p className="text-[10px] font-bold uppercase tracking-widest text-[#A7ACD9]">COMMISSION REQUEST</p><h2 id="commission-modal-title" className="mt-1 font-h1 text-xl font-bold text-white">Đặt vẽ với {creatorName}</h2><p className="mt-1 text-xs text-[#8A8FA9]">Creator xác nhận trước; Client ký quỹ sau khi thống nhất giá.</p></div>
+        <button type="button" onClick={onClose} disabled={busy} aria-label="Đóng form Commission" className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5 text-slate-300 hover:text-white disabled:opacity-50"><X className="h-4 w-4" /></button>
+      </header>
+      <form onSubmit={handleSubmit(submit)} className="min-h-0 flex-1 space-y-6 overflow-y-auto p-5 sm:p-8">
+        <div className="space-y-2"><label className={label} htmlFor="commission-title">PROJECT TITLE</label><input id="commission-title" className={field} placeholder="Ví dụ: Minh họa nhân vật" {...register('title')} />{errors.title && <small className="text-red-300">{errors.title.message}</small>}</div>
+        <div className="space-y-2"><label className={label} htmlFor="commission-deadline">DELIVERY TARGET</label><input id="commission-deadline" type="date" className={field} {...register('deadlineAt')} /></div>
+        <div className="space-y-2"><label className={label} htmlFor="commission-brief">DETAILED BRIEF</label><textarea id="commission-brief" rows={4} className={field} placeholder="Mô tả phong cách, kích thước và yêu cầu…" {...register('description')} />{errors.description && <small className="text-red-300">{errors.description.message}</small>}</div>
+        <fieldset className="space-y-3 border-t border-white/10 pt-5"><legend className="font-h1 text-sm font-bold text-white">CREATOR RATE CARD</legend><p className="text-xs text-[#8A8FA9]">Chọn gói Creator đã cấu hình. Giá và milestone do Creator quyết định.</p>{loadingPackages ? <p className="text-xs text-slate-400">Đang tải bảng giá…</p> : packages.length === 0 ? <p className="text-xs text-amber-200">Creator chưa cấu hình bảng giá nên chưa thể nhận yêu cầu mới.</p> : packages.map(item => <label key={item.id} className={`block cursor-pointer rounded-xl border p-4 text-xs ${selectedPackageId === item.id ? 'border-[#A7ACD9] bg-[#A7ACD9]/10' : 'border-white/10 bg-white/5'}`}><span className="flex items-center gap-3"><input type="radio" name="rate-package" checked={selectedPackageId === item.id} onChange={() => setSelectedPackageId(item.id)} /><strong className="text-white">{item.name}</strong><span className="ml-auto font-bold text-[#C5C9F8]">{money(item.price)}</span></span>{item.description && <span className="mt-2 block text-slate-400">{item.description}</span>}</label>)}{selectedPackage && <div className="rounded-xl border border-white/10 bg-black/20 p-4"><h3 className="text-xs font-bold text-white">Milestone plan</h3><ol className="mt-3 space-y-2">{selectedPackage.milestones.map(stage => <li key={stage.sequence} className="flex justify-between gap-3 text-xs text-slate-300"><span>{stage.sequence}. {stage.title}</span><span>{money(stage.price)}</span></li>)}</ol><p className="mt-3 text-xs text-[#8A8FA9]">File cuối được bàn giao riêng sau các bản nháp.</p></div>}</fieldset>
+        {error && <p role="alert" className="rounded-xl border border-red-400/30 bg-red-400/10 px-4 py-3 text-xs text-red-200">{error}</p>}
+        <div className="flex justify-end border-t border-white/10 pt-5"><button disabled={busy || !selectedPackage} className="rounded-xl bg-white px-8 py-3.5 text-xs font-extrabold text-[#0d0e15] shadow-xl transition-all hover:bg-[#C5C9F8] disabled:opacity-50">{busy ? 'Đang gửi…' : 'Gửi yêu cầu'}</button></div>
+      </form>
     </div>
-  );
+  </div>;
 }

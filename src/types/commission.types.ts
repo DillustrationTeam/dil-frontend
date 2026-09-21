@@ -1,10 +1,7 @@
 export type MilestoneType = 'Sketch' | 'Lineart' | 'Color' | 'Final';
-export type MilestoneStatus = 'Pending' | 'Active' | 'UnderReview' | 'Approved' | 'Rejected';
+export type MilestoneStatus = 'Pending' | 'Submitted' | 'RevisionRequested' | 'Approved';
 export type CommissionStatus =
-  | 'Pending'
   | 'PendingAcceptance'
-  | 'Accepted'
-  | 'AwaitingEscrowDeposit'
   | 'InProgress'
   | 'Negotiating'
   | 'SubmittedFinal'
@@ -21,9 +18,12 @@ export interface Milestone {
   wipPreviewUrl?: string | null;
   watermarkedUrl?: string | null;
   finalDeliverableUrl?: string | null;
+  hasWip?: boolean;
+  hasFinal?: boolean;
   submittedAt?: string | null;
   approvedAt?: string | null;
   revisionCount?: number;
+  revisionFeedback?: string | null;
   price: number;
 }
 
@@ -56,9 +56,8 @@ export interface RespondToCommissionPayload {
 
 export interface CreateCommissionPayload {
   creatorId: string;
+  packageId: string;
   title: string;
   description: string;
   deadlineAt?: string;
-  totalPrice: number;
-  milestones: { sequence: number; title: string; price: number }[];
 }

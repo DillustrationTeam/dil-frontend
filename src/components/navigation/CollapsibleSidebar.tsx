@@ -6,63 +6,49 @@ import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard,
   FolderKanban,
-  MessageSquare,
   Wallet,
-  Star,
-  Settings,
   ChevronLeft,
   ChevronRight,
-  PlusCircle,
   Clock,
   CheckCircle,
-  FileText,
-  UserCheck,
+  ListChecks,
 } from 'lucide-react';
 
 interface SidebarItem {
   label: string;
   href: string;
   icon: React.ElementType;
-  badge?: string;
 }
 
 interface CollapsibleSidebarProps {
   isCollapsed: boolean;
   onToggleCollapse: () => void;
   role?: 'client' | 'creator';
-  onOpenCreateModal?: () => void;
 }
 
 const CLIENT_NAV_ITEMS: SidebarItem[] = [
-  { label: 'All Commissions', href: '/client/commissions', icon: FolderKanban, badge: '5' },
-  { label: 'Active Workrooms', href: '/workroom/1', icon: LayoutDashboard, badge: '2' },
-  { label: 'Messages & Briefs', href: '/client/messages', icon: MessageSquare },
-  { label: 'Escrow & Payments', href: '/client/payments', icon: Wallet },
-  { label: 'Completed & Reviews', href: '/client/reviews', icon: Star },
-  { label: 'Account Settings', href: '/settings', icon: Settings },
+  { label: 'All Commissions', href: '/client/commissions', icon: FolderKanban },
+  { label: 'Wallet & Escrow', href: '/wallet', icon: Wallet },
 ];
 
 const CREATOR_NAV_ITEMS: SidebarItem[] = [
   { label: 'Studio Overview', href: '/creator/commissions', icon: LayoutDashboard },
-  { label: 'Incoming Requests', href: '/creator/requests', icon: Clock, badge: '3' },
-  { label: 'Active Workrooms', href: '/workroom/1', icon: FolderKanban, badge: '4' },
-  { label: 'Deliverables & Files', href: '/creator/deliverables', icon: FileText },
-  { label: 'Wallet & Payouts', href: '/creator/wallet', icon: Wallet },
-  { label: 'Client Reviews', href: '/creator/reviews', icon: UserCheck },
+  { label: 'Incoming Requests', href: '/creator/requests', icon: Clock },
+  { label: 'Rate Card', href: '/creator/rate-card', icon: ListChecks },
+  { label: 'Wallet', href: '/wallet', icon: Wallet },
 ];
 
 export default function CollapsibleSidebar({
   isCollapsed,
   onToggleCollapse,
   role = 'client',
-  onOpenCreateModal,
 }: CollapsibleSidebarProps) {
   const pathname = usePathname();
   const navItems = role === 'client' ? CLIENT_NAV_ITEMS : CREATOR_NAV_ITEMS;
 
   return (
     <aside
-      className={`relative sticky top-16 h-[calc(100vh-4rem)] bg-[#1F2335]/90 backdrop-blur-[20px] border-r border-white/10 transition-all duration-300 flex flex-col justify-between z-30 ${isCollapsed ? 'w-20' : 'w-64'
+      className={`relative sticky top-16 h-[calc(100vh-4rem)] bg-[#1F2335]/90 backdrop-blur-[20px] border-r border-white/10 transition-all duration-300 hidden md:flex flex-col justify-between z-30 shrink-0 ${isCollapsed ? 'w-20' : 'w-64'
         }`}
     >
       {/* Toggle Collapse Button */}
@@ -80,32 +66,6 @@ export default function CollapsibleSidebar({
 
       {/* Top Section: Navigation Links */}
       <div className="p-3 space-y-4 overflow-y-auto">
-        {/* Create Action Button inside Sidebar if expanded
-        {!isCollapsed && onOpenCreateModal && (
-          <div className="mb-2">
-            <button
-              onClick={onOpenCreateModal}
-              className="w-full py-3 px-4 bg-[#A7ACD9] hover:opacity-95 text-[#1F2335] font-sora font-semibold text-xs rounded-2xl shadow-lg shadow-[#A7ACD9]/25 flex items-center justify-center gap-2 transition-all hover:scale-[1.02]"
-            >
-              <PlusCircle className="w-4 h-4" />
-              <span>Create Request</span>
-            </button>
-          </div>
-        )} */}
-
-        {/* Collapsed quick create icon */}
-        {isCollapsed && onOpenCreateModal && (
-          <div className="flex justify-center mb-2">
-            <button
-              onClick={onOpenCreateModal}
-              className="w-11 h-11 rounded-2xl bg-[#A7ACD9] text-[#1F2335] flex items-center justify-center shadow-lg shadow-[#A7ACD9]/30 hover:scale-105 transition-all"
-              title="Create New Request"
-            >
-              <PlusCircle className="w-5 h-5" />
-            </button>
-          </div>
-        )}
-
         {/* Section Header */}
         <div className="px-3 pt-2">
           {!isCollapsed ? (
@@ -142,17 +102,6 @@ export default function CollapsibleSidebar({
                   <span className="truncate flex-1">{item.label}</span>
                 )}
 
-                {/* Badge */}
-                {item.badge && (
-                  <span
-                    className={`px-2 py-0.5 text-[10px] font-bold rounded-full border ${isActive
-                        ? 'bg-[#A7ACD9] text-[#1F2335] border-[#A7ACD9]/50'
-                        : 'bg-white/10 text-slate-300 border-white/10'
-                      } ${isCollapsed ? 'absolute -top-1 -right-1 px-1.5 py-0.2 text-[9px]' : ''}`}
-                  >
-                    {item.badge}
-                  </span>
-                )}
               </Link>
             );
           })}
@@ -170,8 +119,8 @@ export default function CollapsibleSidebar({
           </div>
           {!isCollapsed && (
             <div className="overflow-hidden">
-              <p className="text-[11px] font-bold text-white truncate">Escrow Vault Active</p>
-              <p className="text-[10px] text-emerald-400 truncate">100% Protection</p>
+              <p className="text-[11px] font-bold text-white truncate">Wallet escrow</p>
+              <p className="text-[10px] text-emerald-400 truncate">Released per milestone</p>
             </div>
           )}
         </div>

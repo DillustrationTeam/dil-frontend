@@ -6,7 +6,6 @@ import {
   Sparkles,
   Search,
   Bell,
-  PlusCircle,
   ChevronDown,
   User,
   Settings,
@@ -21,14 +20,12 @@ import { useRouter } from 'next/navigation';
 interface TopNavbarProps {
   currentRole?: 'client' | 'creator';
   onRoleChange?: (role: 'client' | 'creator') => void;
-  onOpenCreateModal?: () => void;
   onToggleSidebar?: () => void;
 }
 
 export default function TopNavbar({
   currentRole = 'client',
   onRoleChange,
-  onOpenCreateModal,
 }: TopNavbarProps) {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -77,7 +74,7 @@ export default function TopNavbar({
       <div className="flex items-center gap-3.5">
         {/* Role Switcher Pill */}
         {isCreator && (
-          <div className="bg-[#161926] p-1 rounded-xl border border-white/10 flex items-center gap-1">
+          <div className="hidden sm:flex bg-[#161926] p-1 rounded-xl border border-white/10 items-center gap-1">
             <button
               onClick={() => onRoleChange && onRoleChange('client')}
               className={`px-3 py-1.5 rounded-lg text-xs font-sora font-medium flex items-center gap-1.5 transition-all ${currentRole === 'client'
@@ -99,17 +96,6 @@ export default function TopNavbar({
               Creator Studio
             </button>
           </div>
-        )}
-
-        {/* Quick Create Commission Button */}
-        {onOpenCreateModal && (
-          <button
-            onClick={onOpenCreateModal}
-            className="hidden items-center gap-2 rounded-xl border border-[#A7ACD9]/40 bg-[#A7ACD9]/20 px-4 py-2 text-xs font-sora font-semibold text-white shadow-md shadow-[#A7ACD9]/10 transition-all hover:bg-[#A7ACD9]/30 hover:scale-[1.02] active:scale-[0.98] sm:flex"
-          >
-            <PlusCircle className="h-4 w-4 text-[#A7ACD9]" />
-            New Commission
-          </button>
         )}
 
         {/* Notifications */}

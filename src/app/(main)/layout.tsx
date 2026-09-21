@@ -1,17 +1,18 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import TopNavbar from '@/components/navigation/TopNavbar';
 import CollapsibleSidebar from '@/components/navigation/CollapsibleSidebar';
-import CreateCommissionModal from '@/components/modals/CreateCommissionModal';
+import { useAuthStore } from '@/store/use-auth-store';
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [currentRole, setCurrentRole] = useState<'client' | 'creator'>('client');
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
+  const isCreator = useAuthStore(state => state.roles.some(role => role.toLowerCase() === 'creator'));
   const activeRole = pathname?.startsWith('/creator') ? 'creator' : currentRole;
 
   const handleRoleChange = (role: 'client' | 'creator') => {
@@ -25,8 +26,13 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
       <TopNavbar
         currentRole={activeRole}
         onRoleChange={handleRoleChange}
-        onOpenCreateModal={() => setIsCreateModalOpen(true)}
       />
+
+      <nav aria-label="Mobile navigation" className="flex gap-2 overflow-x-auto border-b border-white/10 px-4 py-2 text-xs md:hidden">
+        <Link href="/client/commissions" className="shrink-0 rounded-lg bg-white/5 px-3 py-2">My commissions</Link>
+        {isCreator && <Link href="/creator/commissions" className="shrink-0 rounded-lg bg-white/5 px-3 py-2">Creator studio</Link>}
+        <Link href="/wallet" className="shrink-0 rounded-lg bg-white/5 px-3 py-2">Wallet</Link>
+      </nav>
 
       {/* Main Body with Sidebar + Content */}
       <div className="flex-1 flex w-full relative">
@@ -36,7 +42,6 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           isCollapsed={isSidebarCollapsed}
           onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
           role={activeRole}
-          onOpenCreateModal={() => setIsCreateModalOpen(true)}
         />
 
         {/* Dynamic Page Content */}
@@ -45,14 +50,6 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         </main>
       </div>
 
-      {/* Global Commission Creation Pop-up Modal */}
-      <CreateCommissionModal
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-        onSubmitSuccess={() => {
-          console.log('Commission created successfully');
-        }}
-      />
     </div>
   );
 }

@@ -5,7 +5,6 @@ import {
   CheckCircle2,
   ChevronRight,
   LoaderCircle,
-  MessageCircle,
   Send,
   X,
 } from 'lucide-react';
@@ -13,7 +12,7 @@ import { commissionService } from '@/services/commission.service';
 import { Commission, RespondToCommissionPayload } from '@/types/commission.types';
 
 const formatMoney = (value?: number) =>
-  new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value ?? 0);
+  new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value ?? 0);
 
 const formatDate = (value?: string | null) => {
   if (!value) return 'No delivery date set';
@@ -162,7 +161,7 @@ export default function CreatorRequestsPage() {
               <form onSubmit={(event) => { event.preventDefault(); const price = Number(counterOffer); if (Number.isFinite(price) && price > 0) void respond({ action: 'Negotiate', negotiatePrice: price }); }} className="mb-4 rounded-2xl border border-[#A7ACD9]/30 bg-[#A7ACD9]/10 p-4">
                 <label htmlFor="counter-offer" className="text-sm font-bold text-white">Send a counter-offer</label>
                 <div className="mt-3 flex flex-col gap-2 sm:flex-row">
-                  <input id="counter-offer" type="number" min="1" step="0.01" required value={counterOffer} onChange={(event) => setCounterOffer(event.target.value)} placeholder="Proposed price (USD)" className="min-w-0 flex-1 rounded-xl border border-white/15 bg-[#10131f] px-3 py-2.5 text-sm text-white outline-none focus:border-[#A7ACD9]" />
+                  <input id="counter-offer" type="number" min="1" step="1" required value={counterOffer} onChange={(event) => setCounterOffer(event.target.value)} placeholder="Giá đề xuất (VND)" className="min-w-0 flex-1 rounded-xl border border-white/15 bg-[#10131f] px-3 py-2.5 text-sm text-white outline-none focus:border-[#A7ACD9]" />
                   <button disabled={submitting} className="rounded-xl bg-[#A7ACD9] px-4 py-2.5 text-xs font-bold text-[#1F2335] disabled:opacity-60"><Send className="mr-1 inline h-3.5 w-3.5" /> Send offer</button>
                 </div>
               </form>

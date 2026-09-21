@@ -55,6 +55,23 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
 }
 
+.commission-primary {
+  background: #A7ACD9;
+  color: #1F2335;
+  font-weight: 700;
+  transition: background-color 150ms ease, box-shadow 150ms ease;
+}
+
+.commission-primary:hover:not(:disabled) {
+  background: #c2c7f6;
+  box-shadow: 0 0 18px rgba(167, 172, 217, 0.25);
+}
+
+.commission-primary:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
 .floating-bg {
   filter: blur(80px);
   z-index: -1;

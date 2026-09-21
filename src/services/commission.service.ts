@@ -6,6 +6,18 @@ import {
   RespondToCommissionPayload,
 } from '@/types/commission.types';
 
+async function getAll(role: 'Client' | 'Creator', status?: string): Promise<Commission[]> {
+  const items: Commission[] = [];
+  for (let page = 1; ; page++) {
+    const response = await apiClient.get<ApiResponse<Commission[]>>('/commissions', {
+      params: { role, status, page, pageSize: 100 },
+    });
+    items.push(...(response.data.data ?? []));
+    const totalPages = Number(response.data.meta?.totalPages ?? page);
+    if (page >= totalPages) return items;
+  }
+}
+
 export const commissionService = {
   create: async (data: CreateCommissionPayload) => {
     const res = await apiClient.post<ApiResponse<Commission>>('/commissions', data);
@@ -17,41 +29,52 @@ export const commissionService = {
     return res.data.data as Commission;
   },
     
-  getByClient: async () => {
-    const res = await apiClient.get<ApiResponse<Commission[]>>('/commissions', {
-      params: { role: 'Client', pageSize: 50 },
-    });
-    return res.data.data || [];
-  },
+  getByClient: async () => getAll('Client'),
     
-  getByCreator: async () => {
-    const res = await apiClient.get<ApiResponse<Commission[]>>('/commissions', {
-      params: { role: 'Creator', pageSize: 50 },
-    });
-    return res.data.data || [];
-  },
+  getByCreator: async () => getAll('Creator'),
 
-  getCreatorRequests: async () => {
-    const res = await apiClient.get<ApiResponse<Commission[]>>('/commissions', {
-      params: { role: 'Creator', status: 'PendingAcceptance', pageSize: 50 },
-    });
-    return res.data.data || [];
-  },
+  getCreatorRequests: async () => getAll('Creator', 'PendingAcceptance'),
 
   respond: async (id: string, data: RespondToCommissionPayload) => {
     const res = await apiClient.patch<ApiResponse<Commission>>(`/commissions/${id}/respond`, data);
     return res.data.data as Commission;
   },
 
-  depositEscrow: async (id: string, paymentMethod: string) => {
+  respondToCounteroffer: async (id: string, accept: boolean) => {
+    const res = await apiClient.patch<ApiResponse<Commission>>(`/commissions/${id}/counteroffer`, { accept });
+    return res.data.data as Commission;
+  },
+
+  depositEscrow: async (id: string) => {
     const res = await apiClient.post<ApiResponse<Commission>>(`/commissions/${id}/escrow/deposit`, undefined, {
-      params: { paymentMethod },
+      params: { paymentMethod: 'Wallet' },
     });
     return res.data.data as Commission;
   },
 
-  submitMilestone: async (id: string, milestoneId: string, url: string) => {
-    const res = await apiClient.post<ApiResponse<unknown>>(`/commissions/${id}/milestones/${milestoneId}/submit`, { deliverableUrl: url });
+  submitMilestone: async (id: string, milestoneId: string, file?: File, sourceUrl?: string) => {
+    const body = new FormData();
+    if (file) body.append('file', file);
+    if (sourceUrl) body.append('sourceUrl', sourceUrl);
+    const res = await apiClient.post<ApiResponse<unknown>>(`/commissions/${id}/milestones/${milestoneId}/submit`, body);
     return res.data.data;
-  }
+  },
+  approveMilestone: async (id: string, milestoneId: string) => apiClient.patch(`/commissions/${id}/milestones/${milestoneId}/approve`),
+  requestRevision: async (id: string, milestoneId: string, feedbackComment: string) =>
+    apiClient.post(`/commissions/${id}/milestones/${milestoneId}/request-revision`, { feedbackComment }),
+  deliverFinal: async (id: string, file?: File, sourceUrl?: string) => {
+    const body = new FormData();
+    if (file) body.append('file', file);
+    if (sourceUrl) body.append('sourceUrl', sourceUrl);
+    return apiClient.post(`/commissions/${id}/deliver`, body);
+  },
+  complete: async (id: string) => apiClient.patch(`/commissions/${id}/complete`),
+  getWipPreviewUrl: async (id: string, milestoneId: string) => {
+    const res = await apiClient.get<ApiResponse<string>>(`/commissions/${id}/milestones/${milestoneId}/preview`);
+    return res.data.data as string;
+  },
+  getFinalDownloadUrl: async (id: string) => {
+    const res = await apiClient.get<ApiResponse<string>>(`/commissions/${id}/final/download`);
+    return res.data.data as string;
+  },
 };
