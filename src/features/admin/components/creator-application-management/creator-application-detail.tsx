@@ -1,5 +1,4 @@
-'use client';
-
+import Image from 'next/image';
 import { CreatorApplicationDetailDto } from '@/features/admin/types/admin.types';
 
 export interface CreatorApplicationDetailProps {
@@ -66,9 +65,12 @@ export function CreatorApplicationDetail({ application }: CreatorApplicationDeta
           </span>
           {application.idCardUrl ? (
             <div className="overflow-hidden rounded-xl border border-white/10 bg-black/20">
-              <img
+              <Image
                 src={application.idCardUrl}
                 alt="ID Card"
+                width={400}
+                height={192}
+                unoptimized
                 className="h-48 w-full object-cover transition-transform hover:scale-105"
               />
             </div>
@@ -85,9 +87,12 @@ export function CreatorApplicationDetail({ application }: CreatorApplicationDeta
           </span>
           {application.portfolioUrl ? (
             <div className="overflow-hidden rounded-xl border border-white/10 bg-black/20">
-              <img
+              <Image
                 src={application.portfolioUrl}
                 alt="Portfolio"
+                width={400}
+                height={192}
+                unoptimized
                 className="h-48 w-full object-cover transition-transform hover:scale-105"
               />
             </div>

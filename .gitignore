@@ -20,6 +20,7 @@
 .env*
 .vercel
 *.tsbuildinfo
+.eslintcache
 next-env.d.ts
 
 # raw design assets, zips & temporary skills

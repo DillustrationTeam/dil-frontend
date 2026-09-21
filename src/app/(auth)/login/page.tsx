@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -74,9 +75,12 @@ export default function LoginPage() {
           <header className="mb-10 text-center">
             <div className="flex justify-center mb-6">
               <Link href="/">
-                <img
+                <Image
                   src="/weblogo.png"
                   alt="dillustration"
+                  width={220}
+                  height={112}
+                  priority
                   className="h-24 md:h-28 w-auto object-contain drop-shadow-[0_0_20px_rgba(194,199,246,0.4)] hover:scale-105 transition-transform"
                 />
               </Link>

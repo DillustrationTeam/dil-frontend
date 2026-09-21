@@ -2,7 +2,8 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Menu, X, ArrowUpRight } from 'lucide-react';
+import Image from 'next/image';
+import { Menu, X } from 'lucide-react';
 
 export interface AdminTopNavbarProps {
   adminBadgeText?: string;
@@ -46,9 +47,12 @@ export function AdminTopNavbar({
           )}
 
           <Link href="/" className="flex items-center gap-3 group outline-none">
-            <img
+            <Image
               src="/weblogo.png"
               alt="dillustration"
+              width={140}
+              height={44}
+              priority
               className="h-9 md:h-11 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
             />
           </Link>

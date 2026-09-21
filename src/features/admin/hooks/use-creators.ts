@@ -15,10 +15,9 @@ export function useCreators() {
     });
   };
 
+  const { page, size } = state.applications.data;
+
   const getCreatorApplications = useCallback(async () => {
-    const {
-      data: { page, size },
-    } = state.applications;
     const params = { page, size };
 
     dispatch({ type: 'GET_APPLICATIONS_REQUEST' });
@@ -37,7 +36,7 @@ export function useCreators() {
       });
       return false;
     }
-  }, [state.applications.data.page, state.applications.data.size]);
+  }, [page, size]);
 
   const getCreatorApplicationById = useCallback(async (id: string) => {
     dispatch({ type: 'GET_APPLICATION_REQUEST' });

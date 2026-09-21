@@ -1,5 +1,4 @@
-export * from './dashboard/overview';
-export * from './dashboard/overview-card';
+export * from './dashboard';
 export * from './creator-application-management';
 export * from './user-management';
 export * from './vertical-navbar';
