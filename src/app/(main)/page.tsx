@@ -75,9 +75,6 @@ export default function MarketplaceHomePage() {
                 alt="dillustration"
                 width={120}
                 height={56}
-              <img
-                src="/weblogo.png"
-                alt="dillustration"
                 className="h-14 md:h-16 w-auto object-contain hover:scale-105 transition-transform"
               />
             </Link>
@@ -139,6 +136,26 @@ export default function MarketplaceHomePage() {
                         <p className="text-xs font-bold text-white">{user.fullName}</p>
                         <p className="text-[10px] text-[#A7ACD9]">{user.email}</p>
                       </div>
+                      {!roles.includes('Creator') && (
+                        <Link
+                          href="/become-creator"
+                          onClick={() => setIsMenuOpen(false)}
+                          className="flex items-center space-x-2 rounded-xl px-3 py-2 text-xs text-[#A7ACD9] transition-colors hover:bg-white/10"
+                        >
+                          <span className="material-symbols-outlined text-sm">palette</span>
+                          <span>Trở thành Creator</span>
+                        </Link>
+                      )}
+                      {(roles.includes('Administrator') || roles.includes('Moderator')) && (
+                        <Link
+                          href="/admin/creator-verifications"
+                          onClick={() => setIsMenuOpen(false)}
+                          className="flex items-center space-x-2 rounded-xl px-3 py-2 text-xs text-red-300 transition-colors hover:bg-white/10"
+                        >
+                          <span className="material-symbols-outlined text-sm">how_to_reg</span>
+                          <span>Duyệt đơn Creator</span>
+                        </Link>
+                      )}
                       <button
                         onClick={handleLogout}
                         className="w-full text-left px-3 py-2 text-xs text-red-400 hover:bg-white/10 rounded-xl transition-colors flex items-center space-x-2 cursor-pointer"
@@ -236,10 +253,6 @@ export default function MarketplaceHomePage() {
                   src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1200&auto=format&fit=crop"
                   fill
                   unoptimized
-                <img
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                  alt="Digital Etherealism Landscape"
-                  src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1200&auto=format&fit=crop"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#131316]/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col justify-end p-8">
                   <div className="space-y-1">
@@ -308,6 +321,7 @@ export default function MarketplaceHomePage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
+            {/* Main Bento Item */}
             <div className="md:col-span-8 group relative aspect-[16/9] overflow-hidden rounded-[28px] glass-container border border-white/10 periwinkle-glow cursor-pointer">
               <Image
                 className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
@@ -315,12 +329,6 @@ export default function MarketplaceHomePage() {
                 src="https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?q=80&w=1200&auto=format&fit=crop"
                 fill
                 unoptimized
-            {/* Main Bento Item */}
-            <div className="md:col-span-8 group relative aspect-[16/9] overflow-hidden rounded-[28px] glass-container border border-white/10 periwinkle-glow cursor-pointer">
-              <img
-                className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
-                alt="Neural Horizons Collection"
-                src="https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?q=80&w=1200&auto=format&fit=crop"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#131316]/90 via-[#131316]/20 to-transparent p-10 flex flex-col justify-end">
                 <span className="text-xs text-[#A7ACD9] uppercase tracking-widest font-semibold mb-2">
@@ -333,6 +341,7 @@ export default function MarketplaceHomePage() {
               </div>
             </div>
 
+            {/* Secondary Bento Items */}
             <div className="md:col-span-4 flex flex-col gap-8">
               <div className="h-1/2 group relative overflow-hidden rounded-[28px] glass-container border border-white/10 periwinkle-glow cursor-pointer min-h-[200px]">
                 <Image
@@ -341,13 +350,6 @@ export default function MarketplaceHomePage() {
                   src="https://images.unsplash.com/photo-1579783902614-a3fb3927b675?q=80&w=800&auto=format&fit=crop"
                   fill
                   unoptimized
-            {/* Secondary Bento Items */}
-            <div className="md:col-span-4 flex flex-col gap-8">
-              <div className="h-1/2 group relative overflow-hidden rounded-[28px] glass-container border border-white/10 periwinkle-glow cursor-pointer min-h-[200px]">
-                <img
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                  alt="Crystal Flow Collection"
-                  src="https://images.unsplash.com/photo-1579783902614-a3fb3927b675?q=80&w=800&auto=format&fit=crop"
                 />
                 <div className="absolute inset-0 bg-[#131316]/50 p-6 flex flex-col justify-end">
                   <h4 className="font-h1 text-xl font-bold text-white">Crystal Flow</h4>
@@ -361,10 +363,6 @@ export default function MarketplaceHomePage() {
                   src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800&auto=format&fit=crop"
                   fill
                   unoptimized
-                <img
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                  alt="Viscosity Genesis Collection"
-                  src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800&auto=format&fit=crop"
                 />
                 <div className="absolute inset-0 bg-[#131316]/50 p-6 flex flex-col justify-end">
                   <h4 className="font-h1 text-xl font-bold text-white">Viscosity Genesis</h4>
@@ -455,9 +453,6 @@ export default function MarketplaceHomePage() {
                 alt="dillustration"
                 width={100}
                 height={48}
-              <img
-                src="/weblogo.png"
-                alt="dillustration"
                 className="h-12 md:h-14 w-auto object-contain hover:opacity-80 transition-opacity"
               />
             </Link>

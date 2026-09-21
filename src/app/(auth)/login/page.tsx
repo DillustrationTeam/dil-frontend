@@ -19,6 +19,14 @@ const loginSchema = z.object({
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
+const seedAccounts = [
+  { label: 'Client', email: 'client1@seed.dillustration.art' },
+  { label: 'Creator', email: 'artist1@seed.dillustration.art' },
+  { label: 'Moderator', email: 'moderator@seed.dillustration.art' },
+  { label: 'Admin', email: 'admin@seed.dillustration.art' },
+] as const;
+const SEED_PASSWORD = 'Seed@123456';
+
 export default function LoginPage() {
   const router = useRouter();
   const setAuth = useAuthStore((state) => state.setAuth);
@@ -28,10 +36,16 @@ export default function LoginPage() {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
   });
+
+  const fillSeedAccount = (email: string) => {
+    setValue('email', email, { shouldValidate: true });
+    setValue('password', SEED_PASSWORD, { shouldValidate: true });
+  };
 
   const onSubmit = async (data: LoginFormValues) => {
     setIsLoading(true);
@@ -80,9 +94,6 @@ export default function LoginPage() {
                   alt="dillustration"
                   width={180}
                   height={90}
-                <img
-                  src="/weblogo.png"
-                  alt="dillustration"
                   className="h-24 md:h-28 w-auto object-contain drop-shadow-[0_0_20px_rgba(194,199,246,0.4)] hover:scale-105 transition-transform"
                 />
               </Link>
@@ -91,6 +102,27 @@ export default function LoginPage() {
               Enter the digital gallery of etherealism.
             </p>
           </header>
+
+          {/* Dev-only: điền nhanh tài khoản seed theo role */}
+          {process.env.NODE_ENV !== 'production' && (
+            <div className="mb-8 space-y-2">
+              <p className="text-[10px] uppercase tracking-widest text-[#919099] text-center">
+                Dev quick login
+              </p>
+              <div className="flex flex-wrap justify-center gap-2">
+                {seedAccounts.map((account) => (
+                  <button
+                    key={account.email}
+                    type="button"
+                    onClick={() => fillSeedAccount(account.email)}
+                    className="rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5 text-xs font-medium text-[#A7ACD9] hover:bg-white/10 transition-colors cursor-pointer"
+                  >
+                    {account.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Login Form */}
           <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
