@@ -30,7 +30,22 @@ export const notificationTypeLabels: Record<string, string> = {
   PaymentSucceeded: 'Nạp tiền thành công',
   PayoutStatusChanged: 'Trạng thái rút tiền',
   UserSanctionAlert: 'Chế tài tài khoản',
+  PromotionAnnouncement: 'Khuyến mãi',
 };
 
 /** Danh sách loại hợp lệ, dùng cho bộ lọc và kiểm tra dữ liệu. */
 export const notificationTypes = Object.keys(notificationTypeLabels);
+
+/**
+ * Bốn tab phân loại của Notification Center (SCR-45).
+ * `id` khớp enum `NotificationCategory` ở backend; lọc ngay trong DB nên phân trang
+ * theo từng tab vẫn đúng (xem `GetMyNotificationsQuery`).
+ */
+export const notificationCategories = [
+  { id: 'Finance', label: 'Tài chính' },
+  { id: 'Order', label: 'Đơn hàng' },
+  { id: 'System', label: 'Hệ thống' },
+  { id: 'Promotion', label: 'Khuyến mãi' },
+] as const;
+
+export type NotificationCategoryId = (typeof notificationCategories)[number]['id'];

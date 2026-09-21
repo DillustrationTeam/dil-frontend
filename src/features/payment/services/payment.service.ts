@@ -1,7 +1,7 @@
 import { apiClient } from '@/lib/api-client';
 import type { ApiResponse } from '@/types/api.types';
 import { getWalletErrorMessage } from './wallet.service';
-import type { BankAccountDto, BankAccountRequest, PaymentOrderDto, PayoutDto, RevenueBreakdownDto, RevenuePointDto, RevenueSnapshotDto, RevenueSummaryDto, VoucherDetailDto, VoucherDto, VoucherRequest, VoucherValidationDto } from '../types/payment.types';
+import type { BankAccountDto, BankAccountRequest, PaymentOrderDto, PayoutDto, RevenueBreakdownDto, RevenuePointDto, RevenueSnapshotDto, RevenueSummaryDto, VoucherDetailDto, VoucherDto, VoucherRedeemedDto, VoucherRequest, VoucherValidationDto } from '../types/payment.types';
 
 export interface PaymentPage<T> { items: T[]; nextCursor: string | null }
 
@@ -37,6 +37,8 @@ export const paymentService = {
   saveVoucher: (values: VoucherRequest, id?: string) => call<VoucherDto>(id ? 'put' : 'post', id ? `/vouchers/${id}` : '/vouchers', values).then(r => r.data),
   deleteVoucher: (id: string) => call<{ message: string }>('delete', `/vouchers/${id}`).then(r => r.data),
   validateVoucher: (voucherCode: string, orderAmount: number, refType: string, refId?: string) => call<VoucherValidationDto>('post', '/vouchers/validate', { voucherCode, orderAmount, refType, refId }).then(r => r.data),
+  /** Ghi nhận ĐÃ DÙNG voucher — idempotent theo (refType, refId), gọi lại không tiêu thêm lượt. */
+  redeemVoucher: (voucherCode: string, refType: string, refId: string, orderAmount: number) => call<VoucherRedeemedDto>('post', '/vouchers/redeem', { voucherCode, refType, refId, orderAmount }).then(r => r.data),
   summary: (from: string, to: string, signal?: AbortSignal) => call<RevenueSummaryDto>('get', '/creator/revenue/summary', undefined, { from, to }, signal).then(r => r.data),
   timeseries: (from: string, to: string, granularity: string, signal?: AbortSignal) => call<RevenuePointDto[]>('get', '/creator/revenue/timeseries', undefined, { from, to, granularity }, signal).then(r => r.data),
   breakdown: (from: string, to: string, signal?: AbortSignal) => call<RevenueBreakdownDto[]>('get', '/creator/revenue/breakdown', undefined, { from, to, groupBy: 'source' }, signal).then(r => r.data),

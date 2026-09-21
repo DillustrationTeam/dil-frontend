@@ -3,8 +3,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ArrowRight, Bell, CheckCheck, CircleAlert, Clock, Gavel, Info, RefreshCw, ShieldAlert, Wallet } from 'lucide-react';
+import { ArrowRight, Bell, CheckCheck, CircleAlert, Clock, Gavel, Info, Megaphone, RefreshCw, ShieldAlert, Wallet } from 'lucide-react';
 import { notificationService } from '../services/notification.service';
+import { useNotificationHub } from '../hooks/use-notification-hub';
 import { notificationTypeLabels, type NotificationDto } from '../types/notification.types';
 
 function getIcon(type: string, size = 15) {
@@ -22,6 +23,8 @@ function getIcon(type: string, size = 15) {
       return <Wallet size={size} className="text-sky-400" />;
     case 'UserSanctionAlert':
       return <ShieldAlert size={size} className="text-red-400" />;
+    case 'PromotionAnnouncement':
+      return <Megaphone size={size} className="text-brand-periwinkle" />;
     default:
       return <Info size={size} className="text-outline" />;
   }
@@ -99,7 +102,7 @@ export function NotificationBell({
     setLoading(true);
     setError(null);
     try {
-      const res = await notificationService.list(undefined, undefined, undefined, previewLimit);
+      const res = await notificationService.list({ limit: previewLimit });
       setItems(res.items);
       setUnreadCount(res.unreadCount);
     } catch (err: unknown) {
@@ -109,7 +112,16 @@ export function NotificationBell({
     }
   }, [userId, previewLimit]);
 
-  // Badge làm mới mỗi 60 giây, và mỗi lần mở panel.
+  // Real-time (UC45): thông báo mới hiện ngay, không phải chờ nhịp polling 60 giây.
+  useNotificationHub((incoming) => {
+    setUnreadCount((count) => count + (incoming.isRead ? 0 : 1));
+    setItems((prev) => {
+      if (prev.some((n) => n.notificationId === incoming.notificationId)) return prev;
+      return [incoming, ...prev].slice(0, previewLimit);
+    });
+  });
+
+  // Badge làm mới mỗi 60 giây (lưới an toàn khi WebSocket bị chặn), và mỗi lần mở panel.
   useEffect(() => {
     refreshBadge();
     if (!userId) return;

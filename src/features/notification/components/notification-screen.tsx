@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Bell, Check, CheckCheck, CircleAlert, Clock, ExternalLink, Gavel, Info, RefreshCw, ShieldAlert, Wallet } from 'lucide-react';
+import { Bell, Check, CheckCheck, CircleAlert, Clock, ExternalLink, Gavel, Info, Megaphone, RefreshCw, ShieldAlert, Wallet } from 'lucide-react';
 import { notificationService } from '../services/notification.service';
-import { notificationTypeLabels, notificationTypes, type NotificationDto } from '../types/notification.types';
+import { useNotificationHub } from '../hooks/use-notification-hub';
+import { notificationCategories, notificationTypeLabels, type NotificationDto } from '../types/notification.types';
 
 function getIcon(type: string) {
   switch (type) {
@@ -22,6 +23,8 @@ function getIcon(type: string) {
       return <Wallet size={18} className="text-sky-400" />;
     case 'UserSanctionAlert':
       return <ShieldAlert size={18} className="text-red-400" />;
+    case 'PromotionAnnouncement':
+      return <Megaphone size={18} className="text-brand-periwinkle" />;
     default:
       return <Info size={18} className="text-outline" />;
   }
@@ -47,17 +50,21 @@ export function NotificationScreen({ userId }: { userId: string | null }) {
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [loadingMore, setLoadingMore] = useState(false);
 
-  // Bộ lọc: tab trạng thái đọc ('all' / 'unread') + loại thông báo theo enum backend
+  // Bộ lọc (SCR-45): tab phân loại (Tất cả + 4 nhóm) và công tắc "chỉ chưa đọc".
   const [activeTab, setActiveTab] = useState<string>('all');
-  const [activeType, setActiveType] = useState<string>('');
+  const [unreadOnly, setUnreadOnly] = useState(false);
 
   async function loadData(reset = true) {
     if (!userId) return;
     if (reset) setLoading(true);
     setError(null);
     try {
-      const isRead = activeTab === 'unread' ? false : undefined;
-      const res = await notificationService.list(isRead, activeType || undefined, reset ? undefined : nextCursor ?? undefined);
+      const isRead = unreadOnly ? false : undefined;
+      const res = await notificationService.list({
+        isRead,
+        category: activeTab === 'all' ? undefined : activeTab,
+        cursor: reset ? undefined : nextCursor ?? undefined,
+      });
 
       if (reset) {
         setNotifications(res.items);
@@ -74,9 +81,18 @@ export function NotificationScreen({ userId }: { userId: string | null }) {
     }
   }
 
+  // Badge và danh sách cập nhật tức thời qua SignalR (UC45); polling 60s ở chuông vẫn giữ làm lưới an toàn.
+  useNotificationHub((incoming) => {
+    setUnreadCount((count) => count + (incoming.isRead ? 0 : 1));
+    setNotifications((prev) => {
+      if (prev.some((n) => n.notificationId === incoming.notificationId)) return prev;
+      return [incoming, ...prev];
+    });
+  });
+
   useEffect(() => {
     loadData(true);
-  }, [activeTab, activeType, userId]);
+  }, [activeTab, unreadOnly, userId]);
 
   async function handleMarkRead(id: string) {
     try {
@@ -139,16 +155,14 @@ export function NotificationScreen({ userId }: { userId: string | null }) {
         </div>
       </div>
 
-      {/* Bộ lọc: trạng thái đọc + loại thông báo hợp lệ theo enum backend */}
+      {/* Tab phân loại (SCR-45): Tất cả + Tài chính / Đơn hàng / Hệ thống / Khuyến mãi */}
       <div className="glass-container mb-6 flex flex-wrap items-center gap-2 rounded-2xl border border-white/10 p-2 text-xs">
-        {[
-          { id: 'all', label: 'Tất cả' },
-          { id: 'unread', label: 'Chưa đọc' },
-        ].map((tab) => (
+        {[{ id: 'all', label: 'Tất cả' }, ...notificationCategories].map((tab) => (
           <button
             key={tab.id}
             type="button"
             onClick={() => setActiveTab(tab.id)}
+            aria-pressed={activeTab === tab.id}
             className={`rounded-full px-4 py-1.5 font-semibold transition ${
               activeTab === tab.id
                 ? 'bg-brand-periwinkle text-brand-navy'
@@ -159,19 +173,19 @@ export function NotificationScreen({ userId }: { userId: string | null }) {
           </button>
         ))}
 
-        <select
-          aria-label="Lọc theo loại thông báo"
-          value={activeType}
-          onChange={(e) => setActiveType(e.target.value)}
-          className="ml-auto rounded-full border border-white/15 bg-brand-navy px-4 py-1.5 text-xs text-on-surface outline-none focus:border-brand-periwinkle"
+        <button
+          type="button"
+          onClick={() => setUnreadOnly((prev) => !prev)}
+          aria-pressed={unreadOnly}
+          className={`ml-auto inline-flex items-center gap-1.5 rounded-full border px-4 py-1.5 font-semibold transition ${
+            unreadOnly
+              ? 'border-brand-periwinkle/40 bg-brand-periwinkle/15 text-brand-periwinkle'
+              : 'border-white/15 text-on-surface-variant hover:bg-white/5'
+          }`}
         >
-          <option value="">Tất cả loại thông báo</option>
-          {notificationTypes.map((type) => (
-            <option key={type} value={type}>
-              {notificationTypeLabels[type]}
-            </option>
-          ))}
-        </select>
+          <span className={`size-2 rounded-full ${unreadOnly ? 'bg-brand-periwinkle' : 'bg-outline'}`} />
+          Chỉ chưa đọc
+        </button>
       </div>
 
       {error && (

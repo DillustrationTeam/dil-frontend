@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { ArrowLeft, BarChart3, Calendar, CircleAlert, DollarSign, Download, Layers, PieChart, RefreshCw, TrendingUp } from 'lucide-react';
 import { paymentService } from '../services/payment.service';
 import type { RevenueBreakdownDto, RevenuePointDto, RevenueSnapshotDto, RevenueSummaryDto } from '../types/payment.types';
+import { RevenueChart } from './revenue-chart';
 import { AccountPageFooter, AccountPageHeading, AccountShell } from './account-shell';
 
 function formatVnd(value: number) {
@@ -141,35 +142,13 @@ export function RevenueScreen({ userId }: { userId: string | null }) {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
-        {/* Biểu đồ chuỗi thời gian */}
+        {/* Biểu đồ chuỗi thời gian (SVG, không cần thư viện chart) */}
         <section className="glass-container rounded-3xl border border-white/10 p-6 lg:col-span-2">
-          <h2 className="mb-4 font-h1 text-base font-bold">Biến động doanh thu theo thời gian</h2>
-          {timeseries.length === 0 ? (
-            <div className="flex h-56 items-center justify-center text-sm text-outline">
-              Chưa có dữ liệu giao dịch trong khoảng thời gian này.
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {timeseries.map((pt, i) => (
-                <div key={i} className="flex items-center gap-4 text-xs">
-                  <span className="w-24 shrink-0 font-mono text-outline">{pt.periodLabel}</span>
-                  <div className="flex-1">
-                    <div className="h-4 overflow-hidden rounded-full bg-white/5">
-                      <div
-                        className="h-full rounded-full bg-brand-periwinkle"
-                        style={{
-                          width: `${Math.min(100, Math.max(8, ((pt.netAmount || 0) / (summary?.netAmount || 1)) * 100))}%`,
-                        }}
-                      />
-                    </div>
-                  </div>
-                  <span className="w-28 text-right font-mono font-bold text-brand-periwinkle">
-                    {formatVnd(pt.netAmount)}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+            <h2 className="font-h1 text-base font-bold">Biến động doanh thu theo thời gian</h2>
+            <span className="text-[11px] text-outline">Đường: thu nhập ròng · đưa chuột lên điểm để xem gộp/phí</span>
+          </div>
+          <RevenueChart points={timeseries} />
         </section>
 
         {/* Cơ cấu nguồn thu */}

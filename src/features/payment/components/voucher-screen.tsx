@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, CheckCircle2, CircleAlert, Percent, Plus, RefreshCw, Tag, Trash2 } from 'lucide-react';
 import { paymentService } from '../services/payment.service';
-import type { VoucherDto, VoucherRequest, VoucherValidationDto } from '../types/payment.types';
+import type { VoucherDto, VoucherRequest } from '../types/payment.types';
+import { VoucherApplyPanel } from './voucher-apply-panel';
 import { PageLoader } from '@/features/navigation';
 
 function formatVnd(value: number) {
@@ -19,12 +20,6 @@ export function VoucherScreen({ userId }: { userId: string | null }) {
 
   // Tab filter: all, active, expired
   const [statusFilter, setStatusFilter] = useState<string>('');
-
-  // Validate voucher
-  const [checkCode, setCheckCode] = useState('');
-  const [checkAmount, setCheckAmount] = useState('500000');
-  const [validating, setValidating] = useState(false);
-  const [validationResult, setValidationResult] = useState<VoucherValidationDto | null>(null);
 
   // Create voucher
   const [showCreate, setShowCreate] = useState(false);
@@ -59,22 +54,6 @@ export function VoucherScreen({ userId }: { userId: string | null }) {
   useEffect(() => {
     loadVouchers();
   }, [statusFilter]);
-
-  async function handleValidate(e: React.FormEvent) {
-    e.preventDefault();
-    if (!checkCode.trim()) return;
-    setValidating(true);
-    setValidationResult(null);
-    setError(null);
-    try {
-      const res = await paymentService.validateVoucher(checkCode.trim(), Number(checkAmount) || 0, 'Commission');
-      setValidationResult(res);
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Không kiểm tra được mã giảm giá.');
-    } finally {
-      setValidating(false);
-    }
-  }
 
   async function handleCreateVoucher(e: React.FormEvent) {
     e.preventDefault();
@@ -280,49 +259,10 @@ export function VoucherScreen({ userId }: { userId: string | null }) {
         </section>
       )}
 
-      {/* Khối kiểm tra mã */}
-      <section className="glass-container mb-8 rounded-3xl border border-white/10 p-6">
-        <h2 className="mb-3 font-h1 text-base font-bold">Thử nghiệm mã giảm giá</h2>
-        <form onSubmit={handleValidate} className="flex flex-wrap items-center gap-3">
-          <input
-            type="text"
-            value={checkCode}
-            onChange={(e) => setCheckCode(e.target.value.toUpperCase())}
-            placeholder="Nhập mã cần kiểm tra (VD: DIL50K)"
-            className="rounded-xl border border-white/15 bg-brand-navy/60 px-4 py-2 font-mono text-sm uppercase text-on-surface focus:border-brand-periwinkle focus:outline-none"
-          />
-          <input
-            type="number"
-            value={checkAmount}
-            onChange={(e) => setCheckAmount(e.target.value)}
-            placeholder="Giá trị đơn hàng (₫)"
-            className="w-44 rounded-xl border border-white/15 bg-brand-navy/60 px-4 py-2 text-sm text-on-surface focus:border-brand-periwinkle focus:outline-none"
-          />
-          <button
-            type="submit"
-            disabled={validating || !checkCode}
-            className="rounded-full bg-white/10 px-5 py-2 font-h1 text-xs font-bold text-on-surface hover:bg-white/15"
-          >
-            {validating ? 'Đang kiểm tra...' : 'Áp dụng thử'}
-          </button>
-        </form>
-
-        {validationResult && (
-          <div className={`mt-4 rounded-2xl border p-4 text-xs ${
-            validationResult.isValid
-              ? 'border-emerald-400/30 bg-emerald-500/10 text-emerald-200'
-              : 'border-amber-400/30 bg-amber-500/10 text-amber-200'
-          }`}>
-            {validationResult.isValid ? (
-              <p>
-                Mã hợp lệ! Bạn được giảm <strong>{formatVnd(validationResult.discountAmount)}</strong>. Số tiền cần thanh toán còn <strong>{formatVnd(validationResult.finalAmount)}</strong>.
-              </p>
-            ) : (
-              <p>Không thể áp dụng: {validationResult.reason || 'Mã không hợp lệ hoặc không đủ điều kiện đơn hàng.'}</p>
-            )}
-          </div>
-        )}
-      </section>
+      {/* SCR-50 — Client nhập & áp mã cho giao dịch (kiểm tra chỉ đọc, áp dụng mới tiêu lượt) */}
+      <div className="mb-8">
+        <VoucherApplyPanel allowManualInput />
+      </div>
 
       {/* Bộ lọc trạng thái */}
       <div className="mb-4 flex items-center justify-between">

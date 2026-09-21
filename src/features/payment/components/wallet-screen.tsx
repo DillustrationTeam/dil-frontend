@@ -98,9 +98,10 @@ export function WalletScreen({ userId, fullName, ready }: { userId: string | nul
         <Link href="/login" className={`mt-7 inline-flex items-center gap-2 rounded-full bg-brand-periwinkle px-6 py-3 text-sm font-semibold text-brand-navy ${focusClass}`}>Đăng nhập<ArrowRight size={16} aria-hidden="true" /></Link>
       </section> : <>
             {overview.error && <div className="mb-5"><ErrorNotice message={overview.error} onRetry={refresh} /></div>}
-            <section aria-label="Tổng quan ví" aria-busy={!ready || overview.loading} className="grid gap-4 md:grid-cols-3">
+            <section aria-label="Tổng quan ví" aria-busy={!ready || overview.loading} className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
               <Metric title="Số dư khả dụng" value={overview.data ? formatMoney(overview.data.wallet.balance, currency) : null} description="Sẵn sàng cho giao dịch của bạn" icon={Wallet} primary loading={!ready || overview.loading} />
               <Metric title="Tiền đang tạm giữ" value={overview.data ? formatMoney(overview.data.summary.escrowHeldAmount, currency) : null} description="Đang giữ cho các giao dịch" icon={LockKeyhole} loading={!ready || overview.loading} />
+              <Metric title="Đang chờ rút" value={overview.data ? formatMoney(overview.data.summary.pendingPayoutAmount, currency) : null} description="Đã gửi yêu cầu, chờ Admin xử lý" icon={Clock3} loading={!ready || overview.loading} />
               <Metric title="Tổng tiền đã rút" value={overview.data ? formatMoney(overview.data.summary.totalWithdrawn, currency) : null} description="Các yêu cầu rút đã được xử lý" icon={Landmark} loading={!ready || overview.loading} />
             </section>
             <div className="mb-8 mt-4 flex flex-wrap items-center justify-between gap-2 px-1 text-xs text-outline">

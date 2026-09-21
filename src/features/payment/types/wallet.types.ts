@@ -21,7 +21,14 @@ export interface WalletOverviewDto {
     currency: string;
     walletStatus: string;
   };
-  summary: { escrowHeldAmount: number; totalWithdrawn: number };
+  summary: {
+    /** Tiền đang bị giữ cho escrow đơn vẽ + cọc đấu giá. */
+    escrowHeldAmount: number;
+    /** Tổng đã rút THÀNH CÔNG (Admin đã chuyển khoản). */
+    totalWithdrawn: number;
+    /** Tiền đang CHỜ RÚT — ví đã trừ nhưng Admin chưa xử lý. */
+    pendingPayoutAmount: number;
+  };
 }
 
 export interface WalletTransactionDto {

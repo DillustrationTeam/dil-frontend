@@ -2,12 +2,25 @@ import { apiClient } from '@/lib/api-client';
 import type { ApiResponse } from '@/types/api.types';
 import type { NotificationDto, NotificationPage } from '../types/notification.types';
 
+export interface NotificationListOptions {
+  isRead?: boolean;
+  /** Lọc theo một loại cụ thể (`NotificationType`). */
+  notificationType?: string;
+  /** Lọc theo nhóm tab của Notification Center (`NotificationCategory`, SCR-45). */
+  category?: string;
+  cursor?: string;
+  limit?: number;
+}
+
 export const notificationService = {
-  async list(isRead?: boolean, notificationType?: string, cursor?: string, limit = 20): Promise<NotificationPage> {
+  async list(options: NotificationListOptions = {}): Promise<NotificationPage> {
+    const { isRead, notificationType, category, cursor, limit = 20 } = options;
+
     const res = await apiClient.get<ApiResponse<NotificationDto[]>>('/notifications', {
       params: {
-        isRead: isRead === undefined ? undefined : isRead,
+        isRead,
         notificationType: notificationType || undefined,
+        category: category || undefined,
         cursor: cursor || undefined,
         limit,
       },
@@ -17,16 +30,24 @@ export const notificationService = {
       throw new Error(res.data.error.details?.join(' · ') || res.data.error.title || 'Không tải được thông báo.');
     }
 
-    const raw = res.data.data as any;
-    const items: NotificationDto[] = Array.isArray(raw) ? raw : (Array.isArray(raw?.items) ? raw.items : []);
+    // Backend trả `data` là mảng; vẫn chấp nhận dạng bọc `{ items, nextCursor }` để không vỡ
+    // nếu envelope đổi shape (giữ nguyên hành vi phòng thủ của bản cũ).
+    const raw: unknown = res.data.data;
+    const wrapped = raw as { items?: NotificationDto[]; nextCursor?: string; unreadCount?: number } | null;
+    const items: NotificationDto[] = Array.isArray(raw)
+      ? (raw as NotificationDto[])
+      : (Array.isArray(wrapped?.items) ? wrapped.items : []);
+
     const meta = res.data.meta as { unreadCount?: number; nextCursor?: string } | null;
     const nextCursor = typeof meta?.nextCursor === 'string'
       ? meta.nextCursor
-      : (typeof raw?.nextCursor === 'string' ? raw.nextCursor : null);
+      : (typeof wrapped?.nextCursor === 'string' ? wrapped.nextCursor : null);
 
     return {
       items,
-      unreadCount: typeof meta?.unreadCount === 'number' ? meta.unreadCount : (typeof raw?.unreadCount === 'number' ? raw.unreadCount : 0),
+      unreadCount: typeof meta?.unreadCount === 'number'
+        ? meta.unreadCount
+        : (typeof wrapped?.unreadCount === 'number' ? wrapped.unreadCount : 0),
       nextCursor,
     };
   },

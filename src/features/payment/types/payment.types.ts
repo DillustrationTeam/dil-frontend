@@ -28,6 +28,10 @@ export interface VoucherDetailDto {
   redemptions: { voucherRedemptionId: string; userId: string; refType: string; refId: string; discountAmount: number; redeemedAt: string }[];
 }
 export interface VoucherValidationDto { voucherId: string | null; isValid: boolean; discountAmount: number; finalAmount: number; reason: string | null }
+export interface VoucherRedeemedDto {
+  voucherRedemptionId: string; voucherId: string; voucherCode: string;
+  discountAmount: number; orderAmount: number; finalAmount: number; redeemedAt: string;
+}
 export interface RevenueSummaryDto { grossAmount: number; feeAmount: number; netAmount: number; completedOrderCount: number; averageOrderValue: number }
 export interface RevenuePointDto { periodLabel: string; grossAmount: number; feeAmount: number; netAmount: number }
 export interface RevenueBreakdownDto { key: string; label: string; grossAmount: number; feeAmount: number; netAmount: number; orderCount: number }
