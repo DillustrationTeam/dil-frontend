@@ -108,6 +108,15 @@ export function VerticalNavbar({
       return pathname === item.href || pathname === '/admin/overview' || pathname === '/admin/dashboard';
     }
 
+    if (item.id === 'platform-fee-config') {
+      return (
+        pathname === '/admin/fee-policy' ||
+        pathname.startsWith('/admin/fee-policy/') ||
+        pathname === '/admin/platform-config' ||
+        pathname.startsWith('/admin/platform-config/')
+      );
+    }
+
     return pathname === item.href || pathname.startsWith(`${item.href}/`);
   };
 

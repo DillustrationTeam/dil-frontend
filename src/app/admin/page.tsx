@@ -14,6 +14,7 @@ import {
   CreditCard,
   Image,
   RefreshCw,
+  SlidersHorizontal,
 } from 'lucide-react';
 
 export default function AdminDashboardPage() {
@@ -140,8 +141,16 @@ export default function AdminDashboardPage() {
           </p>
         </div>
 
-        {/* Refresh Action */}
+        {/* Actions */}
         <div className="flex items-center gap-2 self-start sm:self-auto">
+          <Link
+            href="/admin/fee-policy"
+            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-[#8A8FA9] hover:text-white transition-all cursor-pointer text-xs font-semibold"
+            title="Configure Platform Fee & Policies (SCR-18)"
+          >
+            <SlidersHorizontal className="w-3.5 h-3.5 text-red-400" />
+            <span>Fee Policy (SCR-18)</span>
+          </Link>
           <button
             type="button"
             onClick={refresh}

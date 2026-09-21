@@ -141,3 +141,5 @@ export interface StatisticsQuery {
   period: DatePeriod;
   referenceDate: string;
 }
+
+export * from './platform-fee.types';
