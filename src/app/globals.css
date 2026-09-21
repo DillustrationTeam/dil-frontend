@@ -32,8 +32,16 @@ body {
   min-height: 100vh;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1, h2, h3, h4, h5, h6, .font-h1 {
   font-family: 'Sora', sans-serif;
+}
+
+.font-h1 {
+  font-family: 'Sora', sans-serif !important;
+}
+
+.font-body {
+  font-family: 'Space Grotesk', sans-serif !important;
 }
 
 .glass-container {

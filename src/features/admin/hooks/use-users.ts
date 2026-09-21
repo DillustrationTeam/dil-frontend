@@ -46,13 +46,7 @@ export function useUsers() {
       });
       return false;
     }
-  }, [
-    state.users.data.page,
-    state.users.data.size,
-    state.users.filters.keyword,
-    state.users.filters.role,
-    state.users.filters.status,
-  ]);
+  }, [state.users]);
 
   const getUserById = useCallback(async (id: string) => {
     dispatch({ type: 'GET_USER_REQUEST' });

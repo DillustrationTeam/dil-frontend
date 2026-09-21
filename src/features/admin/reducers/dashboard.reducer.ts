@@ -1,62 +1,48 @@
-import { DatePeriod } from '@/lib/date-utils';
 import {
-  ChartType,
-  DashboardOverviewDto,
-  StatisticsFilters,
-  StatisticsPointDto,
-  StatisticsTabKey,
+  AdminDashboardOverviewDto,
+  AdminFinancialKpiDto,
 } from '@/features/admin/types/admin.types';
 
 export interface DashboardState {
   overview: {
-    data: DashboardOverviewDto;
+    data: AdminDashboardOverviewDto | null;
     loading: boolean;
     error: string | null;
   };
-  statistics: {
-    data: StatisticsPointDto[];
-    filters: StatisticsFilters;
+  financialKpis: {
+    data: AdminFinancialKpiDto | null;
     loading: boolean;
     error: string | null;
+  };
+  filters: {
+    days: number;
   };
 }
 
 export const initialDashboardState: DashboardState = {
   overview: {
-    data: {
-      totalUsers: 0,
-      totalCreators: 0,
-      totalArtworks: 0,
-      totalCommissions: 0,
-      totalRevenue: 0,
-    },
+    data: null,
     loading: false,
     error: null,
   },
-  statistics: {
-    data: [],
-    filters: {
-      activeTab: 'USERS',
-      period: 'MONTH',
-      referenceDate: new Date(),
-      chartType: 'BAR',
-    },
+  financialKpis: {
+    data: null,
     loading: false,
     error: null,
+  },
+  filters: {
+    days: 120,
   },
 };
 
-type DashboardAction =
+export type DashboardAction =
   | { type: 'GET_OVERVIEW_REQUEST' }
-  | { type: 'GET_OVERVIEW_SUCCESS'; payload: DashboardOverviewDto }
+  | { type: 'GET_OVERVIEW_SUCCESS'; payload: AdminDashboardOverviewDto }
   | { type: 'GET_OVERVIEW_FAILURE'; payload: string }
-  | { type: 'GET_STATISTICS_REQUEST' }
-  | { type: 'GET_STATISTICS_SUCCESS'; payload: StatisticsPointDto[] }
-  | { type: 'GET_STATISTICS_FAILURE'; payload: string }
-  | { type: 'SET_ACTIVE_TAB'; payload: StatisticsTabKey }
-  | { type: 'SET_PERIOD'; payload: DatePeriod }
-  | { type: 'SET_REFERENCE_DATE'; payload: Date }
-  | { type: 'SET_CHART_TYPE'; payload: ChartType };
+  | { type: 'GET_KPIS_REQUEST' }
+  | { type: 'GET_KPIS_SUCCESS'; payload: AdminFinancialKpiDto }
+  | { type: 'GET_KPIS_FAILURE'; payload: string }
+  | { type: 'SET_DAYS_FILTER'; payload: number };
 
 export function dashboardReducer(
   state: DashboardState,
@@ -80,6 +66,10 @@ export function dashboardReducer(
           loading: false,
           data: action.payload,
         },
+        financialKpis: {
+          ...state.financialKpis,
+          data: action.payload.financialKpis,
+        },
       };
     case 'GET_OVERVIEW_FAILURE':
       return {
@@ -90,75 +80,39 @@ export function dashboardReducer(
           error: action.payload,
         },
       };
-    case 'GET_STATISTICS_REQUEST':
+    case 'GET_KPIS_REQUEST':
       return {
         ...state,
-        statistics: {
-          ...state.statistics,
+        financialKpis: {
+          ...state.financialKpis,
           loading: true,
           error: null,
         },
       };
-    case 'GET_STATISTICS_SUCCESS':
+    case 'GET_KPIS_SUCCESS':
       return {
         ...state,
-        statistics: {
-          ...state.statistics,
+        financialKpis: {
+          ...state.financialKpis,
           loading: false,
           data: action.payload,
         },
       };
-    case 'GET_STATISTICS_FAILURE':
+    case 'GET_KPIS_FAILURE':
       return {
         ...state,
-        statistics: {
-          ...state.statistics,
+        financialKpis: {
+          ...state.financialKpis,
           loading: false,
           error: action.payload,
         },
       };
-    case 'SET_ACTIVE_TAB':
+    case 'SET_DAYS_FILTER':
       return {
         ...state,
-        statistics: {
-          ...state.statistics,
-          filters: {
-            ...state.statistics.filters,
-            activeTab: action.payload,
-          },
-        },
-      };
-    case 'SET_PERIOD':
-      return {
-        ...state,
-        statistics: {
-          ...state.statistics,
-          filters: {
-            ...state.statistics.filters,
-            period: action.payload,
-          },
-        },
-      };
-    case 'SET_REFERENCE_DATE':
-      return {
-        ...state,
-        statistics: {
-          ...state.statistics,
-          filters: {
-            ...state.statistics.filters,
-            referenceDate: action.payload,
-          },
-        },
-      };
-    case 'SET_CHART_TYPE':
-      return {
-        ...state,
-        statistics: {
-          ...state.statistics,
-          filters: {
-            ...state.statistics.filters,
-            chartType: action.payload,
-          },
+        filters: {
+          ...state.filters,
+          days: action.payload,
         },
       };
     default:
