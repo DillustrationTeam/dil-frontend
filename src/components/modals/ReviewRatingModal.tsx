@@ -1,11 +1,13 @@
 'use client';
 
 import React, { useState } from 'react';
-import { X, Star, Heart, CheckCircle2, Award } from 'lucide-react';
+import { X, Star, CheckCircle2, Award, Heart } from 'lucide-react';
+import { commissionService } from '@/services/commission.service';
 
 interface ReviewRatingModalProps {
   isOpen: boolean;
   onClose: () => void;
+  commissionId: string;
   creatorName?: string;
   onReviewSubmitted?: () => void;
 }
@@ -13,6 +15,7 @@ interface ReviewRatingModalProps {
 export default function ReviewRatingModal({
   isOpen,
   onClose,
+  commissionId,
   creatorName = 'Creator',
   onReviewSubmitted,
 }: ReviewRatingModalProps) {
@@ -20,18 +23,32 @@ export default function ReviewRatingModal({
   const [hoverRating, setHoverRating] = useState(0);
   const [reviewText, setReviewText] = useState('');
   const [tipAmount, setTipAmount] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
-    setTimeout(() => {
-      if (onReviewSubmitted) onReviewSubmitted();
-      onClose();
-    }, 1200);
+    setIsSubmitting(true);
+    try {
+      await commissionService.createReview(commissionId, {
+        rating,
+        comment: reviewText || undefined,
+      });
+      setSubmitted(true);
+      setTimeout(() => {
+        if (onReviewSubmitted) onReviewSubmitted();
+        onClose();
+      }, 1200);
+    } catch (error) {
+      console.error(error);
+      alert('Failed to submit review.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">

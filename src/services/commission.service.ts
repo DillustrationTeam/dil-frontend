@@ -52,20 +52,19 @@ export const commissionService = {
     return res.data.data as Commission;
   },
 
-  submitMilestone: async (id: string, milestoneId: string, file?: File, sourceUrl?: string) => {
+  submitMilestone: async (id: string, milestoneId: string, file: File, creatorNote?: string) => {
     const body = new FormData();
-    if (file) body.append('file', file);
-    if (sourceUrl) body.append('sourceUrl', sourceUrl);
+    body.append('file', file);
+    if (creatorNote) body.append('creatorNote', creatorNote);
     const res = await apiClient.post<ApiResponse<unknown>>(`/commissions/${id}/milestones/${milestoneId}/submit`, body);
     return res.data.data;
   },
   approveMilestone: async (id: string, milestoneId: string) => apiClient.patch(`/commissions/${id}/milestones/${milestoneId}/approve`),
   requestRevision: async (id: string, milestoneId: string, feedbackComment: string) =>
     apiClient.post(`/commissions/${id}/milestones/${milestoneId}/request-revision`, { feedbackComment }),
-  deliverFinal: async (id: string, file?: File, sourceUrl?: string) => {
+  deliverFinal: async (id: string, file: File) => {
     const body = new FormData();
-    if (file) body.append('file', file);
-    if (sourceUrl) body.append('sourceUrl', sourceUrl);
+    body.append('file', file);
     return apiClient.post(`/commissions/${id}/deliver`, body);
   },
   complete: async (id: string) => apiClient.patch(`/commissions/${id}/complete`),
@@ -74,7 +73,19 @@ export const commissionService = {
     return res.data.data as string;
   },
   getFinalDownloadUrl: async (id: string) => {
-    const res = await apiClient.get<ApiResponse<string>>(`/commissions/${id}/final/download`);
-    return res.data.data as string;
+    const res = await apiClient.get<ApiResponse<{ downloadUrl: string }>>(`/commissions/${id}/final/download`);
+    return res.data.data?.downloadUrl as string;
+  },
+  cancelWithPolicy: async (id: string, payload: { cancellationReason: string; details?: string }) => {
+    const res = await apiClient.post<ApiResponse<Commission>>(`/commissions/${id}/cancel`, payload);
+    return res.data.data as Commission;
+  },
+  createReview: async (id: string, payload: { rating: number; comment?: string; attachedImageUrls?: string[] }) => {
+    const res = await apiClient.post<ApiResponse<unknown>>(`/commissions/${id}/reviews`, payload);
+    return res.data.data;
+  },
+  replyReview: async (id: string, replyComment: string) => {
+    const res = await apiClient.post<ApiResponse<unknown>>(`/commissions/${id}/reviews/reply`, { replyComment });
+    return res.data.data;
   },
 };

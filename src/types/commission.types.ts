@@ -5,6 +5,7 @@ export type CommissionStatus =
   | 'InProgress'
   | 'Negotiating'
   | 'SubmittedFinal'
+  | 'Delivered'
   | 'Completed'
   | 'Cancelled'
   | 'Disputed';
@@ -15,6 +16,7 @@ export interface Milestone {
   sequence: number;
   title: string;
   status: MilestoneStatus;
+  originalWipUrl?: string | null;
   wipPreviewUrl?: string | null;
   watermarkedUrl?: string | null;
   finalDeliverableUrl?: string | null;
@@ -23,6 +25,8 @@ export interface Milestone {
   submittedAt?: string | null;
   approvedAt?: string | null;
   revisionCount?: number;
+  maxRevisions?: number;
+  creatorNote?: string | null;
   revisionFeedback?: string | null;
   price: number;
 }
@@ -61,3 +65,17 @@ export interface CreateCommissionPayload {
   description: string;
   deadlineAt?: string;
 }
+
+export interface Review {
+  id: string;
+  commissionId: string;
+  reviewerId: string;
+  rating: number;
+  comment?: string;
+  reviewerReply?: string;
+  attachedImages?: string[];
+  respondedAt?: string;
+  createdAt: string;
+}
+
+export type CancelRefundPolicy = 'Full' | 'Partial' | 'EscrowRemainder';
