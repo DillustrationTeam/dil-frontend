@@ -13,6 +13,7 @@ import {
   Palette,
   Briefcase,
   ShieldCheck,
+  Wallet,
 } from 'lucide-react';
 import { useAuthStore } from '@/store/use-auth-store';
 import { useRouter } from 'next/navigation';
@@ -123,16 +124,24 @@ export default function TopNavbar({
 
           {/* Profile Dropdown Menu */}
           {showProfileMenu && (
-            <div className="absolute right-0 mt-2 w-56 bg-[#1F2335] border border-white/10 rounded-2xl shadow-2xl p-2 z-50 backdrop-blur-2xl">
+            <div className="absolute right-0 mt-2 w-60 bg-[#1F2335] border border-white/10 rounded-2xl shadow-2xl p-2 z-50 backdrop-blur-2xl">
               <div className="p-3 border-b border-white/10 mb-1">
                 <p className="text-xs font-bold text-white">{user?.fullName || 'Guest'}</p>
-                <p className="text-[11px] text-slate-400">{user?.email || 'No email'}</p>
+                <p className="text-[11px] text-slate-400 truncate">{user?.email || 'No email'}</p>
                 <span className="inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-medium border border-emerald-500/30">
                   <ShieldCheck className="h-3 w-3 text-[#A7ACD9]" /> Escrow Verified
                 </span>
               </div>
               <Link
+                href="/wallet"
+                onClick={() => setShowProfileMenu(false)}
+                className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs text-[#e4e1e5] hover:text-white hover:bg-white/5 transition-colors"
+              >
+                <Wallet className="w-4 h-4 text-[#A7ACD9]" /> Ví của tôi
+              </Link>
+              <Link
                 href="/client/commissions"
+                onClick={() => setShowProfileMenu(false)}
                 className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs text-[#e4e1e5] hover:text-white hover:bg-white/5 transition-colors"
               >
                 <User className="w-4 h-4 text-[#A7ACD9]" /> My Commissions
@@ -140,6 +149,7 @@ export default function TopNavbar({
               {isCreator && (
                 <Link
                   href="/creator/commissions"
+                  onClick={() => setShowProfileMenu(false)}
                   className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs text-[#e4e1e5] hover:text-white hover:bg-white/5 transition-colors"
                 >
                   <Palette className="w-4 h-4 text-[#A7ACD9]" /> Creator Dashboard
@@ -147,6 +157,7 @@ export default function TopNavbar({
               )}
               <Link
                 href="/settings"
+                onClick={() => setShowProfileMenu(false)}
                 className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs text-slate-300 hover:text-white hover:bg-white/5 transition-colors"
               >
                 <Settings className="w-4 h-4 text-[#A7ACD9]" /> Account Settings

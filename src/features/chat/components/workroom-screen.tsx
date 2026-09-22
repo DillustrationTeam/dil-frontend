@@ -9,6 +9,7 @@ import {
   CircleAlert,
   Clock,
   Download,
+  FileArchive,
   FileText,
   Globe,
   Lock,
@@ -16,6 +17,7 @@ import {
   RefreshCw,
   Send,
   ShieldCheck,
+  UploadCloud,
   Wifi,
   WifiOff,
 } from 'lucide-react';
@@ -25,6 +27,14 @@ import { useAutoTranslate } from '../hooks/use-auto-translate';
 import { WorkroomProgressPanel } from './workroom-progress-panel';
 import type { ChatMessageDto, ChatRoomDto } from '../types/chat.types';
 import { PageLoader } from '@/features/navigation';
+import { commissionService } from '@/services/commission.service';
+import type { Commission, CommissionStatus } from '@/types/commission.types';
+
+import SubmitMilestoneModal from '@/components/modals/SubmitMilestoneModal';
+import ApprovalRevisionModal from '@/components/modals/ApprovalRevisionModal';
+import FinalDeliveryModal from '@/components/modals/FinalDeliveryModal';
+import ReviewRatingModal from '@/components/modals/ReviewRatingModal';
+import CancelRefundModal from '@/components/modals/CancelRefundModal';
 
 /** Tin nhắn đã hiện trên UI nhưng server chưa phát lại (chờ SignalR). */
 interface PendingMessage {
@@ -46,6 +56,22 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
   const [translatingIds, setTranslatingIds] = useState<string[]>([]);
   const [failedTranslationIds, setFailedTranslationIds] = useState<string[]>([]);
   const [partnerReadAt, setPartnerReadAt] = useState<string | null>(null);
+
+  // States cho các Modal Hợp đồng & Cột mốc
+  const [commission, setCommission] = useState<Commission | null>(null);
+  const [showSubmitModal, setShowSubmitModal] = useState(false);
+  const [showApprovalModal, setShowApprovalModal] = useState(false);
+  const [showDeliveryModal, setShowDeliveryModal] = useState(false);
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [showCancelModal, setShowCancelModal] = useState(false);
+
+  const currentUserMember = useMemo(
+    () => room?.members.find((m) => m.userId === userId),
+    [room, userId],
+  );
+  const isCreator = currentUserMember?.memberRole === 'Creator';
+  const isClient = !isCreator;
+  const commissionStatus: CommissionStatus = commission?.status ?? 'InProgress';
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -164,6 +190,9 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
     try {
       const [r, m] = await Promise.all([chatService.getRoom(roomId), chatService.getMessages(roomId)]);
       setRoom(r);
+      if (r.commissionId) {
+        void commissionService.getById(r.commissionId).then((c) => setCommission(c)).catch(() => null);
+      }
       // Backend trả về mới nhất trước -> đảo lại để render từ cũ đến mới
       setMessages([...m.items].reverse());
       setPartnerReadAt(r.members.find((member) => member.userId !== userId)?.lastReadAt ?? null);
@@ -282,11 +311,9 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
   }
 
   return (
-    /* w-full là BẮT BUỘC: body là flex-col nên con có margin auto sẽ không được
-       stretch ngang; thiếu w-full thì khung co theo nội dung. */
-    <div className="mx-auto flex h-[calc(100vh-5rem)] w-full max-w-5xl flex-col px-4 py-4 text-on-surface">
-      {/* Thanh tiêu đề phòng */}
-      <div className="glass-container mb-4 flex items-center justify-between rounded-3xl border border-white/10 p-4">
+    <div className="mx-auto flex h-[calc(100vh-4rem)] w-full max-w-7xl flex-col px-4 py-3 text-on-surface gap-3">
+      {/* 1. Thanh tiêu đề phòng */}
+      <div className="glass-container flex shrink-0 flex-wrap items-center justify-between rounded-2xl border border-white/10 px-4 py-3">
         <div className="flex items-center gap-3">
           <Link href="/wallet" className="rounded-full border border-white/10 p-2 text-outline hover:text-white" title="Quay lại">
             <ArrowLeft size={16} />
@@ -364,222 +391,493 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
         </div>
       </div>
 
-      {/* SCR-46 — cảnh báo tiến độ & AI Deadline Predictor (chỉ với phòng của commission) */}
+      {/* 2. SCR-46 — Cảnh báo tiến độ & AI Deadline Predictor */}
       {room.commissionId && <WorkroomProgressPanel commissionId={room.commissionId} />}
 
       {error && (
-        <div role="alert" className="mb-3 flex items-center gap-2 rounded-2xl border border-red-400/30 bg-red-500/10 p-3 text-xs text-red-200">
+        <div role="alert" className="flex items-center gap-2 rounded-2xl border border-red-400/30 bg-red-500/10 p-3 text-xs text-red-200">
           <CircleAlert size={14} className="shrink-0" />
           <span>{error}</span>
         </div>
       )}
 
-      {/* Vùng hiển thị tin nhắn cuộn */}
-      <div className="glass-container flex-1 overflow-y-auto rounded-3xl border border-white/10 p-4 space-y-4">
-        {messages.length === 0 && pending.length === 0 ? (
-          <div className="flex h-full flex-col items-center justify-center text-center text-xs text-outline">
-            <p>Chưa có tin nhắn nào trong phòng làm việc này.</p>
-            <p className="mt-1">Hãy bắt đầu trao đổi về ý tưởng tranh, yêu cầu phác thảo và tiến độ hoàn thành.</p>
+      {/* 3. Bố cục 2 Cột giống SCR-13 Mockup */}
+      <div className="grid flex-1 grid-cols-1 gap-4 overflow-hidden lg:grid-cols-12 min-h-0">
+        {/* CỘT TRÁI: Client Communications (SignalR Chat) */}
+        <div className="glass-container flex h-full flex-col overflow-hidden rounded-3xl border border-white/10 p-4 lg:col-span-5">
+          {/* Header Cột Chat */}
+          <div className="mb-3 flex items-center justify-between border-b border-white/10 pb-2.5">
+            <div className="flex items-center gap-2 text-xs font-bold text-on-surface">
+              <span className="size-2 rounded-full bg-emerald-400 animate-pulse" />
+              Client Communications (SignalR Chat)
+            </div>
+            <span className="text-[10px] text-outline">Trực tiếp</span>
           </div>
-        ) : (
-          messages.map((msg) => {
-            const isMe = userId && msg.senderId === userId;
-            const isTranslating = translatingIds.includes(msg.messageId);
-            return (
-              <div
-                key={msg.messageId}
-                className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}
-              >
-                <div className="mb-1 flex items-center gap-2 text-[11px] text-outline">
-                  <span className="font-medium text-on-surface-variant">
-                    {isMe ? 'Bạn' : msg.senderFullName || 'Đối tác'}
-                  </span>
-                  <span>{new Date(msg.sentAt).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}</span>
-                </div>
 
-                <div
-                  className={`max-w-[80%] rounded-2xl p-4 text-xs leading-relaxed shadow-sm ${
-                    isMe
-                      ? 'bg-brand-periwinkle text-brand-navy rounded-tr-none'
-                      : 'border border-white/10 bg-white/5 text-on-surface rounded-tl-none'
-                  }`}
-                >
-                  <p className="whitespace-pre-wrap">{msg.body}</p>
-
-                  {/* Bản dịch tự động — ẩn khi bản dịch TRÙNG nguyên văn (tin đã cùng ngôn ngữ đích) */}
-                  {msg.translatedBody && msg.translatedBody.trim() !== msg.body.trim() && (
-                    <div className="mt-2 border-t border-black/10 pt-2 text-[11px] italic opacity-90">
-                      <p className="flex items-center gap-1 font-semibold not-italic">
-                        <Globe size={11} /> Bản dịch tiếng Việt:
-                      </p>
-                      <p>{msg.translatedBody}</p>
+          {/* Danh sách tin nhắn */}
+          <div className="flex-1 overflow-y-auto space-y-3 pr-1">
+            {messages.length === 0 && pending.length === 0 ? (
+              <div className="flex h-full flex-col items-center justify-center text-center text-xs text-outline">
+                <p>Chưa có tin nhắn nào trong phòng làm việc này.</p>
+                <p className="mt-1">Hãy bắt đầu trao đổi về ý tưởng tranh, yêu cầu phác thảo và tiến độ hoàn thành.</p>
+              </div>
+            ) : (
+              messages.map((msg) => {
+                const isMe = userId && msg.senderId === userId;
+                const isTranslating = translatingIds.includes(msg.messageId);
+                return (
+                  <div
+                    key={msg.messageId}
+                    className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}
+                  >
+                    <div className="mb-1 flex items-center gap-2 text-[10px] text-outline">
+                      <span className="font-medium text-on-surface-variant">
+                        {isMe ? 'Bạn' : msg.senderFullName || 'Đối tác'}
+                      </span>
+                      <span>{new Date(msg.sentAt).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}</span>
                     </div>
-                  )}
 
-                  {/* Tệp đính kèm */}
-                  {msg.attachments && msg.attachments.length > 0 && (
-                    <div className="mt-3 space-y-2">
-                      {msg.attachments.map((att) => {
-                        const isImg = att.mimeType.startsWith('image/');
-                        return (
-                          <div key={att.messageAttachmentId} className="overflow-hidden rounded-xl border border-black/10 bg-black/20">
-                            {isImg ? (
-                              // eslint-disable-next-line @next/next/no-img-element
-                              <img src={att.fileUrl} alt={att.fileName || 'Ảnh'} className="max-h-60 w-full object-contain" />
-                            ) : (
-                              <div className="flex items-center justify-between p-2.5 text-[11px]">
-                                <span className="inline-flex items-center gap-1.5 truncate">
-                                  <FileText size={14} /> {att.fileName || 'Tệp đính kèm'}
-                                </span>
-                                <a
-                                  href={att.fileUrl}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="ml-2 inline-flex items-center gap-1 text-brand-periwinkle hover:underline"
-                                >
-                                  <Download size={12} /> Tải về
-                                </a>
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-
-                {/* Trạng thái: đang dịch / nút dịch thủ công / dấu đã xem */}
-                <div className="mt-1 flex items-center gap-2 text-[10px] text-outline">
-                  {isTranslating && (
-                    <span className="inline-flex items-center gap-1">
-                      <RefreshCw size={10} className="animate-spin" /> Đang dịch…
-                    </span>
-                  )}
-
-                  {!isMe && msg.translatedBody && !isTranslating && (
-                    <button
-                      type="button"
-                      onClick={() => void translateOne(msg.messageId, true)}
-                      className="inline-flex items-center gap-1 hover:text-white"
-                      title="Dịch lại tin này (bỏ qua bản dịch đã lưu)"
+                    <div
+                      className={`max-w-[85%] rounded-2xl p-3 text-xs leading-relaxed shadow-sm ${
+                        isMe
+                          ? 'bg-brand-periwinkle text-brand-navy rounded-tr-none'
+                          : 'border border-white/10 bg-white/5 text-on-surface rounded-tl-none'
+                      }`}
                     >
-                      <RefreshCw size={10} /> Dịch lại
-                    </button>
-                  )}
+                      <p className="whitespace-pre-wrap">{msg.body}</p>
 
-                  {!isMe && !msg.translatedBody && !isTranslating && (                    failedTranslationIds.includes(msg.messageId) ? (
-                      <button
-                        type="button"
-                        onClick={() => void translateOne(msg.messageId)}
-                        className="inline-flex items-center gap-1 text-red-300 hover:text-red-200"
-                      >
-                        <CircleAlert size={10} /> Dịch lỗi — bấm thử lại
-                      </button>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => void translateOne(msg.messageId)}
-                        className="inline-flex items-center gap-1 hover:text-white"
-                      >
-                        <Globe size={10} /> Dịch sang tiếng Việt
-                      </button>
-                    )
-                  )}
-
-                  {isMe && msg.messageId === lastMineId && (
-                    <span className="inline-flex items-center gap-1">
-                      {partnerReadMine ? (
-                        <>
-                          <CheckCheck size={11} className="text-brand-periwinkle" /> Đã xem
-                        </>
-                      ) : (
-                        <>
-                          <Check size={11} /> Đã gửi
-                        </>
+                      {msg.translatedBody && msg.translatedBody.trim() !== msg.body.trim() && (
+                        <div className="mt-2 border-t border-black/10 pt-2 text-[11px] italic opacity-90">
+                          <p className="flex items-center gap-1 font-semibold not-italic">
+                            <Globe size={11} /> Bản dịch tiếng Việt:
+                          </p>
+                          <p>{msg.translatedBody}</p>
+                        </div>
                       )}
-                    </span>
-                  )}
+
+                      {msg.attachments && msg.attachments.length > 0 && (
+                        <div className="mt-2 space-y-2">
+                          {msg.attachments.map((att) => {
+                            const isImg = att.mimeType.startsWith('image/');
+                            return (
+                              <div key={att.messageAttachmentId} className="overflow-hidden rounded-xl border border-black/10 bg-black/20">
+                                {isImg ? (
+                                  // eslint-disable-next-line @next/next/no-img-element
+                                  <img src={att.fileUrl} alt={att.fileName || 'Ảnh'} className="max-h-48 w-full object-contain" />
+                                ) : (
+                                  <div className="flex items-center justify-between p-2 text-[11px]">
+                                    <span className="inline-flex items-center gap-1.5 truncate">
+                                      <FileText size={14} /> {att.fileName || 'Tệp đính kèm'}
+                                    </span>
+                                    <a
+                                      href={att.fileUrl}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="ml-2 inline-flex items-center gap-1 text-brand-periwinkle hover:underline"
+                                    >
+                                      <Download size={12} /> Tải về
+                                    </a>
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="mt-1 flex items-center gap-2 text-[10px] text-outline">
+                      {isTranslating && (
+                        <span className="inline-flex items-center gap-1">
+                          <RefreshCw size={10} className="animate-spin" /> Đang dịch…
+                        </span>
+                      )}
+
+                      {!isMe && msg.translatedBody && !isTranslating && (
+                        <button
+                          type="button"
+                          onClick={() => void translateOne(msg.messageId, true)}
+                          className="inline-flex items-center gap-1 hover:text-white"
+                          title="Dịch lại tin này"
+                        >
+                          <RefreshCw size={10} /> Dịch lại
+                        </button>
+                      )}
+
+                      {!isMe && !msg.translatedBody && !isTranslating && (
+                        failedTranslationIds.includes(msg.messageId) ? (
+                          <button
+                            type="button"
+                            onClick={() => void translateOne(msg.messageId)}
+                            className="inline-flex items-center gap-1 text-red-300 hover:text-red-200"
+                          >
+                            <CircleAlert size={10} /> Dịch lỗi — thử lại
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => void translateOne(msg.messageId)}
+                            className="inline-flex items-center gap-1 hover:text-white"
+                          >
+                            <Globe size={10} /> Dịch sang Tiếng Việt
+                          </button>
+                        )
+                      )}
+
+                      {isMe && msg.messageId === lastMineId && (
+                        <span className="inline-flex items-center gap-1">
+                          {partnerReadMine ? (
+                            <>
+                              <CheckCheck size={11} className="text-brand-periwinkle" /> Đã xem
+                            </>
+                          ) : (
+                            <>
+                              <Check size={11} /> Đã gửi
+                            </>
+                          )}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })
+            )}
+
+            {pending.map((item) => (
+              <div key={item.tempId} className="flex flex-col items-end">
+                <div className="mb-1 flex items-center gap-2 text-[10px] text-outline">
+                  <span className="font-medium text-on-surface-variant">Bạn</span>
+                  <span className="inline-flex items-center gap-1">
+                    <Clock size={10} /> đang gửi
+                  </span>
+                </div>
+                <div className="max-w-[85%] rounded-2xl rounded-tr-none bg-brand-periwinkle/60 p-3 text-xs leading-relaxed text-brand-navy">
+                  <p className="whitespace-pre-wrap">{item.body}</p>
                 </div>
               </div>
-            );
-          })
-        )}
+            ))}
 
-        {/* Tin nhắn đang chờ server phát lại */}
-        {pending.map((item) => (
-          <div key={item.tempId} className="flex flex-col items-end">
-            <div className="mb-1 flex items-center gap-2 text-[11px] text-outline">
-              <span className="font-medium text-on-surface-variant">Bạn</span>
-              <span className="inline-flex items-center gap-1">
-                <Clock size={10} /> đang gửi
+            {partnerTyping && (
+              <div className="flex items-center gap-2 text-[11px] text-outline" aria-live="polite">
+                <span className="flex gap-1">
+                  <span className="size-1.5 animate-bounce rounded-full bg-brand-periwinkle [animation-delay:0ms]" />
+                  <span className="size-1.5 animate-bounce rounded-full bg-brand-periwinkle [animation-delay:150ms]" />
+                  <span className="size-1.5 animate-bounce rounded-full bg-brand-periwinkle [animation-delay:300ms]" />
+                </span>
+                Đối tác đang gõ…
+              </div>
+            )}
+
+            <div ref={bottomRef} />
+          </div>
+
+          {/* Ô nhập tin nhắn */}
+          <div className="mt-3 shrink-0">
+            <input
+              type="file"
+              ref={fileInputRef}
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) void handleSendFile(file);
+                e.target.value = '';
+              }}
+            />
+
+            <form onSubmit={handleSendMessage} className="flex items-center gap-2">
+              <button
+                type="button"
+                disabled={uploading || room.isLocked}
+                onClick={() => fileInputRef.current?.click()}
+                className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-outline transition hover:bg-white/10 hover:text-white disabled:opacity-50"
+                title="Đính kèm tệp phác thảo"
+              >
+                <Paperclip size={16} className={uploading ? 'animate-spin' : ''} />
+              </button>
+
+              <input
+                type="text"
+                disabled={room.isLocked}
+                value={inputBody}
+                onChange={(e) => {
+                  setInputBody(e.target.value);
+                  chat.notifyTyping();
+                }}
+                placeholder={room.isLocked ? 'Phòng đã đóng.' : 'Nhập tin nhắn trao đổi...'}
+                className="flex-1 rounded-xl border border-white/15 bg-brand-navy/80 px-3.5 py-2.5 text-xs text-on-surface placeholder:text-outline focus:border-brand-periwinkle focus:outline-none disabled:opacity-50"
+              />
+
+              <button
+                type="submit"
+                disabled={!inputBody.trim() || sending || room.isLocked}
+                className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-amber-400 text-brand-navy shadow-md transition hover:brightness-110 disabled:opacity-50"
+                title="Gửi tin nhắn"
+              >
+                {sending ? <RefreshCw size={15} className="animate-spin" /> : <Send size={15} />}
+              </button>
+            </form>
+          </div>
+        </div>
+
+        {/* CỘT PHẢI: Workroom Action Workspace & Deliverables Panel (Khung thao tác giống SCR-13 Mockup) */}
+        <div className="flex flex-col gap-4 overflow-y-auto pr-1 lg:col-span-7">
+          {/* Panel 1: Upload Stage WIP Preview Workspace */}
+          <div className="glass-container flex flex-col rounded-3xl border border-white/10 p-5 space-y-4">
+            <div className="flex items-center justify-between border-b border-white/10 pb-3">
+              <div>
+                <h3 className="font-bold text-sm text-on-surface">Upload Stage WIP Preview</h3>
+                <p className="text-[11px] text-outline">Preview image will be auto-watermarked via CDN before client review.</p>
+              </div>
+              <span className="rounded-full border border-amber-400/30 bg-amber-500/10 px-2.5 py-0.5 text-[10px] font-semibold text-amber-300">
+                Revision Used: 1 / 3
               </span>
             </div>
-            <div className="max-w-[80%] rounded-2xl rounded-tr-none bg-brand-periwinkle/60 p-4 text-xs leading-relaxed text-brand-navy">
-              <p className="whitespace-pre-wrap">{item.body}</p>
+
+            {/* Vùng nộp bản thảo Dropzone */}
+            <div 
+              onClick={() => setShowSubmitModal(true)}
+              className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-white/20 bg-white/5 p-6 text-center cursor-pointer transition hover:border-brand-periwinkle/50 hover:bg-white/10"
+            >
+              <div className="mb-2 rounded-full bg-brand-periwinkle/10 p-3 text-brand-periwinkle">
+                <UploadCloud size={28} />
+              </div>
+              <p className="text-xs font-semibold text-on-surface">Drag & drop WIP preview file here</p>
+              <p className="mt-1 text-[10px] text-outline">Max 25MB · JPG, PNG, WEBP (Auto Watermarked)</p>
+            </div>
+
+            {/* Ghi chú tiến độ */}
+            <div>
+              <label className="block mb-1.5 text-[11px] font-semibold text-outline">Progress Notes for Client</label>
+              <textarea
+                rows={2}
+                placeholder="e.g. Completed clean lineart for outfit and weapon details..."
+                className="w-full rounded-xl border border-white/15 bg-brand-navy/80 p-3 text-xs text-on-surface placeholder:text-outline focus:border-brand-periwinkle focus:outline-none"
+              />
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setShowSubmitModal(true)}
+              className="w-full rounded-xl bg-amber-400 py-2.5 text-xs font-bold text-brand-navy shadow-md transition hover:brightness-110 flex items-center justify-center gap-2"
+            >
+              🚀 Submit Milestone Progress to Client
+            </button>
+          </div>
+
+          {/* Panel 2: Final Deliverables Master Package Uploader */}
+          <div className="glass-container flex flex-col rounded-3xl border border-white/10 p-5 space-y-4">
+            <div>
+              <h3 className="font-bold text-sm text-on-surface">Final Deliverables Master Package Uploader</h3>
+              <p className="text-[11px] text-outline">Upload original un-watermarked master files (.PSD, .SAI, .ZIP). Stored securely in AWS S3 Private Bucket.</p>
+            </div>
+
+            <div 
+              onClick={() => setShowDeliveryModal(true)}
+              className="flex items-center justify-center gap-3 rounded-2xl border border-white/15 bg-white/5 p-4 cursor-pointer transition hover:bg-white/10"
+            >
+              <FileArchive size={24} className="text-brand-periwinkle" />
+              <div className="text-left">
+                <p className="text-xs font-bold text-on-surface">Upload Un-watermarked Master File (.PSD, .ZIP)</p>
+                <p className="text-[10px] text-outline">Unlocked by Client only after 100% Milestone Approvals</p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setShowDeliveryModal(true)}
+              className="w-full rounded-xl border border-emerald-500/40 bg-emerald-500/20 py-2.5 text-xs font-bold text-emerald-300 shadow-md transition hover:bg-emerald-500/30 flex items-center justify-center gap-2"
+            >
+              📦 Deliver Final Master Artwork Package
+            </button>
+          </div>
+
+          {/* Panel 3: Thanh Thao tác Hợp đồng (Conditional Rendering theo Trạng thái & Role) */}
+          <div className="glass-container flex flex-wrap items-center justify-between rounded-2xl border border-white/10 p-3 text-xs gap-2">
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] font-bold text-outline uppercase tracking-wider">Hành động:</span>
+              <span className="rounded-full border border-white/15 bg-white/5 px-2 py-0.5 text-[10px] font-semibold text-brand-periwinkle">
+                {isCreator ? 'Artist (Creator)' : 'Khách hàng (Client)'}
+              </span>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              {/* TRẠNG THÁI 1: InProgress (Đang vẽ / Milestone đang nộp) */}
+              {(commissionStatus === 'InProgress' || commissionStatus === 'PendingAcceptance' || commissionStatus === 'Negotiating') && (
+                <>
+                  {isClient ? (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => setShowApprovalModal(true)}
+                        className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-[11px] font-bold text-emerald-300 transition hover:bg-emerald-500/20"
+                      >
+                        🔍 Duyệt mốc / Yêu cầu sửa
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setShowCancelModal(true)}
+                        className="inline-flex items-center gap-1.5 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-1.5 text-[11px] font-bold text-red-300 transition hover:bg-red-500/20"
+                      >
+                        🚫 Hủy đơn
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => setShowSubmitModal(true)}
+                        className="inline-flex items-center gap-1.5 rounded-xl border border-purple-500/30 bg-purple-500/10 px-3 py-1.5 text-[11px] font-bold text-purple-300 transition hover:bg-purple-500/20"
+                      >
+                        📤 Nộp bản vẽ (Submit WIP)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setShowCancelModal(true)}
+                        className="inline-flex items-center gap-1.5 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-1.5 text-[11px] font-bold text-red-300 transition hover:bg-red-500/20"
+                      >
+                        🚫 Hủy đơn
+                      </button>
+                    </>
+                  )}
+                </>
+              )}
+
+              {/* TRẠNG THÁI 2: SubmittedFinal / Delivered (Đã giao file gốc cuối cùng) */}
+              {(commissionStatus === 'SubmittedFinal' || commissionStatus === 'Delivered') && (
+                <>
+                  {isClient ? (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => setShowDeliveryModal(true)}
+                        className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-[11px] font-bold text-emerald-300 transition hover:bg-emerald-500/20"
+                      >
+                        ✅ Nghiệm thu &amp; Nhận file gốc
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setShowCancelModal(true)}
+                        className="inline-flex items-center gap-1.5 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-[11px] font-bold text-amber-300 transition hover:bg-amber-500/20"
+                      >
+                        ⚖️ Mở khiếu nại (Dispute)
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <span className="inline-flex items-center gap-1.5 rounded-xl border border-amber-400/30 bg-amber-500/10 px-3 py-1.5 text-[11px] font-bold text-amber-300">
+                        ⏳ Chờ khách nghiệm thu
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setShowDeliveryModal(true)}
+                        className="inline-flex items-center gap-1.5 rounded-xl border border-indigo-500/30 bg-indigo-500/10 px-3 py-1.5 text-[11px] font-bold text-indigo-300 transition hover:bg-indigo-500/20"
+                      >
+                        📦 Bàn giao File HD
+                      </button>
+                    </>
+                  )}
+                </>
+              )}
+
+              {/* TRẠNG THÁI 3: Completed (Đã xong đơn hàng) */}
+              {commissionStatus === 'Completed' && (
+                <>
+                  {isClient ? (
+                    <button
+                      type="button"
+                      onClick={() => setShowReviewModal(true)}
+                      className="inline-flex items-center gap-1.5 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-[11px] font-bold text-amber-300 transition hover:bg-amber-500/20"
+                    >
+                      ⭐ Đánh giá Creator (1-5★)
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setShowReviewModal(true)}
+                      className="inline-flex items-center gap-1.5 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-[11px] font-bold text-amber-300 transition hover:bg-amber-500/20"
+                    >
+                      💬 Phản hồi đánh giá
+                    </button>
+                  )}
+                </>
+              )}
+
+              {/* TRẠNG THÁI 4: Disputed / Cancelled (Có tranh chấp / mâu thuẫn) */}
+              {(commissionStatus === 'Disputed' || commissionStatus === 'Cancelled') && (
+                <button
+                  type="button"
+                  onClick={() => setShowCancelModal(true)}
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-1.5 text-[11px] font-bold text-red-300 transition hover:bg-red-500/20"
+                >
+                  ⚖️ Mở khiếu nại (Dispute)
+                </button>
+              )}
             </div>
           </div>
-        ))}
-
-        {partnerTyping && (
-          <div className="flex items-center gap-2 text-[11px] text-outline" aria-live="polite">
-            <span className="flex gap-1">
-              <span className="size-1.5 animate-bounce rounded-full bg-brand-periwinkle [animation-delay:0ms]" />
-              <span className="size-1.5 animate-bounce rounded-full bg-brand-periwinkle [animation-delay:150ms]" />
-              <span className="size-1.5 animate-bounce rounded-full bg-brand-periwinkle [animation-delay:300ms]" />
-            </span>
-            Đối tác đang gõ…
-          </div>
-        )}
-
-        <div ref={bottomRef} />
+        </div>
       </div>
 
-      {/* Khung soạn thảo tin nhắn */}
-      <div className="mt-3">
-        <input
-          type="file"
-          ref={fileInputRef}
-          className="hidden"
-          onChange={(e) => {
-            const file = e.target.files?.[0];
-            if (file) void handleSendFile(file);
-            e.target.value = '';
-          }}
-        />
-
-        <form onSubmit={handleSendMessage} className="flex items-center gap-2">
-          <button
-            type="button"
-            disabled={uploading || room.isLocked}
-            onClick={() => fileInputRef.current?.click()}
-            className="flex size-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-outline transition hover:bg-white/10 hover:text-white disabled:opacity-50"
-            title="Đính kèm ảnh hoặc tài liệu phác thảo"
-          >
-            <Paperclip size={18} className={uploading ? 'animate-spin' : ''} />
-          </button>
-
-          <input
-            type="text"
-            disabled={room.isLocked}
-            value={inputBody}
-            onChange={(e) => {
-              setInputBody(e.target.value);
-              chat.notifyTyping();
+      {/* MODALS NGHIỆP VỤ HỢP ĐỒNG */}
+      {room.commissionId && (
+        <>
+          <SubmitMilestoneModal
+            isOpen={showSubmitModal}
+            onClose={() => setShowSubmitModal(false)}
+            commissionId={room.commissionId}
+            milestoneId=""
+            milestoneTitle="Bản phác thảo nhân vật (Mốc #1)"
+            onSuccess={() => {
+              setShowSubmitModal(false);
+              refresh();
             }}
-            placeholder={room.isLocked ? 'Phòng làm việc đã đóng.' : 'Nhập tin nhắn trao đổi...'}
-            className="flex-1 rounded-2xl border border-white/15 bg-brand-navy/80 px-4 py-3 text-xs text-on-surface placeholder:text-outline focus:border-brand-periwinkle focus:outline-none disabled:opacity-50"
           />
 
-          <button
-            type="submit"
-            disabled={!inputBody.trim() || sending || room.isLocked}
-            className="flex size-11 items-center justify-center rounded-2xl bg-brand-periwinkle text-brand-navy shadow-md transition hover:brightness-110 disabled:opacity-50"
-            title="Gửi tin nhắn"
-          >
-            {sending ? <RefreshCw size={16} className="animate-spin" /> : <Send size={16} />}
-          </button>
-        </form>
-      </div>
+          <ApprovalRevisionModal
+            isOpen={showApprovalModal}
+            onClose={() => setShowApprovalModal(false)}
+            commissionId={room.commissionId}
+            milestoneId=""
+            wipPreviewUrl="https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?auto=format&fit=crop&w=1200&q=80"
+            maxRevisions={3}
+            revisionCount={0}
+            onSuccess={() => {
+              setShowApprovalModal(false);
+              refresh();
+            }}
+          />
+
+          <FinalDeliveryModal
+            isOpen={showDeliveryModal}
+            onClose={() => setShowDeliveryModal(false)}
+            commissionId={room.commissionId}
+            onSuccess={() => {
+              setShowDeliveryModal(false);
+              refresh();
+            }}
+          />
+
+          <ReviewRatingModal
+            isOpen={showReviewModal}
+            onClose={() => setShowReviewModal(false)}
+            commissionId={room.commissionId}
+            creatorName="Linh Nguyen"
+            onReviewSubmitted={() => {
+              setShowReviewModal(false);
+              refresh();
+            }}
+          />
+
+          <CancelRefundModal
+            isOpen={showCancelModal}
+            onClose={() => setShowCancelModal(false)}
+            commissionId={room.commissionId}
+            onSuccess={() => {
+              setShowCancelModal(false);
+              refresh();
+            }}
+          />
+        </>
+      )}
     </div>
   );
 }
