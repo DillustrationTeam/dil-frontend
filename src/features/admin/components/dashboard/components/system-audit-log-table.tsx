@@ -1,8 +1,7 @@
 'use client';
 
 import React, { useMemo, useState } from 'react';
-import { Activity } from 'lucide-react';
-import { Pagination } from '@/components/ui/pagination';
+import { Activity, ChevronLeft, ChevronRight } from 'lucide-react';
 import { AdminRecentTransactionDto } from '@/features/admin/types/admin.types';
 
 interface SystemAuditLogTableProps {
@@ -119,13 +118,29 @@ export function SystemAuditLogTable({
             Page <span className="text-white font-bold">{safeAuditPage + 1}</span> of{' '}
             <span className="text-white font-bold">{totalAuditPages}</span> (10 items / page)
           </span>
-          <Pagination
-            page={safeAuditPage}
-            totalPages={totalAuditPages}
-            isFirst={safeAuditPage === 0}
-            isLast={safeAuditPage >= totalAuditPages - 1}
-            onPageChange={setAuditPage}
-          />
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => setAuditPage((p) => Math.max(0, p - 1))}
+              disabled={safeAuditPage === 0}
+              className="p-1.5 rounded-lg border border-white/10 bg-black/40 text-white hover:bg-white/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+              title="Previous page"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <span className="px-2 text-xs font-semibold text-white">
+              {safeAuditPage + 1} / {totalAuditPages}
+            </span>
+            <button
+              type="button"
+              onClick={() => setAuditPage((p) => Math.min(totalAuditPages - 1, p + 1))}
+              disabled={safeAuditPage >= totalAuditPages - 1}
+              className="p-1.5 rounded-lg border border-white/10 bg-black/40 text-white hover:bg-white/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+              title="Next page"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       )}
     </div>
