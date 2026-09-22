@@ -23,6 +23,7 @@
 .eslintcache
 next-env.d.ts
 
+# raw design assets & temporary skills
 # raw design assets, zips & temporary skills
 stitch_dillustration_marketplace_design_suite/
 stitch_dillustration_marketplace_design_suite.zip
@@ -31,3 +32,4 @@ docs/design-suite/
 .agents/
 skills-lock.json
 CLAUDE.md
+
