@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,21 +8,42 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
   <style>
-    body { font-family: 'Space Grotesk', sans-serif; background: radial-gradient(circle at 50% 15%, #1d2133 0%, #0d0e15 100%); color: #e4e1e5; }
-    h1, h2, h3, .font-h1 { font-family: 'Sora', sans-serif; }
-    .glass-card { background: rgba(22, 25, 38, 0.85); backdrop-filter: blur(32px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 28px; }
+    body {
+      font-family: 'Space Grotesk', sans-serif;
+      background: radial-gradient(circle at 50% 15%, #1d2133 0%, #0d0e15 100%);
+      color: #e4e1e5;
+    }
+
+    h1,
+    h2,
+    h3,
+    .font-h1 {
+      font-family: 'Sora', sans-serif;
+    }
+
+    .glass-card {
+      background: rgba(22, 25, 38, 0.85);
+      backdrop-filter: blur(32px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 28px;
+    }
   </style>
 </head>
+
 <body class="min-h-screen flex flex-col justify-between pb-24">
 
   <!-- Admin Header -->
   <header class="w-full border-b border-white/10 bg-[#0f1017]/90 backdrop-blur-md px-8 py-4 sticky top-0 z-40">
     <div class="max-w-7xl mx-auto flex justify-between items-center">
       <a href="scr05_marketplace_feed_preview.html" class="text-2xl font-black font-h1 text-white">dillustration</a>
-      <span class="text-xs px-3.5 py-1.5 rounded-full bg-red-500/20 text-red-300 border border-red-500/30 font-bold uppercase">
+      <span
+        class="text-xs px-3.5 py-1.5 rounded-full bg-red-500/20 text-red-300 border border-red-500/30 font-bold uppercase">
         ADMINISTRATOR CONSOLE (/admin)
       </span>
     </div>
@@ -29,12 +51,13 @@
 
   <!-- Main Layout: Admin Sidebar + Dashboard Content -->
   <main class="max-w-7xl w-full mx-auto px-6 py-8 flex-grow grid grid-cols-1 lg:grid-cols-12 gap-8">
-    
+
     <!-- LEFT SIDEBAR: ADMIN SIDEBAR -->
     <aside class="lg:col-span-3 glass-card p-6 space-y-6 flex flex-col justify-between h-fit">
       <div class="space-y-6">
         <div class="flex items-center gap-3 border-b border-white/10 pb-4">
-          <div class="w-12 h-12 rounded-full bg-red-500/20 text-red-400 font-extrabold flex items-center justify-center font-h1 text-sm border border-red-500/40">
+          <div
+            class="w-12 h-12 rounded-full bg-red-500/20 text-red-400 font-extrabold flex items-center justify-center font-h1 text-sm border border-red-500/40">
             ADM
           </div>
           <div>
@@ -44,27 +67,33 @@
         </div>
 
         <nav class="space-y-1 text-xs">
-          <a href="scr24_admin_dashboard_kpi_preview.html" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-red-500/20 text-red-300 font-bold border border-red-500/30">
+          <a href="scr24_admin_dashboard_kpi_preview.html"
+            class="flex items-center gap-3 px-4 py-3 rounded-xl bg-red-500/20 text-red-300 font-bold border border-red-500/30">
             <span class="material-symbols-outlined text-lg">equalizer</span>
             <span>System Overview KPIs</span>
           </a>
-          <a href="scr23_user_management_sanctions_preview.html" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-[#8A8FA9] hover:text-white font-bold">
+          <a href="scr23_user_management_sanctions_preview.html"
+            class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-[#8A8FA9] hover:text-white font-bold">
             <span class="material-symbols-outlined text-lg">group</span>
             <span>User Management</span>
           </a>
-          <a href="scr21_creator_application_review_preview.html" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-[#8A8FA9] hover:text-white font-bold">
+          <a href="scr21_creator_application_review_preview.html"
+            class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-[#8A8FA9] hover:text-white font-bold">
             <span class="material-symbols-outlined text-lg">how_to_reg</span>
             <span>Creator Verifications</span>
           </a>
-          <a href="scr20_content_moderation_queue_preview.html" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-[#8A8FA9] hover:text-white font-bold">
+          <a href="scr20_content_moderation_queue_preview.html"
+            class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-[#8A8FA9] hover:text-white font-bold">
             <span class="material-symbols-outlined text-lg">shield</span>
             <span>Content & AI Moderation</span>
           </a>
-          <a href="scr22_dispute_arbitration_preview.html" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-[#8A8FA9] hover:text-white font-bold">
+          <a href="scr22_dispute_arbitration_preview.html"
+            class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-[#8A8FA9] hover:text-white font-bold">
             <span class="material-symbols-outlined text-lg">gavel</span>
             <span>Dispute Arbitration</span>
           </a>
-          <a href="scr18_platform_fee_policy_preview.html" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-[#8A8FA9] hover:text-white font-bold">
+          <a href="scr18_platform_fee_policy_preview.html"
+            class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-[#8A8FA9] hover:text-white font-bold">
             <span class="material-symbols-outlined text-lg">tune</span>
             <span>Platform Fee Config</span>
           </a>
@@ -74,12 +103,13 @@
 
     <!-- RIGHT CONTENT: ADMIN KPIS & SYSTEM OVERVIEW -->
     <div class="lg:col-span-9 space-y-6">
-      
+
       <!-- Header -->
       <div class="flex justify-between items-center">
         <div>
           <h1 class="font-h1 text-2xl font-extrabold text-white">System Overview & Financial KPIs (SCR-24)</h1>
-          <p class="text-xs text-[#8A8FA9]">Real-time system operational metrics, total GMV, and platform revenue analytics.</p>
+          <p class="text-xs text-[#8A8FA9]">Real-time system operational metrics, total GMV, and platform revenue
+            analytics.</p>
         </div>
       </div>
 
@@ -109,7 +139,7 @@
 
       <!-- Financial & Operational Analytics Cards -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
-        
+
         <!-- Revenue Analytics Card -->
         <div class="glass-card p-6 space-y-4">
           <div class="flex justify-between items-center border-b border-white/10 pb-3">
@@ -136,7 +166,9 @@
             </div>
             <div class="flex-1 flex flex-col items-center gap-2">
               <span class="text-[9px] text-emerald-400 font-bold">$3.1k</span>
-              <div class="w-full bg-emerald-400 h-40 rounded-t-lg transition-all shadow-[0_0_15px_rgba(16,185,129,0.4)]"></div>
+              <div
+                class="w-full bg-emerald-400 h-40 rounded-t-lg transition-all shadow-[0_0_15px_rgba(16,185,129,0.4)]">
+              </div>
               <span class="text-[10px] font-bold text-white">Aug</span>
             </div>
           </div>
@@ -207,26 +239,34 @@
               <tr>
                 <td class="py-3.5 px-4 font-mono text-[#C5C9F8]">#LOG-9012</td>
                 <td class="py-3.5 px-4 text-[#8A8FA9]">Today, 11:15 AM</td>
-                <td class="py-3.5 px-4"><span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold">ESCROW_RELEASE</span></td>
+                <td class="py-3.5 px-4"><span
+                    class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold">ESCROW_RELEASE</span></td>
                 <td class="py-3.5 px-4">@CyberClient</td>
                 <td class="py-3.5 px-4 font-mono">Commission #CMD-8492 Stage 1</td>
-                <td class="py-3.5 px-4 text-center"><span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold text-[10px]">SUCCESS</span></td>
+                <td class="py-3.5 px-4 text-center"><span
+                    class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold text-[10px]">SUCCESS</span>
+                </td>
               </tr>
               <tr>
                 <td class="py-3.5 px-4 font-mono text-[#C5C9F8]">#LOG-9011</td>
                 <td class="py-3.5 px-4 text-[#8A8FA9]">Today, 10:30 AM</td>
-                <td class="py-3.5 px-4"><span class="px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 font-bold">CREATOR_VERIFIED</span></td>
+                <td class="py-3.5 px-4"><span
+                    class="px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 font-bold">CREATOR_VERIFIED</span></td>
                 <td class="py-3.5 px-4">Admin @SystemAdmin</td>
                 <td class="py-3.5 px-4 font-mono">Creator @Etherea_Vox</td>
-                <td class="py-3.5 px-4 text-center"><span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold text-[10px]">SUCCESS</span></td>
+                <td class="py-3.5 px-4 text-center"><span
+                    class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold text-[10px]">SUCCESS</span>
+                </td>
               </tr>
               <tr>
                 <td class="py-3.5 px-4 font-mono text-[#C5C9F8]">#LOG-9010</td>
                 <td class="py-3.5 px-4 text-[#8A8FA9]">Today, 09:45 AM</td>
-                <td class="py-3.5 px-4"><span class="px-2 py-0.5 rounded bg-red-500/20 text-red-300 font-bold">AI_NSFW_FLAG</span></td>
+                <td class="py-3.5 px-4"><span
+                    class="px-2 py-0.5 rounded bg-red-500/20 text-red-300 font-bold">AI_NSFW_FLAG</span></td>
                 <td class="py-3.5 px-4">System AI Scanner</td>
                 <td class="py-3.5 px-4 font-mono">Artwork #ART-9920</td>
-                <td class="py-3.5 px-4 text-center"><span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold text-[10px]">FLAGGED</span></td>
+                <td class="py-3.5 px-4 text-center"><span
+                    class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold text-[10px]">FLAGGED</span></td>
               </tr>
             </tbody>
           </table>
@@ -238,21 +278,34 @@
   </main>
 
   <!-- FLOATING SYSTEM SCREEN QUICK NAVIGATOR BAR -->
-  <div id="quickNavigator" class="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 bg-[#0f1017]/95 backdrop-blur-xl border border-white/20 p-3 rounded-full shadow-[0_10px_30px_rgba(0,0,0,0.8)] flex items-center gap-3 text-xs max-w-5xl w-[92%] mx-auto justify-between px-6">
+  <div id="quickNavigator"
+    class="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 bg-[#0f1017]/95 backdrop-blur-xl border border-white/20 p-3 rounded-full shadow-[0_10px_30px_rgba(0,0,0,0.8)] flex items-center gap-3 text-xs max-w-5xl w-[92%] mx-auto justify-between px-6">
     <div class="flex items-center gap-2 font-bold font-h1 text-[#C5C9F8] shrink-0">
       <span class="material-symbols-outlined text-base">explore</span>
       <span class="hidden sm:inline">Screen Navigator</span>
     </div>
-    
+
     <div class="flex items-center gap-2 overflow-x-auto py-1 text-[11px]">
-      <a href="scr05_marketplace_feed_preview.html" class="px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold whitespace-nowrap">Marketplace (SCR-05)</a>
-      <a href="scr20_content_moderation_queue_preview.html" class="px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold whitespace-nowrap">Moderation (SCR-20)</a>
-      <a href="scr21_creator_application_review_preview.html" class="px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold whitespace-nowrap">Creator Apps (SCR-21)</a>
-      <a href="scr22_dispute_arbitration_preview.html" class="px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold whitespace-nowrap">Arbitration (SCR-22)</a>
-      <a href="scr23_user_management_sanctions_preview.html" class="px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold whitespace-nowrap">Sanctions (SCR-23)</a>
-      <a href="scr24_admin_dashboard_kpi_preview.html" class="px-3 py-1 rounded-full bg-red-500 text-black font-bold whitespace-nowrap">Admin (SCR-24)</a>
+      <a href="scr05_marketplace_feed_preview.html"
+        class="px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold whitespace-nowrap">Marketplace
+        (SCR-05)</a>
+      <a href="scr20_content_moderation_queue_preview.html"
+        class="px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold whitespace-nowrap">Moderation
+        (SCR-20)</a>
+      <a href="scr21_creator_application_review_preview.html"
+        class="px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold whitespace-nowrap">Creator Apps
+        (SCR-21)</a>
+      <a href="scr22_dispute_arbitration_preview.html"
+        class="px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold whitespace-nowrap">Arbitration
+        (SCR-22)</a>
+      <a href="scr23_user_management_sanctions_preview.html"
+        class="px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold whitespace-nowrap">Sanctions
+        (SCR-23)</a>
+      <a href="scr24_admin_dashboard_kpi_preview.html"
+        class="px-3 py-1 rounded-full bg-red-500 text-black font-bold whitespace-nowrap">Admin (SCR-24)</a>
     </div>
   </div>
 
 </body>
+
 </html>

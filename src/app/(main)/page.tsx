@@ -73,8 +73,9 @@ export default function MarketplaceHomePage() {
               <Image
                 src="/weblogo.png"
                 alt="dillustration"
-                width={120}
-                height={56}
+                width={160}
+                height={64}
+                priority
                 className="h-14 md:h-16 w-auto object-contain hover:scale-105 transition-transform"
               />
             </Link>
@@ -429,8 +430,8 @@ export default function MarketplaceHomePage() {
               <Image
                 src="/weblogo.png"
                 alt="dillustration"
-                width={100}
-                height={48}
+                width={160}
+                height={56}
                 className="h-12 md:h-14 w-auto object-contain hover:opacity-80 transition-opacity"
               />
             </Link>
