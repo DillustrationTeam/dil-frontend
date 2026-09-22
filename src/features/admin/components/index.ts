@@ -5,3 +5,5 @@ export * from './vertical-navbar';
 export * from './top-navbar';
 export * from './admin-layout';
 export * from './platform-fee-policy';
+export * from './content-moderation';
+

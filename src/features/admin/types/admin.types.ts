@@ -143,3 +143,5 @@ export interface StatisticsQuery {
 }
 
 export * from './platform-fee.types';
+export * from './moderation.types';
+
