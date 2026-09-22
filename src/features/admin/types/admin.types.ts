@@ -144,4 +144,5 @@ export interface StatisticsQuery {
 
 export * from './platform-fee.types';
 export * from './moderation.types';
+export * from './user-management.types';
 

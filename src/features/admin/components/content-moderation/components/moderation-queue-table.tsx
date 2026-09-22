@@ -258,37 +258,40 @@ export function ModerationQueueTable({
         </table>
       </div>
 
-      {/* Pagination Bar */}
-      {meta.totalPages > 1 && (
-        <div className="flex items-center justify-between pt-4 border-t border-white/10 text-xs">
-          <div className="text-[#8A8FA9] text-[11px]">
-            Showing page <span className="text-white font-bold">{meta.page}</span> of{' '}
-            <span className="text-white font-bold">{meta.totalPages}</span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              disabled={meta.page <= 1 || isLoading}
-              onClick={() => onPageChange(meta.page - 1)}
-              className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white font-bold disabled:opacity-40 disabled:pointer-events-none transition-colors cursor-pointer"
-            >
-              <ChevronLeft className="w-4 h-4" />
-              <span>Previous</span>
-            </button>
-
-            <button
-              type="button"
-              disabled={meta.page >= meta.totalPages || isLoading}
-              onClick={() => onPageChange(meta.page + 1)}
-              className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white font-bold disabled:opacity-40 disabled:pointer-events-none transition-colors cursor-pointer"
-            >
-              <span>Next</span>
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
+      {/* Pagination Bar (Always visible with page size = 10) */}
+      <div className="flex items-center justify-between pt-4 border-t border-white/10 text-xs">
+        <div className="text-[#8A8FA9] text-[11px]">
+          Showing page <span className="text-white font-bold">{meta.page}</span> of{' '}
+          <span className="text-white font-bold">{Math.max(1, meta.totalPages)}</span>
+          <span className="ml-1 text-[#8A8FA9]/70">({meta.totalCount} artworks)</span>
         </div>
-      )}
+
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            disabled={meta.page <= 1 || isLoading}
+            onClick={() => onPageChange(meta.page - 1)}
+            className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white font-bold disabled:opacity-40 disabled:pointer-events-none transition-colors cursor-pointer"
+          >
+            <ChevronLeft className="w-4 h-4" />
+            <span>Previous</span>
+          </button>
+
+          <span className="px-3 py-1.5 rounded-lg bg-black/40 border border-white/10 text-white font-semibold text-xs">
+            Page <span className="font-bold text-red-300">{meta.page}</span> of {Math.max(1, meta.totalPages)}
+          </span>
+
+          <button
+            type="button"
+            disabled={meta.page >= meta.totalPages || isLoading}
+            onClick={() => onPageChange(meta.page + 1)}
+            className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white font-bold disabled:opacity-40 disabled:pointer-events-none transition-colors cursor-pointer"
+          >
+            <span>Next</span>
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

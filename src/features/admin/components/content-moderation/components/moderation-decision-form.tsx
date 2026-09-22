@@ -26,7 +26,6 @@ interface ModerationDecisionFormProps {
 export function ModerationDecisionForm({
   artworkId,
   isSubmitting,
-  currentStatus,
   onExecuteDecision,
 }: ModerationDecisionFormProps) {
   const [selectedAction, setSelectedAction] = useState<ModerationActionType>('approve');

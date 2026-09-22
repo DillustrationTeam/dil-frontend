@@ -1,69 +1,104 @@
 import {
-  AdminUserDto,
-  AdminUserFilters,
-  PagedResult,
-} from '@/features/admin/types/admin.types';
+  UserAccountStatus,
+  UserAdminDetailDto,
+  UserAdminListItemDto,
+  UserManagementFilters,
+  UserManagementMeta,
+} from '@/features/admin/types/user-management.types';
 
 export interface UserManagementState {
   users: {
-    data: PagedResult<AdminUserDto>;
-    filters: AdminUserFilters;
+    items: UserAdminListItemDto[];
+    loading: boolean;
+    error: string | null;
+    meta: UserManagementMeta;
+    filters: UserManagementFilters;
+  };
+  selectedUserId: string | null;
+  selectedUser: {
+    data: UserAdminDetailDto | null;
     loading: boolean;
     error: string | null;
   };
-  user: {
-    data: AdminUserDto;
-    loading: boolean;
+  sanctionAction: {
+    submitting: boolean;
     error: string | null;
+    successMessage: string | null;
+  };
+  rolesAction: {
+    submitting: boolean;
+    error: string | null;
+    successMessage: string | null;
   };
 }
 
-export const initialUser: AdminUserDto = {
-  id: '',
-  fullName: '',
-  email: '',
-  role: '',
-  status: '',
-  createdAt: null,
-};
-
 export const initialUserState: UserManagementState = {
   users: {
-    data: {
-      content: [],
-      page: 0,
-      size: 10,
-      totalPages: 0,
-      totalElements: 0,
-      isFirst: true,
-      isLast: true,
+    items: [],
+    loading: false,
+    error: null,
+    meta: {
+      page: 1,
+      pageSize: 10,
+      totalCount: 0,
+      totalPages: 1,
+      activeCount: 0,
+      lockedCount: 0,
     },
     filters: {
-      keyword: '',
-      role: null,
-      status: null,
+      search: '',
+      role: 'All',
+      status: 'All',
+      page: 1,
+      pageSize: 10,
     },
+  },
+  selectedUserId: null,
+  selectedUser: {
+    data: null,
     loading: false,
     error: null,
   },
-  user: {
-    data: initialUser,
-    loading: false,
+  sanctionAction: {
+    submitting: false,
     error: null,
+    successMessage: null,
+  },
+  rolesAction: {
+    submitting: false,
+    error: null,
+    successMessage: null,
   },
 };
 
-type UserAction =
+export type UserAction =
   | { type: 'GET_USERS_REQUEST' }
-  | { type: 'GET_USERS_SUCCESS'; payload: PagedResult<AdminUserDto> }
+  | {
+      type: 'GET_USERS_SUCCESS';
+      payload: { items: UserAdminListItemDto[]; meta: UserManagementMeta };
+    }
   | { type: 'GET_USERS_FAILURE'; payload: string }
-  | { type: 'GET_USER_REQUEST' }
-  | { type: 'GET_USER_SUCCESS'; payload: AdminUserDto }
-  | { type: 'GET_USER_FAILURE'; payload: string }
-  | { type: 'SET_FILTERS'; payload: { field: keyof AdminUserFilters; value: string | null } }
-  | { type: 'SET_PAGE'; payload: number };
+  | { type: 'SET_SEARCH_FILTER'; payload: string }
+  | { type: 'SET_ROLE_FILTER'; payload: string }
+  | { type: 'SET_STATUS_FILTER'; payload: UserAccountStatus }
+  | { type: 'SET_PAGE'; payload: number }
+  | { type: 'SET_PAGE_SIZE'; payload: number }
+  | { type: 'INSPECT_USER_REQUEST'; payload: string }
+  | { type: 'INSPECT_USER_SUCCESS'; payload: UserAdminDetailDto }
+  | { type: 'INSPECT_USER_FAILURE'; payload: string }
+  | { type: 'CLEAR_SELECTED_USER' }
+  | { type: 'APPLY_SANCTION_REQUEST' }
+  | { type: 'APPLY_SANCTION_SUCCESS'; payload: string }
+  | { type: 'APPLY_SANCTION_FAILURE'; payload: string }
+  | { type: 'UPDATE_ROLES_REQUEST' }
+  | { type: 'UPDATE_ROLES_SUCCESS'; payload: string }
+  | { type: 'UPDATE_ROLES_FAILURE'; payload: string }
+  | { type: 'CLEAR_FEEDBACK' };
 
-export function userReducer(state: UserManagementState, action: UserAction): UserManagementState {
+export function userReducer(
+  state: UserManagementState,
+  action: UserAction
+): UserManagementState {
   switch (action.type) {
     case 'GET_USERS_REQUEST':
       return {
@@ -74,15 +109,19 @@ export function userReducer(state: UserManagementState, action: UserAction): Use
           error: null,
         },
       };
+
     case 'GET_USERS_SUCCESS':
       return {
         ...state,
         users: {
           ...state.users,
           loading: false,
-          data: action.payload,
+          items: action.payload.items,
+          meta: action.payload.meta,
+          error: null,
         },
       };
+
     case 'GET_USERS_FAILURE':
       return {
         ...state,
@@ -92,59 +131,188 @@ export function userReducer(state: UserManagementState, action: UserAction): Use
           error: action.payload,
         },
       };
-    case 'GET_USER_REQUEST':
-      return {
-        ...state,
-        user: {
-          ...state.user,
-          loading: true,
-          error: null,
-        },
-      };
-    case 'GET_USER_SUCCESS':
-      return {
-        ...state,
-        user: {
-          ...state.user,
-          loading: false,
-          data: action.payload,
-        },
-      };
-    case 'GET_USER_FAILURE':
-      return {
-        ...state,
-        user: {
-          ...state.user,
-          loading: false,
-          error: action.payload,
-        },
-      };
-    case 'SET_FILTERS':
+
+    case 'SET_SEARCH_FILTER':
       return {
         ...state,
         users: {
           ...state.users,
           filters: {
             ...state.users.filters,
-            [action.payload.field]: action.payload.value,
-          },
-          data: {
-            ...state.users.data,
-            page: 0,
+            search: action.payload,
+            page: 1,
           },
         },
       };
+
+    case 'SET_ROLE_FILTER':
+      return {
+        ...state,
+        users: {
+          ...state.users,
+          filters: {
+            ...state.users.filters,
+            role: action.payload,
+            page: 1,
+          },
+        },
+      };
+
+    case 'SET_STATUS_FILTER':
+      return {
+        ...state,
+        users: {
+          ...state.users,
+          filters: {
+            ...state.users.filters,
+            status: action.payload,
+            page: 1,
+          },
+        },
+      };
+
     case 'SET_PAGE':
       return {
         ...state,
         users: {
           ...state.users,
-          data: {
-            ...state.users.data,
+          filters: {
+            ...state.users.filters,
             page: action.payload,
           },
         },
       };
+
+    case 'SET_PAGE_SIZE':
+      return {
+        ...state,
+        users: {
+          ...state.users,
+          filters: {
+            ...state.users.filters,
+            pageSize: action.payload,
+            page: 1,
+          },
+        },
+      };
+
+    case 'INSPECT_USER_REQUEST':
+      return {
+        ...state,
+        selectedUserId: action.payload,
+        selectedUser: {
+          ...state.selectedUser,
+          loading: true,
+          error: null,
+        },
+      };
+
+    case 'INSPECT_USER_SUCCESS':
+      return {
+        ...state,
+        selectedUser: {
+          data: action.payload,
+          loading: false,
+          error: null,
+        },
+      };
+
+    case 'INSPECT_USER_FAILURE':
+      return {
+        ...state,
+        selectedUser: {
+          ...state.selectedUser,
+          loading: false,
+          error: action.payload,
+        },
+      };
+
+    case 'CLEAR_SELECTED_USER':
+      return {
+        ...state,
+        selectedUserId: null,
+        selectedUser: {
+          data: null,
+          loading: false,
+          error: null,
+        },
+      };
+
+    case 'APPLY_SANCTION_REQUEST':
+      return {
+        ...state,
+        sanctionAction: {
+          submitting: true,
+          error: null,
+          successMessage: null,
+        },
+      };
+
+    case 'APPLY_SANCTION_SUCCESS':
+      return {
+        ...state,
+        sanctionAction: {
+          submitting: false,
+          error: null,
+          successMessage: action.payload,
+        },
+      };
+
+    case 'APPLY_SANCTION_FAILURE':
+      return {
+        ...state,
+        sanctionAction: {
+          submitting: false,
+          error: action.payload,
+          successMessage: null,
+        },
+      };
+
+    case 'UPDATE_ROLES_REQUEST':
+      return {
+        ...state,
+        rolesAction: {
+          submitting: true,
+          error: null,
+          successMessage: null,
+        },
+      };
+
+    case 'UPDATE_ROLES_SUCCESS':
+      return {
+        ...state,
+        rolesAction: {
+          submitting: false,
+          error: null,
+          successMessage: action.payload,
+        },
+      };
+
+    case 'UPDATE_ROLES_FAILURE':
+      return {
+        ...state,
+        rolesAction: {
+          submitting: false,
+          error: action.payload,
+          successMessage: null,
+        },
+      };
+
+    case 'CLEAR_FEEDBACK':
+      return {
+        ...state,
+        sanctionAction: {
+          ...state.sanctionAction,
+          error: null,
+          successMessage: null,
+        },
+        rolesAction: {
+          ...state.rolesAction,
+          error: null,
+          successMessage: null,
+        },
+      };
+
     default:
       return state;
   }

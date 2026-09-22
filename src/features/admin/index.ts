@@ -20,4 +20,5 @@ export * from './reducers/moderation.reducer';
 export * from './types/admin.types';
 export * from './types/platform-fee.types';
 export * from './types/moderation.types';
+export * from './types/user-management.types';
 
