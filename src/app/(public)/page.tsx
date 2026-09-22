@@ -114,10 +114,12 @@ export default function MarketplaceHomePage() {
           <div className="md:col-span-7 relative">
             <div className="animate-float relative z-10 p-4 glass-container rounded-[32px] periwinkle-glow">
               <div className="aspect-[16/10] overflow-hidden rounded-2xl relative group">
-                <img
+                <Image
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   alt="Digital Etherealism Landscape"
                   src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1200&auto=format&fit=crop"
+                  fill
+                  unoptimized
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#131316]/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col justify-end p-8">
                   <div className="space-y-1">
@@ -182,10 +184,12 @@ export default function MarketplaceHomePage() {
 
           <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
             <div className="md:col-span-8 group relative aspect-[16/9] overflow-hidden rounded-[28px] glass-container border border-white/10 periwinkle-glow cursor-pointer">
-              <img
+              <Image
                 className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
                 alt="Neural Horizons Collection"
                 src="https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?q=80&w=1200&auto=format&fit=crop"
+                fill
+                unoptimized
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#131316]/90 via-[#131316]/20 to-transparent p-10 flex flex-col justify-end">
                 <span className="text-xs text-[#A7ACD9] uppercase tracking-widest font-semibold mb-2">
@@ -200,10 +204,12 @@ export default function MarketplaceHomePage() {
 
             <div className="md:col-span-4 flex flex-col gap-8">
               <div className="h-1/2 group relative overflow-hidden rounded-[28px] glass-container border border-white/10 periwinkle-glow cursor-pointer min-h-[200px]">
-                <img
+                <Image
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                   alt="Crystal Flow Collection"
                   src="https://images.unsplash.com/photo-1579783902614-a3fb3927b675?q=80&w=800&auto=format&fit=crop"
+                  fill
+                  unoptimized
                 />
                 <div className="absolute inset-0 bg-[#131316]/50 p-6 flex flex-col justify-end">
                   <h4 className="font-h1 text-xl font-bold text-white">Crystal Flow</h4>
@@ -211,10 +217,12 @@ export default function MarketplaceHomePage() {
               </div>
 
               <div className="h-1/2 group relative overflow-hidden rounded-[28px] glass-container border border-white/10 periwinkle-glow cursor-pointer min-h-[200px]">
-                <img
+                <Image
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                   alt="Viscosity Genesis Collection"
                   src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800&auto=format&fit=crop"
+                  fill
+                  unoptimized
                 />
                 <div className="absolute inset-0 bg-[#131316]/50 p-6 flex flex-col justify-end">
                   <h4 className="font-h1 text-xl font-bold text-white">Viscosity Genesis</h4>
@@ -308,9 +316,11 @@ export default function MarketplaceHomePage() {
         <div className="flex flex-col md:flex-row justify-between items-center py-16 px-6 max-w-7xl mx-auto gap-10">
           <div className="space-y-3 text-center md:text-left">
             <Link href="/">
-              <img
+              <Image
                 src="/weblogo.png"
                 alt="dillustration"
+                width={160}
+                height={56}
                 className="h-12 md:h-14 w-auto object-contain hover:opacity-80 transition-opacity"
               />
             </Link>
