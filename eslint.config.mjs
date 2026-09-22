@@ -15,6 +15,8 @@ const eslintConfig = defineConfig([
       "docs/**",
       "scripts/**",
       "public/**",
+      "src/app/(main)/_wallet/**",
+      "**/_wallet/**",
     ],
   },
   ...nextVitals,

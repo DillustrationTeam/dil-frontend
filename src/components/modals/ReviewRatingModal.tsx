@@ -153,9 +153,10 @@ export default function ReviewRatingModal({
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl text-xs font-semibold bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-lg shadow-amber-500/25 hover:scale-[1.02] transition-all flex items-center gap-1.5"
+                  disabled={isSubmitting}
+                  className="px-5 py-2 rounded-xl text-xs font-semibold bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-lg shadow-amber-500/25 hover:scale-[1.02] transition-all flex items-center gap-1.5 disabled:opacity-50"
                 >
-                  <CheckCircle2 className="w-4 h-4" /> Submit Review
+                  <CheckCircle2 className="w-4 h-4" /> {isSubmitting ? 'Submitting...' : 'Submit Review'}
                 </button>
               </div>
             </form>

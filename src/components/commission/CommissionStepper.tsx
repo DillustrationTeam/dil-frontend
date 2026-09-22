@@ -65,7 +65,6 @@ export default function CommissionStepper({
           const Icon = step.icon;
           const isCompleted = currentStep > step.id;
           const isActive = currentStep === step.id;
-          const isPending = currentStep < step.id;
 
           return (
             <button
