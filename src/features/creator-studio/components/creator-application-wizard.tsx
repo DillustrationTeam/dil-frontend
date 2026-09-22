@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import { Pencil } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useCloudinaryUpload } from '@/features/creator-studio/hooks/use-cloudinary-upload';
 import { creatorApplicationService } from '@/features/creator-studio/services/creator-application.service';
@@ -15,7 +16,7 @@ type WizardFormState = {
   portfolioLinks: string[];
   portfolioUploads: string[];
   primaryStyle: string;
-  speedpaintVideoUrl: string;
+  speedpaintVideoUrls: string[];
 };
 
 const steps: Array<{ key: WizardStep; label: string }> = [
@@ -30,8 +31,27 @@ const defaultValues: WizardFormState = {
   portfolioLinks: [''],
   portfolioUploads: [],
   primaryStyle: '',
-  speedpaintVideoUrl: '',
+  speedpaintVideoUrls: [''],
 };
+
+// Danh sách gợi ý phong cách vẽ — người dùng vẫn có thể gõ tự do, đây chỉ là dropdown hỗ trợ chọn nhanh.
+const primaryStyleSuggestions = [
+  'Anime / Manga',
+  'Chibi',
+  'Semi-realistic',
+  'Realistic / Portrait',
+  'Concept Art',
+  'Character Design',
+  'Fanart',
+  'Fantasy Art',
+  'Pixel Art',
+  '3D / CGI',
+  'Flat Design / Vector',
+  'Watercolor',
+  'Traditional / Sketch',
+  'Environment / Background',
+  'Furry / Anthro',
+];
 
 const inputClass =
   'w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none focus:border-[#A7ACD9]';
@@ -65,6 +85,15 @@ function ImageUploadSlot({
             </span>
             <span className="text-xs">{isUploading ? 'Uploading...' : 'Click to upload'}</span>
           </div>
+        )}
+        {value && !isUploading && (
+          <span
+            title="Nhấn vào ảnh để chọn ảnh khác"
+            className="absolute bottom-2 right-2 flex items-center gap-1.5 rounded-full bg-black/50 px-3 py-1.5 text-white/80 opacity-80 backdrop-blur-sm transition hover:opacity-100"
+          >
+            <Pencil className="h-4 w-4" />
+            <span className="text-xs font-medium">Chỉnh sửa</span>
+          </span>
         )}
         <input
           id={inputId}
@@ -169,8 +198,27 @@ export function CreatorApplicationWizard({
     }));
   };
 
-  const updateField = (field: 'primaryStyle' | 'speedpaintVideoUrl', value: string) => {
-    setForm((previous) => ({ ...previous, [field]: value }));
+  const updateSpeedpaintLink = (index: number, value: string) => {
+    setForm((previous) => {
+      const next = [...previous.speedpaintVideoUrls];
+      next[index] = value;
+      return { ...previous, speedpaintVideoUrls: next };
+    });
+  };
+
+  const addSpeedpaintLink = () => {
+    setForm((previous) => ({ ...previous, speedpaintVideoUrls: [...previous.speedpaintVideoUrls, ''] }));
+  };
+
+  const removeSpeedpaintLink = (index: number) => {
+    setForm((previous) => ({
+      ...previous,
+      speedpaintVideoUrls: previous.speedpaintVideoUrls.filter((_, i) => i !== index),
+    }));
+  };
+
+  const updatePrimaryStyle = (value: string) => {
+    setForm((previous) => ({ ...previous, primaryStyle: value }));
   };
 
   const nextStep = () => {
@@ -204,12 +252,14 @@ export function CreatorApplicationWizard({
         ...form.portfolioUploads,
       ];
 
+      const speedpaintVideoUrls = form.speedpaintVideoUrls.map((link) => link.trim()).filter((link) => link.length > 0);
+
       const payload = {
         portfolioLinks,
         idProofUrl: form.idProofUrl,
         idProofBackUrl: form.idProofBackUrl,
         primaryStyle: form.primaryStyle.trim() || undefined,
-        speedpaintVideoUrl: form.speedpaintVideoUrl.trim() || undefined,
+        speedpaintVideoUrls: speedpaintVideoUrls.length > 0 ? speedpaintVideoUrls : undefined,
       };
 
       if (mode === 'edit') {
@@ -386,22 +436,49 @@ export function CreatorApplicationWizard({
               <label className="text-xs uppercase tracking-wider text-[#C7C5CF]">Phong cách chính</label>
               <input
                 value={form.primaryStyle}
-                onChange={(event) => updateField('primaryStyle', event.target.value)}
+                onChange={(event) => updatePrimaryStyle(event.target.value)}
                 className={inputClass}
-                placeholder="Anime / Concept Art"
+                placeholder="Chọn hoặc gõ phong cách của bạn"
+                list="primary-style-suggestions"
               />
+              <datalist id="primary-style-suggestions">
+                {primaryStyleSuggestions.map((style) => (
+                  <option key={style} value={style} />
+                ))}
+              </datalist>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-3">
               <label className="text-xs uppercase tracking-wider text-[#C7C5CF]">
                 Link video Speedpaint (minh chứng vẽ tay, tuỳ chọn)
               </label>
-              <input
-                value={form.speedpaintVideoUrl}
-                onChange={(event) => updateField('speedpaintVideoUrl', event.target.value)}
-                className={inputClass}
-                placeholder="https://youtube.com/watch?v=..."
-              />
+              {form.speedpaintVideoUrls.map((link, index) => (
+                <div key={index} className="flex gap-2">
+                  <input
+                    value={link}
+                    onChange={(event) => updateSpeedpaintLink(index, event.target.value)}
+                    className={inputClass}
+                    placeholder="https://youtube.com/watch?v=..."
+                  />
+                  {form.speedpaintVideoUrls.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => removeSpeedpaintLink(index)}
+                      className="rounded-xl border border-white/10 px-3 text-[#C7C5CF] hover:border-red-400 hover:text-red-400"
+                      aria-label="Remove link"
+                    >
+                      <span className="material-symbols-outlined text-lg">close</span>
+                    </button>
+                  )}
+                </div>
+              ))}
+              <button
+                type="button"
+                onClick={addSpeedpaintLink}
+                className="text-xs font-semibold text-[#A7ACD9] hover:underline"
+              >
+                + Thêm link khác
+              </button>
             </div>
           </>
         )}

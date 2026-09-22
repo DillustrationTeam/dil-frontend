@@ -4,7 +4,7 @@ export interface SubmitCreatorApplicationRequest {
   idProofUrl: string;
   idProofBackUrl: string;
   primaryStyle?: string;
-  speedpaintVideoUrl?: string;
+  speedpaintVideoUrls?: string[];
 }
 
 export interface SubmitCreatorApplicationResponse {
@@ -24,5 +24,5 @@ export interface MyCreatorApplicationDto {
   idProofUrl: string;
   idProofBackUrl: string;
   primaryStyle?: string | null;
-  speedpaintVideoUrl?: string | null;
+  speedpaintVideoUrls?: string[] | null;
 }

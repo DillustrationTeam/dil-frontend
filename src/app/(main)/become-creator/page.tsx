@@ -10,6 +10,9 @@ import { PageHeader } from '@/components/page-header';
 import { CreatorApplicationWizard } from '@/features/creator-studio/components/creator-application-wizard';
 import { creatorApplicationService } from '@/features/creator-studio/services/creator-application.service';
 import { MyCreatorApplicationDto } from '@/features/creator-studio/types/creator-application.types';
+import { splitPortfolioLinks } from '@/lib/portfolio-link';
+import { EmptyFieldNote } from '@/components/empty-field-note';
+import { ImageLightbox, LightboxImage } from '@/components/image-lightbox';
 
 const statusBanner: Record<
   MyCreatorApplicationDto['status'],
@@ -48,6 +51,7 @@ function ApplicationSummaryCard({
 }) {
   const [confirmingWithdraw, setConfirmingWithdraw] = useState(false);
   const confirmTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   const handleWithdrawClick = () => {
     if (!confirmingWithdraw) {
@@ -63,6 +67,14 @@ function ApplicationSummaryCard({
 
   const sampleImages = application.portfolioLinks.filter(isImageUrl);
   const sampleLinks = application.portfolioLinks.filter((link) => !isImageUrl(link));
+
+  // Gộp tất cả ảnh của đơn (CCCD trước/sau + sản phẩm mẫu) thành 1 gallery để
+  // bấm xem phóng to và dùng mũi tên duyệt qua hết ảnh đã nộp.
+  const galleryImages: LightboxImage[] = [
+    { src: application.idProofUrl, alt: 'Mặt trước CCCD' },
+    { src: application.idProofBackUrl, alt: 'Mặt sau CCCD' },
+    ...sampleImages.map((url) => ({ src: url, alt: 'Portfolio sample' })),
+  ];
 
   return (
     <div className="glass-container rounded-[32px] p-6 md:p-8 max-w-3xl mx-auto space-y-6">
@@ -92,30 +104,35 @@ function ApplicationSummaryCard({
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 text-sm">
-        {application.primaryStyle && (
-          <div>
-            <p className="text-xs uppercase tracking-wider text-[#C7C5CF]">Phong cách chính</p>
-            <p className="mt-1 text-white">{application.primaryStyle}</p>
-          </div>
-        )}
-        {application.speedpaintVideoUrl && (
-          <div>
-            <p className="text-xs uppercase tracking-wider text-[#C7C5CF]">Video speedpaint</p>
-            <a
-              href={application.speedpaintVideoUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-1 block truncate text-[#A7ACD9] underline"
-            >
-              {application.speedpaintVideoUrl}
-            </a>
-          </div>
-        )}
+        <div>
+          <p className="text-xs uppercase tracking-wider text-[#C7C5CF] mb-1">Phong cách chính</p>
+          {application.primaryStyle ? (
+            <p className="text-white">{application.primaryStyle}</p>
+          ) : (
+            <EmptyFieldNote />
+          )}
+        </div>
+        <div>
+          <p className="text-xs uppercase tracking-wider text-[#C7C5CF] mb-1">Video speedpaint</p>
+          {application.speedpaintVideoUrls && application.speedpaintVideoUrls.length > 0 ? (
+            <ul className="space-y-1">
+              {application.speedpaintVideoUrls.map((link) => (
+                <li key={link}>
+                  <a href={link} target="_blank" rel="noopener noreferrer" className="block truncate text-[#A7ACD9] underline">
+                    {link}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <EmptyFieldNote />
+          )}
+        </div>
       </div>
 
-      {sampleLinks.length > 0 && (
-        <div>
-          <p className="text-xs uppercase tracking-wider text-[#C7C5CF] mb-2">Portfolio links</p>
+      <div>
+        <p className="text-xs uppercase tracking-wider text-[#C7C5CF] mb-2">Portfolio links</p>
+        {sampleLinks.length > 0 ? (
           <ul className="space-y-1 text-sm">
             {sampleLinks.map((link) => (
               <li key={link}>
@@ -125,17 +142,24 @@ function ApplicationSummaryCard({
               </li>
             ))}
           </ul>
-        </div>
-      )}
+        ) : (
+          <EmptyFieldNote />
+        )}
+      </div>
 
       {sampleImages.length > 0 && (
         <div>
           <p className="text-xs uppercase tracking-wider text-[#C7C5CF] mb-2">Sản phẩm mẫu</p>
           <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
-            {sampleImages.map((url) => (
-              <div key={url} className="relative aspect-square overflow-hidden rounded-xl border border-white/10">
+            {sampleImages.map((url, sampleIndex) => (
+              <button
+                key={url}
+                type="button"
+                onClick={() => setLightboxIndex(2 + sampleIndex)}
+                className="relative aspect-square overflow-hidden rounded-xl border border-white/10 transition hover:opacity-90"
+              >
                 <Image src={url} alt="Portfolio sample" fill unoptimized className="object-cover" />
-              </div>
+              </button>
             ))}
           </div>
         </div>
@@ -144,14 +168,31 @@ function ApplicationSummaryCard({
       <div>
         <p className="text-xs uppercase tracking-wider text-[#C7C5CF] mb-2">CCCD/CMND đã nộp</p>
         <div className="grid grid-cols-2 gap-3">
-          <div className="relative aspect-[16/10] overflow-hidden rounded-xl border border-white/10">
+          <button
+            type="button"
+            onClick={() => setLightboxIndex(0)}
+            className="relative aspect-[16/10] overflow-hidden rounded-xl border border-white/10 transition hover:opacity-90"
+          >
             <Image src={application.idProofUrl} alt="Mặt trước" fill unoptimized className="object-cover" />
-          </div>
-          <div className="relative aspect-[16/10] overflow-hidden rounded-xl border border-white/10">
+          </button>
+          <button
+            type="button"
+            onClick={() => setLightboxIndex(1)}
+            className="relative aspect-[16/10] overflow-hidden rounded-xl border border-white/10 transition hover:opacity-90"
+          >
             <Image src={application.idProofBackUrl} alt="Mặt sau" fill unoptimized className="object-cover" />
-          </div>
+          </button>
         </div>
       </div>
+
+      {lightboxIndex !== null && (
+        <ImageLightbox
+          images={galleryImages}
+          index={lightboxIndex}
+          onClose={() => setLightboxIndex(null)}
+          onNavigate={setLightboxIndex}
+        />
+      )}
     </div>
   );
 }
@@ -260,13 +301,20 @@ export default function BecomeCreatorPage() {
             {isManageable && application && isEditing && (
               <CreatorApplicationWizard
                 mode="edit"
-                initialValues={{
-                  idProofUrl: application.idProofUrl,
-                  idProofBackUrl: application.idProofBackUrl,
-                  portfolioLinks: application.portfolioLinks.length > 0 ? application.portfolioLinks : [''],
-                  primaryStyle: application.primaryStyle ?? '',
-                  speedpaintVideoUrl: application.speedpaintVideoUrl ?? '',
-                }}
+                initialValues={(() => {
+                  const { manualLinks, uploadedImages } = splitPortfolioLinks(application.portfolioLinks);
+                  return {
+                    idProofUrl: application.idProofUrl,
+                    idProofBackUrl: application.idProofBackUrl,
+                    portfolioLinks: manualLinks.length > 0 ? manualLinks : [''],
+                    portfolioUploads: uploadedImages,
+                    primaryStyle: application.primaryStyle ?? '',
+                    speedpaintVideoUrls:
+                      application.speedpaintVideoUrls && application.speedpaintVideoUrls.length > 0
+                        ? application.speedpaintVideoUrls
+                        : [''],
+                  };
+                })()}
                 onDone={handleEditDone}
               />
             )}

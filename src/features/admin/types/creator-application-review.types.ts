@@ -7,7 +7,7 @@ export interface CreatorApplicationDto {
   applicantEmail: string;
   primaryStyle?: string | null;
   portfolioLinks: string[];
-  speedpaintVideoUrl?: string | null;
+  speedpaintVideoUrls?: string[] | null;
   socialLinks?: string[] | null;
   idProofUrl: string;
   idProofBackUrl: string;

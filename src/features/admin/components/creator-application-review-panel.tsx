@@ -4,6 +4,9 @@ import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import toast from 'react-hot-toast';
 import { creatorApplicationReviewService } from '@/features/admin/services/creator-application-review.service';
+import { isPortfolioImageUrl } from '@/lib/portfolio-link';
+import { EmptyFieldNote } from '@/components/empty-field-note';
+import { ImageLightbox, LightboxImage } from '@/components/image-lightbox';
 import {
   ApplicationStatusName,
   ApplicationStatusValue,
@@ -28,13 +31,6 @@ const statusBadgeClass: Record<ApplicationStatusName, string> = {
 
 type PendingAction = 'reject' | 'more-proof' | null;
 
-// portfolioLinks gộp chung 2 nguồn: link ứng viên tự dán (Behance/ArtStation...) và URL ảnh
-// mẫu họ upload lên Cloudinary — backend chỉ có 1 mảng string, không phân biệt loại.
-// Nhận diện link nào là ảnh (từ Cloudinary hoặc đuôi file ảnh) để hiện thumbnail thay vì text link.
-function isImageUrl(url: string): boolean {
-  return /\.(png|jpe?g|gif|webp|avif)(\?|$)/i.test(url) || url.includes('res.cloudinary.com');
-}
-
 export function CreatorApplicationReviewPanel() {
   const [statusFilter, setStatusFilter] = useState<ApplicationStatusName | 'All'>('Pending');
   const [applications, setApplications] = useState<CreatorApplicationDto[]>([]);
@@ -47,11 +43,25 @@ export function CreatorApplicationReviewPanel() {
   const [grantBadge, setGrantBadge] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   const selectedApplication = useMemo(
     () => applications.find((application) => application.id === selectedId) ?? null,
     [applications, selectedId]
   );
+
+  // Gộp tất cả ảnh của đơn (CCCD trước/sau + sản phẩm mẫu upload) thành 1 gallery để
+  // moderator bấm xem phóng to và dùng mũi tên duyệt qua hết ảnh của đơn đó.
+  const galleryImages = useMemo<LightboxImage[]>(() => {
+    if (!selectedApplication) return [];
+    return [
+      { src: selectedApplication.idProofUrl, alt: 'Mặt trước CCCD' },
+      { src: selectedApplication.idProofBackUrl, alt: 'Mặt sau CCCD' },
+      ...selectedApplication.portfolioLinks
+        .filter((link) => isPortfolioImageUrl(link))
+        .map((link) => ({ src: link, alt: 'Portfolio sample' })),
+    ];
+  }, [selectedApplication]);
 
   useEffect(() => {
     const loadApplications = async () => {
@@ -75,6 +85,7 @@ export function CreatorApplicationReviewPanel() {
     setReviewNote('');
     setPendingAction(null);
     setGrantBadge(true);
+    setLightboxIndex(null);
   };
 
   const handleSelect = (id: string) => {
@@ -82,6 +93,7 @@ export function CreatorApplicationReviewPanel() {
     setReviewNote('');
     setPendingAction(null);
     setGrantBadge(true);
+    setLightboxIndex(null);
   };
 
   const submitReview = async (status: number, note?: string) => {
@@ -241,43 +253,59 @@ export function CreatorApplicationReviewPanel() {
               <div className="space-y-2">
                 <span className="block text-xs font-bold text-white">Ảnh CCCD/CMND</span>
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="relative aspect-[16/10] overflow-hidden rounded-xl border border-white/10">
+                  <button
+                    type="button"
+                    onClick={() => setLightboxIndex(0)}
+                    className="relative aspect-[16/10] overflow-hidden rounded-xl border border-white/10 transition hover:opacity-90"
+                  >
                     <Image src={selectedApplication.idProofUrl} alt="Mặt trước CCCD" fill unoptimized className="object-cover" />
-                  </div>
-                  <div className="relative aspect-[16/10] overflow-hidden rounded-xl border border-white/10">
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setLightboxIndex(1)}
+                    className="relative aspect-[16/10] overflow-hidden rounded-xl border border-white/10 transition hover:opacity-90"
+                  >
                     <Image src={selectedApplication.idProofBackUrl} alt="Mặt sau CCCD" fill unoptimized className="object-cover" />
-                  </div>
+                  </button>
                 </div>
               </div>
 
+              <div className="space-y-2">
+                <span className="block text-xs font-bold text-white">Phong cách chính</span>
+                {selectedApplication.primaryStyle ? (
+                  <p className="text-xs text-[#A7ACD9]">{selectedApplication.primaryStyle}</p>
+                ) : (
+                  <EmptyFieldNote />
+                )}
+              </div>
+
               <div className="space-y-3">
-                {selectedApplication.portfolioLinks.some((link) => isImageUrl(link)) && (
+                {selectedApplication.portfolioLinks.some((link) => isPortfolioImageUrl(link)) && (
                   <div className="space-y-2">
                     <span className="block text-xs font-bold text-white">Sản phẩm mẫu (ảnh upload)</span>
                     <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
                       {selectedApplication.portfolioLinks
-                        .filter((link) => isImageUrl(link))
-                        .map((link) => (
-                          <a
+                        .filter((link) => isPortfolioImageUrl(link))
+                        .map((link, sampleIndex) => (
+                          <button
                             key={link}
-                            href={link}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="relative aspect-square overflow-hidden rounded-xl border border-white/10"
+                            type="button"
+                            onClick={() => setLightboxIndex(2 + sampleIndex)}
+                            className="relative aspect-square overflow-hidden rounded-xl border border-white/10 transition hover:opacity-90"
                           >
                             <Image src={link} alt="Portfolio sample" fill unoptimized className="object-cover" />
-                          </a>
+                          </button>
                         ))}
                     </div>
                   </div>
                 )}
 
-                {selectedApplication.portfolioLinks.some((link) => !isImageUrl(link)) && (
-                  <div className="space-y-2">
-                    <span className="block text-xs font-bold text-white">Link Portfolio (Behance/ArtStation...)</span>
+                <div className="space-y-2">
+                  <span className="block text-xs font-bold text-white">Link Portfolio (Behance/ArtStation...)</span>
+                  {selectedApplication.portfolioLinks.some((link) => !isPortfolioImageUrl(link)) ? (
                     <ul className="space-y-1 text-xs">
                       {selectedApplication.portfolioLinks
-                        .filter((link) => !isImageUrl(link))
+                        .filter((link) => !isPortfolioImageUrl(link))
                         .map((link) => (
                           <li key={link}>
                             <a href={link} target="_blank" rel="noreferrer" className="text-[#A7ACD9] hover:underline break-all">
@@ -286,23 +314,28 @@ export function CreatorApplicationReviewPanel() {
                           </li>
                         ))}
                     </ul>
-                  </div>
-                )}
+                  ) : (
+                    <EmptyFieldNote />
+                  )}
+                </div>
               </div>
 
-              {selectedApplication.speedpaintVideoUrl && (
-                <div className="space-y-2">
-                  <span className="block text-xs font-bold text-white">Speedpaint proof</span>
-                  <a
-                    href={selectedApplication.speedpaintVideoUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-xs text-[#A7ACD9] hover:underline break-all"
-                  >
-                    {selectedApplication.speedpaintVideoUrl}
-                  </a>
-                </div>
-              )}
+              <div className="space-y-2">
+                <span className="block text-xs font-bold text-white">Speedpaint proof</span>
+                {selectedApplication.speedpaintVideoUrls && selectedApplication.speedpaintVideoUrls.length > 0 ? (
+                  <ul className="space-y-1 text-xs">
+                    {selectedApplication.speedpaintVideoUrls.map((link) => (
+                      <li key={link}>
+                        <a href={link} target="_blank" rel="noreferrer" className="text-[#A7ACD9] hover:underline break-all">
+                          {link}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <EmptyFieldNote />
+                )}
+              </div>
 
               {selectedApplication.socialLinks && selectedApplication.socialLinks.length > 0 && (
                 <div className="space-y-2">
@@ -412,6 +445,15 @@ export function CreatorApplicationReviewPanel() {
           )}
         </div>
       </div>
+
+      {lightboxIndex !== null && galleryImages.length > 0 && (
+        <ImageLightbox
+          images={galleryImages}
+          index={lightboxIndex}
+          onClose={() => setLightboxIndex(null)}
+          onNavigate={setLightboxIndex}
+        />
+      )}
     </div>
   );
 }
