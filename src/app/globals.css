@@ -25,7 +25,7 @@
 }
 
 body {
-  background-color: #1F2335;
+  background: radial-gradient(circle at 50% 15%, #181b29 0%, #0d0e15 100%);
   color: #E4E1E5;
   font-family: 'Space Grotesk', sans-serif;
   overflow-x: hidden;
@@ -61,6 +61,23 @@ h1, h2, h3, h4, h5, h6, .font-h1 {
 
 .primary-glow:hover {
   box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+}
+
+.commission-primary {
+  background: #A7ACD9;
+  color: #1F2335;
+  font-weight: 700;
+  transition: background-color 150ms ease, box-shadow 150ms ease;
+}
+
+.commission-primary:hover:not(:disabled) {
+  background: #c2c7f6;
+  box-shadow: 0 0 18px rgba(167, 172, 217, 0.25);
+}
+
+.commission-primary:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
 }
 
 .floating-bg {

@@ -1,6 +1,6 @@
 import { apiClient } from '@/lib/api-client';
 import { ApiResponse } from '@/types/api.types';
-import { ArtworkDto } from '@/features/creator-studio/types/creator-profile.types';
+import { ArtworkDto, CreatorProfileDto } from '@/features/creator-studio/types/creator-profile.types';
 
 export interface MarketplaceArtwork extends ArtworkDto {
   creatorName?: string;
@@ -23,6 +23,12 @@ export const marketplaceService = {
       throw new Error(response.data.error?.details?.join(', ') || 'Failed to load artwork detail.');
     }
 
+    return response.data.data;
+  },
+
+  async getCreatorById(id: string): Promise<CreatorProfileDto> {
+    const response = await apiClient.get<ApiResponse<CreatorProfileDto>>(`/creator/${id}`);
+    if (response.data.error || !response.data.data) throw new Error('Failed to load creator.');
     return response.data.data;
   },
 };

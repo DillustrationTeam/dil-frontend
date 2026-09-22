@@ -5,17 +5,25 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { marketplaceService, MarketplaceArtwork } from '@/features/marketplace/services/marketplace.service';
+import CreateCommissionModal from '@/components/modals/CreateCommissionModal';
 
 export default function ArtworkDetailPage() {
   const params = useParams<{ id: string }>();
   const [artwork, setArtwork] = useState<MarketplaceArtwork | null>(null);
+  const [creatorName, setCreatorName] = useState<string | null>(null);
+  const [creatorAcceptingOrders, setCreatorAcceptingOrders] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isCommissionOpen, setIsCommissionOpen] = useState(false);
 
   useEffect(() => {
     const loadArtwork = async () => {
       try {
         const data = await marketplaceService.getArtworkById(params.id);
         setArtwork(data);
+        marketplaceService.getCreatorById(data.creatorProfileId).then(profile => {
+          setCreatorName(profile.displayName);
+          setCreatorAcceptingOrders(profile.isAcceptingOrders);
+        }).catch(() => {});
       } catch (error) {
         console.error('Failed to load artwork', error);
       } finally {
@@ -75,7 +83,7 @@ export default function ArtworkDetailPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-[#C7C5CF]">Creator</p>
-                <p className="text-lg font-semibold text-white">{artwork.creatorName ?? 'Verified Creator'}</p>
+                <p className="text-lg font-semibold text-white">{creatorName ?? artwork.creatorName ?? 'Verified Creator'}</p>
               </div>
               <span className="rounded-full bg-[#A7ACD9]/15 px-3 py-1 text-xs uppercase tracking-wider text-[#A7ACD9]">
                 {artwork.moderationStatus}
@@ -103,8 +111,8 @@ export default function ArtworkDetailPage() {
           </div>
 
           <div className="flex gap-3">
-            <button className="flex-1 rounded-xl bg-[#A7ACD9] px-5 py-3 font-bold text-[#1F2335]">
-              Commission this artist
+            <button type="button" disabled={creatorAcceptingOrders === false} onClick={() => setIsCommissionOpen(true)} className="flex-1 rounded-xl bg-[#A7ACD9] px-5 py-3 text-center font-bold text-[#1F2335] disabled:cursor-not-allowed disabled:opacity-50">
+              {creatorAcceptingOrders === false ? 'Creator đang tạm ngưng nhận đơn' : 'Commission this artist'}
             </button>
             <button className="rounded-xl border border-white/10 px-5 py-3 font-medium text-white">
               Save
@@ -112,6 +120,7 @@ export default function ArtworkDetailPage() {
           </div>
         </div>
       </div>
+      {isCommissionOpen && <CreateCommissionModal creatorId={artwork.creatorProfileId} creatorName={creatorName ?? artwork.creatorName ?? 'Creator'} onClose={() => setIsCommissionOpen(false)} />}
     </div>
   );
 }
