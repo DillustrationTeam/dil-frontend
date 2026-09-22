@@ -38,4 +38,26 @@ export const creatorApplicationService = {
       throw new Error(getApiErrorMessage(err, 'Failed to load your application status.'));
     }
   },
+
+  async updateApplication(data: SubmitCreatorApplicationRequest): Promise<void> {
+    try {
+      const response = await apiClient.put<ApiResponse<{ message: string }>>('/creator-applications/me', data);
+      if (response.data.error) {
+        throw new Error(response.data.error.detail || 'Failed to update your application.');
+      }
+    } catch (err) {
+      throw new Error(getApiErrorMessage(err, 'Failed to update your application.'));
+    }
+  },
+
+  async withdrawApplication(): Promise<void> {
+    try {
+      const response = await apiClient.delete<ApiResponse<{ message: string }>>('/creator-applications/me');
+      if (response.data.error) {
+        throw new Error(response.data.error.detail || 'Failed to withdraw your application.');
+      }
+    } catch (err) {
+      throw new Error(getApiErrorMessage(err, 'Failed to withdraw your application.'));
+    }
+  },
 };

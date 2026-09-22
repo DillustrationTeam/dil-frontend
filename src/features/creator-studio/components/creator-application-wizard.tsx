@@ -83,10 +83,18 @@ function ImageUploadSlot({
   );
 }
 
-export function CreatorApplicationWizard() {
+export function CreatorApplicationWizard({
+  mode = 'create',
+  initialValues,
+  onDone,
+}: {
+  mode?: 'create' | 'edit';
+  initialValues?: Partial<WizardFormState>;
+  onDone?: () => void;
+}) {
   const router = useRouter();
   const [stepIndex, setStepIndex] = useState(0);
-  const [form, setForm] = useState<WizardFormState>(defaultValues);
+  const [form, setForm] = useState<WizardFormState>({ ...defaultValues, ...initialValues });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const idFrontUpload = useCloudinaryUpload('creator-applications/id-proof');
@@ -196,16 +204,23 @@ export function CreatorApplicationWizard() {
         ...form.portfolioUploads,
       ];
 
-      await creatorApplicationService.submitApplication({
+      const payload = {
         portfolioLinks,
         idProofUrl: form.idProofUrl,
         idProofBackUrl: form.idProofBackUrl,
         primaryStyle: form.primaryStyle.trim() || undefined,
         speedpaintVideoUrl: form.speedpaintVideoUrl.trim() || undefined,
-      });
+      };
 
-      toast.success('Application submitted! Our moderators will review it soon.');
-      router.push('/');
+      if (mode === 'edit') {
+        await creatorApplicationService.updateApplication(payload);
+        toast.success('Application updated! It will be reviewed again.');
+        onDone?.();
+      } else {
+        await creatorApplicationService.submitApplication(payload);
+        toast.success('Application submitted! Our moderators will review it soon.');
+        router.push('/');
+      }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unable to submit your application.';
       toast.error(message);
@@ -216,12 +231,29 @@ export function CreatorApplicationWizard() {
 
   return (
     <div className="glass-container rounded-[32px] p-6 md:p-8 max-w-3xl mx-auto">
-      <div className="mb-8">
-        <p className="text-xs uppercase tracking-[0.2em] text-[#A7ACD9]">Become a creator</p>
-        <h1 className="font-h1 text-3xl font-bold text-white mt-3">Đăng ký trở thành Creator</h1>
-        <p className="mt-2 text-sm text-[#C7C5CF]">
-          Hoàn thành 3 bước để gửi đơn xác minh. Moderator sẽ xét duyệt và cấp quyền Creator sau khi đơn được chấp thuận.
-        </p>
+      <div className="mb-8 flex items-start justify-between gap-4">
+        <div>
+          <p className="text-xs uppercase tracking-[0.2em] text-[#A7ACD9]">
+            {mode === 'edit' ? 'Sửa đơn Creator' : 'Become a creator'}
+          </p>
+          <h1 className="font-h1 text-3xl font-bold text-white mt-3">
+            {mode === 'edit' ? 'Cập nhật đơn của bạn' : 'Đăng ký trở thành Creator'}
+          </h1>
+          <p className="mt-2 text-sm text-[#C7C5CF]">
+            {mode === 'edit'
+              ? 'Cập nhật lại thông tin đơn — đơn sẽ được đưa lại vào hàng chờ duyệt.'
+              : 'Hoàn thành 3 bước để gửi đơn xác minh. Moderator sẽ xét duyệt và cấp quyền Creator sau khi đơn được chấp thuận.'}
+          </p>
+        </div>
+        {mode === 'edit' && onDone && (
+          <button
+            type="button"
+            onClick={onDone}
+            className="shrink-0 rounded-xl border border-white/10 px-4 py-2 text-sm text-[#C7C5CF] hover:text-white"
+          >
+            Hủy
+          </button>
+        )}
       </div>
 
       <div className="mb-8 flex gap-3">
@@ -400,7 +432,7 @@ export function CreatorApplicationWizard() {
             disabled={isSubmitting}
             className="rounded-xl bg-[#A7ACD9] px-5 py-2.5 text-sm font-bold text-[#1F2335] disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {isSubmitting ? 'Submitting...' : 'Submit application'}
+            {isSubmitting ? 'Submitting...' : mode === 'edit' ? 'Save changes' : 'Submit application'}
           </button>
         )}
       </div>

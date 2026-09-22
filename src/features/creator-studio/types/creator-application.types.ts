@@ -19,4 +19,10 @@ export interface MyCreatorApplicationDto {
   reviewNote?: string | null;
   reviewedAt?: string | null;
   submittedAt: string;
+  portfolioLinks: string[];
+  socialLinks?: string[] | null;
+  idProofUrl: string;
+  idProofBackUrl: string;
+  primaryStyle?: string | null;
+  speedpaintVideoUrl?: string | null;
 }

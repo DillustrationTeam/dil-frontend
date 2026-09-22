@@ -28,7 +28,21 @@ export interface RegisterRequest {
   email: string;
   password: string;
   fullName: string;
+  verificationTicket: string;
   role?: string;
+}
+
+export interface SendVerificationCodeRequest {
+  email: string;
+}
+
+export interface ConfirmVerificationCodeRequest {
+  email: string;
+  code: string;
+}
+
+export interface ConfirmVerificationCodeResponse {
+  verificationTicket: string;
 }
 
 export interface ForgotPasswordRequest {
