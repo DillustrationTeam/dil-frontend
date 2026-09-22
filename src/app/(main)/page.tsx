@@ -3,7 +3,6 @@
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { useAuthStore } from '@/store/use-auth-store';
 import { authService } from '@/services/auth.service';
 import { marketplaceService, MarketplaceArtwork } from '@/features/marketplace/services/marketplace.service';
