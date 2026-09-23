@@ -27,23 +27,39 @@ export function DisputeSettlementForm({
   isSubmitting,
   onResolve,
 }: DisputeSettlementFormProps) {
+  const isResolved = dispute.status === 'Resolved';
+  const totalEscrow = dispute.escrowHeldAmount || dispute.finalPrice;
+  const totalSettledAmount =
+    (dispute.clientRefundAmount ?? 0) + (dispute.artistPayAmount ?? 0);
+  const effectiveTotal = totalSettledAmount > 0 ? totalSettledAmount : totalEscrow;
+
+  const resolvedClientPercent =
+    dispute.clientRefundPercent ??
+    (dispute.clientRefundAmount != null && effectiveTotal > 0
+      ? Math.round((dispute.clientRefundAmount / effectiveTotal) * 100)
+      : dispute.resolution === 'ClientWin100'
+      ? 100
+      : dispute.resolution === 'ArtistWin100'
+      ? 0
+      : 50);
+
+  const resolvedCreatorPercent = 100 - resolvedClientPercent;
+
   // Pattern: Render-time state synchronization when inspected dispute changes
   const [prevDisputeId, setPrevDisputeId] = useState(dispute.disputeId);
   const [clientRefundPercent, setClientRefundPercent] = useState<number>(
-    dispute.clientRefundPercent ?? 50
+    dispute.clientRefundPercent ?? resolvedClientPercent
   );
   const [adminNote, setAdminNote] = useState<string>(dispute.adminNote ?? '');
   const [confirmModalOpen, setConfirmModalOpen] = useState<boolean>(false);
 
   if (prevDisputeId !== dispute.disputeId) {
     setPrevDisputeId(dispute.disputeId);
-    setClientRefundPercent(dispute.clientRefundPercent ?? 50);
+    setClientRefundPercent(dispute.clientRefundPercent ?? resolvedClientPercent);
     setAdminNote(dispute.adminNote ?? '');
     setConfirmModalOpen(false);
   }
 
-  const isResolved = dispute.status === 'Resolved';
-  const totalEscrow = dispute.escrowHeldAmount || dispute.finalPrice;
   const clientAmount = (totalEscrow * clientRefundPercent) / 100;
   const creatorAmount = (totalEscrow * (100 - clientRefundPercent)) / 100;
 
@@ -121,15 +137,15 @@ export function DisputeSettlementForm({
             </p>
             <div className="pt-2 border-t border-emerald-500/20 text-[11px] flex justify-between font-mono">
               <span className="text-emerald-300">
-                Client Refund: {dispute.clientRefundPercent}% ($
-                {(dispute.clientRefundAmount ?? 0).toLocaleString('en-US', {
+                Client Refund: {resolvedClientPercent}% ($
+                {(dispute.clientRefundAmount ?? clientAmount).toLocaleString('en-US', {
                   minimumFractionDigits: 2,
                 })}
                 )
               </span>
               <span className="text-[#C5C9F8]">
-                Creator Payout: {100 - (dispute.clientRefundPercent ?? 0)}% ($
-                {(dispute.artistPayAmount ?? 0).toLocaleString('en-US', {
+                Creator Payout: {resolvedCreatorPercent}% ($
+                {(dispute.artistPayAmount ?? creatorAmount).toLocaleString('en-US', {
                   minimumFractionDigits: 2,
                 })}
                 )
