@@ -82,6 +82,15 @@ export default function MarketplaceHomePage() {
               <Link href="/" className="text-[#c2c7f6] border-b-2 border-[#c2c7f6] pb-1 transition-all">
                 Marketplace
               </Link>
+              <Link href="/explore" className="text-[#c7c5cf] hover:text-white transition-colors">
+                Khám phá
+              </Link>
+              <Link href="/collections" className="text-[#c7c5cf] hover:text-white transition-colors">
+                Bộ sưu tập
+              </Link>
+              <Link href="/creator/artworks" className="text-[#c7c5cf] hover:text-white transition-colors">
+                Creator Studio
+              </Link>
               <Link href="#artists" className="text-[#c7c5cf] hover:text-white transition-colors">
                 Artists
               </Link>
@@ -190,7 +199,7 @@ export default function MarketplaceHomePage() {
 
             <div className="flex flex-wrap gap-4 pt-2">
               <Link
-                href="/register"
+                href="/explore"
                 className="bg-[#A7ACD9] text-[#282e53] px-8 py-3.5 rounded-full font-bold text-sm hover:shadow-[0_0_20px_rgba(167,172,217,0.4)] transition-all active:scale-95 inline-flex items-center space-x-2"
               >
                 <span>Explore Gallery</span>
