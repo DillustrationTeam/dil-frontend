@@ -172,6 +172,15 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
   const activeRole: 'client' | 'creator' = isCreator ? 'creator' : 'client';
   const commissionStatus: CommissionStatus = commission?.status ?? 'InProgress';
 
+  const isCommissionEnded = useMemo(() => {
+    return (
+      commissionStatus === 'Completed' ||
+      commissionStatus === 'Cancelled'
+    );
+  }, [commissionStatus]);
+
+  const isChatDisabled = Boolean(room?.isLocked || isCommissionEnded);
+
   const handleSelectFile = useCallback((file: File) => {
     setSelectedFile(file);
     const ext = file.name.split('.').pop()?.toLowerCase() || '';
