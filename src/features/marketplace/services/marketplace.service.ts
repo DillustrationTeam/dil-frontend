@@ -1,6 +1,6 @@
 import { apiClient } from '@/lib/api-client';
 import { ApiResponse } from '@/types/api.types';
-import { ArtworkDto } from '@/features/creator-studio/types/creator-profile.types';
+import { ArtworkDto, CreatorProfileDto } from '@/features/creator-studio/types/creator-profile.types';
 
 export interface MarketplaceArtwork extends ArtworkDto {
   creatorName?: string;
@@ -87,8 +87,8 @@ export const marketplaceService = {
     return getData(response);
   },
 
-  async getCreatorById(id: string) {
-    const response = await apiClient.get<ApiResponse<import('@/features/creator-studio/types/creator-profile.types').CreatorProfileDto>>(`/creator/${id}`);
+  async getCreatorById(id: string): Promise<CreatorProfileDto> {
+    const response = await apiClient.get<ApiResponse<CreatorProfileDto>>(`/creator/${id}`);
     return getData(response);
   },
 
@@ -159,11 +159,6 @@ export const marketplaceService = {
 
   async getMyFavorites(): Promise<MarketplaceArtwork[]> {
     const response = await apiClient.get<ApiResponse<MarketplaceArtwork[]>>('/marketplace/me/favorites');
-    return getData(response);
-  },
-
-  async getArtworkDetailFromApi(id: string): Promise<ArtworkDetailResponse> {
-    const response = await apiClient.get<ApiResponse<ArtworkDetailResponse>>(`/marketplace/artworks/${id}/detail`);
     return getData(response);
   },
 

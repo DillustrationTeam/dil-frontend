@@ -88,8 +88,9 @@ export default function RegisterPage() {
             <Image
               src="/weblogo.png"
               alt="dillustration"
-              width={180}
-              height={90}
+              width={220}
+              height={112}
+              priority
               className="h-24 md:h-28 w-auto object-contain drop-shadow-[0_0_20px_rgba(194,199,246,0.4)] group-hover:scale-105 transition-transform"
             />
           </Link>

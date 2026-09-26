@@ -6,11 +6,9 @@ import Link from 'next/link';
 import { useAuthStore } from '@/store/use-auth-store';
 import { authService } from '@/services/auth.service';
 import { marketplaceService, MarketplaceArtwork } from '@/features/marketplace/services/marketplace.service';
-import toast from 'react-hot-toast';
 
 export default function MarketplaceHomePage() {
-  const { user, roles, refreshToken, isAuthenticated, clearAuth, setUser } = useAuthStore();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user, isAuthenticated, clearAuth, setUser } = useAuthStore();
   const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 });
   const [marketplaceArtworks, setMarketplaceArtworks] = useState<MarketplaceArtwork[]>([]);
 
@@ -31,7 +29,6 @@ export default function MarketplaceHomePage() {
     const handleMouseMove = (e: MouseEvent) => {
       setCursorPos({ x: e.clientX, y: e.clientY });
     };
-
     window.addEventListener('mousemove', handleMouseMove);
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
@@ -45,143 +42,23 @@ export default function MarketplaceHomePage() {
         console.error('Failed to load marketplace feed', error);
       }
     };
-
     loadArtworks();
   }, []);
 
-  const handleLogout = async () => {
-    if (refreshToken) {
-      await authService.revokeToken(refreshToken);
-    }
-    clearAuth();
-    toast.success('Signed out successfully.');
-  };
-
   return (
-    <div className="min-h-screen bg-[#1F2335] text-[#e4e1e5] font-body selection:bg-[#A7ACD9]/30 selection:text-white relative">
+    <div className="relative">
       {/* Custom Mouse Cursor Glow Effect */}
       <div
         className="fixed w-[400px] h-[400px] bg-[#A7ACD9]/10 rounded-full blur-[100px] pointer-events-none -translate-x-1/2 -translate-y-1/2 z-[-5] transition-opacity duration-300 hidden md:block"
         style={{ left: `${cursorPos.x}px`, top: `${cursorPos.y}px` }}
       />
 
-      {/* Top Navigation Shell */}
-      <header className="docked full-width top-0 sticky z-50 bg-[#1F2335]/80 backdrop-blur-xl border-b border-white/10 shadow-[0_0_20px_rgba(167,172,217,0.15)] transition-all duration-300 ease-out">
-        <nav className="flex justify-between items-center w-full px-6 max-w-7xl mx-auto h-20">
-          <div className="flex items-center gap-12">
-            <Link href="/" className="flex items-center space-x-2 group">
-              <Image
-                src="/weblogo.png"
-                alt="dillustration"
-                width={120}
-                height={56}
-                className="h-14 md:h-16 w-auto object-contain hover:scale-105 transition-transform"
-              />
-            </Link>
-            <div className="hidden md:flex gap-8 items-center text-sm font-medium">
-              <Link href="/" className="text-[#c2c7f6] border-b-2 border-[#c2c7f6] pb-1 transition-all">
-                Marketplace
-              </Link>
-              <Link href="/explore" className="text-[#c7c5cf] hover:text-white transition-colors">
-                Khám phá
-              </Link>
-              <Link href="/collections" className="text-[#c7c5cf] hover:text-white transition-colors">
-                Bộ sưu tập
-              </Link>
-              <Link href="/creator/artworks" className="text-[#c7c5cf] hover:text-white transition-colors">
-                Creator Studio
-              </Link>
-              <Link href="#artists" className="text-[#c7c5cf] hover:text-white transition-colors">
-                Artists
-              </Link>
-              <Link href="#bento" className="text-[#c7c5cf] hover:text-white transition-colors">
-                Collections
-              </Link>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-6">
-            {/* Search Input */}
-            <div className="relative hidden sm:block">
-              <input
-                className="bg-[#1b1b1e] border border-[#46464e]/30 rounded-full px-6 py-2 w-64 focus:outline-none focus:ring-1 focus:ring-[#c2c7f6] focus:border-[#c2c7f6] transition-all duration-300 text-sm text-[#e4e1e5] placeholder-white/30"
-                placeholder="Search curated art..."
-                type="text"
-              />
-              <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-[#919099] text-xl">
-                search
-              </span>
-            </div>
-
-            <div className="flex items-center gap-4">
-              <button className="p-2 rounded-full hover:bg-[#c2c7f6]/10 transition-all active:scale-95 text-[#c2c7f6]">
-                <span className="material-symbols-outlined text-xl">notifications</span>
-              </button>
-
-              {/* User Session Profile / Auth Buttons */}
-              {isAuthenticated && user ? (
-                <div className="relative">
-                  <button
-                    onClick={() => setIsMenuOpen(!isMenuOpen)}
-                    className="flex items-center space-x-3 glass-container px-3.5 py-1.5 rounded-full border border-white/10 hover:border-[#A7ACD9] transition-all cursor-pointer"
-                  >
-                    <div className="w-8 h-8 rounded-full bg-[#A7ACD9] text-[#1F2335] flex items-center justify-center font-bold text-xs">
-                      {user.fullName.charAt(0).toUpperCase()}
-                    </div>
-                    <div className="text-left hidden sm:block">
-                      <p className="text-xs font-bold text-white leading-tight">{user.fullName}</p>
-                      <p className="text-[10px] text-[#A7ACD9] uppercase tracking-wider">
-                        {roles.join(', ') || 'CLIENT'}
-                      </p>
-                    </div>
-                    <span className="material-symbols-outlined text-sm text-[#919099]">
-                      expand_more
-                    </span>
-                  </button>
-
-                  {isMenuOpen && (
-                    <div className="absolute right-0 mt-2 w-48 glass-container rounded-2xl p-2 shadow-2xl border border-white/10 z-50 bg-[#1F2335]">
-                      <div className="px-3 py-2 border-b border-white/10 mb-1 sm:hidden">
-                        <p className="text-xs font-bold text-white">{user.fullName}</p>
-                        <p className="text-[10px] text-[#A7ACD9]">{user.email}</p>
-                      </div>
-                      <button
-                        onClick={handleLogout}
-                        className="w-full text-left px-3 py-2 text-xs text-red-400 hover:bg-white/10 rounded-xl transition-colors flex items-center space-x-2 cursor-pointer"
-                      >
-                        <span className="material-symbols-outlined text-sm">logout</span>
-                        <span>Sign Out</span>
-                      </button>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="flex items-center space-x-3">
-                  <Link
-                    href="/login"
-                    className="px-4 py-2 text-xs font-semibold text-[#A7ACD9] hover:text-white transition-colors"
-                  >
-                    Sign In
-                  </Link>
-                  <Link
-                    href="/register"
-                    className="px-5 py-2.5 text-xs font-semibold bg-white text-[#1F2335] rounded-full hover:bg-[#A7ACD9] transition-all primary-glow"
-                  >
-                    Join Collective
-                  </Link>
-                </div>
-              )}
-            </div>
-          </div>
-        </nav>
-      </header>
-
-      <main className="relative overflow-hidden">
-        {/* Atmospheric Background Element */}
+      <div className="relative overflow-hidden">
+        {/* Atmospheric Background */}
         <div className="absolute top-0 right-0 -z-10 w-[800px] h-[800px] bg-[#c2c7f6]/5 rounded-full blur-[120px] translate-x-1/2 -translate-y-1/2" />
         <div className="absolute bottom-0 left-0 -z-10 w-[600px] h-[600px] bg-[#c9c5ca]/5 rounded-full blur-[100px] -translate-x-1/2 translate-y-1/2" />
 
-        {/* Asymmetric Hero Section */}
+        {/* ── HERO ── */}
         <section className="max-w-7xl mx-auto px-6 py-20 md:py-28 grid md:grid-cols-12 gap-12 items-center">
           <div className="md:col-span-5 space-y-8">
             <div className="space-y-4">
@@ -193,7 +70,8 @@ export default function MarketplaceHomePage() {
                 <span className="text-[#A7ACD9] italic font-light">Vast Stillness</span>
               </h1>
               <p className="text-base md:text-lg text-[#c7c5cf] max-w-md">
-                Experience the weightless world of Digital Etherealism. A gallery for the modern collector seeking high-performance serenity.
+                Experience the weightless world of Digital Etherealism. A gallery for the modern
+                collector seeking high-performance serenity.
               </p>
             </div>
 
@@ -213,7 +91,7 @@ export default function MarketplaceHomePage() {
               </Link>
             </div>
 
-            {/* Live Stats Counter */}
+            {/* Stats */}
             <div className="flex items-center gap-8 pt-6">
               <div>
                 <p className="font-h1 text-2xl font-bold text-white">1.2k</p>
@@ -250,15 +128,10 @@ export default function MarketplaceHomePage() {
                   </div>
                 </div>
               </div>
-              {/* Simulated Rim Light Effect */}
               <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent" />
             </div>
-
-            {/* Decorative background circles */}
             <div className="absolute -top-12 -right-12 w-64 h-64 border border-[#A7ACD9]/10 rounded-full animate-pulse pointer-events-none" />
             <div className="absolute -bottom-8 -left-8 w-48 h-48 bg-[#A7ACD9]/5 rounded-2xl rotate-12 blur-sm pointer-events-none" />
-
-            {/* Floating Info Chip */}
             <div className="absolute -right-6 bottom-10 z-20 glass-container p-5 rounded-2xl border border-white/10 periwinkle-glow hidden lg:block">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-full bg-[#A7ACD9]/20 flex items-center justify-center">
@@ -273,7 +146,7 @@ export default function MarketplaceHomePage() {
           </div>
         </section>
 
-        {/* Carousel Pagination Markers */}
+        {/* ── PAGINATION MARKERS ── */}
         <section className="max-w-7xl mx-auto px-6 pb-16">
           <div className="flex items-center gap-4 overflow-x-auto pb-4 no-scrollbar">
             <div className="flex items-center gap-2 group cursor-pointer">
@@ -294,7 +167,7 @@ export default function MarketplaceHomePage() {
           </div>
         </section>
 
-        {/* Bento Grid Highlights Section */}
+        {/* ── BENTO GRID ── */}
         <section id="bento" className="max-w-7xl mx-auto px-6 py-16">
           <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
             <div className="space-y-2">
@@ -359,6 +232,7 @@ export default function MarketplaceHomePage() {
           </div>
         </section>
 
+        {/* ── MARKETPLACE FEED ── */}
         <section className="max-w-7xl mx-auto px-6 pb-16">
           <div className="mb-6 flex items-center justify-between gap-4">
             <div>
@@ -373,7 +247,11 @@ export default function MarketplaceHomePage() {
           <div className="grid gap-6 md:grid-cols-3">
             {marketplaceArtworks.length ? (
               marketplaceArtworks.map((artwork) => (
-                <Link key={artwork.id} href={`/artworks/${artwork.id}`} className="group overflow-hidden rounded-[24px] border border-white/10 bg-[#1b1d29]">
+                <Link
+                  key={artwork.id}
+                  href={`/artworks/${artwork.id}`}
+                  className="group overflow-hidden rounded-[24px] border border-white/10 bg-[#1b1d29]"
+                >
                   <div className="relative aspect-[4/5] overflow-hidden">
                     <Image
                       src={artwork.imageUrl}
@@ -391,7 +269,10 @@ export default function MarketplaceHomePage() {
                     <p className="text-sm text-[#C7C5CF]">{artwork.creatorName ?? 'Verified creator'}</p>
                     <div className="flex flex-wrap gap-2">
                       {(artwork.tags ?? []).slice(0, 3).map((tag) => (
-                        <span key={tag} className="rounded-full border border-white/10 bg-white/5 px-2 py-1 text-[10px] uppercase tracking-wider text-[#C7C5CF]">
+                        <span
+                          key={tag}
+                          className="rounded-full border border-white/10 bg-white/5 px-2 py-1 text-[10px] uppercase tracking-wider text-[#C7C5CF]"
+                        >
                           #{tag}
                         </span>
                       ))}
@@ -407,7 +288,7 @@ export default function MarketplaceHomePage() {
           </div>
         </section>
 
-        {/* Newsletter CTA Section */}
+        {/* ── NEWSLETTER CTA ── */}
         <section className="max-w-7xl mx-auto px-6 py-16">
           <div className="relative glass-container rounded-[3rem] p-10 md:p-20 overflow-hidden border border-white/10 text-center space-y-8 periwinkle-glow">
             <div className="max-w-2xl mx-auto space-y-6">
@@ -428,18 +309,18 @@ export default function MarketplaceHomePage() {
             </div>
           </div>
         </section>
-      </main>
+      </div>
 
-      {/* Footer Shell */}
-      <footer className="full-width bg-[#0e0e11] border-t border-white/10">
+      {/* ── FOOTER ── */}
+      <footer className="bg-[#0e0e11] border-t border-white/10">
         <div className="flex flex-col md:flex-row justify-between items-center py-16 px-6 max-w-7xl mx-auto gap-10">
           <div className="space-y-3 text-center md:text-left">
             <Link href="/">
               <Image
                 src="/weblogo.png"
                 alt="dillustration"
-                width={100}
-                height={48}
+                width={160}
+                height={56}
                 className="h-12 md:h-14 w-auto object-contain hover:opacity-80 transition-opacity"
               />
             </Link>

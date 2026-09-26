@@ -16,7 +16,6 @@ type SetupFormState = {
   websiteUrl: string;
   bannerUrl: string;
   isAcceptingOrders: boolean;
-  rateCard: string;
   availability: string;
 };
 
@@ -35,7 +34,6 @@ const defaultValues: SetupFormState = {
   websiteUrl: '',
   bannerUrl: '',
   isAcceptingOrders: true,
-  rateCard: 'Starting at $350 for character illustration',
   availability: 'Open for 3 new commissions this month',
 };
 
@@ -53,11 +51,11 @@ export function ProfileSetupWizard() {
     }
 
     if (currentStep.key === 'ratecard') {
-      return form.rateCard.trim().length > 0;
+      return true;
     }
 
     return form.availability.trim().length > 0;
-  }, [currentStep.key, form.availability, form.displayName, form.rateCard]);
+  }, [currentStep.key, form.availability, form.displayName]);
 
   const updateField = (field: keyof SetupFormState, value: string | boolean) => {
     setForm((previous) => ({ ...previous, [field]: value }));
@@ -101,7 +99,7 @@ export function ProfileSetupWizard() {
       });
 
       toast.success('Profile setup saved successfully.');
-      router.push('/');
+      router.push('/creator/rate-card');
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unable to save your profile.';
       toast.error(message);
@@ -199,15 +197,7 @@ export function ProfileSetupWizard() {
 
         {currentStep.key === 'ratecard' && (
           <>
-            <div className="space-y-2">
-              <label className="text-xs uppercase tracking-wider text-[#C7C5CF]">Ratecard</label>
-              <textarea
-                value={form.rateCard}
-                onChange={(event) => updateField('rateCard', event.target.value)}
-                className="min-h-[140px] w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none focus:border-[#A7ACD9]"
-                placeholder="Starting at $350 for character illustration"
-              />
-            </div>
+            <p className="rounded-xl border border-[#A7ACD9]/30 bg-[#A7ACD9]/10 p-4 text-sm text-[#C7C5CF]">Sau khi tạo hồ sơ, bạn sẽ cấu hình gói giá và các cột mốc tại màn Rate Card.</p>
 
             <div className="space-y-2">
               <label className="text-xs uppercase tracking-wider text-[#C7C5CF]">Portfolio URL</label>
