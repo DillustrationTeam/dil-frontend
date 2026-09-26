@@ -54,20 +54,27 @@
   </script>
 
   <style>
-    /* Custom Scrollbar for inner memo lists */
+    /* Custom Scrollbar for inner memo lists & body */
     ::-webkit-scrollbar {
-      width: 5px;
-      height: 5px;
+      width: 6px;
+      height: 6px;
     }
     ::-webkit-scrollbar-track {
-      background: rgba(23, 25, 38, 0.5);
+      background: #131316;
     }
     ::-webkit-scrollbar-thumb {
       background: #32364f;
-      border-radius: 10px;
+      border-radius: 9999px;
     }
     ::-webkit-scrollbar-thumb:hover {
       background: #484d6e;
+    }
+    ::-webkit-scrollbar-corner {
+      background: #131316;
+    }
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: #32364f #131316;
     }
 
     /* Soft Realistic Spiral Ring */
@@ -139,14 +146,15 @@
     }
   </style>
 </head>
-<body class="bg-slate-950 text-slate-200 min-h-screen flex flex-col justify-between selection:bg-mint-500/20 selection:text-mint-neon antialiased overflow-x-hidden">
+<body class="bg-[#1F2335] text-slate-200 min-h-screen flex flex-col justify-between selection:bg-mint-500/20 selection:text-mint-neon antialiased overflow-x-hidden">
 
-  <header class="w-full max-w-[1480px] mx-auto px-6 pt-5 pb-3 flex items-center justify-between z-30">
+  <!-- Header đồng bộ hệ thống -->
+  <header class="w-full h-16 bg-[#1F2335]/90 backdrop-blur-[20px] border-b border-white/10 px-6 flex items-center justify-between z-40 sticky top-0">
     <div class="flex items-center gap-6">
       <div class="flex items-center gap-3">
-        <div class="w-9 h-9 rounded-2xl bg-gradient-to-tr from-mint-500 to-lavender-400 p-[1.5px] flex items-center justify-center shadow-lg shadow-mint-500/10">
-          <div class="w-full h-full bg-slate-900 rounded-[14px] flex items-center justify-center">
-            <svg class="w-5 h-5 text-mint-neon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <div class="w-9 h-9 rounded-2xl bg-gradient-to-tr from-[#A7ACD9] to-[#c2c7f6] p-[1px] flex items-center justify-center shadow-lg shadow-[#A7ACD9]/10">
+          <div class="w-full h-full bg-[#1b1b1e] rounded-[14px] flex items-center justify-center">
+            <svg class="w-5 h-5 text-[#A7ACD9]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
             </svg>
           </div>
@@ -154,33 +162,32 @@
         <div>
           <span class="font-bold text-sm tracking-wider uppercase text-white flex items-center gap-2">
             ATELIER BINDER
-            <span class="text-[10px] font-mono font-medium px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">v2.4 Pro</span>
+            <span class="text-[10px] font-mono font-medium px-2 py-0.5 rounded-full bg-slate-800 text-[#A7ACD9] border border-[#A7ACD9]/30">v2.4 Pro</span>
           </span>
-          <p class="text-xs text-slate-400">Creative Ledger & Proofing System</p>
+          <p class="text-xs text-[#919099]">Creative Ledger & Proofing System</p>
         </div>
       </div>
 
-      <!-- Navigation Pill links -->
-      <nav class="hidden md:flex items-center bg-slate-900/80 border border-slate-800/80 rounded-full px-2 py-1 gap-1 text-xs">
-        <button class="px-4 py-1.5 rounded-full bg-slate-800 font-semibold text-white shadow-sm transition">Spread Canvas</button>
-        <button class="px-4 py-1.5 rounded-full text-slate-400 hover:text-white transition">Hợp đồng & Brief</button>
-        <button class="px-4 py-1.5 rounded-full text-slate-400 hover:text-white transition">Vault Kho Lưu Trữ</button>
-      </nav>
+      <!-- Quick Search Input -->
+      <div class="hidden md:flex items-center relative w-64 lg:w-80">
+        <svg class="pointer-events-none absolute left-3.5 h-4 w-4 text-[#A7ACD9]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="text" placeholder="Search commissions, creators, artworks..." class="w-full h-9 pl-9 pr-4 bg-[#1b1b1e] border border-white/10 rounded-full text-xs text-white placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-[#A7ACD9] transition-all">
+      </div>
     </div>
 
     <!-- Right User Pill & Top Stats -->
     <div class="flex items-center gap-4">
-      <div class="hidden sm:flex items-center gap-3 bg-slate-900/60 border border-slate-800/70 px-4 py-2 rounded-2xl text-xs">
-        <span class="flex items-center gap-1.5 text-mint-400 font-medium">
-          <span class="w-2 h-2 rounded-full bg-mint-neon animate-pulse"></span>
+      <div class="hidden sm:flex items-center gap-3 bg-white/5 border border-white/10 px-4 py-2 rounded-2xl text-xs">
+        <span class="flex items-center gap-1.5 text-emerald-400 font-medium">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
           Đang triển khai Mốc #1
         </span>
         <span class="text-slate-600">|</span>
         <span class="text-slate-400">Order ID: <span class="font-mono text-slate-200">#ORD-88219</span></span>
       </div>
 
-      <div class="flex items-center gap-2 bg-slate-900/90 border border-slate-800 px-3 py-1.5 rounded-full">
-        <div class="w-7 h-7 rounded-full bg-gradient-to-br from-lavender-500 to-slate-800 flex items-center justify-center text-xs font-semibold text-white shadow-sm">
+      <div class="flex items-center gap-2 bg-white/5 border border-white/10 px-3 py-1.5 rounded-full">
+        <div class="w-7 h-7 rounded-full bg-gradient-to-br from-[#A7ACD9] to-slate-800 flex items-center justify-center text-xs font-semibold text-white shadow-sm">
           RT
         </div>
         <span class="text-xs font-medium text-slate-300 pr-1">Ren Takahashi</span>
@@ -188,10 +195,59 @@
     </div>
   </header>
 
-  <main class="w-full max-w-[1440px] mx-auto px-4 lg:px-8 py-2 flex-1 flex items-center justify-center relative">
+  <!-- Container chứa Sidebar + Main Content -->
+  <div class="flex-1 flex w-full relative min-h-0">
     
-    <!-- Outer Soft Leather Cover (Bìa sổ bo cong mềm mại) -->
-    <div class="relative w-full bg-slate-900/90 border border-slate-800/80 rounded-[32px] p-3 sm:p-5 shadow-binder">
+    <!-- Collapsible Sidebar (giao diện đồng bộ với tất cả các màn hình khác) -->
+    <aside id="app-sidebar" class="relative sticky top-16 h-[calc(100vh-4rem)] bg-[#1F2335]/90 backdrop-blur-[20px] border-r border-white/10 transition-all duration-300 hidden md:flex flex-col justify-between z-30 shrink-0 w-64">
+      
+      <!-- Toggle Button -->
+      <button onclick="toggleAppSidebar()" class="absolute -right-3.5 top-6 w-7 h-7 rounded-full bg-[#1b1b1e] border border-white/20 text-slate-300 hover:text-white hover:border-[#A7ACD9]/50 flex items-center justify-center shadow-lg transition-all z-40" title="Expand / Collapse Sidebar">
+        <svg id="sidebar-toggle-icon" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+
+      <!-- Navigation Links -->
+      <div class="p-3 space-y-4 overflow-y-auto">
+        <div class="px-3 pt-2">
+          <p id="sidebar-role-label" class="text-[10px] font-mono tracking-widest uppercase font-bold text-[#919099]">Client Workspace</p>
+        </div>
+
+        <nav class="space-y-1.5">
+          <a href="#" class="sidebar-item relative flex items-center gap-3 px-3.5 py-3 rounded-2xl text-xs font-medium bg-[#A7ACD9]/20 text-white border border-[#A7ACD9]/40 shadow-[0_0_15px_rgba(167,172,217,0.2)] transition-all">
+            <svg class="w-4 h-4 text-[#A7ACD9] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+            <span class="sidebar-text truncate">All Commissions</span>
+          </a>
+
+          <a href="#" class="sidebar-item relative flex items-center gap-3 px-3.5 py-3 rounded-2xl text-xs font-medium text-[#919099] hover:text-white hover:bg-white/5 transition-all">
+            <svg class="w-4 h-4 text-[#919099] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 12h.01"/><path d="M10 12h8"/></svg>
+            <span class="sidebar-text truncate">Wallet & Escrow</span>
+          </a>
+
+          <a href="#" class="sidebar-item relative flex items-center gap-3 px-3.5 py-3 rounded-2xl text-xs font-medium text-[#919099] hover:text-white hover:bg-white/5 transition-all">
+            <svg class="w-4 h-4 text-[#919099] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+            <span class="sidebar-text truncate">Lịch sử hoạt động</span>
+          </a>
+        </nav>
+      </div>
+
+      <!-- Footer Widget -->
+      <div class="p-3 border-t border-white/10">
+        <div class="p-3 rounded-2xl bg-white/5 border border-white/10 flex items-center gap-3">
+          <div class="w-8 h-8 rounded-xl bg-[#A7ACD9]/20 text-[#A7ACD9] flex items-center justify-center shrink-0 border border-[#A7ACD9]/30">
+            <svg class="w-4 h-4 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          </div>
+          <div class="sidebar-text overflow-hidden">
+            <p class="text-[11px] font-bold text-white truncate">Wallet escrow</p>
+            <p class="text-[10px] text-emerald-400 truncate">Released per milestone</p>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="w-full max-w-[1440px] mx-auto px-4 lg:px-8 py-4 flex-1 flex items-center justify-center relative">
+    
+    <!-- Outer Soft Leather Cover (Bìa sổ bo 3 góc, cắt cạnh 1 góc phải trên) -->
+    <div class="relative w-full bg-slate-900/90 border border-slate-800/80 rounded-tl-3xl rounded-bl-3xl rounded-br-3xl rounded-tr-none [clip-path:polygon(0_0,calc(100%-24px)_0,100%_24px,100%_100%,0_100%)] p-3 sm:p-5 shadow-binder">
       
       <!-- Inner Binder Spread (2 trang mở song song) -->
       <div class="relative w-full rounded-[24px] bg-slate-850 flex flex-col lg:flex-row overflow-visible">
@@ -535,6 +591,7 @@
       </div>
     </div>
   </main>
+  </div>
 
   <div id="modalBackdrop" class="fixed inset-0 bg-slate-950/75 backdrop-blur-md z-50 flex items-center justify-center p-4 modal-enter">
     
@@ -783,6 +840,30 @@
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') closeModal();
     });
+
+    // Toggle Collapsible Sidebar
+    let isSidebarCollapsed = false;
+    function toggleAppSidebar() {
+      const sidebar = document.getElementById('app-sidebar');
+      const icon = document.getElementById('sidebar-toggle-icon');
+      const roleLabel = document.getElementById('sidebar-role-label');
+      const sidebarTexts = document.querySelectorAll('.sidebar-text');
+      
+      isSidebarCollapsed = !isSidebarCollapsed;
+      if (isSidebarCollapsed) {
+        sidebar.classList.remove('w-64');
+        sidebar.classList.add('w-20');
+        icon.innerHTML = '<path d="M9 18l6-6-6-6"/>';
+        if (roleLabel) roleLabel.style.display = 'none';
+        sidebarTexts.forEach(el => el.style.display = 'none');
+      } else {
+        sidebar.classList.remove('w-20');
+        sidebar.classList.add('w-64');
+        icon.innerHTML = '<path d="M15 18l-6-6 6-6"/>';
+        if (roleLabel) roleLabel.style.display = 'block';
+        sidebarTexts.forEach(el => el.style.display = 'block');
+      }
+    }
   </script>
 </body>
 </html>
