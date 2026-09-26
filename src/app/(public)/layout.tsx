@@ -37,7 +37,13 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
                 Marketplace
               </Link>
               <Link href="/search" className="text-[#c7c5cf] hover:text-white transition-colors">
-                Artists
+                Khám phá
+              </Link>
+              <Link href="/collections" className="text-[#c7c5cf] hover:text-white transition-colors">
+                Bộ sưu tập
+              </Link>
+              <Link href="/creator/artworks" className="text-[#c7c5cf] hover:text-white transition-colors">
+                Creator Studio
               </Link>
               <Link href="/#bento" className="text-[#c7c5cf] hover:text-white transition-colors">
                 Collections

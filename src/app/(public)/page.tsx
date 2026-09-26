@@ -77,7 +77,7 @@ export default function MarketplaceHomePage() {
 
             <div className="flex flex-wrap gap-4 pt-2">
               <Link
-                href="/register"
+                href="/explore"
                 className="bg-[#A7ACD9] text-[#282e53] px-8 py-3.5 rounded-full font-bold text-sm hover:shadow-[0_0_20px_rgba(167,172,217,0.4)] transition-all active:scale-95 inline-flex items-center space-x-2"
               >
                 <span>Explore Gallery</span>
