@@ -153,7 +153,7 @@ export function useChatHub(roomId: string, callbacks: ChatHubCallbacks): ChatHub
     if (!connection || connection.state !== HubConnectionState.Connected) return;
 
     const now = Date.now();
-    if (now - lastTypingRef.current < 2000) return;
+    if (now - lastTypingRef.current < 1500) return;
     lastTypingRef.current = now;
     void connection.invoke('Typing', roomId).catch(() => undefined);
   }, [roomId]);
