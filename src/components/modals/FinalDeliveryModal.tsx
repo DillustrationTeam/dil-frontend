@@ -136,19 +136,20 @@ export default function FinalDeliveryModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
-      <div className="relative w-full max-w-lg bg-[#131522]/95 border border-white/10 rounded-[32px] shadow-2xl overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0C0D14]/80 backdrop-blur-md animate-fadeIn">
+      <div className="relative w-full max-w-lg bg-[#1F2335] border border-white/10 shadow-2xl overflow-hidden rounded-3xl">
+
         {/* Header */}
-        <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between bg-[#161926]/50">
+        <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between bg-[#161926]/80">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center border border-indigo-500/30">
-              {isCreator ? <Upload className="w-5 h-5" /> : <FileArchive className="w-5 h-5 text-emerald-400" />}
+            <div className="w-9 h-9 rounded-xl bg-[#A7ACD9]/20 text-[#A7ACD9] flex items-center justify-center border border-[#A7ACD9]/30">
+              {isCreator ? <Upload className="w-5 h-5 text-[#A7ACD9]" /> : <FileArchive className="w-5 h-5 text-emerald-400" />}
             </div>
             <div>
               <h3 className="text-sm font-space-grotesk font-bold text-white">
                 {isCreator ? 'Bàn giao File Gốc HD' : 'Nghiệm Thu & Tải File Gốc HD'}
               </h3>
-              <p className="text-[11px] text-slate-400">
+              <p className="text-[11px] text-[#919099]">
                 {isCreator ? 'Upload gói sản phẩm gốc hoàn chỉnh (.PSD, .ZIP)' : 'Kiểm tra sản phẩm hoàn chỉnh và tải file chất lượng cao'}
               </p>
             </div>
@@ -177,7 +178,7 @@ export default function FinalDeliveryModal({
                         ? 'border-red-500/60 bg-red-500/10'
                         : file
                         ? 'border-emerald-500/50 bg-emerald-500/10'
-                        : 'border-white/20 hover:border-indigo-500/50 bg-white/5'
+                        : 'border-white/20 hover:border-[#A7ACD9]/50 bg-[#1b1b1e]'
                     }`}
                   >
                     <input 
@@ -195,9 +196,9 @@ export default function FinalDeliveryModal({
                       </div>
                     ) : (
                       <>
-                        <Upload className="w-8 h-8 mx-auto text-indigo-400 mb-2 animate-bounce" />
+                        <Upload className="w-8 h-8 mx-auto text-[#A7ACD9] mb-2 animate-bounce" />
                         <p className="text-xs font-semibold text-white">Kéo và thả file gốc HD tại đây</p>
-                        <p className="text-[11px] text-slate-400 mt-1">Hỗ trợ ZIP, RAR, PSD, AI, PNG (Tối đa 250MB)</p>
+                        <p className="text-[11px] text-[#919099] mt-1">Hỗ trợ ZIP, RAR, PSD, AI, PNG (Tối đa 250MB)</p>
                       </>
                     )}
                   </div>
@@ -210,8 +211,8 @@ export default function FinalDeliveryModal({
                   )}
                 </div>
 
-                <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl flex items-center gap-2.5 text-amber-300 text-[11px]">
-                  <ShieldAlert className="w-4 h-4 shrink-0 text-amber-400" />
+                <div className="p-3 bg-[#A7ACD9]/10 border border-[#A7ACD9]/20 rounded-xl flex items-center gap-2.5 text-[#A7ACD9] text-[11px]">
+                  <ShieldAlert className="w-4 h-4 shrink-0 text-[#A7ACD9]" />
                   <span>File này sẽ được lưu trữ bảo mật trên AWS S3 Private và chỉ mở link tải khi Client hoàn tất nghiệm thu.</span>
                 </div>
 
@@ -251,8 +252,8 @@ export default function FinalDeliveryModal({
               </p>
             </div>
 
-            <div className="p-3 bg-indigo-500/10 border border-indigo-500/20 rounded-xl flex items-center gap-2.5 text-indigo-300 text-[11px]">
-              <ShieldAlert className="w-4 h-4 shrink-0 text-indigo-400" />
+            <div className="p-3 bg-[#A7ACD9]/10 border border-[#A7ACD9]/20 rounded-xl flex items-center gap-2.5 text-[#A7ACD9] text-[11px]">
+              <ShieldAlert className="w-4 h-4 shrink-0 text-[#A7ACD9]" />
               <span>Link tải file gốc được tạo bảo mật trực tiếp từ AWS S3 Private, có hiệu lực trong 15 phút.</span>
             </div>
 
@@ -269,10 +270,10 @@ export default function FinalDeliveryModal({
         )}
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-white/10 bg-[#161926]/80 flex justify-end gap-2">
+        <div className="px-6 py-4 border-t border-white/10 bg-[#161926]/90 flex justify-end gap-2.5 items-center">
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded-xl text-xs font-semibold border border-white/10 text-slate-300 hover:bg-white/5"
+            className="px-4 py-2.5 rounded-full text-xs font-semibold border border-white/10 text-slate-300 hover:bg-white/5 transition-all"
           >
             {isCreator ? (uploaded ? 'Đóng' : 'Hủy') : 'Đóng'}
           </button>
@@ -285,7 +286,7 @@ export default function FinalDeliveryModal({
                     onClose();
                     onOpenReviewModal();
                   }}
-                  className="px-4 py-2 rounded-xl text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30 hover:bg-amber-500/30 transition-all flex items-center gap-1.5"
+                  className="px-4 py-2.5 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30 hover:bg-amber-500/30 transition-all flex items-center gap-1.5"
                 >
                   ⭐ Viết đánh giá
                 </button>
@@ -293,7 +294,7 @@ export default function FinalDeliveryModal({
               <button
                 onClick={handleClientAction}
                 disabled={isUploading}
-                className="px-5 py-2 rounded-xl text-xs font-bold bg-emerald-500 text-black shadow-lg shadow-emerald-500/25 hover:bg-emerald-400 transition-all flex items-center gap-2 disabled:opacity-50"
+                className="px-5 py-2.5 rounded-full text-xs font-bold bg-emerald-500 text-black shadow-lg shadow-emerald-500/25 hover:bg-emerald-400 transition-all flex items-center gap-2 disabled:opacity-50"
               >
                 {isUploading ? (
                   <span>Đang xử lý...</span>
@@ -313,7 +314,7 @@ export default function FinalDeliveryModal({
               <button
                 onClick={handleUpload}
                 disabled={isUploading || !file}
-                className="px-5 py-2 rounded-xl text-xs font-semibold bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-500/25 hover:scale-[1.02] transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-5 py-2.5 rounded-full text-xs font-semibold bg-[#A7ACD9] hover:bg-[#b8bde8] text-[#131316] shadow-md transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isUploading ? (
                   <span>Đang tải lên...</span>

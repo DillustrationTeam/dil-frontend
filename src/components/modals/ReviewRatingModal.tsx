@@ -71,17 +71,18 @@ export default function ReviewRatingModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
-      <div className="relative w-full max-w-lg bg-[#131522]/95 border border-white/10 rounded-[32px] shadow-2xl overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0C0D14]/80 backdrop-blur-md animate-fadeIn">
+      <div className="relative w-full max-w-lg bg-[#1F2335] border border-white/10 shadow-2xl overflow-hidden rounded-3xl">
+
         {/* Header */}
-        <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between bg-[#161926]/50">
+        <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between bg-[#161926]/80">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center border border-amber-500/30">
               <Award className="w-5 h-5" />
             </div>
             <div>
               <h3 className="text-sm font-space-grotesk font-bold text-white">Đánh giá tác phẩm & Dịch vụ</h3>
-              <p className="text-[11px] text-slate-400">Creator: {creatorName}</p>
+              <p className="text-[11px] text-[#919099]">Creator: {creatorName}</p>
             </div>
           </div>
           <button
@@ -135,7 +136,7 @@ export default function ReviewRatingModal({
 
               {/* Feedback Text */}
               <div>
-                <label className="block text-[11px] font-space-grotesk font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+                <label className="block text-[11px] font-space-grotesk font-bold text-[#919099] uppercase tracking-wider mb-1.5">
                   Nhận xét công khai (Không bắt buộc)
                 </label>
                 <textarea
@@ -143,12 +144,12 @@ export default function ReviewRatingModal({
                   value={reviewText}
                   onChange={(e) => setReviewText(e.target.value)}
                   placeholder="Chia sẻ cảm nhận về giao tiếp, thái độ làm việc và chất lượng nét vẽ của Artist..."
-                  className="w-full p-3 bg-white/5 border border-white/10 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500/50"
+                  className="w-full p-3 bg-[#1b1b1e] border border-white/10 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 transition-all"
                 />
               </div>
 
               {/* Tip Artist Option */}
-              <div className="p-4 bg-white/5 border border-white/10 rounded-2xl space-y-2">
+              <div className="p-4 bg-[#1b1b1e] border border-white/10 rounded-2xl space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-white flex items-center gap-1.5">
                     <Heart className="w-4 h-4 text-rose-400" /> Tặng thêm Tip cho Artist
@@ -161,7 +162,7 @@ export default function ReviewRatingModal({
                       key={amount}
                       type="button"
                       onClick={() => setTipAmount(amount)}
-                      className={`py-2 rounded-xl text-xs font-semibold border transition-all ${
+                      className={`py-2 rounded-full text-xs font-semibold border transition-all ${
                         tipAmount === amount
                           ? 'bg-rose-500/20 border-rose-500 text-rose-300 shadow-md'
                           : 'bg-white/5 border-white/10 text-slate-400 hover:bg-white/10'
@@ -184,18 +185,18 @@ export default function ReviewRatingModal({
                 </div>
               )}
 
-              <div className="pt-2 flex justify-end gap-2">
+              <div className="pt-2 flex justify-end gap-2.5 items-center">
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-4 py-2 rounded-xl text-xs font-semibold border border-white/10 text-slate-300 hover:bg-white/5"
+                  className="px-4 py-2.5 rounded-full text-xs font-semibold border border-white/10 text-slate-300 hover:bg-white/5 transition-all"
                 >
                   Bỏ qua
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-5 py-2 rounded-xl text-xs font-semibold bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-lg shadow-amber-500/25 hover:scale-[1.02] transition-all flex items-center gap-1.5 disabled:opacity-50"
+                  className="px-5 py-2.5 rounded-full text-xs font-semibold bg-amber-400 hover:bg-amber-300 text-slate-950 shadow-md transition-all flex items-center gap-1.5 disabled:opacity-50"
                 >
                   <CheckCircle2 className="w-4 h-4" /> {isSubmitting ? 'Đang gửi...' : 'Gửi đánh giá'}
                 </button>

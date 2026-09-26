@@ -109,17 +109,18 @@ export default function SubmitMilestoneModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
-      <div className="relative w-full max-w-lg bg-[#131522]/95 border border-white/10 rounded-[32px] shadow-2xl overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0C0D14]/80 backdrop-blur-md animate-fadeIn">
+      <div className="relative w-full max-w-lg bg-[#1F2335] border border-white/10 shadow-2xl overflow-hidden rounded-3xl">
+
         {/* Header */}
-        <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between bg-[#161926]/50">
+        <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between bg-[#161926]/80">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center border border-purple-500/30">
+            <div className="w-9 h-9 rounded-xl bg-[#A7ACD9]/20 text-[#A7ACD9] flex items-center justify-center border border-[#A7ACD9]/30">
               <Upload className="w-5 h-5" />
             </div>
             <div>
               <h3 className="text-sm font-space-grotesk font-bold text-white">Nộp bản vẽ phác thảo (WIP)</h3>
-              <p className="text-[11px] text-slate-400">{milestoneTitle}</p>
+              <p className="text-[11px] text-[#919099]">{milestoneTitle}</p>
             </div>
           </div>
           <button
@@ -145,7 +146,7 @@ export default function SubmitMilestoneModal({
                       ? 'border-red-500/60 bg-red-500/10'
                       : file
                       ? 'border-emerald-500/50 bg-emerald-500/10'
-                      : 'border-white/20 hover:border-indigo-500/50 bg-white/5'
+                      : 'border-white/20 hover:border-[#A7ACD9]/50 bg-[#1b1b1e]'
                   }`}
                 >
                   <input 
@@ -163,9 +164,9 @@ export default function SubmitMilestoneModal({
                     </div>
                   ) : (
                     <>
-                      <Upload className="w-8 h-8 mx-auto text-indigo-400 mb-2 animate-bounce" />
+                      <Upload className="w-8 h-8 mx-auto text-[#A7ACD9] mb-2 animate-bounce" />
                       <p className="text-xs font-semibold text-white">Kéo và thả file phác thảo / demo tại đây</p>
-                      <p className="text-[11px] text-slate-400 mt-1">Hỗ trợ JPG, PNG, WEBP (Tối đa 25MB). Tự động gắn Watermark.</p>
+                      <p className="text-[11px] text-[#919099] mt-1">Hỗ trợ JPG, PNG, WEBP (Tối đa 25MB). Tự động gắn Watermark.</p>
                     </>
                   )}
                 </div>
@@ -179,7 +180,7 @@ export default function SubmitMilestoneModal({
               </div>
 
               <div>
-                <label className="block text-[11px] font-space-grotesk font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+                <label className="block text-[11px] font-space-grotesk font-bold text-[#919099] uppercase tracking-wider mb-1.5">
                   Ghi chú cho Khách hàng (Không bắt buộc)
                 </label>
                 <textarea
@@ -187,12 +188,12 @@ export default function SubmitMilestoneModal({
                   value={creatorNote}
                   onChange={(e) => setCreatorNote(e.target.value)}
                   placeholder="Mô tả chi tiết tiến độ, ý tưởng hoặc lưu ý cho mốc này..."
-                  className="w-full p-3 bg-white/5 border border-white/10 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                  className="w-full p-3 bg-[#1b1b1e] border border-white/10 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-[#A7ACD9] focus:ring-1 focus:ring-[#A7ACD9] transition-all"
                 />
               </div>
 
-              <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-xl flex items-center gap-2.5 text-blue-300 text-[11px]">
-                <ShieldAlert className="w-4 h-4 shrink-0 text-blue-400" />
+              <div className="p-3 bg-[#A7ACD9]/10 border border-[#A7ACD9]/20 rounded-xl flex items-center gap-2.5 text-[#A7ACD9] text-[11px]">
+                <ShieldAlert className="w-4 h-4 shrink-0 text-[#A7ACD9]" />
                 <span>Watermark bảo vệ tác quyền sẽ tự động chèn đè lên ảnh này trước khi Client xem.</span>
               </div>
 
@@ -219,10 +220,10 @@ export default function SubmitMilestoneModal({
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-white/10 bg-[#161926]/80 flex justify-end gap-2">
+        <div className="px-6 py-4 border-t border-white/10 bg-[#161926]/90 flex justify-end gap-2.5 items-center">
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded-xl text-xs font-semibold border border-white/10 text-slate-300 hover:bg-white/5"
+            className="px-4 py-2.5 rounded-full text-xs font-semibold border border-white/10 text-slate-300 hover:bg-white/5 transition-all"
           >
             {uploaded ? 'Đóng' : 'Hủy'}
           </button>
@@ -230,7 +231,7 @@ export default function SubmitMilestoneModal({
             <button
               onClick={handleUpload}
               disabled={isUploading || !file}
-              className="px-5 py-2 rounded-xl text-xs font-semibold bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-500/25 hover:scale-[1.02] transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-5 py-2.5 rounded-full text-xs font-semibold bg-[#A7ACD9] hover:bg-[#b8bde8] text-[#131316] shadow-md transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isUploading ? (
                 <span>Đang nộp...</span>

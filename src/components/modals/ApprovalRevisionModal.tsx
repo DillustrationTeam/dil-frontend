@@ -1,7 +1,5 @@
-'use client';
-
-import React, { useState } from 'react';
-import { X, CheckCircle2, MessageSquare, AlertTriangle, ShieldCheck, AlertCircle } from 'lucide-react';
+import React, { useRef, useState } from 'react';
+import { X, CheckCircle2, MessageSquare, AlertTriangle, ShieldCheck, AlertCircle, ZoomIn, ZoomOut, RotateCcw, Move } from 'lucide-react';
 import { commissionService } from '@/services/commission.service';
 
 interface ApprovalRevisionModalProps {
@@ -39,9 +37,71 @@ export default function ApprovalRevisionModal({
   const [actionError, setActionError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Dynamic Interactive Zoom & Free Dragging Panning State
+  const [zoomScale, setZoomScale] = useState(1);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStartRef = useRef({ x: 0, y: 0 });
+  const posStartRef = useRef({ x: 0, y: 0 });
+
   if (!isOpen) return null;
 
   const revisionsLeft = maxRevisions - revisionCount;
+
+  // Handlers cho kéo thả tự do (Free Drag & Pan)
+  const handleMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+    dragStartRef.current = { x: e.clientX, y: e.clientY };
+    posStartRef.current = { ...position };
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging) return;
+    const dx = e.clientX - dragStartRef.current.x;
+    const dy = e.clientY - dragStartRef.current.y;
+    setPosition({
+      x: posStartRef.current.x + dx,
+      y: posStartRef.current.y + dy,
+    });
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length === 1) {
+      setIsDragging(true);
+      dragStartRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      posStartRef.current = { ...position };
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (isDragging && e.touches.length === 1) {
+      const dx = e.touches[0].clientX - dragStartRef.current.x;
+      const dy = e.touches[0].clientY - dragStartRef.current.y;
+      setPosition({
+        x: posStartRef.current.x + dx,
+        y: posStartRef.current.y + dy,
+      });
+    }
+  };
+
+  const handleTouchEnd = () => {
+    setIsDragging(false);
+  };
+
+  const handleWheel = (e: React.WheelEvent) => {
+    const delta = e.deltaY < 0 ? 0.15 : -0.15;
+    setZoomScale((prev) => Math.min(3.5, Math.max(0.5, prev + delta)));
+  };
+
+  const handleResetZoom = () => {
+    setZoomScale(1);
+    setPosition({ x: 0, y: 0 });
+  };
 
   const extractErrorMessage = (error: unknown, fallback: string) => {
     if (error && typeof error === 'object' && 'response' in error) {
@@ -93,30 +153,88 @@ export default function ApprovalRevisionModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-fadeIn">
-      <div className="relative w-full max-w-4xl bg-[#131522]/95 border border-white/10 rounded-[32px] shadow-2xl overflow-hidden flex flex-col md:flex-row">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0C0D14]/80 backdrop-blur-md animate-fadeIn">
+      <div className="relative w-full max-w-4xl bg-[#1F2335] border border-white/10 shadow-2xl overflow-hidden flex flex-col md:flex-row rounded-3xl">
         
-        {/* Left Side: Image Viewer */}
-        <div className="w-full md:w-3/5 bg-black/40 border-r border-white/10 p-6 flex flex-col justify-center items-center relative min-h-[300px]">
-          {wipPreviewUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img 
-              src={wipPreviewUrl} 
-              alt="Milestone Preview" 
-              className="max-w-full max-h-[70vh] object-contain rounded-xl shadow-lg pointer-events-none"
-            />
-          ) : (
-            <p className="text-slate-500 text-sm">Chưa có ảnh xem thử.</p>
-          )}
-          <div className="absolute top-4 left-4 bg-black/60 px-3 py-1.5 rounded-lg border border-white/10 backdrop-blur-md flex items-center gap-2">
+        {/* Left Side: Interactive Free Drag & Pan Image Viewer */}
+        <div 
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseUp}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          onWheel={handleWheel}
+          className={`w-full md:w-3/5 bg-black/50 border-r border-white/10 p-6 flex flex-col justify-center items-center relative min-h-[360px] max-h-[80vh] overflow-hidden select-none ${
+            isDragging ? 'cursor-grabbing' : 'cursor-grab'
+          }`}
+        >
+          {/* Nút Điều Khiển Zoom & Reset Vị Trí */}
+          <div className="absolute top-4 right-4 z-20 flex items-center bg-[#161926]/90 border border-white/10 p-1.5 gap-1.5 rounded-xl backdrop-blur-md shadow-lg">
+            <button
+              type="button"
+              onClick={() => setZoomScale((z) => Math.max(0.5, z - 0.25))}
+              className="p-1 text-slate-400 hover:text-white rounded-lg hover:bg-white/10 transition"
+              title="Thu nhỏ (-)"
+            >
+              <ZoomOut size={14} />
+            </button>
+            <span className="text-xs font-mono font-bold text-white px-1.5 select-none">{Math.round(zoomScale * 100)}%</span>
+            <button
+              type="button"
+              onClick={() => setZoomScale((z) => Math.min(3.5, z + 0.25))}
+              className="p-1 text-slate-400 hover:text-white rounded-lg hover:bg-white/10 transition"
+              title="Phóng to (+)"
+            >
+              <ZoomIn size={14} />
+            </button>
+            {(zoomScale !== 1 || position.x !== 0 || position.y !== 0) && (
+              <button
+                type="button"
+                onClick={handleResetZoom}
+                className="p-1 text-slate-400 hover:text-white rounded-lg hover:bg-white/10 transition border-l border-white/10 pl-2"
+                title="Đặt lại khung nhìn (100%)"
+              >
+                <RotateCcw size={13} />
+              </button>
+            )}
+          </div>
+
+          {/* Tag Watermark & Hướng Dẫn Kéo Thả */}
+          <div className="absolute top-4 left-4 z-20 bg-[#161926]/90 px-3 py-1.5 rounded-full border border-white/10 backdrop-blur-md flex items-center gap-2">
             <ShieldCheck className="w-4 h-4 text-emerald-400" />
             <span className="text-[10px] text-emerald-300 font-semibold tracking-wide uppercase">Watermarked Preview</span>
           </div>
+
+          <div className="absolute bottom-3 left-4 z-20 text-[10px] text-slate-400/80 pointer-events-none flex items-center gap-1.5 bg-black/40 px-2.5 py-1 rounded-lg border border-white/5 backdrop-blur-sm">
+            <Move size={11} className="text-slate-400 shrink-0" />
+            <span>Kéo thả để di chuyển tự do · Lăn chuột để zoom</span>
+          </div>
+
+          {wipPreviewUrl ? (
+            <div
+              style={{
+                transform: `translate(${position.x}px, ${position.y}px) scale(${zoomScale})`,
+                transition: isDragging ? 'none' : 'transform 0.15s ease-out',
+              }}
+              className="will-change-transform flex items-center justify-center pointer-events-none"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img 
+                src={wipPreviewUrl} 
+                alt="Milestone Preview" 
+                className="max-w-full max-h-[65vh] object-contain rounded-xl shadow-2xl"
+              />
+            </div>
+          ) : (
+            <p className="text-slate-500 text-sm">Chưa có ảnh xem thử.</p>
+          )}
         </div>
 
         {/* Right Side: Actions */}
         <div className="w-full md:w-2/5 flex flex-col">
-          <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between">
+          <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between bg-[#161926]/80">
             <h3 className="text-sm font-space-grotesk font-bold text-white">
               {isCreator ? 'Xem bản phác thảo & Ý kiến phản hồi' : 'Duyệt mốc & Kiểm tra bản phác thảo'}
             </h3>
@@ -147,8 +265,8 @@ export default function ApprovalRevisionModal({
                     <h4 className="text-xs font-bold text-amber-400 flex items-center gap-2 uppercase tracking-wide">
                       <AlertTriangle className="w-4 h-4 shrink-0 text-amber-400" /> Yêu cầu chỉnh sửa từ Khách hàng
                     </h4>
-                    <p className="text-xs text-amber-100 italic bg-black/40 p-3 rounded-xl border border-amber-500/20 leading-relaxed">
-                      "{revisionFeedback || 'Khách hàng đã gửi yêu cầu chỉnh sửa cho mốc này.'}"
+                    <p className="text-xs text-amber-100 italic bg-[#1b1b1e] p-3 rounded-xl border border-amber-500/20 leading-relaxed">
+                      &ldquo;{revisionFeedback || 'Khách hàng đã gửi yêu cầu chỉnh sửa cho mốc này.'}&rdquo;
                     </p>
                     <p className="text-[11px] text-slate-400 font-mono">
                       Lượt sửa đã thực hiện: {revisionCount} / {maxRevisions}
@@ -159,7 +277,7 @@ export default function ApprovalRevisionModal({
                           onClose();
                           onOpenSubmitModal();
                         }}
-                        className="w-full mt-2 py-2.5 rounded-xl text-xs font-bold bg-amber-400 text-slate-950 hover:bg-amber-300 transition-colors shadow-lg"
+                        className="w-full mt-2 py-2.5 rounded-full text-xs font-bold bg-amber-400 text-slate-950 hover:bg-amber-300 transition-all shadow-md"
                       >
                         Nộp bản phác thảo đã sửa
                       </button>
@@ -175,11 +293,11 @@ export default function ApprovalRevisionModal({
                     </p>
                   </div>
                 ) : (
-                  <div className="p-4 bg-purple-500/10 border border-purple-500/30 rounded-2xl space-y-2">
-                    <h4 className="text-xs font-bold text-purple-300 flex items-center gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-purple-400" /> Đã nộp bản phác thảo
+                  <div className="p-4 bg-[#A7ACD9]/10 border border-[#A7ACD9]/30 rounded-2xl space-y-2">
+                    <h4 className="text-xs font-bold text-[#A7ACD9] flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-[#A7ACD9]" /> Đã nộp bản phác thảo
                     </h4>
-                    <p className="text-xs text-purple-200/80">
+                    <p className="text-xs text-slate-300">
                       Bản phác thảo đã được đăng tải kèm dấu Watermark bảo vệ. Đang chờ Khách hàng xem và bấm duyệt mốc.
                     </p>
                     {onOpenSubmitModal && (
@@ -188,7 +306,7 @@ export default function ApprovalRevisionModal({
                           onClose();
                           onOpenSubmitModal();
                         }}
-                        className="w-full mt-2 py-2.5 rounded-xl text-xs font-bold bg-purple-500 text-white hover:bg-purple-400 transition-colors shadow-lg"
+                        className="w-full mt-2 py-2.5 rounded-full text-xs font-bold bg-[#A7ACD9] text-[#131316] hover:bg-[#b8bde8] transition-all shadow-md"
                       >
                         Cập nhật bản vẽ / Nộp lại WIP
                       </button>
@@ -209,7 +327,7 @@ export default function ApprovalRevisionModal({
                   <button
                     onClick={handleApprove}
                     disabled={isSubmitting}
-                    className="w-full py-2.5 rounded-xl text-xs font-bold bg-emerald-500 text-black shadow-lg shadow-emerald-500/25 hover:bg-emerald-400 transition-colors disabled:opacity-50"
+                    className="w-full py-2.5 rounded-full text-xs font-bold bg-emerald-500 text-black shadow-lg shadow-emerald-500/25 hover:bg-emerald-400 transition-all disabled:opacity-50"
                   >
                     {isSubmitting ? 'Đang duyệt...' : 'Duyệt mốc & Giải ngân tiền mốc'}
                   </button>
@@ -232,7 +350,7 @@ export default function ApprovalRevisionModal({
                       setMode('revise');
                     }}
                     disabled={revisionsLeft <= 0}
-                    className="w-full py-2.5 rounded-xl text-xs font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30 hover:bg-amber-500/30 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                    className="w-full py-2.5 rounded-full text-xs font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30 hover:bg-amber-500/30 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
                   >
                     {revisionsLeft > 0 ? 'Viết yêu cầu sửa đổi' : 'Hết lượt sửa tối đa'}
                   </button>
@@ -252,7 +370,7 @@ export default function ApprovalRevisionModal({
                       if (feedbackError) setFeedbackError(null);
                     }}
                     placeholder="Mô tả cụ thể những điểm cần chỉnh sửa, thêm bớt hoặc đổi màu..."
-                    className={`w-full p-4 bg-black/40 rounded-xl text-sm text-amber-100 placeholder-amber-500/40 focus:outline-none ${
+                    className={`w-full p-4 bg-[#1b1b1e] rounded-xl text-xs text-white placeholder-amber-500/40 focus:outline-none transition-all ${
                       feedbackError
                         ? 'border-2 border-red-500/70 focus:border-red-500'
                         : 'border border-amber-500/30 focus:border-amber-400 focus:ring-1 focus:ring-amber-400'
@@ -264,21 +382,21 @@ export default function ApprovalRevisionModal({
                     </p>
                   )}
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-2.5">
                   <button
                     onClick={() => {
                       setActionError(null);
                       setFeedbackError(null);
                       setMode('view');
                     }}
-                    className="flex-1 py-2.5 rounded-xl text-xs font-bold bg-white/5 text-slate-300 hover:bg-white/10 transition-colors"
+                    className="flex-1 py-2.5 rounded-full text-xs font-bold border border-white/10 text-slate-300 hover:bg-white/5 transition-all"
                   >
                     Quay lại
                   </button>
                   <button
                     onClick={handleRequestRevision}
                     disabled={isSubmitting}
-                    className="flex-1 py-2.5 rounded-xl text-xs font-bold bg-amber-500 text-black shadow-lg shadow-amber-500/25 hover:bg-amber-400 transition-colors disabled:opacity-50"
+                    className="flex-1 py-2.5 rounded-full text-xs font-bold bg-amber-500 text-black shadow-lg shadow-amber-500/25 hover:bg-amber-400 transition-all disabled:opacity-50"
                   >
                     {isSubmitting ? 'Đang gửi...' : 'Gửi yêu cầu sửa'}
                   </button>
