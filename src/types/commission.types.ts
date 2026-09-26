@@ -55,6 +55,8 @@ export interface Commission {
 export interface RespondToCommissionPayload {
   action: 'Accept' | 'Reject' | 'Negotiate';
   negotiatePrice?: number;
+  negotiateDeadlineAt?: string;
+  negotiateNote?: string;
   rejectReason?: string;
 }
 

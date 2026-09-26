@@ -98,3 +98,72 @@ apiClient.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+/**
+ * Trích xuất câu thông báo lỗi chi tiết từ response của Backend ASP.NET Core
+ * (ProblemDetails, ValidationProblemDetails, hoặc custom Result/ApiResponse object).
+ */
+export function extractErrorMessage(error: unknown, fallbackMessage = 'Yêu cầu không hợp lệ. Vui lòng kiểm tra lại.'): string {
+  if (!error) return fallbackMessage;
+
+  if (typeof error === 'string') return error;
+
+  if (typeof error === 'object' && error !== null) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const res = (error as { response?: { data?: any; status?: number; statusText?: string } }).response;
+    if (res?.data) {
+      const data = res.data;
+
+      // Case 1: Custom Result wrapper `data.errors: string[]`
+      if (Array.isArray(data.errors) && data.errors.length > 0) {
+        return data.errors.map((e: unknown) => (typeof e === 'string' ? e : JSON.stringify(e))).join(' · ');
+      }
+
+      // Case 2: ValidationProblemDetails `data.errors: Record<string, string[]>`
+      if (data.errors && typeof data.errors === 'object' && !Array.isArray(data.errors)) {
+        const errorList: string[] = [];
+        for (const key of Object.keys(data.errors)) {
+          const val = data.errors[key];
+          if (Array.isArray(val)) {
+            errorList.push(...val);
+          } else if (typeof val === 'string') {
+            errorList.push(val);
+          }
+        }
+        if (errorList.length > 0) return errorList.join(' · ');
+      }
+
+      // Case 3: `data.error.details` / `data.error.title`
+      if (data.error) {
+        if (Array.isArray(data.error.details) && data.error.details.length > 0) {
+          return data.error.details.join(' · ');
+        }
+        if (typeof data.error.title === 'string' && data.error.title) {
+          return data.error.title;
+        }
+        if (typeof data.error.message === 'string' && data.error.message) {
+          return data.error.message;
+        }
+      }
+
+      // Case 4: `data.message` hoặc `data.detail` hoặc `data.title`
+      if (typeof data.message === 'string' && data.message.trim()) {
+        return data.message;
+      }
+      if (typeof data.detail === 'string' && data.detail.trim()) {
+        return data.detail;
+      }
+      if (typeof data.title === 'string' && data.title.trim() && data.title !== 'One or more validation errors occurred.') {
+        return data.title;
+      }
+    }
+
+    // Case 5: Error.message (nếu không phải dạng generic 'Request failed with status code...')
+    const msg = (error as { message?: string }).message;
+    if (msg && !msg.startsWith('Request failed with status code')) {
+      return msg;
+    }
+  }
+
+  return fallbackMessage;
+}

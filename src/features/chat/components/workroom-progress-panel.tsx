@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Activity, BellRing, CalendarClock, CircleAlert, RefreshCw, ShieldCheck, Sparkles, TrendingDown, TrendingUp } from 'lucide-react';
+import { Activity, BellRing, CalendarClock, CheckCircle2, CircleAlert, RefreshCw, ShieldCheck, Sparkles, TrendingDown, TrendingUp } from 'lucide-react';
 import { deadlineRiskService } from '../services/deadline-risk.service';
 import type { DeadlineRiskDto, DeadlineRiskLevel } from '../types/deadline-risk.types';
 
@@ -73,7 +73,19 @@ function describeCountdown(deadline: string | null) {
  * Chỉ dựng khi phòng gắn với một commission — phòng đấu giá / phòng hỗ trợ không
  * có mốc tiến độ nên `commissionId` là null.
  */
-export function WorkroomProgressPanel({ commissionId }: { commissionId: string }) {
+export function WorkroomProgressPanel({
+  commissionId,
+  onCancelClick,
+  allApproved,
+  isCancelled,
+  totalMilestones,
+}: {
+  commissionId: string;
+  onCancelClick?: () => void;
+  allApproved?: boolean;
+  isCancelled?: boolean;
+  totalMilestones?: number;
+}) {
   const [risk, setRisk] = useState<DeadlineRiskDto | null>(null);
   const [loading, setLoading] = useState(true);
   const [predicting, setPredicting] = useState(false);
@@ -176,9 +188,19 @@ export function WorkroomProgressPanel({ commissionId }: { commissionId: string }
           <RiskIcon size={11} /> Rủi ro trễ hạn: {style.label} · {percent}%
         </span>
 
-        <span className="inline-flex items-center gap-1 rounded-full border border-white/10 px-2.5 py-0.5 text-[11px] text-on-surface-variant">
-          <CalendarClock size={11} /> Mốc #{risk.currentStage}
-        </span>
+        {isCancelled ? (
+          <span className="inline-flex items-center gap-1 rounded-full border border-red-400/40 bg-red-500/15 px-2.5 py-0.5 text-[11px] font-semibold text-red-300">
+            <CircleAlert size={11} /> Đã hủy đơn & Hoàn tiền
+          </span>
+        ) : allApproved || (totalMilestones && risk.currentStage > totalMilestones) ? (
+          <span className="inline-flex items-center gap-1 rounded-full border border-emerald-400/30 bg-emerald-500/10 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-300">
+            <CheckCircle2 size={11} /> Hoàn tất {totalMilestones ? `${totalMilestones}/${totalMilestones}` : 'các'} mốc
+          </span>
+        ) : (
+          <span className="inline-flex items-center gap-1 rounded-full border border-white/10 px-2.5 py-0.5 text-[11px] text-on-surface-variant">
+            <CalendarClock size={11} /> Mốc #{risk.currentStage}
+          </span>
+        )}
 
         {countdown && (
           <span
@@ -209,6 +231,17 @@ export function WorkroomProgressPanel({ commissionId }: { commissionId: string }
             {predicting ? <RefreshCw size={12} className="animate-spin" /> : <Sparkles size={12} />}
             {predicting ? 'Đang chấm…' : 'Chấm lại bằng AI'}
           </button>
+
+          {!isCancelled && onCancelClick && (
+            <button
+              type="button"
+              onClick={onCancelClick}
+              className="inline-flex items-center gap-1 rounded-full border border-red-500/40 bg-red-500/10 px-3 py-1 font-semibold text-red-300 hover:bg-red-500/20 transition"
+              title="Hủy đơn hàng hoặc mở khiếu nại"
+            >
+              <CircleAlert size={12} /> Hủy đơn / Khiếu nại
+            </button>
+          )}
         </div>
       </div>
 

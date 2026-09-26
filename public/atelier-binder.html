@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Atelier Binder - Creative Commission Workspace</title>
+  <!-- Google Fonts: Plus Jakarta Sans & Inter for sleek modern UI typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            slate: {
+              950: '#0c0d14',
+              900: '#12131d',
+              850: '#171926',
+              800: '#1f2133',
+              750: '#26293d',
+              700: '#32364f',
+              600: '#484d6e',
+            },
+            mint: {
+              400: '#34d399',
+              500: '#10b981',
+              neon: '#00e599',
+            },
+            lavender: {
+              300: '#c4b5fd',
+              400: '#a78bfa',
+              500: '#8b5cf6',
+            }
+          },
+          boxShadow: {
+            'ambient': '0 25px 60px -15px rgba(0, 0, 0, 0.7), 0 0 40px -10px rgba(139, 92, 246, 0.08)',
+            'binder': '0 30px 70px -10px rgba(5, 7, 14, 0.8), inset 0 1px 1px rgba(255, 255, 255, 0.08)',
+            'page-l': 'inset -15px 0 25px -10px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.05)',
+            'page-r': 'inset 15px 0 25px -10px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.05)',
+            'glow-mint': '0 0 25px rgba(0, 229, 153, 0.25)',
+            'glow-coral': '0 0 25px rgba(244, 63, 94, 0.25)',
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom Scrollbar for inner memo lists */
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(23, 25, 38, 0.5);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #32364f;
+      border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #484d6e;
+    }
+
+    /* Soft Realistic Spiral Ring */
+    .spiral-ring {
+      position: relative;
+      width: 32px;
+      height: 12px;
+      border-radius: 6px;
+      background: linear-gradient(180deg, #4b516d 0%, #202334 45%, #151724 55%, #4b516d 100%);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.35);
+    }
+    .spiral-ring::before {
+      content: '';
+      position: absolute;
+      left: 3px;
+      top: -3px;
+      width: 6px;
+      height: 6px;
+      background: #0d0e17;
+      border-radius: 50%;
+      box-shadow: inset 0 2px 3px rgba(0,0,0,0.8);
+    }
+    .spiral-ring::after {
+      content: '';
+      position: absolute;
+      right: 3px;
+      top: -3px;
+      width: 6px;
+      height: 6px;
+      background: #0d0e17;
+      border-radius: 50%;
+      box-shadow: inset 0 2px 3px rgba(0,0,0,0.8);
+    }
+
+    /* Interactive Right Edge Bookmark Tabs */
+    .bookmark-tab {
+      transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+      transform: translateX(0);
+    }
+    .bookmark-tab:hover {
+      transform: translateX(12px);
+    }
+
+    /* Subtle Paper Texture Overlay */
+    .paper-texture {
+      background-image: radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 0);
+      background-size: 18px 18px;
+    }
+
+    /* Glass Frosted Backdrop */
+    .frosted-glass {
+      background: rgba(23, 25, 38, 0.78);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    /* Popup Animations */
+    .modal-enter {
+      opacity: 0;
+      transform: scale(0.94) translateY(8px);
+      pointer-events: none;
+      transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .modal-enter-active {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+      pointer-events: auto;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-200 min-h-screen flex flex-col justify-between selection:bg-mint-500/20 selection:text-mint-neon antialiased overflow-x-hidden">
+
+  <header class="w-full max-w-[1480px] mx-auto px-6 pt-5 pb-3 flex items-center justify-between z-30">
+    <div class="flex items-center gap-6">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-2xl bg-gradient-to-tr from-mint-500 to-lavender-400 p-[1.5px] flex items-center justify-center shadow-lg shadow-mint-500/10">
+          <div class="w-full h-full bg-slate-900 rounded-[14px] flex items-center justify-center">
+            <svg class="w-5 h-5 text-mint-neon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </svg>
+          </div>
+        </div>
+        <div>
+          <span class="font-bold text-sm tracking-wider uppercase text-white flex items-center gap-2">
+            ATELIER BINDER
+            <span class="text-[10px] font-mono font-medium px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">v2.4 Pro</span>
+          </span>
+          <p class="text-xs text-slate-400">Creative Ledger & Proofing System</p>
+        </div>
+      </div>
+
+      <!-- Navigation Pill links -->
+      <nav class="hidden md:flex items-center bg-slate-900/80 border border-slate-800/80 rounded-full px-2 py-1 gap-1 text-xs">
+        <button class="px-4 py-1.5 rounded-full bg-slate-800 font-semibold text-white shadow-sm transition">Spread Canvas</button>
+        <button class="px-4 py-1.5 rounded-full text-slate-400 hover:text-white transition">Hợp đồng & Brief</button>
+        <button class="px-4 py-1.5 rounded-full text-slate-400 hover:text-white transition">Vault Kho Lưu Trữ</button>
+      </nav>
+    </div>
+
+    <!-- Right User Pill & Top Stats -->
+    <div class="flex items-center gap-4">
+      <div class="hidden sm:flex items-center gap-3 bg-slate-900/60 border border-slate-800/70 px-4 py-2 rounded-2xl text-xs">
+        <span class="flex items-center gap-1.5 text-mint-400 font-medium">
+          <span class="w-2 h-2 rounded-full bg-mint-neon animate-pulse"></span>
+          Đang triển khai Mốc #1
+        </span>
+        <span class="text-slate-600">|</span>
+        <span class="text-slate-400">Order ID: <span class="font-mono text-slate-200">#ORD-88219</span></span>
+      </div>
+
+      <div class="flex items-center gap-2 bg-slate-900/90 border border-slate-800 px-3 py-1.5 rounded-full">
+        <div class="w-7 h-7 rounded-full bg-gradient-to-br from-lavender-500 to-slate-800 flex items-center justify-center text-xs font-semibold text-white shadow-sm">
+          RT
+        </div>
+        <span class="text-xs font-medium text-slate-300 pr-1">Ren Takahashi</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="w-full max-w-[1440px] mx-auto px-4 lg:px-8 py-2 flex-1 flex items-center justify-center relative">
+    
+    <!-- Outer Soft Leather Cover (Bìa sổ bo cong mềm mại) -->
+    <div class="relative w-full bg-slate-900/90 border border-slate-800/80 rounded-[32px] p-3 sm:p-5 shadow-binder">
+      
+      <!-- Inner Binder Spread (2 trang mở song song) -->
+      <div class="relative w-full rounded-[24px] bg-slate-850 flex flex-col lg:flex-row overflow-visible">
+
+        <!-- Spiral Spine (Cột gáy lò xo kim loại êm ái ở trung tâm) -->
+        <div class="hidden lg:flex absolute left-1/2 top-0 bottom-0 -translate-x-1/2 w-9 flex-col justify-around items-center py-6 z-20 pointer-events-none">
+          <div class="spiral-ring"></div>
+          <div class="spiral-ring"></div>
+          <div class="spiral-ring"></div>
+          <div class="spiral-ring"></div>
+          <div class="spiral-ring"></div>
+          <div class="spiral-ring"></div>
+          <div class="spiral-ring"></div>
+          <div class="spiral-ring"></div>
+        </div>
+
+        <!-- ==================== LEFT PAGE: LOGBOOK & BRIEF ==================== -->
+        <section class="w-full lg:w-1/2 bg-slate-850 paper-texture p-6 lg:p-8 rounded-t-[24px] lg:rounded-tr-none lg:rounded-l-[24px] shadow-page-l border-b lg:border-b-0 lg:border-r border-slate-800/60 flex flex-col justify-between relative overflow-hidden">
+          
+          <div>
+            <!-- Page Header Meta -->
+            <div class="flex items-center justify-between border-b border-slate-800/80 pb-4 mb-5">
+              <div class="flex items-center gap-2.5">
+                <span class="w-2.5 h-2.5 rounded-full bg-mint-neon shadow-sm shadow-mint-neon/50"></span>
+                <span class="text-xs font-mono font-medium tracking-wider text-slate-400 uppercase">ATELIER LOGBOOK // FOLIO #01</span>
+              </div>
+              <span class="px-3 py-1 rounded-full text-[11px] font-medium bg-mint-500/10 text-mint-neon border border-mint-500/20">
+                IN REVISION • MỐC #01
+              </span>
+            </div>
+
+            <!-- Title & Brief Details -->
+            <div class="mb-6">
+              <div class="flex items-baseline justify-between flex-wrap gap-2">
+                <h1 class="text-xl lg:text-2xl font-bold tracking-tight text-white">Logbook & Brief Trao Đổi</h1>
+                <span class="font-mono text-xs text-slate-400">REV #03 • 4K ULTRA</span>
+              </div>
+              <p class="text-xs text-slate-400 mt-1">Tiến trình trao đổi minh họa nhân vật cyberpunk & feedback trực quan theo mốc.</p>
+            </div>
+
+            <!-- Milestone Status Metric Badges (Monotone Soft Pill) -->
+            <div class="grid grid-cols-3 gap-3 mb-6">
+              <div class="bg-slate-800/70 border border-slate-700/50 rounded-2xl p-3">
+                <div class="text-[10px] text-slate-400 uppercase font-medium">Thời hạn mốc</div>
+                <div class="text-xs sm:text-sm font-semibold text-slate-100 mt-0.5 flex items-center gap-1.5">
+                  <svg class="w-3.5 h-3.5 text-mint-400" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10" stroke-width="2"/><path d="M12 6v6l4 2" stroke-width="2"/></svg>
+                  13 ngày 23h
+                </div>
+              </div>
+              <div class="bg-slate-800/70 border border-slate-700/50 rounded-2xl p-3">
+                <div class="text-[10px] text-slate-400 uppercase font-medium">Ngân sách khóa</div>
+                <div class="text-xs sm:text-sm font-semibold text-mint-neon mt-0.5 font-mono">$1,850.00</div>
+              </div>
+              <div class="bg-slate-800/70 border border-slate-700/50 rounded-2xl p-3">
+                <div class="text-[10px] text-slate-400 uppercase font-medium">Độ phân giải</div>
+                <div class="text-xs sm:text-sm font-semibold text-slate-100 mt-0.5">300 DPI (RGB)</div>
+              </div>
+            </div>
+
+            <!-- Exchange Conversation Stream (Dạng Sticky Note ghi chép mềm mại) -->
+            <div class="space-y-4 max-h-[300px] overflow-y-auto pr-1">
+              
+              <!-- Client Note -->
+              <div class="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-4 shadow-sm relative group hover:border-slate-600/80 transition">
+                <div class="flex items-center justify-between mb-2">
+                  <div class="flex items-center gap-2">
+                    <span class="w-5 h-5 rounded-full bg-lavender-500/20 text-lavender-300 text-[10px] flex items-center justify-center font-bold">NL</span>
+                    <span class="text-xs font-semibold text-slate-200">Nova Labs <span class="text-[10px] font-normal text-slate-400">(Art Director)</span></span>
+                  </div>
+                  <span class="text-[10px] text-slate-500 font-mono">Hôm qua 18:42</span>
+                </div>
+                <p class="text-xs leading-relaxed text-slate-300">
+                  <span class="text-lavender-400 font-medium">@Ren:</span> Cần ánh sáng thanh kiếm katana phản chiếu rõ hơn trên vệt nước mặt đường. Chi tiết áo choàng rách rưới và mũ nón lá rơm phong cách cyberpunk đạt yêu cầu rất tốt!
+                </p>
+                <div class="mt-2.5 flex items-center gap-2">
+                  <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-700/50 text-slate-300 border border-slate-600/50">#Phản quang Katana</span>
+                  <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-700/50 text-slate-300 border border-slate-600/50">#Vũng nước mưa</span>
+                  <span class="ml-auto text-[10px] text-mint-400 flex items-center gap-1 font-medium">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                    Đã tiếp nhận
+                  </span>
+                </div>
+              </div>
+
+              <!-- Artist Note (Active revision) -->
+              <div class="bg-slate-800/90 border border-slate-700/90 rounded-2xl p-4 shadow-md relative">
+                <!-- Paperclip Skeuomorphic Accent -->
+                <div class="absolute -top-3.5 right-6 w-3 h-7 rounded-full border-2 border-slate-500 bg-slate-850 shadow-inner"></div>
+
+                <div class="flex items-center justify-between mb-2">
+                  <div class="flex items-center gap-2">
+                    <span class="w-5 h-5 rounded-full bg-mint-500/20 text-mint-neon text-[10px] flex items-center justify-center font-bold">RT</span>
+                    <span class="text-xs font-semibold text-slate-200">Ren Takahashi <span class="text-[10px] font-normal text-mint-400">(Artist)</span></span>
+                  </div>
+                  <span class="text-[10px] text-slate-500 font-mono">09:15 sáng nay</span>
+                </div>
+                <p class="text-xs leading-relaxed text-slate-300">
+                  Đã cập nhật layer phản quang neon mint và gia tăng specular highlight trên giáp ngực titan. Bản preview <span class="font-mono text-mint-neon">#03</span> đã được ghim kèm bên trang phải.
+                </p>
+                <div class="mt-2.5 flex items-center gap-2">
+                  <span class="w-1.5 h-1.5 rounded-full bg-mint-neon"></span>
+                  <span class="text-[10px] text-slate-400">Sẵn sàng nghiệm thu sơ bộ Mốc 1</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom Interactive Quick Reply Box -->
+          <div class="mt-5 pt-4 border-t border-slate-800/80">
+            <div class="relative flex items-center">
+              <input type="text" placeholder="Gõ phản hồi nhanh để dán trực tiếp vào logbook bàn giao..." class="w-full bg-slate-900/90 border border-slate-700/70 rounded-full pl-4 pr-28 py-2.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-mint-500/60 focus:ring-1 focus:ring-mint-500/50 transition">
+              <button class="absolute right-1.5 px-4 py-1.5 rounded-full bg-mint-neon hover:bg-mint-400 text-slate-950 font-bold text-xs shadow-md shadow-mint-neon/20 transition flex items-center gap-1">
+                <span>Dán note</span>
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+              </button>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- ==================== RIGHT PAGE: ARTWORK PROOFING CANVAS ==================== -->
+        <section class="w-full lg:w-1/2 bg-slate-850 paper-texture p-6 lg:p-8 rounded-b-[24px] lg:rounded-bl-none lg:rounded-r-[24px] shadow-page-r flex flex-col justify-between relative overflow-visible">
+          
+          <div>
+            <!-- Proofing Canvas Top Bar -->
+            <div class="flex items-center justify-between border-b border-slate-800/80 pb-4 mb-4">
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-lavender-400"></span>
+                <span class="text-xs font-mono font-medium tracking-wider text-slate-400 uppercase">PROOFING VIEWPORT // NEOPRINT CANVAS</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-[11px] font-mono text-slate-400">3840 × 2400 px</span>
+                <span class="text-[10px] px-2 py-0.5 rounded-md bg-slate-800 text-slate-300 border border-slate-700">100% SCALE</span>
+              </div>
+            </div>
+
+            <!-- Artwork Container (Bức tranh ghim trên trang sổ) -->
+            <div class="relative bg-slate-900 border border-slate-750 rounded-2xl overflow-hidden shadow-xl group">
+              
+              <!-- Corner Pins (Đinh ghim skeuomorphic 4 góc) -->
+              <div class="absolute top-2 left-2 w-2.5 h-2.5 rounded-full bg-slate-400 border border-slate-700 shadow-md z-10 opacity-70"></div>
+              <div class="absolute top-2 right-2 w-2.5 h-2.5 rounded-full bg-slate-400 border border-slate-700 shadow-md z-10 opacity-70"></div>
+              <div class="absolute bottom-2 left-2 w-2.5 h-2.5 rounded-full bg-slate-400 border border-slate-700 shadow-md z-10 opacity-70"></div>
+              <div class="absolute bottom-2 right-2 w-2.5 h-2.5 rounded-full bg-slate-400 border border-slate-700 shadow-md z-10 opacity-70"></div>
+
+              <!-- Artwork Image with Watermark Preview Badge -->
+              <div class="relative h-[255px] sm:h-[285px] w-full bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center overflow-hidden">
+                
+                <!-- Fallback artwork graphic: High detail Cyberpunk Samurai Silhouette SVG Illustration -->
+                <svg class="w-full h-full object-cover" viewBox="0 0 700 420" xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <linearGradient id="cyberSky" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0%" stop-color="#0a0a14" />
+                      <stop offset="50%" stop-color="#18142b" />
+                      <stop offset="100%" stop-color="#071b26" />
+                    </linearGradient>
+                    <linearGradient id="neonCyan" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stop-color="#00ffcc" />
+                      <stop offset="100%" stop-color="#007799" />
+                    </linearGradient>
+                    <linearGradient id="neonPink" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stop-color="#ff0077" />
+                      <stop offset="100%" stop-color="#880044" />
+                    </linearGradient>
+                  </defs>
+                  
+                  <rect width="700" height="420" fill="url(#cyberSky)"/>
+                  
+                  <!-- Cyber City Background Skyscrapers -->
+                  <rect x="60" y="80" width="70" height="340" fill="#0d0e1a" opacity="0.8"/>
+                  <rect x="140" y="40" width="90" height="380" fill="#111322" opacity="0.9"/>
+                  <rect x="420" y="60" width="80" height="360" fill="#101224" opacity="0.85"/>
+                  <rect x="520" y="110" width="110" height="310" fill="#0d0e1c" opacity="0.75"/>
+
+                  <!-- Neon Hologram Ads in City -->
+                  <rect x="155" y="80" width="60" height="15" rx="3" fill="url(#neonCyan)" opacity="0.6"/>
+                  <rect x="440" y="120" width="40" height="80" rx="4" fill="url(#neonPink)" opacity="0.4"/>
+                  
+                  <!-- Rain particles & reflection lines -->
+                  <line x1="80" y1="0" x2="40" y2="420" stroke="#38bdf8" stroke-width="0.5" stroke-dasharray="8,20" opacity="0.3"/>
+                  <line x1="280" y1="0" x2="240" y2="420" stroke="#c084fc" stroke-width="0.5" stroke-dasharray="12,24" opacity="0.3"/>
+                  <line x1="480" y1="0" x2="440" y2="420" stroke="#38bdf8" stroke-width="0.5" stroke-dasharray="6,18" opacity="0.25"/>
+
+                  <!-- Cyberpunk Ronin Character Silhouette -->
+                  <path d="M350 140 C330 140 310 150 280 162 C340 155 360 155 420 162 C390 150 370 140 350 140 Z" fill="#1c2033" /> <!-- Conical Hat -->
+                  <path d="M332 162 L368 162 L372 195 L328 195 Z" fill="#0e111d"/> <!-- Mask & Neck -->
+                  <path d="M305 195 Q350 185 395 195 L425 350 L275 350 Z" fill="#121524" /> <!-- Coat body -->
+                  
+                  <!-- Glowing Katana -->
+                  <line x1="390" y1="180" x2="440" y2="380" stroke="#00e599" stroke-width="4.5" stroke-linecap="round" filter="drop-shadow(0 0 10px #00e599)"/>
+                  <line x1="390" y1="180" x2="440" y2="380" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"/>
+                  
+                  <!-- Wet pavement water puddle glow reflection -->
+                  <ellipse cx="350" cy="385" rx="140" ry="25" fill="#00e599" opacity="0.18"/>
+                  <ellipse cx="430" cy="390" rx="45" ry="10" fill="#00e599" opacity="0.4" filter="blur(6px)"/>
+                </svg>
+
+                <!-- Watermark Overlay Grid Pattern -->
+                <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-25">
+                  <span class="text-3xl sm:text-4xl font-black text-white/30 tracking-widest uppercase rotate-[-25deg] select-none">
+                    PROTECTED PROOF // WATERMARK
+                  </span>
+                </div>
+
+                <!-- Overlay Badges -->
+                <div class="absolute top-3 left-3 flex items-center gap-2">
+                  <div class="bg-slate-950/80 backdrop-blur-md border border-slate-700/60 rounded-full px-3 py-1 flex items-center gap-1.5 shadow-md">
+                    <span class="w-1.5 h-1.5 rounded-full bg-mint-neon animate-ping"></span>
+                    <span class="text-[11px] font-medium text-slate-300">Live Proof v1.4</span>
+                  </div>
+                </div>
+
+                <div class="absolute bottom-3 right-3">
+                  <button class="bg-slate-900/85 hover:bg-slate-800 text-slate-200 border border-slate-700/70 text-xs px-3 py-1.5 rounded-full flex items-center gap-1.5 backdrop-blur-md transition shadow-lg">
+                    <svg class="w-3.5 h-3.5 text-lavender-400" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke-width="2"/></svg>
+                    <span>Soi chi tiết (100%)</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Artwork Caption Footer -->
+              <div class="bg-slate-900 px-4 py-2.5 border-t border-slate-800 flex items-center justify-between text-xs">
+                <span class="font-mono text-slate-400">KENJI 2277 - REVISION #03 (PROOF)</span>
+                <span class="text-[11px] text-mint-400 font-medium">Bản vẽ màu chuẩn dải sRGB</span>
+              </div>
+            </div>
+
+            <!-- Master Artwork Delivery Package (Phong bì niêm phong mềm mại) -->
+            <div class="mt-4 bg-slate-900/75 border border-slate-800 rounded-2xl p-4 flex items-center justify-between gap-4 relative overflow-hidden">
+              <div class="flex items-center gap-3.5">
+                <div class="w-11 h-11 rounded-2xl bg-slate-800/80 border border-slate-700 flex items-center justify-center text-slate-400 shadow-inner">
+                  <svg class="w-5 h-5 text-mint-neon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                  </svg>
+                </div>
+                <div>
+                  <div class="flex items-center gap-2">
+                    <h2 class="text-xs font-bold text-white uppercase tracking-wider">Final Master Artwork Package</h2>
+                    <span class="text-[10px] px-2 py-0.2 rounded-full bg-slate-800 text-slate-400 border border-slate-700">Khoá bảo vệ</span>
+                  </div>
+                  <p class="text-[11px] text-slate-400 mt-0.5">Bao gồm: File gốc .PSD nguyên layer, TIFF 16-bit không nén, PDF thương mại.</p>
+                </div>
+              </div>
+
+              <!-- Status tag -->
+              <div class="text-right">
+                <span class="text-[11px] font-mono text-slate-400 block">Dung lượng: ~1.42 GB</span>
+                <span class="text-[10px] text-slate-500">Mở khóa ngay khi duyệt hoàn tất</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom Micro Notice -->
+          <div class="mt-5 pt-3 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-500">
+            <span class="flex items-center gap-1.5">
+              <svg class="w-3.5 h-3.5 text-mint-neon" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 1.944A11.954 11.954 0 012.166 5C2.056 5.649 2 6.319 2 7c0 5.225 3.34 9.67 8 11.317C14.66 16.67 18 12.225 18 7c0-.682-.057-1.35-.166-2.001A11.954 11.954 0 0110 1.944zM11 14a1 1 0 11-2 0 1 1 0 012 0zm0-7a1 1 0 10-2 0v3a1 1 0 102 0V7z" clip-rule="evenodd"/></svg>
+              Thanh toán ký quỹ an toàn (Escrow Protection)
+            </span>
+            <span class="font-mono">Atelier OS • Ledger Proofing</span>
+          </div>
+
+        </section>
+
+        <!-- ==================== INTERACTIVE BOOKMARK TABS (MÉP NGOÀI BÊN PHẢI) ==================== -->
+        <!-- Các thẻ tab chỉ mục nổi bật với hiệu ứng trượt mượt mà, bóng đổ mềm -->
+        <aside class="absolute -right-3 sm:-right-4 lg:-right-12 top-10 flex flex-col gap-3.5 z-30">
+          
+          <!-- 1. Tab: TIẾN ĐỘ & HẠN CHÓT -->
+          <div class="bookmark-tab relative group" onclick="openMemo('progress')">
+            <button class="w-11 sm:w-12 h-14 rounded-r-2xl bg-slate-800 hover:bg-slate-750 border-t border-r border-b border-slate-700/80 text-slate-300 hover:text-white flex flex-col items-center justify-center shadow-lg transition-colors cursor-pointer group-hover:border-slate-500">
+              <svg class="w-5 h-5 text-lavender-400 group-hover:scale-110 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+              </svg>
+              <span class="text-[9px] font-bold mt-1 uppercase tracking-tighter text-slate-400 group-hover:text-slate-200">Mốc 1</span>
+            </button>
+            <!-- Hover Flyout Label Tooltip -->
+            <div class="absolute right-14 top-1/2 -translate-y-1/2 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200 bg-slate-900 border border-slate-750 text-slate-200 text-xs px-3.5 py-2 rounded-xl shadow-2xl whitespace-nowrap flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-mint-neon"></span>
+              <span><strong>Tiến độ:</strong> Mốc #1 • Còn 13 ngày 23 giờ</span>
+            </div>
+          </div>
+
+          <!-- 2. Tab: THÔNG TIN CHI TIẾT -->
+          <div class="bookmark-tab relative group" onclick="openMemo('details')">
+            <button class="w-11 sm:w-12 h-14 rounded-r-2xl bg-slate-800 hover:bg-slate-750 border-t border-r border-b border-slate-700/80 text-slate-300 hover:text-white flex flex-col items-center justify-center shadow-lg transition-colors cursor-pointer group-hover:border-slate-500">
+              <svg class="w-5 h-5 text-slate-300 group-hover:scale-110 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+              </svg>
+              <span class="text-[9px] font-bold mt-1 uppercase tracking-tighter text-slate-400 group-hover:text-slate-200">Chi tiết</span>
+            </button>
+            <div class="absolute right-14 top-1/2 -translate-y-1/2 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200 bg-slate-900 border border-slate-750 text-slate-200 text-xs px-3.5 py-2 rounded-xl shadow-2xl whitespace-nowrap">
+              Xem thông tin hợp đồng & thông số kỹ thuật
+            </div>
+          </div>
+
+          <!-- Divider -->
+          <div class="w-8 h-[1px] bg-slate-800 mx-auto my-0.5"></div>
+
+          <!-- 3. Tab Thao tác: DUYỆT MỐC (Emerald Glow Accent) -->
+          <div class="bookmark-tab relative group" onclick="openMemo('approve')">
+            <button class="w-11 sm:w-12 h-14 rounded-r-2xl bg-slate-800 hover:bg-slate-750 border-t border-r border-b border-mint-500/50 text-mint-neon flex flex-col items-center justify-center shadow-glow-mint transition-all cursor-pointer group-hover:border-mint-neon">
+              <svg class="w-5 h-5 text-mint-neon group-hover:scale-110 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span class="text-[9px] font-bold mt-1 uppercase tracking-tighter text-mint-neon">Duyệt</span>
+            </button>
+            <div class="absolute right-14 top-1/2 -translate-y-1/2 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200 bg-slate-900 border border-mint-500/40 text-mint-neon text-xs px-3.5 py-2 rounded-xl shadow-2xl whitespace-nowrap font-medium">
+              ✓ Xác nhận Duyệt mốc #1 & Giải ngân
+            </div>
+          </div>
+
+          <!-- 4. Tab Thao tác: KHIẾU NẠI -->
+          <div class="bookmark-tab relative group" onclick="openMemo('dispute')">
+            <button class="w-11 sm:w-12 h-14 rounded-r-2xl bg-slate-800 hover:bg-slate-750 border-t border-r border-b border-slate-700/80 text-amber-300 flex flex-col items-center justify-center shadow-lg transition-colors cursor-pointer group-hover:border-amber-400">
+              <svg class="w-5 h-5 text-amber-400 group-hover:scale-110 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+              </svg>
+              <span class="text-[9px] font-bold mt-1 uppercase tracking-tighter text-slate-400 group-hover:text-amber-300">Khiếu nại</span>
+            </button>
+            <div class="absolute right-14 top-1/2 -translate-y-1/2 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200 bg-slate-900 border border-slate-750 text-slate-200 text-xs px-3.5 py-2 rounded-xl shadow-2xl whitespace-nowrap">
+              Gửi yêu cầu can thiệp & Trọng tài hỗ trợ
+            </div>
+          </div>
+
+          <!-- 5. Tab Thao tác: HỦY ĐƠN (Warning) -->
+          <div class="bookmark-tab relative group" onclick="openMemo('cancel')">
+            <button class="w-11 sm:w-12 h-14 rounded-r-2xl bg-slate-800 hover:bg-slate-750 border-t border-r border-b border-rose-500/40 text-rose-400 flex flex-col items-center justify-center shadow-lg transition-colors cursor-pointer group-hover:border-rose-400">
+              <svg class="w-5 h-5 text-rose-400 group-hover:scale-110 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+              </svg>
+              <span class="text-[9px] font-bold mt-1 uppercase tracking-tighter text-slate-400 group-hover:text-rose-400">Hủy đơn</span>
+            </button>
+            <div class="absolute right-14 top-1/2 -translate-y-1/2 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200 bg-slate-900 border border-rose-500/40 text-rose-300 text-xs px-3.5 py-2 rounded-xl shadow-2xl whitespace-nowrap">
+              Chính sách hủy đơn & Hoàn cọc
+            </div>
+          </div>
+
+        </aside>
+
+      </div>
+    </div>
+  </main>
+
+  <div id="modalBackdrop" class="fixed inset-0 bg-slate-950/75 backdrop-blur-md z-50 flex items-center justify-center p-4 modal-enter">
+    
+    <!-- Modal Card (Mẩu giấy Memo dán đè với kẹp giấy paperclip) -->
+    <div class="relative w-full max-w-lg bg-slate-900 border border-slate-700/80 rounded-[28px] p-7 shadow-2xl overflow-visible">
+      
+      <!-- Skeuomorphic Top Metal Paperclip Accent -->
+      <div class="absolute -top-5 left-10 w-4 h-11 rounded-full border-2 border-slate-400 bg-slate-850 shadow-md z-20 pointer-events-none"></div>
+
+      <!-- Close Button -->
+      <button onclick="closeModal()" class="absolute top-5 right-5 w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition border border-slate-700">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+
+      <!-- Dynamic Modal Content Injection -->
+      <div id="modalContentContainer">
+        <!-- Content will be swapped via JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toastNotification" class="fixed bottom-6 right-6 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none bg-slate-900/95 border border-slate-750 text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-3 text-xs">
+    <div id="toastIcon" class="w-6 h-6 rounded-full bg-mint-500/20 text-mint-neon flex items-center justify-center font-bold">✓</div>
+    <span id="toastMessage">Thao tác thành công.</span>
+  </div>
+
+  <script>
+    // Templates for each modal type matching the monotone/dark slate theme
+    const modalTemplates = {
+      // 1. Tiến độ
+      progress: {
+        title: "Kế hoạch Tiến độ & Mốc Bàn Giao",
+        badge: "TIMELINE & MILESTONES",
+        badgeColor: "bg-lavender-500/20 text-lavender-300 border-lavender-500/30",
+        html: `
+          <div class="space-y-3.5 my-4 text-xs">
+            <div class="p-3.5 rounded-2xl bg-slate-850 border border-mint-500/30">
+              <div class="flex items-center justify-between font-semibold text-slate-200">
+                <span class="flex items-center gap-2 text-mint-neon">
+                  <span class="w-2 h-2 rounded-full bg-mint-neon animate-pulse"></span>
+                  Mốc #1: Phác thảo & Định hướng màu (Hiện tại)
+                </span>
+                <span class="font-mono text-slate-400">Còn 13 ngày 23h</span>
+              </div>
+              <p class="text-slate-400 text-[11px] mt-1.5">Ngân sách giai đoạn: $600.00 (Đã ký quỹ 100%)</p>
+            </div>
+            
+            <div class="p-3.5 rounded-2xl bg-slate-850/60 border border-slate-800">
+              <div class="flex items-center justify-between text-slate-400">
+                <span>Mốc #2: Chi tiết Render & Hiệu ứng Ánh sáng</span>
+                <span class="font-mono text-slate-500">Chờ mở</span>
+              </div>
+              <p class="text-slate-500 text-[11px] mt-1">Ngân sách giai đoạn: $650.00</p>
+            </div>
+
+            <div class="p-3.5 rounded-2xl bg-slate-850/60 border border-slate-800">
+              <div class="flex items-center justify-between text-slate-400">
+                <span>Mốc #3: Hoàn thiện File Master & Quyền bản quyền</span>
+                <span class="font-mono text-slate-500">Chờ mở</span>
+              </div>
+              <p class="text-slate-500 text-[11px] mt-1">Ngân sách giai đoạn: $600.00</p>
+            </div>
+          </div>
+          <div class="flex justify-end pt-2">
+            <button onclick="closeModal()" class="px-5 py-2 rounded-full bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 transition">Đã hiểu</button>
+          </div>
+        `
+      },
+
+      // 2. Chi tiết
+      details: {
+        title: "Thông số Kỹ thuật & Hợp đồng",
+        badge: "SPECIFICATIONS & BRIEF",
+        badgeColor: "bg-slate-800 text-slate-300 border-slate-700",
+        html: `
+          <div class="space-y-3 my-4 text-xs">
+            <div class="grid grid-cols-2 gap-2.5">
+              <div class="bg-slate-850 p-3 rounded-2xl border border-slate-800">
+                <span class="text-slate-500 text-[11px] block">Khách hàng (Client)</span>
+                <span class="font-semibold text-slate-200 mt-0.5 block">Nova Labs Digital</span>
+              </div>
+              <div class="bg-slate-850 p-3 rounded-2xl border border-slate-800">
+                <span class="text-slate-500 text-[11px] block">Nghệ sĩ phụ trách</span>
+                <span class="font-semibold text-slate-200 mt-0.5 block">Ren Takahashi</span>
+              </div>
+            </div>
+            <div class="bg-slate-850 p-3.5 rounded-2xl border border-slate-800">
+              <span class="text-slate-500 text-[11px] block">Mục đích sử dụng</span>
+              <p class="text-slate-300 text-xs mt-1">Ảnh bìa Artbook thương mại độc quyền & Teaser Trailer Web3 Campaign.</p>
+            </div>
+            <div class="bg-slate-850 p-3.5 rounded-2xl border border-slate-800 flex justify-between items-center">
+              <div>
+                <span class="text-slate-500 text-[11px] block">Bản quyền thương mại</span>
+                <span class="text-mint-neon font-medium text-xs mt-0.5 block">Full Commercial Rights (Exclusive)</span>
+              </div>
+              <span class="text-[10px] font-mono px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 border border-slate-700">TIFF + PSD</span>
+            </div>
+          </div>
+          <div class="flex justify-end pt-2">
+            <button onclick="closeModal()" class="px-5 py-2 rounded-full bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 transition">Đóng</button>
+          </div>
+        `
+      },
+
+      // 3. Duyệt mốc (Approve)
+      approve: {
+        title: "Xác nhận Nghiệm thu Mốc #1",
+        badge: "ESCROW RELEASE AUTHORIZATION",
+        badgeColor: "bg-mint-500/20 text-mint-neon border-mint-500/30",
+        html: `
+          <div class="my-4 text-xs space-y-3">
+            <p class="text-slate-300 leading-relaxed">
+              Bạn đang thực hiện duyệt và xác nhận bản phác thảo & bảng màu của <strong>Mốc #1 (Kenji 2277 - Revision 03)</strong>.
+            </p>
+            <div class="bg-slate-850 border border-mint-500/20 rounded-2xl p-4 space-y-2">
+              <div class="flex justify-between items-center text-xs">
+                <span class="text-slate-400">Khoản thanh toán mốc 1:</span>
+                <span class="font-mono font-bold text-mint-neon text-sm">$600.00 USD</span>
+              </div>
+              <div class="text-[11px] text-slate-400 leading-normal">
+                ✓ Khoản ký quỹ sẽ tự động giải ngân cho Artist.<br>
+                ✓ Mở khóa triển khai Mốc #2 (Chi tiết render & ánh sáng).
+              </div>
+            </div>
+          </div>
+          <div class="flex items-center justify-end gap-3 pt-2">
+            <button onclick="closeModal()" class="px-4 py-2 rounded-full bg-slate-800 hover:bg-slate-750 text-slate-300 text-xs font-semibold transition">Quay lại xem xét</button>
+            <button onclick="executeAction('Đã duyệt thành công Mốc #1! Hệ thống đã giải ngân cho Artist.')" class="px-5 py-2 rounded-full bg-mint-neon hover:bg-mint-400 text-slate-950 font-bold text-xs shadow-lg shadow-mint-neon/20 transition">Xác nhận Duyệt Mốc</button>
+          </div>
+        `
+      },
+
+      // 4. Khiếu nại (Dispute)
+      dispute: {
+        title: "Yêu cầu Trọng tài & Khiếu nại Đơn hàng",
+        badge: "DISPUTE MEDIATION",
+        badgeColor: "bg-amber-500/20 text-amber-300 border-amber-500/30",
+        html: `
+          <div class="my-4 text-xs space-y-3">
+            <p class="text-slate-300">
+              Nếu bạn không đạt được sự thống nhất về chất lượng bản vẽ hoặc tiến độ với đối tác sau nhiều lần feedback, đội ngũ Trọng tài Atelier sẽ tham gia hỗ trợ trực tiếp.
+            </p>
+            <div class="space-y-1.5">
+              <label class="text-slate-400 text-[11px] block font-medium">Lý do khiếu nại:</label>
+              <select class="w-full bg-slate-850 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-amber-400">
+                <option>Bản vẽ sai lệch đáng kể so với Brief ban đầu</option>
+                <option>Trễ hạn cam kết mốc mà không có phản hồi</option>
+                <option>Vấn đề về thái độ hoặc vi phạm bản quyền</option>
+                <option>Lý do khác</option>
+              </select>
+            </div>
+            <textarea placeholder="Ghi chú thêm chi tiết về vấn đề bạn đang gặp phải..." rows="3" class="w-full bg-slate-850 border border-slate-700 rounded-xl p-3 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-amber-400"></textarea>
+          </div>
+          <div class="flex items-center justify-end gap-3 pt-2">
+            <button onclick="closeModal()" class="px-4 py-2 rounded-full bg-slate-800 hover:bg-slate-750 text-slate-300 text-xs font-semibold transition">Hủy bỏ</button>
+            <button onclick="executeAction('Yêu cầu khiếu nại đã gửi đến bộ phận Trọng tài Atelier. Chúng tôi sẽ phản hồi trong 24h.')" class="px-5 py-2 rounded-full bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs shadow-lg transition">Gửi Khiếu Nại</button>
+          </div>
+        `
+      },
+
+      // 5. Hủy đơn (Cancel)
+      cancel: {
+        title: "Chính sách Hủy Hợp đồng Đơn hàng",
+        badge: "CANCELLATION & REFUND",
+        badgeColor: "bg-rose-500/20 text-rose-300 border-rose-500/30",
+        html: `
+          <div class="my-4 text-xs space-y-3">
+            <div class="p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/25 text-rose-300 text-xs leading-relaxed">
+              <strong>Lưu ý quan trọng:</strong> Vì Artist đã hoàn thành xong bản phác thảo Mốc #1, phí công sức khởi tạo sẽ được tính dựa trên chính sách bảo vệ hai chiều.
+            </div>
+            <div class="bg-slate-850 p-3.5 rounded-2xl border border-slate-800 space-y-2 text-slate-400">
+              <div class="flex justify-between">
+                <span>Tổng tiền ký quỹ hiện tại:</span>
+                <span class="font-mono text-slate-200">$1,850.00</span>
+              </div>
+              <div class="flex justify-between">
+                <span>Phí cọc bảo lưu công việc:</span>
+                <span class="font-mono text-rose-400">-$250.00</span>
+              </div>
+              <div class="flex justify-between pt-2 border-t border-slate-800 font-semibold text-slate-200">
+                <span>Số tiền hoàn trả về ví bạn:</span>
+                <span class="font-mono text-mint-neon">$1,600.00</span>
+              </div>
+            </div>
+          </div>
+          <div class="flex items-center justify-end gap-3 pt-2">
+            <button onclick="closeModal()" class="px-4 py-2 rounded-full bg-slate-800 hover:bg-slate-750 text-slate-300 text-xs font-semibold transition">Giữ lại đơn hàng</button>
+            <button onclick="executeAction('Yêu cầu hủy đơn đã được ghi nhận. Khoản hoàn trả đang được xử lý.')" class="px-5 py-2 rounded-full bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs shadow-lg shadow-rose-600/20 transition">Đồng ý Hủy Đơn</button>
+          </div>
+        `
+      }
+    };
+
+    // Open Modal logic
+    function openMemo(type) {
+      const modal = document.getElementById('modalBackdrop');
+      const container = document.getElementById('modalContentContainer');
+      const data = modalTemplates[type];
+
+      if (!data) return;
+
+      container.innerHTML = `
+        <div class="mb-3">
+          <span class="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-mono font-medium border ${data.badgeColor}">
+            ${data.badge}
+          </span>
+          <h3 class="text-base sm:text-lg font-bold text-white mt-2">${data.title}</h3>
+        </div>
+        ${data.html}
+      `;
+
+      modal.classList.add('modal-enter-active');
+    }
+
+    // Close Modal logic
+    function closeModal() {
+      const modal = document.getElementById('modalBackdrop');
+      modal.classList.remove('modal-enter-active');
+    }
+
+    // Action Confirmation Toast
+    function executeAction(message) {
+      closeModal();
+      const toast = document.getElementById('toastNotification');
+      const toastMsg = document.getElementById('toastMessage');
+      toastMsg.innerText = message;
+      
+      toast.classList.remove('translate-y-24', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+
+      setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-24', 'opacity-0');
+      }, 4000);
+    }
+
+    // Close on click outside backdrop
+    document.getElementById('modalBackdrop').addEventListener('click', (e) => {
+      if (e.target.id === 'modalBackdrop') {
+        closeModal();
+      }
+    });
+
+    // ESC key closes modal
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeModal();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,2743 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Workroom Redesign Mockup — Dillustration Studio</title>
+  <!-- Google Fonts: Inter & Space Grotesk -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap"
+    rel="stylesheet">
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              navy: '#0F121D',
+              card: '#161929',
+              periwinkle: '#8B95EE',
+              emerald: '#34D399',
+              amber: '#FBBF24',
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Space Grotesk', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #0F121D;
+      color: #E2E8F0;
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+    }
+
+    .glass-container {
+      background: rgba(22, 25, 41, 0.75);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .glass-header {
+      background: rgba(15, 18, 29, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.18);
+      border-radius: 9999px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(139, 149, 238, 0.45);
+    }
+
+    .badge-glow {
+      box-shadow: 0 0 15px rgba(139, 149, 238, 0.25);
+    }
+
+    .glow-hover:hover {
+      box-shadow: 0 0 20px rgba(139, 149, 238, 0.2);
+    }
+
+    .modal-backdrop {
+      background: rgba(10, 12, 20, 0.85);
+      backdrop-filter: blur(12px);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    main {
+      flex: 1 1 0%;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      overflow-y: auto;
+    }
+
+    #view-layout-notebook {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      max-width: 1280px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    #view-layout-notebook.hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+
+<body class="flex h-screen overflow-hidden bg-brand-navy text-slate-200">
+
+  <!-- ========================================================================= -->
+  <!-- 1. LEFT PLATFORM APPLICATION SIDEBAR (THANH MENU ĐIỀU HƯỚNG CHÍNH DỰ ÁN) -->
+  <!-- ========================================================================= -->
+  <aside id="main-app-sidebar"
+    class="flex w-64 shrink-0 flex-col border-r border-white/10 bg-[#0C0F1A]/90 backdrop-blur-xl transition-all duration-300 z-40">
+
+    <!-- Sidebar Header & Logo -->
+    <div class="flex h-16 items-center justify-between px-5 border-b border-white/10">
+      <a href="#" class="flex items-center gap-2.5 font-display text-lg font-bold text-white tracking-wider">
+        <span
+          class="flex size-9 items-center justify-center rounded-2xl bg-brand-periwinkle/20 text-brand-periwinkle border border-brand-periwinkle/30 shadow-md">
+          <i data-lucide="palette" class="size-5"></i>
+        </span>
+        <span class="sidebar-text font-extrabold tracking-wide">DILLUSTRATION</span>
+      </a>
+      <button type="button" onclick="toggleSidebarCollapse()"
+        class="rounded-xl p-1.5 text-slate-400 hover:bg-white/10 hover:text-white transition" title="Thu gọn Menu">
+        <i data-lucide="panel-left-close" id="sidebar-toggle-icon" class="size-4"></i>
+      </button>
+    </div>
+
+    <!-- Navigation Links Group -->
+    <div class="flex-1 overflow-y-auto px-3 py-4 space-y-6">
+
+      <!-- Menu Chính -->
+      <div class="space-y-1">
+        <span class="sidebar-text px-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 block mb-2">Chức
+          năng chính</span>
+
+        <a href="#"
+          class="flex items-center gap-3 rounded-2xl px-3 py-2.5 text-xs font-semibold text-slate-400 hover:bg-white/5 hover:text-white transition">
+          <i data-lucide="compass" class="size-4 text-brand-periwinkle"></i>
+          <span class="sidebar-text">Khám phá Artwork</span>
+        </a>
+
+        <a href="#"
+          class="flex items-center justify-between rounded-2xl border border-brand-periwinkle/40 bg-brand-periwinkle/15 px-3 py-2.5 text-xs font-bold text-brand-periwinkle shadow-md">
+          <div class="flex items-center gap-3">
+            <i data-lucide="briefcase" class="size-4"></i>
+            <span class="sidebar-text">Quản lý Đơn hàng</span>
+          </div>
+          <span class="sidebar-text rounded-full bg-brand-periwinkle/30 px-2 py-0.5 text-[10px]">1 Đang vẽ</span>
+        </a>
+
+        <a href="#"
+          class="flex items-center gap-3 rounded-2xl px-3 py-2.5 text-xs font-semibold text-slate-400 hover:bg-white/5 hover:text-white transition">
+          <i data-lucide="message-square" class="size-4 text-emerald-400"></i>
+          <span class="sidebar-text">Tin nhắn SignalR</span>
+          <span class="sidebar-text ml-auto size-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        </a>
+
+        <a href="#"
+          class="flex items-center gap-3 rounded-2xl px-3 py-2.5 text-xs font-semibold text-slate-400 hover:bg-white/5 hover:text-white transition">
+          <i data-lucide="wallet" class="size-4 text-amber-400"></i>
+          <span class="sidebar-text">Ví Escrow &amp; Thanh toán</span>
+        </a>
+      </div>
+
+      <!-- Khám phá & Studio -->
+      <div class="space-y-1 border-t border-white/10 pt-4">
+        <span class="sidebar-text px-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 block mb-2">Studio
+          &amp; Cộng đồng</span>
+
+        <a href="#"
+          class="flex items-center gap-3 rounded-2xl px-3 py-2.5 text-xs font-semibold text-slate-400 hover:bg-white/5 hover:text-white transition">
+          <i data-lucide="award" class="size-4 text-amber-300"></i>
+          <span class="sidebar-text">Bảng xếp hạng Creator</span>
+        </a>
+
+        <a href="#"
+          class="flex items-center gap-3 rounded-2xl px-3 py-2.5 text-xs font-semibold text-slate-400 hover:bg-white/5 hover:text-white transition">
+          <i data-lucide="shield-check" class="size-4 text-indigo-400"></i>
+          <span class="sidebar-text">Khiếu nại &amp; Trọng tài</span>
+        </a>
+      </div>
+
+    </div>
+
+    <!-- User Profile Footer -->
+    <div class="border-t border-white/10 p-3 bg-white/[0.02]">
+      <div class="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 p-2.5">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <div
+            class="flex size-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-tr from-brand-periwinkle to-indigo-500 text-xs font-bold text-white shadow">
+            DC
+          </div>
+          <div class="sidebar-text min-w-0 flex-1">
+            <h4 class="truncate text-xs font-bold text-white">Demo Client</h4>
+            <p class="truncate text-[10px] text-emerald-400 font-semibold">Ví: 50.000.000đ</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- ========================================================================= -->
+  <!-- 2. MAIN APPLICATION WORKSPACE CONTENT AREA (CHỨA CÁC BỐ CỤC MÔ PHỎNG WORKROOM) -->
+  <!-- ========================================================================= -->
+  <main class="flex flex-1 flex-col min-w-0 overflow-y-auto">
+
+    <!-- TOP APPLICATION BREADCRUMB HEADER BAR -->
+    <header class="glass-header sticky top-0 z-30 flex h-14 items-center justify-between px-6 border-b border-white/10">
+
+      <!-- Breadcrumb Nav -->
+      <div class="flex items-center gap-2 text-xs text-slate-400">
+        <a href="#" class="hover:text-white transition">Dillustration</a>
+        <span class="text-white/20">/</span>
+        <a href="#" class="hover:text-white transition">Đơn hàng #COMM-8829</a>
+        <span class="text-white/20">/</span>
+        <span class="font-bold text-white flex items-center gap-1.5">
+          <i data-lucide="layout" class="size-3.5 text-brand-periwinkle"></i> Workroom Studio Interactive
+        </span>
+      </div>
+
+      <!-- Quick Actions Header Right -->
+      <div class="flex items-center gap-3 text-xs">
+        <div
+          class="hidden md:flex items-center gap-2 rounded-xl border border-white/10 bg-brand-navy px-3 py-1.5 text-slate-400 text-xs">
+          <i data-lucide="search" class="size-3.5"></i>
+          <span>Tìm trong đơn hàng...</span>
+        </div>
+
+        <button type="button"
+          class="relative rounded-xl border border-white/10 bg-white/5 p-2 text-slate-300 hover:bg-white/10 hover:text-white transition"
+          title="Thông báo">
+          <i data-lucide="bell" class="size-4"></i>
+          <span class="absolute top-1 right-1 size-2 rounded-full bg-amber-400 animate-ping"></span>
+          <span class="absolute top-1 right-1 size-2 rounded-full bg-amber-400"></span>
+        </button>
+
+        <span
+          class="rounded-full border border-emerald-400/30 bg-emerald-500/10 px-3 py-1 text-[11px] font-bold text-emerald-300 flex items-center gap-1.5">
+          <span class="size-2 rounded-full bg-emerald-400 animate-pulse"></span> 🟢 Online SignalR Hub
+        </span>
+      </div>
+
+    </header>
+
+    <!-- DEMO CONTROL BAR (TRẠNG THÁI & BỐ CỤC SWITCHER NHÂN BẢN) -->
+    <div
+      class="bg-brand-periwinkle/20 border-b border-brand-periwinkle/30 px-6 py-2.5 flex flex-wrap items-center justify-between text-xs text-brand-periwinkle gap-3 z-30 backdrop-blur-md">
+
+      <!-- Left: State Switcher -->
+      <div class="flex items-center gap-2 flex-wrap">
+        <span class="font-bold flex items-center gap-1.5 mr-1 text-white">
+          <i data-lucide="sliders" class="size-4 text-brand-periwinkle"></i> Trạng thái Demo:
+        </span>
+        <button type="button" onclick="switchDemoState('in_progress')" id="btn-state-progress"
+          class="rounded-full bg-brand-periwinkle text-brand-navy font-bold px-3 py-1 transition shadow">
+          Mốc #1 (Đang phác thảo)
+        </button>
+        <button type="button" onclick="switchDemoState('empty_state')" id="btn-state-empty"
+          class="rounded-full bg-white/10 text-slate-300 font-semibold px-3 py-1 hover:bg-white/20 transition">
+          Chưa có phác thảo (Empty)
+        </button>
+        <button type="button" onclick="switchDemoState('completed')" id="btn-state-completed"
+          class="rounded-full bg-white/10 text-slate-300 font-semibold px-3 py-1 hover:bg-white/20 transition">
+          Hoàn tất 3/3 &amp; Master Package
+        </button>
+      </div>
+
+      <!-- Right: Layout Switcher -->
+      <div class="flex items-center gap-2 flex-wrap">
+        <span class="font-bold flex items-center gap-1.5 mr-1 text-amber-300">
+          <i data-lucide="layout-grid" class="size-4"></i> Đổi Kiểu Bố cục Workroom:
+        </span>
+        <button type="button" onclick="switchLayoutVariant('layout-3col')" id="btn-layout-3col"
+          class="rounded-full bg-white/10 text-slate-300 font-semibold px-3 py-1 hover:bg-white/20 transition">
+          Kiểu 1: 3 Cột Hiện tại
+        </button>
+        <button type="button" onclick="switchLayoutVariant('layout-2col')" id="btn-layout-2col"
+          class="rounded-full bg-white/10 text-slate-300 font-semibold px-3 py-1 hover:bg-white/20 transition">
+          Kiểu 2: 2 Cột Tabbed Canvas Focus
+        </button>
+        <button type="button" onclick="switchLayoutVariant('layout-stepper')" id="btn-layout-stepper"
+          class="rounded-full bg-white/10 text-slate-300 font-semibold px-3 py-1 hover:bg-white/20 transition">
+          Kiểu 3: Timeline Ngang Top Stepper
+        </button>
+        <button type="button" onclick="switchLayoutVariant('layout-figma')" id="btn-layout-figma"
+          class="rounded-full bg-white/10 text-slate-300 font-semibold px-3 py-1 hover:bg-white/20 transition">
+          Kiểu 4: Figma/Photoshop Studio
+        </button>
+        <button type="button" onclick="switchLayoutVariant('layout-multiorder')" id="btn-layout-multiorder"
+          class="rounded-full bg-white/10 text-slate-300 font-semibold px-3 py-1 hover:bg-white/20 transition">
+          Kiểu 5: Multi-Tab Quản lý Nhiều Đơn
+        </button>
+        <button type="button" onclick="switchLayoutVariant('layout-hover')" id="btn-layout-hover"
+          class="rounded-full bg-white/10 text-slate-300 font-semibold px-3 py-1 hover:bg-white/20 transition">
+          Kiểu 6: Minimal Canvas + Chat (Hover Mốc)
+        </button>
+        <button type="button" onclick="switchLayoutVariant('layout-notebook')" id="btn-layout-notebook"
+          class="rounded-full bg-emerald-400 text-brand-navy font-bold px-3 py-1 transition shadow">
+          Kiểu 7: Sổ Tương Tác Monotone (Notebook)
+        </button>
+      </div>
+
+    </div>
+
+
+    <!-- ========================================================================= -->
+    <!-- BỘ KHUÔN CHỨA BỐ CỤC (CONTAINER VARIANT LAYOUTS) -->
+    <!-- ========================================================================= -->
+
+    <!-- VARIANT 1: BỐ CỤC 3 CỘT HIỆN TẠI (DEFAULT) -->
+    <div id="view-layout-3col" class="hidden mx-auto flex w-full max-w-7xl flex-1 flex-col p-4 sm:p-6 space-y-4">
+
+      <!-- 1. STUDIO ROOM HEADER & TOOLBAR -->
+      <div class="glass-container flex flex-wrap items-center justify-between gap-4 rounded-3xl p-5 shadow-xl">
+        <div class="flex items-center gap-3">
+          <a href="#"
+            class="flex size-9 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white transition">
+            <i data-lucide="arrow-left" class="size-4"></i>
+          </a>
+          <div>
+            <div class="flex items-center gap-2.5">
+              <h1 class="font-display text-base font-bold text-white">Character illustration — Demo Workroom Studio</h1>
+              <span
+                class="inline-flex items-center gap-1 rounded-full border border-emerald-400/30 bg-emerald-500/15 px-2.5 py-0.5 text-[10px] font-bold text-emerald-300">
+                <i data-lucide="wifi" class="size-3"></i> Trực tiếp
+              </span>
+            </div>
+            <p class="mt-0.5 text-xs text-slate-400">
+              Thành viên: <strong class="text-slate-200 font-semibold">Demo Client</strong> (Khách hàng) · <strong
+                class="text-brand-periwinkle font-semibold">Linh Nguyen</strong> (Creator)
+            </p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2.5 text-xs">
+          <span class="hidden sm:inline-flex items-center gap-1.5 text-slate-400">
+            <i data-lucide="shield-check" class="size-4 text-brand-periwinkle"></i> Tin nhắn bảo mật theo hợp đồng
+          </span>
+          <button type="button"
+            class="inline-flex items-center gap-1.5 rounded-full border border-brand-periwinkle/40 bg-brand-periwinkle/15 px-3 py-1.5 text-[11px] font-semibold text-brand-periwinkle hover:bg-brand-periwinkle hover:text-brand-navy transition">
+            <i data-lucide="globe" class="size-3.5"></i> Dịch tự động <span
+              class="ml-1 size-2 rounded-full bg-brand-periwinkle"></span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 2. AI DEADLINE PREDICTOR & PROGRESS PANEL -->
+      <div class="glass-container rounded-3xl p-4 text-xs space-y-3">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex flex-wrap items-center gap-3">
+            <span class="inline-flex items-center gap-1.5 font-bold text-white text-xs">
+              <i data-lucide="activity" class="size-4 text-brand-periwinkle"></i> Tiến độ &amp; Hạn chót
+            </span>
+
+            <span
+              class="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/30 bg-emerald-500/10 px-3 py-1 text-[11px] font-semibold text-emerald-300 badge-glow">
+              <i data-lucide="trending-up" class="size-3.5"></i> Rủi ro trễ hạn: An toàn · 100%
+            </span>
+
+            <!-- Stage Badge -->
+            <span
+              class="v-stage-badge inline-flex items-center gap-1.5 rounded-full border border-brand-periwinkle/40 bg-brand-periwinkle/15 px-3 py-1 text-[11px] font-bold text-brand-periwinkle">
+              <i data-lucide="calendar-clock" class="size-3.5"></i> Mốc #1 (Đang phác thảo)
+            </span>
+
+            <span
+              class="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] text-slate-300">
+              <i data-lucide="clock" class="size-3.5"></i> Còn 10 ngày 18 giờ
+            </span>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button type="button"
+              class="inline-flex items-center gap-1.5 rounded-full bg-brand-periwinkle px-4 py-1.5 font-bold text-brand-navy shadow-md hover:brightness-110 transition">
+              <i data-lucide="sparkles" class="size-3.5"></i> Chấm lại bằng AI
+            </button>
+            <button type="button"
+              class="v-btn-cancel inline-flex items-center gap-1.5 rounded-full border border-red-500/40 bg-red-500/10 px-3.5 py-1.5 font-semibold text-red-300 hover:bg-red-500/20 transition">
+              <i data-lucide="alert-circle" class="size-3.5"></i> Hủy đơn / Khiếu nại
+            </button>
+          </div>
+        </div>
+
+        <div class="h-1.5 overflow-hidden rounded-full bg-white/5">
+          <div class="h-full w-full rounded-full bg-emerald-400 transition-all"></div>
+        </div>
+      </div>
+
+      <!-- 3. BANNER NẠP TIỀN KÝ QUỸ ESCROW -->
+      <div
+        class="v-escrow-banner flex flex-wrap items-center justify-between gap-4 rounded-3xl border border-amber-400/40 bg-gradient-to-r from-amber-500/20 via-amber-500/10 to-amber-500/5 p-4 text-xs text-amber-200 shadow-xl shadow-amber-500/5">
+        <div class="flex items-center gap-3.5">
+          <div
+            class="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-amber-500/20 text-amber-300 border border-amber-400/40">
+            <i data-lucide="shield-alert" class="size-5"></i>
+          </div>
+          <div>
+            <h3 class="font-display text-xs font-bold text-amber-300">Yêu cầu Nạp tiền Ký quỹ Escrow (180.000đ)</h3>
+            <p class="mt-0.5 text-[11px] text-amber-200/90 leading-relaxed">
+              Creator đã chấp nhận đơn hàng. Vui lòng nạp tiền vào ví Escrow bảo mật để Creator bắt đầu vẽ mốc phác thảo
+              đầu tiên.
+            </p>
+          </div>
+        </div>
+        <button type="button" onclick="alert('Demo: Đã nạp 180.000đ vào Ví Escrow bảo mật thành công!')"
+          class="inline-flex items-center gap-2 rounded-2xl bg-amber-400 px-5 py-2.5 font-bold text-brand-navy shadow-lg shadow-amber-400/25 hover:bg-amber-300 transition shrink-0">
+          <i data-lucide="shield-check" class="size-4"></i> Nạp tiền Escrow ngay
+        </button>
+      </div>
+
+      <!-- 4. STUDIO BỐ CỤC 3 CỘT -->
+      <div class="grid flex-1 grid-cols-1 gap-4 lg:grid-cols-12 min-h-0">
+
+        <!-- CỘT 1 (3 Cols): DANH SÁCH MỐC HỢP ĐỒNG -->
+        <div class="glass-container flex h-full flex-col rounded-3xl p-4 space-y-3 lg:col-span-3">
+          <div class="flex items-center justify-between border-b border-white/10 pb-3">
+            <h3 class="font-display font-bold text-xs text-white flex items-center gap-2">
+              <i data-lucide="clock" class="size-4 text-brand-periwinkle"></i> Danh sách Mốc hợp đồng
+            </h3>
+            <span
+              class="rounded-full bg-brand-periwinkle/15 px-2.5 py-0.5 text-[10px] font-bold text-brand-periwinkle border border-brand-periwinkle/30">
+              3 Mốc
+            </span>
+          </div>
+
+          <div class="space-y-3 overflow-y-auto pr-1 flex-1">
+            <!-- Mốc 1 -->
+            <div
+              class="v-card-m1 rounded-2xl border border-brand-periwinkle/60 bg-brand-periwinkle/10 p-3.5 text-xs space-y-2 ring-1 ring-brand-periwinkle/30 shadow-lg glow-hover transition cursor-pointer">
+              <div class="flex items-center justify-between">
+                <span
+                  class="rounded-md bg-brand-periwinkle/20 px-2 py-0.5 text-[10px] font-bold text-brand-periwinkle">Mốc
+                  #1</span>
+                <span
+                  class="v-badge-m1 inline-flex items-center gap-1 text-[10px] font-bold text-brand-periwinkle animate-pulse">●
+                  Đang thực hiện</span>
+              </div>
+              <h4 class="font-bold text-xs text-white">Bản phác thảo nhân vật</h4>
+              <div class="flex items-center justify-between text-[11px] text-slate-400 border-t border-white/10 pt-2">
+                <span>Giá: <strong class="text-white font-semibold">60.000đ</strong></span>
+                <span>Sửa: <strong class="text-amber-300">0/3</strong></span>
+              </div>
+            </div>
+
+            <!-- Mốc 2 -->
+            <div
+              class="v-card-m2 rounded-2xl border border-white/10 bg-white/[0.02] p-3.5 text-xs space-y-2 opacity-75 hover:opacity-100 transition cursor-pointer">
+              <div class="flex items-center justify-between">
+                <span class="rounded-md bg-white/10 px-2 py-0.5 text-[10px] font-bold text-slate-300">Mốc #2</span>
+                <span class="v-badge-m2 text-[10px] text-slate-400">Chưa bắt đầu</span>
+              </div>
+              <h4 class="font-semibold text-xs text-slate-200">Lineart và màu cơ bản</h4>
+              <div class="flex items-center justify-between text-[11px] text-slate-400 border-t border-white/10 pt-2">
+                <span>Giá: <strong class="text-slate-200 font-semibold">70.000đ</strong></span>
+                <span>Sửa: <strong class="text-amber-300">0/3</strong></span>
+              </div>
+            </div>
+
+            <!-- Mốc 3 -->
+            <div
+              class="v-card-m3 rounded-2xl border border-white/10 bg-white/[0.02] p-3.5 text-xs space-y-2 opacity-75 hover:opacity-100 transition cursor-pointer">
+              <div class="flex items-center justify-between">
+                <span class="rounded-md bg-white/10 px-2 py-0.5 text-[10px] font-bold text-slate-300">Mốc #3</span>
+                <span class="v-badge-m3 text-[10px] text-slate-400">Chưa bắt đầu</span>
+              </div>
+              <h4 class="font-semibold text-xs text-slate-200">Hoàn thiện và bàn giao</h4>
+              <div class="flex items-center justify-between text-[11px] text-slate-400 border-t border-white/10 pt-2">
+                <span>Giá: <strong class="text-slate-200 font-semibold">50.000đ</strong></span>
+                <span>Sửa: <strong class="text-amber-300">0/3</strong></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CỘT 2 (5 Cols): CANVAS STUDIO WORKSPACE -->
+        <div class="flex flex-col gap-4 overflow-y-auto pr-1 lg:col-span-5">
+          <div class="glass-container flex flex-col rounded-3xl p-5 space-y-4">
+            <div class="flex flex-wrap items-center justify-between border-b border-white/10 pb-3 gap-2">
+              <div>
+                <div class="flex items-center gap-2">
+                  <span
+                    class="v-canvas-tag rounded-md bg-brand-periwinkle/15 px-2 py-0.5 text-[10px] font-bold text-brand-periwinkle">Mốc
+                    #1</span>
+                  <h3 class="v-canvas-title font-display font-bold text-sm text-white">Bản phác thảo nhân vật</h3>
+                </div>
+                <p class="mt-1 text-[11px] text-slate-400">Bản vẽ xem thử do Creator đăng tải được tự động gắn Watermark
+                  bảo vệ.</p>
+              </div>
+              <span
+                class="rounded-full border border-amber-400/30 bg-amber-500/10 px-3 py-1 text-[10px] font-semibold text-amber-300">Lượt
+                sửa: 0 / 3</span>
+            </div>
+
+            <div
+              class="group relative flex min-h-[240px] max-h-[360px] w-full cursor-pointer items-center justify-center overflow-hidden rounded-2xl border border-white/15 bg-black/50 p-2 transition hover:border-brand-periwinkle/60"
+              onclick="openApprovalModal()">
+              <img
+                class="v-canvas-img max-h-[340px] w-full object-contain rounded-xl transition duration-300 group-hover:scale-[1.01]"
+                src="https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?auto=format&fit=crop&w=1200&q=80"
+                alt="Artwork preview">
+
+              <div class="v-canvas-empty hidden flex-col items-center justify-center p-8 text-center space-y-3">
+                <div
+                  class="flex size-16 items-center justify-center rounded-3xl bg-brand-periwinkle/10 border border-brand-periwinkle/20 text-brand-periwinkle">
+                  <i data-lucide="image-plus" class="size-8"></i>
+                </div>
+                <h4 class="font-bold text-sm text-white">Chưa có hình phác thảo cho Mốc #1</h4>
+              </div>
+
+              <div
+                class="v-canvas-wm absolute top-3 left-3 flex items-center gap-1.5 rounded-lg border border-emerald-400/30 bg-black/75 px-2.5 py-1 text-[10px] font-bold text-emerald-300 backdrop-blur-md">
+                <i data-lucide="shield-check" class="size-3.5 text-emerald-400"></i> Watermarked Preview
+              </div>
+
+              <div
+                class="v-canvas-overlay absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 backdrop-blur-[2px] transition duration-200 group-hover:opacity-100">
+                <span
+                  class="inline-flex items-center gap-2 rounded-xl bg-brand-periwinkle px-5 py-2.5 text-xs font-bold text-brand-navy shadow-xl hover:scale-105 transition">
+                  <i data-lucide="eye" class="size-4"></i> Phóng to &amp; Duyệt mốc
+                </span>
+              </div>
+            </div>
+
+            <div class="rounded-2xl border border-white/10 bg-white/[0.02] p-3 text-xs text-slate-300 space-y-1">
+              <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider flex items-center gap-1">
+                <i data-lucide="message-square" class="size-3 text-brand-periwinkle"></i> Ghi chú từ Creator:
+              </span>
+              <p class="v-creator-note italic">"Mình đã hoàn thiện pose chính và nét phác thảo cơ bản. Bạn xem giúp phần
+                thần thái nhé!"</p>
+            </div>
+          </div>
+
+          <!-- Master Package Card -->
+          <div class="glass-container flex flex-col rounded-3xl p-5 space-y-3">
+            <div class="flex items-center justify-between">
+              <div>
+                <h3 class="font-display font-bold text-sm text-white">Final Master Package</h3>
+                <p class="text-[11px] text-slate-400">Bàn giao file gốc HD không đóng dấu (.PSD, .ZIP)</p>
+              </div>
+              <span
+                class="v-master-tag rounded-full border border-white/15 bg-white/5 px-3 py-1 text-[10px] text-slate-400">Đang
+                khóa</span>
+            </div>
+            <div
+              class="v-master-body flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.02] p-4 text-xs text-slate-400">
+              <i data-lucide="lock" class="size-5 text-slate-500 shrink-0"></i>
+              <span>File gốc HD sẽ được mở khóa sau khi nghiệm thu 100% các mốc phác thảo.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- CỘT 3 (4 Cols): LIVE SIGNALR CHAT PANEL -->
+        <div class="glass-container flex h-full flex-col overflow-hidden rounded-3xl p-4 lg:col-span-4">
+          <div class="mb-3 flex items-center justify-between border-b border-white/10 pb-3">
+            <div class="flex items-center gap-2 font-display text-xs font-bold text-white">
+              <span class="size-2 rounded-full bg-emerald-400 animate-pulse"></span> SignalR Live Chat
+            </div>
+            <span class="text-[10px] text-slate-400">Trực tiếp</span>
+          </div>
+
+          <div class="v-chat-messages flex-1 overflow-y-auto space-y-3 pr-1 min-h-0 text-xs">
+            <div class="flex flex-col items-start">
+              <div class="mb-1 flex items-center gap-2 text-[10px] text-slate-400">
+                <span class="font-bold text-brand-periwinkle">Linh Nguyen</span> <span>08:20</span>
+              </div>
+              <div
+                class="max-w-[85%] rounded-2xl rounded-tl-none border border-white/10 bg-white/5 p-3 text-slate-200 shadow-sm">
+                Chào bạn! Mình vừa đăng tải bản phác thảo Mốc #1. Bạn kiểm tra giúp mình nhé!
+              </div>
+            </div>
+            <div class="flex flex-col items-end">
+              <div class="mb-1 flex items-center gap-2 text-[10px] text-slate-400">
+                <span class="font-semibold text-slate-300">Bạn</span> <span>08:22</span>
+              </div>
+              <div
+                class="max-w-[85%] rounded-2xl rounded-tr-none bg-brand-periwinkle text-brand-navy p-3 font-medium shadow-sm">
+                Cảm ơn Linh! Mình đang xem bản nét phác đây.
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick prompts chips -->
+          <div class="mt-3 border-t border-white/10 pt-2.5">
+            <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1.5 block">Gợi ý nhắn
+              nhanh:</span>
+            <div class="flex flex-wrap gap-1.5 text-[11px]">
+              <button type="button" onclick="insertPrompt('Cho mình xin tiến độ mốc 1 nhé')"
+                class="rounded-full border border-white/15 bg-white/5 px-2.5 py-1 text-slate-300 hover:bg-brand-periwinkle/10 hover:text-brand-periwinkle transition">💬
+                Cho mình xin tiến độ mốc 1</button>
+              <button type="button" onclick="insertPrompt('Mình muốn góp ý về màu sắc gương mặt')"
+                class="rounded-full border border-white/15 bg-white/5 px-2.5 py-1 text-slate-300 hover:bg-brand-periwinkle/10 hover:text-brand-periwinkle transition">🎨
+                Góp ý màu sắc</button>
+            </div>
+          </div>
+
+          <!-- Input -->
+          <div class="mt-3 shrink-0">
+            <form onsubmit="sendChatMessage(event)" class="flex items-center gap-2">
+              <input type="text" placeholder="Nhập tin nhắn..."
+                class="v-chat-input flex-1 rounded-xl border border-white/15 bg-brand-navy px-4 py-2.5 text-xs text-white focus:border-brand-periwinkle focus:outline-none">
+              <button type="submit"
+                class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-amber-400 text-brand-navy shadow hover:brightness-110 transition">
+                <i data-lucide="send" class="size-4"></i>
+              </button>
+            </form>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- VARIANT 2: BỐ CỤC 2 CỘT TỐI ƯU CANVAS (CANVAS FOCUS 65% + TABBED SIDEBAR 35%) -->
+    <div id="view-layout-2col" class="hidden mx-auto w-full max-w-7xl flex-1 flex-col p-4 sm:p-6 space-y-4">
+
+      <div class="glass-container flex items-center justify-between rounded-3xl p-4 text-xs">
+        <div class="flex items-center gap-3">
+          <span class="font-display font-bold text-sm text-white">Kiểu 2: Bố cục 2 Cột Tối Ưu Canvas</span>
+          <span
+            class="rounded-full border border-brand-periwinkle/30 bg-brand-periwinkle/15 px-3 py-1 text-[11px] font-semibold text-brand-periwinkle">
+            Khung tranh 65% màn hình · Sidebar 3 Tab bên phải
+          </span>
+        </div>
+        <button type="button" onclick="openApprovalModal()"
+          class="rounded-full bg-brand-periwinkle px-4 py-1.5 font-bold text-brand-navy shadow hover:brightness-110 transition">
+          <i data-lucide="eye" class="size-3.5 inline mr-1"></i> Xem chi tiết &amp; Duyệt Mốc
+        </button>
+      </div>
+
+      <div class="grid flex-1 grid-cols-1 gap-4 lg:grid-cols-12 min-h-0">
+
+        <!-- Cột Trái (LG: 8 Cols - 65%): CANVAS RỘNG RÃI -->
+        <div class="glass-container flex flex-col rounded-3xl p-5 space-y-4 lg:col-span-8">
+          <div class="flex items-center justify-between border-b border-white/10 pb-3">
+            <div>
+              <h2 class="font-display font-bold text-base text-white">Character illustration — Canvas Viewer Studio</h2>
+              <p class="text-xs text-slate-400">Đang xem: <strong class="text-brand-periwinkle">Mốc #1: Bản phác thảo
+                  nhân vật</strong></p>
+            </div>
+            <span
+              class="rounded-full border border-emerald-400/30 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-300">
+              Watermarked HD Active
+            </span>
+          </div>
+
+          <!-- Main Canvas Image Display -->
+          <div
+            class="group relative flex flex-1 min-h-[420px] items-center justify-center overflow-hidden rounded-2xl border border-white/15 bg-black/60 p-4 transition hover:border-brand-periwinkle/60 cursor-pointer"
+            onclick="openApprovalModal()">
+            <img
+              class="v-canvas-img max-h-[440px] w-full object-contain rounded-xl transition duration-300 group-hover:scale-[1.01]"
+              src="https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?auto=format&fit=crop&w=1200&q=80"
+              alt="Artwork preview">
+
+            <div
+              class="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 backdrop-blur-[2px] transition duration-200 group-hover:opacity-100">
+              <span
+                class="inline-flex items-center gap-2 rounded-xl bg-brand-periwinkle px-6 py-3 text-xs font-bold text-brand-navy shadow-2xl hover:scale-105 transition">
+                <i data-lucide="zoom-in" class="size-4"></i> Phóng to sắc nét &amp; Phê duyệt Mốc này
+              </span>
+            </div>
+          </div>
+
+          <!-- Action Bar ngay dưới Canvas -->
+          <div class="flex flex-wrap items-center justify-between gap-3 border-t border-white/10 pt-3 text-xs">
+            <div class="flex items-center gap-2">
+              <span class="rounded-full bg-white/10 px-3 py-1 text-slate-300">Lượt sửa còn lại: <strong
+                  class="text-amber-300">3/3</strong></span>
+            </div>
+            <div class="flex items-center gap-2">
+              <button type="button" onclick="alert('Demo: Đã gửi yêu cầu sửa!')"
+                class="rounded-xl border border-amber-400/40 bg-amber-500/10 px-4 py-2 font-semibold text-amber-300 hover:bg-amber-500/20 transition">
+                Yêu cầu chỉnh sửa
+              </button>
+              <button type="button" onclick="openApprovalModal()"
+                class="rounded-xl bg-emerald-400 px-5 py-2 font-bold text-brand-navy shadow hover:bg-emerald-300 transition">
+                ✅ Duyệt Mốc phác thảo
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cột Phải (LG: 4 Cols - 35%): TABBED SIDEBAR (CHAT / MỐC / CHI TIẾT) -->
+        <div class="glass-container flex h-full flex-col overflow-hidden rounded-3xl p-4 lg:col-span-4">
+
+          <!-- Tab Navigation Bar -->
+          <div class="flex items-center rounded-2xl border border-white/10 bg-white/5 p-1 mb-3 text-xs">
+            <button type="button" onclick="switchTab2Col('chat')" id="tab-btn-chat"
+              class="flex-1 rounded-xl bg-brand-periwinkle text-brand-navy font-bold py-1.5 transition text-center">
+              💬 Live Chat
+            </button>
+            <button type="button" onclick="switchTab2Col('milestones')" id="tab-btn-milestones"
+              class="flex-1 rounded-xl text-slate-400 hover:text-white font-semibold py-1.5 transition text-center">
+              📋 3 Mốc
+            </button>
+            <button type="button" onclick="switchTab2Col('details')" id="tab-btn-details"
+              class="flex-1 rounded-xl text-slate-400 hover:text-white font-semibold py-1.5 transition text-center">
+              ℹ️ Chi tiết
+            </button>
+          </div>
+
+          <!-- Tab 1: Live Chat Content -->
+          <div id="tab-content-chat" class="flex flex-1 flex-col overflow-hidden space-y-3">
+            <div class="flex-1 overflow-y-auto space-y-3 text-xs pr-1">
+              <div class="flex flex-col items-start">
+                <span class="text-[10px] text-slate-400 font-bold">Linh Nguyen</span>
+                <div class="rounded-2xl bg-white/5 p-3 text-slate-200 mt-1 border border-white/10">Chào bạn! Mốc 1 bản
+                  phác thảo đã sẵn sàng ở màn hình bên trái nhé!</div>
+              </div>
+              <div class="flex flex-col items-end">
+                <span class="text-[10px] text-slate-400 font-semibold">Bạn</span>
+                <div class="rounded-2xl bg-brand-periwinkle text-brand-navy p-3 font-medium mt-1">Mình đang kiểm tra ảnh
+                  nét phác đây!</div>
+              </div>
+            </div>
+            <form onsubmit="sendChatMessage(event)" class="flex items-center gap-2 pt-2 border-t border-white/10">
+              <input type="text" placeholder="Nhập tin nhắn..."
+                class="flex-1 rounded-xl border border-white/15 bg-brand-navy px-3.5 py-2 text-xs text-white focus:outline-none">
+              <button type="submit" class="rounded-xl bg-amber-400 p-2 text-brand-navy font-bold"><i data-lucide="send"
+                  class="size-4"></i></button>
+            </form>
+          </div>
+
+          <!-- Tab 2: Milestone Timeline Content -->
+          <div id="tab-content-milestones" class="hidden flex-1 overflow-y-auto space-y-3 text-xs pr-1">
+            <div class="rounded-2xl border border-brand-periwinkle/50 bg-brand-periwinkle/10 p-3 space-y-1">
+              <span class="text-[10px] font-bold text-brand-periwinkle">Mốc #1 · Đang thực hiện</span>
+              <h4 class="font-bold text-white text-xs">Bản phác thảo nhân vật (60.000đ)</h4>
+            </div>
+            <div class="rounded-2xl border border-white/10 bg-white/[0.02] p-3 space-y-1 opacity-75">
+              <span class="text-[10px] text-slate-400">Mốc #2 · Chưa bắt đầu</span>
+              <h4 class="font-semibold text-slate-200 text-xs">Lineart &amp; Màu cơ bản (70.000đ)</h4>
+            </div>
+            <div class="rounded-2xl border border-white/10 bg-white/[0.02] p-3 space-y-1 opacity-75">
+              <span class="text-[10px] text-slate-400">Mốc #3 · Chưa bắt đầu</span>
+              <h4 class="font-semibold text-slate-200 text-xs">Hoàn thiện &amp; Bàn giao Master (50.000đ)</h4>
+            </div>
+          </div>
+
+          <!-- Tab 3: Contract & AI Details Content -->
+          <div id="tab-content-details" class="hidden flex-1 overflow-y-auto space-y-3 text-xs pr-1">
+            <div class="rounded-2xl border border-white/10 bg-white/5 p-3 space-y-2">
+              <h4 class="font-bold text-white text-xs flex items-center gap-1.5"><i data-lucide="shield-check"
+                  class="size-4 text-emerald-400"></i> Hợp đồng &amp; Bảo mật</h4>
+              <p class="text-slate-300 text-[11px]">Tiền ký quỹ 180.000đ được giữ an toàn tại Ví Escrow Dillustration
+                đến khi nghiệm thu.</p>
+            </div>
+            <div class="rounded-2xl border border-brand-periwinkle/30 bg-brand-periwinkle/10 p-3 space-y-2">
+              <h4 class="font-bold text-brand-periwinkle text-xs flex items-center gap-1.5"><i data-lucide="sparkles"
+                  class="size-4"></i> AI Predictor Status</h4>
+              <p class="text-slate-300 text-[11px]">Dự báo rủi ro: <strong class="text-emerald-300">An toàn
+                  100%</strong>. Creator nộp mốc đúng hạn.</p>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- VARIANT 3: BỐ CỤC TIẾN TRÌNH NGANG (TOP HORIZONTAL TIMELINE STEPPER LAYOUT) -->
+    <div id="view-layout-stepper" class="hidden mx-auto w-full max-w-7xl flex-1 flex-col p-4 sm:p-6 space-y-4">
+
+      <!-- TOP HORIZONTAL TIMELINE STEPPER BAR -->
+      <div class="glass-container flex flex-col rounded-3xl p-5 space-y-4">
+        <div class="flex items-center justify-between">
+          <h3 class="font-display font-bold text-sm text-white flex items-center gap-2">
+            <i data-lucide="git-commit" class="size-4 text-brand-periwinkle"></i> Kiểu 3: Tiến trình Mốc Hợp đồng Ngang
+            (Top Horizontal Stepper)
+          </h3>
+          <span
+            class="rounded-full border border-amber-400/30 bg-amber-500/10 px-3 py-1 text-xs text-amber-300 font-semibold">
+            Ký quỹ Escrow: 180.000đ
+          </span>
+        </div>
+
+        <!-- Horizontal Stepper Steps -->
+        <div class="grid grid-cols-3 gap-4 text-xs">
+
+          <!-- Step 1 (Active) -->
+          <div
+            class="relative rounded-2xl border border-brand-periwinkle/60 bg-brand-periwinkle/15 p-3.5 space-y-1.5 shadow-lg">
+            <div class="flex items-center justify-between">
+              <span class="rounded-full bg-brand-periwinkle px-2.5 py-0.5 text-[10px] font-bold text-brand-navy">Bước
+                1</span>
+              <span class="text-[10px] font-bold text-brand-periwinkle animate-pulse">● Đang phác thảo</span>
+            </div>
+            <h4 class="font-bold text-white text-xs">Mốc 1: Phác thảo nét chính</h4>
+            <p class="text-[11px] text-slate-300">Giá: 60.000đ · Lượt sửa: 0/3</p>
+          </div>
+
+          <!-- Step 2 -->
+          <div class="relative rounded-2xl border border-white/10 bg-white/[0.02] p-3.5 space-y-1.5 opacity-60">
+            <div class="flex items-center justify-between">
+              <span class="rounded-full bg-white/10 px-2.5 py-0.5 text-[10px] font-bold text-slate-300">Bước 2</span>
+              <span class="text-[10px] text-slate-400">Chưa bắt đầu</span>
+            </div>
+            <h4 class="font-semibold text-slate-200 text-xs">Mốc 2: Lineart &amp; Màu cơ bản</h4>
+            <p class="text-[11px] text-slate-400">Giá: 70.000đ · Lượt sửa: 0/3</p>
+          </div>
+
+          <!-- Step 3 -->
+          <div class="relative rounded-2xl border border-white/10 bg-white/[0.02] p-3.5 space-y-1.5 opacity-60">
+            <div class="flex items-center justify-between">
+              <span class="rounded-full bg-white/10 px-2.5 py-0.5 text-[10px] font-bold text-slate-300">Bước 3</span>
+              <span class="text-[10px] text-slate-400">Chưa bắt đầu</span>
+            </div>
+            <h4 class="font-semibold text-slate-200 text-xs">Mốc 3: Hoàn thiện Master HD</h4>
+            <p class="text-[11px] text-slate-400">Giá: 50.000đ · Lượt sửa: 0/3</p>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- MAIN DUAL PANEL (LEFT CANVAS 60% & RIGHT CHAT 40%) -->
+      <div class="grid flex-1 grid-cols-1 gap-4 lg:grid-cols-12 min-h-0">
+
+        <!-- Canvas 60% -->
+        <div class="glass-container flex flex-col rounded-3xl p-5 space-y-4 lg:col-span-7">
+          <div class="flex items-center justify-between border-b border-white/10 pb-3">
+            <h3 class="font-display font-bold text-sm text-white">Khung xem bản vẽ Mốc #1</h3>
+            <span class="text-xs text-slate-400">Watermark Protected</span>
+          </div>
+          <div
+            class="group relative flex flex-1 items-center justify-center overflow-hidden rounded-2xl border border-white/15 bg-black/50 p-2 min-h-[300px] cursor-pointer"
+            onclick="openApprovalModal()">
+            <img class="v-canvas-img max-h-[320px] w-full object-contain rounded-xl"
+              src="https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?auto=format&fit=crop&w=1200&q=80"
+              alt="Canvas">
+            <div
+              class="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition">
+              <span class="rounded-xl bg-brand-periwinkle px-5 py-2.5 text-xs font-bold text-brand-navy">Phóng to &amp;
+                Duyệt Mốc</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chat 40% -->
+        <div class="glass-container flex flex-col rounded-3xl p-4 lg:col-span-5">
+          <h3 class="font-display font-bold text-xs text-white border-b border-white/10 pb-3 mb-3">SignalR Live Chat
+          </h3>
+          <div class="flex-1 overflow-y-auto space-y-3 text-xs pr-1 min-h-[280px]">
+            <div class="rounded-2xl bg-white/5 p-3 text-slate-200 border border-white/10">Chào bạn! Mình vừa cập nhật
+              tiến độ mốc 1 ở thanh Stepper phía trên nhé.</div>
+          </div>
+          <form onsubmit="sendChatMessage(event)" class="mt-3 flex items-center gap-2">
+            <input type="text" placeholder="Nhập tin nhắn..."
+              class="flex-1 rounded-xl border border-white/15 bg-brand-navy px-3.5 py-2 text-xs text-white focus:outline-none">
+            <button type="submit" class="rounded-xl bg-amber-400 p-2 text-brand-navy font-bold"><i data-lucide="send"
+                class="size-4"></i></button>
+          </form>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- VARIANT 4: BỐ CỤC FIGMA/PHOTOSHOP STUDIO (FULLSCREEN CANVAS + FLOATING OVERLAY DRAWER & FULL ACTION BUTTONS) -->
+    <div id="view-layout-figma" class="hidden relative mx-auto w-full max-w-7xl flex-1 flex-col p-4 sm:p-6 space-y-4">
+
+      <!-- Top Control Bar in Figma View -->
+      <div class="glass-container flex items-center justify-between rounded-3xl p-4 text-xs">
+        <div class="flex items-center gap-3">
+          <span class="font-display font-bold text-sm text-white flex items-center gap-2">
+            <i data-lucide="maximize-2" class="size-4 text-brand-periwinkle"></i> Kiểu 4: Figma / Photoshop Creative
+            Studio Layout
+          </span>
+          <span
+            class="rounded-full border border-emerald-400/30 bg-emerald-500/10 px-3 py-1 text-[11px] font-bold text-emerald-300">
+            <i data-lucide="trending-up" class="size-3.5 inline mr-1"></i> AI Risk Predictor: An toàn 100%
+          </span>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="alert('Demo: Đã nạp 180.000đ vào Ví Escrow!')"
+            class="rounded-full bg-amber-400 px-3.5 py-1.5 font-bold text-brand-navy shadow hover:bg-amber-300 transition">
+            <i data-lucide="shield-check" class="size-3.5 inline mr-1"></i> Nạp Escrow (180k)
+          </button>
+          <button type="button" onclick="toggleFigmaDrawer('left')"
+            class="rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-slate-300 hover:text-white transition">
+            <i data-lucide="sidebar-left" class="size-3.5 inline mr-1"></i> Mốc &amp; Chi tiết
+          </button>
+          <button type="button" onclick="toggleFigmaDrawer('right')"
+            class="rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-slate-300 hover:text-white transition">
+            <i data-lucide="sidebar-right" class="size-3.5 inline mr-1"></i> SignalR Chat
+          </button>
+          <button type="button"
+            class="rounded-full border border-red-500/40 bg-red-500/10 px-3 py-1.5 text-red-300 hover:bg-red-500/20 transition">
+            <i data-lucide="alert-circle" class="size-3.5 inline"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Fullscreen Workspace Canvas Container -->
+      <div
+        class="relative flex-1 rounded-3xl border border-white/15 bg-black/80 overflow-hidden flex items-center justify-center p-6 min-h-[520px]">
+
+        <!-- 1. Floating Top Tool Palette (Thanh công cụ chính nổi trên Canvas) -->
+        <div
+          class="absolute top-4 left-1/2 -translate-x-1/2 flex items-center gap-3 rounded-2xl border border-white/20 bg-brand-navy/90 px-4 py-2 text-xs text-white shadow-2xl backdrop-blur-md z-30">
+          <div class="flex items-center gap-2">
+            <span class="size-2 rounded-full bg-brand-periwinkle animate-pulse"></span>
+            <span class="font-bold text-brand-periwinkle">Character_Illustration.psd</span>
+            <span class="rounded-md bg-white/10 px-2 py-0.5 text-[10px] font-bold text-slate-300">Mốc #1</span>
+          </div>
+
+          <span class="text-white/20">|</span>
+
+          <!-- Floating Action Buttons -->
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="openApprovalModal()"
+              class="rounded-xl bg-brand-periwinkle px-4 py-1.5 font-bold text-brand-navy shadow hover:brightness-110 transition flex items-center gap-1.5">
+              <i data-lucide="eye" class="size-3.5"></i> Duyệt Mốc 1
+            </button>
+            <button type="button" onclick="openReviewModal()"
+              class="rounded-xl border border-emerald-400/40 bg-emerald-500/20 px-3.5 py-1.5 font-bold text-emerald-300 hover:bg-emerald-400 hover:text-brand-navy transition flex items-center gap-1.5">
+              <i data-lucide="award" class="size-3.5"></i> Master HD
+            </button>
+          </div>
+        </div>
+
+        <!-- 2. Main Artwork Canvas Display -->
+        <div class="group relative flex items-center justify-center max-h-[460px] w-full cursor-pointer"
+          onclick="openApprovalModal()">
+          <img
+            class="v-canvas-img max-h-[440px] w-full object-contain rounded-2xl shadow-2xl transition duration-300 group-hover:scale-[1.01]"
+            src="https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?auto=format&fit=crop&w=1200&q=80"
+            alt="Figma canvas">
+
+          <!-- Hover Overlay -->
+          <div
+            class="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition rounded-2xl">
+            <span
+              class="inline-flex items-center gap-2 rounded-xl bg-brand-periwinkle px-6 py-3 text-xs font-bold text-brand-navy shadow-2xl">
+              <i data-lucide="zoom-in" class="size-4"></i> Phóng to sắc nét &amp; Phê duyệt Mốc 1
+            </span>
+          </div>
+        </div>
+
+        <!-- 3. Floating Bottom Canvas Control Bar (Thanh Zoom & Watermark dưới Canvas) -->
+        <div
+          class="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-4 rounded-2xl border border-white/15 bg-brand-navy/90 px-4 py-2 text-xs text-slate-300 shadow-2xl backdrop-blur-md z-30">
+          <div class="flex items-center gap-2 border-r border-white/10 pr-3">
+            <i data-lucide="shield-check" class="size-4 text-emerald-400"></i>
+            <span class="text-[11px] font-bold text-emerald-300">Watermarked Preview</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <button type="button" class="p-1 hover:text-white transition" title="Zoom in"><i data-lucide="zoom-in"
+                class="size-4"></i></button>
+            <span class="text-[11px] font-mono font-bold text-white">100%</span>
+            <button type="button" class="p-1 hover:text-white transition" title="Zoom out"><i data-lucide="zoom-out"
+                class="size-4"></i></button>
+            <button type="button" class="p-1 hover:text-white transition" title="Xoay ảnh"><i data-lucide="rotate-cw"
+                class="size-4"></i></button>
+          </div>
+        </div>
+
+        <!-- 4. Left Floating Drawer (Milestone Checklist & Escrow Info) -->
+        <div id="figma-drawer-left"
+          class="absolute top-4 left-4 bottom-4 w-72 glass-container rounded-2xl p-4 text-xs space-y-4 z-20 overflow-y-auto shadow-2xl border border-white/20">
+
+          <div class="flex items-center justify-between border-b border-white/10 pb-2">
+            <h4 class="font-bold text-white text-xs flex items-center gap-1.5">
+              <i data-lucide="clock" class="size-4 text-brand-periwinkle"></i> Mốc hợp đồng &amp; Gói Master
+            </h4>
+            <span class="rounded-full bg-brand-periwinkle/20 px-2 py-0.5 text-[10px] text-brand-periwinkle font-bold">3
+              Mốc</span>
+          </div>
+
+          <!-- Mốc 1 -->
+          <div class="rounded-xl border border-brand-periwinkle/50 bg-brand-periwinkle/15 p-3 space-y-1.5 shadow">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-brand-periwinkle text-[10px]">Mốc #1 · 60.000đ</span>
+              <span class="text-[10px] font-bold text-brand-periwinkle animate-pulse">● Đang vẽ</span>
+            </div>
+            <h5 class="text-white text-xs font-bold">Phác thảo nhân vật</h5>
+            <p class="text-[11px] text-slate-300 italic">"Nét phác thảo cơ bản đã sẵn sàng."</p>
+            <div class="flex justify-between items-center text-[10px] text-slate-400 pt-1 border-t border-white/10">
+              <span>Sửa: <strong class="text-amber-300">0/3</strong></span>
+              <button type="button" onclick="openApprovalModal()"
+                class="text-brand-periwinkle font-bold hover:underline">Xem &amp; Duyệt →</button>
+            </div>
+          </div>
+
+          <!-- Mốc 2 -->
+          <div class="rounded-xl border border-white/10 bg-white/5 p-3 space-y-1 opacity-75">
+            <span class="text-slate-400 text-[10px]">Mốc #2 · 70.000đ</span>
+            <h5 class="text-slate-200 text-xs font-semibold">Lineart &amp; Màu cơ bản</h5>
+          </div>
+
+          <!-- Mốc 3 -->
+          <div class="rounded-xl border border-white/10 bg-white/5 p-3 space-y-1 opacity-75">
+            <span class="text-slate-400 text-[10px]">Mốc #3 · 50.000đ</span>
+            <h5 class="text-slate-200 text-xs font-semibold">Hoàn thiện &amp; Bàn giao HD</h5>
+          </div>
+
+          <!-- Master Package Box -->
+          <div class="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 space-y-2">
+            <h5 class="font-bold text-emerald-300 text-xs flex items-center gap-1.5">
+              <i data-lucide="lock" class="size-3.5"></i> Final Master Package
+            </h5>
+            <p class="text-[11px] text-emerald-200/80">File gốc HD (.PSD, .ZIP) tự động mở khóa khi hoàn thành 3 mốc.
+            </p>
+          </div>
+
+        </div>
+
+        <!-- 5. Right Floating Drawer (SignalR Chat Panel & Quick Prompts) -->
+        <div id="figma-drawer-right"
+          class="absolute top-4 right-4 bottom-4 w-80 glass-container rounded-2xl p-4 text-xs flex flex-col justify-between z-20 shadow-2xl border border-white/20">
+
+          <div class="flex items-center justify-between border-b border-white/10 pb-2 mb-2">
+            <h4 class="font-bold text-white text-xs flex items-center gap-1.5">
+              <span class="size-2 rounded-full bg-emerald-400 animate-pulse"></span> SignalR Live Chat
+            </h4>
+            <span class="text-[10px] text-slate-400">Trực tiếp</span>
+          </div>
+
+          <!-- Messages Area -->
+          <div class="v-chat-messages flex-1 overflow-y-auto space-y-3 text-xs pr-1 min-h-0">
+            <div class="flex flex-col items-start">
+              <span class="text-[10px] font-bold text-brand-periwinkle">Linh Nguyen · 08:20</span>
+              <div class="rounded-2xl rounded-tl-none border border-white/10 bg-white/5 p-2.5 text-slate-200 mt-1">
+                Chào bạn! Mình vừa cập nhật phác thảo Mốc #1 ở màn hình Figma Studio nhé!
+              </div>
+            </div>
+            <div class="flex flex-col items-end">
+              <span class="text-[10px] font-semibold text-slate-300">Bạn · 08:22</span>
+              <div class="rounded-2xl rounded-tr-none bg-brand-periwinkle text-brand-navy p-2.5 font-medium mt-1">
+                Cảm ơn Linh! Mình đang xem nét phác đây.
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Prompt Chips -->
+          <div class="my-2 border-t border-white/10 pt-2 space-y-1">
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Gợi ý nhắn nhanh:</span>
+            <div class="flex flex-wrap gap-1 text-[10px]">
+              <button type="button" onclick="insertPrompt('Cho mình xin tiến độ mốc 1 nhé')"
+                class="rounded-full border border-white/15 bg-white/5 px-2 py-0.5 text-slate-300 hover:bg-brand-periwinkle/10 hover:text-brand-periwinkle transition">💬
+                Tiến độ mốc 1</button>
+              <button type="button" onclick="insertPrompt('Mình muốn góp ý về màu sắc gương mặt')"
+                class="rounded-full border border-white/15 bg-white/5 px-2 py-0.5 text-slate-300 hover:bg-brand-periwinkle/10 hover:text-brand-periwinkle transition">🎨
+                Góp ý màu sắc</button>
+            </div>
+          </div>
+
+          <!-- Chat Input Form -->
+          <form onsubmit="sendChatMessage(event)"
+            class="flex items-center gap-1.5 border-t border-white/10 pt-2 shrink-0">
+            <button type="button"
+              class="p-2 text-slate-400 hover:text-white rounded-lg border border-white/10 bg-white/5"
+              title="Đính kèm file">
+              <i data-lucide="paperclip" class="size-3.5"></i>
+            </button>
+            <input type="text" placeholder="Nhập tin nhắn..."
+              class="v-chat-input flex-1 rounded-xl border border-white/15 bg-brand-navy px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-periwinkle">
+            <button type="submit"
+              class="rounded-xl bg-amber-400 p-2 text-brand-navy font-bold shadow hover:brightness-110 transition">
+              <i data-lucide="send" class="size-3.5"></i>
+            </button>
+          </form>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- VARIANT 5: BỐ CỤC QUẢN LÝ NHIỀU ĐƠN HÀNG CÙNG LÚC (MULTI-ORDER WORKROOM TABS LAYOUT - CLIENT & CREATOR DUAL VIEW) -->
+    <div id="view-layout-multiorder" class="hidden mx-auto w-full max-w-7xl flex-1 flex-col p-4 sm:p-6 space-y-4">
+
+      <!-- Role View Switcher & Title Bar -->
+      <div class="glass-container flex flex-wrap items-center justify-between rounded-3xl p-4 text-xs gap-3">
+        <div class="flex items-center gap-3">
+          <span class="font-display font-bold text-sm text-white flex items-center gap-2">
+            <i data-lucide="layers" class="size-4 text-brand-periwinkle"></i> Kiểu 5: Multi-Tab Studio Quản lý Nhiều Đơn
+            hàng
+          </span>
+          <span id="mo-role-tag"
+            class="rounded-full border border-brand-periwinkle/40 bg-brand-periwinkle/15 px-3 py-1 text-[11px] font-bold text-brand-periwinkle">
+            👤 Đang xem: Giao diện KHÁCH HÀNG (Client)
+          </span>
+        </div>
+
+        <!-- Role Switcher Buttons -->
+        <div class="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 p-1">
+          <button type="button" onclick="switchRoleView('client')" id="btn-role-client"
+            class="rounded-xl bg-brand-periwinkle px-3.5 py-1.5 font-bold text-brand-navy shadow transition">
+            👤 Màn hình Khách hàng (Client View)
+          </button>
+          <button type="button" onclick="switchRoleView('creator')" id="btn-role-creator"
+            class="rounded-xl text-slate-400 font-semibold px-3.5 py-1.5 hover:text-white transition">
+            🎨 Màn hình Họa sĩ (Creator View)
+          </button>
+        </div>
+      </div>
+
+      <!-- Multi-Order Active Tabs Bar -->
+      <div class="glass-container flex flex-col rounded-3xl p-4 space-y-3">
+        <div class="flex items-center justify-between border-b border-white/10 pb-2">
+          <span id="mo-tab-header-title" class="font-bold text-xs text-white flex items-center gap-2">
+            Danh sách 3 đơn hàng bạn đã đặt:
+          </span>
+          <span id="mo-escrow-summary"
+            class="rounded-full border border-emerald-400/30 bg-emerald-500/10 px-3 py-1 text-[11px] font-bold text-emerald-300">
+            Ví Escrow bảo vệ: 540.000đ
+          </span>
+        </div>
+
+        <!-- Tab Items -->
+        <div id="mo-tab-items-container" class="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
+
+          <!-- Order Tab 1 (Active) -->
+          <button type="button" onclick="switchOrderTab('order1')" id="order-tab-1"
+            class="flex items-center gap-2.5 rounded-2xl border border-brand-periwinkle/50 bg-brand-periwinkle/20 px-4 py-2 text-white font-bold shadow-md shrink-0">
+            <span class="size-2 rounded-full bg-brand-periwinkle animate-pulse"></span>
+            <span id="otab-text-1">#COMM-8829: Character (Linh Nguyen)</span>
+            <span id="otab-badge-1" class="rounded-full bg-brand-periwinkle/30 px-2 py-0.5 text-[10px]">Mốc 1</span>
+          </button>
+
+          <!-- Order Tab 2 -->
+          <button type="button" onclick="switchOrderTab('order2')" id="order-tab-2"
+            class="flex items-center gap-2.5 rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-slate-400 font-semibold hover:bg-white/10 hover:text-slate-200 transition shrink-0">
+            <span class="size-2 rounded-full bg-amber-400"></span>
+            <span id="otab-text-2">#COMM-9102: Portrait Fanart (Alex Studio)</span>
+            <span id="otab-badge-2" class="rounded-full bg-amber-500/20 text-amber-300 px-2 py-0.5 text-[10px]">Nạp
+              Escrow</span>
+          </button>
+
+          <!-- Order Tab 3 -->
+          <button type="button" onclick="switchOrderTab('order3')" id="order-tab-3"
+            class="flex items-center gap-2.5 rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-slate-400 font-semibold hover:bg-white/10 hover:text-slate-200 transition shrink-0">
+            <span class="size-2 rounded-full bg-emerald-400"></span>
+            <span id="otab-text-3">#COMM-7731: Chibi Mascot (Hana Art)</span>
+            <span id="otab-badge-3" class="rounded-full bg-emerald-500/20 text-emerald-300 px-2 py-0.5 text-[10px]">💬 2
+              tin mới</span>
+          </button>
+
+          <!-- Action Add Button -->
+          <button type="button" id="mo-add-btn"
+            class="flex items-center gap-1.5 rounded-2xl border border-dashed border-white/20 bg-white/[0.02] px-3.5 py-2 text-slate-400 hover:text-white transition shrink-0">
+            <i data-lucide="plus" class="size-3.5"></i> Đặt đơn mới
+          </button>
+
+        </div>
+      </div>
+
+      <!-- Active Selected Order Workroom Canvas & Chat -->
+      <div class="grid flex-1 grid-cols-1 gap-4 lg:grid-cols-12 min-h-0">
+
+        <!-- Left: Artwork Canvas (65%) -->
+        <div class="glass-container flex flex-col rounded-3xl p-5 space-y-4 lg:col-span-8">
+          <div class="flex flex-wrap items-center justify-between border-b border-white/10 pb-3 gap-2">
+            <div>
+              <div class="flex items-center gap-2">
+                <span id="mo-order-tag"
+                  class="rounded-md bg-brand-periwinkle/20 px-2 py-0.5 text-[10px] font-bold text-brand-periwinkle">Đơn
+                  #COMM-8829</span>
+                <h3 id="mo-order-title" class="font-display font-bold text-sm text-white">Character illustration — Linh
+                  Nguyen</h3>
+              </div>
+              <p id="mo-order-subtitle" class="mt-0.5 text-xs text-slate-400">Đang thực hiện Mốc #1 (Phác thảo nhân vật)
+              </p>
+            </div>
+
+            <!-- Dynamic Action Button based on Role -->
+            <div id="mo-role-actions">
+              <button type="button" onclick="openApprovalModal()" id="mo-btn-client-approve"
+                class="rounded-full bg-brand-periwinkle px-4 py-1.5 font-bold text-brand-navy text-xs shadow hover:brightness-110 transition">
+                Duyệt Mốc phác thảo
+              </button>
+              <button type="button" onclick="alert('Creator Demo: Đã mở Modal đăng tải phác thảo WIP cho Client!')"
+                id="mo-btn-creator-upload"
+                class="hidden rounded-full bg-emerald-400 px-4 py-1.5 font-bold text-brand-navy text-xs shadow hover:bg-emerald-300 transition">
+                📤 Đăng tải phác thảo Mốc #1
+              </button>
+            </div>
+          </div>
+
+          <div
+            class="group relative flex flex-1 min-h-[360px] items-center justify-center overflow-hidden rounded-2xl border border-white/15 bg-black/60 p-2 cursor-pointer"
+            onclick="openApprovalModal()">
+            <img id="mo-canvas-img"
+              class="max-h-[380px] w-full object-contain rounded-xl transition group-hover:scale-[1.01]"
+              src="https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?auto=format&fit=crop&w=1200&q=80"
+              alt="Artwork">
+            <div
+              class="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition">
+              <span id="mo-canvas-overlay-text"
+                class="rounded-xl bg-brand-periwinkle px-5 py-2.5 text-xs font-bold text-brand-navy shadow-2xl">Phóng to
+                &amp; Duyệt Mốc</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Live Chat & Order Checklist (35%) -->
+        <div class="glass-container flex flex-col rounded-3xl p-4 space-y-3 lg:col-span-4">
+
+          <!-- Checklist Quick Box -->
+          <div class="rounded-2xl border border-white/10 bg-white/5 p-3 space-y-2 text-xs">
+            <div class="flex justify-between items-center">
+              <span class="font-bold text-white text-xs">Tiến độ 3 Mốc:</span>
+              <span id="mo-progress-text" class="text-brand-periwinkle font-bold text-[11px]">1/3 hoàn thành</span>
+            </div>
+            <div class="h-1.5 w-full rounded-full bg-white/10 overflow-hidden">
+              <div id="mo-progress-bar" class="h-full w-1/3 bg-brand-periwinkle"></div>
+            </div>
+          </div>
+
+          <!-- Creator Panel Specific Controls (Hiển thị khi ở Creator View) -->
+          <div id="mo-creator-controls"
+            class="hidden rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs space-y-2">
+            <span class="font-bold text-emerald-300 block text-[11px]">⚡ Thao tác Họa sĩ (Creator Actions):</span>
+            <div class="grid grid-cols-2 gap-2 text-[11px]">
+              <button type="button" onclick="alert('Demo Creator: Nộp Mốc 1 cho Khách hàng duyệt!')"
+                class="rounded-xl bg-emerald-400 py-1.5 font-bold text-brand-navy text-center shadow">
+                Nộp Mốc #1
+              </button>
+              <button type="button" onclick="alert('Demo Creator: Mở khung nộp Master HD (.PSD, .ZIP)')"
+                class="rounded-xl border border-emerald-400/40 bg-emerald-500/20 text-emerald-300 font-bold py-1.5 text-center">
+                Nộp Master HD
+              </button>
+            </div>
+          </div>
+
+          <!-- SignalR Chat Area -->
+          <div class="flex-1 flex flex-col min-h-0 space-y-2">
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Live Chat SignalR:</span>
+            <div id="mo-chat-feed" class="flex-1 overflow-y-auto space-y-2 text-xs pr-1 min-h-[180px]">
+              <div class="rounded-xl bg-white/5 p-2.5 border border-white/10 text-slate-200">
+                <span id="mo-creator-name" class="font-bold text-brand-periwinkle block text-[10px]">Linh Nguyen</span>
+                <span id="mo-chat-msg">Chào bạn! Mốc 1 bản phác thảo đã có trên màn hình bên trái nhé.</span>
+              </div>
+            </div>
+            <form onsubmit="sendChatMessage(event)"
+              class="flex items-center gap-1.5 border-t border-white/10 pt-2 shrink-0">
+              <input type="text" placeholder="Nhập tin nhắn..."
+                class="flex-1 rounded-xl border border-white/15 bg-brand-navy px-3 py-1.5 text-xs text-white focus:outline-none">
+              <button type="submit" class="rounded-xl bg-amber-400 p-1.5 text-brand-navy font-bold"><i
+                  data-lucide="send" class="size-3.5"></i></button>
+            </form>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- VARIANT 6: ULTRA-MINIMAL CANVAS + CHAT LAYOUT (HOVER MILESTONES POPOVER) -->
+      <div id="view-layout-hover" class="hidden mx-auto flex w-full max-w-7xl flex-col p-4 sm:p-6 space-y-4">
+
+        <div class="glass-container flex items-center justify-between rounded-3xl p-4 text-xs">
+          <div class="flex items-center gap-3">
+            <span class="font-display font-bold text-sm text-white flex items-center gap-2">
+              <i data-lucide="sparkles" class="size-4 text-brand-periwinkle"></i> Kiểu 6: Minimal Canvas Studio &amp;
+              SignalR Chat (Hover xem Mốc)
+            </span>
+            <span
+              class="rounded-full border border-brand-periwinkle/40 bg-brand-periwinkle/15 px-3 py-1 text-[11px] font-bold text-brand-periwinkle">
+              💡 Thử rê chuột vào badge "Mốc #1" trên Canvas để xem danh sách Mốc Hợp đồng nổi!
+            </span>
+          </div>
+        </div>
+
+        <!-- MAIN DUAL PANEL: LEFT CANVAS (65%) & RIGHT SIGNALR CHAT (35%) MATCHING USER SCREENSHOT EXACTLY -->
+        <div class="grid grid-cols-1 gap-4 lg:grid-cols-12 w-full">
+
+          <!-- LEFT SECTION (65%): CANVAS WITH FLOATING TOP BAR & HOVER MILESTONE POPOVER -->
+          <div
+            class="glass-container relative flex flex-col rounded-3xl p-5 space-y-4 lg:col-span-8 overflow-visible min-h-[520px]">
+
+            <!-- FLOATING TOP BAR MATCHING USER'S SCREENSHOT -->
+            <div
+              class="relative z-30 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/20 bg-brand-navy/95 px-4 py-2.5 text-xs text-white shadow-2xl backdrop-blur-md">
+
+              <div class="flex items-center gap-3">
+                <span class="size-2 rounded-full bg-brand-periwinkle animate-pulse"></span>
+                <span class="font-bold text-brand-periwinkle tracking-wide">Character_Illustration.psd</span>
+
+                <span class="text-white/20">|</span>
+
+                <!-- HOVERABLE MILESTONE BADGE WITH POPOVER -->
+                <div class="group relative cursor-pointer">
+                  <span
+                    class="inline-flex items-center gap-1.5 rounded-xl border border-brand-periwinkle/50 bg-brand-periwinkle/20 px-3 py-1 text-xs font-bold text-brand-periwinkle transition group-hover:bg-brand-periwinkle group-hover:text-brand-navy shadow">
+                    Mốc #1 (Đang phác thảo) <i data-lucide="chevron-down" class="size-3.5"></i>
+                  </span>
+
+                  <!-- HOVER MILESTONES GLASSMOPHISM POPOVER DROPDOWN -->
+                  <div
+                    class="invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200 absolute top-full left-0 mt-2 w-80 rounded-2xl border border-white/20 bg-[#0F121D]/95 p-4 text-xs shadow-2xl backdrop-blur-xl space-y-3 z-50">
+                    <div class="flex items-center justify-between border-b border-white/10 pb-2">
+                      <span class="font-bold text-white flex items-center gap-1.5">
+                        <i data-lucide="clock" class="size-4 text-brand-periwinkle"></i> Mốc hợp đồng (3 Mốc)
+                      </span>
+                      <span class="text-[10px] text-emerald-300 font-semibold">Escrow 180k</span>
+                    </div>
+
+                    <!-- Milestone Item 1 -->
+                    <div class="rounded-xl border border-brand-periwinkle/50 bg-brand-periwinkle/15 p-2.5 space-y-1">
+                      <div class="flex justify-between font-bold text-brand-periwinkle text-[11px]">
+                        <span>Mốc #1: Phác thảo</span>
+                        <span class="animate-pulse">● Đang vẽ</span>
+                      </div>
+                      <p class="text-slate-200 text-xs">Giá: 60.000đ · Lượt sửa: 0/3</p>
+                    </div>
+
+                    <!-- Milestone Item 2 -->
+                    <div class="rounded-xl border border-white/10 bg-white/5 p-2.5 space-y-1 opacity-75">
+                      <div class="flex justify-between font-semibold text-slate-300 text-[11px]">
+                        <span>Mốc #2: Lineart &amp; Màu</span>
+                        <span class="text-slate-400">Chưa bắt đầu</span>
+                      </div>
+                      <p class="text-slate-400 text-xs">Giá: 70.000đ · Lượt sửa: 0/3</p>
+                    </div>
+
+                    <!-- Milestone Item 3 -->
+                    <div class="rounded-xl border border-white/10 bg-white/5 p-2.5 space-y-1 opacity-75">
+                      <div class="flex justify-between font-semibold text-slate-300 text-[11px]">
+                        <span>Mốc #3: Bàn giao HD</span>
+                        <span class="text-slate-400">Chưa bắt đầu</span>
+                      </div>
+                      <p class="text-slate-400 text-xs">Giá: 50.000đ · Lượt sửa: 0/3</p>
+                    </div>
+
+                    <div class="pt-1 flex items-center justify-between border-t border-white/10 text-[11px]">
+                      <span class="text-slate-400">Master HD Package:</span>
+                      <span class="text-amber-300 font-bold">🔒 Đang khóa</span>
+                    </div>
+                  </div>
+
+                </div>
+
+              </div>
+
+              <!-- TOP RIGHT ACTION BUTTONS MATCHING USER SCREENSHOT -->
+              <div class="flex items-center gap-2">
+                <button type="button" onclick="openApprovalModal()"
+                  class="inline-flex items-center gap-1.5 rounded-xl bg-brand-periwinkle px-4 py-1.5 font-bold text-brand-navy shadow hover:brightness-110 transition">
+                  <i data-lucide="eye" class="size-4"></i> Duyệt Mốc 1
+                </button>
+                <button type="button" onclick="openReviewModal()"
+                  class="inline-flex items-center gap-1.5 rounded-xl border border-emerald-400/40 bg-emerald-500/15 px-3.5 py-1.5 font-bold text-emerald-300 hover:bg-emerald-400 hover:text-brand-navy transition">
+                  <i data-lucide="award" class="size-4"></i> Master HD
+                </button>
+              </div>
+
+            </div>
+
+            <!-- MAIN ARTWORK DISPLAY AREA -->
+            <div
+              class="group relative flex flex-1 min-h-[380px] items-center justify-center overflow-hidden rounded-2xl border border-white/15 bg-black/60 p-2 cursor-pointer"
+              onclick="openApprovalModal()">
+              <img
+                class="v-canvas-img max-h-[420px] w-full object-contain rounded-xl transition duration-300 group-hover:scale-[1.01]"
+                src="https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?auto=format&fit=crop&w=1200&q=80"
+                alt="Full canvas">
+
+              <!-- HOVER OVERLAY -->
+              <div
+                class="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition rounded-2xl">
+                <span
+                  class="inline-flex items-center gap-2 rounded-xl bg-brand-periwinkle px-6 py-3 text-xs font-bold text-brand-navy shadow-2xl">
+                  <i data-lucide="zoom-in" class="size-4"></i> Phóng to &amp; Phê duyệt Mốc 1
+                </span>
+              </div>
+            </div>
+
+            <!-- FLOATING BOTTOM BAR MATCHING USER'S SCREENSHOT EXACTLY -->
+            <div
+              class="relative z-30 flex items-center justify-between rounded-2xl border border-white/15 bg-brand-navy/95 px-5 py-2 text-xs text-slate-300 shadow-2xl backdrop-blur-md">
+              <div class="flex items-center gap-2">
+                <i data-lucide="shield-check" class="size-4 text-emerald-400"></i>
+                <span class="font-bold text-emerald-300">Watermarked Preview</span>
+              </div>
+
+              <span class="text-white/20">|</span>
+
+              <div class="flex items-center gap-4">
+                <button type="button" class="p-1 hover:text-white transition" title="Zoom In"><i data-lucide="zoom-in"
+                    class="size-4"></i></button>
+                <span class="font-mono font-bold text-white text-xs">100%</span>
+                <button type="button" class="p-1 hover:text-white transition" title="Zoom Out"><i data-lucide="zoom-out"
+                    class="size-4"></i></button>
+                <button type="button" class="p-1 hover:text-white transition" title="Rotate"><i data-lucide="rotate-cw"
+                    class="size-4"></i></button>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- RIGHT SECTION (35%): SIGNALR LIVE CHAT MATCHING USER'S SCREENSHOT EXACTLY -->
+          <div class="glass-container flex h-full flex-col overflow-hidden rounded-3xl p-4 lg:col-span-4 min-h-[520px]">
+            <div class="mb-3 flex items-center justify-between border-b border-white/10 pb-3">
+              <div class="flex items-center gap-2 font-display text-xs font-bold text-white">
+                <span class="size-2 rounded-full bg-emerald-400 animate-pulse"></span> SignalR Live Chat
+              </div>
+              <span class="text-[10px] text-slate-400">Trực tiếp</span>
+            </div>
+
+            <!-- CHAT MESSAGES FEED -->
+            <div class="v-chat-messages flex-1 overflow-y-auto space-y-3 pr-1 min-h-0 text-xs">
+              <div class="flex flex-col items-start">
+                <div class="mb-1 flex items-center gap-2 text-[10px] text-slate-400">
+                  <span class="font-bold text-brand-periwinkle">Linh Nguyen</span>
+                  <span>08:20</span>
+                </div>
+                <div
+                  class="max-w-[88%] rounded-2xl rounded-tl-none border border-white/10 bg-white/5 p-3 text-slate-200 leading-relaxed shadow-sm">
+                  Chào bạn! Mình vừa cập nhật phác thảo Mốc #1 ở màn hình Figma Studio nhé!
+                </div>
+              </div>
+
+              <div class="flex flex-col items-end">
+                <div class="mb-1 flex items-center gap-2 text-[10px] text-slate-400">
+                  <span class="font-semibold text-slate-300">Bạn</span>
+                  <span>08:22</span>
+                </div>
+                <div
+                  class="max-w-[88%] rounded-2xl rounded-tr-none bg-brand-periwinkle text-brand-navy p-3 font-medium leading-relaxed shadow-sm">
+                  Cảm ơn Linh! Mình đang xem nét phác đây.
+                </div>
+              </div>
+            </div>
+
+            <!-- QUICK PROMPTS CHIPS MATCHING USER SCREENSHOT -->
+            <div class="mt-3 border-t border-white/10 pt-2.5">
+              <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1.5 block">Gợi ý nhắn
+                nhanh:</span>
+              <div class="flex flex-wrap gap-1.5 text-[11px]">
+                <button type="button" onclick="insertPrompt('Cho mình xin tiến độ mốc 1 nhé')"
+                  class="rounded-full border border-white/15 bg-white/5 px-2.5 py-1 text-slate-300 hover:bg-brand-periwinkle/10 hover:text-brand-periwinkle transition">💬
+                  Tiến độ mốc 1</button>
+                <button type="button" onclick="insertPrompt('Mình muốn góp ý về màu sắc gương mặt')"
+                  class="rounded-full border border-white/15 bg-white/5 px-2.5 py-1 text-slate-300 hover:bg-brand-periwinkle/10 hover:text-brand-periwinkle transition">🎨
+                  Góp ý màu sắc</button>
+              </div>
+            </div>
+
+            <!-- INPUT FORM MATCHING USER SCREENSHOT -->
+            <div class="mt-3 shrink-0">
+              <form onsubmit="sendChatMessage(event)" class="flex items-center gap-2">
+                <button type="button"
+                  class="flex size-10 shrink-0 items-center justify-center rounded-xl border border-white/15 bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white transition"
+                  title="Đính kèm tệp">
+                  <i data-lucide="paperclip" class="size-4"></i>
+                </button>
+                <input type="text" placeholder="Nhập tin nhắn..."
+                  class="v-chat-input flex-1 rounded-xl border border-white/15 bg-brand-navy px-4 py-2.5 text-xs text-white focus:border-brand-periwinkle focus:outline-none">
+                <button type="submit"
+                  class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-amber-400 text-brand-navy shadow-lg shadow-amber-400/20 hover:brightness-110 transition"
+                  title="Gửi">
+                  <i data-lucide="send" class="size-4"></i>
+                </button>
+              </form>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- VARIANT 7: SỔ TƯƠNG TÁC MONOTONE (INTERACTIVE NOTEBOOK BINDER LAYOUT) -->
+      <div id="view-layout-notebook" class="mx-auto flex w-full max-w-7xl flex-col p-4 sm:p-6 space-y-4">
+
+        <!-- Top Indicator Banner for Kiểu 7 -->
+        <div
+          class="glass-container flex items-center justify-between rounded-3xl p-4 text-xs border border-emerald-500/30">
+          <div class="flex items-center gap-3">
+            <span class="font-display font-bold text-sm text-white flex items-center gap-2">
+              <i data-lucide="book-open" class="size-4 text-emerald-400"></i> Kiểu 7: Sổ Tương Tác Monotone (Dark Binder
+              Studio)
+            </span>
+            <span
+              class="rounded-full border border-emerald-500/40 bg-emerald-500/15 px-3 py-1 text-[11px] font-bold text-emerald-300">
+              ✨ Bìa Sổ Đen Than (#111215) · Còng Lò Xo Đơn Sắc · Bookmark Tab Mép Phải · Modal Pinned Card
+            </span>
+          </div>
+        </div>
+
+        <!-- MAIN INTERACTIVE NOTEBOOK CONTAINER (BÌA SỔ NGOÀI CÙNG & TRANG GIẤY DẬP GRID) -->
+        <div
+          class="relative mx-auto w-full rounded-[32px] border border-white/10 bg-[#111215] p-4 sm:p-6 shadow-[0_20px_50px_rgba(0,0,0,0.8)] overflow-visible">
+
+          <!-- BÌA SỔ GÓC KIM LOẠI NÒNG SÚNG (GUNMETAL CORNER PROTECTORS) -->
+          <div
+            class="absolute top-0 left-0 size-8 rounded-tl-[32px] border-t-2 border-l-2 border-[#3A404F] bg-gradient-to-br from-[#2D323F] to-transparent pointer-events-none">
+          </div>
+          <div
+            class="absolute top-0 right-0 size-8 rounded-tr-[32px] border-t-2 border-r-2 border-[#3A404F] bg-gradient-to-bl from-[#2D323F] to-transparent pointer-events-none">
+          </div>
+          <div
+            class="absolute bottom-0 left-0 size-8 rounded-bl-[32px] border-b-2 border-l-2 border-[#3A404F] bg-gradient-to-tr from-[#2D323F] to-transparent pointer-events-none">
+          </div>
+          <div
+            class="absolute bottom-0 right-0 size-8 rounded-br-[32px] border-b-2 border-r-2 border-[#3A404F] bg-gradient-to-tl from-[#2D323F] to-transparent pointer-events-none">
+          </div>
+
+          <!-- MẶT TRANG SỔ GIẤY THÍCH HỢP (DARK MATTE SKETCH PAPER PAGE WITH DOT GRID OVERLAY) -->
+          <div class="relative rounded-2xl border border-white/10 bg-[#1A1D24] p-5 sm:p-6 shadow-inner overflow-visible"
+            style="background-image: radial-gradient(#262A33 1.2px, transparent 1.2px); background-size: 18px 18px;">
+
+            <!-- CÒNG LÒ XO NÒNG SÚNG NỐI HAI TRANG (CENTER GUNMETAL RING BINDER) -->
+            <div
+              class="absolute inset-y-6 left-1/2 hidden -translate-x-1/2 flex-col justify-between z-30 lg:flex pointer-events-none">
+              <div class="flex items-center gap-1">
+                <div class="size-3.5 rounded-full border border-black bg-[#0C0E14] shadow-inner"></div>
+                <div
+                  class="h-4 w-9 rounded-full bg-gradient-to-r from-[#2D323F] via-[#4A5264] to-[#1F232D] shadow-lg border-y border-white/20 -mx-3 z-10">
+                </div>
+                <div class="size-3.5 rounded-full border border-black bg-[#0C0E14] shadow-inner"></div>
+              </div>
+              <div class="flex items-center gap-1">
+                <div class="size-3.5 rounded-full border border-black bg-[#0C0E14] shadow-inner"></div>
+                <div
+                  class="h-4 w-9 rounded-full bg-gradient-to-r from-[#2D323F] via-[#4A5264] to-[#1F232D] shadow-lg border-y border-white/20 -mx-3 z-10">
+                </div>
+                <div class="size-3.5 rounded-full border border-black bg-[#0C0E14] shadow-inner"></div>
+              </div>
+              <div class="flex items-center gap-1">
+                <div class="size-3.5 rounded-full border border-black bg-[#0C0E14] shadow-inner"></div>
+                <div
+                  class="h-4 w-9 rounded-full bg-gradient-to-r from-[#2D323F] via-[#4A5264] to-[#1F232D] shadow-lg border-y border-white/20 -mx-3 z-10">
+                </div>
+                <div class="size-3.5 rounded-full border border-black bg-[#0C0E14] shadow-inner"></div>
+              </div>
+              <div class="flex items-center gap-1">
+                <div class="size-3.5 rounded-full border border-black bg-[#0C0E14] shadow-inner"></div>
+                <div
+                  class="h-4 w-9 rounded-full bg-gradient-to-r from-[#2D323F] via-[#4A5264] to-[#1F232D] shadow-lg border-y border-white/20 -mx-3 z-10">
+                </div>
+                <div class="size-3.5 rounded-full border border-black bg-[#0C0E14] shadow-inner"></div>
+              </div>
+              <div class="flex items-center gap-1">
+                <div class="size-3.5 rounded-full border border-black bg-[#0C0E14] shadow-inner"></div>
+                <div
+                  class="h-4 w-9 rounded-full bg-gradient-to-r from-[#2D323F] via-[#4A5264] to-[#1F232D] shadow-lg border-y border-white/20 -mx-3 z-10">
+                </div>
+                <div class="size-3.5 rounded-full border border-black bg-[#0C0E14] shadow-inner"></div>
+              </div>
+              <div class="flex items-center gap-1">
+                <div class="size-3.5 rounded-full border border-black bg-[#0C0E14] shadow-inner"></div>
+                <div
+                  class="h-4 w-9 rounded-full bg-gradient-to-r from-[#2D323F] via-[#4A5264] to-[#1F232D] shadow-lg border-y border-white/20 -mx-3 z-10">
+                </div>
+                <div class="size-3.5 rounded-full border border-black bg-[#0C0E14] shadow-inner"></div>
+              </div>
+            </div>
+
+            <!-- TWO-PAGE SPREAD LAYOUT (TRANG TRÁI CANVAS & TRANG PHẢI LOG & CHAT) -->
+            <div class="grid grid-cols-1 gap-8 lg:grid-cols-12">
+
+              <!-- LEFT PAGE (TRANG SỔ TRÁI: CANVAS STUDIO & TOPBAR THÔNG TIN) -->
+              <div class="space-y-4 lg:col-span-6 lg:pr-4">
+
+                <!-- TOP NOTE HEADER -->
+                <div class="flex items-center justify-between border-b border-white/10 pb-3">
+                  <div>
+                    <div class="flex items-center gap-2">
+                      <span
+                        class="rounded-md border border-[#3A404F] bg-[#222630] px-2 py-0.5 text-[10px] font-mono font-bold text-slate-300">#COMM-8829</span>
+                      <h2 class="font-display text-base font-bold text-white">Character Illustration — Demo Workroom
+                      </h2>
+                    </div>
+                    <p class="mt-1 text-xs text-slate-400">
+                      Tác giả: <strong class="text-slate-200">Linh Nguyen</strong> · Khách: <strong
+                        class="text-slate-200">Demo Client</strong>
+                    </p>
+                  </div>
+
+                  <!-- SINGLE MONOTONE MINT ACCENT BADGE -->
+                  <span
+                    class="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/40 bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-300 shadow-[0_0_12px_rgba(16,185,129,0.2)]">
+                    <span class="size-2 rounded-full bg-emerald-400 animate-pulse"></span> Mốc #1 (Phác thảo)
+                  </span>
+                </div>
+
+                <!-- CANVAS SKETCHFRAME WITH WATERMARK & FLOATING TOOLBAR -->
+                <div
+                  class="group relative flex min-h-[380px] items-center justify-center overflow-hidden rounded-2xl border border-white/15 bg-black/70 p-2 cursor-pointer shadow-xl"
+                  onclick="openApprovalModal()">
+                  <img
+                    class="v-canvas-img max-h-[400px] w-full object-contain rounded-xl transition duration-300 group-hover:scale-[1.01]"
+                    src="https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?auto=format&fit=crop&w=1200&q=80"
+                    alt="Canvas artwork">
+
+                  <!-- MONOTONE OVERLAY ON HOVER -->
+                  <div
+                    class="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition rounded-2xl backdrop-blur-xs">
+                    <span
+                      class="inline-flex items-center gap-2 rounded-xl border border-emerald-400/50 bg-[#141720] px-5 py-2.5 text-xs font-bold text-emerald-300 shadow-2xl">
+                      <i data-lucide="zoom-in" class="size-4"></i> Mở xem chi tiết &amp; Phê duyệt Mốc
+                    </span>
+                  </div>
+                </div>
+
+                <!-- FLOATING FOOTER CONTROLS -->
+                <div
+                  class="flex items-center justify-between rounded-xl border border-white/10 bg-[#141720] px-4 py-2 text-xs text-slate-300">
+                  <span class="flex items-center gap-1.5 font-semibold text-emerald-300">
+                    <i data-lucide="shield-check" class="size-4"></i> Watermarked Preview
+                  </span>
+                  <div class="flex items-center gap-3 text-slate-400">
+                    <button type="button" class="hover:text-white transition"><i data-lucide="zoom-in"
+                        class="size-3.5"></i></button>
+                    <span class="font-mono text-white text-[11px] font-bold">100%</span>
+                    <button type="button" class="hover:text-white transition"><i data-lucide="zoom-out"
+                        class="size-3.5"></i></button>
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- RIGHT PAGE (TRANG SỔ PHẢI: LOG GIAO TIẾP & TIMELINE ĐƠN MÓC) -->
+              <div class="space-y-4 lg:col-span-6 lg:pl-4">
+
+                <!-- RIGHT PAGE HEADER -->
+                <div class="flex items-center justify-between border-b border-white/10 pb-3">
+                  <span class="font-display font-bold text-sm text-white flex items-center gap-2">
+                    <i data-lucide="file-text" class="size-4 text-slate-400"></i> Nhật ký Sổ &amp; Live Chat SignalR
+                  </span>
+                  <span class="text-[10px] text-slate-400 font-mono">Cập nhật: 08:22 AM</span>
+                </div>
+
+                <!-- CHAT FEED MATCHING MONOTONE NOTEBOOK STYLE -->
+                <div class="v-chat-messages flex flex-col space-y-3 h-[320px] overflow-y-auto pr-1 text-xs">
+
+                  <!-- System Log Note Item -->
+                  <div
+                    class="rounded-xl border border-white/10 bg-[#222630]/60 p-2.5 text-[11px] text-slate-400 space-y-1">
+                    <span class="font-bold text-slate-300 flex items-center gap-1.5">
+                      <i data-lucide="info" class="size-3.5 text-emerald-400"></i> Nhật ký Escrow:
+                    </span>
+                    <p>Khách hàng đã nạp tiền bảo quản Escrow 180.000đ cho Đơn hàng #COMM-8829.</p>
+                  </div>
+
+                  <!-- Message 1 from Creator -->
+                  <div class="flex flex-col items-start">
+                    <div class="mb-1 flex items-center gap-2 text-[10px] text-slate-400">
+                      <span class="font-bold text-slate-200">Linh Nguyen (Họa sĩ)</span>
+                      <span>08:20</span>
+                    </div>
+                    <div
+                      class="max-w-[90%] rounded-2xl rounded-tl-none border border-white/10 bg-[#222630] p-3 text-slate-200 shadow-sm leading-relaxed">
+                      Chào bạn! Mình vừa đăng bản phác thảo Mốc #1 lên sổ làm việc nhé. Bạn xem giúp mình nét phác nhé!
+                    </div>
+                  </div>
+
+                  <!-- Message 2 from Client -->
+                  <div class="flex flex-col items-end">
+                    <div class="mb-1 flex items-center gap-2 text-[10px] text-slate-400">
+                      <span class="font-bold text-slate-300">Bạn (Khách hàng)</span>
+                      <span>08:22</span>
+                    </div>
+                    <div
+                      class="max-w-[90%] rounded-2xl rounded-tr-none border border-emerald-500/40 bg-[#141720] p-3 text-slate-100 font-medium shadow-sm leading-relaxed">
+                      Cảm ơn Linh! Bố cục phác thảo rất đẹp, mình chuẩn bị xem xét duyệt mốc 1.
+                    </div>
+                  </div>
+
+                </div>
+
+                <!-- CHAT INPUT FORM -->
+                <form onsubmit="sendChatMessage(event)" class="flex items-center gap-2 border-t border-white/10 pt-3">
+                  <button type="button"
+                    class="flex size-9 shrink-0 items-center justify-center rounded-xl border border-white/15 bg-white/5 text-slate-300 hover:bg-white/10 transition"
+                    title="Gửi tệp">
+                    <i data-lucide="paperclip" class="size-4"></i>
+                  </button>
+                  <input type="text" placeholder="Nhập tin nhắn trao đổi..."
+                    class="v-chat-input flex-1 rounded-xl border border-white/15 bg-[#111215] px-3.5 py-2 text-xs text-white focus:border-emerald-400 focus:outline-none">
+                  <button type="submit"
+                    class="flex size-9 shrink-0 items-center justify-center rounded-xl border border-emerald-400/50 bg-emerald-500/20 text-emerald-300 font-bold hover:bg-emerald-400 hover:text-brand-navy transition">
+                    <i data-lucide="send" class="size-4"></i>
+                  </button>
+                </form>
+
+              </div>
+
+            </div>
+
+          </div>
+
+          <!-- BOOKMARK INDEX TABS (CÁC TAB DỌC KẸP MÉP PHẢI SỔ MONOTONE) -->
+          <div class="absolute right-0 top-12 flex flex-col space-y-3 z-40 translate-x-full pl-1">
+
+            <!-- TAB 1: TIẾN ĐỘ MÓC (PROGRESS TAB WITH FLYOUT PREVIEW) -->
+            <div class="group relative">
+              <button type="button" onclick="openApprovalModal()"
+                class="flex items-center gap-2 rounded-r-2xl border border-l-0 border-white/15 bg-[#222630] px-3 py-2.5 text-xs font-bold text-[#8E95A5] shadow-lg transition-all duration-200 group-hover:translate-x-3 group-hover:bg-[#2E3442] group-hover:text-white">
+                <i data-lucide="clock" class="size-4 text-emerald-400"></i>
+                <span class="hidden sm:inline">Tiến độ Mốc</span>
+              </button>
+
+              <!-- FLYOUT TOOLTIP PREVIEW -->
+              <div
+                class="invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200 absolute right-full top-0 mr-3 w-64 rounded-2xl border border-white/20 bg-[#111215]/95 p-3.5 text-xs shadow-2xl backdrop-blur-xl z-50 space-y-2 pointer-events-none">
+                <div class="flex justify-between font-bold text-white text-[11px]">
+                  <span>Mốc #1: Phác thảo</span>
+                  <span class="text-emerald-300">Đang vẽ</span>
+                </div>
+                <p class="text-slate-400 text-[11px]">Hạn chót: Còn 13 ngày 23 giờ</p>
+                <div class="h-1.5 w-full rounded-full bg-white/10 overflow-hidden">
+                  <div class="h-full w-1/3 bg-emerald-400"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- TAB 2: CHI TIẾT ĐƠN (SPECS TAB WITH FLYOUT PREVIEW) -->
+            <div class="group relative">
+              <button type="button"
+                class="flex items-center gap-2 rounded-r-2xl border border-l-0 border-white/15 bg-[#222630] px-3 py-2.5 text-xs font-bold text-[#8E95A5] shadow-lg transition-all duration-200 group-hover:translate-x-3 group-hover:bg-[#2E3442] group-hover:text-white">
+                <i data-lucide="file-spreadsheet" class="size-4 text-slate-300"></i>
+                <span class="hidden sm:inline">Chi tiết Đơn</span>
+              </button>
+
+              <!-- FLYOUT TOOLTIP PREVIEW -->
+              <div
+                class="invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200 absolute right-full top-0 mr-3 w-64 rounded-2xl border border-white/20 bg-[#111215]/95 p-3.5 text-xs shadow-2xl backdrop-blur-xl z-50 space-y-1.5 pointer-events-none">
+                <div class="font-bold text-white text-[11px]">Đơn #COMM-8829</div>
+                <p class="text-slate-400 text-[11px]">Gói: Character Commercial</p>
+                <p class="text-slate-400 text-[11px]">Tổng giá trị: 180.000đ (Escrow)</p>
+              </div>
+            </div>
+
+            <!-- TAB 3: DUYỆT MỐC (APPROVAL ACTION TAB) -->
+            <div class="group relative">
+              <button type="button" onclick="openApprovalModal()"
+                class="flex items-center gap-2 rounded-r-2xl border border-l-0 border-emerald-500/60 bg-[#1A2520] px-3 py-2.5 text-xs font-bold text-emerald-300 shadow-lg transition-all duration-200 group-hover:translate-x-3 group-hover:bg-emerald-500 group-hover:text-brand-navy">
+                <i data-lucide="check-circle-2" class="size-4"></i>
+                <span class="hidden sm:inline">Duyệt Mốc #1</span>
+              </button>
+            </div>
+
+            <!-- TAB 4: HỦY ĐƠN & KHIẾU NẠI (DISPUTE & CANCEL MONOTONE TAB) -->
+            <div class="group relative">
+              <button type="button" onclick="openDisputeModal()"
+                class="flex items-center gap-2 rounded-r-2xl border border-l-0 border-white/15 bg-[#222630] px-3 py-2.5 text-xs font-bold text-[#8E95A5] shadow-lg transition-all duration-200 group-hover:translate-x-3 group-hover:bg-[#2A2E39] group-hover:text-white">
+                <i data-lucide="shield-alert" class="size-4 text-slate-400"></i>
+                <span class="hidden sm:inline">Hủy / Khiếu nại</span>
+              </button>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+  </main>
+
+  <!-- MODAL 1: DUYỆT MỐC PHÁC THẢO INTERACTIVE MOCKUP -->
+  <div id="modal-approval" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop">
+    <div class="glass-container w-full max-w-3xl rounded-3xl p-6 shadow-2xl border border-white/20 space-y-4">
+      <div class="flex items-center justify-between border-b border-white/10 pb-3">
+        <div class="flex items-center gap-2">
+          <span class="rounded-md bg-brand-periwinkle/20 px-2 py-0.5 text-xs font-bold text-brand-periwinkle">Mốc
+            #1</span>
+          <h3 class="font-display font-bold text-base text-white">Xem chi tiết &amp; Duyệt Mốc phác thảo</h3>
+        </div>
+        <button type="button" onclick="closeApprovalModal()"
+          class="rounded-full p-1.5 text-slate-400 hover:bg-white/10 hover:text-white transition">
+          <i data-lucide="x" class="size-5"></i>
+        </button>
+      </div>
+
+      <div
+        class="relative overflow-hidden rounded-2xl border border-white/15 bg-black/60 p-2 flex items-center justify-center max-h-[420px]">
+        <img class="v-canvas-img max-h-[400px] object-contain rounded-xl"
+          src="https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?auto=format&fit=crop&w=1200&q=80"
+          alt="Full artwork">
+        <div
+          class="absolute top-3 left-3 rounded-lg border border-emerald-400/30 bg-black/80 px-3 py-1 text-xs font-bold text-emerald-300 backdrop-blur-md">
+          <i data-lucide="shield-check" class="size-4 inline mr-1"></i> Watermarked HD Preview
+        </div>
+      </div>
+
+      <div class="space-y-2 text-xs">
+        <label class="font-bold text-slate-300 block">Ghi chú phản hồi cho Creator (nếu yêu cầu sửa):</label>
+        <textarea placeholder="Nhập chi tiết cần chỉnh sửa..."
+          class="w-full rounded-xl border border-white/15 bg-brand-navy p-3 text-xs text-white placeholder-slate-500 focus:border-brand-periwinkle focus:outline-none h-20 resize-none"></textarea>
+      </div>
+
+      <div class="flex items-center justify-between pt-2">
+        <button type="button" onclick="alert('Demo: Đã gửi yêu cầu chỉnh sửa cho Creator!')"
+          class="rounded-2xl border border-amber-400/40 bg-amber-500/10 px-5 py-2.5 font-semibold text-amber-300 hover:bg-amber-500/20 transition">
+          <i data-lucide="rotate-ccw" class="size-4 inline mr-1"></i> Yêu cầu sửa (0/3)
+        </button>
+
+        <button type="button" onclick="alert('Demo: Đã duyệt Mốc #1 thành công!'); closeApprovalModal();"
+          class="rounded-2xl bg-brand-periwinkle px-6 py-2.5 font-bold text-brand-navy shadow-lg shadow-brand-periwinkle/30 hover:brightness-110 transition">
+          <i data-lucide="check-circle-2" class="size-4 inline mr-1"></i> ✅ Đồng ý duyệt mốc này
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 2: NGHIỆM THU & ĐÁNH GIÁ REVIEW INTERACTIVE MOCKUP -->
+  <div id="modal-review" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop">
+    <div class="glass-container w-full max-w-xl rounded-3xl p-6 shadow-2xl border border-emerald-500/30 space-y-5">
+
+      <!-- Bước 1: Thông báo hoàn thành & Nghiệm thu -->
+      <div id="review-step-1" class="space-y-4">
+        <div class="text-center space-y-2">
+          <div
+            class="mx-auto flex size-14 items-center justify-center rounded-3xl bg-emerald-500/20 text-emerald-400 border border-emerald-400/30">
+            <i data-lucide="award" class="size-7"></i>
+          </div>
+          <h3 class="font-display font-bold text-lg text-white">Nghiệm thu Đơn hàng &amp; Tải Master Package</h3>
+          <p class="text-xs text-slate-300">
+            Bạn chuẩn bị giải ngân <strong class="text-emerald-300">180.000đ</strong> cho Creator <strong
+              class="text-brand-periwinkle">Linh Nguyen</strong>.
+          </p>
+        </div>
+
+        <div class="rounded-2xl border border-white/10 bg-white/5 p-4 space-y-3 text-xs">
+          <div class="flex items-center justify-between border-b border-white/10 pb-2">
+            <span class="text-slate-400">Gói bàn giao Master:</span>
+            <span class="font-bold text-white">Character_Illustration_Master.zip (45.2 MB)</span>
+          </div>
+          <div class="flex items-center justify-between text-emerald-300 font-semibold">
+            <span>Trạng thái Master File:</span>
+            <span>✓ Đã được xác thực an toàn</span>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-end gap-3 pt-2">
+          <button type="button" onclick="closeReviewModal()"
+            class="rounded-2xl border border-white/15 px-4 py-2.5 text-xs text-slate-300 hover:bg-white/10 transition">
+            Đóng
+          </button>
+          <button type="button" onclick="goToRatingStep()"
+            class="rounded-2xl bg-emerald-400 px-6 py-2.5 text-xs font-bold text-brand-navy shadow-lg shadow-emerald-400/20 hover:bg-emerald-300 transition">
+            Xác nhận Nghiệm thu &amp; Tiếp tục Đánh giá ⭐
+          </button>
+        </div>
+      </div>
+
+      <!-- Bước 2: Tự động chuyển đến Modal Đánh giá Review 5 sao -->
+      <div id="review-step-2" class="hidden space-y-4">
+        <div class="text-center space-y-1">
+          <h3 class="font-display font-bold text-lg text-white">Đánh giá trải nghiệm dịch vụ</h3>
+          <p class="text-xs text-slate-300">Hãy dành 1 phút gửi nhận xét cho Creator <strong
+              class="text-brand-periwinkle">Linh Nguyen</strong></p>
+        </div>
+
+        <!-- Star Rating Picker -->
+        <div class="flex justify-center items-center gap-2 py-2">
+          <button type="button" onclick="setStar(1)" class="star-btn text-amber-400 hover:scale-110 transition"><i
+              data-lucide="star" class="size-7 fill-amber-400"></i></button>
+          <button type="button" onclick="setStar(2)" class="star-btn text-amber-400 hover:scale-110 transition"><i
+              data-lucide="star" class="size-7 fill-amber-400"></i></button>
+          <button type="button" onclick="setStar(3)" class="star-btn text-amber-400 hover:scale-110 transition"><i
+              data-lucide="star" class="size-7 fill-amber-400"></i></button>
+          <button type="button" onclick="setStar(4)" class="star-btn text-amber-400 hover:scale-110 transition"><i
+              data-lucide="star" class="size-7 fill-amber-400"></i></button>
+          <button type="button" onclick="setStar(5)" class="star-btn text-amber-400 hover:scale-110 transition"><i
+              data-lucide="star" class="size-7 fill-amber-400"></i></button>
+        </div>
+
+        <!-- Feedback Quick Tag Chips -->
+        <div class="space-y-1.5">
+          <span class="text-[11px] font-bold text-slate-400 block">Ưu điểm nổi bật:</span>
+          <div class="flex flex-wrap gap-2 text-xs">
+            <button type="button"
+              class="rounded-full border border-brand-periwinkle/40 bg-brand-periwinkle/15 px-3 py-1 text-brand-periwinkle font-semibold">⚡
+              Giao hàng rất nhanh</button>
+            <button type="button"
+              class="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-slate-300 hover:bg-white/10">🎨 Net
+              vẽ sắc nét</button>
+            <button type="button"
+              class="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-slate-300 hover:bg-white/10">💬 Thân
+              thiện &amp; Lắng nghe</button>
+          </div>
+        </div>
+
+        <div class="space-y-1">
+          <label class="text-[11px] font-bold text-slate-400 block">Nhận xét chi tiết:</label>
+          <textarea placeholder="Bản vẽ tuyệt vời, giao hàng đúng hạn và trao đổi rất nhiệt tình..."
+            class="w-full rounded-2xl border border-white/15 bg-brand-navy p-3 text-xs text-white placeholder-slate-500 focus:border-brand-periwinkle focus:outline-none h-20 resize-none"></textarea>
+        </div>
+
+        <button type="button" onclick="submitFinalReview()"
+          class="w-full rounded-2xl bg-amber-400 py-3 text-xs font-bold text-brand-navy shadow-lg shadow-amber-400/25 hover:bg-amber-300 transition">
+          🚀 Gửi Đánh giá &amp; Hoàn tất
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    function safeLucideIcons() {
+      if (typeof lucide !== 'undefined' && lucide && typeof lucide.createIcons === 'function') {
+        try { lucide.createIcons(); } catch (e) { }
+      }
+    }
+    safeLucideIcons();
+
+    function toggleSidebarCollapse() {
+      const sidebar = document.getElementById('main-app-sidebar');
+      const texts = document.querySelectorAll('.sidebar-text');
+      const icon = document.getElementById('sidebar-toggle-icon');
+
+      if (sidebar.classList.contains('w-64')) {
+        sidebar.classList.remove('w-64');
+        sidebar.classList.add('w-16');
+        texts.forEach(t => t.classList.add('hidden'));
+        if (icon) icon.setAttribute('data-lucide', 'panel-left-open');
+      } else {
+        sidebar.classList.remove('w-16');
+        sidebar.classList.add('w-64');
+        texts.forEach(t => t.classList.remove('hidden'));
+        if (icon) icon.setAttribute('data-lucide', 'panel-left-close');
+      }
+      safeLucideIcons();
+    }
+
+    function insertPrompt(text) {
+      const inputs = document.querySelectorAll('.v-chat-input, input[type="text"]');
+      inputs.forEach(input => input.value = text);
+    }
+
+    function sendChatMessage(e) {
+      e.preventDefault();
+      const form = e.target;
+      const input = form.querySelector('input[type="text"]');
+      const text = input ? input.value.trim() : '';
+      if (!text) return;
+
+      const chatContainers = document.querySelectorAll('.v-chat-messages, #tab-content-chat div');
+      chatContainers.forEach(container => {
+        const msgDiv = document.createElement('div');
+        msgDiv.className = 'flex flex-col items-end transition duration-200 mt-2';
+        msgDiv.innerHTML = `
+          <div class="mb-1 flex items-center gap-2 text-[10px] text-slate-400">
+            <span class="font-semibold text-slate-300">Bạn</span>
+            <span>${new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}</span>
+          </div>
+          <div class="max-w-[85%] rounded-2xl rounded-tr-none bg-brand-periwinkle text-brand-navy p-2.5 font-medium shadow-sm text-xs">
+            ${text}
+          </div>
+        `;
+        container.appendChild(msgDiv);
+        container.scrollTop = container.scrollHeight;
+      });
+
+      if (input) input.value = '';
+    }
+
+    // Switch Layout Variant Function
+    function switchLayoutVariant(layoutId) {
+      const layouts = ['layout-3col', 'layout-2col', 'layout-stepper', 'layout-figma', 'layout-multiorder', 'layout-hover', 'layout-notebook'];
+      layouts.forEach(id => {
+        const el = document.getElementById('view-' + id);
+        const btn = document.getElementById('btn-' + id);
+        if (id === layoutId) {
+          if (el) el.classList.remove('hidden');
+          if (btn) btn.className = 'rounded-full bg-emerald-400 text-brand-navy font-bold px-3 py-1 transition shadow';
+        } else {
+          if (el) el.classList.add('hidden');
+          if (btn) btn.className = 'rounded-full bg-white/10 text-slate-300 font-semibold px-3 py-1 hover:bg-white/20 transition';
+        }
+      });
+
+      const titleMap = {
+        'layout-3col': 'Kiểu 1 — Bố cục 3 Cột Song Song',
+        'layout-2col': 'Kiểu 2 — Bố cục 2 Cột Tối Ưu Canvas (Sidebar 3 Tab)',
+        'layout-stepper': 'Kiểu 3 — Bố cục Tiến trình Ngang (Top Stepper)',
+        'layout-figma': 'Kiểu 4 — Bố cục Figma/Photoshop Creative Studio',
+        'layout-multiorder': 'Kiểu 5 — Multi-Tab Studio Quản lý Nhiều Đơn hàng cùng lúc',
+        'layout-hover': 'Kiểu 6 — Minimal Canvas + Chat (Hover Mốc Hợp đồng)',
+        'layout-notebook': 'Kiểu 7 — Sổ Tương Tác Monotone (Dark Binder Studio)'
+      };
+
+      const titleInd = document.getElementById('layout-title-indicator');
+      if (titleInd) {
+        titleInd.innerHTML = `<i data-lucide="layout" class="size-3.5 text-brand-periwinkle"></i> Đang xem: ${titleMap[layoutId]}`;
+      }
+
+      const mainEl = document.querySelector('main');
+      if (mainEl) mainEl.scrollTop = 0;
+
+      safeLucideIcons();
+    }
+
+    // Switch Role View (Client vs Creator in Kiểu 5)
+    let currentRole = 'client';
+    function switchRoleView(role) {
+      currentRole = role;
+      const btnClient = document.getElementById('btn-role-client');
+      const btnCreator = document.getElementById('btn-role-creator');
+      const roleTag = document.getElementById('mo-role-tag');
+      const tabHeaderTitle = document.getElementById('mo-tab-header-title');
+      const escrowSummary = document.getElementById('mo-escrow-summary');
+      const btnClientApprove = document.getElementById('mo-btn-client-approve');
+      const btnCreatorUpload = document.getElementById('mo-btn-creator-upload');
+      const creatorControls = document.getElementById('mo-creator-controls');
+      const overlayText = document.getElementById('mo-canvas-overlay-text');
+
+      if (role === 'creator') {
+        btnCreator.className = 'rounded-xl bg-emerald-400 font-bold text-brand-navy px-3.5 py-1.5 shadow transition';
+        btnClient.className = 'rounded-xl text-slate-400 font-semibold px-3.5 py-1.5 hover:text-white transition';
+        roleTag.className = 'rounded-full border border-emerald-400/40 bg-emerald-500/15 px-3 py-1 text-[11px] font-bold text-emerald-300';
+        roleTag.textContent = '🎨 Đang xem: Giao diện HỌA SĨ (Creator)';
+        tabHeaderTitle.textContent = 'Danh sách 3 đơn hàng bạn đang nhận vẽ cho Khách:';
+        escrowSummary.textContent = '💰 Thu nhập chờ giải ngân: 540.000đ';
+
+        document.getElementById('otab-text-1').textContent = '#COMM-8829: Client Demo Client';
+        document.getElementById('otab-text-2').textContent = '#COMM-9410: Client Tran Van B';
+        document.getElementById('otab-text-3').textContent = '#COMM-6621: Client Le Thi C';
+
+        btnClientApprove.classList.add('hidden');
+        btnCreatorUpload.classList.remove('hidden');
+        creatorControls.classList.remove('hidden');
+        overlayText.textContent = '📤 Bấm để Nộp Phác thảo Mốc #1 mới';
+      } else {
+        btnClient.className = 'rounded-xl bg-brand-periwinkle font-bold text-brand-navy px-3.5 py-1.5 shadow transition';
+        btnCreator.className = 'rounded-xl text-slate-400 font-semibold px-3.5 py-1.5 hover:text-white transition';
+        roleTag.className = 'rounded-full border border-brand-periwinkle/40 bg-brand-periwinkle/15 px-3 py-1 text-[11px] font-bold text-brand-periwinkle';
+        roleTag.textContent = '👤 Đang xem: Giao diện KHÁCH HÀNG (Client)';
+        tabHeaderTitle.textContent = 'Danh sách 3 đơn hàng bạn đã đặt:';
+        escrowSummary.textContent = 'Ví Escrow bảo vệ: 540.000đ';
+
+        document.getElementById('otab-text-1').textContent = '#COMM-8829: Character (Linh Nguyen)';
+        document.getElementById('otab-text-2').textContent = '#COMM-9102: Portrait Fanart (Alex Studio)';
+        document.getElementById('otab-text-3').textContent = '#COMM-7731: Chibi Mascot (Hana Art)';
+
+        btnClientApprove.classList.remove('hidden');
+        btnCreatorUpload.classList.add('hidden');
+        creatorControls.classList.add('hidden');
+        overlayText.textContent = 'Phóng to & Duyệt Mốc';
+      }
+
+      switchOrderTab('order1');
+      safeLucideIcons();
+    }
+
+    // Switch Multi-Order Tabs
+    function switchOrderTab(orderId) {
+      const orders = {
+        order1: {
+          tag: 'Đơn #COMM-8829',
+          title: 'Character illustration — Linh Nguyen',
+          sub: 'Đang thực hiện Mốc #1 (Phác thảo nhân vật)',
+          img: 'https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?auto=format&fit=crop&w=1200&q=80',
+          progress: '1/3 hoàn thành',
+          bar: 'w-1/3',
+          creator: 'Linh Nguyen',
+          msg: 'Chào bạn! Mốc 1 bản phác thảo đã có trên màn hình bên trái nhé.'
+        },
+        order2: {
+          tag: 'Đơn #COMM-9102',
+          title: 'Portrait Fanart — Alex Studio',
+          sub: 'Chờ nạp tiền ký quỹ Escrow (Mốc #1)',
+          img: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=1200&q=80',
+          progress: '0/3 hoàn thành',
+          bar: 'w-0',
+          creator: 'Alex Studio',
+          msg: 'Chào bạn! Vui lòng bấm Nạp Escrow để mình bắt đầu phác thảo nhé.'
+        },
+        order3: {
+          tag: 'Đơn #COMM-7731',
+          title: 'Chibi Mascot Design — Hana Art',
+          sub: 'Đang thực hiện Mốc #2 (Lineart & Màu cơ bản)',
+          img: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=1200&q=80',
+          progress: '2/3 hoàn thành',
+          bar: 'w-2/3',
+          creator: 'Hana Art',
+          msg: 'Mình vừa đăng tải phối màu cơ bản cho mascot chibi, bạn xem giúp nhé!'
+        }
+      };
+
+      const data = orders[orderId];
+      if (!data) return;
+
+      document.getElementById('mo-order-tag').textContent = data.tag;
+      document.getElementById('mo-order-title').textContent = data.title;
+      document.getElementById('mo-order-subtitle').textContent = data.sub;
+      document.getElementById('mo-canvas-img').src = data.img;
+      document.getElementById('mo-progress-text').textContent = data.progress;
+      document.getElementById('mo-progress-bar').className = `h-full ${data.bar} bg-brand-periwinkle`;
+      document.getElementById('mo-creator-name').textContent = data.creator;
+      document.getElementById('mo-chat-msg').textContent = data.msg;
+
+      ['order1', 'order2', 'order3'].forEach((id, idx) => {
+        const tabBtn = document.getElementById('order-tab-' + (idx + 1));
+        if (id === orderId) {
+          tabBtn.className = 'flex items-center gap-2.5 rounded-2xl border border-brand-periwinkle/50 bg-brand-periwinkle/20 px-4 py-2 text-white font-bold shadow-md shrink-0';
+        } else {
+          tabBtn.className = 'flex items-center gap-2.5 rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-slate-400 font-semibold hover:bg-white/10 hover:text-slate-200 transition shrink-0';
+        }
+      });
+
+      safeLucideIcons();
+    }
+
+    // Switch 2-Column Tabs
+    function switchTab2Col(tabName) {
+      const tabs = ['chat', 'milestones', 'details'];
+      tabs.forEach(t => {
+        const btn = document.getElementById('tab-btn-' + t);
+        const content = document.getElementById('tab-content-' + t);
+        if (t === tabName) {
+          if (btn) btn.className = 'flex-1 rounded-xl bg-brand-periwinkle text-brand-navy font-bold py-1.5 transition text-center';
+          if (content) content.classList.remove('hidden');
+        } else {
+          if (btn) btn.className = 'flex-1 rounded-xl text-slate-400 hover:text-white font-semibold py-1.5 transition text-center';
+          if (content) content.classList.add('hidden');
+        }
+      });
+      safeLucideIcons();
+    }
+
+    // Toggle Figma Drawers
+    function toggleFigmaDrawer(side) {
+      const drawer = document.getElementById('figma-drawer-' + side);
+      if (drawer) {
+        drawer.classList.toggle('hidden');
+      }
+    }
+
+    // Modal Control Functions
+    function openApprovalModal() {
+      const modal = document.getElementById('modal-approval');
+      if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeApprovalModal() {
+      const modal = document.getElementById('modal-approval');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function openReviewModal() {
+      const modal = document.getElementById('modal-review');
+      document.getElementById('review-step-1').classList.remove('hidden');
+      document.getElementById('review-step-2').classList.add('hidden');
+      if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeReviewModal() {
+      const modal = document.getElementById('modal-review');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function goToRatingStep() {
+      document.getElementById('review-step-1').classList.add('hidden');
+      document.getElementById('review-step-2').classList.remove('hidden');
+      safeLucideIcons();
+    }
+
+    function submitFinalReview() {
+      alert('Demo: Cảm ơn bạn đã gửi đánh giá 5 sao cho Creator Linh Nguyen!');
+      closeReviewModal();
+    }
+
+    function setStar(starCount) {
+      const btns = document.querySelectorAll('.star-btn');
+      btns.forEach((btn, idx) => {
+        if (idx < starCount) {
+          btn.className = 'star-btn text-amber-400 hover:scale-110 transition';
+        } else {
+          btn.className = 'star-btn text-slate-600 hover:scale-110 transition';
+        }
+      });
+    }
+
+    // FUNCTION CHUYỂN ĐỔI TRẠNG THÁI DEMO INTERACTIVE
+    function switchDemoState(state) {
+      const btnProgress = document.getElementById('btn-state-progress');
+      const btnEmpty = document.getElementById('btn-state-empty');
+      const btnCompleted = document.getElementById('btn-state-completed');
+
+      if (state === 'completed') {
+        btnCompleted.className = 'rounded-full bg-emerald-400 text-brand-navy font-bold px-3 py-1 transition shadow';
+        btnProgress.className = 'rounded-full bg-white/10 text-slate-300 font-semibold px-3 py-1 hover:bg-white/20 transition';
+        btnEmpty.className = 'rounded-full bg-white/10 text-slate-300 font-semibold px-3 py-1 hover:bg-white/20 transition';
+      } else if (state === 'empty_state') {
+        btnEmpty.className = 'rounded-full bg-brand-periwinkle text-brand-navy font-bold px-3 py-1 transition shadow';
+        btnProgress.className = 'rounded-full bg-white/10 text-slate-300 font-semibold px-3 py-1 hover:bg-white/20 transition';
+        btnCompleted.className = 'rounded-full bg-white/10 text-slate-300 font-semibold px-3 py-1 hover:bg-white/20 transition';
+      } else {
+        btnProgress.className = 'rounded-full bg-brand-periwinkle text-brand-navy font-bold px-3 py-1 transition shadow';
+        btnCompleted.className = 'rounded-full bg-white/10 text-slate-300 font-semibold px-3 py-1 hover:bg-white/20 transition';
+        btnEmpty.className = 'rounded-full bg-white/10 text-slate-300 font-semibold px-3 py-1 hover:bg-white/20 transition';
+      }
+
+      document.querySelectorAll('.v-canvas-img').forEach(img => {
+        if (state === 'completed') {
+          img.src = 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=1200&q=80';
+        } else {
+          img.src = 'https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?auto=format&fit=crop&w=1200&q=80';
+        }
+      });
+
+      safeLucideIcons();
+    }
+  </script>
+</body>
+
+</html>
+
+<!-- MODAL 1: DUYỆT MỐC PHÁC THẢO INTERACTIVE MOCKUP -->
+<div id="modal-approval" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop">
+  <div class="glass-container w-full max-w-3xl rounded-3xl p-6 shadow-2xl border border-white/20 space-y-4">
+    <div class="flex items-center justify-between border-b border-white/10 pb-3">
+      <div class="flex items-center gap-2">
+        <span class="rounded-md bg-brand-periwinkle/20 px-2 py-0.5 text-xs font-bold text-brand-periwinkle">Mốc
+          #1</span>
+        <h3 class="font-display font-bold text-base text-white">Xem chi tiết &amp; Duyệt Mốc phác thảo</h3>
+      </div>
+      <button type="button" onclick="closeApprovalModal()"
+        class="rounded-full p-1.5 text-slate-400 hover:bg-white/10 hover:text-white transition">
+        <i data-lucide="x" class="size-5"></i>
+      </button>
+    </div>
+
+    <div
+      class="relative overflow-hidden rounded-2xl border border-white/15 bg-black/60 p-2 flex items-center justify-center max-h-[420px]">
+      <img id="modal-approval-img"
+        src="https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?auto=format&fit=crop&w=1200&q=80"
+        alt="Full artwork" class="max-h-[400px] object-contain rounded-xl">
+      <div
+        class="absolute top-3 left-3 rounded-lg border border-emerald-400/30 bg-black/80 px-3 py-1 text-xs font-bold text-emerald-300 backdrop-blur-md">
+        <i data-lucide="shield-check" class="size-4 inline mr-1"></i> Watermarked HD Preview
+      </div>
+    </div>
+
+    <div class="space-y-2 text-xs">
+      <label class="font-bold text-slate-300 block">Ghi chú phản hồi cho Creator (nếu yêu cầu sửa):</label>
+      <textarea placeholder="Nhập chi tiết cần chỉnh sửa..."
+        class="w-full rounded-xl border border-white/15 bg-brand-navy p-3 text-xs text-white placeholder-slate-500 focus:border-brand-periwinkle focus:outline-none h-20 resize-none"></textarea>
+    </div>
+
+    <div class="flex items-center justify-between pt-2">
+      <button type="button" onclick="alert('Demo: Đã gửi yêu cầu chỉnh sửa cho Creator!')"
+        class="rounded-2xl border border-amber-400/40 bg-amber-500/10 px-5 py-2.5 font-semibold text-amber-300 hover:bg-amber-500/20 transition">
+        <i data-lucide="rotate-ccw" class="size-4 inline mr-1"></i> Yêu cầu sửa (0/3)
+      </button>
+
+      <button type="button" onclick="alert('Demo: Đã duyệt Mốc #1 thành công!'); closeApprovalModal();"
+        class="rounded-2xl bg-brand-periwinkle px-6 py-2.5 font-bold text-brand-navy shadow-lg shadow-brand-periwinkle/30 hover:brightness-110 transition">
+        <i data-lucide="check-circle-2" class="size-4 inline mr-1"></i> ✅ Đồng ý duyệt mốc này
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL 2: NGHIỆM THU & ĐÁNH GIÁ REVIEW INTERACTIVE MOCKUP -->
+<div id="modal-review" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop">
+  <div class="glass-container w-full max-w-xl rounded-3xl p-6 shadow-2xl border border-emerald-500/30 space-y-5">
+
+    <!-- Bước 1: Thông báo hoàn thành & Nghiệm thu -->
+    <div id="review-step-1" class="space-y-4">
+      <div class="text-center space-y-2">
+        <div
+          class="mx-auto flex size-14 items-center justify-center rounded-3xl bg-emerald-500/20 text-emerald-400 border border-emerald-400/30">
+          <i data-lucide="award" class="size-7"></i>
+        </div>
+        <h3 class="font-display font-bold text-lg text-white">Nghiệm thu Đơn hàng &amp; Tải Master Package</h3>
+        <p class="text-xs text-slate-300">
+          Bạn chuẩn bị giải ngân <strong class="text-emerald-300">180.000đ</strong> cho Creator <strong
+            class="text-brand-periwinkle">Linh Nguyen</strong>.
+        </p>
+      </div>
+
+      <div class="rounded-2xl border border-white/10 bg-white/5 p-4 space-y-3 text-xs">
+        <div class="flex items-center justify-between border-b border-white/10 pb-2">
+          <span class="text-slate-400">Gói bàn giao Master:</span>
+          <span class="font-bold text-white">Character_Illustration_Master.zip (45.2 MB)</span>
+        </div>
+        <div class="flex items-center justify-between text-emerald-300 font-semibold">
+          <span>Trạng thái Master File:</span>
+          <span>✓ Đã được xác thực an toàn</span>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end gap-3 pt-2">
+        <button type="button" onclick="closeReviewModal()"
+          class="rounded-2xl border border-white/15 px-4 py-2.5 text-xs text-slate-300 hover:bg-white/10 transition">
+          Đóng
+        </button>
+        <button type="button" onclick="goToRatingStep()"
+          class="rounded-2xl bg-emerald-400 px-6 py-2.5 text-xs font-bold text-brand-navy shadow-lg shadow-emerald-400/20 hover:bg-emerald-300 transition">
+          Xác nhận Nghiệm thu &amp; Tiếp tục Đánh giá ⭐
+        </button>
+      </div>
+    </div>
+
+    <!-- Bước 2: Tự động chuyển đến Modal Đánh giá Review 5 sao -->
+    <div id="review-step-2" class="hidden space-y-4">
+      <div class="text-center space-y-1">
+        <h3 class="font-display font-bold text-lg text-white">Đánh giá trải nghiệm dịch vụ</h3>
+        <p class="text-xs text-slate-300">Hãy dành 1 phút gửi nhận xét cho Creator <strong
+            class="text-brand-periwinkle">Linh Nguyen</strong></p>
+      </div>
+
+      <!-- Star Rating Picker -->
+      <div class="flex justify-center items-center gap-2 py-2">
+        <button type="button" onclick="setStar(1)" class="star-btn text-amber-400 hover:scale-110 transition"><i
+            data-lucide="star" class="size-7 fill-amber-400"></i></button>
+        <button type="button" onclick="setStar(2)" class="star-btn text-amber-400 hover:scale-110 transition"><i
+            data-lucide="star" class="size-7 fill-amber-400"></i></button>
+        <button type="button" onclick="setStar(3)" class="star-btn text-amber-400 hover:scale-110 transition"><i
+            data-lucide="star" class="size-7 fill-amber-400"></i></button>
+        <button type="button" onclick="setStar(4)" class="star-btn text-amber-400 hover:scale-110 transition"><i
+            data-lucide="star" class="size-7 fill-amber-400"></i></button>
+        <button type="button" onclick="setStar(5)" class="star-btn text-amber-400 hover:scale-110 transition"><i
+            data-lucide="star" class="size-7 fill-amber-400"></i></button>
+      </div>
+
+      <!-- Feedback Quick Tag Chips -->
+      <div class="space-y-1.5">
+        <span class="text-[11px] font-bold text-slate-400 block">Ưu điểm nổi bật:</span>
+        <div class="flex flex-wrap gap-2 text-xs">
+          <button type="button"
+            class="rounded-full border border-brand-periwinkle/40 bg-brand-periwinkle/15 px-3 py-1 text-brand-periwinkle font-semibold">⚡
+            Giao hàng rất nhanh</button>
+          <button type="button"
+            class="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-slate-300 hover:bg-white/10">🎨 Net vẽ
+            sắc nét</button>
+          <button type="button"
+            class="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-slate-300 hover:bg-white/10">💬 Thân
+            thiện &amp; Lắng nghe</button>
+        </div>
+      </div>
+
+      <!-- Feedback Text Area -->
+      <div class="space-y-1">
+        <label class="text-[11px] font-bold text-slate-400 block">Nhận xét chi tiết:</label>
+        <textarea placeholder="Bản vẽ tuyệt vời, giao hàng đúng hạn và trao đổi rất nhiệt tình..."
+          class="w-full rounded-2xl border border-white/15 bg-brand-navy p-3 text-xs text-white placeholder-slate-500 focus:border-brand-periwinkle focus:outline-none h-20 resize-none"></textarea>
+      </div>
+
+      <button type="button" onclick="submitFinalReview()"
+        class="w-full rounded-2xl bg-amber-400 py-3 text-xs font-bold text-brand-navy shadow-lg shadow-amber-400/25 hover:bg-amber-300 transition">
+        🚀 Gửi Đánh giá &amp; Hoàn tất
+      </button>
+    </div>
+
+    <!-- MODAL 3: KHIẾU NẠI & HỦY ĐƠN (PINNED MEMO CARD MOCKUP - MONOTONE STYLE) -->
+    <div id="modal-dispute" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop">
+      <div class="relative w-full max-w-lg rounded-2xl border border-[#333846] bg-[#141720] p-6 shadow-2xl space-y-5">
+
+        <!-- Paperclip Decorative Hardware Icon -->
+        <div
+          class="absolute -top-4 right-8 size-8 rounded-full border border-white/20 bg-[#2D323F] flex items-center justify-center text-slate-300 shadow">
+          <i data-lucide="paperclip" class="size-4"></i>
+        </div>
+
+        <div class="flex items-center justify-between border-b border-white/10 pb-3">
+          <div class="flex items-center gap-2">
+            <i data-lucide="shield-alert" class="size-5 text-slate-300"></i>
+            <h3 class="font-display font-bold text-base text-white">Phiếu Yêu Cầu Hủy Đơn / Khiếu Nại Trọng Tài</h3>
+          </div>
+          <button type="button" onclick="closeDisputeModal()"
+            class="rounded-full p-1.5 text-slate-400 hover:bg-white/10 hover:text-white transition">
+            <i data-lucide="x" class="size-5"></i>
+          </button>
+        </div>
+
+        <div class="rounded-xl border border-white/10 bg-[#1A1D24] p-3.5 space-y-2 text-xs">
+          <span class="font-bold text-slate-300 block">Lý do khiếu nại / hủy đơn:</span>
+          <select
+            class="w-full rounded-xl border border-white/15 bg-[#111215] p-2.5 text-xs text-white focus:border-slate-400 focus:outline-none">
+            <option>Creator quá hạn giao sản phẩm phác thảo</option>
+            <option>Sản phẩm phác thảo không đúng yêu cầu mô tả</option>
+            <option>Yêu cầu hủy đơn thỏa thuận hai bên</option>
+          </select>
+        </div>
+
+        <div class="space-y-1.5 text-xs">
+          <label class="font-bold text-slate-300 block">Trình bày chi tiết lý do gửi Ban Trọng Tài
+            Dillustration:</label>
+          <textarea placeholder="Mô tả chi tiết nguyên nhân cần khiếu nại hoặc hủy đơn hàng..."
+            class="w-full rounded-xl border border-white/15 bg-[#111215] p-3 text-xs text-white placeholder-slate-500 focus:border-slate-400 focus:outline-none h-24 resize-none"></textarea>
+        </div>
+
+        <div class="rounded-xl border border-white/10 bg-white/[0.02] p-3 text-[11px] text-slate-400 leading-relaxed">
+          ⚠️ <u class="text-slate-300">Lưu ý quan trọng:</u> Đơn hàng khiếu nại sẽ tạm thời đóng băng ví Escrow. Ban
+          Trọng Tài Dillustration sẽ kiểm tra lịch sử chat SignalR và ra quyết định xử lý trong 24 giờ.
+        </div>
+
+        <div class="flex items-center justify-end gap-3 pt-2 border-t border-white/10">
+          <button type="button" onclick="closeDisputeModal()"
+            class="rounded-xl border border-[#3A404F] bg-transparent px-4 py-2.5 text-xs text-[#8E95A5] hover:bg-white/5 hover:text-white transition">
+            Quay lại
+          </button>
+          <button type="button"
+            onclick="alert('Demo: Đã gửi phiếu khiếu nại tới Ban Trọng Tài Escrow!'); closeDisputeModal();"
+            class="rounded-xl border border-slate-400/40 bg-[#2A2E39] px-5 py-2.5 text-xs font-bold text-white shadow hover:bg-slate-700 transition">
+            Xác nhận Gửi Khiếu Nại
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <script>
+      safeLucideIcons();
+
+      function openDisputeModal() {
+        const modal = document.getElementById('modal-dispute');
+        if (modal) modal.classList.remove('hidden');
+      }
+
+      function closeDisputeModal() {
+        const modal = document.getElementById('modal-dispute');
+        if (modal) modal.classList.add('hidden');
+      }
+
+      function insertPrompt(text) {
+        const input = document.getElementById('chat-input');
+        input.value = text;
+        input.focus();
+      }
+
+      function sendChatMessage(e) {
+        e.preventDefault();
+        const input = document.getElementById('chat-input');
+        const text = input.value.trim();
+        if (!text) return;
+
+        const chatContainer = document.getElementById('chat-messages');
+        const msgDiv = document.createElement('div');
+        msgDiv.className = 'flex flex-col items-end transition duration-200';
+        msgDiv.innerHTML = `
+        <div class="mb-1 flex items-center gap-2 text-[10px] text-slate-400">
+          <span class="font-semibold text-slate-300">Bạn</span>
+          <span>${new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}</span>
+        </div>
+        <div class="max-w-[85%] rounded-2xl rounded-tr-none bg-brand-periwinkle text-brand-navy p-3 font-medium leading-relaxed shadow-sm">
+          ${text}
+        </div>
+      `;
+        chatContainer.appendChild(msgDiv);
+        input.value = '';
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+      }
+
+      // Modal Control Functions
+      function openApprovalModal() {
+        const modal = document.getElementById('modal-approval');
+        if (modal) modal.classList.remove('hidden');
+      }
+
+      function closeApprovalModal() {
+        const modal = document.getElementById('modal-approval');
+        if (modal) modal.classList.add('hidden');
+      }
+
+      function openReviewModal() {
+        const modal = document.getElementById('modal-review');
+        document.getElementById('review-step-1').classList.remove('hidden');
+        document.getElementById('review-step-2').classList.add('hidden');
+        if (modal) modal.classList.remove('hidden');
+      }
+
+      function closeReviewModal() {
+        const modal = document.getElementById('modal-review');
+        if (modal) modal.classList.add('hidden');
+      }
+
+      function goToRatingStep() {
+        document.getElementById('review-step-1').classList.add('hidden');
+        document.getElementById('review-step-2').classList.remove('hidden');
+        safeLucideIcons();
+      }
+
+      function submitFinalReview() {
+        alert('Demo: Cảm ơn bạn đã gửi đánh giá 5 sao cho Creator Linh Nguyen!');
+        closeReviewModal();
+      }
+
+      function setStar(starCount) {
+        const btns = document.querySelectorAll('.star-btn');
+        btns.forEach((btn, idx) => {
+          if (idx < starCount) {
+            btn.className = 'star-btn text-amber-400 hover:scale-110 transition';
+          } else {
+            btn.className = 'star-btn text-slate-600 hover:scale-110 transition';
+          }
+        });
+      }
+
+      // FUNCTION CHUYỂN ĐỔI TRẠNG THÁI DEMO INTERACTIVE
+      function switchDemoState(state) {
+        const btnProgress = document.getElementById('btn-state-progress');
+        const btnEmpty = document.getElementById('btn-state-empty');
+        const btnCompleted = document.getElementById('btn-state-completed');
+        const stageBadge = document.getElementById('stage-badge');
+        const escrowBanner = document.getElementById('escrow-banner');
+        const canvasTag = document.getElementById('canvas-milestone-tag');
+        const canvasTitle = document.getElementById('canvas-milestone-title');
+        const canvasImg = document.getElementById('canvas-img');
+        const canvasEmptyBox = document.getElementById('canvas-empty-box');
+        const canvasWatermark = document.getElementById('canvas-watermark-badge');
+        const canvasOverlay = document.getElementById('canvas-hover-overlay');
+        const creatorNote = document.getElementById('creator-note');
+        const masterCard = document.getElementById('master-package-card');
+        const masterTag = document.getElementById('master-status-tag');
+        const masterBody = document.getElementById('master-body-content');
+        const btnCancel = document.getElementById('btn-cancel-dispute');
+        const chatLockedBanner = document.getElementById('chat-locked-banner');
+        const chatInput = document.getElementById('chat-input');
+        const btnSend = document.getElementById('btn-chat-send');
+        const btnAttach = document.getElementById('btn-file-attach');
+
+        // Milestone Card Badges & Styles
+        const cardM1 = document.getElementById('card-m1');
+        const cardM2 = document.getElementById('card-m2');
+        const cardM3 = document.getElementById('card-m3');
+        const badgeM1 = document.getElementById('badge-m1');
+        const badgeM2 = document.getElementById('badge-m2');
+        const badgeM3 = document.getElementById('badge-m3');
+
+        if (state === 'completed') {
+          if (btnCompleted) btnCompleted.className = 'rounded-full bg-emerald-400 text-brand-navy font-bold px-3 py-1 transition shadow';
+          if (btnProgress) btnProgress.className = 'rounded-full bg-white/10 text-slate-300 font-semibold px-3 py-1 hover:bg-white/20 transition';
+          if (btnEmpty) btnEmpty.className = 'rounded-full bg-white/10 text-slate-300 font-semibold px-3 py-1 hover:bg-white/20 transition';
+
+          if (stageBadge) {
+            stageBadge.className = 'inline-flex items-center gap-1.5 rounded-full border border-emerald-400/30 bg-emerald-500/10 px-3 py-1 text-[11px] font-semibold text-emerald-300';
+            stageBadge.innerHTML = '<i data-lucide="check-circle-2" class="size-3.5"></i> Hoàn tất 3/3 mốc';
+          }
+          if (escrowBanner) escrowBanner.style.display = 'none';
+          if (btnCancel) btnCancel.style.display = 'none';
+
+          if (badgeM1) {
+            badgeM1.className = 'inline-flex items-center gap-1 text-[10px] font-bold text-emerald-400';
+            badgeM1.innerHTML = '<i data-lucide="check-circle-2" class="size-3"></i> Đã duyệt';
+          }
+          if (cardM1) cardM1.className = 'rounded-2xl border border-emerald-500/30 bg-emerald-500/5 p-3.5 text-xs space-y-2 cursor-pointer';
+
+          if (badgeM2) {
+            badgeM2.className = 'inline-flex items-center gap-1 text-[10px] font-bold text-emerald-400';
+            badgeM2.innerHTML = '<i data-lucide="check-circle-2" class="size-3"></i> Đã duyệt';
+          }
+          if (cardM2) cardM2.className = 'rounded-2xl border border-emerald-500/30 bg-emerald-500/5 p-3.5 text-xs space-y-2 cursor-pointer';
+
+          if (badgeM3) {
+            badgeM3.className = 'inline-flex items-center gap-1 text-[10px] font-bold text-emerald-400';
+            badgeM3.innerHTML = '<i data-lucide="check-circle-2" class="size-3"></i> Đã duyệt';
+          }
+          if (cardM3) cardM3.className = 'rounded-2xl border border-emerald-500/30 bg-emerald-500/5 p-3.5 text-xs space-y-2 cursor-pointer';
+
+          if (canvasTag) canvasTag.textContent = 'Hoàn tất các mốc';
+          if (canvasTitle) canvasTitle.textContent = 'Hoàn thiện và bàn giao (Mốc #3)';
+          if (canvasImg) {
+            canvasImg.style.display = 'block';
+            canvasImg.src = 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=1200&q=80';
+          }
+          if (canvasEmptyBox) canvasEmptyBox.classList.add('hidden');
+          if (canvasWatermark) canvasWatermark.style.display = 'flex';
+          if (canvasOverlay) canvasOverlay.style.display = 'flex';
+          if (creatorNote) creatorNote.textContent = '"Đã hoàn thiện 100% ánh sáng, hiệu ứng và đóng gói Master Package HD. Cảm ơn bạn!"';
+
+          if (masterTag) {
+            masterTag.className = 'rounded-full border border-emerald-400/30 bg-emerald-500/20 px-3 py-1 text-[10px] font-bold text-emerald-300';
+            masterTag.textContent = 'Sẵn sàng bàn giao';
+          }
+          if (masterBody) {
+            masterBody.className = 'flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-xs text-emerald-200';
+            masterBody.innerHTML = `
+            <div class="flex items-center gap-2.5">
+              <i data-lucide="check-circle-2" class="size-5 text-emerald-400 shrink-0"></i>
+              <span>File gốc HD đã được nộp. Bấm để nghiệm thu &amp; nhận link tải bảo mật.</span>
+            </div>
+            <button type="button" onclick="openReviewModal()" class="rounded-xl bg-emerald-400 px-4 py-2 font-bold text-brand-navy shadow hover:bg-emerald-300 transition">
+              Nghiệm thu &amp; Tải File HD
+            </button>
+          `;
+          }
+
+          if (chatLockedBanner) chatLockedBanner.style.display = 'flex';
+          if (chatInput) {
+            chatInput.disabled = true;
+            chatInput.placeholder = 'Phòng chat đã được khóa.';
+          }
+          if (btnSend) {
+            btnSend.disabled = true;
+            btnSend.className = 'flex size-10 shrink-0 items-center justify-center rounded-xl bg-slate-700 text-slate-500 cursor-not-allowed';
+          }
+          if (btnAttach) {
+            btnAttach.disabled = true;
+            btnAttach.className = 'flex size-10 shrink-0 items-center justify-center rounded-xl border border-white/5 bg-white/[0.02] text-slate-600 cursor-not-allowed';
+          }
+        } else if (state === 'empty_state') {
+          if (btnEmpty) btnEmpty.className = 'rounded-full bg-brand-periwinkle text-brand-navy font-bold px-3 py-1 transition shadow';
+          if (btnProgress) btnProgress.className = 'rounded-full bg-white/10 text-slate-300 font-semibold px-3 py-1 hover:bg-white/20 transition';
+          if (btnCompleted) btnCompleted.className = 'rounded-full bg-white/10 text-slate-300 font-semibold px-3 py-1 hover:bg-white/20 transition';
+
+          if (stageBadge) {
+            stageBadge.className = 'inline-flex items-center gap-1.5 rounded-full border border-brand-periwinkle/40 bg-brand-periwinkle/15 px-3 py-1 text-[11px] font-bold text-brand-periwinkle';
+            stageBadge.innerHTML = '<i data-lucide="calendar-clock" class="size-3.5"></i> Mốc #1 (Đang phác thảo)';
+          }
+          if (escrowBanner) escrowBanner.style.display = 'flex';
+          if (btnCancel) btnCancel.style.display = 'inline-flex';
+
+          if (cardM1) cardM1.className = 'rounded-2xl border border-brand-periwinkle/60 bg-brand-periwinkle/10 p-3.5 text-xs space-y-2 ring-1 ring-brand-periwinkle/30 shadow-lg glow-hover transition cursor-pointer';
+          if (badgeM1) {
+            badgeM1.className = 'inline-flex items-center gap-1 text-[10px] font-bold text-brand-periwinkle animate-pulse';
+            badgeM1.innerHTML = '● Đang thực hiện';
+          }
+
+          if (cardM2) cardM2.className = 'rounded-2xl border border-white/10 bg-white/[0.02] p-3.5 text-xs space-y-2 opacity-75 hover:opacity-100 transition cursor-pointer';
+          if (badgeM2) {
+            badgeM2.className = 'text-[10px] text-slate-400';
+            badgeM2.textContent = 'Chưa bắt đầu';
+          }
+
+          if (cardM3) cardM3.className = 'rounded-2xl border border-white/10 bg-white/[0.02] p-3.5 text-xs space-y-2 opacity-75 hover:opacity-100 transition cursor-pointer';
+          if (badgeM3) {
+            badgeM3.className = 'text-[10px] text-slate-400';
+            badgeM3.textContent = 'Chưa bắt đầu';
+          }
+
+          if (canvasTag) canvasTag.textContent = 'Mốc #1';
+          if (canvasTitle) canvasTitle.textContent = 'Bản phác thảo nhân vật';
+          if (canvasImg) canvasImg.style.display = 'none';
+          if (canvasEmptyBox) {
+            canvasEmptyBox.classList.remove('hidden');
+            canvasEmptyBox.classList.add('flex');
+          }
+          if (canvasWatermark) canvasWatermark.style.display = 'none';
+          if (canvasOverlay) canvasOverlay.style.display = 'none';
+          if (creatorNote) creatorNote.textContent = '"Chưa có ghi chú từ Creator."';
+
+          if (masterTag) {
+            masterTag.className = 'rounded-full border border-white/15 bg-white/5 px-3 py-1 text-[10px] text-slate-400';
+            masterTag.textContent = 'Đang khóa';
+          }
+          if (masterBody) {
+            masterBody.className = 'flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.02] p-4 text-xs text-slate-400';
+            masterBody.innerHTML = '<i data-lucide="lock" class="size-5 text-slate-500 shrink-0"></i><span>File gốc HD sẽ được mở khóa sau khi nghiệm thu 100% các mốc phác thảo.</span>';
+          }
+
+          if (chatLockedBanner) chatLockedBanner.style.display = 'none';
+          if (chatInput) {
+            chatInput.disabled = false;
+            chatInput.placeholder = 'Nhập tin nhắn...';
+          }
+          if (btnSend) {
+            btnSend.disabled = false;
+            btnSend.className = 'flex size-10 shrink-0 items-center justify-center rounded-xl bg-amber-400 text-brand-navy shadow-lg shadow-amber-400/20 hover:brightness-110 transition';
+          }
+          if (btnAttach) {
+            btnAttach.disabled = false;
+            btnAttach.className = 'flex size-10 shrink-0 items-center justify-center rounded-xl border border-white/15 bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white transition';
+          }
+        } else {
+          if (btnProgress) btnProgress.className = 'rounded-full bg-brand-periwinkle text-brand-navy font-bold px-3 py-1 transition shadow';
+          if (btnCompleted) btnCompleted.className = 'rounded-full bg-white/10 text-slate-300 font-semibold px-3 py-1 hover:bg-white/20 transition';
+          if (btnEmpty) btnEmpty.className = 'rounded-full bg-white/10 text-slate-300 font-semibold px-3 py-1 hover:bg-white/20 transition';
+
+          if (stageBadge) {
+            stageBadge.className = 'inline-flex items-center gap-1.5 rounded-full border border-brand-periwinkle/40 bg-brand-periwinkle/15 px-3 py-1 text-[11px] font-bold text-brand-periwinkle';
+            stageBadge.innerHTML = '<i data-lucide="calendar-clock" class="size-3.5"></i> Mốc #1 (Đang phác thảo)';
+          }
+          if (escrowBanner) escrowBanner.style.display = 'flex';
+          if (btnCancel) btnCancel.style.display = 'inline-flex';
+
+          if (cardM1) cardM1.className = 'rounded-2xl border border-brand-periwinkle/60 bg-brand-periwinkle/10 p-3.5 text-xs space-y-2 ring-1 ring-brand-periwinkle/30 shadow-lg glow-hover transition cursor-pointer';
+          if (badgeM1) {
+            badgeM1.className = 'inline-flex items-center gap-1 text-[10px] font-bold text-brand-periwinkle animate-pulse';
+            badgeM1.innerHTML = '● Đang thực hiện';
+          }
+
+          if (cardM2) cardM2.className = 'rounded-2xl border border-white/10 bg-white/[0.02] p-3.5 text-xs space-y-2 opacity-75 hover:opacity-100 transition cursor-pointer';
+          if (badgeM2) {
+            badgeM2.className = 'text-[10px] text-slate-400';
+            badgeM2.textContent = 'Chưa bắt đầu';
+          }
+
+          if (cardM3) cardM3.className = 'rounded-2xl border border-white/10 bg-white/[0.02] p-3.5 text-xs space-y-2 opacity-75 hover:opacity-100 transition cursor-pointer';
+          if (badgeM3) {
+            badgeM3.className = 'text-[10px] text-slate-400';
+            badgeM3.textContent = 'Chưa bắt đầu';
+          }
+
+          if (canvasTag) canvasTag.textContent = 'Mốc #1';
+          if (canvasTitle) canvasTitle.textContent = 'Bản phác thảo nhân vật';
+          if (canvasImg) {
+            canvasImg.style.display = 'block';
+            canvasImg.src = 'https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?auto=format&fit=crop&w=1200&q=80';
+          }
+          if (canvasEmptyBox) canvasEmptyBox.classList.add('hidden');
+          if (canvasWatermark) canvasWatermark.style.display = 'flex';
+          if (canvasOverlay) canvasOverlay.style.display = 'flex';
+          if (creatorNote) creatorNote.textContent = '"Mình đã hoàn thiện pose chính và nét phác thảo cơ bản. Bạn xem giúp phần thần thái nhé!"';
+
+          if (masterTag) {
+            masterTag.className = 'rounded-full border border-white/15 bg-white/5 px-3 py-1 text-[10px] text-slate-400';
+            masterTag.textContent = 'Đang khóa';
+          }
+          if (masterBody) {
+            masterBody.className = 'flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.02] p-4 text-xs text-slate-400';
+            masterBody.innerHTML = '<i data-lucide="lock" class="size-5 text-slate-500 shrink-0"></i><span>File gốc HD sẽ được mở khóa sau khi nghiệm thu 100% các mốc phác thảo.</span>';
+          }
+
+          if (chatLockedBanner) chatLockedBanner.style.display = 'none';
+          if (chatInput) {
+            chatInput.disabled = false;
+            chatInput.placeholder = 'Nhập tin nhắn...';
+          }
+          if (btnSend) {
+            btnSend.disabled = false;
+            btnSend.className = 'flex size-10 shrink-0 items-center justify-center rounded-xl bg-amber-400 text-brand-navy shadow-lg shadow-amber-400/20 hover:brightness-110 transition';
+          }
+          if (btnAttach) {
+            btnAttach.disabled = false;
+            btnAttach.className = 'flex size-10 shrink-0 items-center justify-center rounded-xl border border-white/15 bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white transition';
+          }
+        }
+
+        safeLucideIcons();
+      }
+
+      // Auto initialize Layout 7 (Notebook Monotone) on load
+      window.addEventListener('DOMContentLoaded', () => {
+        switchLayoutVariant('layout-notebook');
+      });
+      switchLayoutVariant('layout-notebook');
+    </script>
+    </body>
+
+    </html>
