@@ -102,7 +102,7 @@ export default function VerifyOtpPage() {
         <div className="flex flex-col items-center mb-8">
           <Link href="/" className="mb-2 group">
             <Image
-              src="/weblogo.png"
+              src="/studiologo.png"
               alt="dillustration"
               width={220}
               height={112}

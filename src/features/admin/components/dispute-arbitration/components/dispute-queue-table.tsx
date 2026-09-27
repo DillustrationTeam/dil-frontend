@@ -102,9 +102,6 @@ export function DisputeQueueTable({
   onInspect,
   onPageChange,
 }: DisputeQueueTableProps) {
-  const isFirst = meta.page <= 1;
-  const isLast = meta.page >= meta.totalPages;
-
   return (
     <div className="glass-container bg-[#161926]/85 backdrop-blur-[32px] border border-white/10 rounded-[28px] p-6 space-y-4">
       {/* Header Info */}
@@ -272,39 +269,40 @@ export function DisputeQueueTable({
         </table>
       </div>
 
-      {/* Pagination Footer */}
-      {meta.totalPages > 1 && (
-        <div className="pt-4 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#8A8FA9]">
-          <span>
-            Page <span className="text-white font-bold">{meta.page}</span> of{' '}
-            <span className="text-white font-bold">{meta.totalPages}</span> ({meta.totalCount} items)
+      {/* Pagination Bar (Always visible with page size = 10) */}
+      <div className="flex items-center justify-between pt-4 border-t border-white/10 text-xs">
+        <div className="text-[#8A8FA9] text-[11px]">
+          Showing page <span className="text-white font-bold">{meta.page}</span> of{' '}
+          <span className="text-white font-bold">{Math.max(1, meta.totalPages)}</span>
+          <span className="ml-1 text-[#8A8FA9]/70">({meta.totalCount} disputes)</span>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            disabled={meta.page <= 1 || isLoading}
+            onClick={() => onPageChange(meta.page - 1)}
+            className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white font-bold disabled:opacity-40 disabled:pointer-events-none transition-colors cursor-pointer"
+          >
+            <ChevronLeft className="w-4 h-4" />
+            <span>Previous</span>
+          </button>
+
+          <span className="px-3 py-1.5 rounded-lg bg-black/40 border border-white/10 text-white font-semibold text-xs">
+            Page <span className="font-bold text-red-300">{meta.page}</span> of {Math.max(1, meta.totalPages)}
           </span>
 
-          <div className="flex items-center gap-1.5">
-            <button
-              type="button"
-              onClick={() => onPageChange(meta.page - 1)}
-              disabled={isFirst}
-              className="p-1.5 rounded-lg border border-white/10 bg-black/40 text-white hover:bg-white/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
-              title="Previous page"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-            <span className="px-2 text-xs font-semibold text-white">
-              {meta.page} / {meta.totalPages}
-            </span>
-            <button
-              type="button"
-              onClick={() => onPageChange(meta.page + 1)}
-              disabled={isLast}
-              className="p-1.5 rounded-lg border border-white/10 bg-black/40 text-white hover:bg-white/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
-              title="Next page"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
+          <button
+            type="button"
+            disabled={meta.page >= meta.totalPages || isLoading}
+            onClick={() => onPageChange(meta.page + 1)}
+            className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white font-bold disabled:opacity-40 disabled:pointer-events-none transition-colors cursor-pointer"
+          >
+            <span>Next</span>
+            <ChevronRight className="w-4 h-4" />
+          </button>
         </div>
-      )}
+      </div>
     </div>
   );
 }

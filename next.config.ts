@@ -13,6 +13,15 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      {
+        source: '/creator/rate-card',
+        destination: '/creator/services',
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

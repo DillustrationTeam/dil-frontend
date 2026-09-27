@@ -2,9 +2,9 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   Sparkles,
-  Search,
   Bell,
   ChevronDown,
   User,
@@ -13,9 +13,11 @@ import {
   Palette,
   Briefcase,
   ShieldCheck,
+  Wallet,
 } from 'lucide-react';
 import { useAuthStore } from '@/store/use-auth-store';
 import { useRouter } from 'next/navigation';
+import { useLanguage } from '@/context/language-context';
 
 interface TopNavbarProps {
   currentRole?: 'client' | 'creator';
@@ -28,8 +30,8 @@ export default function TopNavbar({
   onRoleChange,
 }: TopNavbarProps) {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
   const { user, roles, clearAuth } = useAuthStore();
+  const { t } = useLanguage();
   const router = useRouter();
 
   const isCreator = roles.includes('Creator') || roles.includes('creator');
@@ -42,32 +44,18 @@ export default function TopNavbar({
 
   return (
     <header className="sticky top-0 z-40 w-full h-16 bg-[#1F2335]/80 backdrop-blur-[20px] border-b border-white/10 px-4 lg:px-8 flex items-center justify-between transition-all">
-      {/* Left: Brand Logo & Search */}
+      {/* Left: Brand Logo */}
       <div className="flex items-center gap-6">
-        <Link href="/" className="flex items-center gap-3 group">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#A7ACD9] to-[#c2c7f6] p-[1px] shadow-[0_0_20px_rgba(167,172,217,0.4)] group-hover:scale-105 transition-transform">
-            <div className="w-full h-full bg-[#1b1b1e] rounded-[11px] flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-[#A7ACD9] group-hover:text-white transition-colors" />
-            </div>
-          </div>
-          <div>
-            <span className="font-space-grotesk font-bold text-lg tracking-wider text-white flex items-center gap-1.5">
-              DIL <span className="text-[10px] uppercase font-normal px-2 py-0.5 rounded-full bg-[#A7ACD9]/20 text-[#A7ACD9] border border-[#A7ACD9]/30">STUDIO</span>
-            </span>
-          </div>
-        </Link>
-
-        {/* Quick Search Input */}
-        <div className="hidden md:flex items-center relative w-64 lg:w-80">
-          <Search className="pointer-events-none absolute left-3.5 h-4 w-4 text-[#A7ACD9]" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search commissions, creators, artworks..."
-            className="w-full h-9 pl-9 pr-4 bg-[#1b1b1e] border border-white/10 rounded-full text-xs text-white placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-[#A7ACD9] focus:border-[#A7ACD9] transition-all"
+        <Link href="/" className="flex items-center group">
+          <Image
+            src="/studiologo.png"
+            alt="Dillustration Studio Logo"
+            width={180}
+            height={48}
+            priority
+            className="h-11 md:h-12 w-auto object-contain transition-transform group-hover:scale-105"
           />
-        </div>
+        </Link>
       </div>
 
       {/* Right: Role Switcher, Quick Create, Notifications, Profile */}
@@ -83,7 +71,7 @@ export default function TopNavbar({
                 }`}
             >
               <Briefcase className="h-3.5 w-3.5 text-[#A7ACD9]" />
-              Client Mode
+              {t('Client Mode')}
             </button>
             <button
               onClick={() => onRoleChange && onRoleChange('creator')}
@@ -93,7 +81,7 @@ export default function TopNavbar({
                 }`}
             >
               <Palette className="h-3.5 w-3.5 text-[#A7ACD9]" />
-              Creator Studio
+              {t('Creator Studio')}
             </button>
           </div>
         )}
@@ -123,40 +111,50 @@ export default function TopNavbar({
 
           {/* Profile Dropdown Menu */}
           {showProfileMenu && (
-            <div className="absolute right-0 mt-2 w-56 bg-[#1F2335] border border-white/10 rounded-2xl shadow-2xl p-2 z-50 backdrop-blur-2xl">
+            <div className="absolute right-0 mt-2 w-60 bg-[#1F2335] border border-white/10 rounded-2xl shadow-2xl p-2 z-50 backdrop-blur-2xl">
               <div className="p-3 border-b border-white/10 mb-1">
                 <p className="text-xs font-bold text-white">{user?.fullName || 'Guest'}</p>
-                <p className="text-[11px] text-slate-400">{user?.email || 'No email'}</p>
+                <p className="text-[11px] text-slate-400 truncate">{user?.email || 'No email'}</p>
                 <span className="inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-medium border border-emerald-500/30">
-                  <ShieldCheck className="h-3 w-3 text-[#A7ACD9]" /> Escrow Verified
+                  <ShieldCheck className="h-3 w-3 text-[#A7ACD9]" /> {t('Escrow Verified')}
                 </span>
               </div>
               <Link
-                href="/client/commissions"
+                href="/wallet"
+                onClick={() => setShowProfileMenu(false)}
                 className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs text-[#e4e1e5] hover:text-white hover:bg-white/5 transition-colors"
               >
-                <User className="w-4 h-4 text-[#A7ACD9]" /> My Commissions
+                <Wallet className="w-4 h-4 text-[#A7ACD9]" /> {t('Ví của tôi')}
+              </Link>
+              <Link
+                href="/client/commissions"
+                onClick={() => setShowProfileMenu(false)}
+                className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs text-[#e4e1e5] hover:text-white hover:bg-white/5 transition-colors"
+              >
+                <User className="w-4 h-4 text-[#A7ACD9]" /> {t('My Commissions')}
               </Link>
               {isCreator && (
                 <Link
                   href="/creator/commissions"
+                  onClick={() => setShowProfileMenu(false)}
                   className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs text-[#e4e1e5] hover:text-white hover:bg-white/5 transition-colors"
                 >
-                  <Palette className="w-4 h-4 text-[#A7ACD9]" /> Creator Dashboard
+                  <Palette className="w-4 h-4 text-[#A7ACD9]" /> {t('Creator Dashboard')}
                 </Link>
               )}
               <Link
                 href="/settings"
+                onClick={() => setShowProfileMenu(false)}
                 className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs text-slate-300 hover:text-white hover:bg-white/5 transition-colors"
               >
-                <Settings className="w-4 h-4 text-[#A7ACD9]" /> Account Settings
+                <Settings className="w-4 h-4 text-[#A7ACD9]" /> {t('Account Settings')}
               </Link>
               <div className="border-t border-white/10 my-1" />
               <button
                 onClick={handleSignOut}
                 className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs text-rose-400 hover:bg-rose-500/10 transition-colors"
               >
-                <LogOut className="w-4 h-4 text-[#A7ACD9]" /> Sign Out
+                <LogOut className="w-4 h-4 text-[#A7ACD9]" /> {t('Sign Out')}
               </button>
             </div>
           )}

@@ -92,7 +92,7 @@ export default function LoginPage() {
             <div className="flex justify-center mb-6">
               <Link href="/">
                 <Image
-                  src="/weblogo.png"
+                  src="/studiologo.png"
                   alt="dillustration"
                   width={220}
                   height={112}

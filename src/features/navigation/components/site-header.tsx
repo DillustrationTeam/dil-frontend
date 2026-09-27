@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
+import { useLanguage } from '@/context/language-context';
 import { authService } from '@/services/auth.service';
 import { useAuthStore } from '@/store/use-auth-store';
 import { NotificationBell } from '@/features/notification';
@@ -30,6 +31,7 @@ export function SiteHeader() {
   const pathname = usePathname() ?? '';
   const router = useRouter();
   const { user, roles, refreshToken, isAuthenticated, clearAuth } = useAuthStore();
+  const { t } = useLanguage();
 
   const [searchOpen, setSearchOpen] = useState(false);
   const [keyword, setKeyword] = useState('');
@@ -112,13 +114,10 @@ export function SiteHeader() {
           aria-label="Dillustration — Trang chủ"
           className={`flex shrink-0 items-center justify-self-start ${focusRing}`}
         >
-          <Image
+          <img
             src="/weblogo.png"
             alt="dillustration"
-            width={120}
-            height={56}
-            className="h-12 w-auto object-contain transition-transform hover:scale-105 md:h-14"
-            priority
+            className="h-11 md:h-12 w-auto object-contain transition-transform hover:scale-105"
           />
         </Link>
 
@@ -138,7 +137,7 @@ export function SiteHeader() {
                       : 'text-[#c7c5cf] hover:text-white'
                   }`}
                 >
-                  {label}
+                  {t(label)}
                 </Link>
               );
             })}
@@ -226,50 +225,83 @@ export function SiteHeader() {
               </button>
 
               {menuOpen && (
-                <div className="absolute right-0 z-50 mt-2 w-56 overflow-hidden rounded-2xl border border-white/10 bg-[#1F2335] p-2 shadow-2xl">
-                  <div className="mb-1 border-b border-white/10 px-3 py-2 sm:hidden">
+                <div className="absolute right-0 z-50 mt-2 w-60 overflow-hidden rounded-2xl border border-white/10 bg-[#1F2335] p-2 shadow-2xl backdrop-blur-2xl">
+                  <div className="mb-1 border-b border-white/10 p-3">
                     <p className="text-xs font-bold text-white">{user.fullName}</p>
-                    <p className="text-[10px] text-[#A7ACD9]">{user.email}</p>
+                    <p className="text-[11px] text-[#A7ACD9] truncate">{user.email}</p>
+                    <span className="inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-medium border border-emerald-500/30">
+                      <span className="material-symbols-outlined text-[12px]">verified_user</span> {t('Escrow Verified')}
+                    </span>
                   </div>
 
-                  {/* Lối vào ví — nằm ngay trên nút đăng xuất */}
                   <Link
                     href="/wallet"
                     onClick={() => setMenuOpen(false)}
-                    className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs text-[#c7c5cf] transition-colors hover:bg-white/10 hover:text-white"
+                    className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs text-[#c7c5cf] transition-colors hover:bg-white/10 hover:text-white"
                   >
-                    <span className="material-symbols-outlined text-sm text-[#c2c7f6]">account_balance_wallet</span>
-                    <span>Ví của tôi</span>
+                    <span className="material-symbols-outlined text-base text-[#c2c7f6]">account_balance_wallet</span>
+                    <span>{t('Ví của tôi')}</span>
+                  </Link>
+
+                  <Link
+                    href="/client/commissions"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs text-[#c7c5cf] transition-colors hover:bg-white/10 hover:text-white"
+                  >
+                    <span className="material-symbols-outlined text-base text-[#c2c7f6]">folder_open</span>
+                    <span>{t('My Commissions')}</span>
+                  </Link>
+
+                  {(roles.includes('Creator') || roles.includes('creator')) && (
+                    <Link
+                      href="/creator/commissions"
+                      onClick={() => setMenuOpen(false)}
+                      className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs text-[#c7c5cf] transition-colors hover:bg-white/10 hover:text-white"
+                    >
+                      <span className="material-symbols-outlined text-base text-[#c2c7f6]">palette</span>
+                      <span>{t('Creator Dashboard')}</span>
+                    </Link>
+                  )}
+
+                  <Link
+                    href="/settings"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs text-[#c7c5cf] transition-colors hover:bg-white/10 hover:text-white"
+                  >
+                    <span className="material-symbols-outlined text-base text-[#c2c7f6]">settings</span>
+                    <span>{t('Account Settings')}</span>
                   </Link>
 
                   {!roles.includes('Creator') && (
                     <Link
                       href="/become-creator"
                       onClick={() => setMenuOpen(false)}
-                      className="flex items-center space-x-2 rounded-xl px-3 py-2 text-xs text-[#A7ACD9] transition-colors hover:bg-white/10"
+                      className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs text-[#c7c5cf] transition-colors hover:bg-white/10 hover:text-white"
                     >
-                      <span className="material-symbols-outlined text-sm">palette</span>
-                      <span>Trở thành Creator</span>
+                      <span className="material-symbols-outlined text-base text-[#c2c7f6]">palette</span>
+                      <span>{t('Trở thành Creator')}</span>
                     </Link>
                   )}
                   {(roles.includes('Administrator') || roles.includes('Moderator')) && (
                     <Link
                       href="/admin/creator-verifications"
                       onClick={() => setMenuOpen(false)}
-                      className="flex items-center space-x-2 rounded-xl px-3 py-2 text-xs text-red-300 transition-colors hover:bg-white/10"
+                      className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs text-red-300 transition-colors hover:bg-white/10"
                     >
-                      <span className="material-symbols-outlined text-sm">how_to_reg</span>
-                      <span>Duyệt đơn Creator</span>
+                      <span className="material-symbols-outlined text-base">how_to_reg</span>
+                      <span>{t('Duyệt đơn Creator')}</span>
                     </Link>
                   )}
+
+                  <div className="my-1 border-t border-white/10" />
 
                   <button
                     type="button"
                     onClick={handleLogout}
-                    className="flex w-full cursor-pointer items-center gap-2 rounded-xl px-3 py-2 text-left text-xs text-red-400 transition-colors hover:bg-white/10"
+                    className="flex w-full cursor-pointer items-center gap-2.5 rounded-xl px-3 py-2 text-left text-xs text-red-400 transition-colors hover:bg-white/10"
                   >
-                    <span className="material-symbols-outlined text-sm">logout</span>
-                    <span>Sign Out</span>
+                    <span className="material-symbols-outlined text-base">logout</span>
+                    <span>{t('Sign Out')}</span>
                   </button>
                 </div>
               )}

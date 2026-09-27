@@ -2,12 +2,15 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useAuthStore } from '@/store/use-auth-store';
 import { authService } from '@/services/auth.service';
+import { useLanguage } from '@/context/language-context';
 import toast from 'react-hot-toast';
 
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
   const { user, roles, refreshToken, isAuthenticated, clearAuth } = useAuthStore();
+  const { t } = useLanguage();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const handleLogout = async () => {
@@ -29,18 +32,21 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
               <img
                 src="/weblogo.png"
                 alt="dillustration"
-                className="h-14 md:h-16 w-auto object-contain hover:scale-105 transition-transform"
+                className="h-11 md:h-12 w-auto object-contain hover:scale-105 transition-transform"
               />
             </Link>
             <div className="hidden md:flex gap-8 items-center text-sm font-medium">
               <Link href="/" className="text-[#c2c7f6] border-b-2 border-[#c2c7f6] pb-1 transition-all">
-                Marketplace
+                {t('Marketplace')}
               </Link>
-              <Link href="/search" className="text-[#c7c5cf] hover:text-white transition-colors">
-                Artists
+              <Link href="/#artists" className="text-[#c7c5cf] hover:text-white transition-colors">
+                {t('Artists')}
               </Link>
               <Link href="/#bento" className="text-[#c7c5cf] hover:text-white transition-colors">
-                Collections
+                {t('Collections')}
+              </Link>
+              <Link href="/auctions" className="text-[#c7c5cf] hover:text-white transition-colors">
+                {t('Đấu giá')}
               </Link>
             </div>
           </div>
@@ -51,7 +57,7 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
             <div className="relative hidden sm:block">
               <input
                 className="bg-[#1b1b1e] border border-[#46464e]/30 rounded-full px-6 py-2 w-64 focus:outline-none focus:ring-1 focus:ring-[#c2c7f6] focus:border-[#c2c7f6] transition-all duration-300 text-sm text-[#e4e1e5] placeholder-white/30"
-                placeholder="Search curated art..."
+                placeholder={t('Search curated art...')}
                 type="text"
               />
               <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-[#919099] text-xl">

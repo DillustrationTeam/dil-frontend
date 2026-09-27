@@ -65,9 +65,9 @@ export const initialDisputeState: DisputeManagementState = {
 export type DisputeAction =
   | { type: 'GET_QUEUE_REQUEST' }
   | {
-      type: 'GET_QUEUE_SUCCESS';
-      payload: { items: DisputeQueueItemDto[]; meta: DisputeQueueMeta };
-    }
+    type: 'GET_QUEUE_SUCCESS';
+    payload: { items: DisputeQueueItemDto[]; meta: DisputeQueueMeta };
+  }
   | { type: 'GET_QUEUE_FAILURE'; payload: string }
   | { type: 'SET_STATUS_FILTER'; payload: DisputeStatus }
   | { type: 'SET_SEARCH_FILTER'; payload: string }
