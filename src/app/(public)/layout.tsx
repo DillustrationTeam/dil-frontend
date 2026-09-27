@@ -117,6 +117,26 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
                           <span className="material-symbols-outlined text-sm text-[#A7ACD9]">dashboard</span>
                           My Studio
                         </Link>
+                        {!roles.includes('Creator') && (
+                          <Link
+                            href="/become-creator"
+                            onClick={() => setIsMenuOpen(false)}
+                            className="flex items-center space-x-2 rounded-xl px-3 py-2 text-xs text-[#A7ACD9] transition-colors hover:bg-white/10"
+                          >
+                            <span className="material-symbols-outlined text-sm">palette</span>
+                            <span>Trở thành Creator</span>
+                          </Link>
+                        )}
+                        {(roles.includes('Administrator') || roles.includes('Moderator')) && (
+                          <Link
+                            href="/admin/creator-verifications"
+                            onClick={() => setIsMenuOpen(false)}
+                            className="flex items-center space-x-2 rounded-xl px-3 py-2 text-xs text-red-300 transition-colors hover:bg-white/10"
+                          >
+                            <span className="material-symbols-outlined text-sm">how_to_reg</span>
+                            <span>Duyệt đơn Creator</span>
+                          </Link>
+                        )}
                         <button
                           onClick={handleLogout}
                           className="w-full text-left px-3 py-2 text-xs text-red-400 hover:bg-white/10 rounded-xl transition-colors flex items-center gap-2 cursor-pointer"

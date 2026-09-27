@@ -272,6 +272,27 @@ export function SiteHeader() {
                     <span>{t('Account Settings')}</span>
                   </Link>
 
+                  {!roles.includes('Creator') && (
+                    <Link
+                      href="/become-creator"
+                      onClick={() => setMenuOpen(false)}
+                      className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs text-[#c7c5cf] transition-colors hover:bg-white/10 hover:text-white"
+                    >
+                      <span className="material-symbols-outlined text-base text-[#c2c7f6]">palette</span>
+                      <span>{t('Trở thành Creator')}</span>
+                    </Link>
+                  )}
+                  {(roles.includes('Administrator') || roles.includes('Moderator')) && (
+                    <Link
+                      href="/admin/creator-verifications"
+                      onClick={() => setMenuOpen(false)}
+                      className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs text-red-300 transition-colors hover:bg-white/10"
+                    >
+                      <span className="material-symbols-outlined text-base">how_to_reg</span>
+                      <span>{t('Duyệt đơn Creator')}</span>
+                    </Link>
+                  )}
+
                   <div className="my-1 border-t border-white/10" />
 
                   <button

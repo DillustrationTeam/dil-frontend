@@ -183,6 +183,7 @@ export default function MarketplaceHomePage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
+            {/* Main Bento Item */}
             <div className="md:col-span-8 group relative aspect-[16/9] overflow-hidden rounded-[28px] glass-container border border-white/10 periwinkle-glow cursor-pointer">
               <Image
                 className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
@@ -202,6 +203,7 @@ export default function MarketplaceHomePage() {
               </div>
             </div>
 
+            {/* Secondary Bento Items */}
             <div className="md:col-span-4 flex flex-col gap-8">
               <div className="h-1/2 group relative overflow-hidden rounded-[28px] glass-container border border-white/10 periwinkle-glow cursor-pointer min-h-[200px]">
                 <Image
