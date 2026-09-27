@@ -7,6 +7,7 @@ import { useAuthStore } from '@/store/use-auth-store';
 import { authService } from '@/services/auth.service';
 import { useLanguage } from '@/context/language-context';
 import toast from 'react-hot-toast';
+import { NotificationBell } from '@/features/notification';
 
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
   const { user, roles, refreshToken, isAuthenticated, clearAuth } = useAuthStore();
@@ -69,9 +70,11 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
               {isAuthenticated && user ? (
                 <>
                   {/* Notification bell */}
-                  <button className="p-2 rounded-full hover:bg-[#c2c7f6]/10 transition-all active:scale-95 text-[#c2c7f6]">
-                    <span className="material-symbols-outlined text-xl">notifications</span>
-                  </button>
+                  <NotificationBell
+                    userId={user.id}
+                    iconSet="material"
+                    triggerClassName="p-2 rounded-full hover:bg-[#c2c7f6]/10 transition-all active:scale-95 text-[#c2c7f6]"
+                  />
 
                   {/* Go to Studio */}
                   <Link
