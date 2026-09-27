@@ -158,6 +158,19 @@ export function extractErrorMessage(error: unknown, fallbackMessage = 'Yêu cầ
       }
     }
 
+    if (res?.status === 401) {
+      return 'Phiên đăng nhập đã hết hạn hoặc bạn chưa đăng nhập. Vui lòng đăng nhập lại.';
+    }
+    if (res?.status === 403) {
+      return 'Tài khoản của bạn không có quyền thực hiện thao tác này.';
+    }
+    if (res?.status === 404) {
+      return 'Không tìm thấy dữ liệu yêu cầu (404).';
+    }
+    if (res?.status === 500) {
+      return 'Máy chủ xảy ra lỗi (500). Vui lòng thử lại sau.';
+    }
+
     // Case 5: Error.message (nếu không phải dạng generic 'Request failed with status code...')
     const msg = (error as { message?: string }).message;
     if (msg && !msg.startsWith('Request failed with status code')) {

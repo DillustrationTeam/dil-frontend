@@ -32,8 +32,6 @@ import {
   ZoomOut,
 } from 'lucide-react';
 
-import CollapsibleSidebar from '@/components/navigation/CollapsibleSidebar';
-
 import { chatService } from '../services/chat.service';
 import { deadlineRiskService } from '../services/deadline-risk.service';
 import type { DeadlineRiskDto } from '../types/deadline-risk.types';
@@ -92,9 +90,6 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
   const [translatingIds, setTranslatingIds] = useState<string[]>([]);
   const [failedTranslationIds, setFailedTranslationIds] = useState<string[]>([]);
   const [partnerReadAt, setPartnerReadAt] = useState<string | null>(null);
-
-  // States cho Sidebar đồng bộ hệ thống
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   // States cho Atelier Binder UI Right Page View & Zoom & Milestone Switcher
   const [rightPageView, setRightPageView] = useState<'canvas' | 'brief' | 'milestones'>('canvas');
@@ -318,7 +313,19 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
 
   const handleIncoming = useCallback(
     (message: ChatMessageDto) => {
-      setMessages((prev) => (prev.some((m) => m.messageId === message.messageId) ? prev : [...prev, message]));
+      setMessages((prev) => {
+        if (prev.some((m) => m.messageId === message.messageId)) return prev;
+        const last = prev[prev.length - 1];
+        if (
+          last &&
+          last.senderId === message.senderId &&
+          last.body.trim() === message.body.trim() &&
+          Math.abs(new Date(message.sentAt).getTime() - new Date(last.sentAt).getTime()) < 15000
+        ) {
+          return prev;
+        }
+        return [...prev, message];
+      });
 
       if (room?.commissionId) {
         void commissionService.getById(room.commissionId).then((c) => setCommission(c)).catch(() => null);
@@ -398,36 +405,52 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
     [],
   );
 
-  const loadData = useCallback(async () => {
+  const loadData = useCallback(async (isInitial = false) => {
+    if (isInitial) setLoading(true);
     try {
       const [r, m] = await Promise.all([chatService.getRoom(roomId), chatService.getMessages(roomId)]);
       setRoom(r);
       if (r.commissionId) {
-        void commissionService.getById(r.commissionId).then((c) => setCommission(c)).catch(() => null);
+        try {
+          const c = await commissionService.getById(r.commissionId);
+          setCommission(c);
+        } catch { }
       }
-      setMessages([...m.items].reverse());
+      const rawList = [...m.items].reverse();
+      const deduplicated: ChatMessageDto[] = [];
+      for (const msg of rawList) {
+        const last = deduplicated[deduplicated.length - 1];
+        if (
+          last &&
+          last.senderId === msg.senderId &&
+          last.body.trim() === msg.body.trim() &&
+          Math.abs(new Date(msg.sentAt).getTime() - new Date(last.sentAt).getTime()) < 15000
+        ) {
+          continue;
+        }
+        deduplicated.push(msg);
+      }
+      setMessages(deduplicated);
       setPartnerReadAt(r.members.find((member) => member.userId !== userId)?.lastReadAt ?? null);
       setError(null);
       await chatService.markRead(roomId).catch(() => { });
     } catch (err: unknown) {
       setError(extractErrorMessage(err, 'Không tải được phòng làm việc.'));
     } finally {
-      setLoading(false);
+      if (isInitial) setLoading(false);
     }
   }, [roomId, userId]);
 
   const refresh = useCallback(() => {
-    setLoading(true);
     setError(null);
-    void loadData();
+    void loadData(false);
   }, [loadData]);
 
   useEffect(() => {
-    void (async () => {
-      await Promise.resolve();
-      await loadData();
-    })();
-  }, [loadData]);
+    void Promise.resolve().then(() => {
+      void loadData(true);
+    });
+  }, [roomId, userId, loadData]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -492,11 +515,14 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
   }
 
   async function handleDepositEscrow() {
-    if (!room?.commissionId) return;
+    if (!room?.commissionId || depositingEscrow) return;
     setDepositingEscrow(true);
     setError(null);
     try {
-      await commissionService.depositEscrow(room.commissionId);
+      const updated = await commissionService.depositEscrow(room.commissionId);
+      if (updated) {
+        setCommission(updated);
+      }
       refresh();
       void chat.sendMessage('🛡️ Khách hàng đã nạp tiền ký quỹ Escrow thành công. Creator có thể bắt đầu vẽ!').catch(() => null);
     } catch (err: unknown) {
@@ -541,36 +567,23 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
   }
 
   return (
-    <div className="min-h-screen bg-[#1F2335] text-on-surface flex flex-col font-body">
-      {/* BODY CHÍNH CÓ SIDEBAR + NỘI DUNG WORKROOM */}
-      <div className="flex-1 flex w-full relative min-h-0 overflow-hidden">
-        {/* COLLAPSIBLE SIDEBAR TƯƠNG TỰ CÁC MÀN HÌNH KHÁC */}
-        <CollapsibleSidebar
-          key={activeRole}
-          isCollapsed={isSidebarCollapsed}
-          onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-          role={activeRole}
-        />
+    <div className="w-full flex flex-col items-center justify-center relative font-body pb-6">
+      {/* Cảnh báo lỗi chung */}
+      {error && (
+        <div role="alert" className="w-full max-w-7xl z-10 mb-3 flex items-center gap-2 rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-xs text-red-200 [clip-path:polygon(10px_0,calc(100%-10px)_0,100%_10px,100%_calc(100%-10px),calc(100%-10px)_100%,10px_100%,0_calc(100%-10px),0_10px)]">
+          <CircleAlert size={14} className="shrink-0 text-red-400" />
+          <span>{error}</span>
+        </div>
+      )}
 
-        {/* MÀN HÌNH WORKROOM SỔ ATELIER BINDER */}
-        <main className="flex-1 min-w-0 p-2 sm:p-4 lg:p-6 overflow-y-auto flex flex-col justify-center items-center relative">
-
-          {/* Cảnh báo lỗi chung */}
-          {error && (
-            <div role="alert" className="w-full max-w-7xl z-10 mb-3 flex items-center gap-2 rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-xs text-red-200 [clip-path:polygon(10px_0,calc(100%-10px)_0,100%_10px,100%_calc(100%-10px),calc(100%-10px)_100%,10px_100%,0_calc(100%-10px),0_10px)]">
-              <CircleAlert size={14} className="shrink-0 text-red-400" />
-              <span>{error}</span>
-            </div>
-          )}
-
-          {/* WRAPPER BÊN NGOÀI ĐỂ CÁC TAB BUNG BÊN NGOÀI BÌA SỔ KHÔNG BỊ CLIP-PATH CẮT */}
-          <div ref={binderRef} className="relative w-full max-w-7xl z-10 my-auto mt-8">
+      {/* WRAPPER BÊN NGOÀI ĐỂ CÁC TAB BUNG BÊN NGOÀI BÌA SỔ KHÔNG BỊ CLIP-PATH CẮT */}
+      <div ref={binderRef} className="relative w-full max-w-7xl z-10 my-auto pt-10 sm:pt-11">
 
             {/* TỜ NOTE TIẾN ĐỘ VÀ HẠN CHÓT Ở GÓC TRÊN BÊN TRÁI KHUNG SỔ (TUCKED BEHIND BINDER COVER AT Z-0) */}
             <div
               onClick={() => setRightPageView((prev) => (prev === 'milestones' ? 'canvas' : 'milestones'))}
               title="Xem chi tiết lộ trình tiến độ & hạn chót"
-              className="hidden sm:block absolute -top-9 left-7 z-0 group cursor-pointer select-none transition-transform duration-300 hover:-translate-y-3"
+              className="hidden sm:block absolute top-1.5 sm:top-2 left-7 z-0 group cursor-pointer select-none transition-transform duration-300 hover:-translate-y-1.5"
             >
               {/* Thân mẩu Note (Cắt polygon 45 độ góc trái trên) */}
               <div
@@ -1424,7 +1437,17 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                           </div>
                           <div>
                             <span className="text-outline text-[11px]">Trạng thái Escrow:</span>
-                            <p className="font-bold text-brand-periwinkle text-sm">{commission?.escrowStatus === 'Deposited' ? 'Đã nạp Escrow' : 'Chờ nạp Escrow'}</p>
+                            <p className="font-bold text-brand-periwinkle text-sm">
+                              {commission?.escrowStatus === 'Released'
+                                ? 'Đã giải ngân (Hoàn tất)'
+                                : commission?.escrowStatus === 'PartialReleased'
+                                  ? 'Đã nạp (Đang giải ngân)'
+                                  : commission?.escrowStatus === 'Deposited'
+                                    ? 'Đã nạp Escrow'
+                                    : commission?.escrowStatus === 'Refunded'
+                                      ? 'Đã hoàn tiền'
+                                      : 'Chờ nạp Escrow'}
+                            </p>
                           </div>
                         </div>
                       </div>
@@ -1545,9 +1568,6 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
               </div>
             </div>
           </div>
-
-        </main>
-      </div>
 
       {/* MODALS NGHIỆP VỤ HỢP ĐỒNG (CÁC MODAL HIỆN CÓ KHÔNG SỬA ĐỔI PROTOCOL) */}
       {room.commissionId && (

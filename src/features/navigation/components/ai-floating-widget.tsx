@@ -3,7 +3,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ArrowUpRight, Bot, CircleAlert, Maximize2, RefreshCw, Send, Sparkles, X } from 'lucide-react';
+import toast from 'react-hot-toast';
+import { ArrowUpRight, Bot, CircleAlert, Eye, EyeOff, Maximize2, Moon, RefreshCw, Send, Sparkles, Sun, X } from 'lucide-react';
+import { useLanguage } from '@/context/language-context';
 import { AiMarkdown } from '@/features/ai-assistant/components/ai-markdown';
 import { aiService } from '@/features/ai-assistant/services/ai.service';
 import type { AiConversationDto, AiMessageDto } from '@/features/ai-assistant/types/ai.types';
@@ -16,13 +18,12 @@ const quickQuestions = [
 ];
 
 /**
- * Nút nổi góc phải dưới: mở cửa sổ chat với trợ lý AI ngay tại trang đang xem,
- * kèm lối vào trang đầy đủ /ai.
- *
- * Không hiển thị khi đang ở chính trang /ai (sẽ trùng lặp).
+ * Nút nổi góc phải dưới: thanh công cụ gồm Ngôn ngữ (VIE/ENG), Chế độ Sáng/Tối, Trợ lý AI
+ * và công tắc Ẩn/Hiện thanh công cụ. Hiện diện ở mọi màn hình.
  */
 export function AiFloatingWidget({ userId }: { userId: string | null }) {
   const pathname = usePathname() ?? '';
+  const { lang, toggleLang, t } = useLanguage();
   const [open, setOpen] = useState(false);
   const [conversation, setConversation] = useState<AiConversationDto | null>(null);
   const [messages, setMessages] = useState<AiMessageDto[]>([]);
@@ -30,9 +31,41 @@ export function AiFloatingWidget({ userId }: { userId: string | null }) {
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+  const [collapsed, setCollapsed] = useState(false);
 
   const panelRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    void Promise.resolve().then(() => {
+      const savedTheme = localStorage.getItem('app-theme') as 'dark' | 'light' | null;
+      if (savedTheme) {
+        setTheme(savedTheme);
+        document.documentElement.classList.toggle('light', savedTheme === 'light');
+      }
+
+      const savedCollapsed = localStorage.getItem('app-floating-collapsed');
+      if (savedCollapsed === 'true') {
+        setCollapsed(true);
+      }
+    });
+  }, []);
+
+  const toggleTheme = () => {
+    const nextTheme = theme === 'dark' ? 'light' : 'dark';
+    setTheme(nextTheme);
+    localStorage.setItem('app-theme', nextTheme);
+    document.documentElement.classList.toggle('light', nextTheme === 'light');
+    toast.success(nextTheme === 'light' ? 'Đã bật Chế độ Sáng' : 'Đã bật Chế độ Tối');
+  };
+
+  const toggleCollapse = () => {
+    const next = !collapsed;
+    setCollapsed(next);
+    localStorage.setItem('app-floating-collapsed', String(next));
+    if (next) setOpen(false);
+  };
 
   const loadConversation = useCallback(async () => {
     if (!userId) return;
@@ -119,7 +152,7 @@ export function AiFloatingWidget({ userId }: { userId: string | null }) {
           ref={panelRef}
           role="dialog"
           aria-label="Cửa sổ trợ lý AI"
-          className="fixed bottom-24 right-4 z-50 flex h-[30rem] w-[24rem] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-3xl border border-white/12 bg-[#1F2335] shadow-2xl sm:right-6"
+          className="fixed bottom-6 right-20 sm:right-24 z-50 flex h-[30rem] w-[24rem] max-w-[calc(100vw-6rem)] flex-col overflow-hidden rounded-3xl border border-white/12 bg-[#1F2335] shadow-2xl"
         >
           {/* Đầu cửa sổ */}
           <div className="flex items-center justify-between border-b border-white/10 bg-white/[0.03] px-4 py-3">
@@ -269,19 +302,79 @@ export function AiFloatingWidget({ userId }: { userId: string | null }) {
         </div>
       )}
 
-      {/* Nút nổi */}
-      <button
-        type="button"
-        onClick={() => setOpen((prev) => !prev)}
-        aria-expanded={open}
-        aria-label={open ? 'Đóng trợ lý AI' : 'Mở trợ lý AI'}
-        className="fixed bottom-6 right-4 z-50 flex size-14 items-center justify-center rounded-full bg-brand-periwinkle text-brand-navy shadow-[0_8px_30px_rgba(167,172,217,0.45)] transition hover:brightness-110 active:scale-95 sm:right-6"
-      >
-        {open ? <X size={22} aria-hidden /> : <Sparkles size={22} aria-hidden />}
-        {!open && (
-          <span className="absolute -right-0.5 -top-0.5 size-3 rounded-full border-2 border-[#1F2335] bg-emerald-400" />
+      {/* Thanh công cụ nổi: Chuyển Ngôn ngữ (VIE/ENG) + Chế độ Sáng/Tối + Trợ lý AI + Nút Ẩn/Hiện */}
+      <div className="fixed bottom-6 right-4 z-50 flex flex-col items-center gap-2 sm:right-6">
+        {collapsed ? (
+          /* Nút mở lại khi đang ẩn */
+          <button
+            type="button"
+            onClick={toggleCollapse}
+            title={lang === 'VIE' ? 'Hiện thanh công cụ' : 'Show toolbar'}
+            className="group relative flex size-10 items-center justify-center rounded-full border border-white/20 bg-[#1F2335] text-white shadow-xl backdrop-blur-xl transition-all hover:scale-105 hover:border-[#A7ACD9] active:scale-95"
+          >
+            <Eye size={18} className="text-[#A7ACD9]" />
+            <span className="absolute right-12 whitespace-nowrap rounded-lg bg-[#1F2335] px-2.5 py-1 text-[11px] font-semibold text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100 border border-white/10 pointer-events-none">
+              {lang === 'VIE' ? 'Hiện thanh công cụ' : 'Show toolbar'}
+            </span>
+          </button>
+        ) : (
+          <>
+            {/* Nút 1: Chuyển ngôn ngữ (VIE / ENG) */}
+            <button
+              type="button"
+              onClick={toggleLang}
+              title={lang === 'VIE' ? 'Chuyển sang English' : 'Chuyển sang Tiếng Việt'}
+              className="group relative flex size-11 items-center justify-center rounded-full border border-white/20 bg-[#1F2335] text-[11px] font-bold text-white shadow-xl backdrop-blur-xl transition-all hover:scale-105 hover:border-[#A7ACD9] active:scale-95"
+            >
+              <span>{lang === 'VIE' ? 'VIE' : 'ENG'}</span>
+              <span className="absolute right-12 whitespace-nowrap rounded-lg bg-[#1F2335] px-2.5 py-1 text-[11px] font-semibold text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100 border border-white/10 pointer-events-none">
+                {lang === 'VIE' ? 'Ngôn ngữ: Tiếng Việt' : 'Language: English'}
+              </span>
+            </button>
+
+            {/* Nút 2: Chế độ Sáng / Tối */}
+            <button
+              type="button"
+              onClick={toggleTheme}
+              title={theme === 'dark' ? 'Chuyển sang Chế độ Sáng' : 'Chuyển sang Chế độ Tối'}
+              className="group relative flex size-11 items-center justify-center rounded-full border border-white/20 bg-[#1F2335] text-white shadow-xl backdrop-blur-xl transition-all hover:scale-105 hover:border-[#A7ACD9] active:scale-95"
+            >
+              {theme === 'dark' ? (
+                <Sun size={18} className="text-amber-300 transition-transform group-hover:rotate-[#45deg]" />
+              ) : (
+                <Moon size={18} className="text-indigo-400 transition-transform group-hover:-rotate-12" />
+              )}
+              <span className="absolute right-12 whitespace-nowrap rounded-lg bg-[#1F2335] px-2.5 py-1 text-[11px] font-semibold text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100 border border-white/10 pointer-events-none">
+                {theme === 'dark' ? 'Chế độ Sáng (Light)' : 'Chế độ Tối (Dark)'}
+              </span>
+            </button>
+
+            {/* Nút 3: Trợ lý AI */}
+            <button
+              type="button"
+              onClick={() => setOpen((prev) => !prev)}
+              aria-expanded={open}
+              aria-label={open ? 'Đóng trợ lý AI' : 'Mở trợ lý AI'}
+              className="relative flex size-14 items-center justify-center rounded-full bg-brand-periwinkle text-brand-navy shadow-[0_8px_30px_rgba(167,172,217,0.45)] transition hover:brightness-110 active:scale-95"
+            >
+              {open ? <X size={22} aria-hidden /> : <Sparkles size={22} aria-hidden />}
+              {!open && (
+                <span className="absolute -right-0.5 -top-0.5 size-3 rounded-full border-2 border-[#1F2335] bg-emerald-400" />
+              )}
+            </button>
+
+            {/* Nút Ẩn công cụ */}
+            <button
+              type="button"
+              onClick={toggleCollapse}
+              title={lang === 'VIE' ? 'Ẩn thanh công cụ' : 'Hide toolbar'}
+              className="group relative flex size-7 items-center justify-center rounded-full border border-white/10 bg-[#1F2335]/70 text-slate-400 shadow transition hover:bg-[#1F2335] hover:text-white"
+            >
+              <EyeOff size={13} />
+            </button>
+          </>
         )}
-      </button>
+      </div>
     </>
   );
 }

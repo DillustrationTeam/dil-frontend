@@ -9,9 +9,10 @@ import { X, AlertCircle } from 'lucide-react';
 import axios from 'axios';
 import { commissionService } from '@/services/commission.service';
 import { creatorRateCardService, RateCardPackage } from '@/features/creator-studio/services/creator-rate-card.service';
+import { extractErrorMessage } from '@/lib/api-client';
 
 const schema = z.object({
-  title: z.string().trim().min(1, 'Vui lòng nhập tên dự án (tối thiểu 1 ký tự).').max(200, 'Tên dự án quá dài (tối đa 200 ký tự).'),
+  title: z.string().trim().max(200, 'Tên dự án quá dài (tối đa 200 ký tự).').optional(),
   description: z.string().trim().min(1, 'Vui lòng nhập mô tả chi tiết yêu cầu đặt vẽ.'),
   deadlineAt: z.string().optional(),
 });
@@ -64,16 +65,14 @@ export default function CreateCommissionModal({ creatorId, creatorName, onClose 
       const created = await commissionService.create({
         creatorId,
         packageId: selectedPackage.id,
-        ...values,
+        title: values.title?.trim() || `Đặt vẽ gói ${selectedPackage.name}`,
+        description: values.description,
         deadlineAt: values.deadlineAt ? new Date(values.deadlineAt).toISOString() : undefined,
       });
       onClose();
       router.push(`/client/requests/${created.id}`);
     } catch (cause) {
-      const details = axios.isAxiosError(cause) ? cause.response?.data?.error?.details : undefined;
-      setError(Array.isArray(details) && details.length > 0
-        ? details.join(' · ')
-        : 'Không tạo được đơn đặt vẽ. Vui lòng kiểm tra lại thông tin.');
+      setError(extractErrorMessage(cause, 'Không tạo được đơn đặt vẽ. Vui lòng kiểm tra lại thông tin.'));
     }
     finally { setBusy(false); }
   };
@@ -92,8 +91,8 @@ export default function CreateCommissionModal({ creatorId, creatorName, onClose 
 
         <form onSubmit={handleSubmit(submit)} className="min-h-0 flex-1 space-y-6 overflow-y-auto p-5 sm:p-8">
           <div className="space-y-2">
-            <label className={label} htmlFor="commission-title">TÊN DỰ ÁN <span className="text-red-400">*</span></label>
-            <input id="commission-title" className={`${field} ${errors.title ? 'border-red-500/70' : ''}`} placeholder="Ví dụ: Minh họa nhân vật Game Vô Diện" {...register('title')} />
+            <label className={label} htmlFor="commission-title">TÊN DỰ ÁN</label>
+            <input id="commission-title" className={`${field} ${errors.title ? 'border-red-500/70' : ''}`} placeholder="Ví dụ: Minh họa nhân vật Game (để trống sẽ tự lấy tên gói vẽ)" {...register('title')} />
             {errors.title && <p role="alert" className="mt-1 flex items-center gap-1.5 text-xs text-red-300"><AlertCircle className="w-3.5 h-3.5 shrink-0" /> {errors.title.message}</p>}
           </div>
 

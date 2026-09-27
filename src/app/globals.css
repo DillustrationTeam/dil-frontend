@@ -136,3 +136,106 @@ h1, h2, h3, h4, h5, h6, .font-h1 {
   scrollbar-width: thin;
   scrollbar-color: #32364f #131316;
 }
+
+/* Light Theme Mode Overrides */
+html.light,
+html.light body {
+  background-color: #f1f5f9 !important;
+  background-image: none !important;
+  color: #0f172a !important;
+}
+
+html.light div,
+html.light main,
+html.light aside,
+html.light header,
+html.light nav,
+html.light footer {
+  color: #0f172a;
+}
+
+/* Hard override for dark background utilities in light mode */
+html.light [class*="bg-[#1F2335]"],
+html.light [class*="bg-[#161926]"],
+html.light [class*="bg-[#131316]"],
+html.light [class*="bg-[#181b29]"],
+html.light [class*="bg-[#1b1b1e]"],
+html.light .bg-brand-navy {
+  background-color: #f8fafc !important;
+  color: #0f172a !important;
+}
+
+html.light header[class*="bg-[#1F2335]"],
+html.light aside[class*="bg-[#1F2335]"] {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Glass containers & card backgrounds in light mode */
+html.light .glass-container,
+html.light [class*="bg-white/5"],
+html.light [class*="bg-white/10"],
+html.light [class*="bg-white/[0.02]"],
+html.light [class*="bg-white/[0.03]"],
+html.light [class*="bg-white/[0.05]"] {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  color: #0f172a !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04) !important;
+}
+
+/* Text colors in light mode */
+html.light [class*="text-white"],
+html.light [class*="text-[#e4e1e5]"],
+html.light [class*="text-[#E4E1E5]"],
+html.light .text-on-surface {
+  color: #0f172a !important;
+}
+
+html.light [class*="text-[#919099]"],
+html.light [class*="text-[#c7c5cf]"],
+html.light [class*="text-[#C7C5CF]"],
+html.light .text-on-surface-variant,
+html.light .text-outline,
+html.light .text-slate-300,
+html.light .text-slate-400 {
+  color: #475569 !important;
+}
+
+/* Borders in light mode */
+html.light [class*="border-white/"] {
+  border-color: #e2e8f0 !important;
+}
+
+/* Input fields & Textareas in light mode */
+html.light input,
+html.light textarea,
+html.light select {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #cbd5e1 !important;
+}
+
+html.light input::placeholder,
+html.light textarea::placeholder {
+  color: #94a3b8 !important;
+}
+
+/* Dropdown menus & Floating modals in light mode */
+html.light .shadow-2xl,
+html.light [role="dialog"] {
+  background-color: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  color: #0f172a !important;
+}
+
+html.light ::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+html.light ::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+}
+
+

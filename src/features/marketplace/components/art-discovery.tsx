@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { ChangeEvent, DragEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { ImagePlus, Search, SlidersHorizontal, Sparkles, Upload, X } from 'lucide-react';
 import { marketplaceService, MarketplaceArtwork } from '../services/marketplace.service';
+import { ArtworkDetailModal } from './artwork-detail';
 
 type FeedTab = 'recommended' | 'following';
 type License = 'all' | 'personal' | 'commercial';
@@ -19,16 +20,17 @@ function contains(artwork: MarketplaceArtwork, value: string) {
   return haystack.includes(value.toLocaleLowerCase());
 }
 
-function ArtworkCard({ artwork, index }: { artwork: MarketplaceArtwork; index: number }) {
+function ArtworkCard({ artwork, index, onSelect }: { artwork: MarketplaceArtwork; index: number; onSelect: (id: string) => void }) {
   return (
-    <Link
-      href={`/artworks/${artwork.id}`}
-      className="group mb-5 block break-inside-avoid overflow-hidden rounded-3xl border border-white/10 bg-white/[0.045] transition hover:-translate-y-1 hover:border-[#A7ACD9]/60 hover:bg-white/[0.07]"
+    <button
+      type="button"
+      onClick={() => onSelect(artwork.id)}
+      className="group mb-5 block w-full text-left break-inside-avoid overflow-hidden rounded-3xl border border-white/10 bg-white/[0.045] transition hover:-translate-y-1 hover:border-[#A7ACD9]/60 hover:bg-white/[0.07]"
     >
       <div className={`relative overflow-hidden ${index % 3 === 0 ? 'aspect-[4/5]' : index % 3 === 1 ? 'aspect-square' : 'aspect-[4/4.7]'}`}>
         <Image src={artwork.thumbnailUrl || artwork.imageUrl} alt={artwork.title} fill unoptimized className="object-cover transition duration-700 group-hover:scale-105" />
         <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#121525]/85 to-transparent p-4 pt-16 opacity-0 transition group-hover:opacity-100">
-          <span className="text-xs text-white">Xem tác phẩm</span>
+          <span className="text-xs font-medium text-white">Xem chi tiết tác phẩm</span>
         </div>
       </div>
       <div className="space-y-2 p-4">
@@ -41,11 +43,11 @@ function ArtworkCard({ artwork, index }: { artwork: MarketplaceArtwork; index: n
         </div>
         {artwork.tags?.length ? <div className="flex flex-wrap gap-1.5">{artwork.tags.slice(0, 3).map((tag) => <span key={tag} className="rounded-full bg-[#A7ACD9]/10 px-2 py-1 text-[10px] text-[#C7C5CF]">#{tag}</span>)}</div> : null}
       </div>
-    </Link>
+    </button>
   );
 }
 
-function ImageSearchModal({ artworks, onClose }: { artworks: MarketplaceArtwork[]; onClose: () => void }) {
+function ImageSearchModal({ artworks, onClose, onSelectArtwork }: { artworks: MarketplaceArtwork[]; onClose: () => void; onSelectArtwork: (id: string) => void }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -79,7 +81,7 @@ function ImageSearchModal({ artworks, onClose }: { artworks: MarketplaceArtwork[
         {preview ? <Image src={preview} alt="Ảnh tham khảo đã tải lên" fill unoptimized className="object-cover opacity-65" /> : null}
         <span className="relative z-10 rounded-2xl bg-[#A7ACD9]/20 p-4"><Upload className="h-7 w-7 text-[#D7DBFF]" /></span><span className="relative z-10 mt-4 text-sm font-semibold text-white">Kéo thả ảnh vào đây hoặc chọn ảnh</span><span className="relative z-10 mt-1 text-xs text-[#C7C5CF]">PNG, JPG, WEBP · tối đa 10 MB</span><input ref={inputRef} className="hidden" type="file" accept="image/png,image/jpeg,image/webp" onChange={upload} />
       </button>
-      {preview && <div className="mt-7"><div className="mb-4 flex items-center gap-2"><Sparkles className="h-4 w-4 text-[#A7ACD9]" /><h3 className="font-h1 text-lg font-semibold text-white">Tác phẩm gợi ý</h3><span className="text-xs text-[#C7C5CF]">{resultItems.length} kết quả tương đồng</span></div><div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">{resultItems.slice(0, 8).map((artwork) => <Link key={artwork.id} href={`/artworks/${artwork.id}`} onClick={onClose} className="group overflow-hidden rounded-2xl border border-white/10 bg-white/5"><div className="relative aspect-square"><Image src={artwork.thumbnailUrl || artwork.imageUrl} alt={artwork.title} fill unoptimized className="object-cover transition group-hover:scale-105" /></div><p className="truncate p-2 text-xs text-white">{artwork.title}</p></Link>)}</div></div>}
+      {preview && <div className="mt-7"><div className="mb-4 flex items-center gap-2"><Sparkles className="h-4 w-4 text-[#A7ACD9]" /><h3 className="font-h1 text-lg font-semibold text-white">Tác phẩm gợi ý</h3><span className="text-xs text-[#C7C5CF]">{resultItems.length} kết quả tương đồng</span></div><div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">{resultItems.slice(0, 8).map((artwork) => <button key={artwork.id} type="button" onClick={() => { onClose(); onSelectArtwork(artwork.id); }} className="group overflow-hidden rounded-2xl border border-white/10 bg-white/5 text-left"><div className="relative aspect-square"><Image src={artwork.thumbnailUrl || artwork.imageUrl} alt={artwork.title} fill unoptimized className="object-cover transition group-hover:scale-105" /></div><p className="truncate p-2 text-xs text-white">{artwork.title}</p></button>)}</div></div>}
     </div>
   </div>;
 }
@@ -96,6 +98,7 @@ export function ArtDiscovery({ initialSearch = false }: { initialSearch?: boolea
   const [onlyOpenSlots, setOnlyOpenSlots] = useState(false);
   const [showFilters, setShowFilters] = useState(initialSearch);
   const [showImageSearch, setShowImageSearch] = useState(false);
+  const [selectedArtworkId, setSelectedArtworkId] = useState<string | null>(null);
 
   useEffect(() => {
     const loadHome = async () => {
@@ -137,6 +140,9 @@ export function ArtDiscovery({ initialSearch = false }: { initialSearch?: boolea
     <div className="mb-6 flex flex-col gap-3 lg:flex-row"><div className="flex flex-1 items-center gap-3 rounded-2xl border border-white/10 bg-[#171a2a] px-4 py-3 focus-within:border-[#A7ACD9]/70"><Search className="h-5 w-5 text-[#A7ACD9]" /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Tìm tác phẩm, nghệ sĩ hoặc phong cách..." className="w-full bg-transparent text-sm text-white outline-none placeholder:text-[#919099]" /></div><button onClick={() => setShowFilters((value) => !value)} className={`inline-flex items-center justify-center gap-2 rounded-2xl border px-5 py-3 text-sm font-medium transition ${showFilters ? 'border-[#A7ACD9] bg-[#A7ACD9]/15 text-white' : 'border-white/10 bg-white/5 text-[#C7C5CF] hover:border-[#A7ACD9]/60'}`}><SlidersHorizontal className="h-4 w-4" />Bộ lọc</button></div>
     {showFilters && <section className="glass-container mb-8 rounded-3xl p-5"><div className="grid gap-6 md:grid-cols-2 xl:grid-cols-5"><div><p className="mb-3 text-xs font-semibold uppercase tracking-widest text-[#A7ACD9]">Phong cách</p><div className="flex flex-wrap gap-2">{styles.map((style) => <button key={style} onClick={() => toggleStyle(style)} className={`rounded-full px-3 py-1.5 text-xs transition ${selectedStyles.includes(style) ? 'bg-[#A7ACD9] text-[#1F2335]' : 'bg-white/5 text-[#C7C5CF] hover:bg-white/10'}`}>{style}</button>)}</div></div><div><p className="mb-3 text-xs font-semibold uppercase tracking-widest text-[#A7ACD9]">Khoảng giá</p><div className="flex gap-2"><input aria-label="Giá tối thiểu" placeholder="Từ" className="min-w-0 rounded-xl border border-white/10 bg-[#171a2a] px-3 py-2 text-xs outline-none focus:border-[#A7ACD9]" /><input aria-label="Giá tối đa" placeholder="Đến" className="min-w-0 rounded-xl border border-white/10 bg-[#171a2a] px-3 py-2 text-xs outline-none focus:border-[#A7ACD9]" /></div></div><div><p className="mb-3 text-xs font-semibold uppercase tracking-widest text-[#A7ACD9]">Đánh giá</p><select className="w-full rounded-xl border border-white/10 bg-[#171a2a] px-3 py-2 text-xs outline-none"><option>Tất cả đánh giá</option><option>4★ trở lên</option><option>4.5★ trở lên</option></select></div><label className="flex cursor-pointer items-center gap-3 pt-6 text-sm text-[#C7C5CF]"><input checked={onlyOpenSlots} onChange={(event) => setOnlyOpenSlots(event.target.checked)} type="checkbox" className="h-4 w-4 accent-[#A7ACD9]" />Artist còn slot</label><div><p className="mb-3 text-xs font-semibold uppercase tracking-widest text-[#A7ACD9]">Bản quyền</p><select value={license} onChange={(event) => setLicense(event.target.value as License)} className="w-full rounded-xl border border-white/10 bg-[#171a2a] px-3 py-2 text-xs outline-none"><option value="all">Tất cả</option><option value="personal">Cá nhân</option><option value="commercial">Thương mại</option></select></div></div></section>}
     <div className="mb-6 flex flex-wrap items-center justify-between gap-4"><div className="flex rounded-full bg-white/5 p-1">{([['recommended', 'Dành cho bạn'], ['following', 'Đang theo dõi']] as const).map(([tab, label]) => <button key={tab} onClick={() => setFeedTab(tab)} className={`rounded-full px-4 py-2 text-sm transition ${feedTab === tab ? 'bg-[#A7ACD9] font-semibold text-[#1F2335]' : 'text-[#C7C5CF] hover:text-white'}`}>{tab === 'recommended' && <Sparkles className="mr-1 inline h-3.5 w-3.5" />}{label}</button>)}</div><p className="text-sm text-[#C7C5CF]">{displayed.length} tác phẩm phù hợp</p></div>
-    {loading ? <div className="rounded-3xl border border-white/10 bg-white/5 p-12 text-center text-sm text-[#C7C5CF]">Đang tải chợ tranh...</div> : displayed.length ? <div className="columns-1 gap-5 sm:columns-2 lg:columns-3 xl:columns-4">{displayed.map((artwork, index) => <ArtworkCard key={artwork.id} artwork={artwork} index={index} />)}</div> : <div className="rounded-3xl border border-dashed border-white/15 bg-white/[.03] p-12 text-center"><p className="font-h1 text-lg text-white">Chưa tìm thấy tác phẩm phù hợp</p><button onClick={() => { setQuery(''); setSelectedStyles([]); setLicense('all'); setOnlyOpenSlots(false); }} className="mt-3 text-sm text-[#A7ACD9] hover:underline">Xóa bộ lọc</button></div>}
-  </div>{showImageSearch && <ImageSearchModal artworks={artworks} onClose={() => setShowImageSearch(false)} />}</main>;
+    {loading ? <div className="rounded-3xl border border-white/10 bg-white/5 p-12 text-center text-sm text-[#C7C5CF]">Đang tải chợ tranh...</div> : displayed.length ? <div className="columns-1 gap-5 sm:columns-2 lg:columns-3 xl:columns-4">{displayed.map((artwork, index) => <ArtworkCard key={artwork.id} artwork={artwork} index={index} onSelect={setSelectedArtworkId} />)}</div> : <div className="rounded-3xl border border-dashed border-white/15 bg-white/[.03] p-12 text-center"><p className="font-h1 text-lg text-white">Chưa tìm thấy tác phẩm phù hợp</p><button onClick={() => { setQuery(''); setSelectedStyles([]); setLicense('all'); setOnlyOpenSlots(false); }} className="mt-3 text-sm text-[#A7ACD9] hover:underline">Xóa bộ lọc</button></div>}
+  </div>
+  {showImageSearch && <ImageSearchModal artworks={artworks} onClose={() => setShowImageSearch(false)} onSelectArtwork={setSelectedArtworkId} />}
+  {selectedArtworkId && <ArtworkDetailModal id={selectedArtworkId} onClose={() => setSelectedArtworkId(null)} />}
+  </main>;
 }

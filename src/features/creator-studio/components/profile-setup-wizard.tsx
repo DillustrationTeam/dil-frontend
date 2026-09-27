@@ -99,7 +99,7 @@ export function ProfileSetupWizard() {
       });
 
       toast.success('Profile setup saved successfully.');
-      router.push('/creator/rate-card');
+      router.push('/creator/services');
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unable to save your profile.';
       toast.error(message);

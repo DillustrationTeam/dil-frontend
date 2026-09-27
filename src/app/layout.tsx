@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Toaster } from "react-hot-toast";
+import { LanguageProvider } from "@/context/language-context";
+import { AiAssistantLauncher } from "@/features/navigation";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -24,8 +26,11 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col text-[#E4E1E5]">
-        {children}
-        <Toaster position="top-right" toastOptions={{ duration: 4000 }} />
+        <LanguageProvider>
+          {children}
+          <AiAssistantLauncher />
+          <Toaster position="top-right" toastOptions={{ duration: 4000 }} />
+        </LanguageProvider>
       </body>
     </html>
   );
