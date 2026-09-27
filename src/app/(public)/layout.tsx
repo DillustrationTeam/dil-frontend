@@ -22,6 +22,8 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
     toast.success('Signed out successfully.');
   };
 
+  const isAdmin = roles.some((r) => ['Administrator', 'Admin', 'Moderator'].includes(r));
+
   return (
     <div className="min-h-screen bg-[#1F2335] text-[#e4e1e5] font-body selection:bg-[#A7ACD9]/30 selection:text-white">
       {/* Top Navigation */}
@@ -76,13 +78,13 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
                     triggerClassName="p-2 rounded-full hover:bg-[#c2c7f6]/10 transition-all active:scale-95 text-[#c2c7f6]"
                   />
 
-                  {/* Go to Studio */}
+                  {/* Go to Studio / Admin Center */}
                   <Link
-                    href="/client/commissions"
+                    href={isAdmin ? '/admin' : '/client/commissions'}
                     className="hidden sm:flex items-center gap-2 px-4 py-2 bg-[#A7ACD9] text-[#1F2335] rounded-full font-semibold text-xs hover:opacity-90 transition-all active:scale-95"
                   >
-                    <span className="material-symbols-outlined text-base">dashboard</span>
-                    Studio
+                    <span className="material-symbols-outlined text-base">{isAdmin ? 'admin_panel_settings' : 'dashboard'}</span>
+                    {isAdmin ? 'Admin Center' : 'Studio'}
                   </Link>
 
                   {/* User menu */}
@@ -110,12 +112,12 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
                           <p className="text-[10px] text-[#A7ACD9]">{user.email}</p>
                         </div>
                         <Link
-                          href="/client/commissions"
+                          href={isAdmin ? '/admin' : '/client/commissions'}
                           className="flex items-center gap-2 px-3 py-2 text-xs text-[#e4e1e5] hover:bg-white/10 rounded-xl transition-colors"
                           onClick={() => setIsMenuOpen(false)}
                         >
-                          <span className="material-symbols-outlined text-sm text-[#A7ACD9]">dashboard</span>
-                          My Studio
+                          <span className="material-symbols-outlined text-sm text-[#A7ACD9]">{isAdmin ? 'admin_panel_settings' : 'dashboard'}</span>
+                          {isAdmin ? 'Admin Center' : 'My Studio'}
                         </Link>
                         {!roles.includes('Creator') && (
                           <Link
@@ -127,7 +129,7 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
                             <span>Trở thành Creator</span>
                           </Link>
                         )}
-                        {(roles.includes('Administrator') || roles.includes('Moderator')) && (
+                        {isAdmin && (
                           <Link
                             href="/admin/creator-verifications"
                             onClick={() => setIsMenuOpen(false)}

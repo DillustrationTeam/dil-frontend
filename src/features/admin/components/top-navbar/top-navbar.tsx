@@ -53,6 +53,7 @@ export function AdminTopNavbar({
               width={140}
               height={44}
               priority
+              style={{ width: 'auto' }}
               className="h-9 md:h-11 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
             />
           </Link>

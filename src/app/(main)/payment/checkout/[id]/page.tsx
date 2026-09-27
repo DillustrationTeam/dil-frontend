@@ -10,6 +10,7 @@ import { useAuthStore } from '@/store/use-auth-store';
 import { walletService } from '@/services/wallet.service';
 import { apiClient } from '@/lib/api-client';
 import { LockKeyhole, ShieldCheck, Wallet, Zap } from 'lucide-react';
+import { VoucherApplyPanel } from '@/features/payment';
 
 const money = (value: number) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
 
@@ -88,6 +89,18 @@ export default function CheckoutPage() {
           </div>
         )}
       </section>
+      
+      {canDeposit && (
+        <VoucherApplyPanel
+          refType="Commission"
+          refId={commission.id}
+          orderAmount={commission.finalPrice ?? 0}
+          onApplied={(result) => {
+            setCommission(prev => prev ? { ...prev, finalPrice: result.finalAmount } : null);
+            toast.success(`Đã áp dụng mã ${result.voucherCode}! Tiền ký quỹ giảm còn ${money(result.finalAmount)}.`);
+          }}
+        />
+      )}
       <section className="flex items-start gap-3 border-t border-white/10 pt-5 text-xs"><ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-[#A7ACD9]" /><div className="space-y-1"><h4 className="font-h1 font-bold text-white text-sm">Escrow protection</h4><p className="text-[#8A8FA9] leading-relaxed">Tiền nạp qua payOS vào ví. Khoản ký quỹ được giữ cho đơn và trả Creator theo từng cột mốc Client duyệt.</p></div></section>
       {error && <p role="alert" className="rounded-xl border border-red-400/30 bg-red-400/10 px-4 py-3 text-xs text-red-200">{error}</p>}
       {canDeposit ? <button disabled={loading || balance === null || gap > 0} onClick={deposit} className="commission-primary flex w-full items-center justify-center gap-2 rounded-2xl py-4 text-xs font-extrabold transition-all disabled:opacity-50"><LockKeyhole className="h-4 w-4" />{loading ? 'Đang xử lý…' : `Xác nhận ký quỹ ${money(commission.finalPrice ?? 0)}`}</button> : <div className="rounded-xl border border-white/10 bg-white/[0.035] p-5 text-center"><p className="text-xs text-[#8A8FA9]">Đơn chưa thể ký quỹ hoặc đã được ký quỹ.</p><Link href={commission.status === 'PendingAcceptance' || commission.status === 'Negotiating' ? `/client/requests/${id}` : `/workroom/${id}`} className="mt-3 inline-block text-xs text-[#C5C9F8] underline">{commission.status === 'PendingAcceptance' || commission.status === 'Negotiating' ? 'Xem yêu cầu' : 'Xem Workroom'}</Link></div>}

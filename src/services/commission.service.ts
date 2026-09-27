@@ -88,4 +88,12 @@ export const commissionService = {
     const res = await apiClient.post<ApiResponse<unknown>>(`/commissions/${id}/reviews/reply`, { replyComment });
     return res.data.data;
   },
+  createDispute: async (id: string, payload: { reason: string; evidenceUrls?: string[] }) => {
+    const res = await apiClient.post<ApiResponse<unknown>>(`/commissions/${id}/disputes`, payload);
+    return res.data.data;
+  },
+  getDispute: async (id: string) => {
+    const res = await apiClient.get<ApiResponse<unknown>>(`/commissions/${id}/disputes`);
+    return res.data.data;
+  },
 };

@@ -10,6 +10,7 @@ import axios from 'axios';
 import { commissionService } from '@/services/commission.service';
 import { creatorRateCardService, RateCardPackage } from '@/features/creator-studio/services/creator-rate-card.service';
 import { extractErrorMessage } from '@/lib/api-client';
+import { VoucherApplyPanel } from '@/features/payment';
 
 const schema = z.object({
   title: z.string().trim().max(200, 'Tên dự án quá dài (tối đa 200 ký tự).').optional(),
@@ -130,18 +131,27 @@ export default function CreateCommissionModal({ creatorId, creatorName, onClose 
             {packageError && <p role="alert" className="mt-1.5 flex items-center gap-1.5 text-xs text-red-300 font-medium"><AlertCircle className="w-3.5 h-3.5 shrink-0" /> {packageError}</p>}
 
             {selectedPackage && (
-              <div className="rounded-xl border border-white/10 bg-black/20 p-4">
-                <h3 className="text-xs font-bold text-white">Kế hoạch các mốc vẽ (Milestone plan)</h3>
-                <ol className="mt-3 space-y-2">
-                  {selectedPackage.milestones.map(stage => (
-                    <li key={stage.sequence} className="flex justify-between gap-3 text-xs text-slate-300">
-                      <span>{stage.sequence}. {stage.title}</span>
-                      <span>{money(stage.price)}</span>
-                    </li>
-                  ))}
-                </ol>
-                <p className="mt-3 text-xs text-[#8A8FA9]">File gốc HD được bàn giao sau khi duyệt xong tất cả các bản phác thảo.</p>
-              </div>
+              <>
+                <div className="rounded-xl border border-white/10 bg-black/20 p-4">
+                  <h3 className="text-xs font-bold text-white">Kế hoạch các mốc vẽ (Milestone plan)</h3>
+                  <ol className="mt-3 space-y-2">
+                    {selectedPackage.milestones.map(stage => (
+                      <li key={stage.sequence} className="flex justify-between gap-3 text-xs text-slate-300">
+                        <span>{stage.sequence}. {stage.title}</span>
+                        <span>{money(stage.price)}</span>
+                      </li>
+                    ))}
+                  </ol>
+                  <p className="mt-3 text-xs text-[#8A8FA9]">File gốc HD được bàn giao sau khi duyệt xong tất cả các bản phác thảo.</p>
+                </div>
+
+                <div className="pt-2">
+                  <VoucherApplyPanel
+                    refType="Commission"
+                    orderAmount={selectedPackage.price}
+                  />
+                </div>
+              </>
             )}
           </fieldset>
 

@@ -21,6 +21,11 @@ import {
   Paperclip,
   RefreshCw,
   Send,
+  AlertCircle,
+  AlertTriangle,
+  Ban,
+  Scale,
+  ShieldAlert,
   ShieldCheck,
   Sparkles,
   TrendingUp,
@@ -49,6 +54,7 @@ import ApprovalRevisionModal from '@/components/modals/ApprovalRevisionModal';
 import FinalDeliveryModal from '@/components/modals/FinalDeliveryModal';
 import ReviewRatingModal from '@/components/modals/ReviewRatingModal';
 import CancelRefundModal from '@/components/modals/CancelRefundModal';
+import RaiseDisputeModal from '@/components/modals/RaiseDisputeModal';
 
 /** Tin nhắn đã hiện trên UI nhưng server chưa phát lại (chờ SignalR). */
 interface PendingMessage {
@@ -103,6 +109,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
   const [showDeliveryModal, setShowDeliveryModal] = useState(false);
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
+  const [showDisputeModal, setShowDisputeModal] = useState(false);
 
   // AI Deadline Risk Predictor
   const [predictingRisk, setPredictingRisk] = useState(false);
@@ -852,6 +859,30 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                       <span className={`inline-block size-2 rounded-full ${autoTranslate ? 'bg-brand-periwinkle animate-pulse' : 'bg-white/20'}`} />
                     </button>
 
+                    {/* Nút Khiếu Nại Tranh Chấp (Icon Scale Cái cân Trọng tài) */}
+                    {commissionStatus !== 'Completed' && commissionStatus !== 'Cancelled' && commissionStatus !== 'Disputed' && (
+                      <button
+                        type="button"
+                        onClick={() => setShowDisputeModal(true)}
+                        title="Gửi khiếu nại tranh chấp với Trọng tài sàn"
+                        className="group relative flex size-9 shrink-0 items-center justify-center border border-amber-500/40 bg-[#1C202D] hover:bg-[#232838] hover:border-amber-400 text-amber-400 transition shadow-md [clip-path:polygon(10px_0,100%_0,100%_100%,0_100%,0_10px)]"
+                      >
+                        <Scale size={18} className="text-amber-400 group-hover:scale-110 transition-transform" />
+                      </button>
+                    )}
+
+                    {/* Nút Hủy đơn hàng (Icon Ban Hủy đơn) */}
+                    {commissionStatus !== 'Completed' && commissionStatus !== 'Cancelled' && commissionStatus !== 'Disputed' && (
+                      <button
+                        type="button"
+                        onClick={() => setShowCancelModal(true)}
+                        title="Hủy đơn hàng & Hoàn tiền Escrow"
+                        className="inline-flex items-center gap-1.5 rounded-full border border-rose-500/40 bg-rose-500/10 px-2.5 py-1 text-[11px] font-semibold text-rose-300 hover:bg-rose-500/20 transition"
+                      >
+                        <Ban size={12} className="text-rose-400" /> Hủy đơn
+                      </button>
+                    )}
+
                     <button
                       type="button"
                       onClick={refresh}
@@ -863,7 +894,22 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                   </div>
                 </div>
 
-                {/* CẢNH BÁO BẢN GHI KẸP GIẤY */}
+                {/* BANNER CẢNH BÁO KHI ĐANG TRANH CHẤP (DISPUTED) */}
+                {commissionStatus === 'Disputed' && (
+                  <div className="relative z-10 my-3 border border-amber-500/40 bg-amber-500/15 p-3.5 text-xs text-amber-200 flex items-start gap-2.5 shadow-lg [clip-path:polygon(0_0,calc(100%-12px)_0,100%_12px,100%_100%,0_100%)]">
+                    <div className="shrink-0 p-1 bg-amber-500/20 rounded-md text-amber-300 border border-amber-400/40">
+                      <ShieldAlert size={16} />
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-h1 font-bold text-amber-300 text-xs uppercase tracking-wider">Đơn hàng đang trong quá trình khiếu nại tranh chấp (Disputed)</p>
+                      <p className="text-[11px] text-amber-100/90 leading-relaxed mt-0.5">
+                        Hồ sơ khiếu nại đã được chuyển đến Ban Trọng tài sàn để thẩm định lịch sử trao đổi và sản phẩm. Tiền ký quỹ Escrow được tạm khóa an toàn cho đến khi có phán quyết chính thức.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* CẢNH BÁO BẢO VỆ ESCROW */}
                 <div className="relative z-10 my-3 border border-brand-periwinkle/30 bg-brand-periwinkle/10 p-3 text-xs text-on-surface flex items-start gap-2.5 shadow-lg [clip-path:polygon(0_0,calc(100%-12px)_0,100%_12px,100%_100%,0_100%)]">
                   <div className="shrink-0 p-1 bg-brand-periwinkle/20 rounded-md text-brand-periwinkle border border-brand-periwinkle/40">
                     <ShieldCheck size={16} />
@@ -1074,6 +1120,16 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                   />
 
                   <form onSubmit={handleSendMessage} className="flex items-center gap-2">
+                    {/* Nút Khiếu Nại Tranh Chấp (Icon Scale Cái cân Trọng tài - Vị trí góc dưới bên trái) */}
+                    <button
+                      type="button"
+                      onClick={() => setShowDisputeModal(true)}
+                      title="Gửi khiếu nại tranh chấp với Trọng tài sàn"
+                      className="group relative flex size-10 shrink-0 items-center justify-center border border-amber-500/40 bg-[#1C202D] hover:bg-[#232838] hover:border-amber-400 text-amber-400 transition shadow-md [clip-path:polygon(10px_0,100%_0,100%_100%,0_100%,0_10px)]"
+                    >
+                      <Scale size={18} className="text-amber-400 group-hover:scale-110 transition-transform" />
+                    </button>
+
                     <button
                       type="button"
                       disabled={uploading || isChatDisabled}
@@ -1152,6 +1208,23 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                       <Clock size={18} className={rightPageView === 'milestones' ? 'text-purple-300' : 'text-purple-400 group-hover:text-purple-300'} />
                     </div>
                   </button>
+
+                  {/* Tab 3: KHIẾU NẠI TRANH CHẤP */}
+                  {commissionStatus !== 'Completed' && commissionStatus !== 'Cancelled' && commissionStatus !== 'Disputed' && (
+                    <button
+                      type="button"
+                      onClick={() => setShowDisputeModal(true)}
+                      title="Gửi khiếu nại tranh chấp với Trọng tài"
+                      className="group relative w-[40px] sm:w-[42px] h-[52px] hover:h-[115px] bg-[#1C202D] hover:bg-[#232838] border border-t-0 border-amber-500/40 hover:border-amber-400 cursor-pointer overflow-hidden flex flex-col items-center justify-end pb-3 shadow-lg [clip-path:polygon(0_0,100%_0,100%_calc(100%-10px),50%_100%,0_calc(100%-10px))] [transition:height_0.32s_cubic-bezier(0.34,1.45,0.7,1),background-color_0.25s_ease,border-color_0.25s_ease]"
+                    >
+                      <span className="[writing-mode:vertical-rl] [text-orientation:mixed] rotate-180 text-[10px] font-extrabold tracking-wider transition-opacity duration-200 mb-2 pointer-events-none whitespace-nowrap select-none opacity-0 group-hover:opacity-100 text-amber-300">
+                        KHIẾU NẠI
+                      </span>
+                      <div className="flex items-center justify-center shrink-0">
+                        <Scale size={18} className="text-amber-400 group-hover:text-amber-300" />
+                      </div>
+                    </button>
+                  )}
                 </div>
 
                 {/* VIEW 1: DEFAULT STUDIO CANVAS VIEW */}
@@ -1636,6 +1709,17 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
             onSuccess={() => {
               setShowCancelModal(false);
               refresh();
+            }}
+          />
+
+          <RaiseDisputeModal
+            isOpen={showDisputeModal}
+            onClose={() => setShowDisputeModal(false)}
+            commissionId={room.commissionId}
+            onSuccess={() => {
+              setShowDisputeModal(false);
+              refresh();
+              void chat.sendMessage('⚖️ Đã gửi yêu cầu khiếu nại tranh chấp tới Trọng tài sàn.', 'SystemEvent').catch(() => null);
             }}
           />
         </>

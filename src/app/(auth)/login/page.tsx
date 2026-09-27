@@ -97,6 +97,7 @@ export default function LoginPage() {
                   width={220}
                   height={112}
                   priority
+                  style={{ width: 'auto' }}
                   className="h-24 md:h-28 w-auto object-contain drop-shadow-[0_0_20px_rgba(194,199,246,0.4)] hover:scale-105 transition-transform"
                 />
               </Link>

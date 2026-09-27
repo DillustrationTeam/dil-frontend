@@ -161,6 +161,7 @@ export default function RegisterPage() {
               width={220}
               height={112}
               priority
+              style={{ width: 'auto' }}
               className="h-24 md:h-28 w-auto object-contain drop-shadow-[0_0_20px_rgba(194,199,246,0.4)] group-hover:scale-105 transition-transform"
             />
           </Link>

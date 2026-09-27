@@ -32,6 +32,7 @@ export function SiteHeader() {
   const router = useRouter();
   const { user, roles, refreshToken, isAuthenticated, clearAuth } = useAuthStore();
   const { t } = useLanguage();
+  const isAdmin = roles.some((r) => ['Administrator', 'Admin', 'Moderator'].includes(r));
 
   const [searchOpen, setSearchOpen] = useState(false);
   const [keyword, setKeyword] = useState('');
@@ -244,12 +245,12 @@ export function SiteHeader() {
                   </Link>
 
                   <Link
-                    href="/client/commissions"
+                    href={isAdmin ? '/admin' : '/client/commissions'}
                     onClick={() => setMenuOpen(false)}
                     className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs text-[#c7c5cf] transition-colors hover:bg-white/10 hover:text-white"
                   >
-                    <span className="material-symbols-outlined text-base text-[#c2c7f6]">folder_open</span>
-                    <span>{t('My Commissions')}</span>
+                    <span className="material-symbols-outlined text-base text-[#c2c7f6]">{isAdmin ? 'admin_panel_settings' : 'folder_open'}</span>
+                    <span>{isAdmin ? 'Admin Center' : t('My Commissions')}</span>
                   </Link>
 
                   {(roles.includes('Creator') || roles.includes('creator')) && (
@@ -282,7 +283,7 @@ export function SiteHeader() {
                       <span>{t('Trở thành Creator')}</span>
                     </Link>
                   )}
-                  {(roles.includes('Administrator') || roles.includes('Moderator')) && (
+                  {isAdmin && (
                     <Link
                       href="/admin/creator-verifications"
                       onClick={() => setMenuOpen(false)}

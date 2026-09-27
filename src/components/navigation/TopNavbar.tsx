@@ -36,6 +36,7 @@ export default function TopNavbar({
   const router = useRouter();
 
   const isCreator = roles.includes('Creator') || roles.includes('creator');
+  const isAdmin = roles.some((r) => ['Administrator', 'Admin', 'Moderator'].includes(r));
 
   const handleSignOut = () => {
     clearAuth();
@@ -54,6 +55,7 @@ export default function TopNavbar({
             width={180}
             height={48}
             priority
+            style={{ width: 'auto' }}
             className="h-11 md:h-12 w-auto object-contain transition-transform group-hover:scale-105"
           />
         </Link>
@@ -127,11 +129,11 @@ export default function TopNavbar({
                 <Wallet className="w-4 h-4 text-[#A7ACD9]" /> {t('Ví của tôi')}
               </Link>
               <Link
-                href="/client/commissions"
+                href={isAdmin ? '/admin' : '/client/commissions'}
                 onClick={() => setShowProfileMenu(false)}
                 className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs text-[#e4e1e5] hover:text-white hover:bg-white/5 transition-colors"
               >
-                <User className="w-4 h-4 text-[#A7ACD9]" /> {t('My Commissions')}
+                <User className="w-4 h-4 text-[#A7ACD9]" /> {isAdmin ? 'Admin Center' : t('My Commissions')}
               </Link>
               {isCreator && (
                 <Link
@@ -140,6 +142,15 @@ export default function TopNavbar({
                   className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs text-[#e4e1e5] hover:text-white hover:bg-white/5 transition-colors"
                 >
                   <Palette className="w-4 h-4 text-[#A7ACD9]" /> {t('Creator Dashboard')}
+                </Link>
+              )}
+              {isAdmin && (
+                <Link
+                  href="/admin/creator-verifications"
+                  onClick={() => setShowProfileMenu(false)}
+                  className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs text-red-300 hover:text-white hover:bg-white/5 transition-colors"
+                >
+                  <ShieldCheck className="w-4 h-4 text-red-400" /> Duyệt đơn Creator
                 </Link>
               )}
               <Link

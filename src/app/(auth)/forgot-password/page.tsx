@@ -110,7 +110,7 @@ export default function ForgotPasswordPage() {
       {/* Header */}
       <header className="w-full flex justify-between items-center z-10">
         <Link href="/" className="flex items-center gap-3">
-          <Image src="/studiologo.png" alt="dillustration" width={160} height={40} className="h-10 w-auto object-contain" />
+          <Image src="/studiologo.png" alt="dillustration" width={160} height={40} style={{ width: 'auto' }} className="h-10 w-auto object-contain" />
         </Link>
       </header>
 
