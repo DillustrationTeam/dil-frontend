@@ -18,6 +18,7 @@ import {
 import { useAuthStore } from '@/store/use-auth-store';
 import { useRouter } from 'next/navigation';
 import { useLanguage } from '@/context/language-context';
+import { NotificationBell } from '@/features/notification';
 
 interface TopNavbarProps {
   currentRole?: 'client' | 'creator';
@@ -87,11 +88,10 @@ export default function TopNavbar({
         )}
 
         {/* Notifications */}
-        <button className="relative w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-300 hover:text-white hover:bg-[#c2c7f6]/10 transition-colors">
-          <Bell className="h-4 w-4 text-[#A7ACD9]" />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#A7ACD9] ring-2 ring-[#1F2335] animate-ping" />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#A7ACD9] ring-2 ring-[#1F2335]" />
-        </button>
+        <NotificationBell
+          userId={user?.id ?? null}
+          triggerClassName="relative w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-[#A7ACD9] hover:text-white hover:bg-[#c2c7f6]/10 transition-colors"
+        />
 
         {/* User Profile Menu */}
         <div className="relative">
