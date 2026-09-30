@@ -6,9 +6,10 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { X, AlertCircle } from 'lucide-react';
-import axios from 'axios';
 import { commissionService } from '@/services/commission.service';
 import { creatorRateCardService, RateCardPackage } from '@/features/creator-studio/services/creator-rate-card.service';
+import { creatorProfileService } from '@/features/creator-studio/services/creator-profile.service';
+import { CreatorTermsDto } from '@/features/creator-studio/types/creator-profile.types';
 import { extractErrorMessage } from '@/lib/api-client';
 import { VoucherApplyPanel } from '@/features/payment';
 
@@ -28,6 +29,8 @@ export default function CreateCommissionModal({ creatorId, creatorName, onClose 
   const [packages, setPackages] = useState<RateCardPackage[]>([]);
   const [loadingPackages, setLoadingPackages] = useState(true);
   const [selectedPackageId, setSelectedPackageId] = useState('');
+  const [licenseType, setLicenseType] = useState<'Personal' | 'Commercial'>('Personal');
+  const [terms, setTerms] = useState<CreatorTermsDto | null>(null);
   const [packageError, setPackageError] = useState<string | null>(null);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
@@ -37,11 +40,15 @@ export default function CreateCommissionModal({ creatorId, creatorName, onClose 
     defaultValues: { title: '', description: '', deadlineAt: '' },
   });
   const selectedPackage = packages.find(item => item.id === selectedPackageId);
+  const multiplier = licenseType === 'Commercial' ? terms?.commercialLicenseMultiplier ?? 1.5 : 1;
+  const estimatedTotal = (selectedPackage?.price ?? 0) * multiplier;
 
   useEffect(() => {
     creatorRateCardService.get(creatorId).then(setPackages)
       .catch(() => setError('Không tải được bảng giá Creator.'))
       .finally(() => setLoadingPackages(false));
+    creatorProfileService.getTerms(creatorId).then(setTerms)
+      .catch(() => setError('Không tải được điều khoản của Creator.'));
   }, [creatorId]);
 
   useEffect(() => {
@@ -66,6 +73,7 @@ export default function CreateCommissionModal({ creatorId, creatorName, onClose 
       const created = await commissionService.create({
         creatorId,
         packageId: selectedPackage.id,
+        licenseType,
         title: values.title?.trim() || `Đặt vẽ gói ${selectedPackage.name}`,
         description: values.description,
         deadlineAt: values.deadlineAt ? new Date(values.deadlineAt).toISOString() : undefined,
@@ -130,6 +138,23 @@ export default function CreateCommissionModal({ creatorId, creatorName, onClose 
             
             {packageError && <p role="alert" className="mt-1.5 flex items-center gap-1.5 text-xs text-red-300 font-medium"><AlertCircle className="w-3.5 h-3.5 shrink-0" /> {packageError}</p>}
 
+            <div className="space-y-3 border-t border-white/10 pt-5">
+              <h3 className="font-h1 text-sm font-bold text-white">MỤC ĐÍCH SỬ DỤNG</h3>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {(['Personal', 'Commercial'] as const).map(value => (
+                  <label key={value} className={`cursor-pointer rounded-xl border p-4 text-xs ${licenseType === value ? 'border-[#A7ACD9] bg-[#A7ACD9]/10' : 'border-white/10 bg-white/5'}`}>
+                    <span className="flex items-center gap-2">
+                      <input type="radio" name="license-type" checked={licenseType === value} onChange={() => setLicenseType(value)} />
+                      <strong className="text-white">{value === 'Personal' ? 'Cá nhân' : 'Thương mại'}</strong>
+                    </span>
+                    <span className="mt-2 block text-slate-400">{value === 'Personal' ? 'Không sử dụng để kinh doanh.' : `Áp dụng hệ số ${terms?.commercialLicenseMultiplier ?? 1.5}×.`}</span>
+                  </label>
+                ))}
+              </div>
+              {terms?.revisionPolicy && <p className="text-xs text-slate-400"><strong className="text-slate-300">Chính sách chỉnh sửa:</strong> {terms.revisionPolicy}</p>}
+              {terms?.cancellationPolicy && <p className="text-xs text-slate-400"><strong className="text-slate-300">Chính sách hủy:</strong> {terms.cancellationPolicy}</p>}
+            </div>
+
             {selectedPackage && (
               <>
                 <div className="rounded-xl border border-white/10 bg-black/20 p-4">
@@ -143,12 +168,17 @@ export default function CreateCommissionModal({ creatorId, creatorName, onClose 
                     ))}
                   </ol>
                   <p className="mt-3 text-xs text-[#8A8FA9]">File gốc HD được bàn giao sau khi duyệt xong tất cả các bản phác thảo.</p>
+                  <div className="mt-4 space-y-1 border-t border-white/10 pt-3 text-xs">
+                    <p className="flex justify-between text-slate-400"><span>Giá gói</span><span>{money(selectedPackage.price)}</span></p>
+                    <p className="flex justify-between text-slate-400"><span>Hệ số bản quyền</span><span>× {multiplier}</span></p>
+                    <p className="flex justify-between font-bold text-white"><span>Tổng dự kiến</span><span>{money(estimatedTotal)}</span></p>
+                  </div>
                 </div>
 
                 <div className="pt-2">
                   <VoucherApplyPanel
                     refType="Commission"
-                    orderAmount={selectedPackage.price}
+                    orderAmount={estimatedTotal}
                   />
                 </div>
               </>
@@ -158,7 +188,7 @@ export default function CreateCommissionModal({ creatorId, creatorName, onClose 
           {error && <div role="alert" className="rounded-xl border border-red-400/30 bg-red-400/10 px-4 py-3 text-xs text-red-200 flex items-center gap-2"><AlertCircle className="w-4 h-4 shrink-0" /><span>{error}</span></div>}
 
           <div className="flex justify-end border-t border-white/10 pt-5">
-            <button disabled={busy || !selectedPackage} className="rounded-xl bg-white px-8 py-3.5 text-xs font-extrabold text-[#0d0e15] shadow-xl transition-all hover:bg-[#C5C9F8] disabled:opacity-50">
+            <button disabled={busy || !selectedPackage || !terms} className="rounded-xl bg-white px-8 py-3.5 text-xs font-extrabold text-[#0d0e15] shadow-xl transition-all hover:bg-[#C5C9F8] disabled:opacity-50">
               {busy ? 'Đang gửi…' : 'Gửi yêu cầu đặt vẽ'}
             </button>
           </div>

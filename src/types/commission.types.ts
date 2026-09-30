@@ -35,6 +35,8 @@ export interface Commission {
   id: string;
   clientId: string;
   creatorId: string;
+  licenseType: 'Personal' | 'Commercial';
+  licenseMultiplierApplied: number;
   title: string;
   description?: string;
   status: CommissionStatus;
@@ -63,6 +65,7 @@ export interface RespondToCommissionPayload {
 export interface CreateCommissionPayload {
   creatorId: string;
   packageId: string;
+  licenseType: 'Personal' | 'Commercial';
   title: string;
   description: string;
   deadlineAt?: string;
