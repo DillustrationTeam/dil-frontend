@@ -49,6 +49,7 @@ const CLIENT_NAV_SECTIONS: SidebarSection[] = [
     title: 'Client Workspace',
     items: [
       { label: 'My Commissions', href: '/client/commissions', icon: FolderKanban },
+      { label: 'My Vouchers', href: '/vouchers', icon: Ticket },
       { label: 'Auctions & Trade', href: '/auctions', icon: Gavel },
       { label: 'Workroom Chat', href: '/workroom', icon: MessageSquare },
     ],
@@ -87,7 +88,7 @@ const CREATOR_NAV_SECTIONS: SidebarSection[] = [
     items: [
       { label: 'Artworks Portfolio', href: '/creator/artworks', icon: Brush },
       { label: 'Rate Card & Services', href: '/creator/rate-card', icon: LayoutGrid },
-      { label: 'My Vouchers', href: '/vouchers', icon: Ticket },
+      { label: 'My Vouchers', href: '/creator/vouchers', icon: Ticket },
       { label: 'Terms & Licensing', href: '/creator/terms', icon: ShieldCheck },
       { label: 'AI Auto-reply', href: '/creator/ai-rules', icon: Bot },
       { label: 'Asset & Presets', href: '/creator/assets', icon: Palette },
