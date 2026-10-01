@@ -13,7 +13,6 @@ import {
   Clock,
   CheckCircle,
   ListChecks,
-  Gavel,
   MessageSquare,
   Ticket,
   Brush,
@@ -25,6 +24,7 @@ import {
   ArrowUpRight,
   History,
   TrendingUp,
+  Gavel,
 } from 'lucide-react';
 
 interface SidebarItem {
@@ -50,7 +50,7 @@ const CLIENT_NAV_SECTIONS: SidebarSection[] = [
     items: [
       { label: 'My Commissions', href: '/client/commissions', icon: FolderKanban },
       { label: 'My Vouchers', href: '/vouchers', icon: Ticket },
-      { label: 'Auctions & Trade', href: '/auctions', icon: Gavel },
+      { label: 'My Auctions', href: '/my-auctions', icon: Gavel },
       { label: 'Workroom Chat', href: '/workroom', icon: MessageSquare },
     ],
   },
@@ -73,7 +73,6 @@ const CREATOR_NAV_SECTIONS: SidebarSection[] = [
       { label: 'Incoming Requests', href: '/creator/requests', icon: Clock },
       { label: 'Waitlist', href: '/creator/waitlist', icon: ListChecks },
       { label: 'Workroom Chat', href: '/workroom', icon: MessageSquare },
-      { label: 'Art Auctions', href: '/auctions', icon: Gavel },
     ],
   },
   {
