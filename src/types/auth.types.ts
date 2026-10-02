@@ -4,6 +4,10 @@ export interface UserDto {
   fullName: string;
   isVerified: boolean;
   createdAt: string;
+  avatarUrl?: string | null;
+  coverUrl?: string | null;
+  bio?: string | null;
+  socialLinks?: string[];
 }
 
 export interface TokenDto {
@@ -11,6 +15,7 @@ export interface TokenDto {
   refreshToken: string;
   accessTokenExpiresAt: string;
   refreshTokenExpiresAt: string;
+  sessionId: string;
 }
 
 export interface AuthResponseDto {
@@ -22,6 +27,24 @@ export interface AuthResponseDto {
 export interface LoginRequest {
   email: string;
   password: string;
+}
+
+export interface TwoFactorRequiredDto {
+  requiresTwoFactor: true;
+  twoFactorTicket: string;
+  email: string;
+}
+
+export type LoginResult = AuthResponseDto | TwoFactorRequiredDto;
+
+export function isTwoFactorRequired(result: LoginResult): result is TwoFactorRequiredDto {
+  return (result as TwoFactorRequiredDto).requiresTwoFactor === true;
+}
+
+export interface VerifyTwoFactorLoginRequest {
+  email: string;
+  twoFactorTicket: string;
+  code: string;
 }
 
 export interface RegisterRequest {

@@ -213,9 +213,20 @@ export function SiteHeader() {
                 aria-label="Mở menu tài khoản"
                 className={`flex cursor-pointer items-center gap-3 rounded-full border border-white/10 px-3.5 py-1.5 transition-all hover:border-[#A7ACD9] ${focusRing}`}
               >
-                <span className="flex size-8 items-center justify-center rounded-full bg-[#A7ACD9] text-xs font-bold text-[#1F2335]">
-                  {user.fullName.charAt(0).toUpperCase()}
-                </span>
+                {user.avatarUrl ? (
+                  <Image
+                    src={user.avatarUrl}
+                    alt={user.fullName}
+                    width={32}
+                    height={32}
+                    unoptimized
+                    className="size-8 rounded-lg object-cover"
+                  />
+                ) : (
+                  <span className="flex size-8 items-center justify-center rounded-lg bg-[#A7ACD9] text-xs font-bold text-[#1F2335]">
+                    {user.fullName.charAt(0).toUpperCase()}
+                  </span>
+                )}
                 <span className="hidden text-left xl:block">
                   <span className="block text-xs font-bold leading-tight text-white">{user.fullName}</span>
                   <span className="block text-[10px] uppercase tracking-wider text-[#A7ACD9]">
@@ -263,6 +274,15 @@ export function SiteHeader() {
                       <span>{t('Creator Dashboard')}</span>
                     </Link>
                   )}
+
+                  <Link
+                    href={`/clients/${user.id}`}
+                    onClick={() => setMenuOpen(false)}
+                    className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs text-[#c7c5cf] transition-colors hover:bg-white/10 hover:text-white"
+                  >
+                    <span className="material-symbols-outlined text-base text-[#c2c7f6]">person</span>
+                    <span>{t('Hồ sơ của tôi')}</span>
+                  </Link>
 
                   <Link
                     href="/settings"
