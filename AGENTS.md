@@ -12,7 +12,7 @@
 3. **Dual-Role Model**: Users are `Client` by default. Creating a `CreatorProfile` adds `Creator` role (User holds BOTH `["Client", "Creator"]`).
 4. **API Integration**: Use `apiClient` (`src/lib/api-client.ts`). Backend base URL: `http://localhost:5075/api/v1`. Unwraps `{ data, meta, error }` Envelope.
 5. **Feature-based Structure**: Code organized under `src/features/<feature>/` (components, hooks, services, store, types). Import via barrel `@/features/<feature>`.
-6. **Feature Ownership**: See `docs/06-feature-ownership.md` for module assignments — respect feature boundaries to prevent Git conflicts.
+6. **Feature Ownership**: See `docs/07-feature-ownership.md` for module assignments — respect feature boundaries to prevent Git conflicts.
 7. **Verification**: Always run `npm run build` in `dil-frontend` before declaring completion.
 
 <!-- BEGIN:nextjs-agent-rules -->

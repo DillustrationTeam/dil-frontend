@@ -2,7 +2,6 @@
 
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import {
   ArrowLeft,
   BookOpen,
@@ -21,8 +20,6 @@ import {
   Paperclip,
   RefreshCw,
   Send,
-  AlertCircle,
-  AlertTriangle,
   Ban,
   Scale,
   ShieldAlert,
@@ -30,19 +27,13 @@ import {
   Sparkles,
   TrendingUp,
   UploadCloud,
-  Wifi,
-  WifiOff,
   X,
-  ZoomIn,
-  ZoomOut,
 } from 'lucide-react';
 
 import { chatService } from '../services/chat.service';
 import { deadlineRiskService } from '../services/deadline-risk.service';
-import type { DeadlineRiskDto } from '../types/deadline-risk.types';
 import { useChatHub } from '../hooks/use-chat-hub';
 import { useAutoTranslate } from '../hooks/use-auto-translate';
-import { WorkroomProgressPanel } from './workroom-progress-panel';
 import type { ChatMessageDto, ChatRoomDto } from '../types/chat.types';
 import { PageLoader } from '@/features/navigation';
 import { commissionService } from '@/services/commission.service';
@@ -79,7 +70,6 @@ function resolveAttachmentUrl(url?: string | null): string {
 }
 
 export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: string | null }) {
-  const router = useRouter();
   const [room, setRoom] = useState<ChatRoomDto | null>(null);
   const [messages, setMessages] = useState<ChatMessageDto[]>([]);
   const [loading, setLoading] = useState(true);
@@ -99,7 +89,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
 
   // States cho Atelier Binder UI Right Page View & Zoom & Milestone Switcher
   const [rightPageView, setRightPageView] = useState<'canvas' | 'brief' | 'milestones'>('canvas');
-  const [zoomScale, setZoomScale] = useState<number>(1);
+  const [zoomScale] = useState<number>(1);
   const [selectedMilestoneId, setSelectedMilestoneId] = useState<string | null>(null);
 
   // States cho các Modal Hợp đồng & Cột mốc
@@ -113,14 +103,12 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
 
   // AI Deadline Risk Predictor
   const [predictingRisk, setPredictingRisk] = useState(false);
-  const [riskData, setRiskData] = useState<DeadlineRiskDto | null>(null);
 
   const handlePredictRisk = useCallback(async () => {
     if (!room?.commissionId || predictingRisk) return;
     setPredictingRisk(true);
     try {
-      const res = await deadlineRiskService.predict(room.commissionId);
-      setRiskData(res);
+      await deadlineRiskService.predict(room.commissionId);
       if (room.commissionId) {
         void commissionService.getById(room.commissionId).then((c) => setCommission(c)).catch(() => null);
       }

@@ -1,18 +1,28 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { Suspense, useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useAuthStore } from '@/store/use-auth-store';
 import { authService } from '@/services/auth.service';
 import { useLanguage } from '@/context/language-context';
 import toast from 'react-hot-toast';
 import { NotificationBell } from '@/features/notification';
+import { BecomeCreatorModal } from '@/components/modals/BecomeCreatorModal';
 
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
+  return <Suspense fallback={children}><PublicLayoutContent>{children}</PublicLayoutContent></Suspense>;
+}
+
+function PublicLayoutContent({ children }: { children: React.ReactNode }) {
   const { user, roles, refreshToken, isAuthenticated, clearAuth } = useAuthStore();
   const { t } = useLanguage();
+  const pathname = usePathname() ?? '';
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isBecomeCreatorOpen, setIsBecomeCreatorOpen] = useState(false);
+  const isBecomeCreatorRequested = searchParams?.get('become-creator') === 'true';
 
   const handleLogout = async () => {
     if (refreshToken) {
@@ -30,34 +40,42 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
       <header className="sticky top-0 z-50 w-full bg-[#1F2335]/80 backdrop-blur-xl border-b border-white/10 shadow-[0_0_20px_rgba(167,172,217,0.08)]">
         <nav className="flex justify-between items-center w-full px-6 max-w-7xl mx-auto h-20">
           {/* Left: Logo + Nav Links */}
-          <div className="flex items-center gap-12">
-            <Link href="/" className="flex items-center space-x-2 group">
+          <div className="flex min-w-0 items-center gap-8">
+            <Link href="/" className="group flex shrink-0 items-center space-x-2">
               <img
                 src="/weblogo.png"
                 alt="dillustration"
                 className="h-11 md:h-12 w-auto object-contain hover:scale-105 transition-transform"
               />
             </Link>
-            <div className="hidden md:flex gap-8 items-center text-sm font-medium">
-              <Link href="/" className="text-[#c2c7f6] border-b-2 border-[#c2c7f6] pb-1 transition-all">
+            <div className="hidden shrink-0 items-center gap-6 text-sm font-medium lg:flex">
+              <Link
+                href="/"
+                aria-current={pathname === '/' ? 'page' : undefined}
+                className={`shrink-0 whitespace-nowrap ${pathname === '/' ? 'text-[#c2c7f6] border-b-2 border-[#c2c7f6] pb-1' : 'text-[#c7c5cf] hover:text-white'} transition-all`}
+              >
                 {t('Marketplace')}
               </Link>
-              <Link href="/#artists" className="text-[#c7c5cf] hover:text-white transition-colors">
+              <Link href="/#artists" className="shrink-0 whitespace-nowrap text-[#c7c5cf] transition-colors hover:text-white">
                 {t('Artists')}
               </Link>
-              <Link href="/#bento" className="text-[#c7c5cf] hover:text-white transition-colors">
+              <Link href="/#bento" className="shrink-0 whitespace-nowrap text-[#c7c5cf] transition-colors hover:text-white">
                 {t('Collections')}
               </Link>
-              <Link href="/auctions" className="text-[#c7c5cf] hover:text-white transition-colors">
+              <Link
+                href="/auctions"
+                aria-current={pathname === '/auctions' || pathname.startsWith('/auctions/') ? 'page' : undefined}
+                className={`shrink-0 whitespace-nowrap ${pathname === '/auctions' || pathname.startsWith('/auctions/') ? 'text-[#c2c7f6] border-b-2 border-[#c2c7f6] pb-1' : 'text-[#c7c5cf] hover:text-white'} transition-colors`}
+              >
                 {t('Đấu giá')}
               </Link>
             </div>
           </div>
 
           {/* Right: Search + Auth */}
-          <div className="flex items-center gap-6">
+          <div className="flex shrink-0 items-center gap-4">
             {/* Search Input */}
-            <div className="relative hidden sm:block">
+            <div className="relative hidden shrink-0 xl:block">
               <input
                 className="bg-[#1b1b1e] border border-[#46464e]/30 rounded-full px-6 py-2 w-64 focus:outline-none focus:ring-1 focus:ring-[#c2c7f6] focus:border-[#c2c7f6] transition-all duration-300 text-sm text-[#e4e1e5] placeholder-white/30"
                 placeholder={t('Search curated art...')}
@@ -68,7 +86,7 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
               </span>
             </div>
 
-            <div className="flex items-center gap-4">
+              <div className="flex shrink-0 items-center gap-4">
               {isAuthenticated && user ? (
                 <>
                   {/* Notification bell */}
@@ -97,7 +115,7 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
                         {user.fullName.charAt(0).toUpperCase()}
                       </div>
                       <div className="text-left hidden sm:block">
-                        <p className="text-xs font-bold text-white leading-tight">{user.fullName}</p>
+                        <p className="whitespace-nowrap text-xs font-bold leading-tight text-white">{user.fullName}</p>
                         <p className="text-[10px] text-[#A7ACD9] uppercase tracking-wider">
                           {roles.join(', ') || 'CLIENT'}
                         </p>
@@ -120,14 +138,17 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
                           {isAdmin ? 'Admin Center' : 'My Studio'}
                         </Link>
                         {!roles.includes('Creator') && (
-                          <Link
-                            href="/become-creator"
-                            onClick={() => setIsMenuOpen(false)}
-                            className="flex items-center space-x-2 rounded-xl px-3 py-2 text-xs text-[#A7ACD9] transition-colors hover:bg-white/10"
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setIsMenuOpen(false);
+                              setIsBecomeCreatorOpen(true);
+                            }}
+                            className="flex w-full items-center space-x-2 rounded-xl px-3 py-2 text-xs text-[#A7ACD9] transition-colors hover:bg-white/10 cursor-pointer"
                           >
                             <span className="material-symbols-outlined text-sm">palette</span>
                             <span>Trở thành Creator</span>
-                          </Link>
+                          </button>
                         )}
                         {isAdmin && (
                           <Link
@@ -173,6 +194,18 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
 
       {/* Page Content */}
       <main>{children}</main>
+
+      <BecomeCreatorModal
+        isOpen={isBecomeCreatorOpen || isBecomeCreatorRequested}
+        onClose={() => {
+          setIsBecomeCreatorOpen(false);
+          if (isBecomeCreatorRequested) {
+            const params = new URLSearchParams(searchParams.toString());
+            params.delete('become-creator');
+            router.replace(`${pathname}${params.size ? `?${params}` : ''}`, { scroll: false });
+          }
+        }}
+      />
     </div>
   );
 }
