@@ -7,12 +7,12 @@ export function useCloudinaryUpload(folder: string) {
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const upload = async (file: File): Promise<string | null> => {
+  const upload = async (file: File, transformation?: string): Promise<string | null> => {
     setIsUploading(true);
     setError(null);
 
     try {
-      const url = await uploadService.uploadFile(file, folder);
+      const url = await uploadService.uploadFile(file, folder, transformation);
       return url;
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to upload file.';

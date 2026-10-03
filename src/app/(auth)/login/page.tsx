@@ -11,9 +11,10 @@ import toast from 'react-hot-toast';
 import { authService } from '@/services/auth.service';
 import { useAuthStore } from '@/store/use-auth-store';
 import { useGoogleAuth } from '@/features/auth/hooks/use-google-auth';
+import { isTwoFactorRequired } from '@/types/auth.types';
 
 const loginSchema = z.object({
-  email: z.string().min(1, 'Email is required').email('Invalid email address'),
+  emailOrUsername: z.string().min(1, 'Email or username is required'),
   password: z.string().min(1, 'Password is required'),
   remember: z.boolean().optional(),
 });
@@ -31,9 +32,16 @@ const SEED_PASSWORD = 'Seed@123456';
 export default function LoginPage() {
   const router = useRouter();
   const setAuth = useAuthStore((state) => state.setAuth);
-  const googleLogin = useGoogleAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [twoFactorTicket, setTwoFactorTicket] = useState<string | null>(null);
+  const [pendingEmail, setPendingEmail] = useState('');
+  const [twoFactorCode, setTwoFactorCode] = useState('');
+  const [isVerifying, setIsVerifying] = useState(false);
+  const googleLogin = useGoogleAuth((email, ticket) => {
+    setPendingEmail(email);
+    setTwoFactorTicket(ticket);
+  });
 
   const {
     register,
@@ -45,19 +53,26 @@ export default function LoginPage() {
   });
 
   const fillSeedAccount = (email: string) => {
-    setValue('email', email, { shouldValidate: true });
+    setValue('emailOrUsername', email, { shouldValidate: true });
     setValue('password', SEED_PASSWORD, { shouldValidate: true });
   };
 
   const onSubmit = async (data: LoginFormValues) => {
     setIsLoading(true);
     try {
-      const authResponse = await authService.login({
-        email: data.email,
+      const result = await authService.login({
+        emailOrUsername: data.emailOrUsername,
         password: data.password,
       });
-      setAuth(authResponse);
-      toast.success(`Welcome back, ${authResponse.user.fullName}!`);
+
+      if (isTwoFactorRequired(result)) {
+        setTwoFactorTicket(result.twoFactorTicket);
+        setPendingEmail(result.email);
+        return;
+      }
+
+      setAuth(result);
+      toast.success(`Welcome back, ${result.user.fullName}!`);
       router.push('/');
     } catch (err: unknown) {
       const errorObj = err as { message?: string };
@@ -65,6 +80,39 @@ export default function LoginPage() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleVerifyTwoFactor = async () => {
+    if (!twoFactorTicket) {
+      return;
+    }
+    if (!twoFactorCode.trim()) {
+      toast.error('Please enter the verification code.');
+      return;
+    }
+
+    setIsVerifying(true);
+    try {
+      const authResponse = await authService.verifyTwoFactorLogin({
+        email: pendingEmail,
+        twoFactorTicket,
+        code: twoFactorCode.trim(),
+      });
+      setAuth(authResponse);
+      toast.success(`Welcome back, ${authResponse.user.fullName}!`);
+      router.push('/');
+    } catch (err: unknown) {
+      const errorObj = err as { message?: string };
+      toast.error(errorObj.message || 'Invalid verification code.');
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
+  const handleCancelTwoFactor = () => {
+    setTwoFactorTicket(null);
+    setPendingEmail('');
+    setTwoFactorCode('');
   };
 
   return (
@@ -107,6 +155,8 @@ export default function LoginPage() {
             </p>
           </header>
 
+          {!twoFactorTicket ? (
+            <>
           {/* Dev-only: điền nhanh tài khoản seed theo role */}
           {process.env.NODE_ENV !== 'production' && (
             <div className="mb-8 space-y-2">
@@ -134,9 +184,9 @@ export default function LoginPage() {
             <div className="space-y-2">
               <label
                 className="text-xs text-[#C7C5CF] uppercase tracking-widest block ml-1 font-medium"
-                htmlFor="email"
+                htmlFor="emailOrUsername"
               >
-                Email Address
+                Email or Username
               </label>
               <div className="relative group periwinkle-glow rounded-xl transition-all duration-300 border border-white/10 bg-white/5">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -145,16 +195,17 @@ export default function LoginPage() {
                   </span>
                 </div>
                 <input
-                  {...register('email')}
+                  {...register('emailOrUsername')}
                   className="block w-full bg-transparent border-none py-4 pl-12 pr-4 text-[#E4E1E5] focus:outline-none placeholder-white/20 text-base"
-                  id="email"
-                  placeholder="artist@dillustration.com"
-                  type="email"
+                  id="emailOrUsername"
+                  placeholder="artist@dillustration.com or username"
+                  type="text"
+                  autoComplete="username"
                   disabled={isLoading}
                 />
               </div>
-              {errors.email && (
-                <p className="text-red-400 text-xs ml-1">{errors.email.message}</p>
+              {errors.emailOrUsername && (
+                <p className="text-red-400 text-xs ml-1">{errors.emailOrUsername.message}</p>
               )}
             </div>
 
@@ -184,6 +235,7 @@ export default function LoginPage() {
                   id="password"
                   placeholder="••••••••••••"
                   type={showPassword ? 'text' : 'password'}
+                  autoComplete="current-password"
                   disabled={isLoading}
                 />
                 <div className="absolute inset-y-0 right-0 pr-4 flex items-center">
@@ -273,6 +325,41 @@ export default function LoginPage() {
               </Link>
             </p>
           </div>
+            </>
+          ) : (
+            <div className="space-y-6">
+              <p className="text-sm text-[#C7C5CF]">
+                Enter the 6-digit code from your authenticator app for{' '}
+                <span className="text-white font-medium">{pendingEmail}</span>.
+              </p>
+              <input
+                value={twoFactorCode}
+                onChange={(event) => setTwoFactorCode(event.target.value)}
+                maxLength={11}
+                className="block w-full rounded-xl border border-white/10 bg-white/5 px-4 py-4 text-center text-lg tracking-widest text-[#E4E1E5] placeholder-white/20 focus:border-[#A7ACD9] focus:outline-none"
+                placeholder="••••••"
+                disabled={isVerifying}
+              />
+              <p className="text-center text-xs text-[#919099]">
+                Or enter one of your recovery codes (format XXXXX-XXXXX).
+              </p>
+              <button
+                type="button"
+                onClick={handleVerifyTwoFactor}
+                disabled={isVerifying}
+                className="w-full bg-white text-[#1F2335] font-semibold text-lg py-4 rounded-xl transition-all duration-300 active:scale-[0.98] primary-glow disabled:opacity-50"
+              >
+                {isVerifying ? 'Verifying...' : 'Verify & Continue'}
+              </button>
+              <button
+                type="button"
+                onClick={handleCancelTwoFactor}
+                className="w-full text-center text-sm text-[#919099] hover:text-white transition-colors"
+              >
+                Back to login
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Decorative Artwork Snippet */}

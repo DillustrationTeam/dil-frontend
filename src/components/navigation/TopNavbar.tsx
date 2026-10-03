@@ -113,13 +113,20 @@ export default function TopNavbar({
             onClick={() => setShowProfileMenu(!showProfileMenu)}
             className="flex items-center gap-2 p-1 bg-white/5 border border-white/10 rounded-xl hover:border-[#A7ACD9] transition-colors"
           >
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-[#A7ACD9] to-[#c2c7f6] p-[1px]">
-              <img
-                src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80"
-                alt="Avatar"
-                className="w-full h-full object-cover rounded-[7px]"
+            {user?.avatarUrl ? (
+              <Image
+                src={user.avatarUrl}
+                alt={user.fullName}
+                width={32}
+                height={32}
+                unoptimized
+                className="h-8 w-8 rounded-lg object-cover"
               />
-            </div>
+            ) : (
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#A7ACD9] text-xs font-bold text-[#1F2335]">
+                {user?.fullName ? user.fullName.charAt(0).toUpperCase() : '?'}
+              </div>
+            )}
             <ChevronDown className="mr-1 h-3.5 w-3.5 text-[#A7ACD9]" />
           </button>
 

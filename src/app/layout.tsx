@@ -1,8 +1,12 @@
 import type { Metadata } from "next";
-import { Toaster } from "react-hot-toast";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 import { LanguageProvider } from "@/context/language-context";
 import { AiAssistantLauncher } from "@/features/navigation";
+import { AppToaster } from "@/components/hover-fade-toast";
 import "./globals.css";
+
+const GOOGLE_CLIENT_ID =
+  process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "1234567890-dummyid.apps.googleusercontent.com";
 
 export const metadata: Metadata = {
   title: "dillustration | Digital Gallery & Art Marketplace",
@@ -26,11 +30,13 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col text-[#E4E1E5]">
-        <LanguageProvider>
-          {children}
-          <AiAssistantLauncher />
-          <Toaster position="top-right" toastOptions={{ duration: 4000 }} />
-        </LanguageProvider>
+        <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+          <LanguageProvider>
+            {children}
+            <AiAssistantLauncher />
+            <AppToaster />
+          </LanguageProvider>
+        </GoogleOAuthProvider>
       </body>
     </html>
   );

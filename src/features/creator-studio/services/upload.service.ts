@@ -5,11 +5,12 @@ import { getApiErrorMessage } from '@/lib/api-error';
 import { CloudinaryUploadSignature } from '@/features/creator-studio/types/upload.types';
 
 export const uploadService = {
-  async getUploadSignature(folder: string): Promise<CloudinaryUploadSignature> {
+  async getUploadSignature(folder: string, transformation?: string): Promise<CloudinaryUploadSignature> {
     let signature: CloudinaryUploadSignature;
     try {
       const response = await apiClient.post<ApiResponse<CloudinaryUploadSignature>>('/uploads/signature', {
         folder,
+        transformation,
       });
       if (response.data.error || !response.data.data) {
         throw new Error(response.data.error?.detail || 'Failed to get upload signature.');
@@ -36,6 +37,10 @@ export const uploadService = {
     formData.append('timestamp', String(signature.timestamp));
     formData.append('signature', signature.signature);
     formData.append('folder', signature.folder);
+    formData.append('allowed_formats', signature.allowedFormats);
+    if (signature.transformation) {
+      formData.append('transformation', signature.transformation);
+    }
 
     try {
       // Gọi thẳng Cloudinary (domain khác, không qua apiClient — không cần JWT).
@@ -52,8 +57,8 @@ export const uploadService = {
     }
   },
 
-  async uploadFile(file: File, folder: string): Promise<string> {
-    const signature = await this.getUploadSignature(folder);
+  async uploadFile(file: File, folder: string, transformation?: string): Promise<string> {
+    const signature = await this.getUploadSignature(folder, transformation);
     return this.uploadToCloudinary(file, signature);
   },
 };
