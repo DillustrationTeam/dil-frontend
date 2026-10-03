@@ -12,12 +12,16 @@ export interface AdminTopNavbarProps {
 }
 
 export function AdminTopNavbar({
+  adminBadgeText,
+  className,
   onToggleMobileMenu,
 }: AdminTopNavbarProps) {
   return (
     <TopNavbar
       currentRole="admin"
       showRoleSwitcher={false}
+      adminBadgeText={adminBadgeText}
+      className={className}
       onToggleSidebar={onToggleMobileMenu}
     />
   );

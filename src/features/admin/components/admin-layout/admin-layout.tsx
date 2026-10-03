@@ -22,6 +22,7 @@ export function AdminLayout({
   children,
   sidebarItems,
   sidebarSections,
+  adminBadgeText = 'ADMIN CONSOLE',
   adminName,
   adminRole = 'Platform Control',
   showScreenIds = false,
@@ -52,6 +53,7 @@ export function AdminLayout({
       <TopNavbar
         currentRole="admin"
         showRoleSwitcher={false}
+        adminBadgeText={adminBadgeText}
         onRoleChange={handleRoleChange}
         onToggleSidebar={toggleMobileNav}
       />

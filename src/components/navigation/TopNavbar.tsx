@@ -4,8 +4,6 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
-  Sparkles,
-  Bell,
   ChevronDown,
   User,
   Settings,
@@ -26,6 +24,8 @@ interface TopNavbarProps<T extends string = string> {
   onRoleChange?: (role: T) => void;
   onToggleSidebar?: () => void;
   showRoleSwitcher?: boolean;
+  adminBadgeText?: string;
+  className?: string;
 }
 
 export default function TopNavbar<T extends string = string>({
@@ -33,6 +33,8 @@ export default function TopNavbar<T extends string = string>({
   onRoleChange,
   onToggleSidebar,
   showRoleSwitcher = true,
+  adminBadgeText,
+  className = '',
 }: TopNavbarProps<T>) {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const { user, roles, clearAuth } = useAuthStore();
@@ -49,7 +51,7 @@ export default function TopNavbar<T extends string = string>({
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full h-16 bg-[#1F2335]/80 backdrop-blur-[20px] border-b border-white/10 px-4 lg:px-8 flex items-center justify-between transition-all">
+    <header className={`sticky top-0 z-40 w-full h-16 bg-[#1F2335]/80 backdrop-blur-[20px] border-b border-white/10 px-4 lg:px-8 flex items-center justify-between transition-all ${className}`}>
       {/* Left: Brand Logo & Optional Mobile Sidebar Toggle */}
       <div className="flex items-center gap-4 lg:gap-6">
         {onToggleSidebar && (
@@ -114,6 +116,13 @@ export default function TopNavbar<T extends string = string>({
               </button>
             )}
           </div>
+        )}
+
+        {/* Administrator Console Badge */}
+        {adminBadgeText && (
+          <span className="text-xs px-3.5 py-1.5 rounded-full bg-red-500/20 text-red-300 border border-red-500/30 font-bold uppercase tracking-wider">
+            {adminBadgeText}
+          </span>
         )}
 
         {/* Notifications */}
