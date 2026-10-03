@@ -52,10 +52,7 @@ h6,
 
 .glass-container {
   position: relative;
-  /* Giữ độ trong suốt cao để thấy rõ nền phía sau */
   background: rgba(255, 255, 255, 0.025); 
-  
-  /* Giảm mức blur xuống 12px giúp kính trong trẻo, không bị đục ngầu */
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   

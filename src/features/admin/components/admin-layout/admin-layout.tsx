@@ -47,10 +47,8 @@ export function AdminLayout({
   };
 
   return (
-    <div
-      className={`min-h-screen bg-[#1F2335] text-[#e4e1e5] flex flex-col font-sora ${className}`}
-    >
-      {/* 1. TOP NAVBAR (Identical to Creator/Client TopNavbar without Role Switcher Pill) */}
+    <div className={`min-h-screen bg-[#1F2335] text-[#e4e1e5] flex flex-col font-sora ${className}`}>
+      {/* 1. TOP NAVBAR */}
       <TopNavbar
         currentRole="admin"
         showRoleSwitcher={false}
@@ -58,17 +56,14 @@ export function AdminLayout({
         onToggleSidebar={toggleMobileNav}
       />
 
-      {/* 2. MOBILE NAVIGATION DRAWER (Off-canvas for tablet / mobile viewports) */}
+      {/* 2. MOBILE DRAWER */}
       {isMobileNavOpen && (
         <div className="fixed inset-0 z-50 md:hidden flex animate-fadeIn">
-          {/* Backdrop overlay */}
           <div
             className="fixed inset-0 bg-black/70 backdrop-blur-sm transition-opacity"
             onClick={closeMobileNav}
             aria-hidden="true"
           />
-
-          {/* Drawer Content */}
           <div className="relative w-72 max-w-[80vw] h-full z-10 bg-[#1F2335] border-r border-white/10 shadow-2xl flex flex-col">
             <VerticalNavbar
               items={sidebarItems}
@@ -85,9 +80,8 @@ export function AdminLayout({
         </div>
       )}
 
-      {/* 3. MAIN WORKSPACE CONTAINER: LEFT COLLAPSIBLE SIDEBAR + RIGHT CONTENT */}
+      {/* 3. MAIN WORKSPACE */}
       <div className="flex-1 flex w-full relative">
-        {/* DESKTOP COLLAPSIBLE SIDEBAR (Matching CollapsibleSidebar exactly) */}
         <div className="hidden md:flex">
           <VerticalNavbar
             items={sidebarItems}
@@ -100,10 +94,7 @@ export function AdminLayout({
           />
         </div>
 
-        {/* RIGHT COLUMN: DYNAMIC & CUSTOMIZABLE PAGE CONTENT */}
-        <main
-          className={`flex-1 min-w-0 p-4 lg:p-8 overflow-y-auto ${contentClassName}`}
-        >
+        <main className={`flex-1 min-w-0 p-4 lg:p-8 overflow-y-auto ${contentClassName}`}>
           {children}
         </main>
       </div>
@@ -111,5 +102,4 @@ export function AdminLayout({
   );
 }
 
-// Named alias for convenience
 export const AdminConsoleLayout = AdminLayout;
