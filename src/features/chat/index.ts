@@ -1,4 +1,5 @@
 export { WorkroomScreen } from './components/workroom-screen';
+export { WorkroomListScreen } from './components/workroom-list-screen';
 export { WorkroomProgressPanel } from './components/workroom-progress-panel';
 export { chatService } from './services/chat.service';
 export { deadlineRiskService } from './services/deadline-risk.service';

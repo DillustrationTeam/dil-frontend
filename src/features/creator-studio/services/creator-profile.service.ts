@@ -105,6 +105,14 @@ export const creatorProfileService = {
     return response.data.data;
   },
 
+  async getTerms(creatorId: string): Promise<CreatorTermsDto> {
+    const response = await apiClient.get<ApiResponse<CreatorTermsDto>>(`/creator/${creatorId}/terms`);
+    if (response.data.error || !response.data.data) {
+      throw new Error(response.data.error?.details?.join(', ') || 'Failed to load creator terms.');
+    }
+    return response.data.data;
+  },
+
   async saveAutoReply(data: UpdateAutoReplySettingRequest): Promise<AutoReplySettingDto> {
     const response = await apiClient.post<ApiResponse<AutoReplySettingDto>>('/creator/workstation/auto-reply', data);
     if (response.data.error || !response.data.data) {

@@ -12,7 +12,7 @@ function formatVnd(value: number) {
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 }).format(value);
 }
 
-export function VoucherScreen({ userId }: { userId: string | null }) {
+export function VoucherScreen({ userId, mode = 'client' }: { userId: string | null; mode?: 'client' | 'creator' }) {
   const [vouchers, setVouchers] = useState<VoucherDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -122,12 +122,12 @@ export function VoucherScreen({ userId }: { userId: string | null }) {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8 text-on-surface">
-      <div className="mb-6 flex items-center justify-between">
-        <Link href="/wallet" className="inline-flex items-center gap-2 text-sm text-brand-periwinkle hover:underline">
-          <ArrowLeft size={16} /> Quay lại ví
-        </Link>
-        {/* Quản lý voucher cần đăng nhập — ẩn với khách. */}
-        {userId && (
+      {mode === 'creator' && <>
+        <div className="mb-6 flex items-center justify-between">
+          <Link href="/wallet" className="inline-flex items-center gap-2 text-sm text-brand-periwinkle hover:underline">
+            <ArrowLeft size={16} /> Quay lại ví
+          </Link>
+          {userId && (
           <button
             type="button"
             onClick={() => setShowCreate(!showCreate)}
@@ -135,13 +135,14 @@ export function VoucherScreen({ userId }: { userId: string | null }) {
           >
             <Plus size={16} /> Tạo mã giảm giá mới
           </button>
-        )}
-      </div>
+          )}
+        </div>
 
-      <h1 className="mb-2 font-h1 text-2xl font-bold">Trung tâm mã giảm giá</h1>
-      <p className="mb-6 text-sm text-on-surface-variant">
-        Khám phá mã ưu đãi áp dụng cho đặt tranh hoa hồng nghệ thuật và các phiên đấu giá độc quyền.
-      </p>
+        <h1 className="mb-2 font-h1 text-2xl font-bold">Trung tâm mã giảm giá</h1>
+        <p className="mb-6 text-sm text-on-surface-variant">
+          Khám phá mã ưu đãi áp dụng cho đặt tranh hoa hồng nghệ thuật và các phiên đấu giá độc quyền.
+        </p>
+      </>}
 
       {error && (
         <div role="alert" className="mb-6 flex items-center gap-2 rounded-2xl border border-red-400/30 bg-red-500/10 p-4 text-sm text-red-200">
@@ -158,7 +159,7 @@ export function VoucherScreen({ userId }: { userId: string | null }) {
       )}
 
       {/* Form tạo mới voucher */}
-      {showCreate && (
+      {mode === 'creator' && showCreate && (
         <section className="glass-container mb-8 rounded-3xl border border-brand-periwinkle/30 bg-brand-navy/80 p-6 md:p-8">
           <h2 className="mb-4 font-h1 text-lg font-bold text-brand-periwinkle">Tạo mã ưu đãi mới</h2>
           <form onSubmit={handleCreateVoucher} className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
@@ -279,9 +280,7 @@ export function VoucherScreen({ userId }: { userId: string | null }) {
       )}
 
       {/* SCR-50 — Client nhập & áp mã cho giao dịch (kiểm tra chỉ đọc, áp dụng mới tiêu lượt) */}
-      <div className="mb-8">
-        <VoucherApplyPanel allowManualInput />
-      </div>
+      {mode === 'client' && <div className="mb-8"><VoucherApplyPanel allowManualInput /></div>}
 
       {/* Bộ lọc trạng thái */}
       <div className="mb-4 flex items-center justify-between">
@@ -369,7 +368,7 @@ export function VoucherScreen({ userId }: { userId: string | null }) {
                   </div>
                 </div>
 
-                {v.isMine && (
+                {mode === 'creator' && v.isMine && (
                   <div className="mt-4 flex justify-end border-t border-white/5 pt-3">
                     <button
                       type="button"

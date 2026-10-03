@@ -4,7 +4,8 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, CircleAlert, Gavel, ShieldCheck } from 'lucide-react';
-import { auctionService } from '../services/auction.service';
+import { auctionError, auctionService } from '../services/auction.service';
+import { EligibleArtworkSelector } from './eligible-artwork-selector';
 import type { AuctionRequest } from '../types/auction.types';
 
 function formatVnd(value: number) {
@@ -13,8 +14,7 @@ function formatVnd(value: number) {
 
 export function AuctionCreateScreen({ userId }: { userId: string | null }) {
   const router = useRouter();
-  // Khởi tạo trong lazy initializer: `Date.now()` là hàm không thuần khiết,
-  // gọi thẳng trong thân render sẽ bị react-hooks/purity chặn.
+
   const [form, setForm] = useState<AuctionRequest>(() => {
     const now = new Date();
     return {
@@ -27,8 +27,10 @@ export function AuctionCreateScreen({ userId }: { userId: string | null }) {
       endAt: new Date(now.getTime() + 3 * 86400000).toISOString().slice(0, 16),
     };
   });
+
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [reloadTrigger, setReloadTrigger] = useState<number>(0);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -36,18 +38,22 @@ export function AuctionCreateScreen({ userId }: { userId: string | null }) {
       setError('Vui lòng đăng nhập để mở phiên đấu giá.');
       return;
     }
+
     if (!form.artworkId.trim()) {
-      setError('Vui lòng nhập mã tác phẩm nghệ thuật bạn muốn đưa lên sàn đấu giá.');
+      setError('Vui lòng chọn tác phẩm nghệ thuật bạn muốn đưa lên sàn đấu giá.');
       return;
     }
+
     if (form.startPrice < 10000) {
       setError('Giá khởi điểm tối thiểu là 10.000 ₫.');
       return;
     }
+
     if (form.bidStep < 1000) {
       setError('Bước giá tối thiểu là 1.000 ₫.');
       return;
     }
+
     if (new Date(form.endAt) <= new Date(form.startAt)) {
       setError('Thời gian kết thúc phải sau thời gian bắt đầu.');
       return;
@@ -55,6 +61,7 @@ export function AuctionCreateScreen({ userId }: { userId: string | null }) {
 
     setSubmitting(true);
     setError(null);
+
     try {
       const res = await auctionService.create({
         ...form,
@@ -63,7 +70,10 @@ export function AuctionCreateScreen({ userId }: { userId: string | null }) {
       });
       router.push(`/auctions/${res.auctionId}`);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Không thể tạo phiên đấu giá. Vui lòng kiểm tra lại thông tin.');
+      // FE-07: Handle 409 conflict on creation (artwork already in an active auction)
+      // Increment reloadTrigger to refresh eligible artworks list
+      setReloadTrigger((prev) => prev + 1);
+      setError(auctionError(err));
     } finally {
       setSubmitting(false);
     }
@@ -97,23 +107,12 @@ export function AuctionCreateScreen({ userId }: { userId: string | null }) {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label htmlFor="artworkId" className="mb-1.5 block text-xs font-semibold text-on-surface-variant">
-              Mã tác phẩm tranh (Artwork ID) <span className="text-red-400">*</span>
-            </label>
-            <input
-              id="artworkId"
-              type="text"
-              required
-              value={form.artworkId}
-              onChange={(e) => setForm({ ...form, artworkId: e.target.value })}
-              placeholder="VD: 3fa85f64-5717-4562-b3fc-2c963f66afa6"
-              className="w-full rounded-xl border border-white/15 bg-brand-navy/60 px-4 py-2.5 font-mono text-sm text-on-surface placeholder:text-outline focus:border-brand-periwinkle focus:outline-none"
-            />
-            <span className="mt-1 block text-[11px] text-outline">
-              Bạn có thể lấy mã này từ danh sách tác phẩm đã tải lên trong trang cá nhân của mình.
-            </span>
-          </div>
+          {/* FE-07 Eligible Artwork Selector Card/Dropdown */}
+          <EligibleArtworkSelector
+            selectedArtworkId={form.artworkId}
+            onSelect={(id) => setForm((prev) => ({ ...prev, artworkId: id }))}
+            reloadTrigger={reloadTrigger}
+          />
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div>

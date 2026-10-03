@@ -6,6 +6,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import { authService } from '@/services/auth.service';
+import { useLanguage } from '@/context/language-context';
 import { useAuthStore } from '@/store/use-auth-store';
 import { NotificationBell } from '@/features/notification';
 
@@ -30,6 +31,8 @@ export function SiteHeader() {
   const pathname = usePathname() ?? '';
   const router = useRouter();
   const { user, roles, refreshToken, isAuthenticated, clearAuth } = useAuthStore();
+  const { t } = useLanguage();
+  const isAdmin = roles.some((r) => ['Administrator', 'Admin', 'Moderator'].includes(r));
 
   const [searchOpen, setSearchOpen] = useState(false);
   const [keyword, setKeyword] = useState('');
@@ -245,12 +248,12 @@ export function SiteHeader() {
                   </Link>
 
                   <Link
-                    href="/client/commissions"
+                    href={isAdmin ? '/admin' : '/client/commissions'}
                     onClick={() => setMenuOpen(false)}
                     className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs text-[#c7c5cf] transition-colors hover:bg-white/10 hover:text-white"
                   >
-                    <span className="material-symbols-outlined text-base text-[#c2c7f6]">folder_open</span>
-                    <span>My Commissions</span>
+                    <span className="material-symbols-outlined text-base text-[#c2c7f6]">{isAdmin ? 'admin_panel_settings' : 'folder_open'}</span>
+                    <span>{isAdmin ? 'Admin Center' : t('My Commissions')}</span>
                   </Link>
 
                   {(roles.includes('Creator') || roles.includes('creator')) && (
@@ -272,6 +275,27 @@ export function SiteHeader() {
                     <span className="material-symbols-outlined text-base text-[#c2c7f6]">person</span>
                     <span>Hồ sơ của tôi</span>
                   </Link>
+
+                  {!roles.includes('Creator') && (
+                    <Link
+                      href="/become-creator"
+                      onClick={() => setMenuOpen(false)}
+                      className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs text-[#c7c5cf] transition-colors hover:bg-white/10 hover:text-white"
+                    >
+                      <span className="material-symbols-outlined text-base text-[#c2c7f6]">palette</span>
+                      <span>{t('Trở thành Creator')}</span>
+                    </Link>
+                  )}
+                  {isAdmin && (
+                    <Link
+                      href="/admin/creator-verifications"
+                      onClick={() => setMenuOpen(false)}
+                      className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs text-red-300 transition-colors hover:bg-white/10"
+                    >
+                      <span className="material-symbols-outlined text-base">how_to_reg</span>
+                      <span>{t('Duyệt đơn Creator')}</span>
+                    </Link>
+                  )}
 
                   <div className="my-1 border-t border-white/10" />
 

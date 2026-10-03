@@ -1,11 +1,10 @@
 'use client';
 
+import Image from 'next/image';
 import React, { useState } from 'react';
 import Link from 'next/link';
 import {
-  Sparkles,
   Search,
-  Bell,
   ChevronDown,
   User,
   Settings,
@@ -17,6 +16,8 @@ import {
 } from 'lucide-react';
 import { useAuthStore } from '@/store/use-auth-store';
 import { useRouter } from 'next/navigation';
+import { useLanguage } from '@/context/language-context';
+import { NotificationBell } from '@/features/notification';
 
 interface TopNavbarProps {
   currentRole?: 'client' | 'creator';
@@ -32,8 +33,10 @@ export default function TopNavbar({
   const [searchQuery, setSearchQuery] = useState('');
   const { user, roles, clearAuth } = useAuthStore();
   const router = useRouter();
+  const { t } = useLanguage();
 
   const isCreator = roles.includes('Creator') || roles.includes('creator');
+  const isAdmin = roles.some((r) => ['Administrator', 'Admin', 'Moderator'].includes(r));
 
   const handleSignOut = () => {
     clearAuth();
@@ -45,17 +48,16 @@ export default function TopNavbar({
     <header className="sticky top-0 z-40 w-full h-16 bg-[#1F2335]/80 backdrop-blur-[20px] border-b border-white/10 px-4 lg:px-8 flex items-center justify-between transition-all">
       {/* Left: Brand Logo & Search */}
       <div className="flex items-center gap-6">
-        <Link href="/" className="flex items-center gap-3 group">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#A7ACD9] to-[#c2c7f6] p-[1px] shadow-[0_0_20px_rgba(167,172,217,0.4)] group-hover:scale-105 transition-transform">
-            <div className="w-full h-full bg-[#1b1b1e] rounded-[11px] flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-[#A7ACD9] group-hover:text-white transition-colors" />
-            </div>
-          </div>
-          <div>
-            <span className="font-space-grotesk font-bold text-lg tracking-wider text-white flex items-center gap-1.5">
-              DIL <span className="text-[10px] uppercase font-normal px-2 py-0.5 rounded-full bg-[#A7ACD9]/20 text-[#A7ACD9] border border-[#A7ACD9]/30">STUDIO</span>
-            </span>
-          </div>
+        <Link href="/" className="flex items-center group">
+          <Image
+            src="/studiologo.png"
+            alt="Dillustration Studio Logo"
+            width={180}
+            height={48}
+            priority
+            style={{ width: 'auto' }}
+            className="h-11 md:h-12 w-auto object-contain transition-transform group-hover:scale-105"
+          />
         </Link>
 
         {/* Quick Search Input */}
@@ -100,11 +102,10 @@ export default function TopNavbar({
         )}
 
         {/* Notifications */}
-        <Link href="/notifications" aria-label="Thông báo" className="relative w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-300 hover:text-white hover:bg-[#c2c7f6]/10 transition-colors">
-          <Bell className="h-4 w-4 text-[#A7ACD9]" />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#A7ACD9] ring-2 ring-[#1F2335] animate-ping" />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#A7ACD9] ring-2 ring-[#1F2335]" />
-        </Link>
+        <NotificationBell
+          userId={user?.id ?? null}
+          triggerClassName="relative w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-[#A7ACD9] hover:text-white hover:bg-[#c2c7f6]/10 transition-colors"
+        />
 
         {/* User Profile Menu */}
         <div className="relative">
@@ -140,11 +141,11 @@ export default function TopNavbar({
                 <Wallet className="w-4 h-4 text-[#A7ACD9]" /> Ví của tôi
               </Link>
               <Link
-                href="/client/commissions"
+                href={isAdmin ? '/admin' : '/client/commissions'}
                 onClick={() => setShowProfileMenu(false)}
                 className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs text-[#e4e1e5] hover:text-white hover:bg-white/5 transition-colors"
               >
-                <User className="w-4 h-4 text-[#A7ACD9]" /> My Commissions
+                <User className="w-4 h-4 text-[#A7ACD9]" /> {isAdmin ? 'Admin Center' : t('My Commissions')}
               </Link>
               {isCreator && (
                 <Link
@@ -153,6 +154,15 @@ export default function TopNavbar({
                   className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs text-[#e4e1e5] hover:text-white hover:bg-white/5 transition-colors"
                 >
                   <Palette className="w-4 h-4 text-[#A7ACD9]" /> Creator Dashboard
+                </Link>
+              )}
+              {isAdmin && (
+                <Link
+                  href="/admin/creator-verifications"
+                  onClick={() => setShowProfileMenu(false)}
+                  className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs text-red-300 hover:text-white hover:bg-white/5 transition-colors"
+                >
+                  <ShieldCheck className="w-4 h-4 text-red-400" /> Duyệt đơn Creator
                 </Link>
               )}
               <Link

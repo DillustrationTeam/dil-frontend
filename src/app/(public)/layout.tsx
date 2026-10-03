@@ -1,13 +1,23 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { Suspense, useState } from 'react';
 import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
+import { useLanguage } from '@/context/language-context';
 import { useAuthStore } from '@/store/use-auth-store';
 import { authService } from '@/services/auth.service';
 import toast from 'react-hot-toast';
+import { NotificationBell } from '@/features/notification';
 
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
+  return <Suspense fallback={children}><PublicLayoutContent>{children}</PublicLayoutContent></Suspense>;
+}
+
+function PublicLayoutContent({ children }: { children: React.ReactNode }) {
   const { user, roles, refreshToken, isAuthenticated, clearAuth } = useAuthStore();
+  const { t } = useLanguage();
+  const pathname = usePathname() ?? '';
+  const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const handleLogout = async () => {
@@ -18,43 +28,50 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
     toast.success('Signed out successfully.');
   };
 
+  const isAdmin = roles.some((r) => ['Administrator', 'Admin', 'Moderator'].includes(r));
+
   return (
     <div className="min-h-screen bg-[#1F2335] text-[#e4e1e5] font-body selection:bg-[#A7ACD9]/30 selection:text-white">
       {/* Top Navigation */}
       <header className="sticky top-0 z-50 w-full bg-[#1F2335]/80 backdrop-blur-xl border-b border-white/10 shadow-[0_0_20px_rgba(167,172,217,0.08)]">
         <nav className="flex justify-between items-center w-full px-6 max-w-7xl mx-auto h-20">
           {/* Left: Logo + Nav Links */}
-          <div className="flex items-center gap-12">
-            <Link href="/" className="flex items-center space-x-2 group">
+          <div className="flex min-w-0 items-center gap-8">
+            <Link href="/" className="group flex shrink-0 items-center space-x-2">
               <img
                 src="/weblogo.png"
                 alt="dillustration"
                 className="h-14 md:h-16 w-auto object-contain hover:scale-105 transition-transform"
               />
             </Link>
-            <div className="hidden md:flex gap-8 items-center text-sm font-medium">
-              <Link href="/" className="text-[#c2c7f6] border-b-2 border-[#c2c7f6] pb-1 transition-all">
-                Marketplace
+            <div className="hidden shrink-0 items-center gap-6 text-sm font-medium lg:flex">
+              <Link
+                href="/"
+                aria-current={pathname === '/' ? 'page' : undefined}
+                className={`shrink-0 whitespace-nowrap ${pathname === '/' ? 'text-[#c2c7f6] border-b-2 border-[#c2c7f6] pb-1' : 'text-[#c7c5cf] hover:text-white'} transition-all`}
+              >
+                {t('Marketplace')}
               </Link>
-              <Link href="/search" className="text-[#c7c5cf] hover:text-white transition-colors">
-                Khám phá
+              <Link href="/#artists" className="shrink-0 whitespace-nowrap text-[#c7c5cf] transition-colors hover:text-white">
+                {t('Artists')}
               </Link>
-              <Link href="/collections" className="text-[#c7c5cf] hover:text-white transition-colors">
-                Bộ sưu tập
+              <Link href="/#bento" className="shrink-0 whitespace-nowrap text-[#c7c5cf] transition-colors hover:text-white">
+                {t('Collections')}
               </Link>
-              <Link href="/creator/artworks" className="text-[#c7c5cf] hover:text-white transition-colors">
-                Creator Studio
-              </Link>
-              <Link href="/#bento" className="text-[#c7c5cf] hover:text-white transition-colors">
-                Collections
+              <Link
+                href="/auctions"
+                aria-current={pathname === '/auctions' || pathname.startsWith('/auctions/') ? 'page' : undefined}
+                className={`shrink-0 whitespace-nowrap ${pathname === '/auctions' || pathname.startsWith('/auctions/') ? 'text-[#c2c7f6] border-b-2 border-[#c2c7f6] pb-1' : 'text-[#c7c5cf] hover:text-white'} transition-colors`}
+              >
+                {t('Đấu giá')}
               </Link>
             </div>
           </div>
 
           {/* Right: Search + Auth */}
-          <div className="flex items-center gap-6">
+          <div className="flex shrink-0 items-center gap-4">
             {/* Search Input */}
-            <div className="relative hidden sm:block">
+            <div className="relative hidden shrink-0 xl:block">
               <input
                 className="bg-[#1b1b1e] border border-[#46464e]/30 rounded-full px-6 py-2 w-64 focus:outline-none focus:ring-1 focus:ring-[#c2c7f6] focus:border-[#c2c7f6] transition-all duration-300 text-sm text-[#e4e1e5] placeholder-white/30"
                 placeholder="Search curated art..."
@@ -65,21 +82,23 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
               </span>
             </div>
 
-            <div className="flex items-center gap-4">
+              <div className="flex shrink-0 items-center gap-4">
               {isAuthenticated && user ? (
                 <>
                   {/* Notification bell */}
-                  <button className="p-2 rounded-full hover:bg-[#c2c7f6]/10 transition-all active:scale-95 text-[#c2c7f6]">
-                    <span className="material-symbols-outlined text-xl">notifications</span>
-                  </button>
+                  <NotificationBell
+                    userId={user.id}
+                    iconSet="material"
+                    triggerClassName="p-2 rounded-full hover:bg-[#c2c7f6]/10 transition-all active:scale-95 text-[#c2c7f6]"
+                  />
 
-                  {/* Go to Studio */}
+                  {/* Go to Studio / Admin Center */}
                   <Link
-                    href="/client/commissions"
+                    href={isAdmin ? '/admin' : '/client/commissions'}
                     className="hidden sm:flex items-center gap-2 px-4 py-2 bg-[#A7ACD9] text-[#1F2335] rounded-full font-semibold text-xs hover:opacity-90 transition-all active:scale-95"
                   >
-                    <span className="material-symbols-outlined text-base">dashboard</span>
-                    Studio
+                    <span className="material-symbols-outlined text-base">{isAdmin ? 'admin_panel_settings' : 'dashboard'}</span>
+                    {isAdmin ? 'Admin Center' : 'Studio'}
                   </Link>
 
                   {/* User menu */}
@@ -92,7 +111,7 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
                         {user.fullName.charAt(0).toUpperCase()}
                       </div>
                       <div className="text-left hidden sm:block">
-                        <p className="text-xs font-bold text-white leading-tight">{user.fullName}</p>
+                        <p className="whitespace-nowrap text-xs font-bold leading-tight text-white">{user.fullName}</p>
                         <p className="text-[10px] text-[#A7ACD9] uppercase tracking-wider">
                           {roles.join(', ') || 'CLIENT'}
                         </p>
@@ -107,13 +126,36 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
                           <p className="text-[10px] text-[#A7ACD9]">{user.email}</p>
                         </div>
                         <Link
-                          href="/client/commissions"
+                          href={isAdmin ? '/admin' : '/client/commissions'}
                           className="flex items-center gap-2 px-3 py-2 text-xs text-[#e4e1e5] hover:bg-white/10 rounded-xl transition-colors"
                           onClick={() => setIsMenuOpen(false)}
                         >
-                          <span className="material-symbols-outlined text-sm text-[#A7ACD9]">dashboard</span>
-                          My Studio
+                          <span className="material-symbols-outlined text-sm text-[#A7ACD9]">{isAdmin ? 'admin_panel_settings' : 'dashboard'}</span>
+                          {isAdmin ? 'Admin Center' : 'My Studio'}
                         </Link>
+                        {!roles.includes('Creator') && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setIsMenuOpen(false);
+                              router.push('/become-creator');
+                            }}
+                            className="flex w-full items-center space-x-2 rounded-xl px-3 py-2 text-xs text-[#A7ACD9] transition-colors hover:bg-white/10 cursor-pointer"
+                          >
+                            <span className="material-symbols-outlined text-sm">palette</span>
+                            <span>Trở thành Creator</span>
+                          </button>
+                        )}
+                        {isAdmin && (
+                          <Link
+                            href="/admin/creator-verifications"
+                            onClick={() => setIsMenuOpen(false)}
+                            className="flex items-center space-x-2 rounded-xl px-3 py-2 text-xs text-red-300 transition-colors hover:bg-white/10"
+                          >
+                            <span className="material-symbols-outlined text-sm">how_to_reg</span>
+                            <span>Duyệt đơn Creator</span>
+                          </Link>
+                        )}
                         <button
                           onClick={handleLogout}
                           className="w-full text-left px-3 py-2 text-xs text-red-400 hover:bg-white/10 rounded-xl transition-colors flex items-center gap-2 cursor-pointer"
@@ -148,6 +190,7 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
 
       {/* Page Content */}
       <main>{children}</main>
+
     </div>
   );
 }
