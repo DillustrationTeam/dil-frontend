@@ -33,8 +33,6 @@ export default function CreatorRequestsPage() {
   const [submitting, setSubmitting] = useState(false);
   const [showNegotiate, setShowNegotiate] = useState(false);
   const [counterOffer, setCounterOffer] = useState('');
-  const [counterDeadline, setCounterDeadline] = useState('');
-  const [counterNote, setCounterNote] = useState('');
   const [rejecting, setRejecting] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
   const [feedback, setFeedback] = useState<string | null>(null);
@@ -160,72 +158,11 @@ export default function CreatorRequestsPage() {
             </div>
 
             {showNegotiate && (
-              <form
-                onSubmit={(event) => {
-                  event.preventDefault();
-                  const price = counterOffer ? Number(counterOffer) : undefined;
-                  const deadline = counterDeadline ? new Date(counterDeadline).toISOString() : undefined;
-                  const note = counterNote.trim() || undefined;
-
-                  if ((price && Number.isFinite(price) && price > 0) || deadline || note) {
-                    void respond({
-                      action: 'Negotiate',
-                      negotiatePrice: price,
-                      negotiateDeadlineAt: deadline,
-                      negotiateNote: note,
-                    });
-                  }
-                }}
-                className="mb-4 space-y-3 rounded-2xl border border-[#A7ACD9]/30 bg-[#A7ACD9]/10 p-4"
-              >
-                <label className="block text-sm font-bold text-white">Thương lượng &amp; Đề xuất lại hợp đồng</label>
-                
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <div>
-                    <label htmlFor="counter-offer" className="block text-[11px] font-bold text-[#A7ACD9] uppercase mb-1">Giá đề xuất mới (VND)</label>
-                    <input
-                      id="counter-offer"
-                      type="number"
-                      min="1"
-                      step="1"
-                      value={counterOffer}
-                      onChange={(event) => setCounterOffer(event.target.value)}
-                      placeholder="Ví dụ: 450000"
-                      className="w-full rounded-xl border border-white/15 bg-[#10131f] px-3 py-2.5 text-sm text-white outline-none focus:border-[#A7ACD9]"
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor="counter-deadline" className="block text-[11px] font-bold text-[#A7ACD9] uppercase mb-1">Hạn hoàn thành mới (Tùy chọn)</label>
-                    <input
-                      id="counter-deadline"
-                      type="date"
-                      value={counterDeadline}
-                      onChange={(event) => setCounterDeadline(event.target.value)}
-                      className="w-full rounded-xl border border-white/15 bg-[#10131f] px-3 py-2.5 text-sm text-white outline-none focus:border-[#A7ACD9]"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label htmlFor="counter-note" className="block text-[11px] font-bold text-[#A7ACD9] uppercase mb-1">Ghi chú / Lý do điều chỉnh cho Client (Tùy chọn)</label>
-                  <textarea
-                    id="counter-note"
-                    rows={2}
-                    value={counterNote}
-                    onChange={(event) => setCounterNote(event.target.value)}
-                    placeholder="Ví dụ: Cần nới thêm 3 ngày do gói vẽ có thêm background chi tiết..."
-                    className="w-full rounded-xl border border-white/15 bg-[#10131f] px-3 py-2.5 text-sm text-white outline-none focus:border-[#A7ACD9]"
-                  />
-                </div>
-
-                <div className="flex justify-end pt-1">
-                  <button
-                    disabled={submitting}
-                    className="rounded-xl bg-[#A7ACD9] px-5 py-2.5 text-xs font-bold text-[#1F2335] shadow-lg hover:bg-white transition-all disabled:opacity-60 flex items-center gap-1.5"
-                  >
-                    <Send className="h-3.5 w-3.5" /> Gửi đề xuất lại cho Client
-                  </button>
+              <form onSubmit={(event) => { event.preventDefault(); const price = Number(counterOffer); if (Number.isFinite(price) && price > 0) void respond({ action: 'Negotiate', negotiatePrice: price }); }} className="mb-4 rounded-2xl border border-[#A7ACD9]/30 bg-[#A7ACD9]/10 p-4">
+                <label htmlFor="counter-offer" className="text-sm font-bold text-white">Send a counter-offer</label>
+                <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+                  <input id="counter-offer" type="number" min="1" step="1" required value={counterOffer} onChange={(event) => setCounterOffer(event.target.value)} placeholder="Giá đề xuất (VND)" className="min-w-0 flex-1 rounded-xl border border-white/15 bg-[#10131f] px-3 py-2.5 text-sm text-white outline-none focus:border-[#A7ACD9]" />
+                  <button disabled={submitting} className="rounded-xl bg-[#A7ACD9] px-4 py-2.5 text-xs font-bold text-[#1F2335] disabled:opacity-60"><Send className="mr-1 inline h-3.5 w-3.5" /> Send offer</button>
                 </div>
               </form>
             )}

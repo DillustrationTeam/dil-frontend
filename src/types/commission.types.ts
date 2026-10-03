@@ -32,6 +32,7 @@ export interface Milestone {
 }
 
 export interface Commission {
+  discountAmount: number;
   id: string;
   clientId: string;
   creatorId: string;
@@ -45,6 +46,7 @@ export interface Commission {
   totalPrice?: number;
   finalPrice?: number;
   escrowHeldAmount?: number;
+  disbursedAmount?: number;
   escrowStatus?: string;
   currentStage?: number;
   clientName?: string;
@@ -63,6 +65,7 @@ export interface RespondToCommissionPayload {
 }
 
 export interface CreateCommissionPayload {
+  voucherCode?: string;
   creatorId: string;
   packageId: string;
   licenseType: 'Personal' | 'Commercial';
