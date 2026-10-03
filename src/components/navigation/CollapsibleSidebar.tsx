@@ -13,7 +13,6 @@ import {
   Clock,
   CheckCircle,
   ListChecks,
-  Gavel,
   MessageSquare,
   Ticket,
   Brush,
@@ -25,6 +24,7 @@ import {
   ArrowUpRight,
   History,
   TrendingUp,
+  Gavel,
 } from 'lucide-react';
 
 interface SidebarItem {
@@ -49,9 +49,9 @@ const CLIENT_NAV_SECTIONS: SidebarSection[] = [
     title: 'Client Workspace',
     items: [
       { label: 'My Commissions', href: '/client/commissions', icon: FolderKanban },
-      { label: 'Auctions & Trade', href: '/auctions', icon: Gavel },
-      { label: 'Workroom Chat', href: '/workroom', icon: MessageSquare },
       { label: 'My Vouchers', href: '/vouchers', icon: Ticket },
+      { label: 'My Auctions', href: '/my-auctions', icon: Gavel },
+      { label: 'Workroom Chat', href: '/workroom', icon: MessageSquare },
     ],
   },
   {
@@ -73,7 +73,6 @@ const CREATOR_NAV_SECTIONS: SidebarSection[] = [
       { label: 'Incoming Requests', href: '/creator/requests', icon: Clock },
       { label: 'Waitlist', href: '/creator/waitlist', icon: ListChecks },
       { label: 'Workroom Chat', href: '/workroom', icon: MessageSquare },
-      { label: 'Art Auctions', href: '/auctions', icon: Gavel },
     ],
   },
   {
@@ -88,6 +87,7 @@ const CREATOR_NAV_SECTIONS: SidebarSection[] = [
     items: [
       { label: 'Artworks Portfolio', href: '/creator/artworks', icon: Brush },
       { label: 'Rate Card & Services', href: '/creator/rate-card', icon: LayoutGrid },
+      { label: 'My Vouchers', href: '/creator/vouchers', icon: Ticket },
       { label: 'Terms & Licensing', href: '/creator/terms', icon: ShieldCheck },
       { label: 'AI Auto-reply', href: '/creator/ai-rules', icon: Bot },
       { label: 'Asset & Presets', href: '/creator/assets', icon: Palette },

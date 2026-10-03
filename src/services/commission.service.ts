@@ -69,8 +69,8 @@ export const commissionService = {
   },
   complete: async (id: string) => apiClient.patch(`/commissions/${id}/complete`),
   getWipPreviewUrl: async (id: string, milestoneId: string) => {
-    const res = await apiClient.get<ApiResponse<string>>(`/commissions/${id}/milestones/${milestoneId}/preview`);
-    return res.data.data as string;
+    const res = await apiClient.get<ApiResponse<{ previewUrl: string }>>(`/commissions/${id}/milestones/${milestoneId}/preview`);
+    return res.data.data?.previewUrl as string;
   },
   getFinalDownloadUrl: async (id: string) => {
     const res = await apiClient.get<ApiResponse<{ downloadUrl: string }>>(`/commissions/${id}/final/download`);
@@ -86,6 +86,14 @@ export const commissionService = {
   },
   replyReview: async (id: string, replyComment: string) => {
     const res = await apiClient.post<ApiResponse<unknown>>(`/commissions/${id}/reviews/reply`, { replyComment });
+    return res.data.data;
+  },
+  createDispute: async (id: string, payload: { reason: string; evidenceUrls?: string[] }) => {
+    const res = await apiClient.post<ApiResponse<unknown>>(`/commissions/${id}/disputes`, payload);
+    return res.data.data;
+  },
+  getDispute: async (id: string) => {
+    const res = await apiClient.get<ApiResponse<unknown>>(`/commissions/${id}/disputes`);
     return res.data.data;
   },
 };

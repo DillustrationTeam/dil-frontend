@@ -5,8 +5,8 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
-import { useLanguage } from '@/context/language-context';
 import { authService } from '@/services/auth.service';
+import { useLanguage } from '@/context/language-context';
 import { useAuthStore } from '@/store/use-auth-store';
 import { NotificationBell } from '@/features/notification';
 
@@ -32,6 +32,7 @@ export function SiteHeader() {
   const router = useRouter();
   const { user, roles, refreshToken, isAuthenticated, clearAuth } = useAuthStore();
   const { t } = useLanguage();
+  const isAdmin = roles.some((r) => ['Administrator', 'Admin', 'Moderator'].includes(r));
 
   const [searchOpen, setSearchOpen] = useState(false);
   const [keyword, setKeyword] = useState('');
@@ -114,10 +115,13 @@ export function SiteHeader() {
           aria-label="Dillustration — Trang chủ"
           className={`flex shrink-0 items-center justify-self-start ${focusRing}`}
         >
-          <img
+          <Image
             src="/weblogo.png"
             alt="dillustration"
-            className="h-11 md:h-12 w-auto object-contain transition-transform hover:scale-105"
+            width={120}
+            height={56}
+            className="h-12 w-auto object-contain transition-transform hover:scale-105 md:h-14"
+            priority
           />
         </Link>
 
@@ -137,7 +141,7 @@ export function SiteHeader() {
                       : 'text-[#c7c5cf] hover:text-white'
                   }`}
                 >
-                  {t(label)}
+                  {label}
                 </Link>
               );
             })}
@@ -212,9 +216,20 @@ export function SiteHeader() {
                 aria-label="Mở menu tài khoản"
                 className={`flex cursor-pointer items-center gap-3 rounded-full border border-white/10 px-3.5 py-1.5 transition-all hover:border-[#A7ACD9] ${focusRing}`}
               >
-                <span className="flex size-8 items-center justify-center rounded-full bg-[#A7ACD9] text-xs font-bold text-[#1F2335]">
-                  {user.fullName.charAt(0).toUpperCase()}
-                </span>
+                {user.avatarUrl ? (
+                  <Image
+                    src={user.avatarUrl}
+                    alt={user.fullName}
+                    width={32}
+                    height={32}
+                    unoptimized
+                    className="size-8 rounded-lg object-cover"
+                  />
+                ) : (
+                  <span className="flex size-8 items-center justify-center rounded-lg bg-[#A7ACD9] text-xs font-bold text-[#1F2335]">
+                    {user.fullName.charAt(0).toUpperCase()}
+                  </span>
+                )}
                 <span className="hidden text-left xl:block">
                   <span className="block text-xs font-bold leading-tight text-white">{user.fullName}</span>
                   <span className="block text-[10px] uppercase tracking-wider text-[#A7ACD9]">
@@ -230,7 +245,7 @@ export function SiteHeader() {
                     <p className="text-xs font-bold text-white">{user.fullName}</p>
                     <p className="text-[11px] text-[#A7ACD9] truncate">{user.email}</p>
                     <span className="inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-medium border border-emerald-500/30">
-                      <span className="material-symbols-outlined text-[12px]">verified_user</span> {t('Escrow Verified')}
+                      <span className="material-symbols-outlined text-[12px]">verified_user</span> Escrow Verified
                     </span>
                   </div>
 
@@ -240,16 +255,16 @@ export function SiteHeader() {
                     className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs text-[#c7c5cf] transition-colors hover:bg-white/10 hover:text-white"
                   >
                     <span className="material-symbols-outlined text-base text-[#c2c7f6]">account_balance_wallet</span>
-                    <span>{t('Ví của tôi')}</span>
+                    <span>Ví của tôi</span>
                   </Link>
 
                   <Link
-                    href="/client/commissions"
+                    href={isAdmin ? '/admin' : '/client/commissions'}
                     onClick={() => setMenuOpen(false)}
                     className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs text-[#c7c5cf] transition-colors hover:bg-white/10 hover:text-white"
                   >
-                    <span className="material-symbols-outlined text-base text-[#c2c7f6]">folder_open</span>
-                    <span>{t('My Commissions')}</span>
+                    <span className="material-symbols-outlined text-base text-[#c2c7f6]">{isAdmin ? 'admin_panel_settings' : 'folder_open'}</span>
+                    <span>{isAdmin ? 'Admin Center' : t('My Commissions')}</span>
                   </Link>
 
                   {(roles.includes('Creator') || roles.includes('creator')) && (
@@ -259,9 +274,18 @@ export function SiteHeader() {
                       className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs text-[#c7c5cf] transition-colors hover:bg-white/10 hover:text-white"
                     >
                       <span className="material-symbols-outlined text-base text-[#c2c7f6]">palette</span>
-                      <span>{t('Creator Dashboard')}</span>
+                      <span>Creator Dashboard</span>
                     </Link>
                   )}
+
+                  <Link
+                    href="/profile"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs text-[#c7c5cf] transition-colors hover:bg-white/10 hover:text-white"
+                  >
+                    <span className="material-symbols-outlined text-base text-[#c2c7f6]">person</span>
+                    <span>{t('Hồ sơ của tôi')}</span>
+                  </Link>
 
                   <Link
                     href="/settings"
@@ -269,8 +293,29 @@ export function SiteHeader() {
                     className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs text-[#c7c5cf] transition-colors hover:bg-white/10 hover:text-white"
                   >
                     <span className="material-symbols-outlined text-base text-[#c2c7f6]">settings</span>
-                    <span>{t('Account Settings')}</span>
+                    <span>{t('Cài đặt')}</span>
                   </Link>
+
+                  {!roles.includes('Creator') && (
+                    <Link
+                      href="/become-creator"
+                      onClick={() => setMenuOpen(false)}
+                      className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs text-[#c7c5cf] transition-colors hover:bg-white/10 hover:text-white"
+                    >
+                      <span className="material-symbols-outlined text-base text-[#c2c7f6]">palette</span>
+                      <span>{t('Trở thành Creator')}</span>
+                    </Link>
+                  )}
+                  {isAdmin && (
+                    <Link
+                      href="/admin/creator-verifications"
+                      onClick={() => setMenuOpen(false)}
+                      className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs text-red-300 transition-colors hover:bg-white/10"
+                    >
+                      <span className="material-symbols-outlined text-base">how_to_reg</span>
+                      <span>{t('Duyệt đơn Creator')}</span>
+                    </Link>
+                  )}
 
                   <div className="my-1 border-t border-white/10" />
 
@@ -280,7 +325,7 @@ export function SiteHeader() {
                     className="flex w-full cursor-pointer items-center gap-2.5 rounded-xl px-3 py-2 text-left text-xs text-red-400 transition-colors hover:bg-white/10"
                   >
                     <span className="material-symbols-outlined text-base">logout</span>
-                    <span>{t('Sign Out')}</span>
+                    <span>Sign Out</span>
                   </button>
                 </div>
               )}

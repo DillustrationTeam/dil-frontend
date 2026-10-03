@@ -261,3 +261,13 @@ html.light ::-webkit-scrollbar-track {
 html.light ::-webkit-scrollbar-thumb {
   background: #cbd5e1;
 }
+
+/* react-hot-toast tự đặt pointer-events: auto cứng trên div nội dung của nó, nên chỉ set
+   pointer-events: none trên div bọc ngoài (hover-fade-toast.tsx) là không đủ — ép xuống
+   toàn bộ phần tử con bằng !important để click thật sự xuyên qua được nút phía sau. */
+.hover-fade-toast--faded,
+.hover-fade-toast--faded * {
+  pointer-events: none !important;
+}
+
+

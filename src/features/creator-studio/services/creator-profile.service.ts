@@ -51,6 +51,44 @@ export const creatorProfileService = {
     return response.data.data;
   },
 
+  async uploadArtworkImage(file: File): Promise<string> {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await apiClient.post<ApiResponse<{ imageUrl: string }>>('/artworks/image', formData);
+    if (response.data.error || !response.data.data?.imageUrl) {
+      throw new Error(response.data.error?.details?.join(', ') || 'Failed to upload artwork image.');
+    }
+    return response.data.data.imageUrl;
+  },
+
+  async getMyArtworks(search?: string, status?: string): Promise<ArtworkDto[]> {
+    const response = await apiClient.get<ApiResponse<ArtworkDto[]>>('/creator/me/artworks', {
+      params: { search, status },
+    });
+    if (response.data.error || !response.data.data) {
+      throw new Error(response.data.error?.details?.join(', ') || 'Failed to load artworks.');
+    }
+    return response.data.data;
+  },
+
+  async updateArtwork(
+    id: string,
+    data: Pick<CreateArtworkRequest, 'title'> & Partial<Pick<CreateArtworkRequest, 'description' | 'tags' | 'imageUrl' | 'thumbnailUrl'>>
+  ): Promise<ArtworkDto> {
+    const response = await apiClient.put<ApiResponse<ArtworkDto>>(`/artworks/${id}`, data);
+    if (response.data.error || !response.data.data) {
+      throw new Error(response.data.error?.details?.join(', ') || 'Failed to update artwork.');
+    }
+    return response.data.data;
+  },
+
+  async deleteArtwork(id: string): Promise<void> {
+    const response = await apiClient.delete<ApiResponse<{ deleted: boolean }>>(`/artworks/${id}`);
+    if (response.data.error) {
+      throw new Error(response.data.error.details?.join(', ') || 'Failed to delete artwork.');
+    }
+  },
+
   async getWorkstationState(): Promise<CreatorWorkstationState> {
     const response = await apiClient.get<ApiResponse<CreatorWorkstationState>>('/creator/workstation');
     if (response.data.error || !response.data.data) {
@@ -63,6 +101,14 @@ export const creatorProfileService = {
     const response = await apiClient.post<ApiResponse<CreatorTermsDto>>('/creator/workstation/terms', data);
     if (response.data.error || !response.data.data) {
       throw new Error(response.data.error?.details?.join(', ') || 'Failed to save terms.');
+    }
+    return response.data.data;
+  },
+
+  async getTerms(creatorId: string): Promise<CreatorTermsDto> {
+    const response = await apiClient.get<ApiResponse<CreatorTermsDto>>(`/creator/${creatorId}/terms`);
+    if (response.data.error || !response.data.data) {
+      throw new Error(response.data.error?.details?.join(', ') || 'Failed to load creator terms.');
     }
     return response.data.data;
   },

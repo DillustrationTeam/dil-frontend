@@ -6,6 +6,7 @@ const eslintConfig = defineConfig([
   {
     ignores: [
       ".next/**",
+      ".next-*/**",
       "node_modules/**",
       "out/**",
       "build/**",

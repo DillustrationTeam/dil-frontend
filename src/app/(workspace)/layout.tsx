@@ -1,39 +1,33 @@
-'use client';
+import type { Metadata } from 'next';
+import { AiAssistantLauncher, SiteHeader } from '@/features/navigation';
 
-import React, { useState } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
-import TopNavbar from '@/components/navigation/TopNavbar';
-import CollapsibleSidebar from '@/components/navigation/CollapsibleSidebar';
+export const metadata: Metadata = {
+  title: 'Không gian tài khoản | Dillustration',
+  description: 'Ví, nạp rút tiền, doanh thu, đấu giá, phòng làm việc và trợ lý AI.',
+};
 
+/**
+ * Layout riêng cho nhóm màn hình của module An.
+ *
+ * VÌ SAO ĐẶT Ở ĐÂY MÀ KHÔNG PHẢI `src/app/layout.tsx`:
+ * `src/app/layout.tsx` là file dùng chung — nhiều nhánh khác cũng sửa nó
+ * (feature/de190291-admin, feature/de190123-commission). Đặt header ở layout
+ * gốc sẽ khiến mọi lần merge đều xung đột. Route group `(workspace)` là không
+ * gian riêng của nhóm này: không nhánh nào khác dùng, nên merge luôn sạch.
+ *
+ * Route group `(workspace)` KHÔNG xuất hiện trong URL:
+ *   src/app/(workspace)/wallet/page.tsx  →  /wallet
+ *
+ * Cũng nhờ vậy, `src/app/(main)/layout.tsx` (do nhánh commission thêm vào, bọc
+ * TopNavbar + CollapsibleSidebar cho mọi trang trong `(main)`) sẽ KHÔNG bọc
+ * các trang ở đây — tránh cảnh hai thanh điều hướng chồng nhau.
+ */
 export default function WorkspaceLayout({ children }: { children: React.ReactNode }) {
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [currentRole, setCurrentRole] = useState<'client' | 'creator'>('client');
-  const pathname = usePathname();
-  const router = useRouter();
-  const activeRole = pathname?.startsWith('/creator') ? 'creator' : currentRole;
-
-  const handleRoleChange = (role: 'client' | 'creator') => {
-    setCurrentRole(role);
-    router.push(role === 'creator' ? '/creator/commissions' : '/client/commissions');
-  };
-
   return (
-    <div className="min-h-screen bg-[#1F2335] text-[#e4e1e5] flex flex-col font-sora">
-      <TopNavbar
-        currentRole={activeRole}
-        onRoleChange={handleRoleChange}
-      />
-      <div className="flex-1 flex w-full relative">
-        <CollapsibleSidebar
-          key={activeRole}
-          isCollapsed={isSidebarCollapsed}
-          onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-          role={activeRole}
-        />
-        <main className="flex-1 min-w-0 p-4 lg:p-8 overflow-y-auto">
-          {children}
-        </main>
-      </div>
-    </div>
+    <>
+      <SiteHeader />
+      {children}
+      <AiAssistantLauncher />
+    </>
   );
 }
