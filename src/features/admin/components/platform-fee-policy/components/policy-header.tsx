@@ -15,7 +15,7 @@ export function PolicyHeader({ loading, updating, onRefresh }: PolicyHeaderProps
       <div>
         <div className="flex items-center gap-2.5">
           <h1 className="font-h1 text-2xl lg:text-3xl font-extrabold text-white tracking-tight">
-            Platform Fee Rate & Policy Console (SCR-18)
+            Platform Fee Rate & Policy Console
           </h1>
         </div>
         <p className="text-xs text-[#8A8FA9] mt-1 font-body">
