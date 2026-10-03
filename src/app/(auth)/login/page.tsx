@@ -14,7 +14,7 @@ import { useGoogleAuth } from '@/features/auth/hooks/use-google-auth';
 import { isTwoFactorRequired } from '@/types/auth.types';
 
 const loginSchema = z.object({
-  email: z.string().min(1, 'Email is required').email('Invalid email address'),
+  emailOrUsername: z.string().min(1, 'Email or username is required'),
   password: z.string().min(1, 'Password is required'),
   remember: z.boolean().optional(),
 });
@@ -53,7 +53,7 @@ export default function LoginPage() {
   });
 
   const fillSeedAccount = (email: string) => {
-    setValue('email', email, { shouldValidate: true });
+    setValue('emailOrUsername', email, { shouldValidate: true });
     setValue('password', SEED_PASSWORD, { shouldValidate: true });
   };
 
@@ -61,13 +61,13 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       const result = await authService.login({
-        email: data.email,
+        emailOrUsername: data.emailOrUsername,
         password: data.password,
       });
 
       if (isTwoFactorRequired(result)) {
         setTwoFactorTicket(result.twoFactorTicket);
-        setPendingEmail(data.email);
+        setPendingEmail(result.email);
         return;
       }
 
@@ -184,9 +184,9 @@ export default function LoginPage() {
             <div className="space-y-2">
               <label
                 className="text-xs text-[#C7C5CF] uppercase tracking-widest block ml-1 font-medium"
-                htmlFor="email"
+                htmlFor="emailOrUsername"
               >
-                Email Address
+                Email or Username
               </label>
               <div className="relative group periwinkle-glow rounded-xl transition-all duration-300 border border-white/10 bg-white/5">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -195,16 +195,17 @@ export default function LoginPage() {
                   </span>
                 </div>
                 <input
-                  {...register('email')}
+                  {...register('emailOrUsername')}
                   className="block w-full bg-transparent border-none py-4 pl-12 pr-4 text-[#E4E1E5] focus:outline-none placeholder-white/20 text-base"
-                  id="email"
-                  placeholder="artist@dillustration.com"
-                  type="email"
+                  id="emailOrUsername"
+                  placeholder="artist@dillustration.com or username"
+                  type="text"
+                  autoComplete="username"
                   disabled={isLoading}
                 />
               </div>
-              {errors.email && (
-                <p className="text-red-400 text-xs ml-1">{errors.email.message}</p>
+              {errors.emailOrUsername && (
+                <p className="text-red-400 text-xs ml-1">{errors.emailOrUsername.message}</p>
               )}
             </div>
 
@@ -234,6 +235,7 @@ export default function LoginPage() {
                   id="password"
                   placeholder="••••••••••••"
                   type={showPassword ? 'text' : 'password'}
+                  autoComplete="current-password"
                   disabled={isLoading}
                 />
                 <div className="absolute inset-y-0 right-0 pr-4 flex items-center">
@@ -333,11 +335,14 @@ export default function LoginPage() {
               <input
                 value={twoFactorCode}
                 onChange={(event) => setTwoFactorCode(event.target.value)}
-                maxLength={6}
+                maxLength={11}
                 className="block w-full rounded-xl border border-white/10 bg-white/5 px-4 py-4 text-center text-lg tracking-widest text-[#E4E1E5] placeholder-white/20 focus:border-[#A7ACD9] focus:outline-none"
                 placeholder="••••••"
                 disabled={isVerifying}
               />
+              <p className="text-center text-xs text-[#919099]">
+                Or enter one of your recovery codes (format XXXXX-XXXXX).
+              </p>
               <button
                 type="button"
                 onClick={handleVerifyTwoFactor}

@@ -40,4 +40,5 @@ export interface UpdateClientProfileRequest {
   country?: string;
   timezone?: string;
   preferredLanguages?: string[];
+  currentPassword?: string;
 }

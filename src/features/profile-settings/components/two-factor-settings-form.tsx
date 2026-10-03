@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import QRCode from 'qrcode';
 import toast from 'react-hot-toast';
-import { ShieldCheck } from 'lucide-react';
+import { Check, Copy, ShieldCheck } from 'lucide-react';
 import { securitySettingsService } from '@/features/profile-settings/services/security-settings.service';
 
 const inputClass =
@@ -18,6 +18,7 @@ export function TwoFactorSettingsForm() {
   const [qrDataUrl, setQrDataUrl] = useState('');
   const [verifyCode, setVerifyCode] = useState('');
   const [recoveryCodes, setRecoveryCodes] = useState<string[]>([]);
+  const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const [showDisableForm, setShowDisableForm] = useState(false);
   const [disablePassword, setDisablePassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -82,6 +83,19 @@ export function TwoFactorSettingsForm() {
   const handleConfirmSavedRecoveryCodes = () => {
     setStage('idle');
     setRecoveryCodes([]);
+  };
+
+  const handleCopyCode = (code: string) => {
+    navigator.clipboard.writeText(code);
+    setCopiedCode(code);
+    setTimeout(() => setCopiedCode(null), 2000);
+  };
+
+  const handleCopyAllCodes = () => {
+    navigator.clipboard.writeText(recoveryCodes.join('\n'));
+    setCopiedCode('__all__');
+    toast.success('Đã copy toàn bộ 10 mã khôi phục.');
+    setTimeout(() => setCopiedCode(null), 2000);
   };
 
   const handleDisable = async () => {
@@ -194,9 +208,30 @@ export function TwoFactorSettingsForm() {
           </p>
           <div className="grid grid-cols-2 gap-2 rounded-xl border border-white/10 bg-white/5 p-4 font-mono text-sm text-white">
             {recoveryCodes.map((code) => (
-              <span key={code}>{code}</span>
+              <button
+                key={code}
+                type="button"
+                onClick={() => handleCopyCode(code)}
+                className="flex items-center justify-between gap-2 rounded-lg px-2 py-1 text-left transition hover:bg-white/10"
+                title="Copy mã này"
+              >
+                <span>{code}</span>
+                {copiedCode === code ? (
+                  <Check className="h-3.5 w-3.5 shrink-0 text-green-400" />
+                ) : (
+                  <Copy className="h-3.5 w-3.5 shrink-0 text-[#919099]" />
+                )}
+              </button>
             ))}
           </div>
+          <button
+            type="button"
+            onClick={handleCopyAllCodes}
+            className="flex w-full items-center justify-center gap-2 rounded-xl border border-white/10 py-2.5 text-sm text-[#C7C5CF] transition hover:border-[#A7ACD9] hover:text-white"
+          >
+            {copiedCode === '__all__' ? <Check className="h-4 w-4 text-green-400" /> : <Copy className="h-4 w-4" />}
+            Copy tất cả
+          </button>
           <button
             type="button"
             onClick={handleConfirmSavedRecoveryCodes}

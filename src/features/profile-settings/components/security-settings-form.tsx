@@ -29,19 +29,13 @@ export function SecuritySettingsForm() {
   const [isLoadingSessions, setIsLoadingSessions] = useState(true);
 
   const [username, setUsername] = useState('');
-  const [usernameChangedAt, setUsernameChangedAt] = useState<string | null>(null);
+  const [originalUsername, setOriginalUsername] = useState<string | null>(null);
   const [usernameTouched, setUsernameTouched] = useState(false);
   const [isUsernameSubmitting, setIsUsernameSubmitting] = useState(false);
   const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
   const [isCheckingUsername, setIsCheckingUsername] = useState(false);
-  const [showUsernameConfirm, setShowUsernameConfirm] = useState(false);
-  // Chụp mốc thời gian 1 lần lúc mount thay vì gọi Date.now() trực tiếp trong render (impure).
-  const [mountedAt] = useState(() => Date.now());
-
-  const nextUsernameChangeAt = usernameChangedAt
-    ? new Date(new Date(usernameChangedAt).getTime() + 30 * 24 * 60 * 60 * 1000)
-    : null;
-  const isUsernameInCooldown = Boolean(nextUsernameChangeAt && nextUsernameChangeAt.getTime() > mountedAt);
+  const [currentPasswordForUsername, setCurrentPasswordForUsername] = useState('');
+  const [usernamePasswordTouched, setUsernamePasswordTouched] = useState(false);
 
   const usernameError = !usernameTouched
     ? undefined
@@ -51,9 +45,19 @@ export function SecuritySettingsForm() {
         ? 'Username chỉ gồm chữ, số, "." và "_", từ 3-30 ký tự.'
         : undefined;
 
+  // Chỉ bắt xác thực mật khẩu khi THỰC SỰ đổi sang username khác (không áp dụng lúc đặt lần đầu) —
+  // và chỉ với tài khoản có mật khẩu (tài khoản chỉ đăng nhập Google không có gì để xác thực).
+  const isActualUsernameChange =
+    Boolean(originalUsername) && username.trim().toLowerCase() !== (originalUsername ?? '').toLowerCase();
+  const requiresPasswordForUsername = isActualUsernameChange && Boolean(linkedAccounts?.hasPassword);
+  const usernamePasswordError =
+    requiresPasswordForUsername && usernamePasswordTouched && !currentPasswordForUsername
+      ? 'Vui lòng nhập mật khẩu hiện tại để xác nhận đổi username.'
+      : undefined;
+
   useEffect(() => {
     const trimmed = username.trim();
-    const canCheck = Boolean(trimmed) && USERNAME_REGEX.test(trimmed) && !isUsernameInCooldown;
+    const canCheck = Boolean(trimmed) && USERNAME_REGEX.test(trimmed);
 
     const timer = setTimeout(() => {
       if (!canCheck) {
@@ -70,39 +74,35 @@ export function SecuritySettingsForm() {
     }, 400);
 
     return () => clearTimeout(timer);
-  }, [username, isUsernameInCooldown]);
+  }, [username]);
 
-  const saveUsername = async () => {
+  const handleSaveUsername = async () => {
+    setUsernameTouched(true);
+    setUsernamePasswordTouched(true);
+    if (!username.trim() || !USERNAME_REGEX.test(username.trim())) {
+      return;
+    }
+
+    if (requiresPasswordForUsername && !currentPasswordForUsername) {
+      return;
+    }
+
     setIsUsernameSubmitting(true);
     try {
-      const updated = await clientProfileService.updateMyProfile({ username: username.trim() });
+      const updated = await clientProfileService.updateMyProfile({
+        username: username.trim(),
+        currentPassword: requiresPasswordForUsername ? currentPasswordForUsername : undefined,
+      });
       toast.success('Đã lưu username.');
       setUsername(updated.username ?? '');
-      setUsernameChangedAt(updated.usernameChangedAt ?? null);
+      setOriginalUsername(updated.username ?? null);
+      setCurrentPasswordForUsername('');
+      setUsernamePasswordTouched(false);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Không thể lưu username.');
     } finally {
       setIsUsernameSubmitting(false);
     }
-  };
-
-  const handleSaveUsername = () => {
-    setUsernameTouched(true);
-    if (!username.trim() || !USERNAME_REGEX.test(username.trim())) {
-      return;
-    }
-
-    if (usernameChangedAt) {
-      setShowUsernameConfirm(true);
-      return;
-    }
-
-    void saveUsername();
-  };
-
-  const handleConfirmUsernameChange = () => {
-    setShowUsernameConfirm(false);
-    void saveUsername();
   };
 
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
@@ -204,7 +204,7 @@ export function SecuritySettingsForm() {
       .getClientById(user.id)
       .then((profile) => {
         setUsername(profile.username ?? '');
-        setUsernameChangedAt(profile.usernameChangedAt ?? null);
+        setOriginalUsername(profile.username ?? null);
       })
       .catch(() => {
         // Chưa từng thiết lập Client Profile — giữ username rỗng, cho phép đặt lần đầu.
@@ -405,13 +405,10 @@ export function SecuritySettingsForm() {
               value={username}
               onChange={(event) => setUsername(event.target.value)}
               onBlur={() => setUsernameTouched(true)}
-              disabled={isUsernameInCooldown}
-              className={`${inputClass} pr-10 disabled:cursor-not-allowed disabled:opacity-50 ${
-                usernameError ? 'border-red-400' : ''
-              }`}
+              className={`${inputClass} pr-10 ${usernameError ? 'border-red-400' : ''}`}
               placeholder="vd: nguyenvanan"
             />
-            {!isUsernameInCooldown && username.trim() && USERNAME_REGEX.test(username.trim()) && (
+            {username.trim() && USERNAME_REGEX.test(username.trim()) && (
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm">
                 {isCheckingUsername ? (
                   <span className="text-[#78767A]">...</span>
@@ -428,49 +425,30 @@ export function SecuritySettingsForm() {
             <p className="mt-1 text-xs text-red-400">Username này đã có người dùng hoặc không thể sử dụng.</p>
           )}
         </div>
-        {isUsernameInCooldown && nextUsernameChangeAt ? (
-          <p className="text-[11px] text-[#78767A]">
-            Bạn có thể đổi lại sau ngày {nextUsernameChangeAt.toLocaleDateString(lang === 'ENG' ? 'en-US' : 'vi-VN')}.
-          </p>
-        ) : (
-          <button
-            type="button"
-            onClick={handleSaveUsername}
-            disabled={isUsernameSubmitting || usernameAvailable === false}
-            className="rounded-xl bg-[#A7ACD9] px-4 py-2.5 text-sm font-bold text-[#1F2335] transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {isUsernameSubmitting ? 'Đang lưu...' : 'Lưu username'}
-          </button>
-        )}
-      </section>
 
-      {showUsernameConfirm && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-4">
-          <div className="w-full max-w-md rounded-3xl border border-white/10 bg-[#1F2335] p-6">
-            <p className="text-sm font-bold text-white">Xác nhận đổi username</p>
-            <p className="mt-2 text-xs text-[#C7C5CF]">
-              Sau khi đổi, bạn phải chờ 30 ngày mới được đổi tiếp. Bạn chắc chắn muốn đổi sang &quot;{username.trim()}
-              &quot;?
-            </p>
-            <div className="mt-5 flex justify-end gap-3">
-              <button
-                type="button"
-                onClick={() => setShowUsernameConfirm(false)}
-                className="rounded-xl border border-white/10 px-4 py-2 text-sm text-[#C7C5CF] transition hover:border-white/30"
-              >
-                Hủy
-              </button>
-              <button
-                type="button"
-                onClick={handleConfirmUsernameChange}
-                className="rounded-xl bg-[#A7ACD9] px-4 py-2 text-sm font-bold text-[#1F2335] transition hover:bg-white"
-              >
-                Xác nhận đổi
-              </button>
-            </div>
+        {requiresPasswordForUsername && (
+          <div>
+            <input
+              type="password"
+              value={currentPasswordForUsername}
+              onChange={(event) => setCurrentPasswordForUsername(event.target.value)}
+              onBlur={() => setUsernamePasswordTouched(true)}
+              className={`${inputClass} ${usernamePasswordError ? 'border-red-400' : ''}`}
+              placeholder="Mật khẩu hiện tại (để xác nhận đổi username)"
+            />
+            {usernamePasswordError && <p className="mt-1 text-xs text-red-400">{usernamePasswordError}</p>}
           </div>
-        </div>
-      )}
+        )}
+
+        <button
+          type="button"
+          onClick={() => void handleSaveUsername()}
+          disabled={isUsernameSubmitting || usernameAvailable === false}
+          className="rounded-xl bg-[#A7ACD9] px-4 py-2.5 text-sm font-bold text-[#1F2335] transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {isUsernameSubmitting ? 'Đang lưu...' : 'Lưu username'}
+        </button>
+      </section>
 
       <section className="glass-container space-y-4 rounded-[32px] p-6 md:p-8">
         <p className="text-xs uppercase tracking-wider text-[#A7ACD9]">Email đăng nhập</p>
