@@ -30,10 +30,10 @@ export function RevenueScreen({ userId }: { userId: string | null }) {
       const toStr = toDate.toISOString().slice(0, 10);
 
       const [sRes, tRes, bRes, snRes] = await Promise.all([
-        paymentService.summary(fromStr, toStr).catch(() => ({ grossAmount: 0, feeAmount: 0, netAmount: 0, completedOrderCount: 0, averageOrderValue: 0 })),
-        paymentService.timeseries(fromStr, toStr, rangeDays > 60 ? 'month' : 'day').catch(() => []),
-        paymentService.breakdown(fromStr, toStr).catch(() => []),
-        paymentService.snapshots('All', fromStr, toStr).catch(() => ({ items: [], nextCursor: null })),
+        paymentService.summary(fromStr, toStr),
+        paymentService.timeseries(fromStr, toStr, rangeDays > 60 ? 'month' : 'day'),
+        paymentService.breakdown(fromStr, toStr),
+        paymentService.snapshots('All', fromStr, toStr),
       ]);
 
       setSummary(sRes);

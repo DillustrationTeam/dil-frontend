@@ -43,6 +43,7 @@ export interface Commission {
   totalPrice?: number;
   finalPrice?: number;
   escrowHeldAmount?: number;
+  disbursedAmount?: number;
   escrowStatus?: string;
   currentStage?: number;
   clientName?: string;

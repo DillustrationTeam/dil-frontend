@@ -1,6 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { useAuthStore } from '@/store/use-auth-store';
 import { AdminTopNavbar } from '../top-navbar';
 import { VerticalNavbar } from '../vertical-navbar';
 import { AdminNavItem } from '../vertical-navbar/types';
@@ -34,6 +37,12 @@ export function AdminLayout({
   contentClassName = '',
 }: AdminLayoutProps) {
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
+  const authenticated = useAuthStore((state) => state.isAuthenticated);
+  const roles = useAuthStore((state) => state.roles);
+  const pathname = usePathname();
+  const administrator = roles.some((role) => role.toLowerCase() === 'administrator');
+  const moderator = roles.some((role) => role.toLowerCase() === 'moderator');
+  const adminOnly = ['/admin/users', '/admin/fee-policy', '/admin/platform-config'].some((path) => pathname === path || pathname.startsWith(`${path}/`));
 
   const toggleMobileNav = () => {
     setIsMobileNavOpen((prev) => !prev);
@@ -42,6 +51,10 @@ export function AdminLayout({
   const closeMobileNav = () => {
     setIsMobileNavOpen(false);
   };
+
+  if (!authenticated || !administrator && (!moderator || adminOnly)) {
+    return <div className="min-h-screen bg-[#1F2335] px-6 py-24 text-center text-[#E4E1E5]"><h1 className="font-h1 text-2xl">{authenticated ? 'Bạn không có quyền truy cập trang này' : 'Đăng nhập để mở trang quản trị'}</h1><Link href={authenticated ? '/' : '/login'} className="mt-6 inline-block text-[#A7ACD9] underline">{authenticated ? 'Về trang chủ' : 'Đăng nhập'}</Link></div>;
+  }
 
   return (
     <div
@@ -75,7 +88,6 @@ export function AdminLayout({
               adminRole={adminRole}
               showScreenIds={showScreenIds}
               onItemClick={closeMobileNav}
-              onLogout={closeMobileNav}
               className="shadow-2xl h-full border border-white/15"
             />
           </div>

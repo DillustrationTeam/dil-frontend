@@ -5,12 +5,13 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useAuthStore } from '@/store/use-auth-store';
 import { authService } from '@/services/auth.service';
-import { marketplaceService, MarketplaceArtwork } from '@/features/marketplace/services/marketplace.service';
+import { marketplaceService, MarketplaceArtwork, RelatedCreatorDto } from '@/features/marketplace/services/marketplace.service';
 
 export default function MarketplaceHomePage() {
   const { user, isAuthenticated, clearAuth, setUser } = useAuthStore();
   const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 });
   const [marketplaceArtworks, setMarketplaceArtworks] = useState<MarketplaceArtwork[]>([]);
+  const [artists, setArtists] = useState<RelatedCreatorDto[]>([]);
 
   useEffect(() => {
     if (isAuthenticated && !user) {
@@ -31,6 +32,10 @@ export default function MarketplaceHomePage() {
     };
     window.addEventListener('mousemove', handleMouseMove);
     return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
+  useEffect(() => {
+    marketplaceService.getCreators().then(setArtists).catch(() => setArtists([]));
   }, []);
 
   useEffect(() => {
@@ -232,6 +237,20 @@ export default function MarketplaceHomePage() {
           </div>
         </section>
 
+        <section id="artists" className="mx-auto max-w-7xl scroll-mt-24 px-6 py-14">
+          <div className="mb-6 flex items-end justify-between gap-4">
+            <div><p className="text-xs uppercase tracking-[0.2em] text-[#A7ACD9]">Artist directory</p><h2 className="mt-2 font-h1 text-3xl font-bold text-white">Artists nhận commission</h2></div>
+            <Link href="/explore" className="text-sm text-[#A7ACD9] hover:underline">Khám phá tất cả</Link>
+          </div>
+          {artists.length ? <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {artists.slice(0, 8).map((artist) => <Link key={artist.id} href={`/creators/${artist.id}`} className="group rounded-2xl border border-white/10 bg-white/[.035] p-4 transition hover:border-[#A7ACD9]/40 hover:bg-white/[.06]">
+              <div className="flex items-center gap-3"><span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#A7ACD9]/15 font-h1 text-lg font-semibold text-[#DDE0FF]">{artist.displayName.charAt(0).toUpperCase()}</span><span className="min-w-0"><span className="block truncate text-sm font-semibold text-white group-hover:text-[#DDE0FF]">{artist.displayName}</span><span className="mt-1 block truncate text-xs text-[#919099]">{artist.headline || 'Illustrator'}</span></span></div>
+              <p className="mt-3 min-h-8 text-xs leading-4 text-[#C7C5CF]">{artist.specialties || 'Open for commissions'}</p>
+              <div className="mt-3 flex items-center justify-between border-t border-white/10 pt-3 text-xs text-[#C7C5CF]"><span className="inline-flex items-center gap-1"><span className="text-[#E6C47A]">★</span>{artist.ratingAverage.toFixed(1)} <span className="text-[#919099]">({artist.ratingCount})</span></span><span>{artist.availableSlots} slots</span></div>
+            </Link>)}
+          </div> : <div className="rounded-2xl border border-dashed border-white/10 p-8 text-center text-sm text-[#919099]">Chưa có creator đang mở commission.</div>}
+        </section>
+
         {/* ── MARKETPLACE FEED ── */}
         <section className="max-w-7xl mx-auto px-6 pb-16">
           <div className="mb-6 flex items-center justify-between gap-4">
@@ -258,7 +277,7 @@ export default function MarketplaceHomePage() {
                       alt={artwork.title}
                       fill
                       unoptimized
-                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      className="h-full w-full object-contain transition-transform duration-500 group-hover:scale-[1.02]"
                     />
                   </div>
                   <div className="space-y-3 p-4">

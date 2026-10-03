@@ -48,7 +48,7 @@ export function AdminTopNavbar({
 
           <Link href="/" className="flex items-center gap-3 group outline-none">
             <Image
-              src="/studiologo.png"
+              src="/weblogo.png"
               alt="dillustration"
               width={140}
               height={44}
