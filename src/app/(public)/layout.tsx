@@ -3,13 +3,12 @@
 import React, { Suspense, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { useLanguage } from '@/context/language-context';
 import { useAuthStore } from '@/store/use-auth-store';
 import { authService } from '@/services/auth.service';
-import { useLanguage } from '@/context/language-context';
 import toast from 'react-hot-toast';
 import { NotificationBell } from '@/features/notification';
-import { BecomeCreatorModal } from '@/components/modals/BecomeCreatorModal';
 
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
   return <Suspense fallback={children}><PublicLayoutContent>{children}</PublicLayoutContent></Suspense>;
@@ -20,10 +19,7 @@ function PublicLayoutContent({ children }: { children: React.ReactNode }) {
   const { t } = useLanguage();
   const pathname = usePathname() ?? '';
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isBecomeCreatorOpen, setIsBecomeCreatorOpen] = useState(false);
-  const isBecomeCreatorRequested = searchParams?.get('become-creator') === 'true';
 
   const handleLogout = async () => {
     if (refreshToken) {
@@ -46,7 +42,7 @@ function PublicLayoutContent({ children }: { children: React.ReactNode }) {
               <img
                 src="/weblogo.png"
                 alt="dillustration"
-                className="h-11 md:h-12 w-auto object-contain hover:scale-105 transition-transform"
+                className="h-14 md:h-16 w-auto object-contain hover:scale-105 transition-transform"
               />
             </Link>
             <div className="hidden shrink-0 items-center gap-6 text-sm font-medium lg:flex">
@@ -79,7 +75,7 @@ function PublicLayoutContent({ children }: { children: React.ReactNode }) {
             <div className="relative hidden shrink-0 xl:block">
               <input
                 className="bg-[#1b1b1e] border border-[#46464e]/30 rounded-full px-6 py-2 w-64 focus:outline-none focus:ring-1 focus:ring-[#c2c7f6] focus:border-[#c2c7f6] transition-all duration-300 text-sm text-[#e4e1e5] placeholder-white/30"
-                placeholder={t('Search curated art...')}
+                placeholder="Search curated art..."
                 type="text"
               />
               <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-[#919099] text-xl">
@@ -162,7 +158,7 @@ function PublicLayoutContent({ children }: { children: React.ReactNode }) {
                             type="button"
                             onClick={() => {
                               setIsMenuOpen(false);
-                              setIsBecomeCreatorOpen(true);
+                              router.push('/become-creator');
                             }}
                             className="flex w-full items-center space-x-2 rounded-xl px-3 py-2 text-xs text-[#A7ACD9] transition-colors hover:bg-white/10 cursor-pointer"
                           >
@@ -215,17 +211,6 @@ function PublicLayoutContent({ children }: { children: React.ReactNode }) {
       {/* Page Content */}
       <main>{children}</main>
 
-      <BecomeCreatorModal
-        isOpen={isBecomeCreatorOpen || isBecomeCreatorRequested}
-        onClose={() => {
-          setIsBecomeCreatorOpen(false);
-          if (isBecomeCreatorRequested) {
-            const params = new URLSearchParams(searchParams.toString());
-            params.delete('become-creator');
-            router.replace(`${pathname}${params.size ? `?${params}` : ''}`, { scroll: false });
-          }
-        }}
-      />
     </div>
   );
 }

@@ -927,6 +927,7 @@ const translationMap: Record<string, string> = {
 
   // Header user dropdown menu
   'Hồ sơ của tôi': 'My Profile',
+  'Cài đặt': 'Settings',
 
   // Public client profile page (/clients/[id])
   'Độ uy tín': 'Reputation',

@@ -31,23 +31,7 @@ export function CreatorRateCardManager() {
         setHasProfile(true);
         setSlots(profile.availableSlots ?? 3);
         const cardPackages = await creatorRateCardService.get(profile.id);
-        if (cardPackages && cardPackages.length > 0) {
-          setPackages(cardPackages);
-        } else {
-          setPackages([
-            {
-              id: crypto.randomUUID(),
-              name: 'Chân dung / Headshot',
-              description: 'Minh hoạ chân dung bán thân, phong cách anime / digital art.',
-              price: 350000,
-              milestones: [
-                { sequence: 1, title: 'Phác thảo (Sketch)', price: 105000 },
-                { sequence: 2, title: 'Lineart & Màu cơ bản', price: 140000 },
-                { sequence: 3, title: 'Hoàn thiện & Bàn giao', price: 105000 },
-              ],
-            },
-          ]);
-        }
+        setPackages(cardPackages);
       } catch (cause) {
         if (axios.isAxiosError(cause) && cause.response?.status === 400) {
           setError('Tài khoản này chưa có hồ sơ Creator. Hãy tạo hồ sơ trước khi lưu bảng giá.');

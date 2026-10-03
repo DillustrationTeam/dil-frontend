@@ -1,9 +1,9 @@
 'use client';
 
 import { useParams } from 'next/navigation';
-import { CreatorProfile } from '@/features/marketplace';
+import { CreatorProfileScreen } from '@/features/marketplace/components/creator-profile-screen';
 
 export default function CreatorPublicProfilePage() {
   const params = useParams<{ id: string }>();
-  return <CreatorProfile id={params.id} />;
+  return <CreatorProfileScreen id={params.id} />;
 }

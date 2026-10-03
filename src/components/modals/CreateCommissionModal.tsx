@@ -11,12 +11,12 @@ import { creatorRateCardService, RateCardPackage } from '@/features/creator-stud
 import { creatorProfileService } from '@/features/creator-studio/services/creator-profile.service';
 import { CreatorTermsDto } from '@/features/creator-studio/types/creator-profile.types';
 import { extractErrorMessage } from '@/lib/api-client';
-import { VoucherApplyPanel } from '@/features/payment';
 
 const schema = z.object({
-  title: z.string().trim().max(200, 'Tên dự án quá dài (tối đa 200 ký tự).').optional(),
+  title: z.string().trim().min(1, 'Nhập tên dự án.').max(200, 'Tên dự án quá dài (tối đa 200 ký tự).'),
   description: z.string().trim().min(1, 'Vui lòng nhập mô tả chi tiết yêu cầu đặt vẽ.'),
   deadlineAt: z.string().optional(),
+  voucherCode: z.string().trim().max(50, 'Mã giảm giá quá dài.').optional(),
 });
 type Form = z.infer<typeof schema>;
 
@@ -37,7 +37,7 @@ export default function CreateCommissionModal({ creatorId, creatorName, onClose 
 
   const { register, handleSubmit, formState: { errors } } = useForm<Form>({
     resolver: zodResolver(schema),
-    defaultValues: { title: '', description: '', deadlineAt: '' },
+    defaultValues: { title: '', description: '', deadlineAt: '', voucherCode: '' },
   });
   const selectedPackage = packages.find(item => item.id === selectedPackageId);
   const multiplier = licenseType === 'Commercial' ? terms?.commercialLicenseMultiplier ?? 1.5 : 1;
@@ -76,6 +76,7 @@ export default function CreateCommissionModal({ creatorId, creatorName, onClose 
         licenseType,
         title: values.title?.trim() || `Đặt vẽ gói ${selectedPackage.name}`,
         description: values.description,
+        voucherCode: values.voucherCode || undefined,
         deadlineAt: values.deadlineAt ? new Date(values.deadlineAt).toISOString() : undefined,
       });
       onClose();
@@ -101,7 +102,7 @@ export default function CreateCommissionModal({ creatorId, creatorName, onClose 
         <form onSubmit={handleSubmit(submit)} className="min-h-0 flex-1 space-y-6 overflow-y-auto p-5 sm:p-8">
           <div className="space-y-2">
             <label className={label} htmlFor="commission-title">TÊN DỰ ÁN</label>
-            <input id="commission-title" className={`${field} ${errors.title ? 'border-red-500/70' : ''}`} placeholder="Ví dụ: Minh họa nhân vật Game (để trống sẽ tự lấy tên gói vẽ)" {...register('title')} />
+            <input id="commission-title" className={`${field} ${errors.title ? 'border-red-500/70' : ''}`} placeholder="Ví dụ: Minh họa nhân vật Game" {...register('title')} />
             {errors.title && <p role="alert" className="mt-1 flex items-center gap-1.5 text-xs text-red-300"><AlertCircle className="w-3.5 h-3.5 shrink-0" /> {errors.title.message}</p>}
           </div>
 
@@ -135,7 +136,7 @@ export default function CreateCommissionModal({ creatorId, creatorName, onClose 
                 </label>
               ))
             )}
-            
+
             {packageError && <p role="alert" className="mt-1.5 flex items-center gap-1.5 text-xs text-red-300 font-medium"><AlertCircle className="w-3.5 h-3.5 shrink-0" /> {packageError}</p>}
 
             <div className="space-y-3 border-t border-white/10 pt-5">
@@ -176,10 +177,10 @@ export default function CreateCommissionModal({ creatorId, creatorName, onClose 
                 </div>
 
                 <div className="pt-2">
-                  <VoucherApplyPanel
-                    refType="Commission"
-                    orderAmount={estimatedTotal}
-                  />
+                  <label className={label} htmlFor="commission-voucher">MÃ GIẢM GIÁ (KHÔNG BẮT BUỘC)</label>
+                  <input id="commission-voucher" className={field} placeholder="Nhập mã giảm giá" {...register('voucherCode')} />
+                  {errors.voucherCode && <p role="alert" className="text-xs text-red-300">{errors.voucherCode.message}</p>}
+                  <p className="mt-2 text-xs text-slate-400">Hệ thống kiểm tra mã khi tạo yêu cầu và chỉ sử dụng lượt khi ký quỹ.</p>
                 </div>
               </>
             )}
