@@ -1,38 +1,35 @@
 'use client';
 
 import React, { useState } from 'react';
-import { AdminTopNavbar } from '../top-navbar';
+import { useRouter } from 'next/navigation';
+import TopNavbar from '@/components/navigation/TopNavbar';
 import { VerticalNavbar } from '../vertical-navbar';
-import { AdminNavItem } from '../vertical-navbar/types';
+import { AdminNavItem, AdminNavSection } from '../vertical-navbar/types';
 
 export interface AdminLayoutProps {
   children: React.ReactNode;
-
   sidebarItems?: AdminNavItem[];
-
+  sidebarSections?: AdminNavSection[];
   adminBadgeText?: string;
-
   adminName?: string;
-
   adminRole?: string;
-
   showScreenIds?: boolean;
-
   className?: string;
-
   contentClassName?: string;
 }
 
 export function AdminLayout({
   children,
   sidebarItems,
-  adminBadgeText = 'ADMINISTRATOR CONSOLE (/admin)',
+  sidebarSections,
   adminName,
   adminRole = 'Platform Control',
   showScreenIds = false,
   className = '',
   contentClassName = '',
 }: AdminLayoutProps) {
+  const router = useRouter();
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
 
   const toggleMobileNav = () => {
@@ -43,23 +40,27 @@ export function AdminLayout({
     setIsMobileNavOpen(false);
   };
 
+  const handleRoleChange = (role: 'client' | 'creator' | 'admin') => {
+    if (role === 'creator') router.push('/creator/commissions');
+    else if (role === 'client') router.push('/client/commissions');
+    else router.push('/admin');
+  };
+
   return (
     <div
-      className={`min-h-screen flex flex-col bg-[#0d0e15] text-[#e4e1e5] relative selection:bg-red-500/30 selection:text-white ${className}`}
-      style={{
-        background: 'radial-gradient(circle at 50% 15%, #1d2133 0%, #0d0e15 100%)',
-      }}
+      className={`min-h-screen bg-[#1F2335] text-[#e4e1e5] flex flex-col font-sora ${className}`}
     >
-      {/* 1. TOP NAVBAR */}
-      <AdminTopNavbar
-        adminBadgeText={adminBadgeText}
-        isMobileMenuOpen={isMobileNavOpen}
-        onToggleMobileMenu={toggleMobileNav}
+      {/* 1. TOP NAVBAR (Identical to Creator/Client TopNavbar without Role Switcher Pill) */}
+      <TopNavbar
+        currentRole="admin"
+        showRoleSwitcher={false}
+        onRoleChange={handleRoleChange}
+        onToggleSidebar={toggleMobileNav}
       />
 
       {/* 2. MOBILE NAVIGATION DRAWER (Off-canvas for tablet / mobile viewports) */}
       {isMobileNavOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden flex">
+        <div className="fixed inset-0 z-50 md:hidden flex animate-fadeIn">
           {/* Backdrop overlay */}
           <div
             className="fixed inset-0 bg-black/70 backdrop-blur-sm transition-opacity"
@@ -68,37 +69,47 @@ export function AdminLayout({
           />
 
           {/* Drawer Content */}
-          <div className="relative w-full max-w-xs sm:max-w-sm h-full p-4 overflow-y-auto z-10">
+          <div className="relative w-72 max-w-[80vw] h-full z-10 bg-[#1F2335] border-r border-white/10 shadow-2xl flex flex-col">
             <VerticalNavbar
               items={sidebarItems}
+              sections={sidebarSections}
               adminName={adminName}
               adminRole={adminRole}
               showScreenIds={showScreenIds}
               onItemClick={closeMobileNav}
               onLogout={closeMobileNav}
-              className="shadow-2xl h-full border border-white/15"
+              isCollapsed={false}
+              className="h-full border-r-0"
             />
           </div>
         </div>
       )}
 
-      {/* 3. MAIN WORKSPACE CONTAINER: LEFT VERTICAL NAVBAR + RIGHT CUSTOMIZABLE CONTENT */}
-      <main className="max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:pl-6 lg:pr-8 py-8 flex-grow grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
-        {/* LEFT COLUMN: VERTICAL NAVBAR (Desktop) */}
-        <div className="hidden lg:block lg:col-span-3 sticky top-24">
+      {/* 3. MAIN WORKSPACE CONTAINER: LEFT COLLAPSIBLE SIDEBAR + RIGHT CONTENT */}
+      <div className="flex-1 flex w-full relative">
+        {/* DESKTOP COLLAPSIBLE SIDEBAR (Matching CollapsibleSidebar exactly) */}
+        <div className="hidden md:flex">
           <VerticalNavbar
             items={sidebarItems}
+            sections={sidebarSections}
             adminName={adminName}
             adminRole={adminRole}
             showScreenIds={showScreenIds}
+            isCollapsed={isSidebarCollapsed}
+            onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
           />
         </div>
 
         {/* RIGHT COLUMN: DYNAMIC & CUSTOMIZABLE PAGE CONTENT */}
-        <div className={`lg:col-span-9 space-y-6 min-w-0 w-full ${contentClassName}`}>
+        <main
+          className={`flex-1 min-w-0 p-4 lg:p-8 overflow-y-auto ${contentClassName}`}
+        >
           {children}
-        </div>
-      </main>
+        </main>
+      </div>
     </div>
   );
 }
+
+// Named alias for convenience
+export const AdminConsoleLayout = AdminLayout;

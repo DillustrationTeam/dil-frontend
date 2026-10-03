@@ -12,11 +12,31 @@ export interface AdminNavItem {
   exact?: boolean;
 }
 
+export interface AdminNavSection {
+  title?: string;
+  items: AdminNavItem[];
+}
+
 export interface AdminVerticalNavbarProps {
   /**
-   * List of navigation items. Defaults to the standard admin screens (SCR-24, SCR-23, SCR-21, SCR-20, SCR-22, SCR-18).
+   * List of navigation items. Defaults to the standard admin screens.
    */
   items?: AdminNavItem[];
+
+  /**
+   * Grouped navigation sections with headers, matching CollapsibleSidebar.
+   */
+  sections?: AdminNavSection[];
+
+  /**
+   * Whether the sidebar is collapsed (w-20 vs w-64).
+   */
+  isCollapsed?: boolean;
+
+  /**
+   * Callback to toggle collapse state.
+   */
+  onToggleCollapse?: () => void;
 
   /**
    * Explicitly set active href. If not provided, automatically resolved via Next.js usePathname().

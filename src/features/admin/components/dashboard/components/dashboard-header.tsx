@@ -28,21 +28,21 @@ export function DashboardHeader({ loading, error, onRefresh }: DashboardHeaderPr
         <div className="flex items-center gap-2 self-start sm:self-auto">
           <Link
             href="/admin/fee-policy"
-            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-[#8A8FA9] hover:text-white transition-all cursor-pointer text-xs font-semibold"
-            title="Configure Platform Fee & Policies (SCR-18)"
+            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white/5 border border-white/10"
+            title="Configure Platform Fee & Policies"
           >
-            <SlidersHorizontal className="w-3.5 h-3.5 text-red-400" />
-            <span>Fee Policy (SCR-18)</span>
+            <SlidersHorizontal className="w-3.5 h-3.5 text-[#A7ACD9]" />
+            <span>Fee Policy</span>
           </Link>
           <button
             type="button"
             onClick={onRefresh}
             disabled={loading}
-            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-[#8A8FA9] hover:text-white transition-all cursor-pointer disabled:opacity-50 text-xs font-semibold"
+            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white/5 border border-white/10"
             title="Refresh dashboard metrics"
             aria-label="Refresh dashboard metrics"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-red-400' : ''}`} />
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-[#A7ACD9]' : 'text-[#A7ACD9]'}`} />
             <span>Refresh</span>
           </button>
         </div>
