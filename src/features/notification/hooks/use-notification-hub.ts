@@ -53,7 +53,7 @@ export function useNotificationHub(
     connection.onclose(() => setHubConnected(false));
 
     let active = true;
-    connection
+    const startPromise = connection
       .start()
       .then(() => connection.invoke('Subscribe'))
       .then(() => {
@@ -66,7 +66,9 @@ export function useNotificationHub(
 
     return () => {
       active = false;
-      void connection.stop().catch(() => undefined);
+      // Đợi start() xong rồi mới stop() — gọi stop() khi đang negotiate (StrictMode
+      // double-invoke effect ở dev) làm SignalR log lỗi "stopped during negotiation".
+      void startPromise.finally(() => connection.stop().catch(() => undefined));
     };
   }, [userId, accessToken]);
 

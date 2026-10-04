@@ -110,7 +110,7 @@ export function useAuctionHub(
     connection.onclose(() => updateStatus('disconnected'));
 
     let active = true;
-    connection
+    const startPromise = connection
       .start()
       .then(() => connection.invoke('JoinAuction', auctionId))
       .then(() => {
@@ -122,10 +122,14 @@ export function useAuctionHub(
 
     return () => {
       active = false;
-      if (connection.state === HubConnectionState.Connected) {
-        void connection.invoke('LeaveAuction', auctionId).catch(() => undefined);
-      }
-      void connection.stop().catch(() => undefined);
+      // Đợi start() xong rồi mới leave/stop() — gọi stop() khi đang negotiate (StrictMode
+      // double-invoke effect ở dev) làm SignalR log lỗi "stopped during negotiation".
+      void startPromise.finally(async () => {
+        if (connection.state === HubConnectionState.Connected) {
+          await connection.invoke('LeaveAuction', auctionId).catch(() => undefined);
+        }
+        await connection.stop().catch(() => undefined);
+      });
     };
   }, [auctionId, accessToken]);
 

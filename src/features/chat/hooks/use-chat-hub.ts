@@ -101,7 +101,7 @@ export function useChatHub(roomId: string, callbacks: ChatHubCallbacks): ChatHub
     connection.onclose(() => publishStatus('disconnected'));
 
     let active = true;
-    connection
+    const startPromise = connection
       .start()
       .then(() => connection.invoke('JoinRoom', roomId))
       .then(() => {
@@ -114,7 +114,9 @@ export function useChatHub(roomId: string, callbacks: ChatHubCallbacks): ChatHub
     return () => {
       active = false;
       connectionRef.current = null;
-      void connection.stop().catch(() => undefined);
+      // Đợi start() xong rồi mới stop() — gọi stop() khi đang negotiate (StrictMode
+      // double-invoke effect ở dev) làm SignalR log lỗi "stopped during negotiation".
+      void startPromise.finally(() => connection.stop().catch(() => undefined));
     };
   }, [roomId, accessToken]);
 
