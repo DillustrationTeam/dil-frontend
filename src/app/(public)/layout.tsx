@@ -1,6 +1,7 @@
 'use client';
 
 import React, { Suspense, useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useLanguage } from '@/context/language-context';
@@ -107,9 +108,20 @@ function PublicLayoutContent({ children }: { children: React.ReactNode }) {
                       onClick={() => setIsMenuOpen(!isMenuOpen)}
                       className="flex items-center space-x-3 px-3.5 py-1.5 rounded-full border border-white/10 hover:border-[#A7ACD9] bg-white/5 transition-all cursor-pointer"
                     >
-                      <div className="w-8 h-8 rounded-full bg-[#A7ACD9] text-[#1F2335] flex items-center justify-center font-bold text-xs">
-                        {user.fullName.charAt(0).toUpperCase()}
-                      </div>
+                      {user.avatarUrl ? (
+                        <Image
+                          src={user.avatarUrl}
+                          alt={user.fullName}
+                          width={32}
+                          height={32}
+                          unoptimized
+                          className="h-8 w-8 rounded-lg object-cover"
+                        />
+                      ) : (
+                        <div className="w-8 h-8 rounded-lg bg-[#A7ACD9] text-[#1F2335] flex items-center justify-center font-bold text-xs">
+                          {user.fullName.charAt(0).toUpperCase()}
+                        </div>
+                      )}
                       <div className="text-left hidden sm:block">
                         <p className="whitespace-nowrap text-xs font-bold leading-tight text-white">{user.fullName}</p>
                         <p className="text-[10px] text-[#A7ACD9] uppercase tracking-wider">
@@ -132,6 +144,14 @@ function PublicLayoutContent({ children }: { children: React.ReactNode }) {
                         >
                           <span className="material-symbols-outlined text-sm text-[#A7ACD9]">{isAdmin ? 'admin_panel_settings' : 'dashboard'}</span>
                           {isAdmin ? 'Admin Center' : 'My Studio'}
+                        </Link>
+                        <Link
+                          href={`/clients/${user.id}`}
+                          onClick={() => setIsMenuOpen(false)}
+                          className="flex items-center gap-2 px-3 py-2 text-xs text-[#e4e1e5] hover:bg-white/10 rounded-xl transition-colors"
+                        >
+                          <span className="material-symbols-outlined text-sm text-[#A7ACD9]">person</span>
+                          Hồ sơ của tôi
                         </Link>
                         {!roles.includes('Creator') && (
                           <button

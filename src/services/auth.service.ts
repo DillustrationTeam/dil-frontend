@@ -6,21 +6,35 @@ import {
   ConfirmVerificationCodeResponse,
   ForgotPasswordRequest,
   LoginRequest,
+  LoginResult,
   RegisterRequest,
   ResetPasswordRequest,
   UserDto,
+  VerifyTwoFactorLoginRequest,
 } from '@/types/auth.types';
 
 export const authService = {
-  async login(data: LoginRequest): Promise<AuthResponseDto> {
+  async login(data: LoginRequest): Promise<LoginResult> {
     try {
-      const response = await apiClient.post<ApiResponse<AuthResponseDto>>('/auth/login', data);
+      const response = await apiClient.post<ApiResponse<LoginResult>>('/auth/login', data);
       if (response.data.error || !response.data.data) {
         throw new Error(response.data.error?.detail || 'Failed to authenticate.');
       }
       return response.data.data;
     } catch (err) {
       throw new Error(getApiErrorMessage(err, 'Failed to authenticate.'));
+    }
+  },
+
+  async verifyTwoFactorLogin(data: VerifyTwoFactorLoginRequest): Promise<AuthResponseDto> {
+    try {
+      const response = await apiClient.post<ApiResponse<AuthResponseDto>>('/auth/login/verify-2fa', data);
+      if (response.data.error || !response.data.data) {
+        throw new Error(response.data.error?.detail || 'Mã xác minh không đúng.');
+      }
+      return response.data.data;
+    } catch (err) {
+      throw new Error(getApiErrorMessage(err, 'Mã xác minh không đúng.'));
     }
   },
 
@@ -59,9 +73,9 @@ export const authService = {
     }
   },
 
-  async loginWithGoogle(accessToken: string): Promise<AuthResponseDto> {
+  async loginWithGoogle(accessToken: string): Promise<LoginResult> {
     try {
-      const response = await apiClient.post<ApiResponse<AuthResponseDto>>('/auth/google', { accessToken });
+      const response = await apiClient.post<ApiResponse<LoginResult>>('/auth/google', { accessToken });
       if (response.data.error || !response.data.data) {
         throw new Error(response.data.error?.detail || 'Failed to authenticate with Google.');
       }

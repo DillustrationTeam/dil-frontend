@@ -4,4 +4,6 @@ export interface CloudinaryUploadSignature {
   signature: string;
   timestamp: number;
   folder: string;
+  allowedFormats: string;
+  transformation?: string | null;
 }
