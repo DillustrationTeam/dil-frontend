@@ -13,11 +13,8 @@ import {
   Briefcase,
   ShieldCheck,
   Wallet,
-<<<<<<< HEAD
   FolderKanban,
-=======
   Menu,
->>>>>>> b814f7701f5d8ae66fc96451cd04628486bb68dc
 } from 'lucide-react';
 import { useAuthStore } from '@/store/use-auth-store';
 import { useRouter } from 'next/navigation';
