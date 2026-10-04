@@ -34,14 +34,17 @@ export default function SettingsPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#1F2335] px-6 py-12">
-      <div className="mx-auto max-w-5xl">
-        <div className="mb-2 flex items-center justify-between">
-          <PageHeader title="Cài đặt hồ sơ" />
+    <main className="min-h-screen bg-[#1F2335] px-6 py-8">
+      <div className="mx-auto max-w-6xl">
+        <div className="mb-6 flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-white">Cài đặt hồ sơ</h1>
+            <p className="mt-1 text-xs text-[#919099]">Quản lý thông tin cá nhân, tài khoản và bảo mật</p>
+          </div>
           {user?.id && (
             <Link
-              href={`/clients/${user.id}`}
-              className="mb-8 inline-flex items-center gap-1.5 rounded-full border border-white/10 px-3.5 py-1.5 text-xs font-medium text-[#C7C5CF] transition hover:border-[#A7ACD9] hover:text-white"
+              href="/profile"
+              className="inline-flex items-center gap-1.5 rounded-full border border-white/10 px-3.5 py-1.5 text-xs font-medium text-[#C7C5CF] transition hover:border-[#A7ACD9] hover:text-white"
             >
               <span className="material-symbols-outlined text-sm">visibility</span>
               Xem hồ sơ công khai

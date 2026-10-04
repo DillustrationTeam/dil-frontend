@@ -334,7 +334,7 @@ export default function MarketplaceHomePage() {
 
       {/* ── FOOTER ── */}
       <footer className="bg-[#0e0e11] border-t border-white/10">
-        <div className="flex flex-col md:flex-row justify-between items-center py-16 px-6 max-w-7xl mx-auto gap-10">
+        <div className="flex flex-col md:flex-row justify-between items-start py-16 px-6 max-w-7xl mx-auto gap-10">
           <div className="space-y-3 text-center md:text-left">
             <Link href="/">
               <Image
@@ -346,37 +346,40 @@ export default function MarketplaceHomePage() {
               />
             </Link>
             <p className="text-xs text-[#919099] max-w-xs leading-relaxed">
-              Curating the future of digital etherealism for a new generation of collectors.
+              Nền tảng nghệ thuật số &amp; dịch vụ đặt vẽ Commission bảo vệ bằng thanh toán tạm giữ Escrow.
             </p>
           </div>
 
-          <div className="flex flex-wrap justify-center gap-12 text-xs">
+          <div className="flex flex-wrap justify-center md:justify-end gap-12 text-xs">
             <div className="flex flex-col gap-2">
-              <span className="text-[#A7ACD9] uppercase tracking-widest font-bold mb-1">Navigation</span>
-              <Link href="#" className="text-[#919099] hover:text-[#A7ACD9]">Marketplace</Link>
-              <Link href="#" className="text-[#919099] hover:text-[#A7ACD9]">Artists</Link>
-              <Link href="#" className="text-[#919099] hover:text-[#A7ACD9]">Curations</Link>
+              <span className="text-[#A7ACD9] uppercase tracking-widest font-bold mb-1">Điều hướng</span>
+              <Link href="/" className="text-[#919099] hover:text-[#A7ACD9]">Chợ nghệ thuật</Link>
+              <Link href="/#artists" className="text-[#919099] hover:text-[#A7ACD9]">Khám phá Họa sĩ</Link>
+              <Link href="/auctions" className="text-[#919099] hover:text-[#A7ACD9]">Sàn Đấu giá live</Link>
+              <Link href="/workroom" className="text-[#919099] hover:text-[#A7ACD9]">Phòng làm việc</Link>
             </div>
             <div className="flex flex-col gap-2">
-              <span className="text-[#A7ACD9] uppercase tracking-widest font-bold mb-1">Legal</span>
-              <Link href="#" className="text-[#919099] hover:text-[#A7ACD9]">Privacy Policy</Link>
-              <Link href="#" className="text-[#919099] hover:text-[#A7ACD9]">Terms of Service</Link>
-              <Link href="#" className="text-[#919099] hover:text-[#A7ACD9]">Guidelines</Link>
+              <span className="text-[#A7ACD9] uppercase tracking-widest font-bold mb-1">Tính năng</span>
+              <Link href="/explore" className="text-[#919099] hover:text-[#A7ACD9]">Đặt vẽ Commission</Link>
+              <Link href="/auctions" className="text-[#919099] hover:text-[#A7ACD9]">Đấu giá tác phẩm</Link>
+              <Link href="/become-creator" className="text-[#919099] hover:text-[#A7ACD9]">Trở thành Họa sĩ</Link>
+              <Link href="/wallet" className="text-[#919099] hover:text-[#A7ACD9]">Ví &amp; Giao dịch</Link>
             </div>
             <div className="flex flex-col gap-2">
-              <span className="text-[#A7ACD9] uppercase tracking-widest font-bold mb-1">Support</span>
-              <Link href="#" className="text-[#919099] hover:text-[#A7ACD9]">Contact Us</Link>
-              <Link href="#" className="text-[#919099] hover:text-[#A7ACD9]">Help Center</Link>
+              <span className="text-[#A7ACD9] uppercase tracking-widest font-bold mb-1">Dự án đồ án</span>
+              <span className="text-[#919099]">Đồ án tốt nghiệp SEP490</span>
+              <span className="text-[#919099]">Đại học FPT</span>
+              <span className="text-[#919099]">Thị trường Việt Nam</span>
             </div>
           </div>
         </div>
 
         <div className="max-w-7xl mx-auto px-6 py-6 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-[#919099]/60">
-          <p>© 2026 dillustration. Digital Etherealism Art Collective.</p>
+          <p>© 2026 Dillustration Art Collective — Capstone Project SEP490.</p>
           <div className="flex gap-6">
-            <span className="material-symbols-outlined text-lg cursor-pointer hover:text-white">public</span>
-            <span className="material-symbols-outlined text-lg cursor-pointer hover:text-white">hub</span>
-            <span className="material-symbols-outlined text-lg cursor-pointer hover:text-white">share</span>
+            <span className="material-symbols-outlined text-lg cursor-pointer hover:text-white" title="Toàn quốc">public</span>
+            <span className="material-symbols-outlined text-lg cursor-pointer hover:text-white" title="Mạng lưới">hub</span>
+            <span className="material-symbols-outlined text-lg cursor-pointer hover:text-white" title="Chia sẻ">share</span>
           </div>
         </div>
       </footer>

@@ -132,56 +132,93 @@ function PublicLayoutContent({ children }: { children: React.ReactNode }) {
                     </button>
 
                     {isMenuOpen && (
-                      <div className="absolute right-0 mt-2 w-48 bg-[#1F2335] rounded-2xl p-2 shadow-2xl border border-white/10 z-50">
-                        <div className="px-3 py-2 border-b border-white/10 mb-1 sm:hidden">
+                      <div className="absolute right-0 z-50 mt-2 w-60 overflow-hidden rounded-2xl border border-white/10 bg-[#1F2335] p-2 shadow-2xl backdrop-blur-2xl">
+                        <div className="mb-1 border-b border-white/10 p-3">
                           <p className="text-xs font-bold text-white">{user.fullName}</p>
-                          <p className="text-[10px] text-[#A7ACD9]">{user.email}</p>
+                          <p className="text-[11px] text-[#A7ACD9] truncate">{user.email}</p>
+                          <span className="inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-medium border border-emerald-500/30">
+                            <span className="material-symbols-outlined text-[12px]">verified_user</span> Escrow Verified
+                          </span>
                         </div>
+
+                        <Link
+                          href="/wallet"
+                          onClick={() => setIsMenuOpen(false)}
+                          className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs text-[#c7c5cf] transition-colors hover:bg-white/10 hover:text-white"
+                        >
+                          <span className="material-symbols-outlined text-base text-[#c2c7f6]">account_balance_wallet</span>
+                          <span>{t('Ví của tôi')}</span>
+                        </Link>
+
                         <Link
                           href={isAdmin ? '/admin' : '/client/commissions'}
-                          className="flex items-center gap-2 px-3 py-2 text-xs text-[#e4e1e5] hover:bg-white/10 rounded-xl transition-colors"
                           onClick={() => setIsMenuOpen(false)}
+                          className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs text-[#c7c5cf] transition-colors hover:bg-white/10 hover:text-white"
                         >
-                          <span className="material-symbols-outlined text-sm text-[#A7ACD9]">{isAdmin ? 'admin_panel_settings' : 'dashboard'}</span>
-                          {isAdmin ? 'Admin Center' : 'My Studio'}
+                          <span className="material-symbols-outlined text-base text-[#c2c7f6]">{isAdmin ? 'admin_panel_settings' : 'folder_open'}</span>
+                          <span>{isAdmin ? t('Admin Center') : t('My Commissions')}</span>
                         </Link>
-                        <Link
-                          href={`/clients/${user.id}`}
-                          onClick={() => setIsMenuOpen(false)}
-                          className="flex items-center gap-2 px-3 py-2 text-xs text-[#e4e1e5] hover:bg-white/10 rounded-xl transition-colors"
-                        >
-                          <span className="material-symbols-outlined text-sm text-[#A7ACD9]">person</span>
-                          Hồ sơ của tôi
-                        </Link>
-                        {!roles.includes('Creator') && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setIsMenuOpen(false);
-                              router.push('/become-creator');
-                            }}
-                            className="flex w-full items-center space-x-2 rounded-xl px-3 py-2 text-xs text-[#A7ACD9] transition-colors hover:bg-white/10 cursor-pointer"
+
+                        {(roles.includes('Creator') || roles.includes('creator')) && (
+                          <Link
+                            href="/creator/commissions"
+                            onClick={() => setIsMenuOpen(false)}
+                            className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs text-[#c7c5cf] transition-colors hover:bg-white/10 hover:text-white"
                           >
-                            <span className="material-symbols-outlined text-sm">palette</span>
-                            <span>Trở thành Creator</span>
-                          </button>
+                            <span className="material-symbols-outlined text-base text-[#c2c7f6]">palette</span>
+                            <span>{t('Creator Dashboard')}</span>
+                          </Link>
                         )}
+
+                        <Link
+                          href="/profile"
+                          onClick={() => setIsMenuOpen(false)}
+                          className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs text-[#c7c5cf] transition-colors hover:bg-white/10 hover:text-white"
+                        >
+                          <span className="material-symbols-outlined text-base text-[#c2c7f6]">person</span>
+                          <span>{t('Hồ sơ của tôi')}</span>
+                        </Link>
+
+                        <Link
+                          href="/settings"
+                          onClick={() => setIsMenuOpen(false)}
+                          className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs text-[#c7c5cf] transition-colors hover:bg-white/10 hover:text-white"
+                        >
+                          <span className="material-symbols-outlined text-base text-[#c2c7f6]">settings</span>
+                          <span>{t('Cài đặt')}</span>
+                        </Link>
+
+                        {!roles.includes('Creator') && !roles.includes('creator') && !isAdmin && (
+                          <Link
+                            href="/become-creator"
+                            onClick={() => setIsMenuOpen(false)}
+                            className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs text-[#c7c5cf] transition-colors hover:bg-white/10 hover:text-white"
+                          >
+                            <span className="material-symbols-outlined text-base text-[#c2c7f6]">palette</span>
+                            <span>{t('Trở thành Creator')}</span>
+                          </Link>
+                        )}
+
                         {isAdmin && (
                           <Link
                             href="/admin/creator-verifications"
                             onClick={() => setIsMenuOpen(false)}
-                            className="flex items-center space-x-2 rounded-xl px-3 py-2 text-xs text-red-300 transition-colors hover:bg-white/10"
+                            className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs text-red-300 transition-colors hover:bg-white/10"
                           >
-                            <span className="material-symbols-outlined text-sm">how_to_reg</span>
-                            <span>Duyệt đơn Creator</span>
+                            <span className="material-symbols-outlined text-base">how_to_reg</span>
+                            <span>{t('Duyệt đơn Creator')}</span>
                           </Link>
                         )}
+
+                        <div className="my-1 border-t border-white/10" />
+
                         <button
+                          type="button"
                           onClick={handleLogout}
-                          className="w-full text-left px-3 py-2 text-xs text-red-400 hover:bg-white/10 rounded-xl transition-colors flex items-center gap-2 cursor-pointer"
+                          className="flex w-full cursor-pointer items-center gap-2.5 rounded-xl px-3 py-2 text-left text-xs text-red-400 transition-colors hover:bg-white/10"
                         >
-                          <span className="material-symbols-outlined text-sm">logout</span>
-                          Sign Out
+                          <span className="material-symbols-outlined text-base">logout</span>
+                          <span>{t('Sign Out')}</span>
                         </button>
                       </div>
                     )}

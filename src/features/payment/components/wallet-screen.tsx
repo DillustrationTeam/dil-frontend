@@ -15,17 +15,20 @@ function formatMoney(value: number, currency: string) {
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency, maximumFractionDigits: currency === 'VND' ? 0 : 2 }).format(value);
 }
 
-function Metric({ title, value, description, icon: Icon, primary, loading }: {
-  title: string; value: string | null; description: string; icon: LucideIcon; primary?: boolean; loading: boolean;
+function Metric({ title, value, description, icon: Icon, primary, loading, actions }: {
+  title: string; value: string | null; description: string; icon: LucideIcon; primary?: boolean; loading: boolean; actions?: React.ReactNode;
 }) {
   return (
-    <article className={`glass-container relative overflow-hidden rounded-3xl p-6 ${primary ? 'border border-brand-periwinkle/35' : 'border border-white/5'}`}>
-      <div className="mb-7 flex items-center justify-between gap-3">
-        <h2 className="font-body text-sm text-on-surface-variant">{title}</h2>
-        <span className={`flex size-10 shrink-0 items-center justify-center rounded-2xl ${primary ? 'bg-brand-periwinkle text-brand-navy' : 'bg-white/5 text-brand-periwinkle'}`}><Icon size={19} aria-hidden="true" /></span>
+    <article className={`glass-container relative flex flex-col justify-between overflow-hidden rounded-3xl p-6 ${primary ? 'border border-brand-periwinkle/35' : 'border border-white/5'}`}>
+      <div>
+        <div className="mb-7 flex items-center justify-between gap-3">
+          <h2 className="font-body text-sm text-on-surface-variant">{title}</h2>
+          <span className={`flex size-10 shrink-0 items-center justify-center rounded-2xl ${primary ? 'bg-brand-periwinkle text-brand-navy' : 'bg-white/5 text-brand-periwinkle'}`}><Icon size={19} aria-hidden="true" /></span>
+        </div>
+        {loading ? <div className="mb-4 h-10 w-3/4 rounded-lg bg-white/10 motion-safe:animate-pulse" aria-label="Đang tải số liệu" /> : <p className={`mb-3 break-words font-h1 text-[clamp(1.5rem,2.5vw,2.4rem)] font-semibold tracking-tight tabular-nums ${primary ? 'text-brand-periwinkle' : 'text-on-surface'}`}>{value ?? '—'}</p>}
+        <p className="text-xs leading-5 text-outline">{description}</p>
       </div>
-      {loading ? <div className="mb-4 h-10 w-3/4 rounded-lg bg-white/10 motion-safe:animate-pulse" aria-label="Đang tải số liệu" /> : <p className={`mb-3 break-words font-h1 text-[clamp(1.5rem,2.5vw,2.4rem)] font-semibold tracking-tight tabular-nums ${primary ? 'text-brand-periwinkle' : 'text-on-surface'}`}>{value ?? '—'}</p>}
-      <p className="text-xs leading-5 text-outline">{description}</p>
+      {actions && <div className="mt-4 border-t border-white/10 pt-3">{actions}</div>}
       {primary && <div aria-hidden="true" className="absolute bottom-0 left-6 right-6 h-px bg-brand-periwinkle/60" />}
     </article>
   );
@@ -78,15 +81,31 @@ export function WalletScreen({ userId, ready }: { userId: string | null; ready: 
         description="Mọi chuyển động của dòng tiền, trong một nơi."
         actions={
           authenticated ? (
-            <button
-              type="button"
-              disabled={busy}
-              onClick={refresh}
-              className={`flex h-11 items-center gap-2 rounded-full border border-white/15 px-5 text-sm hover:border-brand-periwinkle/50 hover:bg-white/5 disabled:opacity-50 ${focusClass}`}
-            >
-              <RefreshCw size={15} className={busy ? 'motion-safe:animate-spin' : ''} aria-hidden />
-              Làm mới
-            </button>
+            <div className="flex flex-wrap items-center gap-2 md:gap-3">
+              <Link
+                href="/deposit"
+                className={`flex h-11 items-center gap-2 rounded-full bg-brand-periwinkle px-5 text-sm font-semibold text-brand-navy hover:bg-brand-periwinkle/90 transition-all ${focusClass}`}
+              >
+                <ArrowDownLeft size={16} aria-hidden="true" />
+                Nạp tiền
+              </Link>
+              <Link
+                href="/payout"
+                className={`flex h-11 items-center gap-2 rounded-full border border-white/20 bg-white/5 px-5 text-sm font-semibold text-on-surface hover:bg-white/10 hover:border-brand-periwinkle/40 transition-all ${focusClass}`}
+              >
+                <ArrowUpRight size={16} aria-hidden="true" />
+                Rút tiền
+              </Link>
+              <button
+                type="button"
+                disabled={busy}
+                onClick={refresh}
+                className={`flex size-11 items-center justify-center rounded-full border border-white/15 text-on-surface-variant hover:border-brand-periwinkle/50 hover:bg-white/5 disabled:opacity-50 ${focusClass}`}
+                title="Làm mới dữ liệu"
+              >
+                <RefreshCw size={15} className={busy ? 'motion-safe:animate-spin' : ''} aria-hidden="true" />
+              </button>
+            </div>
           ) : undefined
         }
       />
@@ -99,7 +118,32 @@ export function WalletScreen({ userId, ready }: { userId: string | null; ready: 
       </section> : <>
             {overview.error && <div className="mb-5"><ErrorNotice message={overview.error} onRetry={refresh} /></div>}
             <section aria-label="Tổng quan ví" aria-busy={!ready || overview.loading} className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-              <Metric title="Số dư khả dụng" value={overview.data ? formatMoney(overview.data.wallet.balance, currency) : null} description="Sẵn sàng cho giao dịch của bạn" icon={Wallet} primary loading={!ready || overview.loading} />
+              <Metric
+                title="Số dư khả dụng"
+                value={overview.data ? formatMoney(overview.data.wallet.balance, currency) : null}
+                description="Sẵn sàng cho giao dịch của bạn"
+                icon={Wallet}
+                primary
+                loading={!ready || overview.loading}
+                actions={
+                  <div className="flex w-full gap-2">
+                    <Link
+                      href="/deposit"
+                      className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-brand-periwinkle/15 py-2 text-xs font-semibold text-brand-periwinkle hover:bg-brand-periwinkle hover:text-brand-navy transition-all ${focusClass}`}
+                    >
+                      <ArrowDownLeft size={14} aria-hidden="true" />
+                      Nạp tiền
+                    </Link>
+                    <Link
+                      href="/payout"
+                      className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-white/10 bg-white/5 py-2 text-xs font-semibold text-on-surface hover:bg-white/15 transition-all ${focusClass}`}
+                    >
+                      <ArrowUpRight size={14} aria-hidden="true" />
+                      Rút tiền
+                    </Link>
+                  </div>
+                }
+              />
               <Metric title="Tiền đang tạm giữ" value={overview.data ? formatMoney(overview.data.summary.escrowHeldAmount, currency) : null} description="Đang giữ cho các giao dịch" icon={LockKeyhole} loading={!ready || overview.loading} />
               <Metric title="Đang chờ rút" value={overview.data ? formatMoney(overview.data.summary.pendingPayoutAmount, currency) : null} description="Đã gửi yêu cầu, chờ Admin xử lý" icon={Clock3} loading={!ready || overview.loading} />
               <Metric title="Tổng tiền đã rút" value={overview.data ? formatMoney(overview.data.summary.totalWithdrawn, currency) : null} description="Các yêu cầu rút đã được xử lý" icon={Landmark} loading={!ready || overview.loading} />

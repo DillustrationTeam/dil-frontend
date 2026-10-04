@@ -17,6 +17,24 @@ const inputClass =
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const USERNAME_REGEX = /^[a-zA-Z0-9_.]{3,30}$/;
 
+function parseUserAgent(ua?: string | null): string {
+  if (!ua) return 'Thiết bị không xác định';
+  let browser = 'Trình duyệt';
+  if (ua.includes('Edg/')) browser = 'Microsoft Edge';
+  else if (ua.includes('Chrome/')) browser = 'Google Chrome';
+  else if (ua.includes('Firefox/')) browser = 'Mozilla Firefox';
+  else if (ua.includes('Safari/')) browser = 'Safari';
+
+  let os = '';
+  if (ua.includes('Windows')) os = 'Windows';
+  else if (ua.includes('Macintosh') || ua.includes('Mac OS')) os = 'macOS';
+  else if (ua.includes('Android')) os = 'Android';
+  else if (ua.includes('iPhone') || ua.includes('iPad')) os = 'iOS';
+  else if (ua.includes('Linux')) os = 'Linux';
+
+  return os ? `${browser} (${os})` : browser;
+}
+
 export function SecuritySettingsForm() {
   const user = useAuthStore((state) => state.user);
   const roles = useAuthStore((state) => state.roles);
@@ -396,381 +414,393 @@ export function SecuritySettingsForm() {
   };
 
   return (
-    <div className="mx-auto max-w-3xl space-y-8">
-      <section className="glass-container space-y-4 rounded-[32px] p-6 md:p-8">
-        <p className="text-xs uppercase tracking-wider text-[#A7ACD9]">Username</p>
-        <div>
-          <div className="relative">
-            <input
-              value={username}
-              onChange={(event) => setUsername(event.target.value)}
-              onBlur={() => setUsernameTouched(true)}
-              className={`${inputClass} pr-10 ${usernameError ? 'border-red-400' : ''}`}
-              placeholder="vd: nguyenvanan"
-            />
-            {username.trim() && USERNAME_REGEX.test(username.trim()) && (
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm">
-                {isCheckingUsername ? (
-                  <span className="text-[#78767A]">...</span>
-                ) : usernameAvailable === true ? (
-                  <span className="text-emerald-400">✓</span>
-                ) : usernameAvailable === false ? (
-                  <span className="text-red-400">✗</span>
-                ) : null}
-              </span>
-            )}
-          </div>
-          {usernameError && <p className="mt-1 text-xs text-red-400">{usernameError}</p>}
-          {!usernameError && !isCheckingUsername && usernameAvailable === false && (
-            <p className="mt-1 text-xs text-red-400">Username này đã có người dùng hoặc không thể sử dụng.</p>
-          )}
-        </div>
-
-        {requiresPasswordForUsername && (
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 items-start">
+      {/* Left Column: Account Identifiers & Social Links */}
+      <div className="space-y-6">
+        {/* Username Card */}
+        <section className="glass-container space-y-4 rounded-[28px] p-6 md:p-8">
+          <p className="text-xs font-bold uppercase tracking-wider text-[#A7ACD9]">Username</p>
           <div>
-            <input
-              type="password"
-              value={currentPasswordForUsername}
-              onChange={(event) => setCurrentPasswordForUsername(event.target.value)}
-              onBlur={() => setUsernamePasswordTouched(true)}
-              className={`${inputClass} ${usernamePasswordError ? 'border-red-400' : ''}`}
-              placeholder="Mật khẩu hiện tại (để xác nhận đổi username)"
-            />
-            {usernamePasswordError && <p className="mt-1 text-xs text-red-400">{usernamePasswordError}</p>}
-          </div>
-        )}
-
-        <button
-          type="button"
-          onClick={() => void handleSaveUsername()}
-          disabled={isUsernameSubmitting || usernameAvailable === false}
-          className="rounded-xl bg-[#A7ACD9] px-4 py-2.5 text-sm font-bold text-[#1F2335] transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {isUsernameSubmitting ? 'Đang lưu...' : 'Lưu username'}
-        </button>
-      </section>
-
-      <section className="glass-container space-y-4 rounded-[32px] p-6 md:p-8">
-        <p className="text-xs uppercase tracking-wider text-[#A7ACD9]">Email đăng nhập</p>
-        <p className="text-sm text-[#C7C5CF]">
-          Email hiện tại: <span className="text-white">{user?.email}</span>
-        </p>
-
-        {emailStep === 'idle' && linkedAccounts && !linkedAccounts.hasPassword && (
-          <div className="space-y-3">
-            <p className="text-xs text-[#78767A]">
-              Tài khoản của bạn đăng nhập bằng Google, chưa có mật khẩu. Để đổi email, cần xác thực lại qua email
-              hiện tại trước.
-            </p>
-            <button
-              type="button"
-              onClick={handleRequestEmailReauth}
-              disabled={isEmailSubmitting}
-              className="rounded-xl bg-[#A7ACD9] px-4 py-2.5 text-sm font-bold text-[#1F2335] transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              Gửi mã xác thực tới email hiện tại
-            </button>
-          </div>
-        )}
-
-        {emailStep === 'idle' && linkedAccounts?.hasPassword && (
-          <div className="space-y-3">
-            <input
-              type="password"
-              value={currentPasswordForEmail}
-              onChange={(event) => setCurrentPasswordForEmail(event.target.value)}
-              className={inputClass}
-              placeholder="Mật khẩu hiện tại"
-            />
-            {twoFactorEnabled && (
+            <div className="relative">
               <input
-                value={twoFactorCodeForEmail}
-                onChange={(event) => setTwoFactorCodeForEmail(event.target.value)}
-                maxLength={6}
-                className={inputClass}
-                placeholder="Mã 2FA"
+                value={username}
+                onChange={(event) => setUsername(event.target.value)}
+                onBlur={() => setUsernameTouched(true)}
+                className={`${inputClass} pr-10 ${usernameError ? 'border-red-400' : ''}`}
+                placeholder="vd: nguyenvanan"
               />
-            )}
-            <div>
-              <div className="flex gap-2">
-                <input
-                  value={newEmail}
-                  onChange={(event) => setNewEmail(event.target.value)}
-                  onBlur={() => markEmailTouched('newEmail')}
-                  className={`${inputClass} ${emailErrors.newEmail ? 'border-red-400' : ''}`}
-                  placeholder="Email mới"
-                />
-                <button
-                  type="button"
-                  onClick={handleRequestCode}
-                  disabled={isEmailSubmitting}
-                  className="shrink-0 rounded-xl bg-[#A7ACD9] px-4 text-sm font-bold text-[#1F2335] transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  Gửi mã
-                </button>
-              </div>
-              {emailErrors.newEmail && <p className="mt-1 text-xs text-red-400">{emailErrors.newEmail}</p>}
+              {username.trim() && USERNAME_REGEX.test(username.trim()) && (
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm">
+                  {isCheckingUsername ? (
+                    <span className="text-[#78767A]">...</span>
+                  ) : usernameAvailable === true ? (
+                    <span className="text-emerald-400">✓</span>
+                  ) : usernameAvailable === false ? (
+                    <span className="text-red-400">✗</span>
+                  ) : null}
+                </span>
+              )}
             </div>
-          </div>
-        )}
-
-        {emailStep === 'reauth' && (
-          <div className="space-y-3">
-            <p className="text-xs text-[#78767A]">Mã xác thực đã gửi tới email hiện tại ({user?.email}).</p>
-            <input
-              value={reauthCode}
-              onChange={(event) => setReauthCode(event.target.value)}
-              maxLength={6}
-              className={inputClass}
-              placeholder="Mã xác thực 6 số"
-            />
-            <div>
-              <div className="flex gap-2">
-                <input
-                  value={newEmail}
-                  onChange={(event) => setNewEmail(event.target.value)}
-                  onBlur={() => markEmailTouched('newEmail')}
-                  className={`${inputClass} ${emailErrors.newEmail ? 'border-red-400' : ''}`}
-                  placeholder="Email mới"
-                />
-                <button
-                  type="button"
-                  onClick={handleRequestCode}
-                  disabled={isEmailSubmitting}
-                  className="shrink-0 rounded-xl bg-[#A7ACD9] px-4 text-sm font-bold text-[#1F2335] transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  Gửi mã
-                </button>
-              </div>
-              {emailErrors.newEmail && <p className="mt-1 text-xs text-red-400">{emailErrors.newEmail}</p>}
-            </div>
-            <button type="button" onClick={resetEmailFlow} className="text-xs text-[#78767A] hover:text-white">
-              Hủy
-            </button>
-          </div>
-        )}
-
-        {emailStep === 'code' && (
-          <div className="space-y-3">
-            <p className="text-xs text-[#78767A]">Mã xác minh đã gửi tới {newEmail}.</p>
-            <div>
-              <div className="flex gap-2">
-                <input
-                  value={emailCode}
-                  onChange={(event) => setEmailCode(event.target.value)}
-                  onBlur={() => markEmailTouched('code')}
-                  maxLength={6}
-                  className={`${inputClass} ${emailErrors.code ? 'border-red-400' : ''}`}
-                  placeholder="Mã 6 số"
-                />
-                <button
-                  type="button"
-                  onClick={handleConfirmEmail}
-                  disabled={isEmailSubmitting}
-                  className="shrink-0 rounded-xl bg-[#A7ACD9] px-4 text-sm font-bold text-[#1F2335] transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  Xác nhận
-                </button>
-              </div>
-              {emailErrors.code && <p className="mt-1 text-xs text-red-400">{emailErrors.code}</p>}
-            </div>
-            <button type="button" onClick={resetEmailFlow} className="text-xs text-[#78767A] hover:text-white">
-              Hủy
-            </button>
-          </div>
-        )}
-      </section>
-
-      <section className="glass-container space-y-4 rounded-[32px] p-6 md:p-8">
-        <p className="text-xs uppercase tracking-wider text-[#A7ACD9]">
-          {linkedAccounts?.hasPassword ? 'Đổi mật khẩu' : 'Đặt mật khẩu'}
-        </p>
-        {linkedAccounts && !linkedAccounts.hasPassword && (
-          <p className="text-xs text-[#78767A]">
-            Tài khoản của bạn đang đăng nhập bằng Google, chưa có mật khẩu. Đặt mật khẩu để có thể đăng nhập bằng
-            email/mật khẩu.
-          </p>
-        )}
-        {linkedAccounts?.hasPassword && (
-          <div>
-            <input
-              type="password"
-              value={currentPassword}
-              onChange={(event) => setCurrentPassword(event.target.value)}
-              onBlur={() => markPasswordTouched('currentPassword')}
-              disabled={passwordStep === 'code'}
-              className={`${inputClass} disabled:cursor-not-allowed disabled:opacity-50 ${
-                passwordErrors.currentPassword ? 'border-red-400' : ''
-              }`}
-              placeholder="Mật khẩu hiện tại"
-            />
-            {passwordErrors.currentPassword && (
-              <p className="mt-1 text-xs text-red-400">{passwordErrors.currentPassword}</p>
+            {usernameError && <p className="mt-1 text-xs text-red-400">{usernameError}</p>}
+            {!usernameError && !isCheckingUsername && usernameAvailable === false && (
+              <p className="mt-1 text-xs text-red-400">Username này đã có người dùng hoặc không thể sử dụng.</p>
             )}
           </div>
-        )}
-        <div>
-          <input
-            type="password"
-            value={newPassword}
-            onChange={(event) => setNewPassword(event.target.value)}
-            onBlur={() => markPasswordTouched('newPassword')}
-            disabled={passwordStep === 'code'}
-            className={`${inputClass} disabled:cursor-not-allowed disabled:opacity-50 ${
-              passwordErrors.newPassword ? 'border-red-400' : ''
-            }`}
-            placeholder="Mật khẩu mới"
-          />
-          {passwordErrors.newPassword && <p className="mt-1 text-xs text-red-400">{passwordErrors.newPassword}</p>}
-        </div>
-        <div>
-          <input
-            type="password"
-            value={confirmPassword}
-            onChange={(event) => setConfirmPassword(event.target.value)}
-            onBlur={() => markPasswordTouched('confirmPassword')}
-            disabled={passwordStep === 'code'}
-            className={`${inputClass} disabled:cursor-not-allowed disabled:opacity-50 ${
-              passwordErrors.confirmPassword ? 'border-red-400' : ''
-            }`}
-            placeholder="Xác nhận mật khẩu mới"
-          />
-          {passwordErrors.confirmPassword && (
-            <p className="mt-1 text-xs text-red-400">{passwordErrors.confirmPassword}</p>
+
+          {requiresPasswordForUsername && (
+            <div>
+              <input
+                type="password"
+                value={currentPasswordForUsername}
+                onChange={(event) => setCurrentPasswordForUsername(event.target.value)}
+                onBlur={() => setUsernamePasswordTouched(true)}
+                className={`${inputClass} ${usernamePasswordError ? 'border-red-400' : ''}`}
+                placeholder="Mật khẩu hiện tại (để xác nhận đổi username)"
+              />
+              {usernamePasswordError && <p className="mt-1 text-xs text-red-400">{usernamePasswordError}</p>}
+            </div>
           )}
-        </div>
 
-        {passwordStep === 'idle' ? (
           <button
             type="button"
-            onClick={handleSendPasswordOtp}
-            disabled={isPasswordSubmitting}
-            className="w-full rounded-xl bg-[#A7ACD9] py-3 text-sm font-bold text-[#1F2335] transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
+            onClick={() => void handleSaveUsername()}
+            disabled={isUsernameSubmitting || usernameAvailable === false}
+            className="rounded-xl bg-[#A7ACD9] px-4 py-2.5 text-sm font-bold text-[#1F2335] transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
           >
-            Gửi mã xác minh
+            {isUsernameSubmitting ? 'Đang lưu...' : 'Lưu username'}
           </button>
-        ) : (
-          <div className="space-y-3">
-            <p className="text-xs text-[#78767A]">Mã xác minh đã gửi tới email {user?.email}.</p>
-            <input
-              value={passwordOtpCode}
-              onChange={(event) => setPasswordOtpCode(event.target.value)}
-              onBlur={() => setPasswordOtpTouched(true)}
-              maxLength={6}
-              className={`${inputClass} ${passwordOtpError ? 'border-red-400' : ''}`}
-              placeholder="Mã 6 số"
-            />
-            {passwordOtpError && <p className="mt-1 text-xs text-red-400">{passwordOtpError}</p>}
-            <button
-              type="button"
-              onClick={handleConfirmChangePassword}
-              disabled={isPasswordSubmitting}
-              className="w-full rounded-xl bg-[#A7ACD9] py-3 text-sm font-bold text-[#1F2335] transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {linkedAccounts?.hasPassword ? 'Xác nhận đổi mật khẩu' : 'Xác nhận đặt mật khẩu'}
-            </button>
-            <button
-              type="button"
-              onClick={handleCancelPasswordOtp}
-              className="text-xs text-[#78767A] hover:text-white"
-            >
-              Hủy
-            </button>
-          </div>
-        )}
-      </section>
+        </section>
 
-      <section className="glass-container space-y-4 rounded-[32px] p-6 md:p-8">
-        <p className="text-xs uppercase tracking-wider text-[#A7ACD9]">Tài khoản liên kết</p>
-        {linkedAccounts && linkedAccounts.linkedProviders.length > 0 ? (
-          linkedAccounts.linkedProviders.map((provider) => (
-            <div
-              key={provider}
-              className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-3"
-            >
-              <span className="flex items-center gap-2 text-sm text-white">
-                <ShieldCheck className="h-4 w-4 text-[#A7ACD9]" />
-                {provider}
-              </span>
+        {/* Email Card */}
+        <section className="glass-container space-y-4 rounded-[28px] p-6 md:p-8">
+          <p className="text-xs font-bold uppercase tracking-wider text-[#A7ACD9]">Email đăng nhập</p>
+          <p className="text-sm text-[#C7C5CF]">
+            Email hiện tại: <span className="font-semibold text-white">{user?.email}</span>
+          </p>
+
+          {emailStep === 'idle' && linkedAccounts && !linkedAccounts.hasPassword && (
+            <div className="space-y-3">
+              <p className="text-xs text-[#78767A]">
+                Tài khoản của bạn đăng nhập bằng Google, chưa có mật khẩu. Để đổi email, cần xác thực lại qua email
+                hiện tại trước.
+              </p>
               <button
                 type="button"
-                onClick={() => handleUnlink(provider)}
-                className="text-xs font-semibold text-red-400 hover:underline"
+                onClick={handleRequestEmailReauth}
+                disabled={isEmailSubmitting}
+                className="rounded-xl bg-[#A7ACD9] px-4 py-2.5 text-sm font-bold text-[#1F2335] transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
               >
-                Gỡ liên kết
+                Gửi mã xác thực tới email hiện tại
               </button>
             </div>
-          ))
-        ) : (
-          <p className="text-sm text-[#78767A]">Chưa liên kết tài khoản nào.</p>
-        )}
-        {linkedAccounts && !linkedAccounts.linkedProviders.includes('Google') && (
-          <button
-            type="button"
-            onClick={triggerGoogleLink}
-            className="w-full rounded-xl border border-white/10 bg-white/5 py-3 text-sm font-semibold text-white transition hover:border-[#A7ACD9] hover:text-[#A7ACD9]"
-          >
-            Liên kết Google
-          </button>
-        )}
-      </section>
+          )}
 
-      <section className="glass-container space-y-4 rounded-[32px] p-6 md:p-8">
-        <div className="flex items-center justify-between">
-          <p className="text-xs uppercase tracking-wider text-[#A7ACD9]">Phiên đăng nhập</p>
-          <button
-            type="button"
-            onClick={handleRevokeOthers}
-            className="text-xs font-semibold text-red-400 hover:underline"
-          >
-            Đăng xuất tất cả thiết bị khác
-          </button>
-        </div>
-        {isLoadingSessions ? (
-          <p className="text-sm text-[#78767A]">Đang tải...</p>
-        ) : sessions.length === 0 ? (
-          <p className="text-sm text-[#78767A]">Không có phiên nào.</p>
-        ) : (
-          <div className="space-y-2">
-            {sessions.map((session) => (
-              <div
-                key={session.id}
-                className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-3"
-              >
-                <div className="flex items-start gap-2.5">
-                  <Laptop className="mt-0.5 h-4 w-4 shrink-0 text-[#A7ACD9]" />
-                  <div>
-                    <p className="text-sm text-white">
-                      {session.userAgent ? session.userAgent.slice(0, 60) : 'Thiết bị không xác định'}
-                      {session.isCurrent && (
-                        <span className="ml-2 rounded-full bg-[#A7ACD9]/15 px-2 py-0.5 text-[10px] text-[#A7ACD9]">
-                          Thiết bị này
-                        </span>
-                      )}
-                    </p>
-                    <p className="text-xs text-[#78767A]">
-                      {session.createdByIp ?? 'IP không xác định'} · Hoạt động lần cuối:{' '}
-                      {new Date(session.lastUsedAt ?? session.createdAt).toLocaleString(lang === 'ENG' ? 'en-US' : 'vi-VN')}
-                    </p>
-                  </div>
-                </div>
-                {!session.isCurrent && (
+          {emailStep === 'idle' && linkedAccounts?.hasPassword && (
+            <div className="space-y-3">
+              <input
+                type="password"
+                value={currentPasswordForEmail}
+                onChange={(event) => setCurrentPasswordForEmail(event.target.value)}
+                className={inputClass}
+                placeholder="Mật khẩu hiện tại"
+              />
+              {twoFactorEnabled && (
+                <input
+                  value={twoFactorCodeForEmail}
+                  onChange={(event) => setTwoFactorCodeForEmail(event.target.value)}
+                  maxLength={6}
+                  className={inputClass}
+                  placeholder="Mã 2FA"
+                />
+              )}
+              <div>
+                <div className="flex gap-2">
+                  <input
+                    value={newEmail}
+                    onChange={(event) => setNewEmail(event.target.value)}
+                    onBlur={() => markEmailTouched('newEmail')}
+                    className={`${inputClass} ${emailErrors.newEmail ? 'border-red-400' : ''}`}
+                    placeholder="Email mới"
+                  />
                   <button
                     type="button"
-                    onClick={() => handleRevokeSession(session.id)}
-                    className="shrink-0 text-[#C7C5CF] transition hover:text-red-400"
-                    aria-label="Đăng xuất thiết bị này"
+                    onClick={handleRequestCode}
+                    disabled={isEmailSubmitting}
+                    className="shrink-0 rounded-xl bg-[#A7ACD9] px-4 text-sm font-bold text-[#1F2335] transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
                   >
-                    <Trash2 className="h-4 w-4" />
+                    Gửi mã
                   </button>
-                )}
+                </div>
+                {emailErrors.newEmail && <p className="mt-1 text-xs text-red-400">{emailErrors.newEmail}</p>}
               </div>
-            ))}
-          </div>
-        )}
-      </section>
+            </div>
+          )}
 
-      <TwoFactorSettingsForm />
+          {emailStep === 'reauth' && (
+            <div className="space-y-3">
+              <p className="text-xs text-[#78767A]">Mã xác thực đã gửi tới email hiện tại ({user?.email}).</p>
+              <input
+                value={reauthCode}
+                onChange={(event) => setReauthCode(event.target.value)}
+                maxLength={6}
+                className={inputClass}
+                placeholder="Mã xác thực 6 số"
+              />
+              <div>
+                <div className="flex gap-2">
+                  <input
+                    value={newEmail}
+                    onChange={(event) => setNewEmail(event.target.value)}
+                    onBlur={() => markEmailTouched('newEmail')}
+                    className={`${inputClass} ${emailErrors.newEmail ? 'border-red-400' : ''}`}
+                    placeholder="Email mới"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleRequestCode}
+                    disabled={isEmailSubmitting}
+                    className="shrink-0 rounded-xl bg-[#A7ACD9] px-4 text-sm font-bold text-[#1F2335] transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
+                  >
+                    Gửi mã
+                  </button>
+                </div>
+                {emailErrors.newEmail && <p className="mt-1 text-xs text-red-400">{emailErrors.newEmail}</p>}
+              </div>
+              <button type="button" onClick={resetEmailFlow} className="text-xs text-[#78767A] hover:text-white cursor-pointer">
+                Hủy
+              </button>
+            </div>
+          )}
+
+          {emailStep === 'code' && (
+            <div className="space-y-3">
+              <p className="text-xs text-[#78767A]">Mã xác minh đã gửi tới {newEmail}.</p>
+              <div>
+                <div className="flex gap-2">
+                  <input
+                    value={emailCode}
+                    onChange={(event) => setEmailCode(event.target.value)}
+                    onBlur={() => markEmailTouched('code')}
+                    maxLength={6}
+                    className={`${inputClass} ${emailErrors.code ? 'border-red-400' : ''}`}
+                    placeholder="Mã 6 số"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleConfirmEmail}
+                    disabled={isEmailSubmitting}
+                    className="shrink-0 rounded-xl bg-[#A7ACD9] px-4 text-sm font-bold text-[#1F2335] transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
+                  >
+                    Xác nhận
+                  </button>
+                </div>
+                {emailErrors.code && <p className="mt-1 text-xs text-red-400">{emailErrors.code}</p>}
+              </div>
+              <button type="button" onClick={resetEmailFlow} className="text-xs text-[#78767A] hover:text-white cursor-pointer">
+                Hủy
+              </button>
+            </div>
+          )}
+        </section>
+
+        {/* Password Card */}
+        <section className="glass-container space-y-4 rounded-[28px] p-6 md:p-8">
+          <p className="text-xs font-bold uppercase tracking-wider text-[#A7ACD9]">
+            {linkedAccounts?.hasPassword ? 'Đổi mật khẩu' : 'Đặt mật khẩu'}
+          </p>
+          {linkedAccounts && !linkedAccounts.hasPassword && (
+            <p className="text-xs text-[#78767A]">
+              Tài khoản của bạn đang đăng nhập bằng Google, chưa có mật khẩu. Đặt mật khẩu để có thể đăng nhập bằng
+              email/mật khẩu.
+            </p>
+          )}
+          {linkedAccounts?.hasPassword && (
+            <div>
+              <input
+                type="password"
+                value={currentPassword}
+                onChange={(event) => setCurrentPassword(event.target.value)}
+                onBlur={() => markPasswordTouched('currentPassword')}
+                disabled={passwordStep === 'code'}
+                className={`${inputClass} disabled:cursor-not-allowed disabled:opacity-50 ${
+                  passwordErrors.currentPassword ? 'border-red-400' : ''
+                }`}
+                placeholder="Mật khẩu hiện tại"
+              />
+              {passwordErrors.currentPassword && (
+                <p className="mt-1 text-xs text-red-400">{passwordErrors.currentPassword}</p>
+              )}
+            </div>
+          )}
+          <div>
+            <input
+              type="password"
+              value={newPassword}
+              onChange={(event) => setNewPassword(event.target.value)}
+              onBlur={() => markPasswordTouched('newPassword')}
+              disabled={passwordStep === 'code'}
+              className={`${inputClass} disabled:cursor-not-allowed disabled:opacity-50 ${
+                passwordErrors.newPassword ? 'border-red-400' : ''
+              }`}
+              placeholder="Mật khẩu mới"
+            />
+            {passwordErrors.newPassword && <p className="mt-1 text-xs text-red-400">{passwordErrors.newPassword}</p>}
+          </div>
+          <div>
+            <input
+              type="password"
+              value={confirmPassword}
+              onChange={(event) => setConfirmPassword(event.target.value)}
+              onBlur={() => markPasswordTouched('confirmPassword')}
+              disabled={passwordStep === 'code'}
+              className={`${inputClass} disabled:cursor-not-allowed disabled:opacity-50 ${
+                passwordErrors.confirmPassword ? 'border-red-400' : ''
+              }`}
+              placeholder="Xác nhận mật khẩu mới"
+            />
+            {passwordErrors.confirmPassword && (
+              <p className="mt-1 text-xs text-red-400">{passwordErrors.confirmPassword}</p>
+            )}
+          </div>
+
+          {passwordStep === 'idle' ? (
+            <button
+              type="button"
+              onClick={handleSendPasswordOtp}
+              disabled={isPasswordSubmitting}
+              className="w-full rounded-xl bg-[#A7ACD9] py-3 text-sm font-bold text-[#1F2335] transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
+            >
+              Gửi mã xác minh
+            </button>
+          ) : (
+            <div className="space-y-3">
+              <p className="text-xs text-[#78767A]">Mã xác minh đã gửi tới email {user?.email}.</p>
+              <input
+                value={passwordOtpCode}
+                onChange={(event) => setPasswordOtpCode(event.target.value)}
+                onBlur={() => setPasswordOtpTouched(true)}
+                maxLength={6}
+                className={`${inputClass} ${passwordOtpError ? 'border-red-400' : ''}`}
+                placeholder="Mã 6 số"
+              />
+              {passwordOtpError && <p className="mt-1 text-xs text-red-400">{passwordOtpError}</p>}
+              <button
+                type="button"
+                onClick={handleConfirmChangePassword}
+                disabled={isPasswordSubmitting}
+                className="w-full rounded-xl bg-[#A7ACD9] py-3 text-sm font-bold text-[#1F2335] transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
+              >
+                {linkedAccounts?.hasPassword ? 'Xác nhận đổi mật khẩu' : 'Xác nhận đặt mật khẩu'}
+              </button>
+              <button
+                type="button"
+                onClick={handleCancelPasswordOtp}
+                className="text-xs text-[#78767A] hover:text-white cursor-pointer"
+              >
+                Hủy
+              </button>
+            </div>
+          )}
+        </section>
+      </div>
+
+      {/* Right Column: 2FA, Linked Accounts & Active Sessions */}
+      <div className="space-y-6">
+        {/* 2FA Section Card */}
+        <TwoFactorSettingsForm />
+
+        {/* Linked Accounts Card */}
+        <section className="glass-container space-y-4 rounded-[28px] p-6 md:p-8">
+          <p className="text-xs font-bold uppercase tracking-wider text-[#A7ACD9]">Tài khoản liên kết</p>
+          {linkedAccounts && linkedAccounts.linkedProviders.length > 0 ? (
+            linkedAccounts.linkedProviders.map((provider) => (
+              <div
+                key={provider}
+                className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-3"
+              >
+                <span className="flex items-center gap-2 text-sm text-white font-medium">
+                  <ShieldCheck className="h-4 w-4 text-[#A7ACD9]" />
+                  {provider}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => handleUnlink(provider)}
+                  className="text-xs font-semibold text-red-400 hover:underline cursor-pointer"
+                >
+                  Gỡ liên kết
+                </button>
+              </div>
+            ))
+          ) : (
+            <p className="text-sm text-[#78767A]">Chưa liên kết tài khoản nào.</p>
+          )}
+          {linkedAccounts && !linkedAccounts.linkedProviders.includes('Google') && (
+            <button
+              type="button"
+              onClick={triggerGoogleLink}
+              className="w-full rounded-xl border border-white/10 bg-white/5 py-3 text-sm font-semibold text-white transition hover:border-[#A7ACD9] hover:text-[#A7ACD9] cursor-pointer"
+            >
+              Liên kết Google
+            </button>
+          )}
+        </section>
+
+        {/* Sessions Card */}
+        <section className="glass-container space-y-4 rounded-[28px] p-6 md:p-8">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-bold uppercase tracking-wider text-[#A7ACD9]">Phiên đăng nhập</p>
+            <button
+              type="button"
+              onClick={handleRevokeOthers}
+              className="text-xs font-semibold text-red-400 hover:underline cursor-pointer"
+            >
+              Đăng xuất tất cả thiết bị khác
+            </button>
+          </div>
+          {isLoadingSessions ? (
+            <p className="text-sm text-[#78767A]">Đang tải...</p>
+          ) : sessions.length === 0 ? (
+            <p className="text-sm text-[#78767A]">Không có phiên nào.</p>
+          ) : (
+            <div className="space-y-2 max-h-[340px] overflow-y-auto pr-1">
+              {sessions.map((session) => (
+                <div
+                  key={session.id}
+                  className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-3"
+                >
+                  <div className="flex items-start gap-2.5 min-w-0">
+                    <Laptop className="mt-0.5 h-4 w-4 shrink-0 text-[#A7ACD9]" />
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-white truncate flex items-center gap-2">
+                        <span className="truncate">{parseUserAgent(session.userAgent)}</span>
+                        {session.isCurrent && (
+                          <span className="shrink-0 rounded-full bg-[#A7ACD9]/15 px-2 py-0.5 text-[10px] font-semibold text-[#A7ACD9]">
+                            Thiết bị này
+                          </span>
+                        )}
+                      </p>
+                      <p className="text-xs text-[#78767A] truncate">
+                        {session.createdByIp ?? 'IP không xác định'} · Hoạt động lần cuối:{' '}
+                        {new Date(session.lastUsedAt ?? session.createdAt).toLocaleString(lang === 'ENG' ? 'en-US' : 'vi-VN')}
+                      </p>
+                    </div>
+                  </div>
+                  {!session.isCurrent && (
+                    <button
+                      type="button"
+                      onClick={() => handleRevokeSession(session.id)}
+                      className="shrink-0 text-[#C7C5CF] transition hover:text-red-400 cursor-pointer ml-2"
+                      aria-label="Đăng xuất thiết bị này"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+      </div>
     </div>
   );
 }
