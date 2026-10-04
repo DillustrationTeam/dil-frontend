@@ -105,7 +105,7 @@ export function DisputeSettlementForm({
                 Admin Arbitration &amp; Refund Settlement
               </h3>
               <p className="text-[11px] text-[#8A8FA9]">
-                Arbitration Protocol SCR-22 • Atomic Escrow Ledger
+                Arbitration Protocol • Atomic Escrow Ledger
               </p>
             </div>
           </div>

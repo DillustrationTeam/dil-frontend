@@ -56,7 +56,7 @@ export function ModerationHeader({
               <Shield className="w-4 h-4" />
             </div>
             <h1 className="font-h1 text-2xl font-extrabold text-white">
-              Content & AI Moderation Queue (SCR-20)
+              Content & AI Moderation Queue
             </h1>
           </div>
           <p className="text-xs text-[#8A8FA9] mt-1 font-body">

@@ -50,6 +50,8 @@ const dictionary: Record<string, { VIE: string; ENG: string }> = {
   'Đấu giá': { VIE: 'Đấu giá', ENG: 'Auctions' },
   'Phòng làm việc': { VIE: 'Phòng làm việc', ENG: 'Workroom' },
   'Escrow Verified': { VIE: 'Xác thực Escrow', ENG: 'Escrow Verified' },
+  'Admin Console': { VIE: 'Quản trị Admin', ENG: 'Admin Console' },
+  'System Admin': { VIE: 'Quản trị viên', ENG: 'System Admin' },
   'Trợ lý AI Dillustration': { VIE: 'Trợ lý AI Dillustration', ENG: 'Dillustration AI Assistant' },
   'Search curated art...': { VIE: 'Tìm tác phẩm tuyển chọn...', ENG: 'Search curated art...' },
 };

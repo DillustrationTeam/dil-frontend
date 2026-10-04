@@ -32,7 +32,13 @@ body {
   min-height: 100vh;
 }
 
-h1, h2, h3, h4, h5, h6, .font-h1 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.font-h1 {
   font-family: 'Sora', sans-serif;
 }
 
@@ -45,13 +51,31 @@ h1, h2, h3, h4, h5, h6, .font-h1 {
 }
 
 .glass-container {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border-top: 1px solid rgba(255, 255, 255, 0.15);
-  border-left: 1px solid rgba(255, 255, 255, 0.05);
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3), 
-              0 0 30px rgba(167, 172, 217, 0.1);
+  position: relative;
+  background: rgba(255, 255, 255, 0.025); 
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  
+  /* Viền tinh tế với điểm nhấn bắt sáng phía trên */
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-top: 1px solid rgba(255, 255, 255, 0.18);
+  
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25), 
+              0 0 20px rgba(167, 172, 217, 0.04);
+  
+  /* Cực kỳ quan trọng: Cô lập layer để GPU không bị lỗi sọc/vệt sáng khi hover */
+  isolation: isolate;
+  transform: translateZ(0);
+  will-change: transform;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+/* Hiệu ứng khi di chuột vào khối kính */
+.glass-container:hover {
+  border-color: rgba(167, 172, 217, 0.2);
+  border-top-color: rgba(167, 172, 217, 0.35);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.35), 
+              0 0 25px rgba(167, 172, 217, 0.12);
 }
 
 .periwinkle-glow:focus-within {

@@ -12,61 +12,77 @@ import {
   SlidersHorizontal,
   ArrowUpRight,
   LogOut,
+  ChevronLeft,
+  ChevronRight,
+  Shield,
 } from 'lucide-react';
 import { useAuthStore } from '@/store/use-auth-store';
-import { AdminNavItem, AdminVerticalNavbarProps } from './types';
+import { AdminNavItem, AdminNavSection, AdminVerticalNavbarProps } from './types';
 
-export const DEFAULT_ADMIN_NAV_ITEMS: AdminNavItem[] = [
+export const DEFAULT_ADMIN_NAV_SECTIONS: AdminNavSection[] = [
   {
-    id: 'system-overview',
-    label: 'System Overview KPIs',
-    href: '/admin',
-    screenId: 'SCR-24',
-    icon: <BarChart3 className="w-5 h-5 shrink-0" />,
-    materialIcon: 'equalizer',
-    exact: true,
+    title: 'Platform Overview',
+    items: [
+      {
+        id: 'system-overview',
+        label: 'System Overview KPIs',
+        href: '/admin',
+        icon: <BarChart3 className="w-4 h-4 shrink-0" />,
+        materialIcon: 'equalizer',
+        exact: true,
+      },
+      {
+        id: 'platform-fee-config',
+        label: 'Platform Fee Config',
+        href: '/admin/fee-policy',
+        icon: <SlidersHorizontal className="w-4 h-4 shrink-0" />,
+        materialIcon: 'tune',
+      },
+    ],
   },
   {
-    id: 'user-management',
-    label: 'User Management',
-    href: '/admin/users',
-    screenId: 'SCR-23',
-    icon: <Users className="w-5 h-5 shrink-0" />,
-    materialIcon: 'group',
+    title: 'User Management',
+    items: [
+      {
+        id: 'user-management',
+        label: 'User Accounts',
+        href: '/admin/users',
+        icon: <Users className="w-4 h-4 shrink-0" />,
+        materialIcon: 'group',
+      },
+      {
+        id: 'creator-verifications',
+        label: 'Creator Verifications',
+        href: '/admin/creator-applications',
+        icon: <UserCheck className="w-4 h-4 shrink-0" />,
+        materialIcon: 'how_to_reg',
+      },
+    ],
   },
   {
-    id: 'creator-verifications',
-    label: 'Creator Verifications',
-    href: '/admin/creator-applications',
-    screenId: 'SCR-21',
-    icon: <UserCheck className="w-5 h-5 shrink-0" />,
-    materialIcon: 'how_to_reg',
-  },
-  {
-    id: 'content-moderation',
-    label: 'Content & AI Moderation',
-    href: '/admin/moderation',
-    screenId: 'SCR-20',
-    icon: <ShieldAlert className="w-5 h-5 shrink-0" />,
-    materialIcon: 'shield',
-  },
-  {
-    id: 'dispute-arbitration',
-    label: 'Dispute Arbitration',
-    href: '/admin/disputes',
-    screenId: 'SCR-22',
-    icon: <Gavel className="w-5 h-5 shrink-0" />,
-    materialIcon: 'gavel',
-  },
-  {
-    id: 'platform-fee-config',
-    label: 'Platform Fee Config',
-    href: '/admin/fee-policy',
-    screenId: 'SCR-18',
-    icon: <SlidersHorizontal className="w-5 h-5 shrink-0" />,
-    materialIcon: 'tune',
+    title: 'Trust & Safety',
+    items: [
+      {
+        id: 'content-moderation',
+        label: 'Content & AI Moderation',
+        href: '/admin/moderation',
+        icon: <ShieldAlert className="w-4 h-4 shrink-0" />,
+        materialIcon: 'shield',
+      },
+      {
+        id: 'dispute-arbitration',
+        label: 'Dispute Arbitration',
+        href: '/admin/disputes',
+        icon: <Gavel className="w-4 h-4 shrink-0" />,
+        materialIcon: 'gavel',
+      },
+    ],
   },
 ];
+
+export const DEFAULT_ADMIN_NAV_ITEMS: AdminNavItem[] = DEFAULT_ADMIN_NAV_SECTIONS.flatMap(
+  (sec) => sec.items
+);
 
 function getInitials(name?: string | null): string {
   if (!name) return 'ADM';
@@ -78,7 +94,8 @@ function getInitials(name?: string | null): string {
 }
 
 export function VerticalNavbar({
-  items = DEFAULT_ADMIN_NAV_ITEMS,
+  items,
+  sections,
   activeHref,
   adminName,
   adminRole = 'Platform Control',
@@ -88,6 +105,8 @@ export function VerticalNavbar({
   showFooter = true,
   footerContent,
   className = '',
+  isCollapsed = false,
+  onToggleCollapse,
   onItemClick,
   onLogout,
 }: AdminVerticalNavbarProps) {
@@ -97,6 +116,11 @@ export function VerticalNavbar({
   const displayName = adminName || user?.fullName || 'System Admin';
   const displayInitials = avatarText || getInitials(displayName);
 
+  // Normalize sections
+  const navSections: AdminNavSection[] =
+    sections ||
+    (items ? [{ title: 'Admin Console', items }] : DEFAULT_ADMIN_NAV_SECTIONS);
+
   const isItemActive = (item: AdminNavItem) => {
     if (activeHref !== undefined) {
       return activeHref === item.href;
@@ -105,7 +129,11 @@ export function VerticalNavbar({
     if (!pathname) return false;
 
     if (item.exact || item.href === '/admin') {
-      return pathname === item.href || pathname === '/admin/overview' || pathname === '/admin/dashboard';
+      return (
+        pathname === item.href ||
+        pathname === '/admin/overview' ||
+        pathname === '/admin/dashboard'
+      );
     }
 
     if (item.id === 'platform-fee-config') {
@@ -130,99 +158,152 @@ export function VerticalNavbar({
 
   return (
     <aside
-      className={`glass-container bg-[#161926]/85 backdrop-blur-[32px] border border-white/10 rounded-[28px] p-6 space-y-6 flex flex-col justify-between h-fit w-full ${className}`}
+      className={`relative sticky top-16 h-[calc(100vh-4rem)] bg-[#1F2335]/90 backdrop-blur-[20px] border-r border-white/10 transition-all duration-300 flex flex-col justify-between z-30 shrink-0 ${
+        isCollapsed ? 'w-20' : 'w-64'
+      } ${className}`}
     >
-      <div className="space-y-6">
+      {/* Toggle Collapse Button (matching CollapsibleSidebar) */}
+      {onToggleCollapse && (
+        <button
+          type="button"
+          onClick={onToggleCollapse}
+          className="absolute -right-3.5 top-6 w-7 h-7 rounded-full bg-[#1b1b1e] border border-white/20 text-slate-300 hover:text-white hover:border-[#A7ACD9]/50 flex items-center justify-center shadow-lg transition-all z-40 cursor-pointer"
+          title={isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
+          aria-label={isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
+        >
+          {isCollapsed ? (
+            <ChevronRight className="w-4 h-4" />
+          ) : (
+            <ChevronLeft className="w-4 h-4" />
+          )}
+        </button>
+      )}
+
+      {/* Top Section: Admin Profile + Navigation Sections */}
+      <div className="p-3 space-y-4 overflow-y-auto">
         {/* Admin Header / Profile Banner */}
         {showProfile && (
-          <div className="flex items-center gap-3 border-b border-white/10 pb-4">
-            <div className="w-12 h-12 rounded-full bg-red-500/20 text-red-400 font-extrabold flex items-center justify-center font-h1 text-sm border border-red-500/40 shrink-0 select-none shadow-[0_0_12px_rgba(239,68,68,0.2)]">
+          <div
+            className={`p-2.5 rounded-2xl bg-white/5 border border-white/10 flex items-center gap-3 ${
+              isCollapsed ? 'justify-center p-2' : ''
+            }`}
+          >
+            <div className="w-8 h-8 rounded-xl bg-[#A7ACD9]/20 text-[#A7ACD9] font-bold flex items-center justify-center font-sora text-xs border border-[#A7ACD9]/30 shrink-0 select-none shadow-[0_0_12px_rgba(167,172,217,0.15)]">
               {displayInitials}
             </div>
-            <div className="min-w-0">
-              <h4 className="font-bold text-white text-xs truncate font-h1">
-                {displayName}
-              </h4>
-              <span className="text-[10px] text-red-300 font-bold uppercase tracking-wider">
-                {adminRole}
-              </span>
-            </div>
+            {!isCollapsed && (
+              <div className="min-w-0 flex-1">
+                <h4 className="font-bold text-white text-xs truncate font-sora">
+                  {displayName}
+                </h4>
+                <div className="flex items-center gap-1.5 mt-0.5">
+                  <Shield className="w-3 h-3 text-[#A7ACD9]" />
+                  <span className="text-[10px] text-[#A7ACD9] font-medium tracking-wide truncate">
+                    {adminRole}
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
-        {/* Navigation Links */}
-        <nav className="space-y-1.5 text-xs font-body" aria-label="Admin Navigation">
-          {items.map((item) => {
-            const active = isItemActive(item);
+        {/* Grouped Navigation Links (matching CollapsibleSidebar structure) */}
+        {navSections.map((section, sectionIdx) => (
+          <div key={section.title || sectionIdx} className="space-y-1">
+            {/* Section Header */}
+            {section.title && (
+              <div className="px-3 pt-2 pb-1">
+                {!isCollapsed ? (
+                  <p className="text-[10px] font-space-grotesk tracking-widest uppercase font-bold text-[#919099]">
+                    {section.title}
+                  </p>
+                ) : (
+                  sectionIdx > 0 && (
+                    <div className="h-[1px] bg-white/10 w-full my-2" />
+                  )
+                )}
+              </div>
+            )}
 
-            return (
-              <Link
-                key={item.id}
-                href={item.href}
-                onClick={() => onItemClick?.(item)}
-                className={`group flex items-center justify-between px-4 py-3 rounded-xl font-bold transition-all duration-200 outline-none select-none ${
-                  active
-                    ? 'bg-red-500/20 text-red-300 border border-red-500/30 shadow-[0_0_15px_rgba(239,68,68,0.15)]'
-                    : 'text-[#8A8FA9] hover:text-white hover:bg-white/5 border border-transparent'
-                }`}
-                aria-current={active ? 'page' : undefined}
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  {/* Icon Rendering: supports Lucide React icon or Material Symbol */}
-                  {item.icon ? (
-                    <span
-                      className={`transition-colors duration-200 ${
-                        active ? 'text-red-300' : 'text-[#8A8FA9] group-hover:text-white'
-                      }`}
-                    >
-                      {item.icon}
-                    </span>
-                  ) : item.materialIcon ? (
-                    <span
-                      className={`material-symbols-outlined text-lg transition-colors duration-200 ${
-                        active ? 'text-red-300' : 'text-[#8A8FA9] group-hover:text-white'
-                      }`}
-                    >
-                      {item.materialIcon}
-                    </span>
-                  ) : null}
+            {/* Nav Link List */}
+            <nav className="space-y-1">
+              {section.items.map((item) => {
+                const active = isItemActive(item);
 
-                  <span className="truncate">{item.label}</span>
-                </div>
+                return (
+                  <Link
+                    key={item.id}
+                    href={item.href}
+                    onClick={() => onItemClick?.(item)}
+                    className={`relative flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-sora font-medium transition-all group ${
+                      active
+                        ? 'bg-[#A7ACD9]/20 text-white border border-[#A7ACD9]/40 shadow-[0_0_15px_rgba(167,172,217,0.2)]'
+                        : 'text-[#919099] hover:text-white hover:bg-white/5 border border-transparent'
+                    } ${isCollapsed ? 'justify-center px-0' : ''}`}
+                    title={isCollapsed ? item.label : undefined}
+                    aria-current={active ? 'page' : undefined}
+                  >
+                    {/* Icon Rendering */}
+                    {item.icon ? (
+                      <span
+                        className={`w-4 h-4 shrink-0 transition-colors ${
+                          active
+                            ? 'text-[#A7ACD9]'
+                            : 'text-[#919099] group-hover:text-white'
+                        }`}
+                      >
+                        {item.icon}
+                      </span>
+                    ) : item.materialIcon ? (
+                      <span
+                        className={`material-symbols-outlined text-lg transition-colors ${
+                          active
+                            ? 'text-[#A7ACD9]'
+                            : 'text-[#919099] group-hover:text-white'
+                        }`}
+                      >
+                        {item.materialIcon}
+                      </span>
+                    ) : null}
 
-                {/* Right side: Badge / Screen ID */}
-                <div className="flex items-center gap-1.5 shrink-0 ml-2">
-                  {item.badge !== undefined && (
-                    <span
-                      className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${
-                        item.badgeVariant === 'danger' || active
-                          ? 'bg-red-500/20 text-red-300 border-red-500/30'
-                          : item.badgeVariant === 'warning'
-                          ? 'bg-amber-500/20 text-amber-300 border-amber-500/30'
-                          : item.badgeVariant === 'success'
-                          ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
-                          : 'bg-white/10 text-white/80 border-white/20'
-                      }`}
-                    >
-                      {item.badge}
-                    </span>
-                  )}
+                    {/* Label */}
+                    {!isCollapsed && (
+                      <span className="truncate flex-1">{item.label}</span>
+                    )}
 
-                  {showScreenIds && item.screenId && (
-                    <span className="text-[9px] font-mono font-medium text-white/40 group-hover:text-white/70 px-1.5 py-0.5 rounded bg-white/5">
-                      {item.screenId}
-                    </span>
-                  )}
-                </div>
-              </Link>
-            );
-          })}
-        </nav>
+                    {/* Badge / Screen ID (only when expanded) */}
+                    {!isCollapsed && (
+                      <div className="flex items-center gap-1.5 shrink-0 ml-1">
+                        {item.badge !== undefined && (
+                          <span
+                            className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${
+                              item.badgeVariant === 'danger'
+                                ? 'bg-rose-500/20 text-rose-300 border-rose-500/30'
+                                : item.badgeVariant === 'warning'
+                                ? 'bg-amber-500/20 text-amber-300 border-amber-500/30'
+                                : item.badgeVariant === 'success'
+                                ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+                                : 'bg-[#A7ACD9]/20 text-[#A7ACD9] border-[#A7ACD9]/30'
+                            }`}
+                          >
+                            {item.badge}
+                          </span>
+                        )}
+
+                        {/* Badge (only when expanded) */}
+                      </div>
+                    )}
+                  </Link>
+                );
+              })}
+            </nav>
+          </div>
+        ))}
       </div>
 
-      {/* Footer / Utilities */}
+      {/* Bottom Footer Section (matching CollapsibleSidebar) */}
       {showFooter && (
-        <div className="pt-4 border-t border-white/10 space-y-2">
+        <div className="p-3 border-t border-white/10 space-y-1.5">
           {footerContent ? (
             footerContent
           ) : (
@@ -230,23 +311,31 @@ export function VerticalNavbar({
               {/* Return to Marketplace */}
               <Link
                 href="/"
-                className="flex items-center justify-between px-4 py-2.5 rounded-xl text-xs font-semibold text-[#8A8FA9] hover:text-white hover:bg-white/5 transition-all duration-200 group"
+                className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-sora text-[#919099] hover:text-white hover:bg-white/5 transition-colors group ${
+                  isCollapsed ? 'justify-center px-0' : ''
+                }`}
+                title={isCollapsed ? 'Return to Marketplace' : undefined}
               >
-                <span className="flex items-center gap-2 truncate">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                  Return to Marketplace
-                </span>
-                <ArrowUpRight className="w-4 h-4 text-[#8A8FA9] group-hover:text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+                {!isCollapsed && (
+                  <span className="truncate flex-1 font-medium">Marketplace</span>
+                )}
+                {!isCollapsed && (
+                  <ArrowUpRight className="w-3.5 h-3.5 text-[#919099] group-hover:text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                )}
               </Link>
 
               {/* Logout button */}
               <button
                 type="button"
                 onClick={handleLogout}
-                className="w-full flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-xs font-semibold text-red-400/80 hover:text-red-300 hover:bg-red-500/10 transition-all duration-200 text-left cursor-pointer"
+                className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-sora text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 transition-colors text-left cursor-pointer ${
+                  isCollapsed ? 'justify-center px-0' : ''
+                }`}
+                title={isCollapsed ? 'Exit Console' : undefined}
               >
-                <LogOut className="w-4 h-4 shrink-0" />
-                <span>Exit Console</span>
+                <LogOut className="w-3.5 h-3.5 shrink-0" />
+                {!isCollapsed && <span className="font-medium">Exit Console</span>}
               </button>
             </>
           )}
