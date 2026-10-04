@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import { HomeCollections } from '@/features/marketplace/components/home-collections';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useAuthStore } from '@/store/use-auth-store';
@@ -11,6 +12,8 @@ export default function MarketplaceHomePage() {
   const { user, isAuthenticated, clearAuth, setUser } = useAuthStore();
   const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 });
   const [marketplaceArtworks, setMarketplaceArtworks] = useState<MarketplaceArtwork[]>([]);
+  const [artworksLoading, setArtworksLoading] = useState(true);
+  const [artworksError, setArtworksError] = useState('');
   const [artists, setArtists] = useState<RelatedCreatorDto[]>([]);
 
   useEffect(() => {
@@ -42,10 +45,11 @@ export default function MarketplaceHomePage() {
     const loadArtworks = async () => {
       try {
         const artworks = await marketplaceService.getArtworks();
-        setMarketplaceArtworks(artworks.slice(0, 6));
+        setMarketplaceArtworks(artworks);
       } catch (error) {
         console.error('Failed to load marketplace feed', error);
-      }
+        setArtworksError('Không tải được tranh. Vui lòng thử tải lại trang.');
+      } finally { setArtworksLoading(false); }
     };
     loadArtworks();
   }, []);
@@ -172,72 +176,7 @@ export default function MarketplaceHomePage() {
           </div>
         </section>
 
-        {/* ── BENTO GRID ── */}
-        <section id="bento" className="max-w-7xl mx-auto px-6 py-16">
-          <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
-            <div className="space-y-2">
-              <span className="text-xs uppercase tracking-[0.2em] text-[#A7ACD9] font-medium block">
-                Market Trends
-              </span>
-              <h2 className="font-h1 text-3xl font-bold text-white">Curated Collections</h2>
-            </div>
-            <button className="flex items-center gap-2 text-[#A7ACD9] text-sm hover:underline active:scale-95 transition-all cursor-pointer">
-              <span>View All Collections</span>
-              <span className="material-symbols-outlined text-lg">arrow_right_alt</span>
-            </button>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
-            {/* Main Bento Item */}
-            <div className="md:col-span-8 group relative aspect-[16/9] overflow-hidden rounded-[28px] glass-container border border-white/10 periwinkle-glow cursor-pointer">
-              <Image
-                className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
-                alt="Neural Horizons Collection"
-                src="https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?q=80&w=1200&auto=format&fit=crop"
-                fill
-                unoptimized
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#131316]/90 via-[#131316]/20 to-transparent p-10 flex flex-col justify-end">
-                <span className="text-xs text-[#A7ACD9] uppercase tracking-widest font-semibold mb-2">
-                  Featured Collection
-                </span>
-                <h3 className="font-h1 text-3xl font-bold text-white mb-2">Neural Horizons</h3>
-                <p className="text-sm text-[#c7c5cf] max-w-md">
-                  Exploring the intersection of artificial cognition and organic serenity.
-                </p>
-              </div>
-            </div>
-
-            {/* Secondary Bento Items */}
-            <div className="md:col-span-4 flex flex-col gap-8">
-              <div className="h-1/2 group relative overflow-hidden rounded-[28px] glass-container border border-white/10 periwinkle-glow cursor-pointer min-h-[200px]">
-                <Image
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                  alt="Crystal Flow Collection"
-                  src="https://images.unsplash.com/photo-1579783902614-a3fb3927b675?q=80&w=800&auto=format&fit=crop"
-                  fill
-                  unoptimized
-                />
-                <div className="absolute inset-0 bg-[#131316]/50 p-6 flex flex-col justify-end">
-                  <h4 className="font-h1 text-xl font-bold text-white">Crystal Flow</h4>
-                </div>
-              </div>
-
-              <div className="h-1/2 group relative overflow-hidden rounded-[28px] glass-container border border-white/10 periwinkle-glow cursor-pointer min-h-[200px]">
-                <Image
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                  alt="Viscosity Genesis Collection"
-                  src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800&auto=format&fit=crop"
-                  fill
-                  unoptimized
-                />
-                <div className="absolute inset-0 bg-[#131316]/50 p-6 flex flex-col justify-end">
-                  <h4 className="font-h1 text-xl font-bold text-white">Viscosity Genesis</h4>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
+        <HomeCollections artworks={marketplaceArtworks} loading={artworksLoading} error={artworksError} />
 
         <section id="artists" className="mx-auto max-w-7xl scroll-mt-24 px-6 py-14">
           <div className="mb-6 flex items-end justify-between gap-4">
@@ -267,10 +206,11 @@ export default function MarketplaceHomePage() {
 
           <div className="grid gap-6 md:grid-cols-3">
             {marketplaceArtworks.length ? (
-              marketplaceArtworks.map((artwork) => (
+              marketplaceArtworks.slice(0, 6).map((artwork) => (
                 <Link
                   key={artwork.id}
                   href={`/artworks/${artwork.id}`}
+                  scroll={false}
                   className="group overflow-hidden rounded-[24px] border border-white/10 bg-[#1b1d29]"
                 >
                   <div className="relative aspect-[4/5] overflow-hidden">
@@ -303,7 +243,7 @@ export default function MarketplaceHomePage() {
               ))
             ) : (
               <div className="md:col-span-3 rounded-[24px] border border-dashed border-white/10 bg-white/5 p-10 text-center text-[#C7C5CF]">
-                Loading marketplace feed...
+                {artworksLoading ? 'Đang tải tranh…' : artworksError || 'Chưa có tranh công khai.'}
               </div>
             )}
           </div>
