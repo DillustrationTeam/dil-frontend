@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/use-auth-store';
@@ -98,8 +97,7 @@ if (!authenticated || (!administrator && (!moderator || adminOnly))) {
               onItemClick={closeMobileNav}
               onLogout={closeMobileNav}
               isCollapsed={false}
-              className="h-full border-r-0"
-              className="shadow-2xl h-full border border-white/15"
+              className="h-full border-r-0 shadow-2xl border border-white/15"
             />
           </div>
         </div>
