@@ -9,8 +9,8 @@ import { authService } from '@/services/auth.service';
 import toast from 'react-hot-toast';
 import { NotificationBell } from '@/features/notification';
 
-export default function PublicLayout({ children }: { children: React.ReactNode }) {
-  return <Suspense fallback={children}><PublicLayoutContent>{children}</PublicLayoutContent></Suspense>;
+export default function PublicLayout({ children, artworkModal }: { children: React.ReactNode; artworkModal: React.ReactNode }) {
+  return <Suspense fallback={children}><PublicLayoutContent>{children}</PublicLayoutContent>{artworkModal}</Suspense>;
 }
 
 function PublicLayoutContent({ children }: { children: React.ReactNode }) {
