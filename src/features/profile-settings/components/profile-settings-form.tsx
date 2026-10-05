@@ -395,204 +395,166 @@ export function ProfileSettingsForm() {
 
   return (
     <>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 items-start">
-          {/* Left Column: Avatar, Cover Art & Social Links */}
-          <div className="space-y-6">
-            {/* Hình ảnh hồ sơ Card */}
-            <div className="glass-container space-y-6 rounded-[28px] p-6">
-              <h3 className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#A7ACD9]">
-                <span className="material-symbols-outlined text-base">image</span>
-                Hình ảnh hồ sơ
-              </h3>
+      <form onSubmit={handleSubmit(onSubmit)} className="glass-container rounded-[32px] p-6 md:p-8 max-w-3xl mx-auto space-y-8">
+        <div className="grid gap-6 sm:grid-cols-2">
+          <ImageUploadSlot
+            label="Ảnh đại diện (Avatar)"
+            value={avatarUrl}
+            isUploading={avatarUpload.isUploading}
+            aspectClassName="aspect-square"
+            onSelectNewFile={(file) => handleSelectNewFile('avatar', file)}
+            onEditExisting={() => handleEditExisting('avatar')}
+            onRemove={() => {
+              setValue('avatarUrl', '', { shouldDirty: true });
+              setCropSessions((previous) => ({ ...previous, avatar: null }));
+            }}
+          />
+          <ImageUploadSlot
+            label="Ảnh bìa (Cover Art)"
+            value={coverUrl}
+            isUploading={coverUpload.isUploading}
+            aspectClassName="aspect-[16/9]"
+            onSelectNewFile={(file) => handleSelectNewFile('cover', file)}
+            onEditExisting={() => handleEditExisting('cover')}
+            onRemove={() => {
+              setValue('coverUrl', '', { shouldDirty: true });
+              setCropSessions((previous) => ({ ...previous, cover: null }));
+            }}
+          />
+        </div>
 
-              <ImageUploadSlot
-                label="Ảnh đại diện (Avatar)"
-                value={avatarUrl}
-                isUploading={avatarUpload.isUploading}
-                aspectClassName="aspect-square max-w-[220px] mx-auto"
-                onSelectNewFile={(file) => handleSelectNewFile('avatar', file)}
-                onEditExisting={() => handleEditExisting('avatar')}
-                onRemove={() => {
-                  setValue('avatarUrl', '', { shouldDirty: true });
-                  setCropSessions((previous) => ({ ...previous, avatar: null }));
-                }}
-              />
+        <div className="space-y-2">
+          <label className="text-xs uppercase tracking-wider text-[#C7C5CF]">Tên hiển thị</label>
+          <input {...register('fullName')} className={inputClass} placeholder="Tên hiển thị của bạn" />
+          {errors.fullName && <p className="text-red-400 text-xs">{errors.fullName.message}</p>}
+        </div>
 
-              <ImageUploadSlot
-                label="Ảnh bìa (Cover Art)"
-                value={coverUrl}
-                isUploading={coverUpload.isUploading}
-                aspectClassName="aspect-[16/9]"
-                onSelectNewFile={(file) => handleSelectNewFile('cover', file)}
-                onEditExisting={() => handleEditExisting('cover')}
-                onRemove={() => {
-                  setValue('coverUrl', '', { shouldDirty: true });
-                  setCropSessions((previous) => ({ ...previous, cover: null }));
-                }}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <label className="text-xs uppercase tracking-wider text-[#C7C5CF]">Giới thiệu bản thân (Bio)</label>
+            <span className="text-[10px] text-[#78767A]">{bio.length}/1000</span>
+          </div>
+          <textarea
+            {...register('bio')}
+            className={`${inputClass} min-h-[120px] resize-y`}
+            placeholder="Vài dòng giới thiệu về bạn..."
+          />
+          {errors.bio && <p className="text-red-400 text-xs">{errors.bio.message}</p>}
+        </div>
+
+        <div className="space-y-3">
+          <label className="text-xs uppercase tracking-wider text-[#C7C5CF]">Social Links</label>
+          {socialLinks.map((link, index) => (
+            <div key={index} className="flex gap-2">
+              <input
+                value={link}
+                onChange={(event) => updateSocialLink(index, event.target.value)}
+                className={inputClass}
+                placeholder="https://facebook.com/..."
               />
+              {socialLinks.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() => removeSocialLink(index)}
+                  className="rounded-xl border border-white/10 px-3 text-[#C7C5CF] hover:border-red-400 hover:text-red-400"
+                  aria-label="Remove link"
+                >
+                  <span className="material-symbols-outlined text-lg">close</span>
+                </button>
+              )}
             </div>
+          ))}
+          <button type="button" onClick={addSocialLink} className="text-xs font-semibold text-[#A7ACD9] hover:underline">
+            + Thêm link khác
+          </button>
+        </div>
 
-            {/* Social Links Card */}
-            <div className="glass-container space-y-4 rounded-[28px] p-6">
-              <h3 className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#A7ACD9]">
-                <span className="material-symbols-outlined text-base">link</span>
-                Social Links
-              </h3>
-              {socialLinks.map((link, index) => (
-                <div key={index} className="flex gap-2">
-                  <input
-                    value={link}
-                    onChange={(event) => updateSocialLink(index, event.target.value)}
-                    className={inputClass}
-                    placeholder="https://facebook.com/..."
-                  />
-                  {socialLinks.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => removeSocialLink(index)}
-                      className="rounded-xl border border-white/10 px-3 text-[#C7C5CF] hover:border-red-400 hover:text-red-400"
-                      aria-label="Remove link"
+        <div className="space-y-6 border-t border-white/10 pt-8">
+          <p className="text-xs uppercase tracking-wider text-[#A7ACD9]">Hồ sơ công khai (hiện trên trang profile)</p>
+
+          <div className="space-y-2">
+            <label className="text-xs uppercase tracking-wider text-[#C7C5CF]">Phong cách / Thể loại quan tâm</label>
+            <ChipToggleGroup options={interestTagOptions} selected={interestTags} onToggle={toggleInterestTag} />
+            {interestTags.filter((tag) => !interestTagOptions.includes(tag)).length > 0 && (
+              <div className="flex flex-wrap gap-2 pt-1">
+                {interestTags
+                  .filter((tag) => !interestTagOptions.includes(tag))
+                  .map((tag) => (
+                    <span
+                      key={tag}
+                      className="flex items-center gap-1.5 rounded-full border border-[#A7ACD9] bg-[#A7ACD9]/15 px-3 py-1.5 text-xs font-medium text-white"
                     >
-                      <span className="material-symbols-outlined text-lg">close</span>
-                    </button>
-                  )}
-                </div>
-              ))}
+                      {tag}
+                      <button type="button" onClick={() => removeInterestTag(tag)} aria-label={`Xóa tag ${tag}`}>
+                        <X className="h-3 w-3" />
+                      </button>
+                    </span>
+                  ))}
+              </div>
+            )}
+            <div className="flex gap-2 pt-1">
+              <input
+                value={customTagInput}
+                onChange={(event) => setCustomTagInput(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter') {
+                    event.preventDefault();
+                    addCustomTag();
+                  }
+                }}
+                className={inputClass}
+                placeholder="Tự thêm phong cách khác..."
+              />
               <button
                 type="button"
-                onClick={addSocialLink}
-                className="inline-flex items-center gap-1 text-xs font-semibold text-[#A7ACD9] hover:underline"
+                onClick={addCustomTag}
+                className="shrink-0 rounded-xl border border-white/10 px-4 text-xs font-semibold text-[#A7ACD9] hover:border-[#A7ACD9]"
               >
-                + Thêm link khác
+                Thêm
               </button>
             </div>
           </div>
 
-          {/* Right Column: Basic Info & Public Profile */}
-          <div className="space-y-6">
-            {/* Thông tin cơ bản Card */}
-            <div className="glass-container space-y-6 rounded-[28px] p-6 md:p-8">
-              <h3 className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#A7ACD9]">
-                <span className="material-symbols-outlined text-base">person</span>
-                Thông tin cơ bản
-              </h3>
-
-              <div className="space-y-2">
-                <label className="text-xs uppercase tracking-wider text-[#C7C5CF]">Tên hiển thị</label>
-                <input {...register('fullName')} className={inputClass} placeholder="Tên hiển thị của bạn" />
-                {errors.fullName && <p className="text-xs text-red-400">{errors.fullName.message}</p>}
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs uppercase tracking-wider text-[#C7C5CF]">Giới thiệu bản thân (Bio)</label>
-                  <span className="text-[10px] text-[#78767A]">{bio.length}/1000</span>
-                </div>
-                <textarea
-                  {...register('bio')}
-                  className={`${inputClass} min-h-[140px] resize-y`}
-                  placeholder="Vài dòng giới thiệu về bạn..."
-                />
-                {errors.bio && <p className="text-xs text-red-400">{errors.bio.message}</p>}
-              </div>
+          <div className="grid gap-6 sm:grid-cols-2">
+            <div className="space-y-2">
+              <label className="text-xs uppercase tracking-wider text-[#C7C5CF]">
+                Quốc gia <span className="normal-case text-[#78767A]">(để trống nếu không muốn hiển thị)</span>
+              </label>
+              <input {...register('country')} list="country-suggestions" className={inputClass} placeholder="vd: Việt Nam" />
+              <datalist id="country-suggestions">
+                {countryOptions.map((option) => (
+                  <option key={option} value={option} />
+                ))}
+              </datalist>
             </div>
-
-            {/* Hồ sơ công khai & Gu thẩm mỹ Card */}
-            <div className="glass-container space-y-6 rounded-[28px] p-6 md:p-8">
-              <h3 className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#A7ACD9]">
-                <span className="material-symbols-outlined text-base">tune</span>
-                Hồ sơ công khai & Gu thẩm mỹ
-              </h3>
-
-              <div className="space-y-2">
-                <label className="text-xs uppercase tracking-wider text-[#C7C5CF]">Phong cách / Thể loại quan tâm</label>
-                <ChipToggleGroup options={interestTagOptions} selected={interestTags} onToggle={toggleInterestTag} />
-                {interestTags.filter((tag) => !interestTagOptions.includes(tag)).length > 0 && (
-                  <div className="flex flex-wrap gap-2 pt-1">
-                    {interestTags
-                      .filter((tag) => !interestTagOptions.includes(tag))
-                      .map((tag) => (
-                        <span
-                          key={tag}
-                          className="flex items-center gap-1.5 rounded-full border border-[#A7ACD9] bg-[#A7ACD9]/15 px-3 py-1.5 text-xs font-medium text-white"
-                        >
-                          {tag}
-                          <button type="button" onClick={() => removeInterestTag(tag)} aria-label={`Xóa tag ${tag}`}>
-                            <X className="h-3 w-3" />
-                          </button>
-                        </span>
-                      ))}
-                  </div>
-                )}
-                <div className="flex gap-2 pt-1">
-                  <input
-                    value={customTagInput}
-                    onChange={(event) => setCustomTagInput(event.target.value)}
-                    onKeyDown={(event) => {
-                      if (event.key === 'Enter') {
-                        event.preventDefault();
-                        addCustomTag();
-                      }
-                    }}
-                    className={inputClass}
-                    placeholder="Tự thêm phong cách khác..."
-                  />
-                  <button
-                    type="button"
-                    onClick={addCustomTag}
-                    className="shrink-0 rounded-xl border border-white/10 px-4 text-xs font-semibold text-[#A7ACD9] hover:border-[#A7ACD9]"
-                  >
-                    Thêm
-                  </button>
-                </div>
-              </div>
-
-              <div className="grid gap-6 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <label className="text-xs uppercase tracking-wider text-[#C7C5CF]">
-                    Quốc gia <span className="normal-case text-[#78767A]">(để trống nếu không muốn hiển thị)</span>
-                  </label>
-                  <input {...register('country')} list="country-suggestions" className={inputClass} placeholder="vd: Việt Nam" />
-                  <datalist id="country-suggestions">
-                    {countryOptions.map((option) => (
-                      <option key={option} value={option} />
-                    ))}
-                  </datalist>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs uppercase tracking-wider text-[#C7C5CF]">
-                    Múi giờ <span className="normal-case text-[#78767A]">(để trống nếu không muốn hiển thị)</span>
-                  </label>
-                  <input {...register('timezone')} list="timezone-suggestions" className={inputClass} placeholder="vd: GMT+7" />
-                  <datalist id="timezone-suggestions">
-                    {timezoneOptions.map((option) => (
-                      <option key={option} value={option} />
-                    ))}
-                  </datalist>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-xs uppercase tracking-wider text-[#C7C5CF]">
-                  Ngôn ngữ giao tiếp <span className="normal-case text-[#78767A]">(để trống nếu không muốn hiển thị)</span>
-                </label>
-                <ChipToggleGroup options={languageOptions} selected={preferredLanguages} onToggle={toggleLanguage} />
-              </div>
+            <div className="space-y-2">
+              <label className="text-xs uppercase tracking-wider text-[#C7C5CF]">
+                Múi giờ <span className="normal-case text-[#78767A]">(để trống nếu không muốn hiển thị)</span>
+              </label>
+              <input {...register('timezone')} list="timezone-suggestions" className={inputClass} placeholder="vd: GMT+7" />
+              <datalist id="timezone-suggestions">
+                {timezoneOptions.map((option) => (
+                  <option key={option} value={option} />
+                ))}
+              </datalist>
             </div>
+          </div>
 
-            {/* Save Button Bar */}
-            <div className="flex items-center justify-end gap-4 pt-2">
-              <button
-                type="submit"
-                disabled={isSubmitting || !isDirty}
-                className="w-full cursor-pointer rounded-xl bg-[#A7ACD9] py-3.5 px-8 text-sm font-bold text-[#1F2335] shadow-lg shadow-[#A7ACD9]/10 transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
-              >
-                {isSubmitting ? 'Đang lưu...' : 'Lưu thay đổi'}
-              </button>
-            </div>
+          <div className="space-y-2">
+            <label className="text-xs uppercase tracking-wider text-[#C7C5CF]">
+              Ngôn ngữ giao tiếp <span className="normal-case text-[#78767A]">(để trống nếu không muốn hiển thị)</span>
+            </label>
+            <ChipToggleGroup options={languageOptions} selected={preferredLanguages} onToggle={toggleLanguage} />
           </div>
         </div>
+
+        <button
+          type="submit"
+          disabled={isSubmitting || !isDirty}
+          className="w-full rounded-xl bg-[#A7ACD9] py-3.5 text-sm font-bold text-[#1F2335] transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {isSubmitting ? 'Đang lưu...' : 'Lưu thay đổi'}
+        </button>
       </form>
 
       {cropTarget && cropSessions[cropTarget] && (
