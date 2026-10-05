@@ -53,7 +53,7 @@ export const DEFAULT_ADMIN_NAV_SECTIONS: AdminNavSection[] = [
       {
         id: 'creator-verifications',
         label: 'Creator Verifications',
-        href: '/admin/creator-applications',
+        href: '/admin/creator-verifications',
         icon: <UserCheck className="w-4 h-4 shrink-0" />,
         materialIcon: 'how_to_reg',
       },
@@ -101,7 +101,6 @@ export function VerticalNavbar({
   adminRole = 'Platform Control',
   avatarText,
   showProfile = true,
-  showScreenIds = false,
   showFooter = true,
   footerContent,
   className = '',

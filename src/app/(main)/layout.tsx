@@ -38,15 +38,15 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
       {/* Main Body with Sidebar + Content */}
       <div className="flex-1 flex w-full relative">
         {/* Collapsible Sidebar */}
-        {!isProfilePage && <CollapsibleSidebar
+        <CollapsibleSidebar
           key={activeRole}
           isCollapsed={isSidebarCollapsed}
           onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
           role={activeRole}
-        />}
+        />
 
         {/* Dynamic Page Content */}
-        <main className={`flex-1 min-w-0 overflow-y-auto ${isProfilePage ? '' : 'p-4 lg:p-8'}`}>
+        <main className="flex-1 min-w-0 overflow-y-auto p-4 lg:p-8">
           {children}
         </main>
       </div>

@@ -2,6 +2,7 @@
 
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
+import { z } from 'zod';
 import {
   ArrowLeft,
   BookOpen,
@@ -52,6 +53,8 @@ interface PendingMessage {
   tempId: string;
   body: string;
 }
+
+const workroomMessageSchema = z.string().trim().max(4000, 'Tin nhắn tối đa 4000 ký tự.');
 
 /** Trích xuất URL hoàn chỉnh cho attachment / WIP preview (ghép API host nếu url dạng tương đối). */
 function resolveAttachmentUrl(url?: string | null): string {
@@ -483,7 +486,13 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
     e.preventDefault();
     if (isChatDisabled || sending || uploading || !userId) return;
 
-    const body = inputBody.trim();
+    const parsedBody = workroomMessageSchema.safeParse(inputBody);
+    if (!parsedBody.success) {
+      setError(parsedBody.error.issues[0]?.message ?? 'Tin nhắn không hợp lệ.');
+      return;
+    }
+
+    const body = parsedBody.data;
     if (!body && !selectedFile) return;
 
     setSending(true);
@@ -1130,6 +1139,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
 
                     <input
                       type="text"
+                      maxLength={4000}
                       disabled={isChatDisabled}
                       value={inputBody}
                       onChange={(e) => {

@@ -31,6 +31,9 @@ export const notificationTypeLabels: Record<string, string> = {
   PayoutStatusChanged: 'Trạng thái rút tiền',
   UserSanctionAlert: 'Chế tài tài khoản',
   PromotionAnnouncement: 'Khuyến mãi',
+  CommissionStatusChanged: 'Trạng thái đặt vẽ',
+  EscrowStatusChanged: 'Trạng thái ký quỹ',
+  DisputeStatusChanged: 'Trạng thái tranh chấp',
 };
 
 /** Danh sách loại hợp lệ, dùng cho bộ lọc và kiểm tra dữ liệu. */

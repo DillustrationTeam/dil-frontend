@@ -13,6 +13,7 @@ import {
   Briefcase,
   ShieldCheck,
   Wallet,
+  FolderKanban,
   Menu,
 } from 'lucide-react';
 import { useAuthStore } from '@/store/use-auth-store';
@@ -188,14 +189,14 @@ export default function TopNavbar<T extends string = string>({
                 onClick={() => setShowProfileMenu(false)}
                 className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs text-[#e4e1e5] hover:text-white hover:bg-white/5 transition-colors"
               >
-                <Wallet className="w-4 h-4 text-[#A7ACD9]" /> Ví của tôi
+                <Wallet className="w-4 h-4 text-[#A7ACD9]" /> {t('Ví của tôi')}
               </Link>
               <Link
                 href={isAdmin ? '/admin' : '/client/commissions'}
                 onClick={() => setShowProfileMenu(false)}
                 className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs text-[#e4e1e5] hover:text-white hover:bg-white/5 transition-colors"
               >
-                <User className="w-4 h-4 text-[#A7ACD9]" /> {isAdmin ? 'Admin Center' : t('My Commissions')}
+                <FolderKanban className="w-4 h-4 text-[#A7ACD9]" /> {isAdmin ? t('Admin Center') : t('My Commissions')}
               </Link>
               {isCreator && (
                 <Link
@@ -203,7 +204,30 @@ export default function TopNavbar<T extends string = string>({
                   onClick={() => setShowProfileMenu(false)}
                   className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs text-[#e4e1e5] hover:text-white hover:bg-white/5 transition-colors"
                 >
-                  <Palette className="w-4 h-4 text-[#A7ACD9]" /> Creator Dashboard
+                  <Palette className="w-4 h-4 text-[#A7ACD9]" /> {t('Creator Dashboard')}
+                </Link>
+              )}
+              <Link
+                href="/profile"
+                onClick={() => setShowProfileMenu(false)}
+                className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs text-slate-300 hover:text-white hover:bg-white/5 transition-colors"
+              >
+                <User className="w-4 h-4 text-[#A7ACD9]" /> {t('Hồ sơ của tôi')}
+              </Link>
+              <Link
+                href="/settings"
+                onClick={() => setShowProfileMenu(false)}
+                className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs text-slate-300 hover:text-white hover:bg-white/5 transition-colors"
+              >
+                <Settings className="w-4 h-4 text-[#A7ACD9]" /> {t('Cài đặt')}
+              </Link>
+              {!isCreator && !isAdmin && (
+                <Link
+                  href="/become-creator"
+                  onClick={() => setShowProfileMenu(false)}
+                  className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs text-[#e4e1e5] hover:text-white hover:bg-white/5 transition-colors"
+                >
+                  <Palette className="w-4 h-4 text-[#A7ACD9]" /> {t('Trở thành Creator')}
                 </Link>
               )}
               {isAdmin && (
@@ -212,31 +236,15 @@ export default function TopNavbar<T extends string = string>({
                   onClick={() => setShowProfileMenu(false)}
                   className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs text-red-300 hover:text-white hover:bg-white/5 transition-colors"
                 >
-                  <ShieldCheck className="w-4 h-4 text-red-400" /> Duyệt đơn Creator
+                  <ShieldCheck className="w-4 h-4 text-red-400" /> {t('Duyệt đơn Creator')}
                 </Link>
               )}
-              {isAdmin && (
-                <Link
-                  href="/admin"
-                  onClick={() => setShowProfileMenu(false)}
-                  className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs text-[#e4e1e5] hover:text-white hover:bg-white/5 transition-colors"
-                >
-                  <ShieldCheck className="w-4 h-4 text-[#A7ACD9]" /> {t('Admin Console')}
-                </Link>
-              )}
-              <Link
-                href="/profile"
-                onClick={() => setShowProfileMenu(false)}
-                className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs text-slate-300 hover:text-white hover:bg-white/5 transition-colors"
-              >
-                <Settings className="w-4 h-4 text-[#A7ACD9]" /> Hồ sơ của tôi
-              </Link>
               <div className="border-t border-white/10 my-1" />
               <button
                 onClick={handleSignOut}
                 className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs text-rose-400 hover:bg-rose-500/10 transition-colors"
               >
-                <LogOut className="w-4 h-4 text-[#A7ACD9]" /> Sign Out
+                <LogOut className="w-4 h-4 text-[#A7ACD9]" /> {t('Sign Out')}
               </button>
             </div>
           )}
