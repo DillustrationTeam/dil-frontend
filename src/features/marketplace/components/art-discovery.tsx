@@ -48,7 +48,7 @@ function ArtworkCard({ artwork, onSelect }: { artwork: MarketplaceArtwork; onSel
   );
 }
 
-function ImageSearchModal({ artworks, onClose, onSelectArtwork }: { artworks: MarketplaceArtwork[]; onClose: () => void; onSelectArtwork: (id: string) => void }) {
+function ImageSearchModal({ onClose, onSelectArtwork }: { onClose: () => void; onSelectArtwork: (id: string) => void }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -167,7 +167,7 @@ export function ArtDiscovery({ initialSearch = false }: { initialSearch?: boolea
     <div className="mb-6 flex flex-wrap items-center justify-between gap-4"><div className="flex rounded-full bg-white/5 p-1">{([['recommended', 'Dành cho bạn'], ['following', 'Đang theo dõi']] as const).map(([tab, label]) => <button key={tab} onClick={() => setFeedTab(tab)} className={`rounded-full px-4 py-2 text-sm transition ${feedTab === tab ? 'bg-[#A7ACD9] font-semibold text-[#1F2335]' : 'text-[#C7C5CF] hover:text-white'}`}>{tab === 'recommended' && <Sparkles className="mr-1 inline h-3.5 w-3.5" />}{label}</button>)}</div><p className="text-sm text-[#C7C5CF]">{displayed.length} tác phẩm phù hợp</p></div>
     {feedTab === 'following' && !isAuthenticated ? <div className="rounded-2xl border border-dashed border-white/15 bg-white/[.03] p-12 text-center"><p className="font-h1 text-lg text-white">Đăng nhập để xem nghệ sĩ bạn theo dõi</p><Link href="/login" className="mt-3 inline-block text-sm text-[#A7ACD9] hover:underline">Đăng nhập</Link></div> : feedTab === 'following' && followingError ? <div className="rounded-2xl border border-rose-300/20 bg-rose-300/5 p-8 text-center text-sm text-rose-200">{followingError}</div> : loading || loadedForAuth !== isAuthenticated ? <div className="rounded-3xl border border-white/10 bg-white/5 p-12 text-center text-sm text-[#C7C5CF]">Đang tải chợ tranh...</div> : displayed.length ? <div className="columns-1 gap-5 sm:columns-2 lg:columns-3 xl:columns-4">{displayed.map((artwork) => <ArtworkCard key={artwork.id} artwork={artwork} onSelect={setSelectedArtworkId} />)}</div> : feedTab === 'following' ? <div className="rounded-2xl border border-dashed border-white/15 bg-white/[.03] p-12 text-center"><p className="font-h1 text-lg text-white">Chưa có tác phẩm phù hợp từ nghệ sĩ bạn theo dõi</p><Link href="/#artists" className="mt-3 inline-block text-sm text-[#A7ACD9] hover:underline">Khám phá artist đang mở commission</Link></div> : <div className="rounded-3xl border border-dashed border-white/15 bg-white/[.03] p-12 text-center"><p className="font-h1 text-lg text-white">Chưa tìm thấy tác phẩm phù hợp</p><button onClick={() => { setQuery(''); setSelectedStyles([]); setLicense('all'); setOnlyOpenSlots(false); setMinPrice(''); setMaxPrice(''); setMinRating(''); }} className="mt-3 text-sm text-[#A7ACD9] hover:underline">Xóa bộ lọc</button></div>}
   </div>
-  {showImageSearch && <ImageSearchModal artworks={artworks} onClose={() => setShowImageSearch(false)} onSelectArtwork={setSelectedArtworkId} />}
+  {showImageSearch && <ImageSearchModal onClose={() => setShowImageSearch(false)} onSelectArtwork={setSelectedArtworkId} />}
   {selectedArtworkId && <ArtworkDetailModal id={selectedArtworkId} onClose={() => setSelectedArtworkId(null)} />}
   </main>;
 }

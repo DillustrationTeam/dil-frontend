@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Pencil, Trash2, Upload, X } from 'lucide-react';
@@ -192,7 +192,7 @@ export function ProfileSettingsForm() {
   const {
     register,
     handleSubmit,
-    watch,
+    control,
     setValue,
     reset,
     getValues,
@@ -212,12 +212,12 @@ export function ProfileSettingsForm() {
     },
   });
 
-  const avatarUrl = watch('avatarUrl');
-  const coverUrl = watch('coverUrl');
-  const socialLinks = watch('socialLinks');
-  const interestTags = watch('interestTags');
-  const preferredLanguages = watch('preferredLanguages');
-  const bio = watch('bio');
+  const avatarUrl = useWatch({ control, name: 'avatarUrl' });
+  const coverUrl = useWatch({ control, name: 'coverUrl' });
+  const socialLinks = useWatch({ control, name: 'socialLinks' });
+  const interestTags = useWatch({ control, name: 'interestTags' });
+  const preferredLanguages = useWatch({ control, name: 'preferredLanguages' });
+  const bio = useWatch({ control, name: 'bio' });
 
   const avatarUpload = useCloudinaryUpload('profile-avatars');
   const coverUpload = useCloudinaryUpload('profile-covers');

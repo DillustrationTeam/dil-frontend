@@ -3,7 +3,7 @@
 import React, { Suspense, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { useLanguage } from '@/context/language-context';
 import { useAuthStore } from '@/store/use-auth-store';
 import { authService } from '@/services/auth.service';
@@ -18,7 +18,6 @@ function PublicLayoutContent({ children }: { children: React.ReactNode }) {
   const { user, roles, refreshToken, isAuthenticated, clearAuth } = useAuthStore();
   const { t } = useLanguage();
   const pathname = usePathname() ?? '';
-  const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const handleLogout = async () => {
@@ -39,9 +38,11 @@ function PublicLayoutContent({ children }: { children: React.ReactNode }) {
           {/* Left: Logo + Nav Links */}
           <div className="flex min-w-0 items-center gap-8">
             <Link href="/" className="group flex shrink-0 items-center space-x-2">
-              <img
+              <Image
                 src="/weblogo.png"
                 alt="dillustration"
+                width={220}
+                height={64}
                 className="h-14 md:h-16 w-auto object-contain hover:scale-105 transition-transform"
               />
             </Link>

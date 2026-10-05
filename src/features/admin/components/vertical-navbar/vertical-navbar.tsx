@@ -101,7 +101,6 @@ export function VerticalNavbar({
   adminRole = 'Platform Control',
   avatarText,
   showProfile = true,
-  showScreenIds = false,
   showFooter = true,
   footerContent,
   className = '',

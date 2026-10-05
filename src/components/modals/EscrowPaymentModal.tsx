@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 import { X, ShieldCheck, Wallet, QrCode, CheckCircle2, Lock, Copy, Check } from 'lucide-react';
 
 interface EscrowPaymentModalProps {
@@ -121,9 +122,12 @@ export default function EscrowPaymentModal({
                 <div className="p-4 bg-white/5 border border-white/10 rounded-2xl space-y-3 text-center">
                   <p className="text-xs text-slate-300 font-medium">Scan VietQR via Banking App:</p>
                   <div className="w-44 h-44 mx-auto p-2 bg-white rounded-xl shadow-lg flex items-center justify-center">
-                    <img
+                    <Image
                       src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=SEPAY_DEPOSIT_${amountVND}`}
                       alt="VietQR SePay"
+                      width={180}
+                      height={180}
+                      unoptimized
                       className="w-full h-full object-contain"
                     />
                   </div>
