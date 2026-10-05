@@ -30,7 +30,7 @@ export function CommissionBreakdownCard({
       : 0;
 
   return (
-    <div className="glass-container bg-[#161926]/85 backdrop-blur-[32px] border border-white/10 rounded-[28px] p-6 space-y-6">
+    <div className="glass-container bg-[#161926]/85 border border-white/10 rounded-[28px] p-6 space-y-6">
       <div className="flex justify-between items-center border-b border-white/10 pb-4">
         <div>
           <h3 className="font-h1 font-bold text-white text-base">

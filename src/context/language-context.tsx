@@ -54,6 +54,10 @@ const dictionary: Record<string, { VIE: string; ENG: string }> = {
   'System Admin': { VIE: 'Quản trị viên', ENG: 'System Admin' },
   'Trợ lý AI Dillustration': { VIE: 'Trợ lý AI Dillustration', ENG: 'Dillustration AI Assistant' },
   'Search curated art...': { VIE: 'Tìm tác phẩm tuyển chọn...', ENG: 'Search curated art...' },
+  'Contests': { VIE: 'Cuộc thi', ENG: 'Contests' },
+  'Cuộc thi': { VIE: 'Cuộc thi', ENG: 'Contests' },
+  'Events': { VIE: 'Sự kiện', ENG: 'Events' },
+  'Auctions': { VIE: 'Đấu giá', ENG: 'Auctions' },
 };
 
 // Global DOM Auto-Translation Map for Client-side text node replacement
