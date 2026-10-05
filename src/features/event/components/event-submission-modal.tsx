@@ -31,146 +31,32 @@ interface EventSubmissionModalProps {
   userName?: string;
   userId?: string;
   isCreator?: boolean;
+  existingSubmission?: EventSubmissionDto | null;
 }
 
 type SubmissionMode = 'existing' | 'upload';
 
 const ARTWORKS_PAGE_SIZE = 9;
 
-const DEMO_ARTWORKS: ArtworkDto[] = [
-  {
-    id: 'art-demo-1',
-    creatorProfileId: 'profile-1',
-    title: 'Neo-Saigon Cyber Ronin',
-    description: 'Sci-fi concept character created with Procreate and Photoshop.',
-    imageUrl: 'https://images.unsplash.com/photo-1578632767115-351597cf2477?q=80&w=800&auto=format&fit=crop',
-    isAiGenerated: false,
-    moderationStatus: 'Approved',
-    viewCount: 240,
-    createdAt: new Date().toISOString(),
-    tags: ['cyberpunk', 'character'],
-  },
-  {
-    id: 'art-demo-2',
-    creatorProfileId: 'profile-1',
-    title: 'Ethereal Lotus Spirit',
-    description: 'Digital watercolor painting inspired by Vietnamese folklore.',
-    imageUrl: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?q=80&w=800&auto=format&fit=crop',
-    isAiGenerated: false,
-    moderationStatus: 'Approved',
-    viewCount: 180,
-    createdAt: new Date().toISOString(),
-    tags: ['folklore', 'lotus'],
-  },
-  {
-    id: 'art-demo-3',
-    creatorProfileId: 'profile-1',
-    title: 'Astral Wandering Mecha',
-    description: 'Deep-space mecha explorer guarding ancient galactic ruins.',
-    imageUrl: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800&auto=format&fit=crop',
-    isAiGenerated: false,
-    moderationStatus: 'Approved',
-    viewCount: 310,
-    createdAt: new Date().toISOString(),
-    tags: ['sci-fi', 'mecha'],
-  },
-  {
-    id: 'art-demo-4',
-    creatorProfileId: 'profile-1',
-    title: 'Dragon Valley Sunrise',
-    description: 'Majestic fantasy landscape bathed in golden hour mist.',
-    imageUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=800&auto=format&fit=crop',
-    isAiGenerated: false,
-    moderationStatus: 'Approved',
-    viewCount: 195,
-    createdAt: new Date().toISOString(),
-    tags: ['landscape', 'fantasy'],
-  },
-  {
-    id: 'art-demo-5',
-    creatorProfileId: 'profile-1',
-    title: 'Midnight Blossom Samurai',
-    description: 'Dynamic battle posture beneath illuminated cherry trees.',
-    imageUrl: 'https://images.unsplash.com/photo-1563089145-599997674d42?q=80&w=800&auto=format&fit=crop',
-    isAiGenerated: false,
-    moderationStatus: 'Approved',
-    viewCount: 420,
-    createdAt: new Date().toISOString(),
-    tags: ['samurai', 'action'],
-  },
-  {
-    id: 'art-demo-6',
-    creatorProfileId: 'profile-1',
-    title: 'Whispering Willow Grove',
-    description: 'Serene forest mood concept painted in earthy tones.',
-    imageUrl: 'https://images.unsplash.com/photo-1541701494587-cb58502866ab?q=80&w=800&auto=format&fit=crop',
-    isAiGenerated: false,
-    moderationStatus: 'Approved',
-    viewCount: 155,
-    createdAt: new Date().toISOString(),
-    tags: ['nature', 'forest'],
-  },
-  {
-    id: 'art-demo-7',
-    creatorProfileId: 'profile-1',
-    title: 'Chrono Weaver',
-    description: 'Temporal mage channeling celestial clockwork energy.',
-    imageUrl: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=800&auto=format&fit=crop',
-    isAiGenerated: false,
-    moderationStatus: 'Approved',
-    viewCount: 275,
-    createdAt: new Date().toISOString(),
-    tags: ['magic', 'character'],
-  },
-  {
-    id: 'art-demo-8',
-    creatorProfileId: 'profile-1',
-    title: 'Sunset Harbor Citadel',
-    description: 'Coastal fantasy town with soaring towers and sailing ships.',
-    imageUrl: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?q=80&w=800&auto=format&fit=crop',
-    isAiGenerated: false,
-    moderationStatus: 'Approved',
-    viewCount: 380,
-    createdAt: new Date().toISOString(),
-    tags: ['environment', 'citadel'],
-  },
-  {
-    id: 'art-demo-9',
-    creatorProfileId: 'profile-1',
-    title: 'Solar Phoenix Awakening',
-    description: 'Vibrant plumage bursting with radiant cosmic embers.',
-    imageUrl: 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?q=80&w=800&auto=format&fit=crop',
-    isAiGenerated: false,
-    moderationStatus: 'Approved',
-    viewCount: 520,
-    createdAt: new Date().toISOString(),
-    tags: ['phoenix', 'creature'],
-  },
-  {
-    id: 'art-demo-10',
-    creatorProfileId: 'profile-1',
-    title: 'Neon Alleyway Cat',
-    description: 'Cozy cyberpunk scene featuring a stray cat under neon city rain.',
-    imageUrl: 'https://images.unsplash.com/photo-1549490349-8643362247b5?q=80&w=800&auto=format&fit=crop',
-    isAiGenerated: false,
-    moderationStatus: 'Approved',
-    viewCount: 330,
-    createdAt: new Date().toISOString(),
-    tags: ['neon', 'illustration'],
-  },
-];
 
-export function EventSubmissionModal({
-  isOpen,
+
+export function EventSubmissionModal(props: EventSubmissionModalProps) {
+  if (!props.isOpen) return null;
+  return <EventSubmissionModalInner key={props.existingSubmission?.id || 'new'} {...props} />;
+}
+
+function EventSubmissionModalInner({
   onClose,
   eventId,
   eventTitle,
   onSuccess,
-  userName = 'Artist',
-  userId = '',
   isCreator = true,
+  existingSubmission,
 }: EventSubmissionModalProps) {
-  const [mode, setMode] = useState<SubmissionMode>('existing');
+  const isEditing = Boolean(existingSubmission);
+  const [mode, setMode] = useState<SubmissionMode>(
+    existingSubmission ? (existingSubmission.artworkId ? 'existing' : 'upload') : 'existing'
+  );
 
   // Existing artworks state
   const [myArtworks, setMyArtworks] = useState<ArtworkDto[]>([]);
@@ -181,37 +67,40 @@ export function EventSubmissionModal({
 
   // Local file upload state
   const [localFile, setLocalFile] = useState<File | null>(null);
-  const [localPreviewUrl, setLocalPreviewUrl] = useState<string | null>(null);
+  const [localPreviewUrl, setLocalPreviewUrl] = useState<string | null>(
+    existingSubmission?.artworkImageUrl || existingSubmission?.artworkThumbnailUrl || null
+  );
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Shared form fields
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [agreed, setAgreed] = useState(false);
+  const [title, setTitle] = useState(existingSubmission?.title || '');
+  const [description, setDescription] = useState(existingSubmission?.description || '');
+  const [agreed, setAgreed] = useState(Boolean(existingSubmission));
   const [submitting, setSubmitting] = useState(false);
 
   // Fetch user's existing artworks when modal is open
   useEffect(() => {
-    if (!isOpen) return;
-
     async function loadArtworks() {
       setLoadingArtworks(true);
       try {
         const list = await creatorProfileService.getMyArtworks();
-        if (list && list.length > 0) {
-          setMyArtworks(list);
-        } else {
-          setMyArtworks(DEMO_ARTWORKS);
+        setMyArtworks(list || []);
+        if (existingSubmission?.artworkId && list && list.length > 0) {
+          const matched = list.find((a) => a.id === existingSubmission.artworkId);
+          if (matched) {
+            setSelectedArtwork(matched);
+            setMode('existing');
+          }
         }
       } catch {
-        setMyArtworks(DEMO_ARTWORKS);
+        setMyArtworks([]);
       } finally {
         setLoadingArtworks(false);
       }
     }
 
     void loadArtworks();
-  }, [isOpen]);
+  }, [existingSubmission?.artworkId]);
 
   // Filter artworks by search query
   const filteredArtworks = myArtworks.filter((art) =>
@@ -306,40 +195,41 @@ export function EventSubmissionModal({
           // Fallback to preview URL in development
           finalImageUrl = localPreviewUrl || 'https://images.unsplash.com/photo-1578632767115-351597cf2477?q=80&w=1200';
         }
+      } else if (isEditing && existingSubmission) {
+        finalArtworkId = existingSubmission.artworkId;
+        finalImageUrl = existingSubmission.artworkImageUrl || '';
       }
 
-      // Submit to contest
-      const res = await eventService.submitArtwork(eventId, {
-        eventId,
-        artworkId: finalArtworkId,
-        title: title.trim(),
-        description: description.trim(),
-        imageUrl: finalImageUrl,
-        thumbnailUrl: finalImageUrl,
-        isAiGenerated: false,
-      });
+      let resultSub: EventSubmissionDto;
 
-      const newSub: EventSubmissionDto = {
-        id: res?.id || `sub-${Date.now()}`,
-        eventId,
-        eventTitle,
-        submitterId: userId,
-        submitterName: userName,
-        submitterUsername: userName.toLowerCase().replace(/\s+/g, '_'),
-        artworkId: finalArtworkId || `art-${Date.now()}`,
-        title: title.trim(),
-        description: description.trim(),
-        artworkImageUrl: finalImageUrl,
-        artworkThumbnailUrl: finalImageUrl,
-        aiScanPassed: true,
-        voteCount: 0,
-        score: null,
-        submittedAt: new Date().toISOString(),
-        hasVoted: false,
-      };
+      if (isEditing && existingSubmission) {
+        // Cập nhật bài dự thi cũ (Update submission)
+        resultSub = await eventService.updateSubmission(existingSubmission.id, {
+          title: title.trim(),
+          description: description.trim(),
+          artworkId: mode === 'existing' ? finalArtworkId : undefined,
+          imageUrl: mode === 'upload' && localFile ? finalImageUrl : undefined,
+          thumbnailUrl: mode === 'upload' && localFile ? finalImageUrl : undefined,
+          isAiGenerated: false,
+        });
 
-      toast.success('Your artwork has been submitted successfully to the contest!');
-      onSuccess(newSub);
+        toast.success('Your contest entry has been updated successfully!');
+      } else {
+        // Nộp bài dự thi mới (Submit new entry)
+        resultSub = await eventService.submitArtwork(eventId, {
+          eventId,
+          artworkId: finalArtworkId,
+          title: title.trim(),
+          description: description.trim(),
+          imageUrl: finalImageUrl,
+          thumbnailUrl: finalImageUrl,
+          isAiGenerated: false,
+        });
+
+        toast.success('Your artwork has been submitted successfully to the contest!');
+      }
+
+      onSuccess(resultSub);
       onClose();
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : 'Failed to submit artwork. Please check inputs.');
@@ -347,8 +237,6 @@ export function EventSubmissionModal({
       setSubmitting(false);
     }
   };
-
-  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
@@ -360,7 +248,9 @@ export function EventSubmissionModal({
               <Sparkles size={18} />
             </div>
             <div>
-              <h3 className="font-h1 text-lg font-bold text-white">Submit Contest Artwork</h3>
+              <h3 className="font-h1 text-lg font-bold text-white">
+                {isEditing ? 'Edit Contest Entry' : 'Submit Contest Artwork'}
+              </h3>
               <p className="text-xs text-[#8A8FA9] line-clamp-1">{eventTitle}</p>
             </div>
           </div>
@@ -710,12 +600,12 @@ export function EventSubmissionModal({
               {submitting ? (
                 <>
                   <div className="size-3.5 animate-spin rounded-full border-2 border-brand-navy border-t-transparent" />
-                  <span>Submitting...</span>
+                  <span>{isEditing ? 'Updating...' : 'Submitting...'}</span>
                 </>
               ) : (
                 <>
                   <UploadCloud size={16} />
-                  <span>Submit Artwork</span>
+                  <span>{isEditing ? 'Update Entry' : 'Submit Artwork'}</span>
                 </>
               )}
             </button>
