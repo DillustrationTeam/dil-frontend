@@ -25,6 +25,8 @@ import {
   History,
   TrendingUp,
   Gavel,
+  User,
+  Settings,
 } from 'lucide-react';
 
 interface SidebarItem {
@@ -45,6 +47,13 @@ interface CollapsibleSidebarProps {
 }
 
 const CLIENT_NAV_SECTIONS: SidebarSection[] = [
+  {
+    title: 'Profile',
+    items: [
+      { label: 'My Profile', href: '/client/profile', icon: User },
+      { label: 'Settings', href: '/client/settings', icon: Settings },
+    ],
+  },
   {
     title: 'Client Workspace',
     items: [
@@ -86,7 +95,7 @@ const CREATOR_NAV_SECTIONS: SidebarSection[] = [
     title: 'Workstation',
     items: [
       { label: 'Artworks Portfolio', href: '/creator/artworks', icon: Brush },
-      { label: 'Rate Card & Services', href: '/creator/rate-card', icon: LayoutGrid },
+      { label: 'Rate Card & Services', href: '/creator/services', icon: LayoutGrid },
       { label: 'My Vouchers', href: '/creator/vouchers', icon: Ticket },
       { label: 'Terms & Licensing', href: '/creator/terms', icon: ShieldCheck },
       { label: 'AI Auto-reply', href: '/creator/ai-rules', icon: Bot },

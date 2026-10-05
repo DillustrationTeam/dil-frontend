@@ -42,7 +42,7 @@ export function PersonalProfileScreen() {
   }, [authenticated, user?.id, isCreator, retry]);
 
   if (!authenticated || !user) return <div className="py-20 text-center"><h1 className="font-h1 text-2xl">Hồ sơ của bạn</h1><Link href="/login" className="mt-4 inline-block text-[#A7ACD9]">Đăng nhập để xem hồ sơ</Link></div>;
-  return <ProfileLayout name={user.fullName} sidebar={<>
+  return <ProfileLayout name={user.fullName} bannerUrl={user.coverUrl} avatarUrl={user.avatarUrl} sidebar={<>
     <p className="mb-2 text-[10px] font-semibold uppercase tracking-[.2em] text-[#A7ACD9]">Personal profile</p>
     <h1 className="break-words font-h1 text-3xl font-semibold text-white">{user.fullName}</h1>
     <p className="mt-2 text-sm text-[#919099]">Thành viên Dillustration</p>

@@ -35,10 +35,49 @@ export interface TwoFactorRequiredDto {
   email: string;
 }
 
-export type LoginResult = AuthResponseDto | TwoFactorRequiredDto;
+export interface GoogleRegistrationRequiredDto {
+  requiresRegistration: true;
+  registrationTicket: string;
+  suggestedEmail: string;
+  suggestedFullName: string | null;
+}
+
+export interface PasswordSetupRequiredDto {
+  requiresPasswordSetup: true;
+  passwordSetupTicket: string;
+  email: string;
+  fullName: string | null;
+}
+
+export type LoginResult =
+  | AuthResponseDto
+  | TwoFactorRequiredDto
+  | GoogleRegistrationRequiredDto
+  | PasswordSetupRequiredDto;
 
 export function isTwoFactorRequired(result: LoginResult): result is TwoFactorRequiredDto {
   return (result as TwoFactorRequiredDto).requiresTwoFactor === true;
+}
+
+export function isGoogleRegistrationRequired(result: LoginResult): result is GoogleRegistrationRequiredDto {
+  return (result as GoogleRegistrationRequiredDto).requiresRegistration === true;
+}
+
+export function isPasswordSetupRequired(result: LoginResult): result is PasswordSetupRequiredDto {
+  return (result as PasswordSetupRequiredDto).requiresPasswordSetup === true;
+}
+
+export interface CompleteGoogleRegistrationRequest {
+  registrationTicket: string;
+  username: string;
+  password: string;
+}
+
+export interface CompleteAccountPasswordSetupRequest {
+  email: string;
+  setupTicket: string;
+  username: string;
+  password: string;
 }
 
 export interface VerifyTwoFactorLoginRequest {
@@ -46,6 +85,8 @@ export interface VerifyTwoFactorLoginRequest {
   twoFactorTicket: string;
   code: string;
 }
+
+export type VerifyTwoFactorLoginResult = AuthResponseDto | PasswordSetupRequiredDto;
 
 export interface RegisterRequest {
   email: string;

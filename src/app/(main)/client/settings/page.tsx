@@ -40,7 +40,7 @@ export default function SettingsPage() {
           <PageHeader title="Cài đặt hồ sơ" />
           {user?.id && (
             <Link
-              href={`/clients/${user.id}`}
+              href="/client/profile"
               className="mb-8 inline-flex items-center gap-1.5 rounded-full border border-white/10 px-3.5 py-1.5 text-xs font-medium text-[#C7C5CF] transition hover:border-[#A7ACD9] hover:text-white"
             >
               <span className="material-symbols-outlined text-sm">visibility</span>

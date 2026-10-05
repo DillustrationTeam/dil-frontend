@@ -145,14 +145,6 @@ function PublicLayoutContent({ children }: { children: React.ReactNode }) {
                           <span className="material-symbols-outlined text-sm text-[#A7ACD9]">{isAdmin ? 'admin_panel_settings' : 'dashboard'}</span>
                           {isAdmin ? 'Admin Center' : 'My Studio'}
                         </Link>
-                        <Link
-                          href={`/clients/${user.id}`}
-                          onClick={() => setIsMenuOpen(false)}
-                          className="flex items-center gap-2 px-3 py-2 text-xs text-[#e4e1e5] hover:bg-white/10 rounded-xl transition-colors"
-                        >
-                          <span className="material-symbols-outlined text-sm text-[#A7ACD9]">person</span>
-                          Hồ sơ của tôi
-                        </Link>
                         {!roles.includes('Creator') && (
                           <button
                             type="button"
