@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 import { X, ShieldCheck, Wallet, QrCode, CheckCircle2, Lock, Copy, Check } from 'lucide-react';
 
 interface EscrowPaymentModalProps {
@@ -18,7 +19,7 @@ export default function EscrowPaymentModal({
   milestoneName = 'Stage 1 Escrow Deposit',
   onPaymentSuccess,
 }: EscrowPaymentModalProps) {
-  const [paymentMethod, setPaymentMethod] = useState<'payos' | 'wallet'>('payos');
+  const [paymentMethod, setPaymentMethod] = useState<'sepay' | 'wallet'>('sepay');
   const [isProcessing, setIsProcessing] = useState(false);
   const [copied, setCopied] = useState(false);
   const [paidSuccess, setPaidSuccess] = useState(false);
@@ -91,15 +92,15 @@ export default function EscrowPaymentModal({
                 <div className="grid grid-cols-2 gap-3">
                   <button
                     type="button"
-                    onClick={() => setPaymentMethod('payos')}
+                    onClick={() => setPaymentMethod('sepay')}
                     className={`p-3 rounded-2xl border flex items-center gap-2.5 transition-all text-xs font-semibold ${
-                      paymentMethod === 'payos'
+                      paymentMethod === 'sepay'
                         ? 'bg-indigo-600/30 border-indigo-500 text-white shadow-md'
                         : 'bg-white/5 border-white/10 text-slate-400 hover:bg-white/10'
                     }`}
                   >
                     <QrCode className="w-4 h-4 text-indigo-400" />
-                    <span>VietQR / PayOS</span>
+                    <span>VietQR / SePay</span>
                   </button>
                   <button
                     type="button"
@@ -116,14 +117,17 @@ export default function EscrowPaymentModal({
                 </div>
               </div>
 
-              {/* PayOS QR View */}
-              {paymentMethod === 'payos' && (
+              {/* SePay QR preview */}
+              {paymentMethod === 'sepay' && (
                 <div className="p-4 bg-white/5 border border-white/10 rounded-2xl space-y-3 text-center">
                   <p className="text-xs text-slate-300 font-medium">Scan VietQR via Banking App:</p>
                   <div className="w-44 h-44 mx-auto p-2 bg-white rounded-xl shadow-lg flex items-center justify-center">
-                    <img
-                      src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=PAYOS_DEPOSIT_${amountVND}`}
-                      alt="VietQR PayOS"
+                    <Image
+                      src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=SEPAY_DEPOSIT_${amountVND}`}
+                      alt="VietQR SePay"
+                      width={180}
+                      height={180}
+                      unoptimized
                       className="w-full h-full object-contain"
                     />
                   </div>

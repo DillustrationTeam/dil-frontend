@@ -6,24 +6,17 @@ import Link from 'next/link';
 import toast from 'react-hot-toast';
 import {
   Bot,
-  Brush,
   CalendarDays,
   Check,
   ChevronLeft,
   ChevronRight,
-  Clock3,
   FileImage,
   FolderOpen,
   GripVertical,
   ImagePlus,
-  LayoutGrid,
   List,
-  MessageSquareText,
-  Palette,
   Pencil,
   Plus,
-  ShieldCheck,
-  Sparkles,
   Trash2,
   Upload,
   X,
@@ -33,12 +26,8 @@ import { commissionService } from '@/services/commission.service';
 import type { Commission, CommissionStatus } from '@/types/commission.types';
 import { CreatorRateCardManager } from './creator-rate-card-manager';
 import type {
-  AutoReplySettingDto,
-  CreateCreatorAssetRequest,
   ArtworkDto,
   CreatorAssetDto,
-  CreatorFaqDto,
-  CreatorTermsDto,
   CreatorWorkstationState,
 } from '../types/creator-profile.types';
 
@@ -47,15 +36,6 @@ export type WorkstationView = 'artworks' | 'services' | 'terms' | 'ai-rules' | '
 type Service = { id: number; name: string; price: string; days: string; active: boolean };
 
 type FaqDraft = { q: string; a: string };
-
-const navigation: { value: WorkstationView; label: string; icon: typeof Brush }[] = [
-  { value: 'artworks', label: 'Tác phẩm', icon: Brush },
-  { value: 'services', label: 'Dịch vụ & giá', icon: LayoutGrid },
-  { value: 'terms', label: 'Điều khoản', icon: ShieldCheck },
-  { value: 'ai-rules', label: 'AI Auto-reply', icon: Bot },
-  { value: 'waitlist', label: 'Hàng chờ', icon: Clock3 },
-  { value: 'assets', label: 'Asset & Presets', icon: Palette },
-];
 
 const titles: Record<WorkstationView, [string, string]> = {
   artworks: ['Đăng tải & quản lý tác phẩm', 'Xây dựng portfolio với thiết lập AI hỗ trợ.'],
@@ -439,6 +419,7 @@ function Artworks() {
   );
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- legacy editor retained until rate-card migration is complete
 function Services() {
   const [slots, setSlots] = useState(3);
   const [services, setServices] = useState<Service[]>([
@@ -599,7 +580,7 @@ function AiRules() {
       try {
         const state = await creatorProfileService.getWorkstationState();
         setEnabled(state.autoReply.isEnabled);
-        setTemplate(state.autoReply.briefTemplate || template);
+        setTemplate(state.autoReply.briefTemplate || defaultState.autoReply.briefTemplate);
         setFaqs((state.faqs ?? []).map((faq) => ({ q: faq.question, a: faq.answer })) || [
           { q: 'Bạn nhận commission không?', a: 'Mình đang nhận commission theo số slot hiển thị trên profile.' },
         ]);

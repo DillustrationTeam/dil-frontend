@@ -46,6 +46,28 @@ apiClient.interceptors.response.use(
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
 
     if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
+      // Kiểm tra xem 401 có phải do tài khoản bị đình chỉ / khóa / vô hiệu hóa không
+      const errorData = error.response?.data as ApiResponse | undefined;
+      const errorDetail = errorData?.error?.detail ?? '';
+      const isSanctionedOrBanned =
+        typeof errorDetail === 'string' &&
+        (errorDetail.includes('đình chỉ') ||
+          errorDetail.includes('khóa vĩnh viễn') ||
+          errorDetail.includes('vô hiệu hóa') ||
+          errorDetail.includes('Tài khoản không tồn tại'));
+
+      if (isSanctionedOrBanned) {
+        useAuthStore.getState().clearAuth();
+        if (typeof window !== 'undefined') {
+          import('react-hot-toast')
+            .then(({ default: toast }) => {
+              toast.error(errorDetail, { duration: 6000 });
+            })
+            .catch(() => {});
+        }
+        return Promise.reject(error);
+      }
+
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
@@ -133,16 +155,19 @@ export function extractErrorMessage(error: unknown, fallbackMessage = 'Yêu cầ
         if (errorList.length > 0) return errorList.join(' · ');
       }
 
-      // Case 3: `data.error.details` / `data.error.title`
+      // Case 3: `data.error.detail` / `data.error.details` / `data.error.title`
       if (data.error) {
+        if (typeof data.error.detail === 'string' && data.error.detail.trim()) {
+          return data.error.detail;
+        }
         if (Array.isArray(data.error.details) && data.error.details.length > 0) {
           return data.error.details.join(' · ');
         }
-        if (typeof data.error.title === 'string' && data.error.title) {
-          return data.error.title;
-        }
         if (typeof data.error.message === 'string' && data.error.message) {
           return data.error.message;
+        }
+        if (typeof data.error.title === 'string' && data.error.title && data.error.title !== 'Unauthorized') {
+          return data.error.title;
         }
       }
 

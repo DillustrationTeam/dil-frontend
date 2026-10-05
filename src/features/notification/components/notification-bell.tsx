@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ArrowRight, Bell, CheckCheck, CircleAlert, Clock, Gavel, Info, Megaphone, RefreshCw, ShieldAlert, Wallet } from 'lucide-react';
+import { ArrowRight, Bell, BriefcaseBusiness, CheckCheck, CircleAlert, Clock, Gavel, Info, LockKeyhole, Megaphone, RefreshCw, Scale, ShieldAlert, Wallet } from 'lucide-react';
 import { notificationService } from '../services/notification.service';
 import { useNotificationHub } from '../hooks/use-notification-hub';
 import { notificationTypeLabels, type NotificationDto } from '../types/notification.types';
@@ -25,18 +25,33 @@ function getIcon(type: string, size = 15) {
       return <ShieldAlert size={size} className="text-red-400" />;
     case 'PromotionAnnouncement':
       return <Megaphone size={size} className="text-brand-periwinkle" />;
+    case 'CommissionStatusChanged':
+      return <BriefcaseBusiness size={size} className="text-brand-periwinkle" />;
+    case 'EscrowStatusChanged':
+      return <LockKeyhole size={size} className="text-emerald-400" />;
+    case 'DisputeStatusChanged':
+      return <Scale size={size} className="text-amber-400" />;
     default:
       return <Info size={size} className="text-outline" />;
   }
 }
 
 /** RefType backend ghi theo tên entity (VD: "Auction", "PaymentOrder", "PayoutRequest"). */
-function getRefLink(refType: string | null, refId: string | null): string | null {
+function getRefLink({ refType, refId, notificationType, notificationTitle, body }: NotificationDto): string | null {
   if (!refType) return null;
   const key = refType.toLowerCase();
   if (key === 'auction' && refId) return `/auctions/${refId}`;
   if (key === 'paymentorder') return '/wallet';
   if (key === 'payoutrequest') return '/payout';
+  if (key === 'creatorcommissionrequests') return '/creator/requests';
+  if (key === 'clientcommissionrequest' && refId) return `/client/requests/${refId}`;
+  if (key === 'commissioncheckout' && refId) return `/payment/checkout/${refId}`;
+  if (key === 'commission' && refId && notificationType === 'CommissionStatusChanged') {
+    if (notificationTitle === 'Bạn có yêu cầu đặt vẽ mới' || notificationTitle === 'Khách hàng đã phản hồi đề nghị giá') {
+      return '/creator/requests';
+    }
+    return body.toLowerCase().includes('accept') ? `/payment/checkout/${refId}` : `/client/requests/${refId}`;
+  }
   if (key === 'commission' && refId) return `/workroom/${refId}`;
   if (key === 'chatroom' && refId) return `/workroom/${refId}`;
   return null;
@@ -160,7 +175,7 @@ export function NotificationBell({
   }, [open]);
 
   async function handleOpenItem(item: NotificationDto) {
-    const target = getRefLink(item.refType, item.refId);
+    const target = getRefLink(item);
     if (!item.isRead) {
       setBusyId(item.notificationId);
       try {
