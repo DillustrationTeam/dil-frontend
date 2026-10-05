@@ -52,22 +52,31 @@ h6,
 
 .glass-container {
   position: relative;
-  background: rgba(255, 255, 255, 0.025); 
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: transparent; /* Để nền trong suốt, nhường chỗ cho lớp ::before */
   
-  /* Viền tinh tế với điểm nhấn bắt sáng phía trên */
+  /* Viền và bóng đổ nằm ở đây để transition mượt mà không làm lỗi blur */
   border: 1px solid rgba(255, 255, 255, 0.07);
   border-top: 1px solid rgba(255, 255, 255, 0.18);
-  
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25), 
               0 0 20px rgba(167, 172, 217, 0.04);
   
-  /* Cực kỳ quan trọng: Cô lập layer để GPU không bị lỗi sọc/vệt sáng khi hover */
-  isolation: isolate;
-  transform: translateZ(0);
-  will-change: transform;
+  overflow: hidden; /* Tránh tràn viền */
   transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+/* Đưa backdrop-filter và background vào lớp giả định dạng "cố định" */
+.glass-container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.025);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: -1;
+  pointer-events: none;
+  
+  /* Ép GPU render ổn định cho lớp kính */
+  transform: translateZ(0);
 }
 
 /* Hiệu ứng khi di chuột vào khối kính */
@@ -269,5 +278,31 @@ html.light ::-webkit-scrollbar-thumb {
 .hover-fade-toast--faded * {
   pointer-events: none !important;
 }
+
+/* Featured Event Carousel Animations */
+@keyframes carouselProgress {
+  0% {
+    width: 0%;
+  }
+  100% {
+    width: 100%;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
 
 

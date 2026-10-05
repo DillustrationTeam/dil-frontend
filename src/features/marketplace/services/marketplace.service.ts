@@ -10,6 +10,7 @@ export interface MarketplaceArtwork extends ArtworkDto {
   style?: string | null;
   licenseType?: string;
   startingPrice?: number | null;
+  likeCount?: number;
 }
 
 export interface BannerDto {
@@ -105,8 +106,19 @@ export const marketplaceService = {
   },
 
   async getArtworkDetail(id: string): Promise<ArtworkDetailResponse> {
-    const response = await apiClient.get<ApiResponse<ArtworkDetailResponse>>(`/marketplace/artworks/${id}/detail`);
-    return getData(response);
+    try {
+      const response = await apiClient.get<ApiResponse<ArtworkDetailResponse>>(`/marketplace/artworks/${id}/detail`);
+      return getData(response);
+    } catch {
+      const artwork = await this.getArtworkById(id);
+      return {
+        artwork,
+        licenseType: artwork.licenseType || 'Personal',
+        startingPrice: artwork.startingPrice ?? null,
+        isFavorited: false,
+        favoriteCount: artwork.likeCount ?? 0,
+      };
+    }
   },
 
   async getArtworkInteractions(id: string): Promise<ArtworkInteractions> {

@@ -19,6 +19,7 @@ function PublicLayoutContent({ children }: { children: React.ReactNode }) {
   const { t } = useLanguage();
   const pathname = usePathname() ?? '';
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
 
   const handleLogout = async () => {
     if (refreshToken) {
@@ -34,19 +35,20 @@ function PublicLayoutContent({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen bg-[#1F2335] text-[#e4e1e5] font-body selection:bg-[#A7ACD9]/30 selection:text-white">
       {/* Top Navigation */}
       <header className="sticky top-0 z-50 w-full bg-[#1F2335]/80 backdrop-blur-xl border-b border-white/10 shadow-[0_0_20px_rgba(167,172,217,0.08)]">
-        <nav className="flex justify-between items-center w-full px-6 max-w-7xl mx-auto h-20">
+        <nav className="flex justify-between items-center w-full px-4 sm:px-6 max-w-7xl mx-auto h-20 gap-3 sm:gap-4">
           {/* Left: Logo + Nav Links */}
-          <div className="flex min-w-0 items-center gap-8">
+          <div className="flex min-w-0 items-center gap-4 xl:gap-7">
             <Link href="/" className="group flex shrink-0 items-center space-x-2">
               <Image
                 src="/weblogo.png"
                 alt="dillustration"
                 width={220}
                 height={64}
+                priority
                 className="h-14 md:h-16 w-auto object-contain hover:scale-105 transition-transform"
               />
             </Link>
-            <div className="hidden shrink-0 items-center gap-6 text-sm font-medium lg:flex">
+            <div className="hidden shrink-0 items-center gap-3.5 xl:gap-5 2xl:gap-6 text-sm font-medium lg:flex">
               <Link
                 href="/"
                 aria-current={pathname === '/' ? 'page' : undefined}
@@ -65,26 +67,33 @@ function PublicLayoutContent({ children }: { children: React.ReactNode }) {
                 aria-current={pathname === '/auctions' || pathname.startsWith('/auctions/') ? 'page' : undefined}
                 className={`shrink-0 whitespace-nowrap ${pathname === '/auctions' || pathname.startsWith('/auctions/') ? 'text-[#c2c7f6] border-b-2 border-[#c2c7f6] pb-1' : 'text-[#c7c5cf] hover:text-white'} transition-colors`}
               >
-                {t('Đấu giá')}
+                {t('Auctions')}
+              </Link>
+              <Link
+                href="/events"
+                aria-current={pathname === '/events' || pathname.startsWith('/events/') ? 'page' : undefined}
+                className={`shrink-0 whitespace-nowrap ${pathname === '/events' || pathname.startsWith('/events/') ? 'text-[#c2c7f6] border-b-2 border-[#c2c7f6] pb-1' : 'text-[#c7c5cf] hover:text-white'} transition-colors`}
+              >
+                {t('Events')}
               </Link>
             </div>
           </div>
 
-          {/* Right: Search + Auth */}
-          <div className="flex shrink-0 items-center gap-4">
+          {/* Right: Search + Auth + Mobile toggle */}
+          <div className="flex shrink-0 items-center gap-3 sm:gap-4">
             {/* Search Input */}
             <div className="relative hidden shrink-0 xl:block">
               <input
-                className="bg-[#1b1b1e] border border-[#46464e]/30 rounded-full px-6 py-2 w-64 focus:outline-none focus:ring-1 focus:ring-[#c2c7f6] focus:border-[#c2c7f6] transition-all duration-300 text-sm text-[#e4e1e5] placeholder-white/30"
-                placeholder="Search curated art..."
+                className="bg-[#1b1b1e] border border-[#46464e]/30 rounded-full pl-5 pr-9 py-2 w-36 xl:w-44 2xl:w-56 focus:w-52 2xl:focus:w-64 focus:outline-none focus:ring-1 focus:ring-[#c2c7f6] focus:border-[#c2c7f6] transition-all duration-300 text-sm text-[#e4e1e5] placeholder-white/30"
+                placeholder={t('Search curated art...')}
                 type="text"
               />
-              <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-[#919099] text-xl">
+              <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-[#919099] text-lg pointer-events-none">
                 search
               </span>
             </div>
 
-              <div className="flex shrink-0 items-center gap-4">
+            <div className="flex shrink-0 items-center gap-2 sm:gap-4">
               {isAuthenticated && user ? (
                 <>
                   {/* Notification bell */}
@@ -241,9 +250,62 @@ function PublicLayoutContent({ children }: { children: React.ReactNode }) {
                   </Link>
                 </div>
               )}
+
+              {/* Mobile menu toggle */}
+              <button
+                type="button"
+                onClick={() => setIsMobileNavOpen(!isMobileNavOpen)}
+                className="lg:hidden p-2 rounded-full hover:bg-white/10 text-[#c7c5cf] hover:text-white transition-colors flex items-center justify-center cursor-pointer"
+                aria-label="Toggle navigation menu"
+              >
+                <span className="material-symbols-outlined text-2xl">
+                  {isMobileNavOpen ? 'close' : 'menu'}
+                </span>
+              </button>
             </div>
           </div>
         </nav>
+
+        {/* Mobile Navigation Drawer */}
+        {isMobileNavOpen && (
+          <div className="lg:hidden border-t border-white/10 bg-[#1F2335]/95 backdrop-blur-xl px-4 py-4 space-y-1">
+            <Link
+              href="/"
+              onClick={() => setIsMobileNavOpen(false)}
+              className={`block px-3 py-2 rounded-xl text-sm font-medium ${pathname === '/' ? 'bg-[#c2c7f6]/10 text-[#c2c7f6]' : 'text-[#c7c5cf] hover:text-white hover:bg-white/5'} transition-all`}
+            >
+              {t('Marketplace')}
+            </Link>
+            <Link
+              href="/#artists"
+              onClick={() => setIsMobileNavOpen(false)}
+              className="block px-3 py-2 rounded-xl text-sm font-medium text-[#c7c5cf] hover:text-white hover:bg-white/5 transition-all"
+            >
+              {t('Artists')}
+            </Link>
+            <Link
+              href="/#bento"
+              onClick={() => setIsMobileNavOpen(false)}
+              className="block px-3 py-2 rounded-xl text-sm font-medium text-[#c7c5cf] hover:text-white hover:bg-white/5 transition-all"
+            >
+              {t('Collections')}
+            </Link>
+            <Link
+              href="/auctions"
+              onClick={() => setIsMobileNavOpen(false)}
+              className={`block px-3 py-2 rounded-xl text-sm font-medium ${pathname === '/auctions' || pathname.startsWith('/auctions/') ? 'bg-[#c2c7f6]/10 text-[#c2c7f6]' : 'text-[#c7c5cf] hover:text-white hover:bg-white/5'} transition-all`}
+            >
+              {t('Auctions')}
+            </Link>
+            <Link
+              href="/events"
+              onClick={() => setIsMobileNavOpen(false)}
+              className={`block px-3 py-2 rounded-xl text-sm font-medium ${pathname === '/events' || pathname.startsWith('/events/') ? 'bg-[#c2c7f6]/10 text-[#c2c7f6]' : 'text-[#c7c5cf] hover:text-white hover:bg-white/5'} transition-all`}
+            >
+              {t('Events')}
+            </Link>
+          </div>
+        )}
       </header>
 
       {/* Page Content */}
