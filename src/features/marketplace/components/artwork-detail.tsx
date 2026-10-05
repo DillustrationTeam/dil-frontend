@@ -45,7 +45,6 @@ function SafeArtworkImage({
 }
 
 export function ArtworkDetail({ id }: { id: string }) {
-  const router = useRouter();
   const [artwork, setArtwork] = useState<MarketplaceArtwork | null>(null);
   const [loading, setLoading] = useState(true);
   const { comment, setComment, comments, submit, submitting } = useArtworkComments(id);
@@ -55,29 +54,22 @@ export function ArtworkDetail({ id }: { id: string }) {
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
 
   useEffect(() => {
-    let active = true;
-    void (async () => {
-      setLoading(true);
-      setArtwork(null);
-      setCreatorName(null);
-      setCreatorAcceptingOrders(null);
-      setIsCommissionOpen(false);
+    const load = async () => {
       try {
         const detail = await marketplaceService.getArtworkDetail(id);
-        if (!active) return;
         setArtwork(detail.artwork);
-        marketplaceService.getCreatorById(detail.artwork.creatorProfileId).then(profile => {
-          if (!active) return;
+        marketplaceService.getCreatorById(detail.artwork.creatorProfileId).then((profile) => {
           setCreatorName(profile.displayName);
           setCreatorAcceptingOrders(profile.isAcceptingOrders);
         }).catch(() => undefined);
       } catch {
-        if (active) setArtwork(null);
-      } finally {
-        if (active) setLoading(false);
+        setArtwork(null);
       }
-    })();
-    return () => { active = false; };
+
+      setLoading(false);
+    };
+
+    void load();
   }, [id]);
 
   if (loading) return <div className="p-16 text-center text-[#C7C5CF]">Đang tải tác phẩm...</div>;
@@ -229,8 +221,6 @@ export function ArtworkDetail({ id }: { id: string }) {
 }
 
 export function ArtworkDetailModal({ id, onClose }: { id: string; onClose: () => void }) {
-  const dialogRef = useRef<HTMLDivElement>(null);
-  const closeDialog = useEffectEvent(onClose);
   const [artwork, setArtwork] = useState<MarketplaceArtwork | null>(null);
   const [loading, setLoading] = useState(true);
   const { comment, setComment, comments, submit, submitting } = useArtworkComments(id);
@@ -240,57 +230,40 @@ export function ArtworkDetailModal({ id, onClose }: { id: string; onClose: () =>
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
 
   useEffect(() => {
-    const priorFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    const releaseScrollLock = acquireBodyScrollLock();
-    dialogRef.current?.querySelector<HTMLButtonElement>('button')?.focus();
     const handleKeyDown = (event: KeyboardEvent) => {
-      // Nested collection/commission dialogs own their keyboard handling.
-      if (dialogRef.current?.querySelector('[role="dialog"]')) return;
-      if (event.key === 'Escape') { event.preventDefault(); closeDialog(); }
-      if (event.key !== 'Tab') return;
-      const items = Array.from(dialogRef.current?.querySelectorAll<HTMLElement>('button:not(:disabled), a[href], input:not(:disabled), textarea:not(:disabled), select:not(:disabled), [tabindex="0"]') ?? []).filter(item => item.getClientRects().length > 0);
-      const first = items[0];
-      const last = items.at(-1);
-      if (event.shiftKey && (document.activeElement === first || !dialogRef.current?.contains(document.activeElement))) { event.preventDefault(); last?.focus(); }
-      else if (!event.shiftKey && (document.activeElement === last || !dialogRef.current?.contains(document.activeElement))) { event.preventDefault(); first?.focus(); }
+      if (event.key === 'Escape') onClose();
     };
     window.addEventListener('keydown', handleKeyDown);
-    return () => { window.removeEventListener('keydown', handleKeyDown); releaseScrollLock(); if (priorFocus?.isConnected) priorFocus.focus({ preventScroll: true }); };
-  }, []);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
 
   useEffect(() => {
-    let active = true;
-    void (async () => {
-      setLoading(true);
-      setArtwork(null);
-      setCreatorName(null);
-      setCreatorAcceptingOrders(null);
-      setIsCommissionOpen(false);
+    const load = async () => {
       try {
         const detail = await marketplaceService.getArtworkDetail(id);
-        if (!active) return;
         setArtwork(detail.artwork);
-        marketplaceService.getCreatorById(detail.artwork.creatorProfileId).then(profile => {
-          if (!active) return;
-          setCreatorName(profile.displayName);
-          setCreatorAcceptingOrders(profile.isAcceptingOrders);
-        }).catch(() => undefined);
+        marketplaceService
+          .getCreatorById(detail.artwork.creatorProfileId)
+          .then((profile) => {
+            setCreatorName(profile.displayName);
+            setCreatorAcceptingOrders(profile.isAcceptingOrders);
+          })
+          .catch(() => undefined);
       } catch {
-        if (active) setArtwork(null);
-      } finally {
-        if (active) setLoading(false);
+        setArtwork(null);
       }
-    })();
-    return () => { active = false; };
+
+      setLoading(false);
+    };
+
+    void load();
   }, [id]);
 
   return (
     <div
       className="fixed inset-0 z-[80] flex items-center justify-center bg-[#0b0d16]/85 p-3 sm:p-6 backdrop-blur-md overflow-y-auto"
-      ref={dialogRef}
       role="dialog"
       aria-modal="true"
-      aria-label="Chi tiết tác phẩm"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -341,6 +314,7 @@ export function ArtworkDetailModal({ id, onClose }: { id: string; onClose: () =>
                     bởi{' '}
                     <Link
                       href={`/creators/${artwork.creatorProfileId}`}
+                      onClick={onClose}
                       className="font-medium text-[#D6D9FF] hover:underline"
                     >
                       {creatorName || artwork.creatorName || 'Nghệ sĩ Dillustration'}
