@@ -15,7 +15,7 @@ import {
   ChevronDown,
 } from 'lucide-react';
 import type { EventListItemDto, EventFilters, EventSortOption, EventStatsDto } from '../types/event.types';
-import { eventService, isEventInSubmissionStage, calculateEventStats, FALLBACK_EVENTS } from '../services/event.service';
+import { eventService, isEventInSubmissionStage } from '../services/event.service';
 import { EventCard } from './event-card';
 import { EventSpotlightHero } from './event-spotlight-hero';
 
@@ -64,7 +64,13 @@ export function EventListScreen({}: EventListScreenProps) {
   const [featuredEvents, setFeaturedEvents] = useState<EventListItemDto[]>([]);
 
   // Overall event statistics for top ticker cards (independent of page/filters)
-  const [stats, setStats] = useState<EventStatsDto>(() => calculateEventStats(FALLBACK_EVENTS));
+  const [stats, setStats] = useState<EventStatsDto>({
+    totalPrizePool: 0,
+    formattedTotalPrizePool: '0 đ',
+    openEventsCount: 0,
+    totalSubmissionsCount: 0,
+    totalEventsCount: 0,
+  });
 
   async function loadStats() {
     try {

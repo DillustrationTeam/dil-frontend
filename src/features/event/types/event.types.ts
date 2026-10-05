@@ -126,6 +126,17 @@ export interface UploadSubmissionRequest {
   tags?: string[];
 }
 
+export interface UpdateSubmissionRequest {
+  title?: string;
+  description?: string;
+  artworkId?: string | null;
+  imageUrl?: string;
+  thumbnailUrl?: string;
+  isAiGenerated?: boolean;
+  aiDetectionScore?: number;
+  tags?: string[];
+}
+
 export interface EventStatsDto {
   totalPrizePool: number;
   formattedTotalPrizePool: string;

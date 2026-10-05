@@ -26,6 +26,7 @@ import {
   Lock,
   FolderHeart,
   MonitorUp,
+  Edit3,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import type { EventDetailDto, EventSubmissionDto, EventLeaderboardItemDto } from '../types/event.types';
@@ -146,8 +147,18 @@ export function EventDetailScreen({ id, userId }: EventDetailScreenProps) {
     }
   };
 
-  const handleSubmissionSuccess = (newSub: EventSubmissionDto) => {
-    setSubmissions((prev) => [newSub, ...prev]);
+  const handleSubmissionSuccess = (savedSub: EventSubmissionDto) => {
+    setSubmissions((prev) => {
+      const idx = prev.findIndex(
+        (s) => s.id === savedSub.id || (effectiveUserId && s.submitterId === effectiveUserId)
+      );
+      if (idx >= 0) {
+        const next = [...prev];
+        next[idx] = { ...next[idx], ...savedSub };
+        return next;
+      }
+      return [savedSub, ...prev];
+    });
     setActiveTab('my-submission');
   };
 
@@ -761,8 +772,8 @@ export function EventDetailScreen({ id, userId }: EventDetailScreenProps) {
                           onClick={handleOpenSubmitModal}
                           className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-brand-periwinkle to-[#c2c7f6] px-5 py-2.5 text-xs font-bold text-brand-navy shadow-md hover:brightness-110 active:scale-95 transition cursor-pointer"
                         >
-                          <UploadCloud size={15} />
-                          <span>Re-submit / Change Entry</span>
+                          <Edit3 size={15} />
+                          <span>Edit Submission</span>
                         </button>
                       )}
                     </div>
@@ -1307,6 +1318,7 @@ export function EventDetailScreen({ id, userId }: EventDetailScreenProps) {
         userName={currentUser?.fullName || 'Artist'}
         userId={effectiveUserId || ''}
         isCreator={isCreator}
+        existingSubmission={mySubmission}
         onSuccess={handleSubmissionSuccess}
       />
 
