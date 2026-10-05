@@ -122,7 +122,7 @@ export function ClientProfile({ id }: { id: string }) {
 
               {isOwnProfile && (
                 <Link
-                  href="/client/settings"
+                  href="/settings"
                   className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-white/10 px-3 py-1.5 text-xs font-medium text-[#C7C5CF] transition hover:border-[#A7ACD9] hover:text-white"
                 >
                   <Pencil className="h-3.5 w-3.5" />

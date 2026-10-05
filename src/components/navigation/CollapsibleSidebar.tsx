@@ -48,13 +48,6 @@ interface CollapsibleSidebarProps {
 
 const CLIENT_NAV_SECTIONS: SidebarSection[] = [
   {
-    title: 'Profile',
-    items: [
-      { label: 'My Profile', href: '/client/profile', icon: User },
-      { label: 'Settings', href: '/client/settings', icon: Settings },
-    ],
-  },
-  {
     title: 'Client Workspace',
     items: [
       { label: 'My Commissions', href: '/client/commissions', icon: FolderKanban },

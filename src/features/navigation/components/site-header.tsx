@@ -288,7 +288,7 @@ export function SiteHeader() {
                   </Link>
 
                   <Link
-                    href="/client/settings"
+                    href="/settings"
                     onClick={() => setMenuOpen(false)}
                     className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs text-[#c7c5cf] transition-colors hover:bg-white/10 hover:text-white"
                   >
