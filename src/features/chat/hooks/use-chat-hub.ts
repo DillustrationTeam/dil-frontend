@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { HubConnection, HubConnectionBuilder, HubConnectionState, LogLevel } from '@microsoft/signalr';
 import { useAuthStore } from '@/store/use-auth-store';
+import { ensureFreshAccessToken } from '@/lib/api-client';
 import type { ChatMessageDto } from '../types/chat.types';
 import { chatHubUrl } from '../services/chat-hub';
 
@@ -72,7 +73,7 @@ export function useChatHub(roomId: string, callbacks: ChatHubCallbacks): ChatHub
     }
 
     const connection = new HubConnectionBuilder()
-      .withUrl(chatHubUrl(), { accessTokenFactory: () => accessToken })
+      .withUrl(chatHubUrl(), { accessTokenFactory: () => ensureFreshAccessToken() })
       .withAutomaticReconnect()
       .configureLogging(LogLevel.Warning)
       .build();

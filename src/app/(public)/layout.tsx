@@ -3,23 +3,23 @@
 import React, { Suspense, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { useLanguage } from '@/context/language-context';
 import { useAuthStore } from '@/store/use-auth-store';
 import { authService } from '@/services/auth.service';
 import toast from 'react-hot-toast';
 import { NotificationBell } from '@/features/notification';
 
-export default function PublicLayout({ children }: { children: React.ReactNode }) {
-  return <Suspense fallback={children}><PublicLayoutContent>{children}</PublicLayoutContent></Suspense>;
+export default function PublicLayout({ children, artworkModal }: { children: React.ReactNode; artworkModal: React.ReactNode }) {
+  return <Suspense fallback={children}><PublicLayoutContent>{children}</PublicLayoutContent>{artworkModal}</Suspense>;
 }
 
 function PublicLayoutContent({ children }: { children: React.ReactNode }) {
   const { user, roles, refreshToken, isAuthenticated, clearAuth } = useAuthStore();
   const { t } = useLanguage();
   const pathname = usePathname() ?? '';
-  const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
 
   const handleLogout = async () => {
     if (refreshToken) {
@@ -35,17 +35,20 @@ function PublicLayoutContent({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen bg-[#1F2335] text-[#e4e1e5] font-body selection:bg-[#A7ACD9]/30 selection:text-white">
       {/* Top Navigation */}
       <header className="sticky top-0 z-50 w-full bg-[#1F2335]/80 backdrop-blur-xl border-b border-white/10 shadow-[0_0_20px_rgba(167,172,217,0.08)]">
-        <nav className="flex justify-between items-center w-full px-6 max-w-7xl mx-auto h-20">
+        <nav className="flex justify-between items-center w-full px-4 sm:px-6 max-w-7xl mx-auto h-20 gap-3 sm:gap-4">
           {/* Left: Logo + Nav Links */}
-          <div className="flex min-w-0 items-center gap-8">
+          <div className="flex min-w-0 items-center gap-4 xl:gap-7">
             <Link href="/" className="group flex shrink-0 items-center space-x-2">
-              <img
+              <Image
                 src="/weblogo.png"
                 alt="dillustration"
+                width={220}
+                height={64}
+                priority
                 className="h-14 md:h-16 w-auto object-contain hover:scale-105 transition-transform"
               />
             </Link>
-            <div className="hidden shrink-0 items-center gap-6 text-sm font-medium lg:flex">
+            <div className="hidden shrink-0 items-center gap-3.5 xl:gap-5 2xl:gap-6 text-sm font-medium lg:flex">
               <Link
                 href="/"
                 aria-current={pathname === '/' ? 'page' : undefined}
@@ -64,26 +67,33 @@ function PublicLayoutContent({ children }: { children: React.ReactNode }) {
                 aria-current={pathname === '/auctions' || pathname.startsWith('/auctions/') ? 'page' : undefined}
                 className={`shrink-0 whitespace-nowrap ${pathname === '/auctions' || pathname.startsWith('/auctions/') ? 'text-[#c2c7f6] border-b-2 border-[#c2c7f6] pb-1' : 'text-[#c7c5cf] hover:text-white'} transition-colors`}
               >
-                {t('Đấu giá')}
+                {t('Auctions')}
+              </Link>
+              <Link
+                href="/events"
+                aria-current={pathname === '/events' || pathname.startsWith('/events/') ? 'page' : undefined}
+                className={`shrink-0 whitespace-nowrap ${pathname === '/events' || pathname.startsWith('/events/') ? 'text-[#c2c7f6] border-b-2 border-[#c2c7f6] pb-1' : 'text-[#c7c5cf] hover:text-white'} transition-colors`}
+              >
+                {t('Events')}
               </Link>
             </div>
           </div>
 
-          {/* Right: Search + Auth */}
-          <div className="flex shrink-0 items-center gap-4">
+          {/* Right: Search + Auth + Mobile toggle */}
+          <div className="flex shrink-0 items-center gap-3 sm:gap-4">
             {/* Search Input */}
             <div className="relative hidden shrink-0 xl:block">
               <input
-                className="bg-[#1b1b1e] border border-[#46464e]/30 rounded-full px-6 py-2 w-64 focus:outline-none focus:ring-1 focus:ring-[#c2c7f6] focus:border-[#c2c7f6] transition-all duration-300 text-sm text-[#e4e1e5] placeholder-white/30"
-                placeholder="Search curated art..."
+                className="bg-[#1b1b1e] border border-[#46464e]/30 rounded-full pl-5 pr-9 py-2 w-36 xl:w-44 2xl:w-56 focus:w-52 2xl:focus:w-64 focus:outline-none focus:ring-1 focus:ring-[#c2c7f6] focus:border-[#c2c7f6] transition-all duration-300 text-sm text-[#e4e1e5] placeholder-white/30"
+                placeholder={t('Search curated art...')}
                 type="text"
               />
-              <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-[#919099] text-xl">
+              <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-[#919099] text-lg pointer-events-none">
                 search
               </span>
             </div>
 
-              <div className="flex shrink-0 items-center gap-4">
+            <div className="flex shrink-0 items-center gap-2 sm:gap-4">
               {isAuthenticated && user ? (
                 <>
                   {/* Notification bell */}
@@ -132,48 +142,93 @@ function PublicLayoutContent({ children }: { children: React.ReactNode }) {
                     </button>
 
                     {isMenuOpen && (
-                      <div className="absolute right-0 mt-2 w-48 bg-[#1F2335] rounded-2xl p-2 shadow-2xl border border-white/10 z-50">
-                        <div className="px-3 py-2 border-b border-white/10 mb-1 sm:hidden">
+                      <div className="absolute right-0 z-50 mt-2 w-60 overflow-hidden rounded-2xl border border-white/10 bg-[#1F2335] p-2 shadow-2xl backdrop-blur-2xl">
+                        <div className="mb-1 border-b border-white/10 p-3">
                           <p className="text-xs font-bold text-white">{user.fullName}</p>
-                          <p className="text-[10px] text-[#A7ACD9]">{user.email}</p>
+                          <p className="text-[11px] text-[#A7ACD9] truncate">{user.email}</p>
+                          <span className="inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-medium border border-emerald-500/30">
+                            <span className="material-symbols-outlined text-[12px]">verified_user</span> Escrow Verified
+                          </span>
                         </div>
+
+                        <Link
+                          href="/wallet"
+                          onClick={() => setIsMenuOpen(false)}
+                          className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs text-[#c7c5cf] transition-colors hover:bg-white/10 hover:text-white"
+                        >
+                          <span className="material-symbols-outlined text-base text-[#c2c7f6]">account_balance_wallet</span>
+                          <span>{t('Ví của tôi')}</span>
+                        </Link>
+
                         <Link
                           href={isAdmin ? '/admin' : '/client/commissions'}
-                          className="flex items-center gap-2 px-3 py-2 text-xs text-[#e4e1e5] hover:bg-white/10 rounded-xl transition-colors"
                           onClick={() => setIsMenuOpen(false)}
+                          className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs text-[#c7c5cf] transition-colors hover:bg-white/10 hover:text-white"
                         >
-                          <span className="material-symbols-outlined text-sm text-[#A7ACD9]">{isAdmin ? 'admin_panel_settings' : 'dashboard'}</span>
-                          {isAdmin ? 'Admin Center' : 'My Studio'}
+                          <span className="material-symbols-outlined text-base text-[#c2c7f6]">{isAdmin ? 'admin_panel_settings' : 'folder_open'}</span>
+                          <span>{isAdmin ? t('Admin Center') : t('My Commissions')}</span>
                         </Link>
-                        {!roles.includes('Creator') && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setIsMenuOpen(false);
-                              router.push('/become-creator');
-                            }}
-                            className="flex w-full items-center space-x-2 rounded-xl px-3 py-2 text-xs text-[#A7ACD9] transition-colors hover:bg-white/10 cursor-pointer"
+
+                        {(roles.includes('Creator') || roles.includes('creator')) && (
+                          <Link
+                            href="/creator/commissions"
+                            onClick={() => setIsMenuOpen(false)}
+                            className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs text-[#c7c5cf] transition-colors hover:bg-white/10 hover:text-white"
                           >
-                            <span className="material-symbols-outlined text-sm">palette</span>
-                            <span>Trở thành Creator</span>
-                          </button>
+                            <span className="material-symbols-outlined text-base text-[#c2c7f6]">palette</span>
+                            <span>{t('Creator Dashboard')}</span>
+                          </Link>
                         )}
+
+                        <Link
+                          href="/profile"
+                          onClick={() => setIsMenuOpen(false)}
+                          className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs text-[#c7c5cf] transition-colors hover:bg-white/10 hover:text-white"
+                        >
+                          <span className="material-symbols-outlined text-base text-[#c2c7f6]">person</span>
+                          <span>{t('Hồ sơ của tôi')}</span>
+                        </Link>
+
+                        <Link
+                          href="/settings"
+                          onClick={() => setIsMenuOpen(false)}
+                          className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs text-[#c7c5cf] transition-colors hover:bg-white/10 hover:text-white"
+                        >
+                          <span className="material-symbols-outlined text-base text-[#c2c7f6]">settings</span>
+                          <span>{t('Cài đặt')}</span>
+                        </Link>
+
+                        {!roles.includes('Creator') && !roles.includes('creator') && !isAdmin && (
+                          <Link
+                            href="/become-creator"
+                            onClick={() => setIsMenuOpen(false)}
+                            className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs text-[#c7c5cf] transition-colors hover:bg-white/10 hover:text-white"
+                          >
+                            <span className="material-symbols-outlined text-base text-[#c2c7f6]">palette</span>
+                            <span>{t('Trở thành Creator')}</span>
+                          </Link>
+                        )}
+
                         {isAdmin && (
                           <Link
                             href="/admin/creator-verifications"
                             onClick={() => setIsMenuOpen(false)}
-                            className="flex items-center space-x-2 rounded-xl px-3 py-2 text-xs text-red-300 transition-colors hover:bg-white/10"
+                            className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs text-red-300 transition-colors hover:bg-white/10"
                           >
-                            <span className="material-symbols-outlined text-sm">how_to_reg</span>
-                            <span>Duyệt đơn Creator</span>
+                            <span className="material-symbols-outlined text-base">how_to_reg</span>
+                            <span>{t('Duyệt đơn Creator')}</span>
                           </Link>
                         )}
+
+                        <div className="my-1 border-t border-white/10" />
+
                         <button
+                          type="button"
                           onClick={handleLogout}
-                          className="w-full text-left px-3 py-2 text-xs text-red-400 hover:bg-white/10 rounded-xl transition-colors flex items-center gap-2 cursor-pointer"
+                          className="flex w-full cursor-pointer items-center gap-2.5 rounded-xl px-3 py-2 text-left text-xs text-red-400 transition-colors hover:bg-white/10"
                         >
-                          <span className="material-symbols-outlined text-sm">logout</span>
-                          Sign Out
+                          <span className="material-symbols-outlined text-base">logout</span>
+                          <span>{t('Sign Out')}</span>
                         </button>
                       </div>
                     )}
@@ -195,9 +250,62 @@ function PublicLayoutContent({ children }: { children: React.ReactNode }) {
                   </Link>
                 </div>
               )}
+
+              {/* Mobile menu toggle */}
+              <button
+                type="button"
+                onClick={() => setIsMobileNavOpen(!isMobileNavOpen)}
+                className="lg:hidden p-2 rounded-full hover:bg-white/10 text-[#c7c5cf] hover:text-white transition-colors flex items-center justify-center cursor-pointer"
+                aria-label="Toggle navigation menu"
+              >
+                <span className="material-symbols-outlined text-2xl">
+                  {isMobileNavOpen ? 'close' : 'menu'}
+                </span>
+              </button>
             </div>
           </div>
         </nav>
+
+        {/* Mobile Navigation Drawer */}
+        {isMobileNavOpen && (
+          <div className="lg:hidden border-t border-white/10 bg-[#1F2335]/95 backdrop-blur-xl px-4 py-4 space-y-1">
+            <Link
+              href="/"
+              onClick={() => setIsMobileNavOpen(false)}
+              className={`block px-3 py-2 rounded-xl text-sm font-medium ${pathname === '/' ? 'bg-[#c2c7f6]/10 text-[#c2c7f6]' : 'text-[#c7c5cf] hover:text-white hover:bg-white/5'} transition-all`}
+            >
+              {t('Marketplace')}
+            </Link>
+            <Link
+              href="/#artists"
+              onClick={() => setIsMobileNavOpen(false)}
+              className="block px-3 py-2 rounded-xl text-sm font-medium text-[#c7c5cf] hover:text-white hover:bg-white/5 transition-all"
+            >
+              {t('Artists')}
+            </Link>
+            <Link
+              href="/#bento"
+              onClick={() => setIsMobileNavOpen(false)}
+              className="block px-3 py-2 rounded-xl text-sm font-medium text-[#c7c5cf] hover:text-white hover:bg-white/5 transition-all"
+            >
+              {t('Collections')}
+            </Link>
+            <Link
+              href="/auctions"
+              onClick={() => setIsMobileNavOpen(false)}
+              className={`block px-3 py-2 rounded-xl text-sm font-medium ${pathname === '/auctions' || pathname.startsWith('/auctions/') ? 'bg-[#c2c7f6]/10 text-[#c2c7f6]' : 'text-[#c7c5cf] hover:text-white hover:bg-white/5'} transition-all`}
+            >
+              {t('Auctions')}
+            </Link>
+            <Link
+              href="/events"
+              onClick={() => setIsMobileNavOpen(false)}
+              className={`block px-3 py-2 rounded-xl text-sm font-medium ${pathname === '/events' || pathname.startsWith('/events/') ? 'bg-[#c2c7f6]/10 text-[#c2c7f6]' : 'text-[#c7c5cf] hover:text-white hover:bg-white/5'} transition-all`}
+            >
+              {t('Events')}
+            </Link>
+          </div>
+        )}
       </header>
 
       {/* Page Content */}

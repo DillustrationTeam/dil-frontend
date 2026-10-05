@@ -7,6 +7,21 @@ import { walletService } from '../services/wallet.service';
 import type { BankAccountDto, BankAccountRequest, PayoutDto } from '../types/payment.types';
 import type { WalletOverviewDto } from '../types/wallet.types';
 import { AccountPageFooter, AccountPageHeading, AccountShell } from './account-shell';
+import { z } from 'zod';
+
+const bankSchema = z.object({
+  bankName: z.string().trim().min(1, 'Vui lòng nhập tên ngân hàng.').max(200),
+  accountNumber: z.string().trim().min(1, 'Vui lòng nhập số tài khoản.').max(50)
+    .regex(/^[0-9A-Za-z-]+$/, 'Số tài khoản chỉ được chứa chữ, số và dấu gạch ngang.'),
+  accountHolder: z.string().trim().min(1, 'Vui lòng nhập tên chủ tài khoản.').max(200),
+  isDefault: z.boolean(),
+});
+
+const payoutSchema = z.object({
+  amount: z.number().min(50000, 'Số tiền rút tối thiểu là 50.000 ₫.'),
+  bankAccountId: z.string().uuid('Vui lòng chọn tài khoản nhận tiền.'),
+  note: z.string().max(500, 'Ghi chú tối đa 500 ký tự.'),
+});
 
 function formatVnd(value: number) {
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 }).format(value);
@@ -86,14 +101,15 @@ export function PayoutScreen({ userId }: { userId: string | null }) {
 
   async function handleAddBank(e: React.FormEvent) {
     e.preventDefault();
-    if (!bankForm.bankName || !bankForm.accountNumber || !bankForm.accountHolder) {
-      setError('Vui lòng điền đầy đủ thông tin ngân hàng.');
+    const parsed = bankSchema.safeParse(bankForm);
+    if (!parsed.success) {
+      setError(parsed.error.issues[0]?.message ?? 'Thông tin ngân hàng không hợp lệ.');
       return;
     }
     setSubmitting(true);
     setError(null);
     try {
-      await paymentService.saveBank(bankForm);
+      await paymentService.saveBank(parsed.data);
       setSuccess('Thêm tài khoản ngân hàng thành công.');
       setShowAddBank(false);
       setBankForm({ bankName: '', accountNumber: '', accountHolder: '', isDefault: false });
@@ -119,22 +135,19 @@ export function PayoutScreen({ userId }: { userId: string | null }) {
   async function handleRequestPayout(e: React.FormEvent) {
     e.preventDefault();
     const numAmount = Number(amount);
-    if (!selectedBankId) {
-      setError('Vui lòng chọn tài khoản nhận tiền.');
+    const parsed = payoutSchema.safeParse({ amount: numAmount, bankAccountId: selectedBankId, note });
+    if (!parsed.success) {
+      setError(parsed.error.issues[0]?.message ?? 'Yêu cầu rút tiền không hợp lệ.');
       return;
     }
-    if (!numAmount || numAmount < 50000) {
-      setError('Số tiền rút tối thiểu là 50.000 ₫.');
-      return;
-    }
-    if (wallet && numAmount > wallet.wallet.balance) {
+    if (wallet && parsed.data.amount > wallet.wallet.balance) {
       setError('Số dư khả dụng không đủ để thực hiện yêu cầu.');
       return;
     }
     setSubmitting(true);
     setError(null);
     try {
-      await paymentService.payout(numAmount, selectedBankId, note);
+      await paymentService.payout(parsed.data.amount, parsed.data.bankAccountId, parsed.data.note);
       setSuccess('Gửi yêu cầu rút tiền thành công! Hệ thống sẽ xử lý trong vòng 24 giờ làm việc.');
       setAmount('');
       setNote('');
@@ -262,6 +275,7 @@ export function PayoutScreen({ userId }: { userId: string | null }) {
                     type="text"
                     value={note}
                     onChange={(e) => setNote(e.target.value)}
+                    maxLength={500}
                     placeholder="Ví dụ: Rút tiền vẽ tranh tháng 10"
                     className="w-full rounded-xl border border-white/15 bg-brand-navy/60 px-4 py-2.5 text-sm text-on-surface placeholder:text-outline focus:border-brand-periwinkle focus:outline-none"
                   />

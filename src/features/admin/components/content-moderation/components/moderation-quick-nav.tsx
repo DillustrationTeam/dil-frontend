@@ -5,12 +5,12 @@ import Link from 'next/link';
 import { Compass } from 'lucide-react';
 
 const QUICK_SCREENS = [
-  { label: 'Marketplace (SCR-05)', href: '/' },
-  { label: 'Moderation (SCR-20)', href: '/admin/moderation', active: true },
-  { label: 'Creator Apps (SCR-21)', href: '/admin/creator-applications' },
-  { label: 'Arbitration (SCR-22)', href: '/admin/disputes' },
-  { label: 'Fee Policy (SCR-18)', href: '/admin/fee-policy' },
-  { label: 'Admin KPIs (SCR-24)', href: '/admin' },
+  { label: 'Marketplace', href: '/' },
+  { label: 'Moderation', href: '/admin/moderation', active: true },
+  { label: 'Creator Apps', href: '/admin/creator-verifications' },
+  { label: 'Arbitration', href: '/admin/disputes' },
+  { label: 'Fee Policy', href: '/admin/fee-policy' },
+  { label: 'Admin KPIs', href: '/admin' },
 ];
 
 export function ModerationQuickNav() {

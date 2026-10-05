@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import toast from 'react-hot-toast';
@@ -74,7 +74,7 @@ export default function RegisterPage() {
   const {
     register,
     handleSubmit,
-    watch,
+    control,
     formState: { errors },
   } = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
@@ -83,15 +83,16 @@ export default function RegisterPage() {
     },
   });
 
-  const emailValue = watch('email');
-
-  useEffect(() => {
-    if (verifiedEmail && emailValue !== verifiedEmail) {
+  const emailValue = useWatch({ control, name: 'email' });
+  const emailRegistration = register('email');
+  const handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    void emailRegistration.onChange(event);
+    if (verifiedEmail && event.target.value !== verifiedEmail) {
       setVerifyState('idle');
       setVerificationTicket(null);
       setVerificationCode('');
     }
-  }, [emailValue, verifiedEmail]);
+  };
 
   const handleSendCode = async () => {
     if (!emailValue || errors.email) {
@@ -296,7 +297,8 @@ export default function RegisterPage() {
                     alternate_email
                   </span>
                   <input
-                    {...register('email')}
+                    {...emailRegistration}
+                    onChange={handleEmailChange}
                     className="w-full bg-[#0e0e11]/50 border border-white/10 rounded-xl pl-12 pr-28 py-3 text-white placeholder-white/30 focus:outline-none focus:border-[#A7ACD9] focus:ring-1 focus:ring-[#A7ACD9] transition-all text-sm"
                     placeholder="curator@ethereal.art"
                     type="email"

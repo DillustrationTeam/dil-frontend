@@ -32,7 +32,7 @@ export function ActionRequiredQueue({ queue }: ActionRequiredQueueProps) {
       </Link>
 
       <Link
-        href="/admin/creator-applications"
+        href="/admin/creator-verifications"
         className="glass-container bg-[#161926]/70 border border-white/10 rounded-2xl p-3.5 flex items-center justify-between hover:border-purple-500/30 transition-all group"
       >
         <div className="flex items-center gap-2.5 min-w-0">

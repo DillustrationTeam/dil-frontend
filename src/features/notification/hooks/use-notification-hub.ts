@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { HubConnection, HubConnectionBuilder, LogLevel } from '@microsoft/signalr';
 import { useAuthStore } from '@/store/use-auth-store';
+import { ensureFreshAccessToken } from '@/lib/api-client';
 import type { NotificationDto } from '../types/notification.types';
 import { notificationHubUrl } from '../services/notification-hub';
 
@@ -36,7 +37,7 @@ export function useNotificationHub(
     }
 
     const connection: HubConnection = new HubConnectionBuilder()
-      .withUrl(notificationHubUrl(), { accessTokenFactory: () => accessToken })
+      .withUrl(notificationHubUrl(), { accessTokenFactory: () => ensureFreshAccessToken() })
       .withAutomaticReconnect()
       .configureLogging(LogLevel.Warning)
       .build();

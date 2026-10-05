@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { HubConnection, HubConnectionBuilder, HubConnectionState, LogLevel } from '@microsoft/signalr';
 import { useAuthStore } from '@/store/use-auth-store';
+import { ensureFreshAccessToken } from '@/lib/api-client';
 import { auctionHubUrl } from '../services/auction-hub';
 import type {
   AuctionExtendedPayload,
@@ -58,7 +59,7 @@ export function useAuctionHub(
     }
 
     const connection: HubConnection = new HubConnectionBuilder()
-      .withUrl(auctionHubUrl(), { accessTokenFactory: () => accessToken })
+      .withUrl(auctionHubUrl(), { accessTokenFactory: () => ensureFreshAccessToken() })
       .withAutomaticReconnect()
       .configureLogging(LogLevel.Warning)
       .build();

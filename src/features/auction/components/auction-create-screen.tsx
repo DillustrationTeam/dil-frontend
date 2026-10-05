@@ -7,6 +7,27 @@ import { ArrowLeft, CircleAlert, Gavel, ShieldCheck } from 'lucide-react';
 import { auctionError, auctionService } from '../services/auction.service';
 import { EligibleArtworkSelector } from './eligible-artwork-selector';
 import type { AuctionRequest } from '../types/auction.types';
+import { z } from 'zod';
+
+const auctionSchema = z.object({
+  artworkId: z.string().uuid('Vui lòng chọn tác phẩm nghệ thuật.'),
+  startPrice: z.number().min(10000, 'Giá khởi điểm tối thiểu là 10.000 ₫.'),
+  bidStep: z.number().min(1000, 'Bước giá tối thiểu là 1.000 ₫.'),
+  reservePrice: z.number().nullable(),
+  buyNowPrice: z.number().nullable(),
+  startAt: z.string().min(1),
+  endAt: z.string().min(1),
+}).superRefine((value, ctx) => {
+  const start = new Date(value.startAt);
+  const end = new Date(value.endAt);
+  const duration = end.getTime() - start.getTime();
+  if (!Number.isFinite(duration) || end <= start) ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['endAt'], message: 'Thời gian kết thúc phải sau thời gian bắt đầu.' });
+  if (end <= new Date()) ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['endAt'], message: 'Thời gian kết thúc phải nằm trong tương lai.' });
+  if (duration < 3600000) ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['endAt'], message: 'Phiên đấu giá phải kéo dài ít nhất 1 giờ.' });
+  if (duration > 30 * 86400000) ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['endAt'], message: 'Phiên đấu giá tối đa 30 ngày.' });
+  if (value.reservePrice !== null && value.reservePrice < value.startPrice) ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['reservePrice'], message: 'Giá bảo lưu không được thấp hơn giá khởi điểm.' });
+  if (value.buyNowPrice !== null && value.buyNowPrice <= value.startPrice) ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['buyNowPrice'], message: 'Giá mua ngay phải cao hơn giá khởi điểm.' });
+});
 
 function formatVnd(value: number) {
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 }).format(value);
@@ -39,23 +60,9 @@ export function AuctionCreateScreen({ userId }: { userId: string | null }) {
       return;
     }
 
-    if (!form.artworkId.trim()) {
-      setError('Vui lòng chọn tác phẩm nghệ thuật bạn muốn đưa lên sàn đấu giá.');
-      return;
-    }
-
-    if (form.startPrice < 10000) {
-      setError('Giá khởi điểm tối thiểu là 10.000 ₫.');
-      return;
-    }
-
-    if (form.bidStep < 1000) {
-      setError('Bước giá tối thiểu là 1.000 ₫.');
-      return;
-    }
-
-    if (new Date(form.endAt) <= new Date(form.startAt)) {
-      setError('Thời gian kết thúc phải sau thời gian bắt đầu.');
+    const parsed = auctionSchema.safeParse(form);
+    if (!parsed.success) {
+      setError(parsed.error.issues[0]?.message ?? 'Thông tin phiên đấu giá không hợp lệ.');
       return;
     }
 
@@ -64,9 +71,9 @@ export function AuctionCreateScreen({ userId }: { userId: string | null }) {
 
     try {
       const res = await auctionService.create({
-        ...form,
-        startAt: new Date(form.startAt).toISOString(),
-        endAt: new Date(form.endAt).toISOString(),
+        ...parsed.data,
+        startAt: new Date(parsed.data.startAt).toISOString(),
+        endAt: new Date(parsed.data.endAt).toISOString(),
       });
       router.push(`/auctions/${res.auctionId}`);
     } catch (err: unknown) {

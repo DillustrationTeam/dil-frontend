@@ -39,7 +39,7 @@ export function FinancialKpiCards({
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-5">
       {/* Card 1: Platform GMV */}
-      <div className="glass-container bg-[#161926]/85 backdrop-blur-[32px] border border-white/10 rounded-[24px] p-5 space-y-2 border-l-4 border-l-[#C5C9F8] shadow-lg hover:border-white/20 transition-all duration-300">
+      <div className="glass-container rounded-[24px] p-5 space-y-2 shadow-lg">
         <div className="flex items-center justify-between">
           <span className="text-[10px] text-[#8A8FA9] font-bold uppercase tracking-wider">
             TOTAL PLATFORM GMV
@@ -57,7 +57,7 @@ export function FinancialKpiCards({
       </div>
 
       {/* Card 2: Active Escrow */}
-      <div className="glass-container bg-[#161926]/85 backdrop-blur-[32px] border border-white/10 rounded-[24px] p-5 space-y-2 border-l-4 border-l-amber-400 shadow-lg hover:border-white/20 transition-all duration-300">
+      <div className="glass-container rounded-[24px] p-5 space-y-2 shadow-lg">
         <div className="flex items-center justify-between">
           <span className="text-[10px] text-[#8A8FA9] font-bold uppercase tracking-wider">
             ACTIVE ESCROW LOCKED
@@ -75,7 +75,7 @@ export function FinancialKpiCards({
       </div>
 
       {/* Card 3: Net Revenue */}
-      <div className="glass-container bg-[#161926]/85 backdrop-blur-[32px] border border-white/10 rounded-[24px] p-5 space-y-2 border-l-4 border-l-emerald-400 shadow-lg hover:border-white/20 transition-all duration-300">
+      <div className="glass-container rounded-[24px] p-5 space-y-2 shadow-lg">
         <div className="flex items-center justify-between">
           <span className="text-[10px] text-[#8A8FA9] font-bold uppercase tracking-wider">
             NET REVENUE (<span className="font-h1 font-bold">10%</span> FEE)
@@ -93,7 +93,7 @@ export function FinancialKpiCards({
       </div>
 
       {/* Card 4: Registered Users */}
-      <div className="glass-container bg-[#161926]/85 backdrop-blur-[32px] border border-white/10 rounded-[24px] p-5 space-y-2 border-l-4 border-l-purple-400 shadow-lg hover:border-white/20 transition-all duration-300">
+      <div className="glass-container rounded-[24px] p-5 space-y-2 shadow-lg">
         <div className="flex items-center justify-between">
           <span className="text-[10px] text-[#8A8FA9] font-bold uppercase tracking-wider">
             REGISTERED USERS

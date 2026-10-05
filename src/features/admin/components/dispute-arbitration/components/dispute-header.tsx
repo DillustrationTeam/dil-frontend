@@ -80,9 +80,6 @@ export function DisputeHeader({
                 <h1 className="text-2xl font-black text-white font-h1 tracking-tight">
                   Dispute Resolution & Escrow Arbitration
                 </h1>
-                <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-red-500/20 text-red-300 border border-red-500/30 font-bold uppercase tracking-wider">
-                  SCR-22
-                </span>
               </div>
               <p className="text-xs text-[#8A8FA9] mt-0.5">
                 Investigate workroom chat transcripts, review party claims, and execute atomic escrow refund settlements.

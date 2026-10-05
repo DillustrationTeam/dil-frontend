@@ -1,6 +1,7 @@
 export interface PaymentOrderDto {
   paymentOrderId: string; orderRef: string; amount: number; gateway: string; paymentOrderStatus: string;
   paymentUrl?: string | null; qrCode?: string | null; accountNumber?: string | null; accountName?: string | null; bankBin?: string | null;
+  checkoutAction?: string | null; checkoutFields?: { name: string; value: string }[] | null;
   createdAt?: string; paidAt?: string | null; walletBalance?: number;
 }
 export interface BankAccountDto {

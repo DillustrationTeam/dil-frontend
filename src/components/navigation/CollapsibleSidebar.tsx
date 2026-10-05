@@ -72,6 +72,13 @@ const CLIENT_NAV_SECTIONS: SidebarSection[] = [
       { label: 'Lịch sử giao dịch', href: '/wallet#wallet-history', icon: History },
     ],
   },
+  {
+    title: 'Cài đặt & Tài khoản',
+    items: [
+      { label: 'Hồ sơ của tôi', href: '/profile', icon: User },
+      { label: 'Cài đặt hồ sơ', href: '/settings', icon: Settings },
+    ],
+  },
 ];
 
 const CREATOR_NAV_SECTIONS: SidebarSection[] = [
@@ -100,6 +107,13 @@ const CREATOR_NAV_SECTIONS: SidebarSection[] = [
       { label: 'Terms & Licensing', href: '/creator/terms', icon: ShieldCheck },
       { label: 'AI Auto-reply', href: '/creator/ai-rules', icon: Bot },
       { label: 'Asset & Presets', href: '/creator/assets', icon: Palette },
+    ],
+  },
+  {
+    title: 'Cài đặt & Tài khoản',
+    items: [
+      { label: 'Hồ sơ của tôi', href: '/profile', icon: User },
+      { label: 'Cài đặt hồ sơ', href: '/settings', icon: Settings },
     ],
   },
 ];

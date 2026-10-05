@@ -40,12 +40,120 @@ const processQueue = (error: AxiosError | null) => {
   failedQueue = [];
 };
 
+async function performTokenRefresh(): Promise<string | null> {
+  const refreshToken = useAuthStore.getState().refreshToken;
+  if (!refreshToken) {
+    useAuthStore.getState().clearAuth();
+    return null;
+  }
+
+  try {
+    const refreshResponse = await axios.post<ApiResponse<AuthResponseDto>>(
+      `${API_BASE_URL}/auth/refresh-token`,
+      { refreshToken }
+    );
+
+    if (refreshResponse.data.data) {
+      const newAuthData = refreshResponse.data.data;
+      useAuthStore.getState().setAuth(newAuthData);
+      return newAuthData.tokens.accessToken;
+    }
+
+    useAuthStore.getState().clearAuth();
+    return null;
+  } catch {
+    useAuthStore.getState().clearAuth();
+    return null;
+  }
+}
+
+let refreshPromise: Promise<string | null> | null = null;
+
+/**
+ * Refresh access token, dedupe các lệnh gọi đồng thời thành MỘT request.
+ *
+ * Dùng chung cho axios interceptor (401) và `accessTokenFactory` của SignalR
+ * (xem `ensureFreshAccessToken`) — refresh token xoay vòng mỗi lần dùng
+ * (`docs/04-api-conventions.md`), nên hai lệnh refresh song song sẽ khiến một
+ * bên dùng lại token đã bị thu hồi và revoke luôn cả chuỗi token.
+ */
+export function refreshAccessToken(): Promise<string | null> {
+  if (!refreshPromise) {
+    refreshPromise = performTokenRefresh().finally(() => {
+      refreshPromise = null;
+    });
+  }
+  return refreshPromise;
+}
+
+function decodeJwtExpiryMs(token: string): number | null {
+  try {
+    const payload = token.split('.')[1];
+    if (!payload) return null;
+    const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
+    const padded = base64.padEnd(Math.ceil(base64.length / 4) * 4, '=');
+    const json = typeof window !== 'undefined'
+      ? window.atob(padded)
+      : Buffer.from(padded, 'base64').toString('utf-8');
+    const { exp } = JSON.parse(json) as { exp?: number };
+    return typeof exp === 'number' ? exp * 1000 : null;
+  } catch {
+    return null;
+  }
+}
+
+const TOKEN_REFRESH_SKEW_MS = 15_000;
+
+/**
+ * Access token còn hiệu lực cho SignalR, tự refresh trước nếu đã/sắp hết hạn.
+ *
+ * SignalR gọi `accessTokenFactory` trước MỖI lần negotiate/reconnect — kể cả
+ * khi tab đứng yên không gọi REST API nào suốt 15 phút (thời hạn access
+ * token). Trả thẳng token đang nằm trong store (như trước) khiến negotiate
+ * luôn fail 401 "Lifetime validation failed" sau một khoảng không hoạt động
+ * dài. Dùng chung `refreshAccessToken()` ở trên để tránh đua với interceptor.
+ */
+export async function ensureFreshAccessToken(): Promise<string> {
+  const { accessToken } = useAuthStore.getState();
+  if (!accessToken) return '';
+
+  const expiresAtMs = decodeJwtExpiryMs(accessToken);
+  if (expiresAtMs === null || expiresAtMs - Date.now() > TOKEN_REFRESH_SKEW_MS) {
+    return accessToken;
+  }
+
+  const refreshed = await refreshAccessToken();
+  return refreshed ?? '';
+}
+
 apiClient.interceptors.response.use(
   (response) => response,
   async (error: AxiosError<ApiResponse>) => {
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
 
     if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
+      // Kiểm tra xem 401 có phải do tài khoản bị đình chỉ / khóa / vô hiệu hóa không
+      const errorData = error.response?.data as ApiResponse | undefined;
+      const errorDetail = errorData?.error?.detail ?? '';
+      const isSanctionedOrBanned =
+        typeof errorDetail === 'string' &&
+        (errorDetail.includes('đình chỉ') ||
+          errorDetail.includes('khóa vĩnh viễn') ||
+          errorDetail.includes('vô hiệu hóa') ||
+          errorDetail.includes('Tài khoản không tồn tại'));
+
+      if (isSanctionedOrBanned) {
+        useAuthStore.getState().clearAuth();
+        if (typeof window !== 'undefined') {
+          import('react-hot-toast')
+            .then(({ default: toast }) => {
+              toast.error(errorDetail, { duration: 6000 });
+            })
+            .catch(() => {});
+        }
+        return Promise.reject(error);
+      }
+
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
@@ -57,37 +165,21 @@ apiClient.interceptors.response.use(
       originalRequest._retry = true;
       isRefreshing = true;
 
-      const refreshToken = useAuthStore.getState().refreshToken;
-
-      if (!refreshToken) {
-        useAuthStore.getState().clearAuth();
-        isRefreshing = false;
-        return Promise.reject(error);
-      }
-
       try {
-        const refreshResponse = await axios.post<ApiResponse<AuthResponseDto>>(
-          `${API_BASE_URL}/auth/refresh-token`,
-          { refreshToken }
-        );
+        const newAccessToken = await refreshAccessToken();
 
-        if (refreshResponse.data.data) {
-          const newAuthData = refreshResponse.data.data;
-          useAuthStore.getState().setAuth(newAuthData);
-
+        if (newAccessToken) {
           if (originalRequest.headers) {
-            originalRequest.headers.Authorization = `Bearer ${newAuthData.tokens.accessToken}`;
+            originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
           }
 
           processQueue(null);
           return apiClient(originalRequest);
         } else {
-          useAuthStore.getState().clearAuth();
           processQueue(error);
           return Promise.reject(error);
         }
       } catch (refreshErr) {
-        useAuthStore.getState().clearAuth();
         processQueue(refreshErr as AxiosError);
         return Promise.reject(refreshErr);
       } finally {
@@ -133,16 +225,19 @@ export function extractErrorMessage(error: unknown, fallbackMessage = 'Yêu cầ
         if (errorList.length > 0) return errorList.join(' · ');
       }
 
-      // Case 3: `data.error.details` / `data.error.title`
+      // Case 3: `data.error.detail` / `data.error.details` / `data.error.title`
       if (data.error) {
+        if (typeof data.error.detail === 'string' && data.error.detail.trim()) {
+          return data.error.detail;
+        }
         if (Array.isArray(data.error.details) && data.error.details.length > 0) {
           return data.error.details.join(' · ');
         }
-        if (typeof data.error.title === 'string' && data.error.title) {
-          return data.error.title;
-        }
         if (typeof data.error.message === 'string' && data.error.message) {
           return data.error.message;
+        }
+        if (typeof data.error.title === 'string' && data.error.title && data.error.title !== 'Unauthorized') {
+          return data.error.title;
         }
       }
 

@@ -70,7 +70,7 @@ export function RevenueTrendChart({ revenueTrend }: RevenueTrendChartProps) {
   }, [revenueTrend]);
 
   return (
-    <div className="glass-container bg-[#161926]/85 backdrop-blur-[32px] border border-white/10 rounded-[28px] p-6 space-y-6">
+    <div className="glass-container bg-[#161926]/85 border border-white/10 rounded-[28px] p-6 space-y-6">
       <div className="flex justify-between items-center border-b border-white/10 pb-4">
         <div>
           <h3 className="font-h1 font-bold text-white text-base">
@@ -86,7 +86,10 @@ export function RevenueTrendChart({ revenueTrend }: RevenueTrendChartProps) {
       {/* Bar Chart Visualizer — Limited to at most 4 months with bars placed closer together */}
       <div className="h-52 flex items-end justify-center gap-5 sm:gap-7 pt-6 px-4">
         {monthlyRevenueTrend.map((bar, idx) => (
-          <div key={idx} className="flex-1 max-w-[64px] flex flex-col items-center gap-2 group">
+          <div 
+            key={idx} 
+            className="flex-1 max-w-[64px] flex flex-col items-center gap-2 group cursor-pointer"
+          >
             {/* Number on top of the bar */}
             <span
               className={`text-xs font-h1 transition-colors ${
@@ -104,7 +107,7 @@ export function RevenueTrendChart({ revenueTrend }: RevenueTrendChartProps) {
               className={`w-10 sm:w-11 max-w-[44px] rounded-t-lg transition-all duration-300 ${
                 bar.active
                   ? 'bg-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.4)]'
-                  : 'bg-[#C5C9F8]/40 hover:bg-[#C5C9F8]'
+                  : 'bg-[#C5C9F8]/40 group-hover:bg-[#C5C9F8]'
               }`}
             />
 

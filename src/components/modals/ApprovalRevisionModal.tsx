@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 import { X, CheckCircle2, MessageSquare, AlertTriangle, ShieldCheck } from 'lucide-react';
 import { commissionService } from '@/services/commission.service';
 import type { MilestoneStatus } from '@/types/commission.types';
@@ -76,9 +77,12 @@ export default function ApprovalRevisionModal({
         {/* Left Side: Image Viewer */}
         <div className="w-full md:w-3/5 bg-black/40 border-r border-white/10 p-6 flex flex-col justify-center items-center relative min-h-[300px]">
           {wipPreviewUrl ? (
-            <img
+            <Image
               src={wipPreviewUrl}
               alt="Milestone Preview"
+              width={1200}
+              height={900}
+              unoptimized
               className="max-w-full max-h-[70vh] object-contain rounded-xl shadow-lg pointer-events-none"
             />
           ) : (

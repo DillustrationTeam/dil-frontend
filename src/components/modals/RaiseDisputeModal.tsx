@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { X, ShieldAlert, AlertCircle, CheckCircle2, Link as LinkIcon, FileText } from 'lucide-react';
+import { X, ShieldAlert, AlertCircle, CheckCircle2, Link as LinkIcon } from 'lucide-react';
 import { commissionService } from '@/services/commission.service';
 import { extractErrorMessage } from '@/lib/api-client';
 
