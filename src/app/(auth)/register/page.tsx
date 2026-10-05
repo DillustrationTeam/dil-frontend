@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import toast from 'react-hot-toast';
@@ -55,6 +55,7 @@ export default function RegisterPage() {
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
   } = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
@@ -63,6 +64,7 @@ export default function RegisterPage() {
     },
   });
 
+  const emailValue = useWatch({ control, name: 'email' });
   const emailRegistration = register('email');
   const handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     void emailRegistration.onChange(event);
