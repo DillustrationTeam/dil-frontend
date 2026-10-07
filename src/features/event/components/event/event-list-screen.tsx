@@ -4,7 +4,6 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Trophy,
   Sparkles,
-  Search,
   RefreshCw,
   Award,
   ShieldCheck,
@@ -12,12 +11,12 @@ import {
   HelpCircle,
   ChevronLeft,
   ChevronRight,
-  ChevronDown,
 } from 'lucide-react';
-import type { EventListItemDto, EventFilters, EventSortOption, EventStatsDto } from '../types/event.types';
-import { eventService, isEventInSubmissionStage } from '../services/event.service';
+import type { EventListItemDto, EventFilters, EventSortOption, EventStatsDto } from '../../types/event.types';
+import { eventService, isEventInSubmissionStage } from '../../services/event.service';
 import { EventCard } from './event-card';
 import { EventSpotlightHero } from './event-spotlight-hero';
+import { EventSearchFilterBar } from './event-search-filter-bar';
 
 interface EventListScreenProps {
   userId?: string | null;
@@ -90,10 +89,10 @@ export function EventListScreen({}: EventListScreenProps) {
       // If fewer than 5 featured submission contests returned, supplement with active open contests
       if (list.length < 5) {
         const fallbackRes = await eventService.list({ status: 'Open', pageSize: 5 });
-        const existingIds = new Set(list.map((e) => e.id));
+        const existingIds = new Set(list.map((e: EventListItemDto) => e.id));
         const extras = fallbackRes.items
           .filter(isEventInSubmissionStage)
-          .filter((e) => !existingIds.has(e.id));
+          .filter((e: EventListItemDto) => !existingIds.has(e.id));
         list = [...list, ...extras].slice(0, 5);
       }
 
@@ -249,75 +248,22 @@ export function EventListScreen({}: EventListScreenProps) {
       )}
 
       {/* 4. Filter & Search Controls Bar */}
-      <div
-        ref={contestGridRef}
-        className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between border-y border-white/10 py-5"
-      >
-        {/* Left: Searchbar (Default: Search contests) */}
-        <div className="relative w-full md:max-w-md">
-          <Search size={16} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#919099]" />
-          <input
-            type="text"
-            value={keyword}
-            onChange={(e) => setKeyword(e.target.value)}
-            placeholder="Search contests"
-            className="w-full rounded-2xl border border-white/10 bg-[#161926] py-2.5 pl-11 pr-10 text-sm text-white placeholder-[#919099] transition focus:border-brand-periwinkle focus:outline-none focus:ring-1 focus:ring-brand-periwinkle"
-          />
-          {keyword && (
-            <button
-              type="button"
-              onClick={() => setKeyword('')}
-              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs text-[#919099] hover:text-white cursor-pointer"
-            >
-              ✕
-            </button>
-          )}
-        </div>
-
-        {/* Right: Status Dropdown + Sort Dropdown */}
-        <div className="flex flex-wrap items-center gap-3">
-          {/* Status Filter Dropdown: All (Default), Open for Submission, Judging And Voting, Ended */}
-          <div className="relative min-w-[190px]">
-            <select
-              value={status}
-              onChange={(e) => {
-                setStatus(e.target.value);
-                setPage(1);
-              }}
-              className="w-full appearance-none rounded-2xl border border-white/10 bg-[#161926] py-2.5 pl-4 pr-10 text-xs font-semibold text-white transition hover:border-white/20 focus:border-brand-periwinkle focus:outline-none focus:ring-1 focus:ring-brand-periwinkle cursor-pointer"
-            >
-              <option value="" className="bg-[#1F2335] text-white">All (Default)</option>
-              <option value="Open" className="bg-[#1F2335] text-white">Open for Submission</option>
-              <option value="Judging" className="bg-[#1F2335] text-white">Judging And Voting</option>
-              <option value="Ended" className="bg-[#1F2335] text-white">Ended</option>
-            </select>
-            <div className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-[#919099]">
-              <ChevronDown size={15} />
-            </div>
-          </div>
-
-          {/* Sort Option Dropdown */}
-          <div className="relative min-w-[170px]">
-            <select
-              value={sortBy}
-              onChange={(e) => {
-                setSortBy(e.target.value as EventSortOption);
-                setPage(1);
-              }}
-              className="w-full appearance-none rounded-2xl border border-white/10 bg-[#161926] py-2.5 pl-4 pr-10 text-xs font-semibold text-white transition hover:border-white/20 focus:border-brand-periwinkle focus:outline-none focus:ring-1 focus:ring-brand-periwinkle cursor-pointer"
-            >
-              <option value="latest" className="bg-[#1F2335] text-white">Latest (Default)</option>
-              <option value="title_asc" className="bg-[#1F2335] text-white">Title (A-Z)</option>
-              <option value="ending_soon" className="bg-[#1F2335] text-white">Ending Soon</option>
-              <option value="most_submissions" className="bg-[#1F2335] text-white">Most Submissions</option>
-              <option value="most_votes" className="bg-[#1F2335] text-white">Most Votes</option>
-            </select>
-            <div className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-[#919099]">
-              <ChevronDown size={15} />
-            </div>
-          </div>
-        </div>
-      </div>
+      <EventSearchFilterBar
+        containerRef={contestGridRef}
+        searchQuery={keyword}
+        onSearchChange={setKeyword}
+        searchPlaceholder="Search contests"
+        statusValue={status}
+        onStatusChange={(val) => {
+          setStatus(val);
+          setPage(1);
+        }}
+        sortValue={sortBy}
+        onSortChange={(val) => {
+          setSortBy(val as EventSortOption);
+          setPage(1);
+        }}
+      />
 
       {/* 5. Error Alert if any */}
       {error && (

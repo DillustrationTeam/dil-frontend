@@ -31,7 +31,7 @@ async function list<T>(url: string, params: object, signal?: AbortSignal): Promi
 }
 
 export const paymentService = {
-  createOrder: (amount: number, returnUrl: string, cancelUrl: string) => call<PaymentOrderDto>('post', '/payments/orders', { amount, gateway: 'PayOS', returnUrl, cancelUrl }).then(r => r.data),
+  createOrder: (amount: number, returnUrl: string, cancelUrl: string) => call<PaymentOrderDto>('post', '/payments/orders', { amount, gateway: 'SePay', returnUrl, cancelUrl }).then(r => r.data),
   order: (id: string, signal?: AbortSignal) => call<PaymentOrderDto>('get', `/payments/orders/${id}`, undefined, undefined, signal).then(r => r.data),
   orders: (cursor?: string, signal?: AbortSignal) => list<PaymentOrderDto>('/payments/orders', { cursor, limit: 10 }, signal),
   banks: (signal?: AbortSignal) => call<BankAccountDto[]>('get', '/bank-accounts', undefined, undefined, signal).then(r => r.data),

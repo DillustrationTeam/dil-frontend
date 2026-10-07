@@ -40,6 +40,7 @@ export interface EventListItemDto {
   isActive?: boolean;
   isOpenForSubmission?: boolean;
   isFeatured?: boolean;
+  isHeadJury?: boolean;
 }
 
 export interface EventDetailDto extends EventListItemDto {

@@ -3,9 +3,9 @@
 import React from 'react';
 import Link from 'next/link';
 import { ArrowUpRight, Clock, Trophy, Users, Sparkles, CheckCircle2, Flame } from 'lucide-react';
-import type { EventListItemDto } from '../types/event.types';
-import { eventStatusBadgeStyles, eventStatusLabels } from '../types/event.types';
-import { useEventCountdown } from '../hooks/use-event-countdown';
+import type { EventListItemDto } from '../../types/event.types';
+import { eventStatusBadgeStyles, eventStatusLabels } from '../../types/event.types';
+import { useEventCountdown } from '../../hooks/use-event-countdown';
 
 interface EventCardProps {
   event: EventListItemDto;
@@ -111,15 +111,13 @@ export function EventCard({ event }: EventCardProps) {
       <div className="px-6 pb-6 pt-2">
         <div className="flex items-center justify-between border-t border-white/10 pt-4 text-xs">
           <div className="flex items-center gap-1.5 text-on-surface-variant">
-            <Sparkles size={14} className="text-brand-periwinkle" />
+            <Users size={14} className="text-brand-periwinkle" />
             <span className="font-semibold text-white">{event.submissionCount}</span>
-            <span className="text-outline">submissions</span>
           </div>
 
           <div className="flex items-center gap-1.5 text-on-surface-variant">
-            <Users size={14} className="text-[#A7ACD9]" />
+            <Sparkles size={14} className="text-[#A7ACD9]" />
             <span className="font-semibold text-white">{(event.totalVoteCount ?? 0).toLocaleString('en-US')}</span>
-            <span className="text-outline">votes</span>
           </div>
         </div>
       </div>

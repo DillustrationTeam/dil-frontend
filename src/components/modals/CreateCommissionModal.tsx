@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useEffectEvent, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -11,6 +11,7 @@ import { creatorRateCardService, RateCardPackage } from '@/features/creator-stud
 import { creatorProfileService } from '@/features/creator-studio/services/creator-profile.service';
 import { CreatorTermsDto } from '@/features/creator-studio/types/creator-profile.types';
 import { extractErrorMessage } from '@/lib/api-client';
+import { acquireBodyScrollLock } from '@/lib/body-scroll-lock';
 
 const schema = z.object({
   title: z.string().trim().min(1, 'Nhập tên dự án.').max(200, 'Tên dự án quá dài (tối đa 200 ký tự).'),
@@ -26,6 +27,7 @@ const label = 'block text-[10px] uppercase font-bold tracking-wider text-[#8A8FA
 
 export default function CreateCommissionModal({ creatorId, creatorName, onClose }: { creatorId: string; creatorName: string; onClose: () => void }) {
   const router = useRouter();
+  const dialogRef = useRef<HTMLDivElement>(null);
   const [packages, setPackages] = useState<RateCardPackage[]>([]);
   const [loadingPackages, setLoadingPackages] = useState(true);
   const [selectedPackageId, setSelectedPackageId] = useState('');
@@ -51,13 +53,24 @@ export default function CreateCommissionModal({ creatorId, creatorName, onClose 
       .catch(() => setError('Không tải được điều khoản của Creator.'));
   }, [creatorId]);
 
+  const closeDialog = useEffectEvent(() => { if (!busy) onClose(); });
   useEffect(() => {
-    const priorOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    const onKeyDown = (event: KeyboardEvent) => { if (event.key === 'Escape') onClose(); };
+    const releaseScrollLock = acquireBodyScrollLock();
+    const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    dialogRef.current?.querySelector<HTMLButtonElement>('button')?.focus();
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') { event.preventDefault(); closeDialog(); }
+      if (event.key !== 'Tab') return;
+      const controls = Array.from(dialogRef.current?.querySelectorAll<HTMLElement>('button:not(:disabled), input:not(:disabled), textarea:not(:disabled), select:not(:disabled), a[href]') ?? []).filter(item => item.getClientRects().length > 0);
+      const first = controls[0];
+      const last = controls.at(-1);
+      const outside = !dialogRef.current?.contains(document.activeElement);
+      if (event.shiftKey && (document.activeElement === first || outside)) { event.preventDefault(); last?.focus(); }
+      else if (!event.shiftKey && (document.activeElement === last || outside)) { event.preventDefault(); first?.focus(); }
+    };
     window.addEventListener('keydown', onKeyDown);
-    return () => { document.body.style.overflow = priorOverflow; window.removeEventListener('keydown', onKeyDown); };
-  }, [onClose]);
+    return () => { releaseScrollLock(); window.removeEventListener('keydown', onKeyDown); if (previousFocus?.isConnected) previousFocus.focus({ preventScroll: true }); };
+  }, []);
 
   const submit = async (values: Form) => {
     setError('');
@@ -89,7 +102,7 @@ export default function CreateCommissionModal({ creatorId, creatorName, onClose 
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-3 sm:p-4" onMouseDown={event => { if (event.target === event.currentTarget && !busy) onClose(); }}>
-      <div role="dialog" aria-modal="true" aria-labelledby="commission-modal-title" className="flex max-h-[92vh] w-full max-w-3xl flex-col overflow-hidden rounded-[28px] border border-white/10 bg-[#141722] shadow-2xl shadow-black/30">
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="commission-modal-title" className="flex max-h-[92vh] w-full max-w-3xl flex-col overflow-hidden rounded-[28px] border border-white/10 bg-[#141722] shadow-2xl shadow-black/30">
         <header className="flex items-start justify-between gap-4 border-b border-white/10 bg-[#1F2335]/70 px-5 py-5 sm:px-8">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-widest text-[#A7ACD9]">COMMISSION REQUEST</p>

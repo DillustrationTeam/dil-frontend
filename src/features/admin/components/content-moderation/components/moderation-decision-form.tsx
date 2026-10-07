@@ -11,6 +11,15 @@ import {
   FileText,
 } from 'lucide-react';
 import { ModerationActionType } from '@/features/admin/types/moderation.types';
+import { z } from 'zod';
+
+const moderationSchema = z.object({
+  action: z.enum(['approve', 'reject', 'hide', 'flag_ai']),
+  note: z.string().max(1000, 'Audit note must be 1000 characters or fewer.'),
+}).refine((value) => value.action !== 'reject' || value.note.trim().length > 0, {
+  path: ['note'],
+  message: 'Audit note is required when rejecting an artwork.',
+});
 
 interface ModerationDecisionFormProps {
   artworkId: string;
@@ -39,11 +48,12 @@ export function ModerationDecisionForm({
     e.preventDefault();
     setTouched(true);
 
-    if (isNoteInvalid) {
+    const parsed = moderationSchema.safeParse({ action: selectedAction, note: auditNote });
+    if (!parsed.success) {
       return;
     }
 
-    const success = await onExecuteDecision(artworkId, selectedAction, auditNote);
+    const success = await onExecuteDecision(artworkId, parsed.data.action, parsed.data.note);
     if (success) {
       setAuditNote('');
       setTouched(false);

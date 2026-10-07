@@ -255,7 +255,7 @@ export function SiteHeader() {
                     className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs text-[#c7c5cf] transition-colors hover:bg-white/10 hover:text-white"
                   >
                     <span className="material-symbols-outlined text-base text-[#c2c7f6]">account_balance_wallet</span>
-                    <span>Ví của tôi</span>
+                    <span>{t('Ví của tôi')}</span>
                   </Link>
 
                   <Link
@@ -264,7 +264,7 @@ export function SiteHeader() {
                     className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs text-[#c7c5cf] transition-colors hover:bg-white/10 hover:text-white"
                   >
                     <span className="material-symbols-outlined text-base text-[#c2c7f6]">{isAdmin ? 'admin_panel_settings' : 'folder_open'}</span>
-                    <span>{isAdmin ? 'Admin Center' : t('My Commissions')}</span>
+                    <span>{isAdmin ? t('Admin Center') : t('My Commissions')}</span>
                   </Link>
 
                   {(roles.includes('Creator') || roles.includes('creator')) && (
@@ -274,7 +274,7 @@ export function SiteHeader() {
                       className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs text-[#c7c5cf] transition-colors hover:bg-white/10 hover:text-white"
                     >
                       <span className="material-symbols-outlined text-base text-[#c2c7f6]">palette</span>
-                      <span>Creator Dashboard</span>
+                      <span>{t('Creator Dashboard')}</span>
                     </Link>
                   )}
 
@@ -296,7 +296,7 @@ export function SiteHeader() {
                     <span>{t('Cài đặt')}</span>
                   </Link>
 
-                  {!roles.includes('Creator') && (
+                  {!roles.includes('Creator') && !roles.includes('creator') && !isAdmin && (
                     <Link
                       href="/become-creator"
                       onClick={() => setMenuOpen(false)}
@@ -325,7 +325,7 @@ export function SiteHeader() {
                     className="flex w-full cursor-pointer items-center gap-2.5 rounded-xl px-3 py-2 text-left text-xs text-red-400 transition-colors hover:bg-white/10"
                   >
                     <span className="material-symbols-outlined text-base">logout</span>
-                    <span>Sign Out</span>
+                    <span>{t('Sign Out')}</span>
                   </button>
                 </div>
               )}
