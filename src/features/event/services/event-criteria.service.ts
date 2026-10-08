@@ -1,7 +1,6 @@
 import { apiClient, extractErrorMessage } from '@/lib/api-client';
 import type { ApiResponse } from '@/types/api.types';
 import type { JuryCriterion } from '../types/jury.types';
-import { DEFAULT_RUBRIC_CRITERIA } from '../types/jury.types';
 
 export const eventCriteriaService = {
   /**
@@ -14,9 +13,9 @@ export const eventCriteriaService = {
         return response.data.data;
       }
     } catch {
-      // Fallback standard rubric criteria
+      // Fallback empty criteria
     }
-    return DEFAULT_RUBRIC_CRITERIA;
+    return [];
   },
 
   /**

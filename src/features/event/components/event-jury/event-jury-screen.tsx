@@ -36,7 +36,6 @@ import type {
   JuryEvaluationDraft,
   JuryStats,
 } from '../../types/jury.types';
-import { DEFAULT_RUBRIC_CRITERIA } from '../../types/jury.types';
 import { eventService } from '../../services/event.service';
 import { juryService } from '../../services/jury.service';
 import { JuryArtworkLightbox } from './jury-artwork-lightbox';
@@ -64,7 +63,7 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [event, setEvent] = useState<EventDetailDto | null>(null);
-  const [criteria, setCriteria] = useState<JuryCriterion[]>(DEFAULT_RUBRIC_CRITERIA);
+  const [criteria, setCriteria] = useState<JuryCriterion[]>([]);
   const [submissions, setSubmissions] = useState<JurySubmissionItem[]>([]);
   const [selectedSubmissionId, setSelectedSubmissionId] = useState<string | null>(null);
 
@@ -125,7 +124,7 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
       try {
         const [eventData, criteriaData] = await Promise.all([
           eventService.detail(eventId).catch(() => null),
-          juryService.getEventCriteria(eventId).catch(() => DEFAULT_RUBRIC_CRITERIA),
+          juryService.getEventCriteria(eventId).catch(() => []),
         ]);
 
         if (!isMounted) return;
@@ -152,7 +151,7 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
           });
         }
 
-        setCriteria(criteriaData.length > 0 ? criteriaData : DEFAULT_RUBRIC_CRITERIA);
+        setCriteria(criteriaData);
 
         const eventTitle = eventData?.title || 'AURA 2026';
         const subItems = await juryService.getAssignedSubmissions(eventId, eventTitle);

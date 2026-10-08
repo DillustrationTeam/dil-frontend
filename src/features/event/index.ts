@@ -16,7 +16,6 @@ export { eventCriteriaService } from './services/event-criteria.service';
 export { juryService } from './services/jury.service';
 export { useEventCountdown } from './hooks/use-event-countdown';
 export { eventStatusLabels, eventStatusBadgeStyles } from './types/event.types';
-export { DEFAULT_RUBRIC_CRITERIA } from './types/jury.types';
 export type {
   EventStatus,
   EventListItemDto,

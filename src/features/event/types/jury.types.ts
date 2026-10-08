@@ -146,29 +146,3 @@ export interface HeadJuryWorkspaceData {
   isResultsApproved: boolean;
 }
 
-export const DEFAULT_RUBRIC_CRITERIA: JuryCriterion[] = [
-  {
-    id: 'crit-creative',
-    name: 'Creativity & Concept',
-    description: 'Originality, visual storytelling, and distinct thematic concept',
-    maxScore: 40,
-    weight: 0.4,
-    displayOrder: 1,
-  },
-  {
-    id: 'crit-technique',
-    name: 'Execution & Technique',
-    description: 'Composition, lighting, rendering quality, color harmony, and anatomical structure',
-    maxScore: 35,
-    weight: 0.35,
-    displayOrder: 2,
-  },
-  {
-    id: 'crit-theme',
-    name: 'Theme Adherence',
-    description: 'Relevance and alignment with the competition theme and guidelines',
-    maxScore: 25,
-    weight: 0.25,
-    displayOrder: 3,
-  },
-];

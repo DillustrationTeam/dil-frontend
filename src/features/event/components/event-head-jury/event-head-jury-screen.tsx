@@ -29,7 +29,6 @@ import type {
   ArbitrationCase,
   WinnerApprovalItem,
 } from '../../types/jury.types';
-import { DEFAULT_RUBRIC_CRITERIA } from '../../types/jury.types';
 import { eventService } from '../../services/event.service';
 import { juryService } from '../../services/jury.service';
 import { JuryArtworkLightbox } from '../event-jury/jury-artwork-lightbox';
@@ -49,7 +48,7 @@ export function EventHeadJuryScreen({ eventId }: EventHeadJuryScreenProps) {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<HeadJuryTab>('score');
   const [event, setEvent] = useState<EventDetailDto | null>(null);
-  const [criteria, setCriteria] = useState<JuryCriterion[]>(DEFAULT_RUBRIC_CRITERIA);
+  const [criteria, setCriteria] = useState<JuryCriterion[]>([]);
   const [submissions, setSubmissions] = useState<JurySubmissionItem[]>([]);
   const [selectedSubmissionId, setSelectedSubmissionId] = useState<string | null>(null);
   const [headData, setHeadData] = useState<HeadJuryWorkspaceData | null>(null);
@@ -99,7 +98,7 @@ export function EventHeadJuryScreen({ eventId }: EventHeadJuryScreenProps) {
       try {
         const [eventData, criteriaData, headWorkspace, subItems, eventJuries] = await Promise.all([
           eventService.detail(eventId).catch(() => null),
-          juryService.getEventCriteria(eventId).catch(() => DEFAULT_RUBRIC_CRITERIA),
+          juryService.getEventCriteria(eventId).catch(() => []),
           juryService.getHeadJuryWorkspace(eventId).catch(() => null),
           juryService.getAssignedSubmissions(eventId, 'AURA 2026').catch(() => []),
           juryService.getEventJuries(eventId).catch(() => []),
@@ -109,7 +108,7 @@ export function EventHeadJuryScreen({ eventId }: EventHeadJuryScreenProps) {
 
         setEvent(eventData);
 
-        setCriteria(criteriaData.length > 0 ? criteriaData : DEFAULT_RUBRIC_CRITERIA);
+        setCriteria(criteriaData);
 
         const finalHeadWorkspace: HeadJuryWorkspaceData = headWorkspace || {
           totalSubmissions: subItems.length,

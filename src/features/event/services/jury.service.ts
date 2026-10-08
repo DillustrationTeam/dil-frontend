@@ -10,7 +10,6 @@ import type {
   SubmissionScoreResponse,
   HeadJuryWorkspaceData,
 } from '../types/jury.types';
-import { DEFAULT_RUBRIC_CRITERIA } from '../types/jury.types';
 import type { EventSubmissionDto } from '../types/event.types';
 
 const DRAFT_STORAGE_PREFIX = 'dil_jury_draft_';
@@ -38,9 +37,9 @@ export const juryService = {
         return response.data.data;
       }
     } catch {
-      // Fallback to standard rubric
+      // Fallback empty criteria
     }
-    return DEFAULT_RUBRIC_CRITERIA;
+    return [];
   },
 
   /**
