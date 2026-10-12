@@ -145,3 +145,22 @@ export interface EventStatsDto {
   totalSubmissionsCount: number;
   totalEventsCount: number;
 }
+
+export interface EventRequestPayload {
+  title: string;
+  description: string;
+  bannerUrl?: string | null;
+  rules?: string | null;
+  prize?: string | null;
+  maxVote: number;
+  status: EventStatus | string;
+  isFeatured: boolean;
+  submissionStartAt: string;
+  submissionEndAt: string;
+  judgingStartAt: string;
+  judgingEndAt: string;
+  votingStartAt: string;
+  votingEndAt: string;
+  resultAnnouncementAt: string;
+}
+

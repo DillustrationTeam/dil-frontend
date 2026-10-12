@@ -285,4 +285,65 @@ export const juryService = {
     await apiClient.post<ApiResponse<unknown>>(`/events/${eventId}/approve-results`);
     return { success: true, message: 'Phê duyệt kết quả cuộc thi thành công!' };
   },
+
+  /**
+   * Send invitation to jury member by email
+   */
+  sendInvitation: async (eventId: string, email: string): Promise<unknown> => {
+    const response = await apiClient.post<ApiResponse<unknown>>('/invitations', {
+      eventId,
+      email,
+    });
+    return response.data?.data;
+  },
+
+  /**
+   * Remove a jury member from an event
+   */
+  removeJury: async (juryId: string): Promise<void> => {
+    await apiClient.delete(`/juries/${juryId}`);
+  },
+
+  /**
+   * Cancel a pending invitation
+   */
+  cancelInvitation: async (invitationId: string): Promise<void> => {
+    await apiClient.put(`/invitations/${invitationId}/cancel`);
+  },
+
+  /**
+   * Fetch invitations for an event
+   */
+  getInvitations: async (eventId: string): Promise<unknown[]> => {
+    try {
+      const response = await apiClient.get<ApiResponse<unknown>>('/invitations', {
+        params: { eventId, pageSize: 50 },
+      });
+      const data = response.data?.data;
+      if (Array.isArray(data)) return data;
+      if (data && typeof data === 'object' && 'items' in data && Array.isArray((data as { items: unknown[] }).items)) {
+        return (data as { items: unknown[] }).items;
+      }
+    } catch {
+      // Fallback empty
+    }
+    return [];
+  },
+
+  /**
+   * Update jury member role
+   */
+  updateJuryRole: async (eventId: string, juryId: string, role: 'Head Jury' | 'Jury'): Promise<void> => {
+    try {
+      await apiClient.put(`/juries/${juryId}/role`, {
+        eventId,
+        isHeadJury: role === 'Head Jury',
+      });
+    } catch {
+      // Endpoint fallback
+    }
+  },
 };
+
+
+

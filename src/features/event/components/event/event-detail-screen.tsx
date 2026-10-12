@@ -26,6 +26,7 @@ import { EventRulesModal } from './detail/event-rules-modal';
 interface EventDetailScreenProps {
   id: string;
   userId?: string | null;
+  isAdmin?: boolean;
 }
 
 function formatScore(val?: number | null): string | null {
@@ -38,7 +39,7 @@ function formatScore(val?: number | null): string | null {
   return `${num.toFixed(1)} / 100`;
 }
 
-export function EventDetailScreen({ id, userId }: EventDetailScreenProps) {
+export function EventDetailScreen({ id, userId, isAdmin }: EventDetailScreenProps) {
   const [event, setEvent] = useState<EventDetailDto | null>(null);
   const [submissions, setSubmissions] = useState<EventSubmissionDto[]>([]);
   const [leaderboard, setLeaderboard] = useState<EventLeaderboardItemDto[]>([]);
@@ -65,6 +66,13 @@ export function EventDetailScreen({ id, userId }: EventDetailScreenProps) {
   const currentUser = useAuthStore((state) => state.user);
   const roles = useAuthStore((state) => state.roles);
   const isCreator = roles.some((r) => r.toLowerCase() === 'creator');
+  const isAdminFromRoles = roles.some(
+    (r) =>
+      r.toLowerCase().includes('admin') ||
+      r.toLowerCase() === 'administrator' ||
+      r.toLowerCase() === 'moderator'
+  );
+  const effectiveIsAdmin = typeof isAdmin === 'boolean' ? isAdmin : isAdminFromRoles;
   const effectiveUserId = userId || currentUser?.id || null;
 
   useEffect(() => {
@@ -285,6 +293,7 @@ export function EventDetailScreen({ id, userId }: EventDetailScreenProps) {
         hasMySubmission={Boolean(mySubmission)}
         isAnnounced={isAnnounced}
         leaderboardCount={leaderboard.length || 0}
+        isAdmin={effectiveIsAdmin}
       />
 
       {/* Tab Contents */}
@@ -306,7 +315,7 @@ export function EventDetailScreen({ id, userId }: EventDetailScreenProps) {
         )}
 
         {/* TAB 2: MY SUBMISSION */}
-        {activeTab === 'my-submission' && (
+        {!effectiveIsAdmin && activeTab === 'my-submission' && (
           <EventTabMySubmission
             effectiveUserId={effectiveUserId}
             isJuryMember={isJuryMember}

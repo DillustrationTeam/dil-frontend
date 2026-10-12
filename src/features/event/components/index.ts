@@ -10,3 +10,6 @@ export { EventJuryScreen } from './event-jury/event-jury-screen';
 export { JuryArtworkLightbox } from './event-jury/jury-artwork-lightbox';
 
 export { EventHeadJuryScreen } from './event-head-jury/event-head-jury-screen';
+
+export { EventAdminScreen } from './event-admin/event-admin-screen';
+

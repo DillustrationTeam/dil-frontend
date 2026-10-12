@@ -6,11 +6,19 @@ import {
   DisputeQueueItemDto,
   DisputeQueueResponse,
   ResolveDisputeArbitrationRequest,
+  ResolveSubmissionDisputeRequest,
+  SubmissionDisputeDto,
+  SubmissionDisputeQueueFilters,
+  SubmissionDisputeQueueResponse,
 } from '@/features/admin/types/dispute-arbitration.types';
 
 export const adminDisputeService = {
+  // =========================================================================
+  // 1. COMMISSION DISPUTES (TRANH CHẤP ĐƠN ĐẶT VẼ & ESCROW)
+  // =========================================================================
+
   /**
-   * Lấy danh sách hàng đợi các vụ khiếu nại tranh chấp cần xử lý (SCR-22 / UC30)
+   * Lấy danh sách hàng đợi các vụ khiếu nại tranh chấp đơn hàng cần xử lý (SCR-22 / UC30)
    */
   async getDisputeQueue(
     filters?: Partial<DisputeQueueFilters>
@@ -21,7 +29,7 @@ export const adminDisputeService = {
     const pageSize = filters?.pageSize || 10;
 
     const response = await apiClient.get<ApiResponse<DisputeQueueItemDto[]>>(
-      '/admin/disputes/queue',
+      '/admin/disputes/commissions',
       {
         params: {
           status,
@@ -64,11 +72,11 @@ export const adminDisputeService = {
   },
 
   /**
-   * Xem chi tiết hồ sơ trọng tài tranh chấp (claims, escrow, milestones, chat snapshot) (SCR-22 / UC30)
+   * Xem chi tiết hồ sơ trọng tài tranh chấp đơn vẽ (claims, escrow, milestones, chat snapshot) (SCR-22 / UC30)
    */
   async getDisputeDetail(id: string): Promise<DisputeArbitrationDetailDto> {
     const response = await apiClient.get<ApiResponse<DisputeArbitrationDetailDto>>(
-      `/admin/disputes/${id}`
+      `/admin/disputes/commissions/${id}`
     );
 
     if (response.data.error || !response.data.data) {
@@ -106,7 +114,7 @@ export const adminDisputeService = {
     payload: ResolveDisputeArbitrationRequest
   ): Promise<{ message: string }> {
     const response = await apiClient.post<ApiResponse<{ message: string }>>(
-      `/admin/disputes/${id}/arbitrate`,
+      `/admin/disputes/commissions/${id}/resolve`,
       payload
     );
 
@@ -115,6 +123,102 @@ export const adminDisputeService = {
         response.data.error?.details?.join(', ') ||
           response.data.error?.title ||
           'Failed to resolve dispute.'
+      );
+    }
+
+    return response.data.data;
+  },
+
+  // =========================================================================
+  // 2. SUBMISSION DISPUTES (KHIẾU NẠI BÀI THI SỰ KIỆN)
+  // =========================================================================
+
+  /**
+   * Lấy danh sách hàng đợi các khiếu nại bài thi sự kiện
+   */
+  async getSubmissionDisputeQueue(
+    filters?: Partial<SubmissionDisputeQueueFilters>
+  ): Promise<SubmissionDisputeQueueResponse> {
+    const status = filters?.status && filters.status !== 'All' ? filters.status : undefined;
+    const category = filters?.category && filters.category !== 'All' ? filters.category : undefined;
+    const eventId = filters?.eventId || undefined;
+    const submissionId = filters?.submissionId || undefined;
+    const page = filters?.page || 1;
+    const pageSize = filters?.pageSize || 10;
+
+    const response = await apiClient.get<ApiResponse<SubmissionDisputeDto[]>>(
+      '/admin/disputes/submissions',
+      {
+        params: {
+          eventId,
+          submissionId,
+          status,
+          category,
+          page,
+          pageSize,
+        },
+      }
+    );
+
+    if (response.data.error || !response.data.data) {
+      throw new Error(
+        response.data.error?.details?.join(', ') ||
+          response.data.error?.title ||
+          'Failed to fetch submission dispute queue.'
+      );
+    }
+
+    const rawMeta = response.data.meta as Record<string, unknown> | null;
+    const totalCount = Number(rawMeta?.totalCount ?? 0);
+    const totalPages = Number(rawMeta?.totalPages ?? Math.max(1, Math.ceil(totalCount / pageSize)));
+
+    return {
+      items: response.data.data,
+      meta: {
+        page: Number(rawMeta?.page ?? page),
+        pageSize: Number(rawMeta?.pageSize ?? pageSize),
+        totalCount,
+        totalPages,
+      },
+    };
+  },
+
+  /**
+   * Xem chi tiết một khiếu nại bài thi sự kiện
+   */
+  async getSubmissionDisputeDetail(id: string): Promise<SubmissionDisputeDto> {
+    const response = await apiClient.get<ApiResponse<SubmissionDisputeDto>>(
+      `/admin/disputes/submissions/${id}`
+    );
+
+    if (response.data.error || !response.data.data) {
+      throw new Error(
+        response.data.error?.details?.join(', ') ||
+          response.data.error?.title ||
+          'Failed to fetch submission dispute details.'
+      );
+    }
+
+    return response.data.data;
+  },
+
+  /**
+   * Phán quyết xử lý khiếu nại bài thi sự kiện (Dismiss, Disqualify, AdjustScore, DeductVotes)
+   */
+  async resolveSubmissionDispute(
+    id: string,
+    payload: ResolveSubmissionDisputeRequest
+  ): Promise<{ message: string }> {
+    const response = await apiClient.post<ApiResponse<{ message: string }>>(
+      `/admin/disputes/submissions/${id}/resolve`,
+      payload
+    );
+
+    if (response.data.error || !response.data.data) {
+      throw new Error(
+        response.data.error?.details?.join(', ') ||
+          response.data.error?.title ||
+          'Failed to resolve submission dispute.'
       );
     }
 

@@ -6,6 +6,7 @@ export {
   EventDetailScreen,
   EventJuryScreen,
   EventHeadJuryScreen,
+  EventAdminScreen,
   JuryArtworkLightbox,
   EventSearchFilterBar,
 } from './components';

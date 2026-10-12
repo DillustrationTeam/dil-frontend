@@ -194,6 +194,35 @@ export const eventService = {
     };
   },
 
+  /**
+   * Create a new platform event
+   */
+  create: async (data: Record<string, unknown>): Promise<EventDetailDto> => {
+    const response = await apiClient.post<ApiResponse<EventDetailDto>>('/events', data);
+    if (response.data.data) {
+      return response.data.data;
+    }
+    throw new Error(response.data.error?.detail || 'Failed to create event.');
+  },
+
+  /**
+   * Update an existing platform event
+   */
+  update: async (id: string, data: Record<string, unknown>): Promise<EventDetailDto> => {
+    const response = await apiClient.put<ApiResponse<EventDetailDto>>(`/events/${id}`, data);
+    if (response.data.data) {
+      return response.data.data;
+    }
+    throw new Error(response.data.error?.detail || 'Failed to update event.');
+  },
+
+  /**
+   * Delete an existing platform event
+   */
+  delete: async (id: string): Promise<void> => {
+    await apiClient.delete(`/events/${id}`);
+  },
+
   // Re-exports for backwards compatibility
   getSubmissions: eventSubmissionService.getSubmissions,
   getLeaderboard: eventSubmissionService.getLeaderboard,
@@ -202,3 +231,4 @@ export const eventService = {
   voteSubmission: eventVoteService.voteSubmission,
   unvoteSubmission: eventVoteService.unvoteSubmission,
 };
+
