@@ -96,6 +96,7 @@ const CREATOR_NAV_SECTIONS: SidebarSection[] = [
     items: [
       { label: 'Artworks Portfolio', href: '/creator/artworks', icon: Brush },
       { label: 'Rate Card & Services', href: '/creator/rate-card', icon: LayoutGrid },
+      { label: 'Event Jury', href: '/creator/events/jury', icon: Gavel },
       { label: 'My Vouchers', href: '/creator/vouchers', icon: Ticket },
       { label: 'Terms & Licensing', href: '/creator/terms', icon: ShieldCheck },
       { label: 'AI Auto-reply', href: '/creator/ai-rules', icon: Bot },

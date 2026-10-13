@@ -22,8 +22,15 @@ export default function EventDetailPage() {
     () => false,
   );
   const user = useAuthStore((state) => state.user);
+  const roles = useAuthStore((state) => state.roles);
   const accessToken = useAuthStore((state) => state.accessToken);
   const userId = ready && accessToken ? user?.id ?? null : null;
+  const isAdmin = ready && roles.some(
+    (r) =>
+      r.toLowerCase().includes('admin') ||
+      r.toLowerCase() === 'administrator' ||
+      r.toLowerCase() === 'moderator'
+  );
 
-  return <EventDetailScreen id={params.id} userId={userId} />;
+  return <EventDetailScreen id={params.id} userId={userId} isAdmin={isAdmin} />;
 }

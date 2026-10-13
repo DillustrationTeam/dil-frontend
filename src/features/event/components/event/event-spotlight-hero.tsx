@@ -14,9 +14,9 @@ import {
   Play,
   Calendar,
 } from 'lucide-react';
-import type { EventListItemDto } from '../types/event.types';
-import { useEventCountdown } from '../hooks/use-event-countdown';
-import { isEventInSubmissionStage } from '../services/event.service';
+import type { EventListItemDto } from '../../types/event.types';
+import { useEventCountdown } from '../../hooks/use-event-countdown';
+import { isEventInSubmissionStage } from '../../services/event.service';
 
 interface EventSpotlightHeroProps {
   events?: EventListItemDto[] | null;
