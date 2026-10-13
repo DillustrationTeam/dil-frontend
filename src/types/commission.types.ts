@@ -52,7 +52,26 @@ export interface Commission {
   clientName?: string;
   creatorName?: string;
   deadlineAt?: string | null;
+  cancellationReason?: string | null;
+  cancellationDetails?: string | null;
   milestones?: Milestone[];
+  dispute?: Dispute | null;
+  createdAt: string;
+}
+
+export interface Dispute {
+  id: string;
+  commissionId: string;
+  raisedById: string;
+  reason: string;
+  evidenceUrls?: string | null;
+  status: string;
+  resolution?: string | null;
+  clientRefundAmount?: number | null;
+  artistPayAmount?: number | null;
+  clientRefundPercent?: number | null;
+  adminNote?: string | null;
+  resolvedAt?: string | null;
   createdAt: string;
 }
 

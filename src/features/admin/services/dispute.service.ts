@@ -83,8 +83,11 @@ export const adminDisputeService = {
     if (data.clientRefundPercent == null && data.status === 'Resolved') {
       const refund = data.clientRefundAmount ?? 0;
       const payout = data.artistPayAmount ?? 0;
-      const total = refund + payout > 0 ? refund + payout : (data.escrowHeldAmount || data.finalPrice);
-      if (total > 0) {
+      const storedSplit = data.resolution?.match(/^Split_(\d+(?:\.\d+)?)_/);
+      const total = refund + payout;
+      if (storedSplit) {
+        data.clientRefundPercent = Number(storedSplit[1]);
+      } else if (total > 0) {
         data.clientRefundPercent = Math.round((refund / total) * 100);
       } else if (data.resolution === 'ClientWin100') {
         data.clientRefundPercent = 100;

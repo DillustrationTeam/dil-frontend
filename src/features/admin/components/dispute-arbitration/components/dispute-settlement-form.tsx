@@ -28,7 +28,7 @@ export function DisputeSettlementForm({
   onResolve,
 }: DisputeSettlementFormProps) {
   const isResolved = dispute.status === 'Resolved';
-  const totalEscrow = dispute.escrowHeldAmount || dispute.finalPrice;
+  const totalEscrow = dispute.escrowHeldAmount;
   const totalSettledAmount =
     (dispute.clientRefundAmount ?? 0) + (dispute.artistPayAmount ?? 0);
   const effectiveTotal = totalSettledAmount > 0 ? totalSettledAmount : totalEscrow;

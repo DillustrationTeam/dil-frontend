@@ -4,7 +4,6 @@ import React, { useState } from 'react';
 import { X, AlertTriangle, Info, CheckCircle2 } from 'lucide-react';
 import { commissionService } from '@/services/commission.service';
 
-
 interface CancelRefundModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -81,15 +80,15 @@ export default function CancelRefundModal({
                 </label>
                 <select
                   value={reason}
-                  onChange={(e) => setReason(e.target.value)}
-                  className="w-full p-3 bg-white/5 border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-indigo-500"
+                  onChange={(event) => setReason(event.target.value)}
+                  className="w-full p-3 bg-[#1b1b1e] rounded-xl text-xs text-white focus:outline-none transition-all border border-white/10 focus:border-[#A7ACD9] focus:ring-1 focus:ring-[#A7ACD9]"
                 >
-                  <option value="" disabled>Select a reason...</option>
-                  <option value="Creator unresponsive">Creator is unresponsive</option>
-                  <option value="Missed deadline">Creator missed the deadline</option>
-                  <option value="Quality issues">Poor quality / Doesn&apos;t match requirements</option>
-                  <option value="Mutual agreement">Mutual agreement</option>
-                  <option value="Other">Other</option>
+                  <option value="" disabled className="bg-[#1b1b1e] text-slate-400">Chọn lý do hủy đơn...</option>
+                  <option value="Creator unresponsive" className="bg-[#1b1b1e] text-white py-2">Creator không phản hồi</option>
+                  <option value="Missed deadline" className="bg-[#1b1b1e] text-white py-2">Creator đã quá hạn hoàn thành</option>
+                  <option value="Quality issues" className="bg-[#1b1b1e] text-white py-2">Chất lượng không đạt yêu cầu hoặc không đúng thỏa thuận</option>
+                  <option value="Mutual agreement" className="bg-[#1b1b1e] text-white py-2">Hai bên đồng ý hủy đơn</option>
+                  <option value="Other" className="bg-[#1b1b1e] text-white py-2">Lý do khác</option>
                 </select>
               </div>
 

@@ -3,6 +3,7 @@ import { ApiResponse } from '@/types/api.types';
 import {
   Commission,
   CreateCommissionPayload,
+  Dispute,
   RespondToCommissionPayload,
 } from '@/types/commission.types';
 
@@ -73,8 +74,8 @@ export const commissionService = {
     return res.data.data?.previewUrl as string;
   },
   getFinalDownloadUrl: async (id: string) => {
-    const res = await apiClient.get<ApiResponse<{ downloadUrl: string }>>(`/commissions/${id}/final/download`);
-    return res.data.data?.downloadUrl as string;
+    const res = await apiClient.get<ApiResponse<{ downloadUrl: string; expiresAt: string }>>(`/commissions/${id}/final/download`);
+    return res.data.data as { downloadUrl: string; expiresAt: string };
   },
   cancelWithPolicy: async (id: string, payload: { cancellationReason: string; details?: string }) => {
     const res = await apiClient.post<ApiResponse<Commission>>(`/commissions/${id}/cancel`, payload);
@@ -93,7 +94,7 @@ export const commissionService = {
     return res.data.data;
   },
   getDispute: async (id: string) => {
-    const res = await apiClient.get<ApiResponse<unknown>>(`/commissions/${id}/disputes`);
-    return res.data.data;
+    const res = await apiClient.get<ApiResponse<Dispute>>(`/commissions/${id}/disputes`);
+    return res.data.data as Dispute;
   },
 };
