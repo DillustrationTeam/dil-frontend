@@ -2,7 +2,7 @@
 
 import React, { useState, useSyncExternalStore } from 'react';
 import { createPortal } from 'react-dom';
-import { ShieldCheck, Clock, Crown, UserCheck, Edit2, UserX, X, Info } from 'lucide-react';
+import { ShieldCheck, Clock, Crown, UserCheck, Edit2, UserX, X, Info, Search } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const emptySubscribe = () => () => {};
@@ -24,13 +24,15 @@ interface PermissionsTableProps {
 
 export function PermissionsTable({ members, onUpdateRole, onRemoveMember, isJudgingPhaseActive = false }: PermissionsTableProps) {
   const mounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [roleFilter, setRoleFilter] = useState<'All' | 'Head Jury' | 'Jury'>('All');
   const [editingMember, setEditingMember] = useState<JuryPermissionMember | null>(null);
   const [editRole, setEditRole] = useState<'Head Jury' | 'Jury'>('Jury');
   const [memberToRemove, setMemberToRemove] = useState<JuryPermissionMember | null>(null);
 
   const handleOpenEdit = (member: JuryPermissionMember) => {
     if (isJudgingPhaseActive) {
-      toast.error('Không thể chỉnh sửa vai trò giám khảo khi giai đoạn chấm thi đã bắt đầu.');
+      toast.error('Cannot edit jury role once the judging phase has started.');
       return;
     }
     setEditingMember(member);
@@ -39,7 +41,7 @@ export function PermissionsTable({ members, onUpdateRole, onRemoveMember, isJudg
 
   const handleOpenRemove = (member: JuryPermissionMember) => {
     if (isJudgingPhaseActive) {
-      toast.error('Không thể gỡ giám khảo khỏi sự kiện khi giai đoạn chấm thi đã bắt đầu.');
+      toast.error('Cannot remove jury member once the judging phase has started.');
       return;
     }
     setMemberToRemove(member);
@@ -60,9 +62,64 @@ export function PermissionsTable({ members, onUpdateRole, onRemoveMember, isJudg
     setMemberToRemove(null);
   };
 
+  const filteredMembers = members.filter((member) => {
+    if (roleFilter !== 'All' && member.role !== roleFilter) {
+      return false;
+    }
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      const matchName = member.name.toLowerCase().includes(q);
+      const matchEmail = (member.email || '').toLowerCase().includes(q);
+      return matchName || matchEmail;
+    }
+    return true;
+  });
+
   return (
     <div className="glass-container rounded-2xl p-6 border border-white/10 bg-[#161926]/90 backdrop-blur-xl">
-      <h2 className="text-xl font-bold font-h1 text-on-surface mb-4">Jury Panel Permissions</h2>
+      {/* 1. Header Title & Description */}
+      <div className="mb-4">
+        <h2 className="text-xl font-bold font-h1 text-on-surface">Jury Panel Permissions</h2>
+        <p className="text-xs text-outline mt-0.5">Manage jury members, roles and evaluation access.</p>
+      </div>
+
+      {/* 2. Searchbar & Filter by Role Row (Underneath Header) */}
+      <div className="flex flex-wrap items-center gap-3 mb-5">
+        {/* Searchbar */}
+        <div className="relative flex-1 min-w-[220px]">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search jury member by name or email..."
+            className="w-full h-10 pl-10 pr-9 bg-[#090b12]/80 border border-white/10 rounded-xl text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-brand-periwinkle focus:ring-1 focus:ring-brand-periwinkle/30 transition-all"
+          />
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => setSearchQuery('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white p-0.5 cursor-pointer"
+              title="Clear search"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
+
+        {/* Filter by Role */}
+        <div className="relative shrink-0">
+          <select
+            value={roleFilter}
+            onChange={(e) => setRoleFilter(e.target.value as 'All' | 'Head Jury' | 'Jury')}
+            className="h-10 px-3.5 pr-8 bg-[#090b12]/80 border border-white/10 rounded-xl text-xs text-white focus:outline-none focus:border-brand-periwinkle focus:ring-1 focus:ring-brand-periwinkle/30 transition-all cursor-pointer font-medium"
+          >
+            <option value="All" className="bg-[#161926]">All Roles</option>
+            <option value="Head Jury" className="bg-[#161926]">Head Jury</option>
+            <option value="Jury" className="bg-[#161926]">Jury</option>
+          </select>
+        </div>
+      </div>
 
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse min-w-[550px]">
@@ -75,14 +132,16 @@ export function PermissionsTable({ members, onUpdateRole, onRemoveMember, isJudg
             </tr>
           </thead>
           <tbody className="divide-y divide-white/5 text-sm">
-            {members.length === 0 ? (
+            {filteredMembers.length === 0 ? (
               <tr>
-                <td colSpan={4} className="py-6 text-center text-xs text-outline">
-                  No jury members assigned yet.
+                <td colSpan={4} className="py-8 text-center text-xs text-outline">
+                  {members.length === 0
+                    ? 'No jury members assigned yet.'
+                    : 'No jury members found matching your search and filter criteria.'}
                 </td>
               </tr>
             ) : (
-              members.map((member) => (
+              filteredMembers.map((member) => (
                 <tr key={member.id} className="hover:bg-white/[0.02] transition-colors">
                   <td className="py-3.5 px-3 font-semibold text-on-surface">
                     {member.name}
@@ -186,10 +245,10 @@ export function PermissionsTable({ members, onUpdateRole, onRemoveMember, isJudg
                   className="w-full rounded-xl border border-white/10 bg-[#090b12]/90 text-white px-3.5 py-2.5 text-sm focus:outline-none focus:border-brand-periwinkle focus:ring-1 focus:ring-brand-periwinkle/30 transition-all cursor-pointer mb-3"
                 >
                   <option value="Jury" className="bg-[#1f2335]">
-                    Jury Member (Giám khảo)
+                    Jury Member
                   </option>
                   <option value="Head Jury" className="bg-[#1f2335]">
-                    Head Jury (Trưởng ban giám khảo)
+                    Head Jury
                   </option>
                 </select>
 

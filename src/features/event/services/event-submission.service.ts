@@ -1,6 +1,7 @@
 import { apiClient, extractErrorMessage } from '@/lib/api-client';
 import type { ApiResponse } from '@/types/api.types';
 import type {
+  CreateSubmissionDisputeRequest,
   EventLeaderboardItemDto,
   EventPageResponse,
   EventSubmissionDto,
@@ -9,6 +10,23 @@ import type {
 } from '../types/event.types';
 
 export const eventSubmissionService = {
+  /**
+   * Tạo khiếu nại / báo cáo vi phạm bài dự thi sự kiện
+   */
+  createDispute: async (
+    submissionId: string,
+    data: CreateSubmissionDisputeRequest
+  ): Promise<{ message?: string; disputeId?: string }> => {
+    try {
+      const response = await apiClient.post<ApiResponse<{ message?: string; disputeId?: string }>>(
+        `/event-submissions/${submissionId}/disputes`,
+        data
+      );
+      return response.data.data ?? {};
+    } catch (err) {
+      throw new Error(extractErrorMessage(err, 'Failed to file dispute. Please try again.'));
+    }
+  },
   /**
    * Lấy danh sách bài nộp của sự kiện
    */
@@ -95,6 +113,17 @@ export const eventSubmissionService = {
       return response.data.data!;
     } catch (err) {
       throw new Error(extractErrorMessage(err, 'Failed to update contest entry. Please try again.'));
+    }
+  },
+
+  /**
+   * Rút bài dự thi khỏi cuộc thi (chỉ được thực hiện khi trong thời gian nộp bài)
+   */
+  withdrawSubmission: async (submissionId: string): Promise<void> => {
+    try {
+      await apiClient.delete(`/event-submissions/${submissionId}`);
+    } catch (err) {
+      throw new Error(extractErrorMessage(err, 'Failed to withdraw contest submission. Please try again.'));
     }
   },
 };

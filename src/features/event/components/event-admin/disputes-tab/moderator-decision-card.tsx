@@ -6,8 +6,8 @@ import toast from 'react-hot-toast';
 
 interface ModeratorDecisionCardProps {
   selectedDisputeCode: string;
-  onReject?: () => void;
-  onApprove?: () => void;
+  onReject?: (notes?: string) => void;
+  onApprove?: (notes?: string) => void;
 }
 
 export function ModeratorDecisionCard({
@@ -21,12 +21,12 @@ export function ModeratorDecisionCard({
 
   const handleReject = () => {
     toast.error(`Rejected appeal for dispute ${selectedDisputeCode}`);
-    if (onReject) onReject();
+    if (onReject) onReject(decisionNotes);
   };
 
   const handleApprove = () => {
     toast.success(`Approved dispute resolution for ${selectedDisputeCode}`);
-    if (onApprove) onApprove();
+    if (onApprove) onApprove(decisionNotes);
   };
 
   return (

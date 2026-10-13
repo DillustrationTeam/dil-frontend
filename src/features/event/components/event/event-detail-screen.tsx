@@ -66,6 +66,7 @@ export function EventDetailScreen({ id, userId, isAdmin }: EventDetailScreenProp
   const currentUser = useAuthStore((state) => state.user);
   const roles = useAuthStore((state) => state.roles);
   const isCreator = roles.some((r) => r.toLowerCase() === 'creator');
+  const isClient = roles.some((r) => r.toLowerCase() === 'client' || r.toLowerCase() === 'user');
   const isAdminFromRoles = roles.some(
     (r) =>
       r.toLowerCase().includes('admin') ||
@@ -74,6 +75,11 @@ export function EventDetailScreen({ id, userId, isAdmin }: EventDetailScreenProp
   );
   const effectiveIsAdmin = typeof isAdmin === 'boolean' ? isAdmin : isAdminFromRoles;
   const effectiveUserId = userId || currentUser?.id || null;
+  // Creator and client side: logged in user who is a Creator, Client, standard User, and not admin/moderator
+  const isCreatorOrClient =
+    Boolean(currentUser || effectiveUserId) &&
+    !effectiveIsAdmin &&
+    (isCreator || isClient || (!effectiveIsAdmin && roles.length === 0));
 
   useEffect(() => {
     async function loadDetail() {
@@ -188,6 +194,22 @@ export function EventDetailScreen({ id, userId, isAdmin }: EventDetailScreenProp
       return [savedSub, ...prev];
     });
     setActiveTab('my-submission');
+  };
+
+  const handleWithdrawSubmission = async (submissionId: string) => {
+    const confirmed = window.confirm(
+      'Are you sure you want to withdraw your submission from this contest? You can resubmit anytime before the submission deadline ends.'
+    );
+    if (!confirmed) return;
+
+    try {
+      await eventSubmissionService.withdrawSubmission(submissionId);
+      toast.success('Your submission has been withdrawn successfully.');
+      setSubmissions((prev) => prev.filter((s) => s.id !== submissionId));
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to withdraw submission.';
+      toast.error(msg);
+    }
   };
 
   // Find current user's submission
@@ -311,6 +333,7 @@ export function EventDetailScreen({ id, userId, isAdmin }: EventDetailScreenProp
             effectiveUserId={effectiveUserId}
             votingId={votingId}
             handleVote={handleVote}
+            isCreatorOrClient={isCreatorOrClient}
           />
         )}
 
@@ -329,6 +352,7 @@ export function EventDetailScreen({ id, userId, isAdmin }: EventDetailScreenProp
             onOpenSubmitModal={handleOpenSubmitModal}
             onCopyLink={handleCopyLink}
             currentUserFullName={currentUser?.fullName}
+            onWithdrawSubmission={handleWithdrawSubmission}
           />
         )}
 

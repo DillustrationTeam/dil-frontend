@@ -1,10 +1,11 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
-import { Search, Palette, UserCheck, Trophy, ExternalLink, ThumbsUp } from 'lucide-react';
+import { Search, Palette, UserCheck, Trophy, ExternalLink, ThumbsUp, ShieldAlert } from 'lucide-react';
 import type { EventSubmissionDto } from '@/features/event/types/event.types';
 import type { TabType } from './event-detail-tab-nav';
+import { SubmissionDisputeModal } from './submission-dispute-modal';
 
 interface EventTabArtworksProps {
   filteredArtworks: EventSubmissionDto[];
@@ -17,6 +18,7 @@ interface EventTabArtworksProps {
   effectiveUserId: string | null;
   votingId: string | null;
   handleVote: (submissionId: string, hasVoted?: boolean) => void;
+  isCreatorOrClient?: boolean;
 }
 
 export function EventTabArtworks({
@@ -30,7 +32,9 @@ export function EventTabArtworks({
   effectiveUserId,
   votingId,
   handleVote,
+  isCreatorOrClient = false,
 }: EventTabArtworksProps) {
+  const [disputeTarget, setDisputeTarget] = useState<EventSubmissionDto | null>(null);
   return (
     <div className="space-y-6">
       {/* Filter and Search Bar */}
@@ -158,28 +162,53 @@ export function EventTabArtworks({
                     <p className="line-clamp-2 text-xs text-[#8A8FA9]">{sub.description}</p>
                   )}
 
-                  <div className="pt-2 flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => handleVote(sub.id, sub.hasVoted)}
-                      disabled={votingId === sub.id}
-                      className={`flex flex-1 items-center justify-center gap-2 rounded-xl py-2.5 text-xs font-bold transition active:scale-95 cursor-pointer ${
-                        sub.hasVoted
-                          ? 'border border-brand-periwinkle bg-brand-periwinkle/20 text-brand-periwinkle'
-                          : 'bg-white/10 hover:bg-brand-periwinkle hover:text-brand-navy text-white'
-                      }`}
-                    >
-                      <ThumbsUp size={14} className={sub.hasVoted ? 'fill-current' : ''} />
-                      <span>{sub.hasVoted ? 'Voted' : 'Vote'}</span>
-                    </button>
+                  <div className="pt-2 flex items-center justify-center gap-2">
+                    {/* Voting button: Only show on creator and client side */}
+                    {isCreatorOrClient && (
+                      <button
+                        type="button"
+                        onClick={() => handleVote(sub.id, sub.hasVoted)}
+                        disabled={votingId === sub.id}
+                        className={`flex-1 flex items-center justify-center gap-1.5 rounded-xl py-2.5 px-2 text-xs font-bold transition active:scale-95 cursor-pointer text-center ${
+                          sub.hasVoted
+                            ? 'border border-brand-periwinkle bg-brand-periwinkle/20 text-brand-periwinkle'
+                            : 'bg-white/10 hover:bg-brand-periwinkle hover:text-brand-navy text-white'
+                        }`}
+                      >
+                        <ThumbsUp size={14} className={sub.hasVoted ? 'fill-current' : ''} />
+                        <span>{sub.hasVoted ? 'Voted' : 'Vote'}</span>
+                      </button>
+                    )}
+
+                    {/* Raise Dispute button: Always visible on other artists' submissions */}
+                    {!isMine && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (!effectiveUserId) {
+                            import('react-hot-toast').then(({ default: toast }) => {
+                              toast.error('Please log in to raise a dispute.');
+                            });
+                            return;
+                          }
+                          setDisputeTarget(sub);
+                        }}
+                        className="flex-1 flex items-center justify-center gap-1.5 rounded-xl border border-rose-500/30 bg-rose-500/10 py-2.5 px-2 text-xs font-semibold text-rose-300 hover:bg-rose-500/20 hover:text-rose-200 transition cursor-pointer text-center"
+                        title="Raise a dispute for this submission"
+                      >
+                        <ShieldAlert size={14} className="text-rose-400 shrink-0" />
+                        <span className="truncate">Raise Dispute</span>
+                      </button>
+                    )}
+
 
                     <Link
                       href={artworkLink}
-                      className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-xs font-semibold text-[#A7ACD9] hover:bg-white/10 hover:text-white transition cursor-pointer"
+                      className="flex-1 flex items-center justify-center gap-1.5 rounded-xl border border-white/10 bg-white/5 py-2.5 px-2 text-xs font-semibold text-[#A7ACD9] hover:bg-white/10 hover:text-white transition cursor-pointer text-center"
                       title="View artwork details"
                     >
-                      <ExternalLink size={13} />
-                      <span className="hidden sm:inline">Details</span>
+                      <ExternalLink size={13} className="shrink-0" />
+                      <span>Details</span>
                     </Link>
                   </div>
                 </div>
@@ -187,6 +216,14 @@ export function EventTabArtworks({
             );
           })}
         </div>
+      )}
+
+      {/* Submission Dispute Modal */}
+      {disputeTarget && (
+        <SubmissionDisputeModal
+          submission={disputeTarget}
+          onClose={() => setDisputeTarget(null)}
+        />
       )}
     </div>
   );

@@ -80,6 +80,7 @@ export interface JuryMemberInfo {
   creatorId: string;
   creatorName?: string;
   creatorDisplayName?: string;
+  creatorEmail?: string;
   creatorAvatarUrl?: string;
   isHeadJury: boolean;
   role: string;

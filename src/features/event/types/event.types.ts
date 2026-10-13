@@ -41,6 +41,8 @@ export interface EventListItemDto {
   isOpenForSubmission?: boolean;
   isFeatured?: boolean;
   isHeadJury?: boolean;
+  isHeadJurySignedOff?: boolean;
+  headJurySignedOffAt?: string | null;
 }
 
 export interface EventDetailDto extends EventListItemDto {
@@ -162,5 +164,12 @@ export interface EventRequestPayload {
   votingStartAt: string;
   votingEndAt: string;
   resultAnnouncementAt: string;
+}
+
+export interface CreateSubmissionDisputeRequest {
+  reason: string;
+  description?: string;
+  evidenceUrls?: string[];
+  priority?: 'Low' | 'Medium' | 'High' | string;
 }
 

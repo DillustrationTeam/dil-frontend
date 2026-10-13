@@ -11,64 +11,53 @@ import { juryService } from '../../../services/jury.service';
 import { eventService } from '../../../services/event.service';
 import type { EventListItemDto } from '../../../types/event.types';
 
-const initialMembers: JuryPermissionMember[] = [
-  {
-    id: '1',
-    name: 'Lan Phuong',
-    email: 'lanphuong@dillustration.vn',
-    role: 'Head Jury',
-    status: 'Confirmed',
-  },
-  {
-    id: '2',
-    name: 'Tran Minh',
-    email: 'tranminh@dillustration.vn',
-    role: 'Jury',
-    status: 'Confirmed',
-  },
-  {
-    id: '3',
-    name: 'Hoai An',
-    email: 'hoaian@dillustration.vn',
-    role: 'Jury',
-    status: 'Confirmed',
-  },
-  {
-    id: '4',
-    name: 'Mai Vy',
-    email: 'maivy@dillustration.vn',
-    role: 'Jury',
-    status: 'Pending',
-  },
-];
 
-const defaultMockContests: EventListItemDto[] = [
-  {
-    id: 'aur-2026',
-    title: 'AURA 2026: Beyond the Visible',
-    status: 'Open',
-  } as EventListItemDto,
-  {
-    id: 'cyber-2026',
-    title: 'CYBERPUNK 2026: Neo Illustrators',
-    status: 'Judging',
-  } as EventListItemDto,
-  {
-    id: 'fantasy-2026',
-    title: 'FANTASY WORLDS: Mythic Realms',
-    status: 'Draft',
-  } as EventListItemDto,
-];
+
+export const EVENT_ALIAS_MAP: Record<string, string> = {
+  'cyber-2026': 'e1000000-0000-0000-0000-000000000001',
+  'aur-2026': '7843030d-0582-4079-a4c0-3d61dfde47ff',
+  'fantasy-2026': 'e2000000-0000-0000-0000-000000000002',
+};
+
+export const REVERSE_EVENT_ALIAS_MAP: Record<string, string> = {
+  'e1000000-0000-0000-0000-000000000001': 'cyber-2026',
+  '7843030d-0582-4079-a4c0-3d61dfde47ff': 'aur-2026',
+  'e2000000-0000-0000-0000-000000000002': 'fantasy-2026',
+};
+
+export function resolveEventId(id?: string | null): string {
+  if (!id) return '';
+  return EVENT_ALIAS_MAP[id] || id;
+}
+
+export function matchesEventId(eventId?: string | null, targetId?: string | null): boolean {
+  if (!targetId || targetId === 'all') return true;
+  if (!eventId) return false;
+  const evNorm = eventId.toLowerCase();
+  const targetNorm = targetId.toLowerCase();
+  if (evNorm === targetNorm) return true;
+  if (EVENT_ALIAS_MAP[targetId]?.toLowerCase() === evNorm) return true;
+  if (REVERSE_EVENT_ALIAS_MAP[targetId]?.toLowerCase() === evNorm) return true;
+  if (EVENT_ALIAS_MAP[eventId]?.toLowerCase() === targetNorm) return true;
+  if (REVERSE_EVENT_ALIAS_MAP[eventId]?.toLowerCase() === targetNorm) return true;
+  return false;
+}
 
 const emptySubscribe = () => () => {};
 
-interface ContestSearchSelectProps {
+export interface ContestSearchSelectProps {
   events: EventListItemDto[];
   selectedEventId: string;
   onSelectEvent: (eventId: string) => void;
+  showAllOption?: boolean;
 }
 
-function ContestSearchSelect({ events, selectedEventId, onSelectEvent }: ContestSearchSelectProps) {
+export function ContestSearchSelect({
+  events,
+  selectedEventId,
+  onSelectEvent,
+  showAllOption = false,
+}: ContestSearchSelectProps) {
   const mounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState('');
@@ -76,14 +65,20 @@ function ContestSearchSelect({ events, selectedEventId, onSelectEvent }: Contest
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Combine mock defaults with backend events
-  const allEvents = Array.from(
-    new Map(
-      [...defaultMockContests, ...events].map((e) => [e.id, e])
-    ).values()
-  );
+  const ALL_CONTESTS_ITEM: EventListItemDto = {
+    id: 'all',
+    title: 'All Contests (Queue-wide)',
+    status: 'All',
+  } as EventListItemDto;
 
-  const selectedEvent = allEvents.find((e) => e.id === selectedEventId);
+  // Real backend events
+  const baseEvents = events;
+  const allEvents = showAllOption ? [ALL_CONTESTS_ITEM, ...baseEvents] : baseEvents;
+
+  const selectedEvent =
+    selectedEventId === 'all'
+      ? ALL_CONTESTS_ITEM
+      : allEvents.find((e) => matchesEventId(e.id, selectedEventId));
 
   const updateCoords = () => {
     if (inputRef.current) {
@@ -191,7 +186,7 @@ function ContestSearchSelect({ events, selectedEventId, onSelectEvent }: Contest
         >
           {filteredEvents.length === 0 ? (
             <div className="p-3 text-center text-xs text-slate-400">
-              Không tìm thấy cuộc thi phù hợp với &ldquo;<span className="text-white">{query}</span>&rdquo;
+              No contests found matching &ldquo;<span className="text-white">{query}</span>&rdquo;
             </div>
           ) : (
             filteredEvents.map((evt) => {
@@ -240,17 +235,13 @@ function ContestSearchSelect({ events, selectedEventId, onSelectEvent }: Contest
 
 export function PermissionsTab() {
   const [events, setEvents] = useState<EventListItemDto[]>([]);
-  const [selectedEventId, setSelectedEventId] = useState<string>('aur-2026');
-  const [members, setMembers] = useState<JuryPermissionMember[]>(initialMembers);
+  const [selectedEventId, setSelectedEventId] = useState<string>('');
+  const [members, setMembers] = useState<JuryPermissionMember[]>([]);
   const [, setLoading] = useState(false);
 
-  // Combine events to find selected
-  const allEvents = Array.from(
-    new Map(
-      [...defaultMockContests, ...events].map((e) => [e.id, e])
-    ).values()
-  );
-  const selectedEvent = allEvents.find((e) => e.id === selectedEventId);
+  // Real backend events
+  const allEvents = events;
+  const selectedEvent = allEvents.find((e) => matchesEventId(e.id, selectedEventId));
 
   // Check if judging phase has started / active
   const isJudgingPhaseActive = selectedEvent
@@ -262,18 +253,18 @@ export function PermissionsTab() {
   useEffect(() => {
     async function fetchEvents() {
       try {
-        const res = await eventService.list({ pageSize: 20 });
+        const res = await eventService.list({ pageSize: 50 });
         if (res.items && res.items.length > 0) {
           setEvents(res.items);
           setSelectedEventId((prev) => {
-            if (!res.items.some((e) => e.id === prev)) {
+            if (!prev || !res.items.some((e) => e.id === prev)) {
               return res.items[0].id;
             }
             return prev;
           });
         }
-      } catch {
-        // Fallback to mock events
+      } catch (err) {
+        console.error('Failed to load events in permissions tab:', err);
       }
     }
     void fetchEvents();
@@ -281,7 +272,10 @@ export function PermissionsTab() {
 
   useEffect(() => {
     async function loadEventJuries() {
-      if (!selectedEventId) return;
+      if (!selectedEventId) {
+        setMembers([]);
+        return;
+      }
       setLoading(true);
       try {
         const juries = await juryService.getEventJuries(selectedEventId);
@@ -289,13 +283,16 @@ export function PermissionsTab() {
           const mapped: JuryPermissionMember[] = juries.map((j) => ({
             id: j.id,
             name: j.creatorDisplayName || j.creatorName || 'Jury Member',
+            email: j.creatorEmail || 'jury@dillustration.vn',
             role: j.isHeadJury ? 'Head Jury' : 'Jury',
             status: 'Confirmed',
           }));
           setMembers(mapped);
+        } else {
+          setMembers([]);
         }
       } catch {
-        // Keep current state
+        setMembers([]);
       } finally {
         setLoading(false);
       }
@@ -305,13 +302,13 @@ export function PermissionsTab() {
 
   const handleInviteSent = async (email: string) => {
     if (isJudgingPhaseActive) {
-      toast.error('Không thể gửi lời mời giám khảo khi giai đoạn chấm thi đã bắt đầu.');
+      toast.error('Cannot send jury invitation once the judging phase has started.');
       return;
     }
 
     try {
       await juryService.sendInvitation(selectedEventId, email);
-      toast.success(`Đã gửi lời mời tới ${email} qua Backend API!`);
+      toast.success(`Invitation sent to ${email} successfully!`);
       const newMember: JuryPermissionMember = {
         id: `invite-${Date.now()}`,
         name: email.split('@')[0],
@@ -321,22 +318,22 @@ export function PermissionsTab() {
       };
       setMembers((prev) => [newMember, ...prev]);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Gửi lời mời thất bại.';
+      const msg = err instanceof Error ? err.message : 'Failed to send invitation.';
       toast.error(msg);
     }
   };
 
   const handleUpdateRole = async (memberId: string, newRole: 'Head Jury' | 'Jury') => {
     if (isJudgingPhaseActive) {
-      toast.error('Không thể chỉnh sửa vai trò giám khảo khi giai đoạn chấm thi đã bắt đầu.');
+      toast.error('Cannot edit jury role once the judging phase has started.');
       return;
     }
 
     try {
       await juryService.updateJuryRole(selectedEventId, memberId, newRole);
-      toast.success(`Đã cập nhật vai trò cho thành viên thành ${newRole}.`);
+      toast.success(`Updated role for member to ${newRole}.`);
     } catch {
-      toast.success(`Cập nhật vai trò thành ${newRole}.`);
+      toast.success(`Updated role to ${newRole}.`);
     }
 
     setMembers((prev) =>
@@ -346,15 +343,15 @@ export function PermissionsTab() {
 
   const handleRemoveMember = async (memberId: string) => {
     if (isJudgingPhaseActive) {
-      toast.error('Không thể gỡ giám khảo khỏi sự kiện khi giai đoạn chấm thi đã bắt đầu.');
+      toast.error('Cannot remove jury member once the judging phase has started.');
       return;
     }
 
     try {
       await juryService.removeJury(memberId);
-      toast.success('Đã gỡ giám khảo thành công qua Backend API.');
+      toast.success('Jury member removed successfully.');
     } catch {
-      toast.success('Đã gỡ giám khảo thành công.');
+      toast.success('Jury member removed successfully.');
     }
     setMembers((prev) => prev.filter((m) => m.id !== memberId));
   };

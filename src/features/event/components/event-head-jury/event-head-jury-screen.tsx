@@ -107,6 +107,10 @@ export function EventHeadJuryScreen({ eventId }: EventHeadJuryScreenProps) {
         if (!isMounted) return;
 
         setEvent(eventData);
+        if (eventData?.isHeadJurySignedOff) {
+          setIsContestResultsApproved(true);
+          setIsAwardAllocationsConfirmed(true);
+        }
 
         setCriteria(criteriaData);
 
@@ -349,8 +353,23 @@ export function EventHeadJuryScreen({ eventId }: EventHeadJuryScreenProps) {
     );
   }, [arbitrationCasesState, arbitrationCasesList, selectedArbitrationId, filteredArbitrationCases]);
 
-  const handleConfirmArbitration = () => {
+  const handleConfirmArbitration = async () => {
     if (!selectedArbitrationCase) return;
+    const isGuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(selectedArbitrationCase.id);
+    if (isGuid) {
+      try {
+        await juryService.saveArbitrationDecision(
+          eventId,
+          selectedArbitrationCase.id,
+          arbitrationDecision,
+          arbitrationNotes
+        );
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : 'Failed to save arbitration decision to backend.';
+        toast.error(msg);
+        return;
+      }
+    }
     const caseList = arbitrationCasesState.length > 0 ? arbitrationCasesState : arbitrationCasesList;
     setArbitrationCasesState(
       caseList.map((item) =>
@@ -373,9 +392,30 @@ export function EventHeadJuryScreen({ eventId }: EventHeadJuryScreenProps) {
     toast.success('Award Allocations Confirmed!');
   };
 
-  const handleApproveContestResults = () => {
-    setIsContestResultsApproved(true);
-    toast.success('Contest results officially approved! Release permissions transferred to Moderators.');
+  const handleApproveContestResults = async () => {
+    try {
+      await juryService.signOffHeadJury(eventId);
+      setIsContestResultsApproved(true);
+      setIsAwardAllocationsConfirmed(true);
+      setEvent((prev) =>
+        prev
+          ? {
+              ...prev,
+              isHeadJurySignedOff: true,
+              headJurySignedOffAt: new Date().toISOString(),
+            }
+          : prev
+      );
+      toast.success(
+        'Contest results officially signed off & approved! Release permissions transferred to Moderators.'
+      );
+    } catch (err: unknown) {
+      const msg =
+        (err as { response?: { data?: { message?: string; errors?: string[] } } })?.response?.data?.message ||
+        (err as { response?: { data?: { errors?: string[] } } })?.response?.data?.errors?.[0] ||
+        'Failed to complete Head Jury sign-off.';
+      toast.error(msg);
+    }
   };
 
   // Dynamic winners list computed from real submissions

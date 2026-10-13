@@ -266,15 +266,43 @@ export const juryService = {
   },
 
   /**
+   * Resolve submission dispute by Head Jury
+   */
+  resolveJuryDispute: async (
+    disputeId: string,
+    payload: { resolution: 'Dismiss' | 'Disqualify' | 'RequestReEvaluation'; note?: string }
+  ): Promise<{ message: string }> => {
+    const response = await apiClient.post<ApiResponse<{ message: string }>>(
+      `/jury/disputes/${disputeId}/resolve`,
+      payload
+    );
+    return response.data?.data ?? { message: 'Phân xử khiếu nại thành công.' };
+  },
+
+  /**
    * Save arbitration decision by Head Jury
    */
   saveArbitrationDecision: async (
-    eventId: string,
+    _eventId: string,
     caseId: string,
     decision: string,
     notes: string
   ): Promise<{ success: boolean; message: string }> => {
-    await apiClient.post<ApiResponse<unknown>>(`/events/${eventId}/arbitration/${caseId}`, { decision, notes });
+    const resolutionMap: Record<string, 'Dismiss' | 'Disqualify' | 'RequestReEvaluation'> = {
+      'Dismiss': 'Dismiss',
+      'Reject': 'Dismiss',
+      'Disqualify': 'Disqualify',
+      'RequestReEvaluation': 'RequestReEvaluation',
+      'Re-evaluation': 'RequestReEvaluation',
+    };
+    const resolution = resolutionMap[decision] || 'RequestReEvaluation';
+    const isGuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(caseId);
+    if (isGuid) {
+      await apiClient.post<ApiResponse<unknown>>(`/jury/disputes/${caseId}/resolve`, {
+        resolution,
+        note: notes,
+      });
+    }
     return { success: true, message: 'Xác nhận phân xử thành công.' };
   },
 
@@ -342,6 +370,17 @@ export const juryService = {
     } catch {
       // Endpoint fallback
     }
+  },
+
+  /**
+   * Complete Head Jury sign-off for an event
+   */
+  signOffHeadJury: async (eventId: string): Promise<{ success: boolean; signedOffAt?: string }> => {
+    const response = await apiClient.post<ApiResponse<{ signedOffAt?: string }>>(`/events/${eventId}/head-jury/sign-off`);
+    return {
+      success: !response.data?.error,
+      signedOffAt: response.data?.data?.signedOffAt,
+    };
   },
 };
 

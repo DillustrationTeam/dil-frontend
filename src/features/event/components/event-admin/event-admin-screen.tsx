@@ -17,78 +17,12 @@ import { eventService } from '../../services/event.service';
 import { EventCard } from '../event/event-card';
 
 import { PermissionsTab } from './permissions-tab/permissions-tab';
+import { DisputesTab } from './disputes-tab/disputes-tab';
 import { PublishTab } from './publish-tab/publish-tab';
 
-export type AdminEventsTab = 'create' | 'permissions' | 'publish';
+export type AdminEventsTab = 'create' | 'permissions' | 'disputes' | 'publish';
 
-const mockEventsList: EventListItemDto[] = [
-  {
-    id: 'aur-2026',
-    title: 'AURA 2026: Beyond the Visible',
-    bannerUrl:
-      'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=1200&q=80',
-    description: 'Digital illustration contest themed Beyond the Visible.',
-    prize: '120,000,000 VND · 6 Categories',
-    rules: 'Each artist may submit up to 2 original artworks.',
-    maxVote: 5,
-    status: 'Open',
-    submissionStartAt: '2026-10-01T09:00:00Z',
-    submissionEndAt: '2026-11-30T20:00:00Z',
-    judgingStartAt: '2026-12-01T09:00:00Z',
-    judgingEndAt: '2026-12-15T20:00:00Z',
-    votingStartAt: '2026-10-01T09:00:00Z',
-    votingEndAt: '2026-11-30T20:00:00Z',
-    resultAnnouncementAt: '2026-12-20T18:00:00Z',
-    submissionCount: 248,
-    totalVoteCount: 1420,
-    createdAt: '2026-09-15T00:00:00Z',
-    isFeatured: true,
-  },
-  {
-    id: 'cyber-2026',
-    title: 'CYBERPUNK 2026: Neo Illustrators',
-    bannerUrl:
-      'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80',
-    description: 'Futuristic sci-fi and cyberpunk character design challenge.',
-    prize: '80,000,000 VND · 4 Categories',
-    rules: 'High-tech neo theme. Max 3 submissions per creator.',
-    maxVote: 3,
-    status: 'Judging',
-    submissionStartAt: '2026-08-01T09:00:00Z',
-    submissionEndAt: '2026-09-30T20:00:00Z',
-    judgingStartAt: '2026-10-01T09:00:00Z',
-    judgingEndAt: '2026-10-20T20:00:00Z',
-    votingStartAt: '2026-08-01T09:00:00Z',
-    votingEndAt: '2026-09-30T20:00:00Z',
-    resultAnnouncementAt: '2026-10-25T18:00:00Z',
-    submissionCount: 182,
-    totalVoteCount: 980,
-    createdAt: '2026-07-10T00:00:00Z',
-    isFeatured: false,
-  },
-  {
-    id: 'fantasy-2026',
-    title: 'FANTASY WORLDS: Mythic Realms',
-    bannerUrl:
-      'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80',
-    description: 'Enchanted environments and epic fantasy concept art contest.',
-    prize: '50,000,000 VND · 3 Categories',
-    rules: 'Original fantasy worlds only. AI generation strictly prohibited.',
-    maxVote: 3,
-    status: 'Draft',
-    submissionStartAt: '2026-11-01T09:00:00Z',
-    submissionEndAt: '2026-12-31T20:00:00Z',
-    judgingStartAt: '2027-01-01T09:00:00Z',
-    judgingEndAt: '2027-01-15T20:00:00Z',
-    votingStartAt: '2026-11-01T09:00:00Z',
-    votingEndAt: '2026-12-31T20:00:00Z',
-    resultAnnouncementAt: '2027-01-20T18:00:00Z',
-    submissionCount: 0,
-    totalVoteCount: 0,
-    createdAt: '2026-09-28T00:00:00Z',
-    isFeatured: false,
-  },
-];
+
 
 const emptySubscribe = () => () => {};
 
@@ -96,7 +30,7 @@ export function EventAdminScreen() {
   const router = useRouter();
   const mounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
   const [activeTab, setActiveTab] = useState<AdminEventsTab>('create');
-  const [events, setEvents] = useState<EventListItemDto[]>(mockEventsList);
+  const [events, setEvents] = useState<EventListItemDto[]>([]);
   const [loading, setLoading] = useState(false);
 
   // Delete Event Modal state
@@ -134,14 +68,14 @@ export function EventAdminScreen() {
         eventService.list(filters),
         eventService.getStats().catch(() => null),
       ]);
-      if (res?.items && res.items.length > 0) {
+      if (res?.items) {
         setEvents(res.items);
       }
       if (statsData) {
         setStats(statsData);
       }
     } catch {
-      // Keep existing
+      setEvents([]);
     } finally {
       setLoading(false);
     }
@@ -164,7 +98,7 @@ export function EventAdminScreen() {
           eventService.getStats().catch(() => null),
         ]);
         if (!ignore) {
-          if (res?.items && res.items.length > 0) {
+          if (res?.items) {
             setEvents(res.items);
           }
           if (statsData) {
@@ -172,7 +106,9 @@ export function EventAdminScreen() {
           }
         }
       } catch {
-        // Keep mock events if network request fails
+        if (!ignore) {
+          setEvents([]);
+        }
       }
     }
 
@@ -259,6 +195,16 @@ export function EventAdminScreen() {
           }`}
         >
           Jury Permissions
+        </button>
+        <button
+          onClick={() => setActiveTab('disputes')}
+          className={`px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
+            activeTab === 'disputes'
+              ? 'bg-brand-periwinkle text-brand-navy shadow-[inset_0_1px_0_rgba(255,255,255,0.5),0_0_20px_rgba(167,172,217,0.25)]'
+              : 'text-[#aaa8b3] hover:text-white hover:bg-white/5'
+          }`}
+        >
+          Dispute Resolution
         </button>
         <button
           onClick={() => setActiveTab('publish')}
@@ -359,6 +305,7 @@ export function EventAdminScreen() {
         )}
 
         {activeTab === 'permissions' && <PermissionsTab />}
+        {activeTab === 'disputes' && <DisputesTab />}
         {activeTab === 'publish' && <PublishTab />}
       </div>
 

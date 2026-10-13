@@ -1,53 +1,163 @@
 'use client';
 
 import React from 'react';
-import { CheckCircle2, Megaphone, Lock } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { Megaphone, Lock, CheckCircle2, Clock, AlertTriangle, ShieldCheck } from 'lucide-react';
 
-export function PublishChecklistAside() {
-  const checklistItems = [
-    { label: 'Event Period Concluded', passed: true },
-    { label: 'Head Jury Sign-Off Complete', passed: true },
-    { label: 'Dispute Queue Resolved', passed: true },
-    { label: 'Announcement Payload Verified', passed: true },
-  ];
+export interface PublishChecklistStatus {
+  eventConcluded: boolean;
+  juryEvaluationsDone: boolean;
+  disputesResolved: boolean;
+  headJurySignOff: boolean;
+  headJurySignedOffAt?: string | null;
+  openDisputesCount: number;
+  juryCount: number;
+  evaluatedJuryCount: number;
+}
 
-  const handlePublishDemo = () => {
-    toast.success('Final contest results published to platform feed successfully!');
-  };
+interface PublishChecklistAsideProps {
+  checklist: PublishChecklistStatus;
+  isAwardAllocationsConfirmed: boolean;
+  isContestResultsPublished: boolean;
+  handlePublishResults: () => void;
+  isPublishing?: boolean;
+}
+
+export function PublishChecklistAside({
+  checklist,
+  isAwardAllocationsConfirmed,
+  isContestResultsPublished,
+  handlePublishResults,
+  isPublishing = false,
+}: PublishChecklistAsideProps) {
+  const canPublish =
+    !isContestResultsPublished &&
+    !isPublishing &&
+    checklist.disputesResolved &&
+    (checklist.headJurySignOff || isAwardAllocationsConfirmed);
 
   return (
-    <aside className="glass-container rounded-2xl p-6 h-fit sticky top-24">
-      <h2 className="text-xl font-bold font-h1 text-on-surface mb-4">Release Audit Checklist</h2>
-
-      <div className="flex flex-col gap-2.5 mb-6">
-        {checklistItems.map((item, idx) => (
-          <div
-            key={idx}
-            className="flex items-center justify-between gap-3 p-3 rounded-xl border border-white/10 bg-white/5"
-          >
-            <span className="text-sm font-medium text-on-surface-variant">{item.label}</span>
-            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-950/70 border border-emerald-400/30 text-emerald-300 shadow-[0_0_12px_rgba(52,211,153,0.15)]">
-              <CheckCircle2 className="w-3.5 h-3.5" />
-              Passed
-            </span>
-          </div>
-        ))}
+    <aside className="p-6 rounded-2xl bg-[#151926]/90 border border-white/10 backdrop-blur-xl space-y-4 lg:sticky lg:top-24">
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-bold font-sora text-white">Release Audit Checklist</h2>
+        <span className="text-xs text-[#9695a1] font-mono">
+          {Object.values(checklist).filter((v) => v === true).length}/4 Verified
+        </span>
       </div>
 
+      <div className="space-y-2.5 text-xs">
+        {/* 1. Event Period Concluded */}
+        <div className="flex items-center justify-between p-3 rounded-xl border border-white/10 bg-white/[0.02]">
+          <span className="text-white font-medium">Event Period Concluded</span>
+          <span
+            className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border transition-all ${
+              checklist.eventConcluded
+                ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300'
+                : 'bg-amber-500/15 border-amber-500/30 text-amber-300'
+            }`}
+          >
+            {checklist.eventConcluded ? (
+              <span className="inline-flex items-center gap-1">
+                <CheckCircle2 size={11} /> Completed
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1">
+                <Clock size={11} /> In Progress
+              </span>
+            )}
+          </span>
+        </div>
+
+        {/* 2. Jury Evaluations Completed */}
+        <div className="flex items-center justify-between p-3 rounded-xl border border-white/10 bg-white/[0.02]">
+          <span className="text-white font-medium">All Jury Evaluations Completed</span>
+          <span
+            className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border transition-all ${
+              checklist.juryEvaluationsDone
+                ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300'
+                : 'bg-amber-500/15 border-amber-500/30 text-amber-300'
+            }`}
+          >
+            {checklist.juryEvaluationsDone ? (
+              <span className="inline-flex items-center gap-1">
+                <ShieldCheck size={11} /> Completed
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1">
+                <Clock size={11} /> {checklist.juryCount > 0 ? `${checklist.juryCount} Juries` : 'Pending'}
+              </span>
+            )}
+          </span>
+        </div>
+
+        {/* 3. Disputes & Arbitrations Resolved */}
+        <div className="flex items-center justify-between p-3 rounded-xl border border-white/10 bg-white/[0.02]">
+          <span className="text-white font-medium">Disputes & Arbitrations Resolved</span>
+          <span
+            className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border transition-all ${
+              checklist.disputesResolved
+                ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300'
+                : 'bg-rose-500/15 border-rose-500/30 text-rose-300'
+            }`}
+          >
+            {checklist.disputesResolved ? (
+              <span className="inline-flex items-center gap-1">
+                <CheckCircle2 size={11} /> Completed
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1">
+                <AlertTriangle size={11} /> {checklist.openDisputesCount} Open
+              </span>
+            )}
+          </span>
+        </div>
+
+        {/* 4. Head Jury Sign-Off Complete */}
+        <div className="flex items-center justify-between p-3 rounded-xl border border-white/10 bg-white/[0.02]">
+          <span className="text-white font-medium">Head Jury Sign-Off Complete</span>
+          <span
+            className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border transition-all ${
+              checklist.headJurySignOff || isAwardAllocationsConfirmed
+                ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300'
+                : 'bg-amber-500/15 border-amber-500/30 text-amber-300'
+            }`}
+          >
+            {checklist.headJurySignOff || isAwardAllocationsConfirmed ? (
+              <span className="inline-flex items-center gap-1">
+                <CheckCircle2 size={11} />{' '}
+                {checklist.headJurySignedOffAt
+                  ? `Signed Off (${new Date(checklist.headJurySignedOffAt).toLocaleDateString()})`
+                  : 'Signed Off'}
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1">
+                <Clock size={11} /> Pending Sign-Off
+              </span>
+            )}
+          </span>
+        </div>
+      </div>
+
+      {/* Main Publish Action Button */}
       <button
         type="button"
-        onClick={handlePublishDemo}
-        className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-[#a7acd9] to-[#7fd5e8] text-brand-navy font-bold text-sm hover:brightness-110 transition-all shadow-[0_0_20px_rgba(167,172,217,0.3)] flex items-center justify-center gap-2 mb-4"
+        onClick={handlePublishResults}
+        disabled={!canPublish}
+        className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-[#7FD5E8] text-white font-sora font-extrabold text-xs shadow-lg hover:brightness-110 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
       >
         <Megaphone className="w-4 h-4" />
-        Publish Results Demo
+        <span>
+          {isContestResultsPublished
+            ? 'Results Officially Published'
+            : isPublishing
+            ? 'Publishing Results...'
+            : 'Publish Official Results'}
+        </span>
       </button>
 
-      <div className="p-3 rounded-xl border-l-4 border-brand-periwinkle bg-brand-periwinkle/10 text-on-surface-variant text-xs leading-relaxed flex items-start gap-2">
-        <Lock className="w-4 h-4 text-brand-periwinkle shrink-0 mt-0.5" />
+      <div className="p-3 rounded-xl border-l-4 border-[#A7ACD9] bg-[#A7ACD9]/10 text-xs text-[#c7c5cf] leading-relaxed flex items-start gap-2">
+        <Lock className="w-4 h-4 text-[#A7ACD9] shrink-0 mt-0.5" />
         <span>
-          Moderators publish signed snapshots only. Scores or rankings cannot be altered once published.
+          Publishing generates an immutable snapshot of contest results and officially reveals winners on the public Wall of Fame and Leaderboard.
         </span>
       </div>
     </aside>

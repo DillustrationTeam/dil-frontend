@@ -17,7 +17,7 @@ export function InviteJuryCard({ onInviteSent, isJudgingPhaseActive = false }: I
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isJudgingPhaseActive) {
-      toast.error('Không thể gửi lời mời giám khảo khi giai đoạn chấm thi đã bắt đầu.');
+      toast.error('Cannot send jury invitation once the judging phase has started.');
       return;
     }
     if (!email) {

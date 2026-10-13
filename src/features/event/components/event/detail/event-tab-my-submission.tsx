@@ -15,6 +15,8 @@ import {
   FolderHeart,
   MonitorUp,
   Clock,
+  Trash2,
+  Maximize2,
 } from 'lucide-react';
 import type { EventSubmissionDto } from '@/features/event/types/event.types';
 import type { JuryMemberInfo } from '@/features/event/types/jury.types';
@@ -33,6 +35,7 @@ interface EventTabMySubmissionProps {
   onOpenSubmitModal: () => void;
   onCopyLink: () => void;
   currentUserFullName?: string | null;
+  onWithdrawSubmission?: (submissionId: string) => void;
 }
 
 export function EventTabMySubmission({
@@ -47,6 +50,7 @@ export function EventTabMySubmission({
   onOpenSubmitModal,
   onCopyLink,
   currentUserFullName,
+  onWithdrawSubmission,
 }: EventTabMySubmissionProps) {
   return (
     <div className="space-y-6">
@@ -139,27 +143,42 @@ export function EventTabMySubmission({
         <div className="rounded-3xl border border-brand-periwinkle/30 bg-gradient-to-br from-brand-periwinkle/10 via-[#161926] to-[#161926] p-6 sm:p-10 shadow-2xl">
           <div className="flex flex-col lg:flex-row gap-8 items-start">
             {/* Left: Artwork Preview */}
-            <Link
-              href={mySubmission.artworkId ? `/artworks/${mySubmission.artworkId}` : '#'}
-              className="w-full lg:w-1/2 aspect-[4/3] rounded-2xl overflow-hidden border border-white/10 bg-black/50 shadow-inner block relative group cursor-pointer"
-            >
-              {mySubmission.artworkImageUrl || mySubmission.artworkThumbnailUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={mySubmission.artworkImageUrl || mySubmission.artworkThumbnailUrl || ''}
-                  alt={mySubmission.title}
-                  className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
-                />
-              ) : (
-                <div className="flex size-full items-center justify-center text-xs text-outline">
-                  Preview not available
+            <div className="w-full lg:w-1/2 aspect-[4/3] rounded-2xl overflow-hidden border border-white/10 bg-black/50 shadow-inner relative group">
+              <Link
+                href={mySubmission.artworkId ? `/artworks/${mySubmission.artworkId}` : '#'}
+                className="size-full block cursor-pointer"
+              >
+                {mySubmission.artworkImageUrl || mySubmission.artworkThumbnailUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={mySubmission.artworkImageUrl || mySubmission.artworkThumbnailUrl || ''}
+                    alt={mySubmission.title}
+                    className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                ) : (
+                  <div className="flex size-full items-center justify-center text-xs text-outline">
+                    Preview not available
+                  </div>
+                )}
+                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center gap-1.5 text-xs font-bold text-white backdrop-blur-[2px]">
+                  <ExternalLink size={15} />
+                  <span>View Artwork Page</span>
                 </div>
+              </Link>
+
+              {/* View Full Resolution icon button in top-right corner */}
+              {mySubmission.artworkImageUrl && (
+                <a
+                  href={mySubmission.artworkImageUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="absolute top-3 right-3 z-10 flex size-9 items-center justify-center rounded-xl bg-black/60 border border-white/20 text-white shadow-lg backdrop-blur-md hover:bg-black/90 hover:scale-105 active:scale-95 transition cursor-pointer"
+                  title="View Full Resolution"
+                >
+                  <Maximize2 size={16} />
+                </a>
               )}
-              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center gap-1.5 text-xs font-bold text-white backdrop-blur-[2px]">
-                <ExternalLink size={15} />
-                <span>View Artwork Page</span>
-              </div>
-            </Link>
+            </div>
 
             {/* Right: Submission Info & Performance */}
             <div className="w-full lg:w-1/2 space-y-6">
@@ -236,17 +255,6 @@ export function EventTabMySubmission({
                   <span>Share My Artwork</span>
                 </button>
 
-                {mySubmission.artworkImageUrl && (
-                  <a
-                    href={mySubmission.artworkImageUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/5 px-5 py-2.5 text-xs font-bold text-white hover:bg-white/10 transition cursor-pointer"
-                  >
-                    <ExternalLink size={15} />
-                    <span>View Full Resolution</span>
-                  </a>
-                )}
 
                 {isSubmissionOpen && (
                   <button
@@ -256,6 +264,18 @@ export function EventTabMySubmission({
                   >
                     <Edit3 size={15} />
                     <span>Edit Submission</span>
+                  </button>
+                )}
+
+                {onWithdrawSubmission && (
+                  <button
+                    type="button"
+                    onClick={() => onWithdrawSubmission(mySubmission.id)}
+                    className="inline-flex items-center gap-2 rounded-xl border border-rose-500/30 bg-rose-500/10 px-5 py-2.5 text-xs font-bold text-rose-300 hover:bg-rose-500/20 hover:text-rose-200 transition cursor-pointer"
+                    title="Withdraw your submission from this contest"
+                  >
+                    <Trash2 size={15} className="text-rose-400" />
+                    <span>Withdraw Submission</span>
                   </button>
                 )}
               </div>

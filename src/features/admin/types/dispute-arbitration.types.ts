@@ -129,20 +129,12 @@ export interface DisputeQueueResponse {
 // =========================================================================
 // 2. SUBMISSION DISPUTE TYPES (KHIẾU NẠI BÀI THI SỰ KIỆN)
 // =========================================================================
-export type SubmissionDisputeCategory =
-  | 'Copyright'
-  | 'ScoreAppeal'
-  | 'AiArt'
-  | 'VoteFraud'
-  | 'Other';
-
 export type SubmissionDisputePriority = 'Low' | 'Medium' | 'High';
 
 export type SubmissionDisputeResolution =
   | 'Dismiss'
   | 'Disqualify'
-  | 'AdjustScore'
-  | 'DeductVotes'
+  | 'RequestReEvaluation'
   | 'Other';
 
 export type SubmissionDisputeStatus =
@@ -161,7 +153,6 @@ export interface SubmissionDisputeDto {
   artworkImageUrl?: string | null;
   raisedById: string;
   raisedByName?: string | null;
-  category: string;
   priority: SubmissionDisputePriority;
   reason: string;
   evidenceUrls?: string | null;
@@ -182,7 +173,6 @@ export interface SubmissionDisputeQueueFilters {
   eventId?: string;
   submissionId?: string;
   status?: string;
-  category?: string;
   page: number;
   pageSize: number;
 }
