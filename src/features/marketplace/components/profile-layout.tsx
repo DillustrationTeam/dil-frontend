@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import { ReactNode } from 'react';
 
-export function ProfileLayout({ name, bannerUrl, sidebar, children }: { name: string; bannerUrl?: string | null; sidebar: ReactNode; children: ReactNode }) {
+export function ProfileLayout({ name, bannerUrl, avatarUrl, sidebar, children }: { name: string; bannerUrl?: string | null; avatarUrl?: string | null; sidebar: ReactNode; children: ReactNode }) {
   return <div className="min-h-screen bg-[#1F2335] font-body text-[#E4E1E5]">
     <div className="relative h-48 overflow-hidden bg-[#2b304b] sm:h-64 lg:h-80">
       {bannerUrl ? <Image src={bannerUrl} alt={`Ảnh bìa của ${name}`} fill unoptimized sizes="100vw" className="object-cover" /> : <div aria-hidden className="absolute inset-0 bg-[radial-gradient(ellipse_at_75%_20%,#A7ACD944,transparent_65%)]"><div className="absolute -right-16 -top-48 h-[600px] w-[900px] rotate-[-20deg] rounded-[50%] border-[40px] border-[#A7ACD9]/10" /><div className="absolute -right-12 -top-32 h-[600px] w-[1000px] rotate-[-20deg] rounded-[50%] border border-[#A7ACD9]/20" /></div>}
@@ -11,7 +11,9 @@ export function ProfileLayout({ name, bannerUrl, sidebar, children }: { name: st
     </div>
     <div className="relative mx-auto grid max-w-[1440px] gap-8 px-5 pb-16 sm:px-8 lg:grid-cols-[260px_minmax(0,1fr)] lg:gap-12 xl:grid-cols-[300px_minmax(0,1fr)] xl:px-12">
       <aside className="min-w-0 -mt-16 self-start lg:-mt-24">
-        <div className="relative mb-6 flex h-32 w-32 items-center justify-center overflow-hidden rounded-full border-[6px] border-[#1F2335] bg-[#A7ACD9] font-h1 text-5xl font-semibold text-[#1F2335] shadow-xl sm:h-40 sm:w-40 lg:h-48 lg:w-48 lg:text-7xl" aria-label={`Avatar ${name}`}>{name.slice(0, 1).toUpperCase()}</div>
+        <div className="relative mb-6 flex h-32 w-32 items-center justify-center overflow-hidden rounded-full border-[6px] border-[#1F2335] bg-[#A7ACD9] font-h1 text-5xl font-semibold text-[#1F2335] shadow-xl sm:h-40 sm:w-40 lg:h-48 lg:w-48 lg:text-7xl" aria-label={`Avatar ${name}`}>
+          {avatarUrl ? <Image src={avatarUrl} alt={`Avatar ${name}`} fill unoptimized className="object-cover" /> : name.slice(0, 1).toUpperCase()}
+        </div>
         {sidebar}
       </aside>
       <section className="min-w-0 pt-0 lg:pt-8">{children}</section>

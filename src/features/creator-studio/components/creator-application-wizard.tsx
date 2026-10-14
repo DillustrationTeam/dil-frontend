@@ -138,8 +138,7 @@ export function CreatorApplicationWizard({
     }
 
     if (currentStep.key === 'portfolio') {
-      const hasManualLink = form.portfolioLinks.some((link) => link.trim().length > 0);
-      return hasManualLink || form.portfolioUploads.length > 0;
+      return form.portfolioUploads.length > 0;
     }
 
     if (currentStep.key === 'style') {
@@ -401,7 +400,7 @@ export function CreatorApplicationWizard({
 
             <div className="space-y-3">
               <label className="text-xs uppercase tracking-wider text-[#C7C5CF]">
-                Upload sản phẩm mẫu (tuỳ chọn, có thể chọn nhiều ảnh)
+                Upload sản phẩm mẫu (bắt buộc, có thể chọn nhiều ảnh)
               </label>
               <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
                 {form.portfolioUploads.map((url) => (

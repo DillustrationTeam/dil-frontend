@@ -3,6 +3,8 @@ import { ApiResponse } from '@/types/api.types';
 import { getApiErrorMessage } from '@/lib/api-error';
 import {
   AuthResponseDto,
+  CompleteAccountPasswordSetupRequest,
+  CompleteGoogleRegistrationRequest,
   ConfirmVerificationCodeResponse,
   ForgotPasswordRequest,
   LoginRequest,
@@ -11,6 +13,7 @@ import {
   ResetPasswordRequest,
   UserDto,
   VerifyTwoFactorLoginRequest,
+  VerifyTwoFactorLoginResult,
 } from '@/types/auth.types';
 
 export const authService = {
@@ -26,9 +29,9 @@ export const authService = {
     }
   },
 
-  async verifyTwoFactorLogin(data: VerifyTwoFactorLoginRequest): Promise<AuthResponseDto> {
+  async verifyTwoFactorLogin(data: VerifyTwoFactorLoginRequest): Promise<VerifyTwoFactorLoginResult> {
     try {
-      const response = await apiClient.post<ApiResponse<AuthResponseDto>>('/auth/login/verify-2fa', data);
+      const response = await apiClient.post<ApiResponse<VerifyTwoFactorLoginResult>>('/auth/login/verify-2fa', data);
       if (response.data.error || !response.data.data) {
         throw new Error(response.data.error?.detail || 'Mã xác minh không đúng.');
       }
@@ -82,6 +85,30 @@ export const authService = {
       return response.data.data;
     } catch (err) {
       throw new Error(getApiErrorMessage(err, 'Failed to authenticate with Google.'));
+    }
+  },
+
+  async completeGoogleRegistration(data: CompleteGoogleRegistrationRequest): Promise<AuthResponseDto> {
+    try {
+      const response = await apiClient.post<ApiResponse<AuthResponseDto>>('/auth/google/complete-registration', data);
+      if (response.data.error || !response.data.data) {
+        throw new Error(response.data.error?.detail || 'Failed to complete registration.');
+      }
+      return response.data.data;
+    } catch (err) {
+      throw new Error(getApiErrorMessage(err, 'Failed to complete registration.'));
+    }
+  },
+
+  async completeAccountPasswordSetup(data: CompleteAccountPasswordSetupRequest): Promise<AuthResponseDto> {
+    try {
+      const response = await apiClient.post<ApiResponse<AuthResponseDto>>('/auth/complete-account-setup', data);
+      if (response.data.error || !response.data.data) {
+        throw new Error(response.data.error?.detail || 'Failed to complete account setup.');
+      }
+      return response.data.data;
+    } catch (err) {
+      throw new Error(getApiErrorMessage(err, 'Failed to complete account setup.'));
     }
   },
 

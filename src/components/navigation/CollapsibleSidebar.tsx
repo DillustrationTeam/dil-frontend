@@ -95,6 +95,7 @@ const CREATOR_NAV_SECTIONS: SidebarSection[] = [
     title: 'Workstation',
     items: [
       { label: 'Artworks Portfolio', href: '/creator/artworks', icon: Brush },
+      { label: 'Rate Card & Services', href: '/creator/services', icon: LayoutGrid },
       { label: 'Rate Card & Services', href: '/creator/rate-card', icon: LayoutGrid },
       { label: 'Event Jury', href: '/creator/events/jury', icon: Gavel },
       { label: 'My Vouchers', href: '/creator/vouchers', icon: Ticket },

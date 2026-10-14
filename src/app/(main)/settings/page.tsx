@@ -20,16 +20,20 @@ const tabs: Array<{ value: SettingsTab; label: string }> = [
 export default function SettingsPage() {
   const router = useRouter();
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const hasHydrated = useAuthStore((state) => state.hasHydrated);
   const user = useAuthStore((state) => state.user);
   const [tab, setTab] = useState<SettingsTab>('profile');
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    // Chờ Zustand persist đọc xong localStorage rồi mới quyết định — kiểm tra
+    // isAuthenticated ngay khi mount sẽ luôn thấy false (giá trị mặc định) và
+    // đá nhầm người dùng đã đăng nhập ra /login mỗi lần F5 hoặc mở link thẳng.
+    if (hasHydrated && !isAuthenticated) {
       router.push('/login');
     }
-  }, [isAuthenticated, router]);
+  }, [hasHydrated, isAuthenticated, router]);
 
-  if (!isAuthenticated) {
+  if (!hasHydrated || !isAuthenticated) {
     return null;
   }
 
@@ -40,7 +44,7 @@ export default function SettingsPage() {
           <PageHeader title="Cài đặt hồ sơ" />
           {user?.id && (
             <Link
-              href={`/clients/${user.id}`}
+              href="/profile"
               className="mb-8 inline-flex items-center gap-1.5 rounded-full border border-white/10 px-3.5 py-1.5 text-xs font-medium text-[#C7C5CF] transition hover:border-[#A7ACD9] hover:text-white"
             >
               <span className="material-symbols-outlined text-sm">visibility</span>

@@ -11,6 +11,7 @@ import toast from 'react-hot-toast';
 import { authService } from '@/services/auth.service';
 import { useAuthStore } from '@/store/use-auth-store';
 import { useGoogleAuth } from '@/features/auth/hooks/use-google-auth';
+import { AccountPasswordSetupForm } from '@/features/auth/components/account-password-setup-form';
 
 const registerSchema = z.object({
   fullName: z.string().min(2, 'Full name must be at least 2 characters'),
@@ -28,7 +29,25 @@ type VerifyState = 'idle' | 'sending' | 'sent' | 'confirming' | 'verified';
 export default function RegisterPage() {
   const router = useRouter();
   const setAuth = useAuthStore((state) => state.setAuth);
-  const googleLogin = useGoogleAuth();
+  const [googleRegistration, setGoogleRegistration] = useState<{
+    ticket: string;
+    email: string;
+    fullName: string | null;
+  } | null>(null);
+  const [passwordSetup, setPasswordSetup] = useState<{
+    ticket: string;
+    email: string;
+    fullName: string | null;
+  } | null>(null);
+  const googleLogin = useGoogleAuth(
+    undefined,
+    (registrationTicket, suggestedEmail, suggestedFullName) => {
+      setGoogleRegistration({ ticket: registrationTicket, email: suggestedEmail, fullName: suggestedFullName });
+    },
+    (passwordSetupTicket, email, fullName) => {
+      setPasswordSetup({ ticket: passwordSetupTicket, email, fullName });
+    }
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 });
 
@@ -179,6 +198,72 @@ export default function RegisterPage() {
           </div>
 
           <div className="relative z-10">
+            {passwordSetup ? (
+              <AccountPasswordSetupForm
+                introText={
+                  <>
+                    <p className="text-sm text-[#c7c5cf]">
+                      Welcome back{passwordSetup.fullName ? `, ${passwordSetup.fullName}` : ''}! Signed in as{' '}
+                      <span className="text-white font-medium">{passwordSetup.email}</span>.
+                    </p>
+                    <p className="text-sm text-[#c7c5cf] mt-2">
+                      This account doesn&apos;t have a username and password yet — set them now before
+                      continuing.
+                    </p>
+                  </>
+                }
+                submitLabel="Finish & Continue"
+                submittingLabel="Saving..."
+                onSubmit={(username, password) =>
+                  authService.completeAccountPasswordSetup({
+                    email: passwordSetup.email,
+                    setupTicket: passwordSetup.ticket,
+                    username,
+                    password,
+                  })
+                }
+                onSuccess={(authResponse) => {
+                  setAuth(authResponse);
+                  setPasswordSetup(null);
+                  toast.success(`Welcome back, ${authResponse.user.fullName}!`);
+                  router.push('/');
+                }}
+                onCancel={() => setPasswordSetup(null)}
+              />
+            ) : googleRegistration ? (
+              <AccountPasswordSetupForm
+                introText={
+                  <>
+                    <p className="text-sm text-[#c7c5cf]">
+                      Welcome{googleRegistration.fullName ? `, ${googleRegistration.fullName}` : ''}! Signed in
+                      with Google as{' '}
+                      <span className="text-white font-medium">{googleRegistration.email}</span>.
+                    </p>
+                    <p className="text-sm text-[#c7c5cf] mt-2">
+                      Google accounts don&apos;t come with a password here — choose a username and
+                      password to finish creating your account.
+                    </p>
+                  </>
+                }
+                submitLabel="Finish Creating Account"
+                submittingLabel="Creating Account..."
+                onSubmit={(username, password) =>
+                  authService.completeGoogleRegistration({
+                    registrationTicket: googleRegistration.ticket,
+                    username,
+                    password,
+                  })
+                }
+                onSuccess={(authResponse) => {
+                  setAuth(authResponse);
+                  setGoogleRegistration(null);
+                  toast.success(`Account created! Welcome to the collective, ${authResponse.user.fullName}!`);
+                  router.push('/');
+                }}
+                onCancel={() => setGoogleRegistration(null)}
+              />
+            ) : (
+              <>
             <h1 className="font-h1 text-3xl font-bold mb-2 text-white">Create Account</h1>
             <p className="text-sm text-[#c7c5cf] mb-8">
               Join the curated gallery of ethereal digital artists.
@@ -364,6 +449,8 @@ export default function RegisterPage() {
                 </button>
               </div>
             </div>
+              </>
+            )}
           </div>
         </div>
 
