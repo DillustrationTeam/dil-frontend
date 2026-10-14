@@ -35,9 +35,9 @@ function PublicLayoutContent({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen bg-[#1F2335] text-[#e4e1e5] font-body selection:bg-[#A7ACD9]/30 selection:text-white">
       {/* Top Navigation */}
       <header className="sticky top-0 z-50 w-full bg-[#1F2335]/80 backdrop-blur-xl border-b border-white/10 shadow-[0_0_20px_rgba(167,172,217,0.08)]">
-        <nav className="flex justify-between items-center w-full px-4 sm:px-6 max-w-7xl mx-auto h-20 gap-3 sm:gap-4">
+        <nav className="flex justify-between items-center w-full px-4 sm:px-6 lg:px-8 max-w-[1440px] mx-auto h-20 gap-3 sm:gap-4">
           {/* Left: Logo + Nav Links */}
-          <div className="flex min-w-0 items-center gap-4 xl:gap-7">
+          <div className="flex min-w-0 items-center gap-3 lg:gap-4 xl:gap-6">
             <Link href="/" className="group flex shrink-0 items-center space-x-2">
               <Image
                 src="/weblogo.png"
@@ -45,10 +45,10 @@ function PublicLayoutContent({ children }: { children: React.ReactNode }) {
                 width={220}
                 height={64}
                 priority
-                className="h-14 md:h-16 w-auto object-contain hover:scale-105 transition-transform"
+                className="h-10 md:h-11 w-auto object-contain hover:scale-105 transition-transform"
               />
             </Link>
-            <div className="hidden shrink-0 items-center gap-3.5 xl:gap-5 2xl:gap-6 text-sm font-medium lg:flex">
+            <div className="hidden items-center gap-2.5 lg:gap-3.5 xl:gap-5 text-xs xl:text-sm font-medium lg:flex">
               <Link
                 href="/"
                 aria-current={pathname === '/' ? 'page' : undefined}
@@ -80,15 +80,15 @@ function PublicLayoutContent({ children }: { children: React.ReactNode }) {
           </div>
 
           {/* Right: Search + Auth + Mobile toggle */}
-          <div className="flex shrink-0 items-center gap-3 sm:gap-4">
+          <div className="flex shrink-0 items-center gap-2 sm:gap-3.5">
             {/* Search Input */}
-            <div className="relative hidden shrink-0 xl:block">
+            <div className="relative hidden shrink-0 lg:block">
               <input
-                className="bg-[#1b1b1e] border border-[#46464e]/30 rounded-full pl-5 pr-9 py-2 w-36 xl:w-44 2xl:w-56 focus:w-52 2xl:focus:w-64 focus:outline-none focus:ring-1 focus:ring-[#c2c7f6] focus:border-[#c2c7f6] transition-all duration-300 text-sm text-[#e4e1e5] placeholder-white/30"
+                className="bg-[#1b1b1e] border border-[#46464e]/30 rounded-full pl-4 pr-8 py-1.5 w-28 lg:w-32 xl:w-44 2xl:w-56 focus:outline-none focus:ring-1 focus:ring-[#c2c7f6] focus:border-[#c2c7f6] transition-all text-xs text-[#e4e1e5] placeholder-white/30"
                 placeholder={t('Search curated art...')}
                 type="text"
               />
-              <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-[#919099] text-lg pointer-events-none">
+              <span className="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-[#919099] text-base pointer-events-none">
                 search
               </span>
             </div>

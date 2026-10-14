@@ -40,6 +40,9 @@ export interface EventListItemDto {
   isActive?: boolean;
   isOpenForSubmission?: boolean;
   isFeatured?: boolean;
+  isHeadJury?: boolean;
+  isHeadJurySignedOff?: boolean;
+  headJurySignedOffAt?: string | null;
 }
 
 export interface EventDetailDto extends EventListItemDto {
@@ -126,6 +129,17 @@ export interface UploadSubmissionRequest {
   tags?: string[];
 }
 
+export interface UpdateSubmissionRequest {
+  title?: string;
+  description?: string;
+  artworkId?: string | null;
+  imageUrl?: string;
+  thumbnailUrl?: string;
+  isAiGenerated?: boolean;
+  aiDetectionScore?: number;
+  tags?: string[];
+}
+
 export interface EventStatsDto {
   totalPrizePool: number;
   formattedTotalPrizePool: string;
@@ -133,3 +147,29 @@ export interface EventStatsDto {
   totalSubmissionsCount: number;
   totalEventsCount: number;
 }
+
+export interface EventRequestPayload {
+  title: string;
+  description: string;
+  bannerUrl?: string | null;
+  rules?: string | null;
+  prize?: string | null;
+  maxVote: number;
+  status: EventStatus | string;
+  isFeatured: boolean;
+  submissionStartAt: string;
+  submissionEndAt: string;
+  judgingStartAt: string;
+  judgingEndAt: string;
+  votingStartAt: string;
+  votingEndAt: string;
+  resultAnnouncementAt: string;
+}
+
+export interface CreateSubmissionDisputeRequest {
+  reason: string;
+  description?: string;
+  evidenceUrls?: string[];
+  priority?: 'Low' | 'Medium' | 'High' | string;
+}
+

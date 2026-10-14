@@ -351,13 +351,12 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
   );
 
   const handleTyping = useCallback(
-    (typerId: string) => {
-      if (!userId || typerId.toLowerCase() === userId.toLowerCase()) return;
+    () => {
       setPartnerTyping(true);
       if (typingTimerRef.current) clearTimeout(typingTimerRef.current);
       typingTimerRef.current = setTimeout(() => setPartnerTyping(false), 4000);
     },
-    [userId],
+    [],
   );
 
   const handleRead = useCallback(

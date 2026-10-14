@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { CheckCircle2, Clock, Crown, Sparkles, Vote, Award } from 'lucide-react';
-import type { EventDetailDto } from '../types/event.types';
+import type { EventDetailDto } from '../../types/event.types';
 
 interface EventStageProgressProps {
   event: EventDetailDto;
