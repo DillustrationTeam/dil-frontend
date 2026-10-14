@@ -3,12 +3,14 @@
 import React, { useState } from 'react';
 import { X, AlertTriangle, Info, CheckCircle2 } from 'lucide-react';
 import { commissionService } from '@/services/commission.service';
-
+import type { Commission } from '@/types/commission.types';
 
 interface CancelRefundModalProps {
   isOpen: boolean;
   onClose: () => void;
   commissionId: string;
+  commission?: Commission | null;
+  currentUserId?: string | null;
   onSuccess?: () => void;
 }
 
@@ -16,12 +18,15 @@ export default function CancelRefundModal({
   isOpen,
   onClose,
   commissionId,
+  commission,
+  currentUserId,
   onSuccess,
 }: CancelRefundModalProps) {
   const [reason, setReason] = useState('');
   const [details, setDetails] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [resultMessage, setResultMessage] = useState('');
 
   if (!isOpen) return null;
 
@@ -29,7 +34,10 @@ export default function CancelRefundModal({
     if (!reason) return alert('Please select a reason.');
     setIsSubmitting(true);
     try {
-      await commissionService.cancelWithPolicy(commissionId, { cancellationReason: reason, details });
+      const updated = await commissionService.cancelWithPolicy(commissionId, { cancellationReason: reason, details });
+      setResultMessage(updated.status === 'Cancelled'
+        ? 'Đơn đã được hủy và phần Escrow còn lại đã được hoàn.'
+        : 'Yêu cầu hủy đã được gửi. Bên còn lại có 48 giờ để phản hồi.');
       setSuccess(true);
       setTimeout(() => {
         if (onSuccess) onSuccess();
@@ -37,6 +45,24 @@ export default function CancelRefundModal({
     } catch (error) {
       console.error(error);
       alert('Failed to cancel commission.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const pendingRequest = commission?.cancellationRequestStatus === 'Pending';
+  const canRespond = pendingRequest && commission.cancellationRequestedById !== currentUserId;
+
+  const handleResponse = async (approve: boolean) => {
+    setIsSubmitting(true);
+    try {
+      await commissionService.respondCancellationRequest(commissionId, approve);
+      setResultMessage(approve ? 'Đã đồng ý hủy đơn.' : 'Đã từ chối yêu cầu hủy đơn.');
+      setSuccess(true);
+      setTimeout(() => onSuccess?.(), 1000);
+    } catch (error) {
+      console.error(error);
+      alert('Không thể phản hồi yêu cầu hủy.');
     } finally {
       setIsSubmitting(false);
     }
@@ -66,7 +92,17 @@ export default function CancelRefundModal({
 
         {/* Content Body */}
         <div className="p-6 space-y-4">
-          {!success ? (
+          {!success && pendingRequest ? (
+            <div className="space-y-4 text-sm text-slate-300">
+              <div className="rounded-xl border border-amber-400/20 bg-amber-400/10 p-4">
+                <p className="font-semibold text-amber-200">Yêu cầu hủy đang chờ phản hồi</p>
+                <p className="mt-2 text-xs"><strong>Lý do:</strong> {commission?.cancellationReason}</p>
+                {commission?.cancellationDetails ? <p className="mt-1 text-xs"><strong>Chi tiết:</strong> {commission.cancellationDetails}</p> : null}
+                {commission?.cancellationRequestExpiresAt ? <p className="mt-1 text-xs"><strong>Hạn phản hồi:</strong> {new Date(commission.cancellationRequestExpiresAt).toLocaleString('vi-VN')}</p> : null}
+              </div>
+              <p className="text-xs text-slate-400">{canRespond ? 'Bạn có thể đồng ý hoặc từ chối yêu cầu này.' : 'Đang chờ bên còn lại phản hồi.'}</p>
+            </div>
+          ) : !success ? (
             <>
               <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl flex items-start gap-2.5 text-red-300 text-[11px]">
                 <Info className="w-4 h-4 shrink-0 mt-0.5 text-red-400" />
@@ -81,15 +117,15 @@ export default function CancelRefundModal({
                 </label>
                 <select
                   value={reason}
-                  onChange={(e) => setReason(e.target.value)}
-                  className="w-full p-3 bg-white/5 border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-indigo-500"
+                  onChange={(event) => setReason(event.target.value)}
+                  className="w-full p-3 bg-[#1b1b1e] rounded-xl text-xs text-white focus:outline-none transition-all border border-white/10 focus:border-[#A7ACD9] focus:ring-1 focus:ring-[#A7ACD9]"
                 >
-                  <option value="" disabled>Select a reason...</option>
-                  <option value="Creator unresponsive">Creator is unresponsive</option>
-                  <option value="Missed deadline">Creator missed the deadline</option>
-                  <option value="Quality issues">Poor quality / Doesn&apos;t match requirements</option>
-                  <option value="Mutual agreement">Mutual agreement</option>
-                  <option value="Other">Other</option>
+                  <option value="" disabled className="bg-[#1b1b1e] text-slate-400">Chọn lý do hủy đơn...</option>
+                  <option value="Creator unresponsive" className="bg-[#1b1b1e] text-white py-2">Creator không phản hồi</option>
+                  <option value="Missed deadline" className="bg-[#1b1b1e] text-white py-2">Creator đã quá hạn hoàn thành</option>
+                  <option value="Quality issues" className="bg-[#1b1b1e] text-white py-2">Chất lượng không đạt yêu cầu hoặc không đúng thỏa thuận</option>
+                  <option value="Mutual agreement" className="bg-[#1b1b1e] text-white py-2">Hai bên đồng ý hủy đơn</option>
+                  <option value="Other" className="bg-[#1b1b1e] text-white py-2">Lý do khác</option>
                 </select>
               </div>
 
@@ -112,7 +148,7 @@ export default function CancelRefundModal({
                 <CheckCircle2 className="w-6 h-6" />
               </div>
               <h4 className="text-sm font-bold text-white">Cancellation Processed!</h4>
-              <p className="text-xs text-slate-400">The remaining Escrow balance has been refunded.</p>
+              <p className="text-xs text-slate-400">{resultMessage}</p>
             </div>
           )}
         </div>
@@ -125,7 +161,12 @@ export default function CancelRefundModal({
           >
             {success ? 'Close' : 'Keep Commission'}
           </button>
-          {!success && (
+          {!success && pendingRequest && canRespond ? (
+            <>
+              <button onClick={() => handleResponse(false)} disabled={isSubmitting} className="px-4 py-2 rounded-xl text-xs font-semibold border border-white/10 text-slate-300 hover:bg-white/5 disabled:opacity-50">Từ chối</button>
+              <button onClick={() => handleResponse(true)} disabled={isSubmitting} className="px-5 py-2 rounded-xl text-xs font-semibold bg-red-500 text-white hover:bg-red-600 disabled:opacity-50">Đồng ý hủy</button>
+            </>
+          ) : !success && !pendingRequest ? (
             <button
               onClick={handleCancel}
               disabled={isSubmitting || !reason}
@@ -133,7 +174,7 @@ export default function CancelRefundModal({
             >
               {isSubmitting ? 'Processing...' : 'Confirm Cancel & Refund'}
             </button>
-          )}
+          ) : null}
         </div>
       </div>
     </div>

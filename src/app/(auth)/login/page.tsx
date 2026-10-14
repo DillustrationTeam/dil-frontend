@@ -27,12 +27,10 @@ const loginSchema = z.object({
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 const seedAccounts = [
-  { label: 'Client', email: 'client1@seed.dillustration.art' },
-  { label: 'Creator', email: 'artist1@seed.dillustration.art' },
-  { label: 'Moderator', email: 'moderator@seed.dillustration.art' },
-  { label: 'Admin', email: 'admin@seed.dillustration.art' },
+  { label: 'Client', email: 'client.demo@dillustration.test', password: 'Demo@123456' },
+  { label: 'Creator', email: 'creator.demo@dillustration.test', password: 'Demo@123456' },
+  { label: 'Admin', email: 'admin.demo@dillustration.local', password: 'Seed123!' },
 ] as const;
-const SEED_PASSWORD = 'Seed@123456';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -75,9 +73,9 @@ export default function LoginPage() {
     resolver: zodResolver(loginSchema),
   });
 
-  const fillSeedAccount = (email: string) => {
-    setValue('emailOrUsername', email, { shouldValidate: true });
-    setValue('password', SEED_PASSWORD, { shouldValidate: true });
+  const fillSeedAccount = (account: (typeof seedAccounts)[number]) => {
+    setValue('emailOrUsername', account.email, { shouldValidate: true });
+    setValue('password', account.password, { shouldValidate: true });
   };
 
   const onSubmit = async (data: LoginFormValues) => {
@@ -269,7 +267,7 @@ export default function LoginPage() {
                   <button
                     key={account.email}
                     type="button"
-                    onClick={() => fillSeedAccount(account.email)}
+                    onClick={() => fillSeedAccount(account)}
                     className="rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5 text-xs font-medium text-[#A7ACD9] hover:bg-white/10 transition-colors cursor-pointer"
                   >
                     {account.label}

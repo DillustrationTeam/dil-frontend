@@ -21,7 +21,6 @@ import {
   Paperclip,
   RefreshCw,
   Send,
-  Ban,
   Scale,
   ShieldAlert,
   ShieldCheck,
@@ -47,6 +46,7 @@ import FinalDeliveryModal from '@/components/modals/FinalDeliveryModal';
 import ReviewRatingModal from '@/components/modals/ReviewRatingModal';
 import CancelRefundModal from '@/components/modals/CancelRefundModal';
 import RaiseDisputeModal from '@/components/modals/RaiseDisputeModal';
+import WorkroomTermsModal from '@/components/modals/WorkroomTermsModal';
 
 /** Tin nhắn đã hiện trên UI nhưng server chưa phát lại (chờ SignalR). */
 interface PendingMessage {
@@ -103,6 +103,8 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [showDisputeModal, setShowDisputeModal] = useState(false);
+  const [acceptingTerms, setAcceptingTerms] = useState(false);
+  const [termsError, setTermsError] = useState<string | null>(null);
 
   // AI Deadline Risk Predictor
   const [predictingRisk, setPredictingRisk] = useState(false);
@@ -149,11 +151,13 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
     return () => window.removeEventListener('resize', checkSpace);
   }, []);
 
-  const isCreator = useMemo(() => {
-    if (!userId) return false;
+  const currentMemberRole = useMemo(() => {
+    if (!userId) return undefined;
     const member = room?.members.find((m) => m.userId.toLowerCase() === userId.toLowerCase());
-    return member?.memberRole?.toLowerCase() === 'creator';
+    return member?.memberRole?.toLowerCase();
   }, [room, userId]);
+
+  const isCreator = currentMemberRole === 'creator';
 
   const partnerDisplayName = useMemo(() => {
     if (!room?.members || !userId) return isCreator ? 'Khách hàng' : 'Họa sĩ';
@@ -161,9 +165,36 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
     return partner?.fullName || (isCreator ? 'Khách hàng' : 'Họa sĩ');
   }, [room, userId, isCreator]);
 
-  const isClient = !isCreator;
+  const isClient = currentMemberRole === 'client';
   const activeRole: 'client' | 'creator' = isCreator ? 'creator' : 'client';
   const commissionStatus: CommissionStatus = commission?.status ?? 'InProgress';
+
+  const acceptedTermsVersion = currentMemberRole === 'client'
+    ? commission?.clientTermsVersion
+    : currentMemberRole === 'creator'
+      ? commission?.creatorTermsVersion
+      : null;
+  const currentTermsVersion = commission?.currentWorkroomTermsVersion ?? '1.0';
+  const showTermsModal = Boolean(
+    commission
+    && commission.status !== 'Completed'
+    && commission.status !== 'Cancelled'
+    && (currentMemberRole === 'client' || currentMemberRole === 'creator')
+    && acceptedTermsVersion !== currentTermsVersion,
+  );
+
+  const handleAcceptWorkroomTerms = useCallback(async () => {
+    if (!commission || acceptingTerms) return;
+    setAcceptingTerms(true);
+    setTermsError(null);
+    try {
+      setCommission(await commissionService.acceptWorkroomTerms(commission.id));
+    } catch (err: unknown) {
+      setTermsError(extractErrorMessage(err, 'Không thể ghi nhận xác nhận điều khoản.'));
+    } finally {
+      setAcceptingTerms(false);
+    }
+  }, [commission, acceptingTerms]);
 
   const isCommissionEnded = useMemo(() => {
     return (
@@ -658,11 +689,13 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
               </div>
             </div>
 
-            {/* DẢI TAB CỐ ĐỊNH MÉP TRÁI (KHIẾU NẠI - TỰ ĐỘNG THU GỌN NẾU BỊ KHUẤT) */}
+            {/* DẢI TAB CỐ ĐỊNH MÉP TRÁI (HỦY ĐƠN - TỰ ĐỘNG THU GỌN NẾU BỊ KHUẤT) */}
             <div className="hidden lg:flex absolute right-full bottom-20 flex-col gap-3 z-50 items-end">
               <button
                 type="button"
                 onClick={() => setShowCancelModal(true)}
+                disabled={commissionStatus === 'Completed' || commissionStatus === 'Cancelled' || commissionStatus === 'Disputed'}
+                title="Hủy đơn hàng thông thường"
                 className={`group relative h-[44px] bg-[#1C202D] hover:bg-[#232838] border border-r-0 rounded-l-lg flex items-center justify-end pr-3.5 shadow-xl [clip-path:polygon(10px_0,100%_0,100%_100%,0_100%,0_10px)] [transition:width_0.3s_cubic-bezier(0.34,1.3,0.64,1),background-color_0.2s_ease,border-color_0.2s_ease] cursor-pointer ${!hasLeftSpace
                     ? showCancelModal
                       ? 'w-[46px] border-rose-400 bg-[#232838] shadow-[0_0_12px_rgba(244,63,94,0.35)]'
@@ -680,16 +713,14 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                       : 'hidden'
                     }`}
                 >
-                  Khiếu nại
+                  Hủy đơn
                 </span>
                 <div className="flex items-center justify-center shrink-0 w-5">
                   <CircleAlert size={18} className="text-rose-400" />
                 </div>
-
-                {/* Smart Tooltip khi ở dạng thu gọn (khi bị khuất/hẹp lề) */}
                 {!hasLeftSpace && (
                   <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none bg-[#161926]/95 border border-rose-500/40 text-rose-300 text-xs font-bold px-2.5 py-1 rounded-lg shadow-2xl backdrop-blur-md whitespace-nowrap z-50">
-                    Khiếu nại / Hỗ trợ
+                    Hủy đơn thông thường
                   </div>
                 )}
               </button>
@@ -867,18 +898,6 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                       </button>
                     )}
 
-                    {/* Nút Hủy đơn hàng (Icon Ban Hủy đơn) */}
-                    {commissionStatus !== 'Completed' && commissionStatus !== 'Cancelled' && commissionStatus !== 'Disputed' && (
-                      <button
-                        type="button"
-                        onClick={() => setShowCancelModal(true)}
-                        title="Hủy đơn hàng & Hoàn tiền Escrow"
-                        className="inline-flex items-center gap-1.5 rounded-full border border-rose-500/40 bg-rose-500/10 px-2.5 py-1 text-[11px] font-semibold text-rose-300 hover:bg-rose-500/20 transition"
-                      >
-                        <Ban size={12} className="text-rose-400" /> Hủy đơn
-                      </button>
-                    )}
-
                     <button
                       type="button"
                       onClick={refresh}
@@ -901,6 +920,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                       <p className="text-[11px] text-amber-100/90 leading-relaxed mt-0.5">
                         Hồ sơ khiếu nại đã được chuyển đến Ban Trọng tài sàn để thẩm định lịch sử trao đổi và sản phẩm. Tiền ký quỹ Escrow được tạm khóa an toàn cho đến khi có phán quyết chính thức.
                       </p>
+                      {commission?.dispute && <div className="mt-3 space-y-1.5 border-t border-amber-400/20 pt-3 text-[11px]"><p><strong>Lý do:</strong> {commission.dispute.reason}</p><p><strong>Ngày tạo:</strong> {new Date(commission.dispute.createdAt).toLocaleString('vi-VN')}</p><p><strong>Trạng thái:</strong> {commission.dispute.status}{commission.dispute.resolution ? ` · ${commission.dispute.resolution}` : ''}</p>{commission.dispute.adminNote && <p><strong>Kết luận:</strong> {commission.dispute.adminNote}</p>}{commission.dispute.evidenceUrls && <div><strong>Bằng chứng:</strong> <div className="mt-1 flex flex-wrap gap-2">{commission.dispute.evidenceUrls.split(',').filter(Boolean).map((url) => <a key={url} href={url.trim()} target="_blank" rel="noreferrer" className="underline hover:text-white">Mở tệp</a>)}</div></div>}</div>}
                     </div>
                   </div>
                 )}
@@ -1206,22 +1226,6 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                     </div>
                   </button>
 
-                  {/* Tab 3: KHIẾU NẠI TRANH CHẤP */}
-                  {commissionStatus !== 'Completed' && commissionStatus !== 'Cancelled' && commissionStatus !== 'Disputed' && (
-                    <button
-                      type="button"
-                      onClick={() => setShowDisputeModal(true)}
-                      title="Gửi khiếu nại tranh chấp với Trọng tài"
-                      className="group relative w-[40px] sm:w-[42px] h-[52px] hover:h-[115px] bg-[#1C202D] hover:bg-[#232838] border border-t-0 border-amber-500/40 hover:border-amber-400 cursor-pointer overflow-hidden flex flex-col items-center justify-end pb-3 shadow-lg [clip-path:polygon(0_0,100%_0,100%_calc(100%-10px),50%_100%,0_calc(100%-10px))] [transition:height_0.32s_cubic-bezier(0.34,1.45,0.7,1),background-color_0.25s_ease,border-color_0.25s_ease]"
-                    >
-                      <span className="[writing-mode:vertical-rl] [text-orientation:mixed] rotate-180 text-[10px] font-extrabold tracking-wider transition-opacity duration-200 mb-2 pointer-events-none whitespace-nowrap select-none opacity-0 group-hover:opacity-100 text-amber-300">
-                        KHIẾU NẠI
-                      </span>
-                      <div className="flex items-center justify-center shrink-0">
-                        <Scale size={18} className="text-amber-400 group-hover:text-amber-300" />
-                      </div>
-                    </button>
-                  )}
                 </div>
 
                 {/* VIEW 1: DEFAULT STUDIO CANVAS VIEW */}
@@ -1703,6 +1707,8 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
             isOpen={showCancelModal}
             onClose={() => setShowCancelModal(false)}
             commissionId={room.commissionId}
+            commission={commission}
+            currentUserId={userId}
             onSuccess={() => {
               setShowCancelModal(false);
               refresh();
@@ -1719,6 +1725,17 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
               void chat.sendMessage('⚖️ Đã gửi yêu cầu khiếu nại tranh chấp tới Trọng tài sàn.', 'SystemEvent').catch(() => null);
             }}
           />
+
+          {commission && (currentMemberRole === 'client' || currentMemberRole === 'creator') && (
+            <WorkroomTermsModal
+              isOpen={showTermsModal}
+              role={currentMemberRole}
+              commission={commission}
+              isSubmitting={acceptingTerms}
+              error={termsError}
+              onConfirm={handleAcceptWorkroomTerms}
+            />
+          )}
         </>
       )}
     </div>
