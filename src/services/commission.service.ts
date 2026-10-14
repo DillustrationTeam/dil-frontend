@@ -53,6 +53,11 @@ export const commissionService = {
     return res.data.data as Commission;
   },
 
+  acceptWorkroomTerms: async (id: string) => {
+    const res = await apiClient.post<ApiResponse<Commission>>(`/commissions/${id}/workroom-terms/accept`);
+    return res.data.data as Commission;
+  },
+
   submitMilestone: async (id: string, milestoneId: string, file: File, creatorNote?: string) => {
     const body = new FormData();
     body.append('file', file);
@@ -79,6 +84,10 @@ export const commissionService = {
   },
   cancelWithPolicy: async (id: string, payload: { cancellationReason: string; details?: string }) => {
     const res = await apiClient.post<ApiResponse<Commission>>(`/commissions/${id}/cancel`, payload);
+    return res.data.data as Commission;
+  },
+  respondCancellationRequest: async (id: string, approve: boolean) => {
+    const res = await apiClient.patch<ApiResponse<Commission>>(`/commissions/${id}/cancellation-request`, { approve });
     return res.data.data as Commission;
   },
   createReview: async (id: string, payload: { rating: number; comment?: string; attachedImageUrls?: string[] }) => {

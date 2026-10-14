@@ -54,6 +54,18 @@ export interface Commission {
   deadlineAt?: string | null;
   cancellationReason?: string | null;
   cancellationDetails?: string | null;
+  cancellationRequestedById?: string | null;
+  cancellationRequestedByRole?: 'Client' | 'Creator' | null;
+  cancellationRequestStatus?: 'Pending' | 'Approved' | 'Rejected' | 'Expired' | null;
+  cancellationRequestedAt?: string | null;
+  cancellationRequestExpiresAt?: string | null;
+  isOverdue?: boolean;
+  overdueGraceEndsAt?: string | null;
+  clientTermsAcceptedAt?: string | null;
+  clientTermsVersion?: string | null;
+  creatorTermsAcceptedAt?: string | null;
+  creatorTermsVersion?: string | null;
+  currentWorkroomTermsVersion?: string;
   milestones?: Milestone[];
   dispute?: Dispute | null;
   createdAt: string;

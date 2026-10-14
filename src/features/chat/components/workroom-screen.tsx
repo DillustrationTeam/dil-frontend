@@ -46,6 +46,7 @@ import FinalDeliveryModal from '@/components/modals/FinalDeliveryModal';
 import ReviewRatingModal from '@/components/modals/ReviewRatingModal';
 import CancelRefundModal from '@/components/modals/CancelRefundModal';
 import RaiseDisputeModal from '@/components/modals/RaiseDisputeModal';
+import WorkroomTermsModal from '@/components/modals/WorkroomTermsModal';
 
 /** Tin nhắn đã hiện trên UI nhưng server chưa phát lại (chờ SignalR). */
 interface PendingMessage {
@@ -102,6 +103,8 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [showDisputeModal, setShowDisputeModal] = useState(false);
+  const [acceptingTerms, setAcceptingTerms] = useState(false);
+  const [termsError, setTermsError] = useState<string | null>(null);
 
   // AI Deadline Risk Predictor
   const [predictingRisk, setPredictingRisk] = useState(false);
@@ -165,6 +168,33 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
   const isClient = currentMemberRole === 'client';
   const activeRole: 'client' | 'creator' = isCreator ? 'creator' : 'client';
   const commissionStatus: CommissionStatus = commission?.status ?? 'InProgress';
+
+  const acceptedTermsVersion = currentMemberRole === 'client'
+    ? commission?.clientTermsVersion
+    : currentMemberRole === 'creator'
+      ? commission?.creatorTermsVersion
+      : null;
+  const currentTermsVersion = commission?.currentWorkroomTermsVersion ?? '1.0';
+  const showTermsModal = Boolean(
+    commission
+    && commission.status !== 'Completed'
+    && commission.status !== 'Cancelled'
+    && (currentMemberRole === 'client' || currentMemberRole === 'creator')
+    && acceptedTermsVersion !== currentTermsVersion,
+  );
+
+  const handleAcceptWorkroomTerms = useCallback(async () => {
+    if (!commission || acceptingTerms) return;
+    setAcceptingTerms(true);
+    setTermsError(null);
+    try {
+      setCommission(await commissionService.acceptWorkroomTerms(commission.id));
+    } catch (err: unknown) {
+      setTermsError(extractErrorMessage(err, 'Không thể ghi nhận xác nhận điều khoản.'));
+    } finally {
+      setAcceptingTerms(false);
+    }
+  }, [commission, acceptingTerms]);
 
   const isCommissionEnded = useMemo(() => {
     return (
@@ -1677,6 +1707,8 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
             isOpen={showCancelModal}
             onClose={() => setShowCancelModal(false)}
             commissionId={room.commissionId}
+            commission={commission}
+            currentUserId={userId}
             onSuccess={() => {
               setShowCancelModal(false);
               refresh();
@@ -1693,6 +1725,17 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
               void chat.sendMessage('⚖️ Đã gửi yêu cầu khiếu nại tranh chấp tới Trọng tài sàn.', 'SystemEvent').catch(() => null);
             }}
           />
+
+          {commission && (currentMemberRole === 'client' || currentMemberRole === 'creator') && (
+            <WorkroomTermsModal
+              isOpen={showTermsModal}
+              role={currentMemberRole}
+              commission={commission}
+              isSubmitting={acceptingTerms}
+              error={termsError}
+              onConfirm={handleAcceptWorkroomTerms}
+            />
+          )}
         </>
       )}
     </div>
