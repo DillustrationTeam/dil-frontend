@@ -142,6 +142,12 @@ export function CreatorApplicationWizard({
       return hasManualLink || form.portfolioUploads.length > 0;
     }
 
+    if (currentStep.key === 'style') {
+      const hasStyle = form.primaryStyle.trim().length > 0;
+      const hasSpeedpaint = form.speedpaintVideoUrls.some((link) => link.trim().length > 0);
+      return hasStyle && hasSpeedpaint;
+    }
+
     return true;
   }, [currentStep.key, form]);
 
@@ -240,7 +246,13 @@ export function CreatorApplicationWizard({
 
   const handleSubmit = async () => {
     if (!canContinue) {
-      toast.error('Please complete the final step before submitting.');
+      if (!form.primaryStyle.trim()) {
+        toast.error('Vui lòng chọn hoặc nhập phong cách vẽ chính.');
+      } else if (!form.speedpaintVideoUrls.some((link) => link.trim().length > 0)) {
+        toast.error('Vui lòng cung cấp link video speedpaint minh chứng.');
+      } else {
+        toast.error('Please complete this step before continuing.');
+      }
       return;
     }
 
@@ -258,8 +270,8 @@ export function CreatorApplicationWizard({
         portfolioLinks,
         idProofUrl: form.idProofUrl,
         idProofBackUrl: form.idProofBackUrl,
-        primaryStyle: form.primaryStyle.trim() || undefined,
-        speedpaintVideoUrls: speedpaintVideoUrls.length > 0 ? speedpaintVideoUrls : undefined,
+        primaryStyle: form.primaryStyle.trim(),
+        speedpaintVideoUrls,
       };
 
       if (mode === 'edit') {
@@ -433,12 +445,14 @@ export function CreatorApplicationWizard({
         {currentStep.key === 'style' && (
           <>
             <div className="space-y-2">
-              <label className="text-xs uppercase tracking-wider text-[#C7C5CF]">Phong cách chính</label>
+              <label className="text-xs uppercase tracking-wider text-[#C7C5CF]">
+                Phong cách chính <span className="text-red-400">*</span>
+              </label>
               <input
                 value={form.primaryStyle}
                 onChange={(event) => updatePrimaryStyle(event.target.value)}
                 className={inputClass}
-                placeholder="Chọn hoặc gõ phong cách của bạn"
+                placeholder="Chọn hoặc gõ phong cách của bạn (bắt buộc)"
                 list="primary-style-suggestions"
               />
               <datalist id="primary-style-suggestions">
@@ -450,7 +464,7 @@ export function CreatorApplicationWizard({
 
             <div className="space-y-3">
               <label className="text-xs uppercase tracking-wider text-[#C7C5CF]">
-                Link video Speedpaint (minh chứng vẽ tay, tuỳ chọn)
+                Link video Speedpaint (minh chứng vẽ tay) <span className="text-red-400">*</span>
               </label>
               {form.speedpaintVideoUrls.map((link, index) => (
                 <div key={index} className="flex gap-2">
