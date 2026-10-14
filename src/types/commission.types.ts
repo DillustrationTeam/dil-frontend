@@ -32,9 +32,12 @@ export interface Milestone {
 }
 
 export interface Commission {
+  discountAmount: number;
   id: string;
   clientId: string;
   creatorId: string;
+  licenseType: 'Personal' | 'Commercial';
+  licenseMultiplierApplied: number;
   title: string;
   description?: string;
   status: CommissionStatus;
@@ -42,20 +45,50 @@ export interface Commission {
   price?: number;
   totalPrice?: number;
   finalPrice?: number;
-  discountAmount?: number;
   escrowHeldAmount?: number;
+  disbursedAmount?: number;
   escrowStatus?: string;
   currentStage?: number;
   clientName?: string;
   creatorName?: string;
-  disbursedAmount?: number;
   deadlineAt?: string | null;
   cancellationReason?: string | null;
   cancellationDetails?: string | null;
+  cancellationRequestedById?: string | null;
+  cancellationRequestedByRole?: 'Client' | 'Creator' | null;
+  cancellationRequestStatus?: 'Pending' | 'Approved' | 'Rejected' | 'Expired' | null;
+  cancellationRequestedAt?: string | null;
+  cancellationRequestExpiresAt?: string | null;
+  isOverdue?: boolean;
+  overdueGraceEndsAt?: string | null;
+  clientTermsAcceptedAt?: string | null;
+  clientTermsVersion?: string | null;
+  creatorTermsAcceptedAt?: string | null;
+  creatorTermsVersion?: string | null;
+  currentWorkroomTermsVersion?: string;
   milestones?: Milestone[];
   review?: Review | null;
+  dispute?: Dispute | null;
   createdAt: string;
 }
+
+export interface Dispute {
+  id: string;
+  commissionId: string;
+  raisedById: string;
+  reason: string;
+  evidenceUrls?: string | null;
+  status: string;
+  resolution?: string | null;
+  clientRefundAmount?: number | null;
+  artistPayAmount?: number | null;
+  clientRefundPercent?: number | null;
+  adminNote?: string | null;
+  resolvedAt?: string | null;
+  createdAt: string;
+}
+
+export type CommissionDispute = Dispute;
 
 export interface RespondToCommissionPayload {
   action: 'Accept' | 'Reject' | 'Negotiate';
@@ -66,12 +99,12 @@ export interface RespondToCommissionPayload {
 }
 
 export interface CreateCommissionPayload {
+  voucherCode?: string;
   creatorId: string;
   packageId: string;
-  licenseType?: 'Personal' | 'Commercial';
+  licenseType: 'Personal' | 'Commercial';
   title: string;
   description: string;
-  voucherCode?: string;
   deadlineAt?: string;
 }
 
@@ -85,22 +118,6 @@ export interface Review {
   attachedImages?: string[];
   respondedAt?: string;
   createdAt: string;
-}
-
-export interface CommissionDispute {
-  id: string;
-  commissionId: string;
-  raisedById: string;
-  raisedByName?: string | null;
-  reason: string;
-  evidenceUrls?: string | null;
-  status: string;
-  resolution?: string | null;
-  clientRefundAmount?: number | null;
-  artistPayAmount?: number | null;
-  adminNote?: string | null;
-  createdAt: string;
-  resolvedAt?: string | null;
 }
 
 export type CancelRefundPolicy = 'Full' | 'Partial' | 'EscrowRemainder';

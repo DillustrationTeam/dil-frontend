@@ -13,7 +13,8 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   const pathname = usePathname();
   const router = useRouter();
   const isCreator = useAuthStore(state => state.roles.some(role => role.toLowerCase() === 'creator'));
-  const activeRole = pathname?.startsWith('/creator') ? 'creator' : currentRole;
+  const activeRole = pathname?.startsWith('/creator/') ? 'creator' : currentRole;
+  const isProfilePage = pathname === '/profile' || pathname?.startsWith('/creators/');
 
   const handleRoleChange = (role: 'client' | 'creator') => {
     setCurrentRole(role);
@@ -28,11 +29,11 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         onRoleChange={handleRoleChange}
       />
 
-      <nav aria-label="Mobile navigation" className="flex gap-2 overflow-x-auto border-b border-white/10 px-4 py-2 text-xs md:hidden">
+      {!isProfilePage && <nav aria-label="Mobile navigation" className="flex gap-2 overflow-x-auto border-b border-white/10 px-4 py-2 text-xs md:hidden">
         <Link href="/client/commissions" className="shrink-0 rounded-lg bg-white/5 px-3 py-2">My commissions</Link>
         {isCreator && <Link href="/creator/commissions" className="shrink-0 rounded-lg bg-white/5 px-3 py-2">Creator studio</Link>}
         <Link href="/wallet" className="shrink-0 rounded-lg bg-white/5 px-3 py-2">Wallet</Link>
-      </nav>
+      </nav>}
 
       {/* Main Body with Sidebar + Content */}
       <div className="flex-1 flex w-full relative">
@@ -45,7 +46,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         />
 
         {/* Dynamic Page Content */}
-        <main className="flex-1 min-w-0 p-4 lg:p-8 overflow-y-auto">
+        <main className="flex-1 min-w-0 overflow-y-auto p-4 lg:p-8">
           {children}
         </main>
       </div>

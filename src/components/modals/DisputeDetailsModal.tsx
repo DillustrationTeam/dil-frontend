@@ -30,7 +30,7 @@ export default function DisputeDetailsModal({ isOpen, onClose, commissionId }: D
   useEffect(() => {
     if (!isOpen) return;
     let active = true;
-    commissionService.getDisputeByCommissionId(commissionId)
+    commissionService.getDispute(commissionId)
       .then((result) => { if (active) setDispute(result); })
       .catch(() => { if (active) setError('Không tải được hồ sơ tranh chấp.'); })
       .finally(() => { if (active) setLoading(false); });

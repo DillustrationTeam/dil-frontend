@@ -1,99 +1,459 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
-import { Check, LoaderCircle, X } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { apiClient } from '@/lib/api-client';
-import { getErrorMessage } from '@/lib/api-error';
-import type { ApiResponse } from '@/types/api.types';
+import { creatorApplicationReviewService } from '@/features/admin/services/creator-application-review.service';
+import { isPortfolioImageUrl } from '@/lib/portfolio-link';
+import { EmptyFieldNote } from '@/components/empty-field-note';
+import { ImageLightbox, LightboxImage } from '@/components/image-lightbox';
+import {
+  ApplicationStatusName,
+  ApplicationStatusValue,
+  CreatorApplicationDto,
+  ListApplicationsMeta,
+} from '@/features/admin/types/creator-application-review.types';
 
-type ApplicationStatus = 'Pending' | 'Approved' | 'Rejected' | 'AdditionalProofRequested';
-interface CreatorApplication {
-  id: string;
-  applicantName: string;
-  applicantUsername: string;
-  applicantEmail: string;
-  primaryStyle?: string | null;
-  portfolioLinks: string[];
-  speedpaintVideoUrls: string[];
-  socialLinks?: string[] | null;
-  idProofUrl: string;
-  idProofBackUrl: string;
-  status: ApplicationStatus;
-  reviewNote?: string | null;
-  submittedAt: string;
-}
+const tabs: Array<{ key: ApplicationStatusName | 'All'; label: string }> = [
+  { key: 'Pending', label: 'Pending' },
+  { key: 'AdditionalProofRequested', label: 'Additional Proof' },
+  { key: 'Approved', label: 'Approved' },
+  { key: 'Rejected', label: 'Rejected' },
+  { key: 'All', label: 'All' },
+];
 
-const statuses: Array<'All' | ApplicationStatus> = ['All', 'Pending', 'AdditionalProofRequested', 'Approved', 'Rejected'];
+const statusBadgeClass: Record<ApplicationStatusName, string> = {
+  Pending: 'bg-purple-500/20 text-purple-300 border-purple-500/30',
+  Approved: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
+  Rejected: 'bg-red-500/20 text-red-300 border-red-500/30',
+  AdditionalProofRequested: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
+};
+
+type PendingAction = 'reject' | 'more-proof' | null;
 
 export function CreatorApplicationReviewPanel() {
-  const [items, setItems] = useState<CreatorApplication[]>([]);
-  const [selected, setSelected] = useState<CreatorApplication | null>(null);
-  const [filter, setFilter] = useState<'All' | ApplicationStatus>('Pending');
-  const [loadedFilter, setLoadedFilter] = useState<'All' | ApplicationStatus | null>(null);
-  const [note, setNote] = useState('');
-  const [saving, setSaving] = useState(false);
-  const loading = loadedFilter !== filter;
+  const [statusFilter, setStatusFilter] = useState<ApplicationStatusName | 'All'>('Pending');
+  const [applications, setApplications] = useState<CreatorApplicationDto[]>([]);
+  const [meta, setMeta] = useState<ListApplicationsMeta | null>(null);
+  const [page, setPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [reviewNote, setReviewNote] = useState('');
+  const [pendingAction, setPendingAction] = useState<PendingAction>(null);
+  const [grantBadge, setGrantBadge] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
-  const loadApplications = useCallback(async () => {
+  const selectedApplication = useMemo(
+    () => applications.find((application) => application.id === selectedId) ?? null,
+    [applications, selectedId]
+  );
+
+  // Gộp tất cả ảnh của đơn (CCCD trước/sau + sản phẩm mẫu upload) thành 1 gallery để
+  // moderator bấm xem phóng to và dùng mũi tên duyệt qua hết ảnh của đơn đó.
+  const galleryImages = useMemo<LightboxImage[]>(() => {
+    if (!selectedApplication) return [];
+    return [
+      { src: selectedApplication.idProofUrl, alt: 'Mặt trước CCCD' },
+      { src: selectedApplication.idProofBackUrl, alt: 'Mặt sau CCCD' },
+      ...selectedApplication.portfolioLinks
+        .filter((link) => isPortfolioImageUrl(link))
+        .map((link) => ({ src: link, alt: 'Portfolio sample' })),
+    ];
+  }, [selectedApplication]);
+
+  useEffect(() => {
+    const loadApplications = async () => {
+      setIsLoading(true);
+      try {
+        const result = await creatorApplicationReviewService.listApplications(statusFilter, page, 10);
+        setApplications(result.items);
+        setMeta(result.meta);
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : 'Failed to load applications.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadApplications();
+  }, [statusFilter, page, reloadKey]);
+
+  const resetSelection = () => {
+    setSelectedId(null);
+    setReviewNote('');
+    setPendingAction(null);
+    setGrantBadge(true);
+    setLightboxIndex(null);
+  };
+
+  const handleSelect = (id: string) => {
+    setSelectedId(id);
+    setReviewNote('');
+    setPendingAction(null);
+    setGrantBadge(true);
+    setLightboxIndex(null);
+  };
+
+  const submitReview = async (status: number, note?: string) => {
+    if (!selectedApplication) return;
+    setIsSubmitting(true);
     try {
-      const response = await apiClient.get<ApiResponse<CreatorApplication[]>>('/creator-applications', {
-        params: { status: filter === 'All' ? undefined : filter, page: 1, pageSize: 50 },
-      });
-      if (response.data.error) throw new Error(response.data.error.details?.join(', ') || response.data.error.detail || 'Không tải được hồ sơ.');
-      const applications = response.data.data ?? [];
-      setItems(applications);
-      setSelected((current) => current ? applications.find((item) => item.id === current.id) ?? null : applications[0] ?? null);
-    } catch (error) {
-      toast.error(getErrorMessage(error, 'Không tải được hồ sơ ứng tuyển.'));
-    } finally {
-      setLoadedFilter(filter);
-    }
-  }, [filter]);
-
-  useEffect(() => { void Promise.resolve().then(loadApplications); }, [loadApplications]);
-
-  const review = async (status: Exclude<ApplicationStatus, 'Pending'>) => {
-    if (!selected || saving) return;
-    if (status !== 'Approved' && !note.trim()) {
-      toast.error('Nhập ghi chú cho quyết định này.');
-      return;
-    }
-    setSaving(true);
-    try {
-      const response = await apiClient.put<ApiResponse<{ message: string }>>(`/creator-applications/${selected.id}/review`, {
+      await creatorApplicationReviewService.reviewApplication(selectedApplication.id, {
         status,
-        reviewNote: note.trim() || null,
-        grantAiVerifiedBadge: true,
+        reviewNote: note,
+        grantAiVerifiedBadge: grantBadge,
       });
-      if (response.data.error) throw new Error(response.data.error.details?.join(', ') || response.data.error.detail || 'Không lưu được quyết định.');
-      toast.success('Đã cập nhật trạng thái hồ sơ.');
-      setNote('');
-      await loadApplications();
+      toast.success('Đã cập nhật kết quả duyệt đơn.');
+      resetSelection();
+      setReloadKey((key) => key + 1);
     } catch (error) {
-      toast.error(getErrorMessage(error, 'Không lưu được quyết định.'));
+      toast.error(error instanceof Error ? error.message : 'Failed to review application.');
     } finally {
-      setSaving(false);
+      setIsSubmitting(false);
     }
   };
 
-  return (
-    <section className="mx-auto mt-8 grid max-w-7xl gap-5 px-6 pb-12 lg:grid-cols-[340px_minmax(0,1fr)]">
-      <aside className="rounded-xl border border-white/10 bg-white/[.03] p-4">
-        <div className="flex items-center justify-between gap-2"><h2 className="font-semibold text-white">Hồ sơ ứng tuyển</h2><select value={filter} onChange={(event) => setFilter(event.target.value as typeof filter)} className="rounded-lg border border-white/10 bg-[#1F2335] px-2 py-1.5 text-xs text-white">{statuses.map((status) => <option key={status} value={status}>{status}</option>)}</select></div>
-        {loading ? <p className="flex items-center gap-2 py-8 text-xs text-slate-400"><LoaderCircle className="h-4 w-4 animate-spin" />Đang tải…</p> : items.length ? <ul className="mt-4 divide-y divide-white/10">{items.map((item) => <li key={item.id}><button type="button" onClick={() => { setSelected(item); setNote(item.reviewNote ?? ''); }} className={`w-full py-3 text-left ${selected?.id === item.id ? 'text-white' : 'text-slate-400'}`}><span className="block truncate text-sm font-medium">{item.applicantName}</span><span className="mt-1 block text-xs">{item.applicantEmail} · {item.status}</span></button></li>)}</ul> : <p className="py-8 text-xs text-slate-400">Không có hồ sơ phù hợp.</p>}
-      </aside>
+  const handleApprove = () => submitReview(ApplicationStatusValue.Approved);
 
-      <div className="min-w-0 rounded-xl border border-white/10 bg-white/[.03] p-5 sm:p-7">
-        {selected ? <>
-          <div className="flex flex-wrap items-start justify-between gap-3"><div><h2 className="font-h1 text-xl font-bold text-white">{selected.applicantName}</h2><p className="mt-1 text-sm text-slate-400">@{selected.applicantUsername} · {selected.applicantEmail}</p></div><span className="rounded-md border border-white/10 px-2.5 py-1 text-xs text-[#C5C9F8]">{selected.status}</span></div>
-          <p className="mt-4 text-sm text-slate-300">Phong cách: {selected.primaryStyle || 'Chưa cung cấp'}</p>
-          <div className="mt-5 grid gap-3 sm:grid-cols-2"><a href={selected.idProofUrl} target="_blank" rel="noreferrer" className="relative aspect-[16/10] overflow-hidden rounded-lg border border-white/10"><Image src={selected.idProofUrl} alt="Mặt trước giấy tờ" fill unoptimized className="object-cover" /></a><a href={selected.idProofBackUrl} target="_blank" rel="noreferrer" className="relative aspect-[16/10] overflow-hidden rounded-lg border border-white/10"><Image src={selected.idProofBackUrl} alt="Mặt sau giấy tờ" fill unoptimized className="object-cover" /></a></div>
-          <div className="mt-5 space-y-2"><h3 className="text-xs font-semibold uppercase text-slate-400">Portfolio & speedpaint</h3>{[...selected.portfolioLinks, ...selected.speedpaintVideoUrls, ...(selected.socialLinks ?? [])].map((url) => <a key={url} href={url} target="_blank" rel="noreferrer" className="block truncate text-sm text-[#C5C9F8] underline">{url}</a>)}</div>
-          <div className="mt-6 border-t border-white/10 pt-5"><label htmlFor="application-review-note" className="text-xs font-semibold text-slate-300">Ghi chú xét duyệt</label><textarea id="application-review-note" rows={3} value={note} onChange={(event) => setNote(event.target.value)} maxLength={1000} className="mt-2 w-full rounded-lg border border-white/10 bg-black/20 p-3 text-sm text-white" placeholder="Bắt buộc khi yêu cầu bổ sung hoặc từ chối" /><div className="mt-3 flex flex-wrap gap-2"><button type="button" disabled={saving} onClick={() => void review('Approved')} className="inline-flex items-center gap-2 rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-slate-950 disabled:opacity-50"><Check className="h-4 w-4" />Duyệt</button><button type="button" disabled={saving} onClick={() => void review('AdditionalProofRequested')} className="rounded-lg border border-amber-300/30 px-4 py-2 text-sm text-amber-200 disabled:opacity-50">Yêu cầu bổ sung</button><button type="button" disabled={saving} onClick={() => void review('Rejected')} className="inline-flex items-center gap-2 rounded-lg border border-rose-300/30 px-4 py-2 text-sm text-rose-200 disabled:opacity-50"><X className="h-4 w-4" />Từ chối</button></div></div>
-        </> : <p className="py-12 text-center text-sm text-slate-400">Chọn một hồ sơ để xem chi tiết.</p>}
+  const handleConfirmNote = () => {
+    if (!reviewNote.trim()) {
+      toast.error('Vui lòng nhập lý do trước khi xác nhận.');
+      return;
+    }
+    if (pendingAction === 'reject') {
+      submitReview(ApplicationStatusValue.Rejected, reviewNote.trim());
+    } else if (pendingAction === 'more-proof') {
+      submitReview(ApplicationStatusValue.AdditionalProofRequested, reviewNote.trim());
+    }
+  };
+
+  const canReview =
+    selectedApplication?.status === 'Pending' || selectedApplication?.status === 'AdditionalProofRequested';
+
+  return (
+    <div className="mx-auto max-w-7xl">
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p className="text-xs uppercase tracking-[0.2em] text-red-300">Admin · SCR-21</p>
+          <h1 className="font-h1 mt-2 text-2xl font-extrabold text-white">Creator Verification & Application Queue</h1>
+        </div>
+        {meta && (
+          <span className="w-fit rounded-full border border-purple-500/30 bg-purple-500/20 px-3 py-1 text-xs font-bold text-purple-300">
+            {meta.pendingCount} Applicants Pending
+          </span>
+        )}
       </div>
-    </section>
+
+      <div className="mb-6 flex flex-wrap gap-2">
+        {tabs.map((tab) => (
+          <button
+            key={tab.key}
+            type="button"
+            onClick={() => {
+              setStatusFilter(tab.key);
+              setPage(1);
+              resetSelection();
+            }}
+            className={`rounded-full border px-4 py-2 text-xs font-bold transition ${
+              statusFilter === tab.key
+                ? 'border-red-500/40 bg-red-500/20 text-red-300'
+                : 'border-white/10 text-[#8A8FA9] hover:text-white'
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-12">
+        {/* Danh sách đơn */}
+        <div className="glass-container rounded-3xl border border-white/10 p-4 lg:col-span-5">
+          {isLoading ? (
+            <p className="p-6 text-center text-sm text-[#8A8FA9]">Loading...</p>
+          ) : applications.length === 0 ? (
+            <p className="p-6 text-center text-sm text-[#8A8FA9]">Không có đơn nào ở trạng thái này.</p>
+          ) : (
+            <ul className="space-y-2">
+              {applications.map((application) => (
+                <li key={application.id}>
+                  <button
+                    type="button"
+                    onClick={() => handleSelect(application.id)}
+                    className={`w-full rounded-2xl border p-4 text-left transition ${
+                      selectedId === application.id
+                        ? 'border-red-500/40 bg-red-500/10'
+                        : 'border-white/10 bg-white/5 hover:border-white/20'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-sm font-bold text-white">{application.applicantName}</p>
+                      <span
+                        className={`rounded-full border px-2 py-0.5 text-[10px] font-bold ${statusBadgeClass[application.status]}`}
+                      >
+                        {application.status}
+                      </span>
+                    </div>
+                    <p className="mt-1 text-xs text-[#8A8FA9]">{application.applicantEmail}</p>
+                    <p className="mt-1 text-[10px] uppercase tracking-wider text-[#8A8FA9]">
+                      {application.primaryStyle ?? 'Chưa ghi phong cách'} · {new Date(application.submittedAt).toLocaleDateString('vi-VN')}
+                    </p>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {meta && meta.totalPages > 1 && (
+            <div className="mt-4 flex items-center justify-between text-xs text-[#8A8FA9]">
+              <button
+                type="button"
+                disabled={page <= 1}
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                className="rounded-lg border border-white/10 px-3 py-1.5 disabled:opacity-40"
+              >
+                Previous
+              </button>
+              <span>
+                Page {meta.page} / {meta.totalPages}
+              </span>
+              <button
+                type="button"
+                disabled={page >= meta.totalPages}
+                onClick={() => setPage((p) => p + 1)}
+                className="rounded-lg border border-white/10 px-3 py-1.5 disabled:opacity-40"
+              >
+                Next
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Chi tiết đơn */}
+        <div className="glass-container rounded-3xl border border-white/10 p-6 lg:col-span-7">
+          {!selectedApplication ? (
+            <p className="py-16 text-center text-sm text-[#8A8FA9]">Chọn 1 đơn để xem chi tiết.</p>
+          ) : (
+            <div className="space-y-6">
+              <div className="flex flex-col gap-2 border-b border-white/10 pb-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h3 className="font-h1 text-lg font-bold text-white">{selectedApplication.applicantName}</h3>
+                  <p className="text-xs text-[#8A8FA9]">
+                    {selectedApplication.applicantEmail} · {selectedApplication.primaryStyle ?? 'Chưa ghi phong cách'}
+                  </p>
+                </div>
+                <span
+                  className={`w-fit rounded-full border px-3 py-1 text-xs font-bold ${statusBadgeClass[selectedApplication.status]}`}
+                >
+                  {selectedApplication.status}
+                </span>
+              </div>
+
+              <div className="space-y-2">
+                <span className="block text-xs font-bold text-white">Ảnh CCCD/CMND</span>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setLightboxIndex(0)}
+                    className="relative aspect-[16/10] overflow-hidden rounded-xl border border-white/10 transition hover:opacity-90"
+                  >
+                    <Image src={selectedApplication.idProofUrl} alt="Mặt trước CCCD" fill unoptimized className="object-cover" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setLightboxIndex(1)}
+                    className="relative aspect-[16/10] overflow-hidden rounded-xl border border-white/10 transition hover:opacity-90"
+                  >
+                    <Image src={selectedApplication.idProofBackUrl} alt="Mặt sau CCCD" fill unoptimized className="object-cover" />
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <span className="block text-xs font-bold text-white">Phong cách chính</span>
+                {selectedApplication.primaryStyle ? (
+                  <p className="text-xs text-[#A7ACD9]">{selectedApplication.primaryStyle}</p>
+                ) : (
+                  <EmptyFieldNote />
+                )}
+              </div>
+
+              <div className="space-y-3">
+                {selectedApplication.portfolioLinks.some((link) => isPortfolioImageUrl(link)) && (
+                  <div className="space-y-2">
+                    <span className="block text-xs font-bold text-white">Sản phẩm mẫu (ảnh upload)</span>
+                    <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
+                      {selectedApplication.portfolioLinks
+                        .filter((link) => isPortfolioImageUrl(link))
+                        .map((link, sampleIndex) => (
+                          <button
+                            key={link}
+                            type="button"
+                            onClick={() => setLightboxIndex(2 + sampleIndex)}
+                            className="relative aspect-square overflow-hidden rounded-xl border border-white/10 transition hover:opacity-90"
+                          >
+                            <Image src={link} alt="Portfolio sample" fill unoptimized className="object-cover" />
+                          </button>
+                        ))}
+                    </div>
+                  </div>
+                )}
+
+                <div className="space-y-2">
+                  <span className="block text-xs font-bold text-white">Link Portfolio (Behance/ArtStation...)</span>
+                  {selectedApplication.portfolioLinks.some((link) => !isPortfolioImageUrl(link)) ? (
+                    <ul className="space-y-1 text-xs">
+                      {selectedApplication.portfolioLinks
+                        .filter((link) => !isPortfolioImageUrl(link))
+                        .map((link) => (
+                          <li key={link}>
+                            <a href={link} target="_blank" rel="noreferrer" className="text-[#A7ACD9] hover:underline break-all">
+                              {link}
+                            </a>
+                          </li>
+                        ))}
+                    </ul>
+                  ) : (
+                    <EmptyFieldNote />
+                  )}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <span className="block text-xs font-bold text-white">Speedpaint proof</span>
+                {selectedApplication.speedpaintVideoUrls && selectedApplication.speedpaintVideoUrls.length > 0 ? (
+                  <ul className="space-y-1 text-xs">
+                    {selectedApplication.speedpaintVideoUrls.map((link) => (
+                      <li key={link}>
+                        <a href={link} target="_blank" rel="noreferrer" className="text-[#A7ACD9] hover:underline break-all">
+                          {link}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <EmptyFieldNote />
+                )}
+              </div>
+
+              {selectedApplication.socialLinks && selectedApplication.socialLinks.length > 0 && (
+                <div className="space-y-2">
+                  <span className="block text-xs font-bold text-white">Social links</span>
+                  <ul className="space-y-1 text-xs">
+                    {selectedApplication.socialLinks.map((link) => (
+                      <li key={link}>
+                        <a href={link} target="_blank" rel="noreferrer" className="text-[#A7ACD9] hover:underline break-all">
+                          {link}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {!canReview && selectedApplication.reviewedByModName && (
+                <div className="rounded-xl border border-white/10 bg-white/5 p-4 text-xs text-[#8A8FA9]">
+                  <p>
+                    Đã duyệt bởi <span className="text-white">{selectedApplication.reviewedByModName}</span> lúc{' '}
+                    {selectedApplication.reviewedAt && new Date(selectedApplication.reviewedAt).toLocaleString('vi-VN')}
+                  </p>
+                  {selectedApplication.reviewNote && <p className="mt-1">Ghi chú: {selectedApplication.reviewNote}</p>}
+                </div>
+              )}
+
+              {canReview && (
+                <div className="space-y-4 border-t border-white/10 pt-4">
+                  <label className="flex items-center gap-2 text-xs text-[#8A8FA9]">
+                    <input
+                      type="checkbox"
+                      checked={grantBadge}
+                      onChange={(event) => setGrantBadge(event.target.checked)}
+                      className="h-4 w-4 rounded border-white/20 bg-white/5"
+                    />
+                    Cấp huy hiệu xác thực vẽ tay (IsAiVerified) khi duyệt
+                  </label>
+
+                  {pendingAction && (
+                    <div className="space-y-2">
+                      <label className="text-xs uppercase tracking-wider text-[#8A8FA9]">
+                        Lý do {pendingAction === 'reject' ? 'từ chối' : 'yêu cầu bổ sung'} (bắt buộc)
+                      </label>
+                      <textarea
+                        value={reviewNote}
+                        onChange={(event) => setReviewNote(event.target.value)}
+                        className="min-h-[100px] w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none focus:border-red-400"
+                        placeholder="Nhập lý do..."
+                      />
+                    </div>
+                  )}
+
+                  <div className="flex flex-col gap-3 sm:flex-row">
+                    {!pendingAction ? (
+                      <>
+                        <button
+                          type="button"
+                          onClick={handleApprove}
+                          disabled={isSubmitting}
+                          className="flex-1 rounded-2xl bg-emerald-400 py-3.5 text-sm font-extrabold text-black transition hover:bg-emerald-300 disabled:opacity-60"
+                        >
+                          ✓ Approve & Grant Creator Role
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setPendingAction('more-proof')}
+                          disabled={isSubmitting}
+                          className="rounded-2xl border border-amber-500/40 bg-amber-500/20 px-5 py-3.5 text-sm font-bold text-amber-300 hover:bg-amber-500/30 disabled:opacity-60"
+                        >
+                          Request Additional Proof
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setPendingAction('reject')}
+                          disabled={isSubmitting}
+                          className="rounded-2xl border border-red-500/40 bg-red-500/20 px-5 py-3.5 text-sm font-bold text-red-300 hover:bg-red-500/30 disabled:opacity-60"
+                        >
+                          Reject
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <button
+                          type="button"
+                          onClick={handleConfirmNote}
+                          disabled={isSubmitting}
+                          className="flex-1 rounded-2xl bg-white py-3.5 text-sm font-extrabold text-[#1F2335] disabled:opacity-60"
+                        >
+                          {isSubmitting ? 'Đang gửi...' : 'Xác nhận'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setPendingAction(null);
+                            setReviewNote('');
+                          }}
+                          className="rounded-2xl border border-white/10 px-5 py-3.5 text-sm text-white"
+                        >
+                          Huỷ
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {lightboxIndex !== null && galleryImages.length > 0 && (
+        <ImageLightbox
+          images={galleryImages}
+          index={lightboxIndex}
+          onClose={() => setLightboxIndex(null)}
+          onNavigate={setLightboxIndex}
+        />
+      )}
+    </div>
   );
 }

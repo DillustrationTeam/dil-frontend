@@ -1,6 +1,6 @@
 import { apiClient } from '@/lib/api-client';
 import { ApiResponse } from '@/types/api.types';
-import { getErrorMessage } from '@/lib/api-error';
+import { getApiErrorMessage } from '@/lib/api-error';
 import { UserDto } from '@/types/auth.types';
 import { LinkedAccountsDto, SessionDto } from '@/features/profile-settings/types/security-settings.types';
 
@@ -9,7 +9,7 @@ export const securitySettingsService = {
     try {
       await apiClient.post<ApiResponse<{ message: string }>>('/auth/me/change-email/request-reauth');
     } catch (err) {
-      throw new Error(getErrorMessage(err, 'Không thể gửi mã xác thực.'));
+      throw new Error(getApiErrorMessage(err, 'Không thể gửi mã xác thực.'));
     }
   },
 
@@ -27,7 +27,7 @@ export const securitySettingsService = {
         reauthCode,
       });
     } catch (err) {
-      throw new Error(getErrorMessage(err, 'Không thể gửi mã xác minh.'));
+      throw new Error(getApiErrorMessage(err, 'Không thể gửi mã xác minh.'));
     }
   },
 
@@ -39,11 +39,11 @@ export const securitySettingsService = {
         currentSessionId,
       });
       if (response.data.error || !response.data.data) {
-        throw new Error(response.data.error?.details?.join(', ') || response.data.error?.detail || 'Không thể xác nhận đổi email.');
+        throw new Error(response.data.error?.detail || 'Không thể xác nhận đổi email.');
       }
       return response.data.data;
     } catch (err) {
-      throw new Error(getErrorMessage(err, 'Không thể xác nhận đổi email.'));
+      throw new Error(getApiErrorMessage(err, 'Không thể xác nhận đổi email.'));
     }
   },
 
@@ -51,7 +51,7 @@ export const securitySettingsService = {
     try {
       await apiClient.post<ApiResponse<{ message: string }>>('/auth/me/change-password/request-otp');
     } catch (err) {
-      throw new Error(getErrorMessage(err, 'Không thể gửi mã xác minh.'));
+      throw new Error(getApiErrorMessage(err, 'Không thể gửi mã xác minh.'));
     }
   },
 
@@ -69,7 +69,7 @@ export const securitySettingsService = {
         currentSessionId,
       });
     } catch (err) {
-      throw new Error(getErrorMessage(err, 'Không thể đổi mật khẩu.'));
+      throw new Error(getApiErrorMessage(err, 'Không thể đổi mật khẩu.'));
     }
   },
 
@@ -77,7 +77,7 @@ export const securitySettingsService = {
     try {
       await apiClient.post<ApiResponse<{ message: string }>>('/auth/me/linked-accounts/google', { accessToken });
     } catch (err) {
-      throw new Error(getErrorMessage(err, 'Không thể liên kết tài khoản Google.'));
+      throw new Error(getApiErrorMessage(err, 'Không thể liên kết tài khoản Google.'));
     }
   },
 
@@ -85,11 +85,11 @@ export const securitySettingsService = {
     try {
       const response = await apiClient.get<ApiResponse<LinkedAccountsDto>>('/auth/me/linked-accounts');
       if (response.data.error || !response.data.data) {
-        throw new Error(response.data.error?.details?.join(', ') || response.data.error?.detail || 'Không thể tải thông tin liên kết.');
+        throw new Error(response.data.error?.detail || 'Không thể tải thông tin liên kết.');
       }
       return response.data.data;
     } catch (err) {
-      throw new Error(getErrorMessage(err, 'Không thể tải thông tin liên kết.'));
+      throw new Error(getApiErrorMessage(err, 'Không thể tải thông tin liên kết.'));
     }
   },
 
@@ -97,7 +97,7 @@ export const securitySettingsService = {
     try {
       await apiClient.delete<ApiResponse<{ message: string }>>(`/auth/me/linked-accounts/${provider}`);
     } catch (err) {
-      throw new Error(getErrorMessage(err, 'Không thể gỡ liên kết.'));
+      throw new Error(getApiErrorMessage(err, 'Không thể gỡ liên kết.'));
     }
   },
 
@@ -107,11 +107,11 @@ export const securitySettingsService = {
         params: currentSessionId ? { currentSessionId } : undefined,
       });
       if (response.data.error || !response.data.data) {
-        throw new Error(response.data.error?.details?.join(', ') || response.data.error?.detail || 'Không thể tải danh sách phiên.');
+        throw new Error(response.data.error?.detail || 'Không thể tải danh sách phiên.');
       }
       return response.data.data;
     } catch (err) {
-      throw new Error(getErrorMessage(err, 'Không thể tải danh sách phiên.'));
+      throw new Error(getApiErrorMessage(err, 'Không thể tải danh sách phiên.'));
     }
   },
 
@@ -119,7 +119,7 @@ export const securitySettingsService = {
     try {
       await apiClient.delete<ApiResponse<{ message: string }>>(`/auth/me/sessions/${id}`);
     } catch (err) {
-      throw new Error(getErrorMessage(err, 'Không thể đăng xuất thiết bị này.'));
+      throw new Error(getApiErrorMessage(err, 'Không thể đăng xuất thiết bị này.'));
     }
   },
 
@@ -130,7 +130,7 @@ export const securitySettingsService = {
       });
       return response.data.data?.revokedCount ?? 0;
     } catch (err) {
-      throw new Error(getErrorMessage(err, 'Không thể đăng xuất các thiết bị khác.'));
+      throw new Error(getApiErrorMessage(err, 'Không thể đăng xuất các thiết bị khác.'));
     }
   },
 
@@ -138,7 +138,7 @@ export const securitySettingsService = {
     try {
       await apiClient.post<ApiResponse<{ message: string }>>('/auth/me/deactivate', { password });
     } catch (err) {
-      throw new Error(getErrorMessage(err, 'Không thể vô hiệu hóa tài khoản.'));
+      throw new Error(getApiErrorMessage(err, 'Không thể vô hiệu hóa tài khoản.'));
     }
   },
 
@@ -147,7 +147,7 @@ export const securitySettingsService = {
       const response = await apiClient.get<ApiResponse<{ enabled: boolean }>>('/auth/me/2fa/status');
       return response.data.data?.enabled ?? false;
     } catch (err) {
-      throw new Error(getErrorMessage(err, 'Không thể tải trạng thái 2FA.'));
+      throw new Error(getApiErrorMessage(err, 'Không thể tải trạng thái 2FA.'));
     }
   },
 
@@ -157,11 +157,11 @@ export const securitySettingsService = {
         '/auth/me/2fa/setup'
       );
       if (response.data.error || !response.data.data) {
-        throw new Error(response.data.error?.details?.join(', ') || response.data.error?.detail || 'Không thể bắt đầu thiết lập 2FA.');
+        throw new Error(response.data.error?.detail || 'Không thể bắt đầu thiết lập 2FA.');
       }
       return response.data.data;
     } catch (err) {
-      throw new Error(getErrorMessage(err, 'Không thể bắt đầu thiết lập 2FA.'));
+      throw new Error(getApiErrorMessage(err, 'Không thể bắt đầu thiết lập 2FA.'));
     }
   },
 
@@ -171,11 +171,11 @@ export const securitySettingsService = {
         code,
       });
       if (response.data.error || !response.data.data) {
-        throw new Error(response.data.error?.details?.join(', ') || response.data.error?.detail || 'Mã xác minh không đúng.');
+        throw new Error(response.data.error?.detail || 'Mã xác minh không đúng.');
       }
       return response.data.data.recoveryCodes;
     } catch (err) {
-      throw new Error(getErrorMessage(err, 'Mã xác minh không đúng.'));
+      throw new Error(getApiErrorMessage(err, 'Mã xác minh không đúng.'));
     }
   },
 
@@ -183,7 +183,7 @@ export const securitySettingsService = {
     try {
       await apiClient.post<ApiResponse<{ message: string }>>('/auth/me/2fa/disable', { password });
     } catch (err) {
-      throw new Error(getErrorMessage(err, 'Không thể tắt 2FA.'));
+      throw new Error(getApiErrorMessage(err, 'Không thể tắt 2FA.'));
     }
   },
 };

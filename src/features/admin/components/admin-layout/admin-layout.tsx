@@ -24,7 +24,7 @@ export function AdminLayout({
   children,
   sidebarItems,
   sidebarSections,
-  adminBadgeText = 'ADMIN CONSOLE',
+  adminBadgeText,
   adminName,
   adminRole = 'Platform Control',
   showScreenIds = false,

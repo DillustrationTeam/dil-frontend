@@ -2,7 +2,7 @@
 
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { z } from 'zod';
 import {
   ArrowLeft,
   BookOpen,
@@ -21,23 +21,19 @@ import {
   Paperclip,
   RefreshCw,
   Send,
+  Scale,
+  ShieldAlert,
   ShieldCheck,
   Sparkles,
   TrendingUp,
   UploadCloud,
-  Wifi,
-  WifiOff,
   X,
-  ZoomIn,
-  ZoomOut,
 } from 'lucide-react';
 
 import { chatService } from '../services/chat.service';
 import { deadlineRiskService } from '../services/deadline-risk.service';
-import type { DeadlineRiskDto } from '../types/deadline-risk.types';
 import { useChatHub } from '../hooks/use-chat-hub';
 import { useAutoTranslate } from '../hooks/use-auto-translate';
-import { WorkroomProgressPanel } from './workroom-progress-panel';
 import type { ChatMessageDto, ChatRoomDto } from '../types/chat.types';
 import { PageLoader } from '@/features/navigation';
 import { commissionService } from '@/services/commission.service';
@@ -47,17 +43,20 @@ import type { Commission, CommissionStatus, Milestone } from '@/types/commission
 import SubmitMilestoneModal from '@/components/modals/SubmitMilestoneModal';
 import ApprovalRevisionModal from '@/components/modals/ApprovalRevisionModal';
 import FinalDeliveryModal from '@/components/modals/FinalDeliveryModal';
+import CreatorReplyModal from '@/components/modals/CreatorReplyModal';
+import DisputeDetailsModal from '@/components/modals/DisputeDetailsModal';
 import ReviewRatingModal from '@/components/modals/ReviewRatingModal';
 import CancelRefundModal from '@/components/modals/CancelRefundModal';
-import CreatorReplyModal from '@/components/modals/CreatorReplyModal';
 import RaiseDisputeModal from '@/components/modals/RaiseDisputeModal';
-import DisputeDetailsModal from '@/components/modals/DisputeDetailsModal';
+import WorkroomTermsModal from '@/components/modals/WorkroomTermsModal';
 
 /** Tin nhắn đã hiện trên UI nhưng server chưa phát lại (chờ SignalR). */
 interface PendingMessage {
   tempId: string;
   body: string;
 }
+
+const workroomMessageSchema = z.string().trim().max(4000, 'Tin nhắn tối đa 4000 ký tự.');
 
 /** Trích xuất URL hoàn chỉnh cho attachment / WIP preview (ghép API host nếu url dạng tương đối). */
 function resolveAttachmentUrl(url?: string | null): string {
@@ -76,7 +75,6 @@ function resolveAttachmentUrl(url?: string | null): string {
 }
 
 export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: string | null }) {
-  const router = useRouter();
   const [room, setRoom] = useState<ChatRoomDto | null>(null);
   const [messages, setMessages] = useState<ChatMessageDto[]>([]);
   const [loading, setLoading] = useState(true);
@@ -96,7 +94,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
 
   // States cho Atelier Binder UI Right Page View & Zoom & Milestone Switcher
   const [rightPageView, setRightPageView] = useState<'canvas' | 'brief' | 'milestones'>('canvas');
-  const [zoomScale, setZoomScale] = useState<number>(1);
+  const [zoomScale] = useState<number>(1);
   const [selectedMilestoneId, setSelectedMilestoneId] = useState<string | null>(null);
 
   // States cho các Modal Hợp đồng & Cột mốc
@@ -106,31 +104,20 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
   const [showDeliveryModal, setShowDeliveryModal] = useState(false);
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
+  const [showDisputeModal, setShowDisputeModal] = useState(false);
   const [showReplyModal, setShowReplyModal] = useState(false);
-  const [showRaiseDisputeModal, setShowRaiseDisputeModal] = useState(false);
   const [showDisputeDetailsModal, setShowDisputeDetailsModal] = useState(false);
-  const [disputeCommissionId, setDisputeCommissionId] = useState<string | null>(null);
-
-  useEffect(() => {
-    const id = commission?.id;
-    if (!id) return;
-    let active = true;
-    commissionService.getDisputeByCommissionId(id).then((dispute) => {
-      if (active) setDisputeCommissionId(dispute ? id : null);
-    }).catch(() => undefined);
-    return () => { active = false; };
-  }, [commission?.id, commission?.status]);
+  const [acceptingTerms, setAcceptingTerms] = useState(false);
+  const [termsError, setTermsError] = useState<string | null>(null);
 
   // AI Deadline Risk Predictor
   const [predictingRisk, setPredictingRisk] = useState(false);
-  const [riskData, setRiskData] = useState<DeadlineRiskDto | null>(null);
 
   const handlePredictRisk = useCallback(async () => {
     if (!room?.commissionId || predictingRisk) return;
     setPredictingRisk(true);
     try {
-      const res = await deadlineRiskService.predict(room.commissionId);
-      setRiskData(res);
+      await deadlineRiskService.predict(room.commissionId);
       if (room.commissionId) {
         void commissionService.getById(room.commissionId).then((c) => setCommission(c)).catch(() => null);
       }
@@ -168,11 +155,13 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
     return () => window.removeEventListener('resize', checkSpace);
   }, []);
 
-  const isCreator = useMemo(() => {
-    if (!userId) return false;
+  const currentMemberRole = useMemo(() => {
+    if (!userId) return undefined;
     const member = room?.members.find((m) => m.userId.toLowerCase() === userId.toLowerCase());
-    return member?.memberRole?.toLowerCase() === 'creator';
+    return member?.memberRole?.toLowerCase();
   }, [room, userId]);
+
+  const isCreator = currentMemberRole === 'creator';
 
   const partnerDisplayName = useMemo(() => {
     if (!room?.members || !userId) return isCreator ? 'Khách hàng' : 'Họa sĩ';
@@ -180,10 +169,36 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
     return partner?.fullName || (isCreator ? 'Khách hàng' : 'Họa sĩ');
   }, [room, userId, isCreator]);
 
-  const isClient = !isCreator;
+  const isClient = currentMemberRole === 'client';
   const activeRole: 'client' | 'creator' = isCreator ? 'creator' : 'client';
   const commissionStatus: CommissionStatus = commission?.status ?? 'InProgress';
-  const hasDispute = commissionStatus === 'Disputed' || (!!commission && disputeCommissionId === commission.id);
+
+  const acceptedTermsVersion = currentMemberRole === 'client'
+    ? commission?.clientTermsVersion
+    : currentMemberRole === 'creator'
+      ? commission?.creatorTermsVersion
+      : null;
+  const currentTermsVersion = commission?.currentWorkroomTermsVersion ?? '1.0';
+  const showTermsModal = Boolean(
+    commission
+    && commission.status !== 'Completed'
+    && commission.status !== 'Cancelled'
+    && (currentMemberRole === 'client' || currentMemberRole === 'creator')
+    && acceptedTermsVersion !== currentTermsVersion,
+  );
+
+  const handleAcceptWorkroomTerms = useCallback(async () => {
+    if (!commission || acceptingTerms) return;
+    setAcceptingTerms(true);
+    setTermsError(null);
+    try {
+      setCommission(await commissionService.acceptWorkroomTerms(commission.id));
+    } catch (err: unknown) {
+      setTermsError(extractErrorMessage(err, 'Không thể ghi nhận xác nhận điều khoản.'));
+    } finally {
+      setAcceptingTerms(false);
+    }
+  }, [commission, acceptingTerms]);
 
   const isCommissionEnded = useMemo(() => {
     return (
@@ -371,13 +386,12 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
   );
 
   const handleTyping = useCallback(
-    (typerId: string) => {
-      if (!userId || typerId.toLowerCase() === userId.toLowerCase()) return;
+    () => {
       setPartnerTyping(true);
       if (typingTimerRef.current) clearTimeout(typingTimerRef.current);
       typingTimerRef.current = setTimeout(() => setPartnerTyping(false), 4000);
     },
-    [userId],
+    [],
   );
 
   const handleRead = useCallback(
@@ -506,7 +520,13 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
     e.preventDefault();
     if (isChatDisabled || sending || uploading || !userId) return;
 
-    const body = inputBody.trim();
+    const parsedBody = workroomMessageSchema.safeParse(inputBody);
+    if (!parsedBody.success) {
+      setError(parsedBody.error.issues[0]?.message ?? 'Tin nhắn không hợp lệ.');
+      return;
+    }
+
+    const body = parsedBody.data;
     if (!body && !selectedFile) return;
 
     setSending(true);
@@ -673,12 +693,13 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
               </div>
             </div>
 
-            {/* DẢI TAB CỐ ĐỊNH MÉP TRÁI (KHIẾU NẠI - TỰ ĐỘNG THU GỌN NẾU BỊ KHUẤT) */}
-            <div className="flex flex-col gap-3 lg:absolute lg:right-full lg:bottom-20 z-50 items-end">
+            {/* DẢI TAB CỐ ĐỊNH MÉP TRÁI (HỦY ĐƠN - TỰ ĐỘNG THU GỌN NẾU BỊ KHUẤT) */}
+            <div className="hidden lg:flex absolute right-full bottom-20 flex-col gap-3 z-50 items-end">
               <button
                 type="button"
-                onClick={() => hasDispute ? setShowDisputeDetailsModal(true) : setShowRaiseDisputeModal(true)}
-                disabled={isCommissionEnded && !hasDispute}
+                onClick={() => setShowCancelModal(true)}
+                disabled={commissionStatus === 'Completed' || commissionStatus === 'Cancelled' || commissionStatus === 'Disputed'}
+                title="Hủy đơn hàng thông thường"
                 className={`group relative h-[44px] bg-[#1C202D] hover:bg-[#232838] border border-r-0 rounded-l-lg flex items-center justify-end pr-3.5 shadow-xl [clip-path:polygon(10px_0,100%_0,100%_100%,0_100%,0_10px)] [transition:width_0.3s_cubic-bezier(0.34,1.3,0.64,1),background-color_0.2s_ease,border-color_0.2s_ease] cursor-pointer ${!hasLeftSpace
                     ? showCancelModal
                       ? 'w-[46px] border-rose-400 bg-[#232838] shadow-[0_0_12px_rgba(244,63,94,0.35)]'
@@ -696,24 +717,17 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                       : 'hidden'
                     }`}
                 >
-                  {hasDispute ? 'Xem tranh chấp' : 'Khiếu nại'}
+                  Hủy đơn
                 </span>
                 <div className="flex items-center justify-center shrink-0 w-5">
                   <CircleAlert size={18} className="text-rose-400" />
                 </div>
-
-                {/* Smart Tooltip khi ở dạng thu gọn (khi bị khuất/hẹp lề) */}
                 {!hasLeftSpace && (
                   <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none bg-[#161926]/95 border border-rose-500/40 text-rose-300 text-xs font-bold px-2.5 py-1 rounded-lg shadow-2xl backdrop-blur-md whitespace-nowrap z-50">
-                    {hasDispute ? 'Xem hồ sơ tranh chấp' : 'Mở tranh chấp'}
+                    Hủy đơn thông thường
                   </div>
                 )}
               </button>
-              {!isCommissionEnded && commissionStatus !== 'Disputed' && !commission?.escrowHeldAmount && (
-                <button type="button" onClick={() => setShowCancelModal(true)} aria-label="Hủy commission" title="Hủy commission" className="flex h-11 w-11 items-center justify-center rounded-l-lg border border-r-0 border-[#2F364A] bg-[#1C202D] text-slate-300 hover:border-rose-400 hover:text-rose-300">
-                  <X size={17} />
-                </button>
-              )}
             </div>
 
             {/* DẢI TAB CỐ ĐỊNH MÉP PHẢI (DUYỆT MỐC & KHO FILE GỐC - TỰ ĐỘNG THU GỌN NẾU BỊ KHUẤT) */}
@@ -876,6 +890,18 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                       <span className={`inline-block size-2 rounded-full ${autoTranslate ? 'bg-brand-periwinkle animate-pulse' : 'bg-white/20'}`} />
                     </button>
 
+                    {/* Nút Khiếu Nại Tranh Chấp (Icon Scale Cái cân Trọng tài) */}
+                    {commissionStatus !== 'Completed' && commissionStatus !== 'Cancelled' && commissionStatus !== 'Disputed' && (
+                      <button
+                        type="button"
+                        onClick={() => setShowDisputeModal(true)}
+                        title="Gửi khiếu nại tranh chấp với Trọng tài sàn"
+                        className="group relative flex size-9 shrink-0 items-center justify-center border border-amber-500/40 bg-[#1C202D] hover:bg-[#232838] hover:border-amber-400 text-amber-400 transition shadow-md [clip-path:polygon(10px_0,100%_0,100%_100%,0_100%,0_10px)]"
+                      >
+                        <Scale size={18} className="text-amber-400 group-hover:scale-110 transition-transform" />
+                      </button>
+                    )}
+
                     <button
                       type="button"
                       onClick={refresh}
@@ -887,7 +913,23 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                   </div>
                 </div>
 
-                {/* CẢNH BÁO BẢN GHI KẸP GIẤY */}
+                {/* BANNER CẢNH BÁO KHI ĐANG TRANH CHẤP (DISPUTED) */}
+                {commissionStatus === 'Disputed' && (
+                  <div className="relative z-10 my-3 border border-amber-500/40 bg-amber-500/15 p-3.5 text-xs text-amber-200 flex items-start gap-2.5 shadow-lg [clip-path:polygon(0_0,calc(100%-12px)_0,100%_12px,100%_100%,0_100%)]">
+                    <div className="shrink-0 p-1 bg-amber-500/20 rounded-md text-amber-300 border border-amber-400/40">
+                      <ShieldAlert size={16} />
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-h1 font-bold text-amber-300 text-xs uppercase tracking-wider">Đơn hàng đang trong quá trình khiếu nại tranh chấp (Disputed)</p>
+                      <p className="text-[11px] text-amber-100/90 leading-relaxed mt-0.5">
+                        Hồ sơ khiếu nại đã được chuyển đến Ban Trọng tài sàn để thẩm định lịch sử trao đổi và sản phẩm. Tiền ký quỹ Escrow được tạm khóa an toàn cho đến khi có phán quyết chính thức.
+                      </p>
+                      {commission?.dispute && <div className="mt-3 space-y-1.5 border-t border-amber-400/20 pt-3 text-[11px]"><p><strong>Lý do:</strong> {commission.dispute.reason}</p><p><strong>Ngày tạo:</strong> {new Date(commission.dispute.createdAt).toLocaleString('vi-VN')}</p><p><strong>Trạng thái:</strong> {commission.dispute.status}{commission.dispute.resolution ? ` · ${commission.dispute.resolution}` : ''}</p>{commission.dispute.adminNote && <p><strong>Kết luận:</strong> {commission.dispute.adminNote}</p>}{commission.dispute.evidenceUrls && <div><strong>Bằng chứng:</strong> <div className="mt-1 flex flex-wrap gap-2">{commission.dispute.evidenceUrls.split(',').filter(Boolean).map((url) => <a key={url} href={url.trim()} target="_blank" rel="noreferrer" className="underline hover:text-white">Mở tệp</a>)}</div></div>}</div>}
+                    </div>
+                  </div>
+                )}
+
+                {/* CẢNH BÁO BẢO VỆ ESCROW */}
                 <div className="relative z-10 my-3 border border-brand-periwinkle/30 bg-brand-periwinkle/10 p-3 text-xs text-on-surface flex items-start gap-2.5 shadow-lg [clip-path:polygon(0_0,calc(100%-12px)_0,100%_12px,100%_100%,0_100%)]">
                   <div className="shrink-0 p-1 bg-brand-periwinkle/20 rounded-md text-brand-periwinkle border border-brand-periwinkle/40">
                     <ShieldCheck size={16} />
@@ -1098,6 +1140,16 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                   />
 
                   <form onSubmit={handleSendMessage} className="flex items-center gap-2">
+                    {/* Nút Khiếu Nại Tranh Chấp (Icon Scale Cái cân Trọng tài - Vị trí góc dưới bên trái) */}
+                    <button
+                      type="button"
+                      onClick={() => setShowDisputeModal(true)}
+                      title="Gửi khiếu nại tranh chấp với Trọng tài sàn"
+                      className="group relative flex size-10 shrink-0 items-center justify-center border border-amber-500/40 bg-[#1C202D] hover:bg-[#232838] hover:border-amber-400 text-amber-400 transition shadow-md [clip-path:polygon(10px_0,100%_0,100%_100%,0_100%,0_10px)]"
+                    >
+                      <Scale size={18} className="text-amber-400 group-hover:scale-110 transition-transform" />
+                    </button>
+
                     <button
                       type="button"
                       disabled={uploading || isChatDisabled}
@@ -1110,6 +1162,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
 
                     <input
                       type="text"
+                      maxLength={4000}
                       disabled={isChatDisabled}
                       value={inputBody}
                       onChange={(e) => {
@@ -1176,6 +1229,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                       <Clock size={18} className={rightPageView === 'milestones' ? 'text-purple-300' : 'text-purple-400 group-hover:text-purple-300'} />
                     </div>
                   </button>
+
                 </div>
 
                 {/* VIEW 1: DEFAULT STUDIO CANVAS VIEW */}
@@ -1428,16 +1482,6 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                             <span className="text-[11px]">File vẽ gốc HD sẽ tự động mở khóa sau khi tất cả các mốc phác thảo được duyệt.</span>
                           </div>
                         )}
-                        {commission?.review && (
-                          <div className="space-y-2 border-t border-white/10 pt-3">
-                            <div className="flex items-center justify-between gap-3">
-                              <p className="text-xs font-bold text-white">Đánh giá của khách hàng <span className="text-amber-300">{commission.review.rating}/5</span></p>
-                              {isCreator && commissionStatus === 'Completed' && !commission.review.reviewerReply && <button type="button" onClick={() => setShowReplyModal(true)} className="rounded-lg border border-white/15 px-3 py-1.5 text-xs font-semibold text-white hover:bg-white/5">Trả lời</button>}
-                            </div>
-                            {commission.review.comment && <p className="whitespace-pre-wrap text-xs text-slate-300">{commission.review.comment}</p>}
-                            {commission.review.reviewerReply && <p className="border-l-2 border-[#A7ACD9] pl-3 text-xs text-slate-300"><span className="font-semibold text-[#C5C9F8]">Phản hồi của Creator:</span> {commission.review.reviewerReply}</p>}
-                          </div>
-                        )}
                       </div>
                     </div>
                   </>
@@ -1667,40 +1711,41 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
             isOpen={showCancelModal}
             onClose={() => setShowCancelModal(false)}
             commissionId={room.commissionId}
+            commission={commission}
+            currentUserId={userId}
             onSuccess={() => {
               setShowCancelModal(false);
               refresh();
             }}
           />
 
-          <CreatorReplyModal
-            isOpen={showReplyModal}
-            onClose={() => setShowReplyModal(false)}
-            commissionId={room.commissionId}
-            reviewComment={commission?.review?.comment}
-            reviewRating={commission?.review?.rating}
-            onSuccess={() => {
-              setShowReplyModal(false);
-              refresh();
-            }}
-          />
-
           <RaiseDisputeModal
-            isOpen={showRaiseDisputeModal}
-            onClose={() => setShowRaiseDisputeModal(false)}
+            isOpen={showDisputeModal}
+            onClose={() => setShowDisputeModal(false)}
             commissionId={room.commissionId}
             onSuccess={() => {
-              setShowRaiseDisputeModal(false);
+              setShowDisputeModal(false);
               refresh();
+              void chat.sendMessage('⚖️ Đã gửi yêu cầu khiếu nại tranh chấp tới Trọng tài sàn.', 'SystemEvent').catch(() => null);
             }}
           />
 
-          {showDisputeDetailsModal && (
-            <DisputeDetailsModal
-              key={room.commissionId}
-              isOpen
-              onClose={() => setShowDisputeDetailsModal(false)}
-              commissionId={room.commissionId}
+          {commission && (currentMemberRole === 'client' || currentMemberRole === 'creator') && (
+            <section className="mt-4 space-y-3 rounded-2xl border border-white/10 bg-white/[.03] p-4">
+              {commission.dispute && <button type="button" onClick={() => setShowDisputeDetailsModal(true)} className="rounded-xl border border-[#A7ACD9]/40 px-4 py-2 text-sm text-[#C5C9F8]">Xem hồ sơ tranh chấp</button>}
+              {commission.review && <div className="space-y-2 text-sm text-slate-300"><p className="font-semibold text-white">Đánh giá của khách: {commission.review.rating}/5</p>{commission.review.comment && <p>{commission.review.comment}</p>}{commission.review.reviewerReply ? <p className="border-l-2 border-[#A7ACD9] pl-3">Phản hồi của Creator: {commission.review.reviewerReply}</p> : currentMemberRole === 'creator' && commission.status === 'Completed' ? <button type="button" onClick={() => setShowReplyModal(true)} className="rounded-xl border border-white/15 px-4 py-2">Trả lời đánh giá</button> : null}</div>}
+            </section>
+          )}
+          {showDisputeDetailsModal && <DisputeDetailsModal key={room.commissionId} isOpen commissionId={room.commissionId} onClose={() => setShowDisputeDetailsModal(false)} />}
+          {showReplyModal && <CreatorReplyModal isOpen commissionId={room.commissionId} reviewComment={commission?.review?.comment} reviewRating={commission?.review?.rating} onClose={() => setShowReplyModal(false)} onSuccess={() => { setShowReplyModal(false); refresh(); }} />}
+          {commission && (currentMemberRole === 'client' || currentMemberRole === 'creator') && (
+            <WorkroomTermsModal
+              isOpen={showTermsModal}
+              role={currentMemberRole}
+              commission={commission}
+              isSubmitting={acceptingTerms}
+              error={termsError}
+              onConfirm={handleAcceptWorkroomTerms}
             />
           )}
         </>

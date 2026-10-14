@@ -5,6 +5,12 @@ import { ArtworkDto, CreatorProfileDto } from '@/features/creator-studio/types/c
 export interface MarketplaceArtwork extends ArtworkDto {
   creatorName?: string;
   creatorHeadline?: string | null;
+  creatorRating?: number;
+  availableSlots?: number;
+  style?: string | null;
+  licenseType?: string;
+  startingPrice?: number | null;
+  likeCount?: number;
 }
 
 export interface BannerDto {
@@ -76,6 +82,12 @@ export interface CollectionDto {
   createdAt: string;
 }
 
+export interface ArtworkInteractions {
+  isLiked: boolean;
+  likeCount: number;
+  collectionIds: string[];
+}
+
 const getData = <T>(response: { data: ApiResponse<T> }) => {
   if (response.data.error || !response.data.data) {
     throw new Error(response.data.error?.details?.join(', ') || 'Request failed.');
@@ -84,11 +96,6 @@ const getData = <T>(response: { data: ApiResponse<T> }) => {
 };
 
 export const marketplaceService = {
-  async getCreators(): Promise<RelatedCreatorDto[]> {
-    const response = await apiClient.get<ApiResponse<RelatedCreatorDto[]>>('/marketplace/creators');
-    return getData(response);
-  },
-
   async getArtworks(): Promise<MarketplaceArtwork[]> {
     const response = await apiClient.get<ApiResponse<MarketplaceArtwork[]>>('/artworks');
     return getData(response);
@@ -100,8 +107,30 @@ export const marketplaceService = {
   },
 
   async getArtworkDetail(id: string): Promise<ArtworkDetailResponse> {
-    const response = await apiClient.get<ApiResponse<ArtworkDetailResponse>>(`/marketplace/artworks/${id}/detail`);
-    return getData(response);
+    try {
+      const response = await apiClient.get<ApiResponse<ArtworkDetailResponse>>(`/marketplace/artworks/${id}/detail`);
+      return getData(response);
+    } catch {
+      const artwork = await this.getArtworkById(id);
+      return {
+        artwork,
+        licenseType: artwork.licenseType || 'Personal',
+        startingPrice: artwork.startingPrice ?? null,
+        isFavorited: false,
+        favoriteCount: artwork.likeCount ?? 0,
+      };
+    }
+  },
+
+  async getArtworkInteractions(id: string): Promise<ArtworkInteractions> {
+    return getData(await apiClient.get<ApiResponse<ArtworkInteractions>>(`/marketplace/artworks/${id}/interactions`));
+  },
+
+  async setArtworkLiked(id: string, liked: boolean): Promise<ArtworkInteractions> {
+    const url = `/marketplace/artworks/${id}/favorite`;
+    return getData(liked
+      ? await apiClient.put<ApiResponse<ArtworkInteractions>>(url)
+      : await apiClient.delete<ApiResponse<ArtworkInteractions>>(url));
   },
 
   async getCreatorById(id: string): Promise<CreatorProfileDto> {
@@ -159,14 +188,19 @@ export const marketplaceService = {
     return getData(response);
   },
 
-  async followCreator(id: string): Promise<{ following: boolean }> {
-    const response = await apiClient.put<ApiResponse<{ following: boolean }>>(`/marketplace/creators/${id}/follow`);
+  async getCreators(): Promise<RelatedCreatorDto[]> {
+    const response = await apiClient.get<ApiResponse<RelatedCreatorDto[]>>('/marketplace/creators');
     return getData(response);
   },
 
   async getCreatorFollowStatus(id: string): Promise<boolean> {
     const response = await apiClient.get<ApiResponse<{ following: boolean }>>(`/marketplace/creators/${id}/follow`);
     return getData(response).following;
+  },
+
+  async followCreator(id: string): Promise<{ following: boolean }> {
+    const response = await apiClient.put<ApiResponse<{ following: boolean }>>(`/marketplace/creators/${id}/follow`);
+    return getData(response);
   },
 
   async unfollowCreator(id: string): Promise<{ following: boolean }> {
@@ -194,8 +228,15 @@ export const marketplaceService = {
     return getData(response);
   },
 
-  async addArtworkToCollection(collectionId: string, artworkId: string): Promise<void> {
-    const response = await apiClient.put<ApiResponse<null>>(`/marketplace/me/collections/${collectionId}/artworks/${artworkId}`);
-    getData(response);
+  async addArtworkToCollection(collectionId: string, artworkId: string): Promise<ArtworkInteractions> {
+    return getData(await apiClient.put<ApiResponse<ArtworkInteractions>>(`/marketplace/me/collections/${collectionId}/artworks/${artworkId}`));
+  },
+
+  async removeArtworkFromCollection(collectionId: string, artworkId: string): Promise<ArtworkInteractions> {
+    return getData(await apiClient.delete<ApiResponse<ArtworkInteractions>>(`/marketplace/me/collections/${collectionId}/artworks/${artworkId}`));
+  },
+
+  async getCollectionArtworks(collectionId: string): Promise<MarketplaceArtwork[]> {
+    return getData(await apiClient.get<ApiResponse<MarketplaceArtwork[]>>(`/marketplace/me/collections/${collectionId}/artworks`));
   },
 };

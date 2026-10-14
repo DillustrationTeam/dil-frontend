@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState, useRef } from 'react';
-import { X, Upload, FileArchive, CheckCircle2, ShieldAlert, Download } from 'lucide-react';
+import { X, Upload, FileArchive, CheckCircle2, ShieldAlert, Download, Clock } from 'lucide-react';
 import { commissionService } from '@/services/commission.service';
+import { getApiErrorMessage } from '@/lib/api-error';
 import type { CommissionStatus } from '@/types/commission.types';
 
 interface FinalDeliveryModalProps {
@@ -26,8 +27,10 @@ export default function FinalDeliveryModal({
 }: FinalDeliveryModalProps) {
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
-  const [uploaded, setUploaded] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
+  const [downloadExpiresAt, setDownloadExpiresAt] = useState<string | null>(null);
+  const [uploaded, setUploaded] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   if (!isOpen) return null;
@@ -64,12 +67,16 @@ export default function FinalDeliveryModal({
 
   const handleDownload = async () => {
     setIsDownloading(true);
+    setDownloadError(null);
     try {
-      const downloadUrl = await commissionService.getFinalDownloadUrl(commissionId);
-      window.location.assign(downloadUrl);
+      const { downloadUrl, expiresAt } = await commissionService.getFinalDownloadUrl(commissionId);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.click();
+      setDownloadExpiresAt(expiresAt);
     } catch (error) {
-      console.error(error);
-      alert('Không thể tải tệp bàn giao.');
+      setDownloadExpiresAt(null);
+      setDownloadError(getApiErrorMessage(error, 'Không thể tạo liên kết tải. Vui lòng thử lại.'));
     } finally {
       setIsDownloading(false);
     }
@@ -99,7 +106,7 @@ export default function FinalDeliveryModal({
 
         {/* Content Body */}
         <div className="p-6 space-y-4">
-          {!isCreator ? <div className="space-y-4 text-sm text-slate-300"><p>{commissionStatus === 'Completed' ? 'Đơn đã hoàn tất.' : 'Kiểm tra sản phẩm bàn giao trước khi hoàn tất đơn.'}</p>{commissionStatus === 'Delivered' ? <button disabled={isUploading} onClick={async () => { setIsUploading(true); try { await commissionService.complete(commissionId); onSuccess?.(); } catch { alert('Không thể hoàn tất đơn.'); } finally { setIsUploading(false); } }} className="w-full rounded-xl bg-[#A7ACD9] px-4 py-3 font-semibold text-[#1F2335] disabled:opacity-50">Xác nhận hoàn tất</button> : null}{commissionStatus === 'Delivered' || commissionStatus === 'Completed' ? <><button disabled={isDownloading} onClick={handleDownload} className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 px-4 py-3 font-semibold text-slate-950 disabled:opacity-50"><Download className="h-4 w-4" />{isDownloading ? 'Đang tải…' : 'Tải file bàn giao'}</button>{commissionStatus === 'Completed' && <button onClick={() => { onClose(); onOpenReviewModal?.(); }} className="w-full rounded-xl border border-white/10 px-4 py-3">Đánh giá creator</button>}</> : null}</div> : !uploaded ? (
+          {!isCreator ? <div className="space-y-4 text-sm text-slate-300"><p>{commissionStatus === 'Completed' ? 'Đơn đã hoàn tất.' : 'Kiểm tra sản phẩm bàn giao trước khi hoàn tất đơn.'}</p>{commissionStatus === 'Delivered' ? <button disabled={isUploading} onClick={async () => { setIsUploading(true); try { await commissionService.complete(commissionId); onSuccess?.(); } catch { alert('Không thể hoàn tất đơn.'); } finally { setIsUploading(false); } }} className="w-full rounded-xl bg-[#A7ACD9] px-4 py-3 font-semibold text-[#1F2335] disabled:opacity-50">Xác nhận hoàn tất</button> : null}{commissionStatus === 'Delivered' || commissionStatus === 'Completed' ? <><div className="flex items-start gap-2 rounded-xl border border-sky-400/20 bg-sky-400/10 p-3 text-xs text-sky-200"><Clock className="mt-0.5 h-4 w-4 shrink-0" /><span>Mỗi lần nhấn tải, hệ thống tạo một liên kết bảo mật mới có hiệu lực trong 15 phút.</span></div><button disabled={isDownloading} onClick={handleDownload} className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#A7ACD9] px-4 py-3 font-semibold text-[#1F2335] disabled:opacity-50"><Download className="h-4 w-4" />{isDownloading ? 'Đang tạo liên kết…' : 'Tạo liên kết & tải file'}</button>{downloadExpiresAt ? <p role="status" className="text-xs text-emerald-300">Liên kết vừa tạo có hiệu lực đến {new Date(downloadExpiresAt).toLocaleTimeString('vi-VN')}.</p> : null}{downloadError ? <p role="alert" className="rounded-xl border border-rose-400/30 bg-rose-500/10 p-3 text-xs text-rose-200">{downloadError}</p> : null}{commissionStatus === 'Completed' && <button onClick={() => { onClose(); onOpenReviewModal?.(); }} className="w-full rounded-xl border border-white/10 px-4 py-3">Đánh giá creator</button>}</> : null}</div> : !uploaded ? (
             <>
               {/* Drag Drop Area */}
               <div
@@ -132,7 +139,7 @@ export default function FinalDeliveryModal({
 
               <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl flex items-center gap-2.5 text-amber-300 text-[11px]">
                 <ShieldAlert className="w-4 h-4 shrink-0 text-amber-400" />
-                <span>Files are securely stored. Commission participants can download them to review the delivery before acceptance.</span>
+                <span>These files will be securely stored and only accessible via Presigned URL after the client formally accepts the delivery.</span>
               </div>
             </>
           ) : (

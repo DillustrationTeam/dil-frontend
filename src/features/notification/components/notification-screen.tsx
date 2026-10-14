@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { Bell, Check, CheckCheck, CircleAlert, Clock, ExternalLink, Gavel, Info, Megaphone, RefreshCw, ShieldAlert, Wallet } from 'lucide-react';
+import { Bell, BriefcaseBusiness, Check, CheckCheck, CircleAlert, Clock, ExternalLink, Gavel, Info, LockKeyhole, Megaphone, RefreshCw, Scale, ShieldAlert, Wallet } from 'lucide-react';
 import { notificationService } from '../services/notification.service';
 import { useNotificationHub } from '../hooks/use-notification-hub';
 import { notificationCategories, notificationTypeLabels, type NotificationDto } from '../types/notification.types';
@@ -25,18 +25,35 @@ function getIcon(type: string) {
       return <ShieldAlert size={18} className="text-red-400" />;
     case 'PromotionAnnouncement':
       return <Megaphone size={18} className="text-brand-periwinkle" />;
+    case 'CommissionStatusChanged':
+      return <BriefcaseBusiness size={18} className="text-brand-periwinkle" />;
+    case 'EscrowStatusChanged':
+      return <LockKeyhole size={18} className="text-emerald-400" />;
+    case 'DisputeStatusChanged':
+      return <Scale size={18} className="text-amber-400" />;
     default:
       return <Info size={18} className="text-outline" />;
   }
 }
 
 /** RefType backend ghi theo tên entity (VD: "Auction", "PaymentOrder", "PayoutRequest"). */
-function getRefLink(refType: string | null, refId: string | null) {
+function getRefLink({ refType, refId, notificationType, notificationTitle, body }: NotificationDto) {
   if (!refType) return null;
   const key = refType.toLowerCase();
   if (key === 'auction' && refId) return { url: `/auctions/${refId}`, label: 'Xem phiên đấu giá' };
   if (key === 'paymentorder') return { url: '/wallet', label: 'Xem ví cá nhân' };
   if (key === 'payoutrequest') return { url: '/payout', label: 'Xem yêu cầu rút tiền' };
+  if (key === 'creatorcommissionrequests') return { url: '/creator/requests', label: 'Xem yêu cầu đặt vẽ' };
+  if (key === 'clientcommissionrequest' && refId) return { url: `/client/requests/${refId}`, label: 'Xem yêu cầu đặt vẽ' };
+  if (key === 'commissioncheckout' && refId) return { url: `/payment/checkout/${refId}`, label: 'Tiến hành ký quỹ' };
+  if (key === 'commission' && refId && notificationType === 'CommissionStatusChanged') {
+    if (notificationTitle === 'Bạn có yêu cầu đặt vẽ mới' || notificationTitle === 'Khách hàng đã phản hồi đề nghị giá') {
+      return { url: '/creator/requests', label: 'Xem yêu cầu đặt vẽ' };
+    }
+    return body.toLowerCase().includes('accept')
+      ? { url: `/payment/checkout/${refId}`, label: 'Tiến hành ký quỹ' }
+      : { url: `/client/requests/${refId}`, label: 'Xem yêu cầu đặt vẽ' };
+  }
   if (key === 'commission' && refId) return { url: `/workroom/${refId}`, label: 'Mở phòng làm việc' };
   if (key === 'chatroom' && refId) return { url: `/workroom/${refId}`, label: 'Mở cuộc trò chuyện' };
   return null;
@@ -221,7 +238,7 @@ export function NotificationScreen({ userId }: { userId: string | null }) {
       ) : (
         <div className="space-y-3">
           {notifications.map((n) => {
-            const refLink = getRefLink(n.refType, n.refId);
+            const refLink = getRefLink(n);
             return (
               <div
                 key={n.notificationId}

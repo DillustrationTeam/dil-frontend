@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { HubConnection, HubConnectionBuilder, HubConnectionState, LogLevel } from '@microsoft/signalr';
 import { useAuthStore } from '@/store/use-auth-store';
+import { ensureFreshAccessToken } from '@/lib/api-client';
 import { auctionHubUrl } from '../services/auction-hub';
 import type {
   AuctionExtendedPayload,
@@ -58,7 +59,7 @@ export function useAuctionHub(
     }
 
     const connection: HubConnection = new HubConnectionBuilder()
-      .withUrl(auctionHubUrl(), { accessTokenFactory: () => accessToken })
+      .withUrl(auctionHubUrl(), { accessTokenFactory: () => ensureFreshAccessToken() })
       .withAutomaticReconnect()
       .configureLogging(LogLevel.Warning)
       .build();
@@ -110,7 +111,7 @@ export function useAuctionHub(
     connection.onclose(() => updateStatus('disconnected'));
 
     let active = true;
-    connection
+    const startPromise = connection
       .start()
       .then(() => connection.invoke('JoinAuction', auctionId))
       .then(() => {
@@ -122,10 +123,14 @@ export function useAuctionHub(
 
     return () => {
       active = false;
-      if (connection.state === HubConnectionState.Connected) {
-        void connection.invoke('LeaveAuction', auctionId).catch(() => undefined);
-      }
-      void connection.stop().catch(() => undefined);
+      // Đợi start() xong rồi mới leave/stop() — gọi stop() khi đang negotiate (StrictMode
+      // double-invoke effect ở dev) làm SignalR log lỗi "stopped during negotiation".
+      void startPromise.finally(async () => {
+        if (connection.state === HubConnectionState.Connected) {
+          await connection.invoke('LeaveAuction', auctionId).catch(() => undefined);
+        }
+        await connection.stop().catch(() => undefined);
+      });
     };
   }, [auctionId, accessToken]);
 

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Pencil, Trash2, Upload, X } from 'lucide-react';
@@ -28,15 +28,7 @@ const profileSchema = z.object({
   bio: z.string().max(1000, 'Giới thiệu bản thân tối đa 1000 ký tự.'),
   avatarUrl: z.string(),
   coverUrl: z.string(),
-  socialLinks: z.array(z.string().trim().refine((value) => {
-    if (!value) return true;
-    try {
-      const url = new URL(value);
-      return url.protocol === 'http:' || url.protocol === 'https:';
-    } catch {
-      return false;
-    }
-  }, 'Nhập URL bắt đầu bằng http:// hoặc https://.')).max(10, 'Tối đa 10 liên kết mạng xã hội.'),
+  socialLinks: z.array(z.string()),
   interestTags: z.array(z.string()),
   country: z.string(),
   timezone: z.string(),
@@ -200,7 +192,7 @@ export function ProfileSettingsForm() {
   const {
     register,
     handleSubmit,
-    watch,
+    control,
     setValue,
     reset,
     getValues,
@@ -220,12 +212,12 @@ export function ProfileSettingsForm() {
     },
   });
 
-  const avatarUrl = watch('avatarUrl');
-  const coverUrl = watch('coverUrl');
-  const socialLinks = watch('socialLinks');
-  const interestTags = watch('interestTags');
-  const preferredLanguages = watch('preferredLanguages');
-  const bio = watch('bio');
+  const avatarUrl = useWatch({ control, name: 'avatarUrl' });
+  const coverUrl = useWatch({ control, name: 'coverUrl' });
+  const socialLinks = useWatch({ control, name: 'socialLinks' });
+  const interestTags = useWatch({ control, name: 'interestTags' });
+  const preferredLanguages = useWatch({ control, name: 'preferredLanguages' });
+  const bio = useWatch({ control, name: 'bio' });
 
   const avatarUpload = useCloudinaryUpload('profile-avatars');
   const coverUpload = useCloudinaryUpload('profile-covers');
@@ -328,10 +320,6 @@ export function ProfileSettingsForm() {
   };
 
   const addSocialLink = () => {
-    if (socialLinks.length >= 10) {
-      toast.error('Bạn chỉ có thể thêm tối đa 10 liên kết mạng xã hội.');
-      return;
-    }
     setValue('socialLinks', [...socialLinks, ''], { shouldDirty: true });
   };
 
@@ -474,10 +462,8 @@ export function ProfileSettingsForm() {
                   <span className="material-symbols-outlined text-lg">close</span>
                 </button>
               )}
-              {errors.socialLinks?.[index]?.message && <p role="alert" className="text-xs text-red-300">{errors.socialLinks[index]?.message}</p>}
             </div>
           ))}
-          {errors.socialLinks?.message && <p role="alert" className="text-xs text-red-300">{errors.socialLinks.message}</p>}
           <button type="button" onClick={addSocialLink} className="text-xs font-semibold text-[#A7ACD9] hover:underline">
             + Thêm link khác
           </button>

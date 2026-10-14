@@ -2,8 +2,8 @@ import { apiClient } from '@/lib/api-client';
 import { ApiResponse } from '@/types/api.types';
 import {
   Commission,
-  CommissionDispute,
   CreateCommissionPayload,
+  Dispute,
   RespondToCommissionPayload,
 } from '@/types/commission.types';
 
@@ -53,6 +53,11 @@ export const commissionService = {
     return res.data.data as Commission;
   },
 
+  acceptWorkroomTerms: async (id: string) => {
+    const res = await apiClient.post<ApiResponse<Commission>>(`/commissions/${id}/workroom-terms/accept`);
+    return res.data.data as Commission;
+  },
+
   submitMilestone: async (id: string, milestoneId: string, file: File, creatorNote?: string) => {
     const body = new FormData();
     body.append('file', file);
@@ -70,23 +75,19 @@ export const commissionService = {
   },
   complete: async (id: string) => apiClient.patch(`/commissions/${id}/complete`),
   getWipPreviewUrl: async (id: string, milestoneId: string) => {
-    const res = await apiClient.get<ApiResponse<string>>(`/commissions/${id}/milestones/${milestoneId}/preview`);
-    return res.data.data as string;
+    const res = await apiClient.get<ApiResponse<{ previewUrl: string }>>(`/commissions/${id}/milestones/${milestoneId}/preview`);
+    return res.data.data?.previewUrl as string;
   },
   getFinalDownloadUrl: async (id: string) => {
-    const res = await apiClient.get<ApiResponse<{ downloadUrl: string }>>(`/commissions/${id}/final/download`);
-    return res.data.data?.downloadUrl as string;
-  },
-  createDispute: async (id: string, payload: { reason: string; evidenceUrls?: string[] }) => {
-    const res = await apiClient.post<ApiResponse<CommissionDispute>>(`/commissions/${id}/disputes`, payload);
-    return res.data.data as CommissionDispute;
-  },
-  getDisputeByCommissionId: async (id: string) => {
-    const res = await apiClient.get<ApiResponse<CommissionDispute>>(`/commissions/${id}/disputes`);
-    return res.data.data as CommissionDispute;
+    const res = await apiClient.get<ApiResponse<{ downloadUrl: string; expiresAt: string }>>(`/commissions/${id}/final/download`);
+    return res.data.data as { downloadUrl: string; expiresAt: string };
   },
   cancelWithPolicy: async (id: string, payload: { cancellationReason: string; details?: string }) => {
     const res = await apiClient.post<ApiResponse<Commission>>(`/commissions/${id}/cancel`, payload);
+    return res.data.data as Commission;
+  },
+  respondCancellationRequest: async (id: string, approve: boolean) => {
+    const res = await apiClient.patch<ApiResponse<Commission>>(`/commissions/${id}/cancellation-request`, { approve });
     return res.data.data as Commission;
   },
   createReview: async (id: string, payload: { rating: number; comment?: string; attachedImageUrls?: string[] }) => {
@@ -96,5 +97,13 @@ export const commissionService = {
   replyReview: async (id: string, replyComment: string) => {
     const res = await apiClient.post<ApiResponse<unknown>>(`/commissions/${id}/reviews/reply`, { replyComment });
     return res.data.data;
+  },
+  createDispute: async (id: string, payload: { reason: string; evidenceUrls?: string[] }) => {
+    const res = await apiClient.post<ApiResponse<unknown>>(`/commissions/${id}/disputes`, payload);
+    return res.data.data;
+  },
+  getDispute: async (id: string) => {
+    const res = await apiClient.get<ApiResponse<Dispute>>(`/commissions/${id}/disputes`);
+    return res.data.data as Dispute;
   },
 };

@@ -1,51 +1,32 @@
-import Image from 'next/image';
-import type { ReactNode } from 'react';
+'use client';
 
-export function ProfileLayout({
-  name,
-  bannerUrl,
-  avatarUrl,
-  sidebar,
-  children,
-}: {
-  name: string;
-  bannerUrl?: string | null;
-  avatarUrl?: string | null;
-  sidebar: ReactNode;
-  children: ReactNode;
-}) {
-  return (
-    <main className="min-h-screen bg-[#1F2335] px-4 py-6 text-[#E4E1E5] sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-7xl">
-        <div className="relative h-48 overflow-hidden rounded-2xl border border-white/10 bg-[#292d44] sm:h-64">
-          {bannerUrl ? <Image src={bannerUrl} alt={`${name} cover`} fill unoptimized className="object-cover" /> : <div className="h-full bg-[radial-gradient(ellipse_at_70%_15%,rgba(167,172,217,.2),transparent_50%),linear-gradient(130deg,#252a43,#1f2335_55%,#24322f)]" />}
-          {avatarUrl && <span className="absolute bottom-4 left-5 h-16 w-16 overflow-hidden rounded-xl border-2 border-[#1F2335] bg-[#1F2335] sm:bottom-5 sm:left-7 sm:h-20 sm:w-20"><Image src={avatarUrl} alt={`${name} avatar`} fill unoptimized className="object-cover" /></span>}
+import Image from 'next/image';
+import { ReactNode } from 'react';
+
+export function ProfileLayout({ name, bannerUrl, avatarUrl, sidebar, children }: { name: string; bannerUrl?: string | null; avatarUrl?: string | null; sidebar: ReactNode; children: ReactNode }) {
+  return <div className="min-h-screen bg-[#1F2335] font-body text-[#E4E1E5]">
+    <div className="relative h-48 overflow-hidden bg-[#2b304b] sm:h-64 lg:h-80">
+      {bannerUrl ? <Image src={bannerUrl} alt={`Ảnh bìa của ${name}`} fill unoptimized sizes="100vw" className="object-cover" /> : <div aria-hidden className="absolute inset-0 bg-[radial-gradient(ellipse_at_75%_20%,#A7ACD944,transparent_65%)]"><div className="absolute -right-16 -top-48 h-[600px] w-[900px] rotate-[-20deg] rounded-[50%] border-[40px] border-[#A7ACD9]/10" /><div className="absolute -right-12 -top-32 h-[600px] w-[1000px] rotate-[-20deg] rounded-[50%] border border-[#A7ACD9]/20" /></div>}
+      <div className="absolute inset-0 bg-gradient-to-t from-[#1F2335]/45 to-transparent" />
+    </div>
+    <div className="relative mx-auto grid max-w-[1440px] gap-8 px-5 pb-16 sm:px-8 lg:grid-cols-[260px_minmax(0,1fr)] lg:gap-12 xl:grid-cols-[300px_minmax(0,1fr)] xl:px-12">
+      <aside className="min-w-0 -mt-16 self-start lg:-mt-24">
+        <div className="relative mb-6 flex h-32 w-32 items-center justify-center overflow-hidden rounded-full border-[6px] border-[#1F2335] bg-[#A7ACD9] font-h1 text-5xl font-semibold text-[#1F2335] shadow-xl sm:h-40 sm:w-40 lg:h-48 lg:w-48 lg:text-7xl" aria-label={`Avatar ${name}`}>
+          {avatarUrl ? <Image src={avatarUrl} alt={`Avatar ${name}`} fill unoptimized className="object-cover" /> : name.slice(0, 1).toUpperCase()}
         </div>
-        <div className="mt-5 grid gap-8 lg:grid-cols-[300px_minmax(0,1fr)]">
-          <aside className="min-w-0">{sidebar}</aside>
-          <section className="min-w-0">{children}</section>
-        </div>
-      </div>
-    </main>
-  );
+        {sidebar}
+      </aside>
+      <section className="min-w-0 pt-0 lg:pt-8">{children}</section>
+    </div>
+  </div>;
 }
 
-export function ProfileTabs<T extends string>({
-  tabs,
-  value,
-  onChange,
-}: {
-  tabs: Array<{ id: T; label: string }>;
-  value: T;
-  onChange: (value: T) => void;
-}) {
-  return (
-    <div role="tablist" className="flex gap-2 overflow-x-auto border-b border-white/10">
-      {tabs.map((tab) => (
-        <button key={tab.id} id={`profile-tab-${tab.id}`} type="button" role="tab" aria-selected={value === tab.id} onClick={() => onChange(tab.id)} className={`shrink-0 border-b-2 px-4 py-3 text-sm ${value === tab.id ? 'border-[#A7ACD9] text-white' : 'border-transparent text-[#919099] hover:text-white'}`}>
-          {tab.label}
-        </button>
-      ))}
-    </div>
-  );
+export function ProfileTabs<T extends string>({ tabs, value, onChange }: { tabs: readonly { id: T; label: string }[]; value: T; onChange: (value: T) => void }) {
+  return <div role="tablist" aria-label="Nội dung hồ sơ" className="flex gap-6 overflow-x-auto border-b border-white/10 sm:gap-8">{tabs.map((tab, index) => <button type="button" key={tab.id} id={`profile-tab-${tab.id}`} role="tab" tabIndex={value === tab.id ? 0 : -1} aria-controls={value === tab.id ? `profile-panel-${tab.id}` : undefined} aria-selected={value === tab.id} onClick={() => onChange(tab.id)} onKeyDown={(event) => {
+    if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+    event.preventDefault();
+    const next = event.key === 'Home' ? 0 : event.key === 'End' ? tabs.length - 1 : (index + (event.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length;
+    onChange(tabs[next].id);
+    document.getElementById(`profile-tab-${tabs[next].id}`)?.focus();
+  }} className={`shrink-0 border-b-2 pb-4 font-h1 text-base font-semibold transition sm:text-xl ${value === tab.id ? 'border-[#A7ACD9] text-white' : 'border-transparent text-[#919099] hover:text-[#E4E1E5]'} focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[#A7ACD9]`}>{tab.label}</button>)}</div>;
 }

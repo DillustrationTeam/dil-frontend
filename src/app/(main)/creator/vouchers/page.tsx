@@ -16,5 +16,5 @@ export default function VouchersPage() {
   const accessToken = useAuthStore((state) => state.accessToken);
   const userId = ready && accessToken ? user?.id ?? null : null;
 
-  return <VoucherScreen userId={userId} />;
+  return <VoucherScreen userId={userId} mode="creator" />;
 }

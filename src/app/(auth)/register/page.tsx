@@ -4,12 +4,14 @@ import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import toast from 'react-hot-toast';
 import { authService } from '@/services/auth.service';
 import { useAuthStore } from '@/store/use-auth-store';
+import { useGoogleAuth } from '@/features/auth/hooks/use-google-auth';
+import { AccountPasswordSetupForm } from '@/features/auth/components/account-password-setup-form';
 
 const registerSchema = z.object({
   fullName: z.string().min(2, 'Full name must be at least 2 characters'),
@@ -22,11 +24,38 @@ const registerSchema = z.object({
 
 type RegisterFormValues = z.infer<typeof registerSchema>;
 
+type VerifyState = 'idle' | 'sending' | 'sent' | 'confirming' | 'verified';
+
 export default function RegisterPage() {
   const router = useRouter();
   const setAuth = useAuthStore((state) => state.setAuth);
+  const [googleRegistration, setGoogleRegistration] = useState<{
+    ticket: string;
+    email: string;
+    fullName: string | null;
+  } | null>(null);
+  const [passwordSetup, setPasswordSetup] = useState<{
+    ticket: string;
+    email: string;
+    fullName: string | null;
+  } | null>(null);
+  const googleLogin = useGoogleAuth(
+    undefined,
+    (registrationTicket, suggestedEmail, suggestedFullName) => {
+      setGoogleRegistration({ ticket: registrationTicket, email: suggestedEmail, fullName: suggestedFullName });
+    },
+    (passwordSetupTicket, email, fullName) => {
+      setPasswordSetup({ ticket: passwordSetupTicket, email, fullName });
+    }
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 });
+
+  const [verifyState, setVerifyState] = useState<VerifyState>('idle');
+  const [verifiedEmail, setVerifiedEmail] = useState<string | null>(null);
+  const [verificationCode, setVerificationCode] = useState('');
+  const [verificationTicket, setVerificationTicket] = useState<string | null>(null);
+  const [resendCooldown, setResendCooldown] = useState(0);
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -36,9 +65,16 @@ export default function RegisterPage() {
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const timer = setInterval(() => setResendCooldown((s) => Math.max(0, s - 1)), 1000);
+    return () => clearInterval(timer);
+  }, [resendCooldown]);
+
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
   } = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
@@ -47,13 +83,67 @@ export default function RegisterPage() {
     },
   });
 
+  const emailValue = useWatch({ control, name: 'email' });
+  const emailRegistration = register('email');
+  const handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    void emailRegistration.onChange(event);
+    if (verifiedEmail && event.target.value !== verifiedEmail) {
+      setVerifyState('idle');
+      setVerificationTicket(null);
+      setVerificationCode('');
+    }
+  };
+
+  const handleSendCode = async () => {
+    if (!emailValue || errors.email) {
+      toast.error('Please enter a valid email address first.');
+      return;
+    }
+
+    setVerifyState('sending');
+    try {
+      await authService.sendVerificationCode(emailValue);
+      setVerifyState('sent');
+      setResendCooldown(60);
+      toast.success('Verification code sent, please check your inbox.');
+    } catch (err) {
+      setVerifyState('idle');
+      toast.error(err instanceof Error ? err.message : 'Failed to send verification code.');
+    }
+  };
+
+  const handleConfirmCode = async () => {
+    if (!verificationCode.trim()) {
+      toast.error('Please enter the verification code.');
+      return;
+    }
+
+    setVerifyState('confirming');
+    try {
+      const result = await authService.confirmVerificationCode(emailValue, verificationCode.trim());
+      setVerificationTicket(result.verificationTicket);
+      setVerifiedEmail(emailValue);
+      setVerifyState('verified');
+      toast.success('Email verified!');
+    } catch (err) {
+      setVerifyState('sent');
+      toast.error(err instanceof Error ? err.message : 'Invalid or expired code.');
+    }
+  };
+
   const onSubmit = async (data: RegisterFormValues) => {
+    if (verifyState !== 'verified' || !verificationTicket) {
+      toast.error('Please verify your email before registering.');
+      return;
+    }
+
     setIsLoading(true);
     try {
       const authResponse = await authService.register({
         fullName: data.fullName,
         email: data.email,
         password: data.password,
+        verificationTicket,
       });
       setAuth(authResponse);
       toast.success(`Account created! Welcome to the collective, ${authResponse.user.fullName}!`);
@@ -91,6 +181,7 @@ export default function RegisterPage() {
               width={220}
               height={112}
               priority
+              style={{ width: 'auto' }}
               className="h-24 md:h-28 w-auto object-contain drop-shadow-[0_0_20px_rgba(194,199,246,0.4)] group-hover:scale-105 transition-transform"
             />
           </Link>
@@ -107,6 +198,72 @@ export default function RegisterPage() {
           </div>
 
           <div className="relative z-10">
+            {passwordSetup ? (
+              <AccountPasswordSetupForm
+                introText={
+                  <>
+                    <p className="text-sm text-[#c7c5cf]">
+                      Welcome back{passwordSetup.fullName ? `, ${passwordSetup.fullName}` : ''}! Signed in as{' '}
+                      <span className="text-white font-medium">{passwordSetup.email}</span>.
+                    </p>
+                    <p className="text-sm text-[#c7c5cf] mt-2">
+                      This account doesn&apos;t have a username and password yet — set them now before
+                      continuing.
+                    </p>
+                  </>
+                }
+                submitLabel="Finish & Continue"
+                submittingLabel="Saving..."
+                onSubmit={(username, password) =>
+                  authService.completeAccountPasswordSetup({
+                    email: passwordSetup.email,
+                    setupTicket: passwordSetup.ticket,
+                    username,
+                    password,
+                  })
+                }
+                onSuccess={(authResponse) => {
+                  setAuth(authResponse);
+                  setPasswordSetup(null);
+                  toast.success(`Welcome back, ${authResponse.user.fullName}!`);
+                  router.push('/');
+                }}
+                onCancel={() => setPasswordSetup(null)}
+              />
+            ) : googleRegistration ? (
+              <AccountPasswordSetupForm
+                introText={
+                  <>
+                    <p className="text-sm text-[#c7c5cf]">
+                      Welcome{googleRegistration.fullName ? `, ${googleRegistration.fullName}` : ''}! Signed in
+                      with Google as{' '}
+                      <span className="text-white font-medium">{googleRegistration.email}</span>.
+                    </p>
+                    <p className="text-sm text-[#c7c5cf] mt-2">
+                      Google accounts don&apos;t come with a password here — choose a username and
+                      password to finish creating your account.
+                    </p>
+                  </>
+                }
+                submitLabel="Finish Creating Account"
+                submittingLabel="Creating Account..."
+                onSubmit={(username, password) =>
+                  authService.completeGoogleRegistration({
+                    registrationTicket: googleRegistration.ticket,
+                    username,
+                    password,
+                  })
+                }
+                onSuccess={(authResponse) => {
+                  setAuth(authResponse);
+                  setGoogleRegistration(null);
+                  toast.success(`Account created! Welcome to the collective, ${authResponse.user.fullName}!`);
+                  router.push('/');
+                }}
+                onCancel={() => setGoogleRegistration(null)}
+              />
+            ) : (
+              <>
             <h1 className="font-h1 text-3xl font-bold mb-2 text-white">Create Account</h1>
             <p className="text-sm text-[#c7c5cf] mb-8">
               Join the curated gallery of ethereal digital artists.
@@ -140,15 +297,65 @@ export default function RegisterPage() {
                     alternate_email
                   </span>
                   <input
-                    {...register('email')}
-                    className="w-full bg-[#0e0e11]/50 border border-white/10 rounded-xl pl-12 pr-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-[#A7ACD9] focus:ring-1 focus:ring-[#A7ACD9] transition-all text-sm"
+                    {...emailRegistration}
+                    onChange={handleEmailChange}
+                    className="w-full bg-[#0e0e11]/50 border border-white/10 rounded-xl pl-12 pr-28 py-3 text-white placeholder-white/30 focus:outline-none focus:border-[#A7ACD9] focus:ring-1 focus:ring-[#A7ACD9] transition-all text-sm"
                     placeholder="curator@ethereal.art"
                     type="email"
                     disabled={isLoading}
                   />
+                  <button
+                    type="button"
+                    onClick={handleSendCode}
+                    disabled={
+                      isLoading ||
+                      verifyState === 'sending' ||
+                      verifyState === 'verified' ||
+                      !emailValue ||
+                      !!errors.email ||
+                      resendCooldown > 0
+                    }
+                    className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg bg-[#A7ACD9]/20 px-3 py-1.5 text-xs font-semibold text-[#A7ACD9] hover:bg-[#A7ACD9]/30 transition-colors disabled:cursor-not-allowed disabled:opacity-40 cursor-pointer"
+                  >
+                    {verifyState === 'verified'
+                      ? 'Verified'
+                      : verifyState === 'sending'
+                        ? 'Sending...'
+                        : resendCooldown > 0
+                          ? `Resend (${resendCooldown}s)`
+                          : verifyState === 'sent' || verifyState === 'confirming'
+                            ? 'Resend code'
+                            : 'Send code'}
+                  </button>
                 </div>
                 {errors.email && (
                   <p className="text-red-400 text-xs ml-1">{errors.email.message}</p>
+                )}
+
+                {verifyState === 'verified' ? (
+                  <p className="flex items-center gap-1 text-xs text-emerald-400 ml-1">
+                    <span className="material-symbols-outlined text-sm">check_circle</span>
+                    Email verified
+                  </p>
+                ) : (verifyState === 'sent' || verifyState === 'confirming') && (
+                  <div className="flex gap-2">
+                    <input
+                      value={verificationCode}
+                      onChange={(e) => setVerificationCode(e.target.value)}
+                      className="w-full bg-[#0e0e11]/50 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder-white/30 focus:outline-none focus:border-[#A7ACD9] focus:ring-1 focus:ring-[#A7ACD9] transition-all text-sm tracking-widest"
+                      placeholder="6-digit code"
+                      maxLength={6}
+                      disabled={verifyState === 'confirming'}
+                    />
+                    <button
+                      type="button"
+                      onClick={handleConfirmCode}
+                      disabled={verifyState === 'confirming'}
+                      className="shrink-0 rounded-xl bg-[#A7ACD9] px-4 py-2.5 text-sm font-bold text-[#1F2335] disabled:opacity-60 cursor-pointer"
+                    >
+                      {verifyState === 'confirming' ? 'Checking...' : 'Confirm'}
+                    </button>
+                  </div>
                 )}
               </div>
 
@@ -199,8 +406,8 @@ export default function RegisterPage() {
               {/* Primary Action Button */}
               <button
                 type="submit"
-                disabled={isLoading}
-                className="w-full py-4 bg-white text-[#1F2335] font-bold text-base rounded-xl transition-all duration-300 active:scale-95 primary-glow-hover mt-4 flex items-center justify-center gap-2 group cursor-pointer disabled:opacity-50"
+                disabled={isLoading || verifyState !== 'verified'}
+                className="w-full py-4 bg-white text-[#1F2335] font-bold text-base rounded-xl transition-all duration-300 active:scale-95 primary-glow-hover mt-4 flex items-center justify-center gap-2 group cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <span>{isLoading ? 'Creating Account...' : 'Begin Journey'}</span>
                 <span className="material-symbols-outlined transition-transform duration-300 group-hover:translate-x-1">
@@ -226,10 +433,11 @@ export default function RegisterPage() {
                 <div className="h-[1px] flex-grow bg-white/10" />
               </div>
 
-              <div className="grid grid-cols-2 gap-4 w-full">
+              <div className="w-full">
                 <button
                   type="button"
-                  className="flex items-center justify-center gap-3 py-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-xs font-semibold text-[#c7c5cf] hover:text-white cursor-pointer"
+                  onClick={() => googleLogin()}
+                  className="flex items-center justify-center gap-3 py-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-xs font-semibold text-[#c7c5cf] hover:text-white cursor-pointer w-full"
                 >
                   <svg className="w-4 h-4" viewBox="0 0 24 24">
                     <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -239,17 +447,10 @@ export default function RegisterPage() {
                   </svg>
                   <span>Google</span>
                 </button>
-                <button
-                  type="button"
-                  className="flex items-center justify-center gap-3 py-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-xs font-semibold text-[#c7c5cf] hover:text-[#0096FA] cursor-pointer"
-                >
-                  <svg className="w-4 h-4 fill-current text-[#0096FA]" viewBox="0 0 24 24">
-                    <path d="M12.238 2C6.609 2 2 6.609 2 12.238c0 5.63 4.609 10.238 10.238 10.238 5.63 0 10.238-4.609 10.238-10.238C22.476 6.609 17.868 2 12.238 2zm3.895 10.665c-1.127 1.551-2.903 2.502-4.697 2.502h-1.921v2.793H7.554V6.993h4.341c2.723 0 4.796 1.666 4.796 4.093 0 1.002-.276 1.956-.558 2.579z"/>
-                  </svg>
-                  <span>Pixiv</span>
-                </button>
               </div>
             </div>
+              </>
+            )}
           </div>
         </div>
 

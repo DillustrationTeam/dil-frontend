@@ -125,3 +125,68 @@ export interface DisputeQueueResponse {
   items: DisputeQueueItemDto[];
   meta: DisputeQueueMeta;
 }
+
+// =========================================================================
+// 2. SUBMISSION DISPUTE TYPES (KHIẾU NẠI BÀI THI SỰ KIỆN)
+// =========================================================================
+export type SubmissionDisputePriority = 'Low' | 'Medium' | 'High';
+
+export type SubmissionDisputeResolution =
+  | 'Dismiss'
+  | 'Disqualify'
+  | 'RequestReEvaluation'
+  | 'Other';
+
+export type SubmissionDisputeStatus =
+  | 'All'
+  | 'Pending'
+  | 'UnderReview'
+  | 'Resolved'
+  | 'Rejected';
+
+export interface SubmissionDisputeDto {
+  id: string;
+  eventId: string;
+  eventTitle?: string | null;
+  submissionId: string;
+  submissionTitle?: string | null;
+  artworkImageUrl?: string | null;
+  raisedById: string;
+  raisedByName?: string | null;
+  priority: SubmissionDisputePriority;
+  reason: string;
+  evidenceUrls?: string | null;
+  evidenceUrlList?: string[] | null;
+  status: 'Pending' | 'UnderReview' | 'Resolved' | 'Rejected';
+  resolution?: string | null;
+  note?: string | null;
+  resolvedAt?: string | null;
+  createdAt: string;
+}
+
+export interface ResolveSubmissionDisputeRequest {
+  resolution: string;
+  note?: string;
+}
+
+export interface SubmissionDisputeQueueFilters {
+  eventId?: string;
+  submissionId?: string;
+  status?: string;
+  page: number;
+  pageSize: number;
+}
+
+export interface SubmissionDisputeQueueResponse {
+  items: SubmissionDisputeDto[];
+  meta: {
+    page: number;
+    pageSize: number;
+    totalCount: number;
+    totalPages: number;
+    pendingCount?: number;
+    underReviewCount?: number;
+    resolvedCount?: number;
+  };
+}
+

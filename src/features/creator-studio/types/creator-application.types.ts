@@ -24,5 +24,5 @@ export interface MyCreatorApplicationDto {
   idProofUrl: string;
   idProofBackUrl: string;
   primaryStyle?: string | null;
-  speedpaintVideoUrls: string[];
+  speedpaintVideoUrls?: string[] | null;
 }

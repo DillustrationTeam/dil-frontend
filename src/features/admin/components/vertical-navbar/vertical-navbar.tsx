@@ -15,6 +15,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Shield,
+  Calendar,
 } from 'lucide-react';
 import { useAuthStore } from '@/store/use-auth-store';
 import { AdminNavItem, AdminNavSection, AdminVerticalNavbarProps } from './types';
@@ -53,9 +54,21 @@ export const DEFAULT_ADMIN_NAV_SECTIONS: AdminNavSection[] = [
       {
         id: 'creator-verifications',
         label: 'Creator Verifications',
-        href: '/admin/creator-applications',
+        href: '/admin/creator-verifications',
         icon: <UserCheck className="w-4 h-4 shrink-0" />,
         materialIcon: 'how_to_reg',
+      },
+    ],
+  },
+  {
+    title: 'Event Management',
+    items: [
+      {
+        id: 'event-operations',
+        label: 'Event Operations',
+        href: '/admin/events',
+        icon: <Calendar className="w-4 h-4 shrink-0" />,
+        materialIcon: 'event',
       },
     ],
   },
@@ -101,7 +114,6 @@ export function VerticalNavbar({
   adminRole = 'Platform Control',
   avatarText,
   showProfile = true,
-  showScreenIds = false,
   showFooter = true,
   footerContent,
   className = '',

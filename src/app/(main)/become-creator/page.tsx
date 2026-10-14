@@ -200,6 +200,7 @@ function ApplicationSummaryCard({
 export default function BecomeCreatorPage() {
   const router = useRouter();
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const hasHydrated = useAuthStore((state) => state.hasHydrated);
   const [isCheckingStatus, setIsCheckingStatus] = useState(true);
   const [application, setApplication] = useState<MyCreatorApplicationDto | null>(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -207,10 +208,13 @@ export default function BecomeCreatorPage() {
   const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    // Chờ Zustand persist đọc xong localStorage rồi mới quyết định — kiểm tra
+    // isAuthenticated ngay khi mount sẽ luôn thấy false (giá trị mặc định) và
+    // đá nhầm người dùng đã đăng nhập ra /login mỗi lần F5 hoặc mở link thẳng.
+    if (hasHydrated && !isAuthenticated) {
       router.push('/login');
     }
-  }, [isAuthenticated, router]);
+  }, [hasHydrated, isAuthenticated, router]);
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -248,7 +252,7 @@ export default function BecomeCreatorPage() {
     }
   };
 
-  if (!isAuthenticated) {
+  if (!hasHydrated || !isAuthenticated) {
     return null;
   }
 

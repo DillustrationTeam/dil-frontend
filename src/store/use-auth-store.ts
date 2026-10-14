@@ -10,11 +10,14 @@ interface AuthState {
   sessionId: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  /** True once the persisted session has been read back from localStorage. */
+  hasHydrated: boolean;
   setAuth: (response: AuthResponseDto) => void;
   setTokens: (tokens: TokenDto) => void;
   setUser: (user: UserDto, roles: string[]) => void;
   clearAuth: () => void;
   setLoading: (loading: boolean) => void;
+  setHasHydrated: (value: boolean) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -27,6 +30,7 @@ export const useAuthStore = create<AuthState>()(
       sessionId: null,
       isAuthenticated: false,
       isLoading: false,
+      hasHydrated: false,
 
       setAuth: (response) =>
         set({
@@ -34,6 +38,7 @@ export const useAuthStore = create<AuthState>()(
           roles: response.roles,
           accessToken: response.tokens.accessToken,
           refreshToken: response.tokens.refreshToken,
+          sessionId: response.tokens.sessionId,
           isAuthenticated: true,
           isLoading: false,
         }),
@@ -42,6 +47,7 @@ export const useAuthStore = create<AuthState>()(
         set(() => ({
           accessToken: tokens.accessToken,
           refreshToken: tokens.refreshToken,
+          sessionId: tokens.sessionId,
           isAuthenticated: true,
         })),
 
@@ -64,9 +70,13 @@ export const useAuthStore = create<AuthState>()(
         }),
 
       setLoading: (loading) => set({ isLoading: loading }),
+      setHasHydrated: (value) => set({ hasHydrated: value }),
     }),
     {
       name: 'dillustration-auth-storage',
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true);
+      },
     }
   )
 );

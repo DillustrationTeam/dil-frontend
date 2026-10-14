@@ -7,6 +7,10 @@ import { paymentService } from '../services/payment.service';
 import type { PaymentOrderDto } from '../types/payment.types';
 import { AccountPageFooter, AccountPageHeading, AccountShell } from './account-shell';
 import { InlineLoader } from '@/features/navigation';
+import { z } from 'zod';
+
+const depositSchema = z.number().min(10000, 'Số tiền nạp tối thiểu là 10.000 ₫.')
+  .max(500000000, 'Số tiền nạp tối đa là 500.000.000 ₫.');
 
 const quickAmounts = [50000, 100000, 200000, 500000, 1000000, 2000000];
 
@@ -15,7 +19,7 @@ function formatVnd(value: number) {
 }
 
 /**
- * PayOS trả về `qrCode` là CHUỖI QR theo chuẩn VietQR (EMVCo), không phải URL ảnh.
+ * Cổng cũ có thể trả về `qrCode` là CHUỖI QR theo chuẩn VietQR (EMVCo), không phải URL ảnh.
  * Vì vậy không thể gán thẳng vào <img src>. Hàm này chuẩn hoá:
  * - Ảnh dựng sẵn (data URI / URL ảnh) → dùng trực tiếp.
  * - Chuỗi QR thô → dựng ảnh QR qua dịch vụ mã hoá, giữ nguyên toàn bộ dữ liệu
@@ -40,6 +44,7 @@ export function DepositScreen({ userId }: { userId: string | null }) {
   const [qrFailed, setQrFailed] = useState(false);
 
   const qrImageSrc = resolveQrImageSrc(order?.qrCode);
+  const hasManualTransferDetails = Boolean(order?.accountNumber);
 
   async function handleCreateOrder(e: React.FormEvent) {
     e.preventDefault();
@@ -47,8 +52,9 @@ export function DepositScreen({ userId }: { userId: string | null }) {
       setError('Vui lòng đăng nhập để thực hiện nạp tiền.');
       return;
     }
-    if (amount < 10000) {
-      setError('Số tiền nạp tối thiểu là 10.000 ₫.');
+    const parsed = depositSchema.safeParse(amount);
+    if (!parsed.success) {
+      setError(parsed.error.issues[0]?.message ?? 'Số tiền nạp không hợp lệ.');
       return;
     }
     setError(null);
@@ -57,7 +63,7 @@ export function DepositScreen({ userId }: { userId: string | null }) {
     try {
       const returnUrl = typeof window !== 'undefined' ? `${window.location.origin}/wallet` : 'http://localhost:3000/wallet';
       const cancelUrl = typeof window !== 'undefined' ? `${window.location.origin}/checkout` : 'http://localhost:3000/checkout';
-      const res = await paymentService.createOrder(amount, returnUrl, cancelUrl);
+      const res = await paymentService.createOrder(parsed.data, returnUrl, cancelUrl);
       setOrder(res);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Tạo đơn nạp tiền thất bại. Vui lòng thử lại.');
@@ -71,7 +77,11 @@ export function DepositScreen({ userId }: { userId: string | null }) {
     setChecking(true);
     try {
       const res = await paymentService.order(order.paymentOrderId);
-      setOrder(res);
+      setOrder({
+        ...res,
+        checkoutAction: order.checkoutAction,
+        checkoutFields: order.checkoutFields,
+      });
       if (res.paymentOrderStatus === 'Paid' || res.paymentOrderStatus === 'Completed') {
         setError(null);
       }
@@ -143,6 +153,7 @@ export function DepositScreen({ userId }: { userId: string | null }) {
                 id="custom-amount"
                 type="number"
                 min="10000"
+                max="500000000"
                 step="1000"
                 value={customAmount}
                 onChange={(e) => {
@@ -152,11 +163,11 @@ export function DepositScreen({ userId }: { userId: string | null }) {
                 className="w-full rounded-xl border border-white/15 bg-brand-navy/60 px-4 py-3 font-h1 text-lg font-semibold text-on-surface placeholder:text-outline focus:border-brand-periwinkle focus:outline-none"
                 placeholder="Nhập số tiền tối thiểu 10.000 ₫"
               />
-              <span className="mt-1 block text-xs text-outline">Tối thiểu: 10.000 ₫ · Miễn phí giao dịch</span>
+              <span className="mt-1 block text-xs text-outline">Từ 10.000 ₫ đến 500.000.000 ₫ · Miễn phí giao dịch</span>
             </div>
 
             <div className="rounded-2xl border border-brand-periwinkle/20 bg-brand-periwinkle/5 p-4 text-xs text-on-surface-variant">
-              Phương thức thanh toán: <strong>Chuyển khoản VietQR qua PayOS</strong>. Hệ thống tự động ghi nhận tiền vào ví trong vòng 1-3 phút sau khi chuyển khoản thành công.
+              Phương thức thanh toán: <strong>VietQR qua SePay</strong>. Hệ thống ghi nhận tiền vào ví sau khi SePay gửi IPN xác nhận giao dịch.
             </div>
 
             <button
@@ -200,7 +211,7 @@ export function DepositScreen({ userId }: { userId: string | null }) {
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={qrImageSrc}
-                        alt="Mã QR thanh toán PayOS"
+                        alt="Mã QR thanh toán"
                         className="size-56 object-contain"
                         onError={() => setQrFailed(true)}
                       />
@@ -208,7 +219,7 @@ export function DepositScreen({ userId }: { userId: string | null }) {
                   ) : (
                     <div className="flex size-56 flex-col items-center justify-center rounded-xl bg-black/20 p-4 text-center text-xs text-outline">
                       <QrCode size={28} className="mb-2 opacity-60" />
-                      Hệ thống chưa trả được ảnh mã QR. Vui lòng dùng thông tin chuyển khoản bên cạnh hoặc mở trang thanh toán ngân hàng.
+                      SePay sẽ hiển thị VietQR trên trang thanh toán bảo mật.
                     </div>
                   )}
                   {qrImageSrc && qrFailed && (
@@ -216,7 +227,19 @@ export function DepositScreen({ userId }: { userId: string | null }) {
                       Không tải được ảnh mã QR. Bạn vẫn có thể chuyển khoản theo thông tin bên cạnh.
                     </p>
                   )}
-                  {order.paymentUrl && (
+                  {order.checkoutAction && order.checkoutFields?.length ? (
+                    <form method="POST" action={order.checkoutAction} target="_blank" className="mt-4">
+                      {order.checkoutFields.map((field) => (
+                        <input key={field.name} type="hidden" name={field.name} value={field.value} />
+                      ))}
+                      <button
+                        type="submit"
+                        className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand-periwinkle hover:underline"
+                      >
+                        Mở cổng thanh toán SePay <ExternalLink size={14} />
+                      </button>
+                    </form>
+                  ) : order.paymentUrl ? (
                     <a
                       href={order.paymentUrl}
                       target="_blank"
@@ -225,11 +248,13 @@ export function DepositScreen({ userId }: { userId: string | null }) {
                     >
                       Mở trang thanh toán ngân hàng <ExternalLink size={14} />
                     </a>
-                  )}
+                  ) : null}
                 </div>
 
                 <div className="space-y-4 rounded-2xl border border-white/10 bg-white/[0.02] p-6 text-sm">
-                  <h3 className="font-h1 font-bold text-on-surface">Thông tin chuyển khoản</h3>
+                  <h3 className="font-h1 font-bold text-on-surface">
+                    {hasManualTransferDetails ? 'Thông tin chuyển khoản' : 'Thông tin đơn nạp'}
+                  </h3>
                   <div className="space-y-3 text-xs">
                     <div>
                       <span className="text-outline">Số tiền cần chuyển:</span>
@@ -257,20 +282,26 @@ export function DepositScreen({ userId }: { userId: string | null }) {
                         <p className="font-semibold text-on-surface">{order.accountName}</p>
                       </div>
                     )}
-                    <div>
-                      <span className="text-outline">Nội dung chuyển khoản (bắt buộc):</span>
-                      <div className="flex items-center justify-between rounded-lg border border-white/10 bg-white/5 px-3 py-2 font-mono text-sm text-brand-periwinkle">
-                        <span>{order.orderRef}</span>
-                        <button
-                          type="button"
-                          onClick={() => handleCopy(order.orderRef)}
-                          className="text-brand-periwinkle hover:text-white"
-                          title="Sao chép nội dung"
-                        >
-                          <Copy size={14} />
-                        </button>
+                    {hasManualTransferDetails ? (
+                      <div>
+                        <span className="text-outline">Nội dung chuyển khoản (bắt buộc):</span>
+                        <div className="flex items-center justify-between rounded-lg border border-white/10 bg-white/5 px-3 py-2 font-mono text-sm text-brand-periwinkle">
+                          <span>{order.orderRef}</span>
+                          <button
+                            type="button"
+                            onClick={() => handleCopy(order.orderRef)}
+                            className="text-brand-periwinkle hover:text-white"
+                            title="Sao chép nội dung"
+                          >
+                            <Copy size={14} />
+                          </button>
+                        </div>
                       </div>
-                    </div>
+                    ) : (
+                      <p className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-on-surface-variant">
+                        Mở cổng SePay để lấy VietQR đã gắn đúng số tiền và mã đơn. Không tự sửa nội dung thanh toán.
+                      </p>
+                    )}
                     {copied && <p className="text-xs text-emerald-400">Đã sao chép vào bộ nhớ tạm!</p>}
                   </div>
 

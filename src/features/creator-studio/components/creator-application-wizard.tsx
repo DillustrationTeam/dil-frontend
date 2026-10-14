@@ -1,18 +1,31 @@
 'use client';
 
-import Image from 'next/image';
+import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
-import { Pencil, X } from 'lucide-react';
+import Image from 'next/image';
+import { Pencil } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useCloudinaryUpload } from '@/features/creator-studio/hooks/use-cloudinary-upload';
 import { creatorApplicationService } from '@/features/creator-studio/services/creator-application.service';
-import type { SubmitCreatorApplicationRequest } from '@/features/creator-studio/types/creator-application.types';
-import { splitPortfolioLinks } from '@/lib/portfolio-link';
 
-type WizardValues = SubmitCreatorApplicationRequest & { portfolioUploads: string[] };
+type WizardStep = 'identity' | 'portfolio' | 'style';
 
-const defaults: WizardValues = {
+type WizardFormState = {
+  idProofUrl: string;
+  idProofBackUrl: string;
+  portfolioLinks: string[];
+  portfolioUploads: string[];
+  primaryStyle: string;
+  speedpaintVideoUrls: string[];
+};
+
+const steps: Array<{ key: WizardStep; label: string }> = [
+  { key: 'identity', label: 'Identity' },
+  { key: 'portfolio', label: 'Portfolio' },
+  { key: 'style', label: 'Style & Proof' },
+];
+
+const defaultValues: WizardFormState = {
   idProofUrl: '',
   idProofBackUrl: '',
   portfolioLinks: [''],
@@ -20,16 +33,83 @@ const defaults: WizardValues = {
   primaryStyle: '',
   speedpaintVideoUrls: [''],
 };
-const inputClass = 'w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none focus:border-[#A7ACD9]';
-const styleSuggestions = ['Anime / Manga', 'Chibi', 'Semi-realistic', 'Realistic / Portrait', 'Concept Art', 'Character Design', 'Fantasy Art', 'Pixel Art', 'Watercolor'];
 
-function isWebUrl(value: string): boolean {
-  try {
-    const url = new URL(value);
-    return url.protocol === 'http:' || url.protocol === 'https:';
-  } catch {
-    return false;
-  }
+// Danh sách gợi ý phong cách vẽ — người dùng vẫn có thể gõ tự do, đây chỉ là dropdown hỗ trợ chọn nhanh.
+const primaryStyleSuggestions = [
+  'Anime / Manga',
+  'Chibi',
+  'Semi-realistic',
+  'Realistic / Portrait',
+  'Concept Art',
+  'Character Design',
+  'Fanart',
+  'Fantasy Art',
+  'Pixel Art',
+  '3D / CGI',
+  'Flat Design / Vector',
+  'Watercolor',
+  'Traditional / Sketch',
+  'Environment / Background',
+  'Furry / Anthro',
+];
+
+const inputClass =
+  'w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none focus:border-[#A7ACD9]';
+
+function ImageUploadSlot({
+  label,
+  value,
+  isUploading,
+  onSelectFile,
+}: {
+  label: string;
+  value: string;
+  isUploading: boolean;
+  onSelectFile: (file: File) => void;
+}) {
+  const inputId = `upload-${label.replace(/\s+/g, '-').toLowerCase()}`;
+
+  return (
+    <div className="space-y-2">
+      <label className="text-xs uppercase tracking-wider text-[#C7C5CF]">{label}</label>
+      <label
+        htmlFor={inputId}
+        className="relative flex aspect-[16/10] w-full cursor-pointer items-center justify-center overflow-hidden rounded-xl border border-dashed border-white/20 bg-white/5 transition hover:border-[#A7ACD9]"
+      >
+        {value ? (
+          <Image src={value} alt={label} fill unoptimized className="object-cover" />
+        ) : (
+          <div className="flex flex-col items-center gap-2 text-[#C7C5CF]">
+            <span className="material-symbols-outlined text-3xl">
+              {isUploading ? 'progress_activity' : 'upload'}
+            </span>
+            <span className="text-xs">{isUploading ? 'Uploading...' : 'Click to upload'}</span>
+          </div>
+        )}
+        {value && !isUploading && (
+          <span
+            title="Nhấn vào ảnh để chọn ảnh khác"
+            className="absolute bottom-2 right-2 flex items-center gap-1.5 rounded-full bg-black/50 px-3 py-1.5 text-white/80 opacity-80 backdrop-blur-sm transition hover:opacity-100"
+          >
+            <Pencil className="h-4 w-4" />
+            <span className="text-xs font-medium">Chỉnh sửa</span>
+          </span>
+        )}
+        <input
+          id={inputId}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          disabled={isUploading}
+          onChange={(event) => {
+            const file = event.target.files?.[0];
+            if (file) onSelectFile(file);
+            event.target.value = '';
+          }}
+        />
+      </label>
+    </div>
+  );
 }
 
 export function CreatorApplicationWizard({
@@ -38,137 +118,414 @@ export function CreatorApplicationWizard({
   onDone,
 }: {
   mode?: 'create' | 'edit';
-  initialValues?: Partial<SubmitCreatorApplicationRequest>;
+  initialValues?: Partial<WizardFormState>;
   onDone?: () => void;
 }) {
   const router = useRouter();
-  const initialPortfolio = initialValues?.portfolioLinks ? splitPortfolioLinks(initialValues.portfolioLinks) : null;
-  const [values, setValues] = useState<WizardValues>(() => ({
-    ...defaults,
-    ...initialValues,
-    portfolioLinks: initialPortfolio?.manualLinks.length ? initialPortfolio.manualLinks : [''],
-    portfolioUploads: initialPortfolio?.uploadedImages ?? [],
-    speedpaintVideoUrls: initialValues?.speedpaintVideoUrls?.length ? initialValues.speedpaintVideoUrls : [''],
-  }));
-  const [step, setStep] = useState(0);
-  const [error, setError] = useState('');
+  const [stepIndex, setStepIndex] = useState(0);
+  const [form, setForm] = useState<WizardFormState>({ ...defaultValues, ...initialValues });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const frontUpload = useCloudinaryUpload('creator-applications/id-proof');
-  const backUpload = useCloudinaryUpload('creator-applications/id-proof');
+
+  const idFrontUpload = useCloudinaryUpload('creator-applications/id-proof');
+  const idBackUpload = useCloudinaryUpload('creator-applications/id-proof');
   const portfolioUpload = useCloudinaryUpload('creator-applications/portfolio');
-  const uploading = frontUpload.isUploading || backUpload.isUploading || portfolioUpload.isUploading;
 
-  const setField = <K extends keyof WizardValues>(key: K, value: WizardValues[K]) => {
-    setValues((current) => ({ ...current, [key]: value }));
-    setError('');
-  };
+  const currentStep = steps[stepIndex];
 
-  const uploadImage = async (file: File, side: 'front' | 'back' | 'portfolio') => {
-    if (!file.type.startsWith('image/')) {
-      setError('Chỉ chấp nhận tệp hình ảnh.');
-      return;
+  const canContinue = useMemo(() => {
+    if (currentStep.key === 'identity') {
+      return form.idProofUrl.trim().length > 0 && form.idProofBackUrl.trim().length > 0;
     }
-    if (file.size > 10 * 1024 * 1024) {
-      setError('Ảnh tải lên không được vượt quá 10MB.');
-      return;
-    }
-    const hook = side === 'front' ? frontUpload : side === 'back' ? backUpload : portfolioUpload;
-    const url = await hook.upload(file);
-    if (!url) {
-      setError(hook.error ?? 'Không thể tải ảnh lên.');
-      return;
-    }
-    if (side === 'front') setField('idProofUrl', url);
-    else if (side === 'back') setField('idProofBackUrl', url);
-    else setField('portfolioUploads', [...values.portfolioUploads, url]);
-  };
 
-  const validateStep = () => {
-    if (step === 0 && (!values.idProofUrl || !values.idProofBackUrl)) {
-      setError('Vui lòng tải đủ ảnh mặt trước và mặt sau giấy tờ tùy thân.');
-      return false;
+    if (currentStep.key === 'portfolio') {
+      return form.portfolioUploads.length > 0;
     }
-    if (step === 1) {
-      const links = values.portfolioLinks.map((link) => link.trim()).filter(Boolean);
-      if (!links.length && !values.portfolioUploads.length) {
-        setError('Vui lòng thêm portfolio link hoặc tải lên ít nhất một sản phẩm mẫu.');
-        return false;
-      }
-      if (links.some((link) => !isWebUrl(link))) {
-        setError('Portfolio link không hợp lệ. Dùng địa chỉ bắt đầu bằng http:// hoặc https://.');
-        return false;
-      }
+
+    if (currentStep.key === 'style') {
+      const hasStyle = form.primaryStyle.trim().length > 0;
+      const hasSpeedpaint = form.speedpaintVideoUrls.some((link) => link.trim().length > 0);
+      return hasStyle && hasSpeedpaint;
     }
-    if (step === 2) {
-      if (!values.primaryStyle.trim()) {
-        setError('Vui lòng nhập phong cách vẽ chính.');
-        return false;
-      }
-      const links = values.speedpaintVideoUrls.map((link) => link.trim()).filter(Boolean);
-      if (!links.length) {
-        setError('Vui lòng cung cấp ít nhất một link speedpaint.');
-        return false;
-      }
-      if (links.some((link) => !isWebUrl(link))) {
-        setError('Speedpaint URL không hợp lệ. Dùng địa chỉ bắt đầu bằng http:// hoặc https://.');
-        return false;
-      }
-    }
-    setError('');
+
     return true;
+  }, [currentStep.key, form]);
+
+  const handleIdFrontUpload = async (file: File) => {
+    const url = await idFrontUpload.upload(file);
+    if (url) {
+      setForm((previous) => ({ ...previous, idProofUrl: url }));
+    } else {
+      toast.error(idFrontUpload.error ?? 'Failed to upload front-side ID image.');
+    }
   };
 
-  const submit = async () => {
-    if (!validateStep()) return;
-    const payload: SubmitCreatorApplicationRequest = {
-      idProofUrl: values.idProofUrl,
-      idProofBackUrl: values.idProofBackUrl,
-      portfolioLinks: [
-        ...values.portfolioLinks.map((link) => link.trim()).filter(Boolean),
-        ...values.portfolioUploads,
-      ],
-      primaryStyle: values.primaryStyle.trim(),
-      speedpaintVideoUrls: values.speedpaintVideoUrls.map((link) => link.trim()).filter(Boolean),
-    };
+  const handleIdBackUpload = async (file: File) => {
+    const url = await idBackUpload.upload(file);
+    if (url) {
+      setForm((previous) => ({ ...previous, idProofBackUrl: url }));
+    } else {
+      toast.error(idBackUpload.error ?? 'Failed to upload back-side ID image.');
+    }
+  };
+
+  const handlePortfolioFileUpload = async (file: File) => {
+    const url = await portfolioUpload.upload(file);
+    if (url) {
+      setForm((previous) => ({ ...previous, portfolioUploads: [...previous.portfolioUploads, url] }));
+    } else {
+      toast.error(portfolioUpload.error ?? 'Failed to upload sample artwork.');
+    }
+  };
+
+  const removePortfolioUpload = (url: string) => {
+    setForm((previous) => ({
+      ...previous,
+      portfolioUploads: previous.portfolioUploads.filter((item) => item !== url),
+    }));
+  };
+
+  const updatePortfolioLink = (index: number, value: string) => {
+    setForm((previous) => {
+      const next = [...previous.portfolioLinks];
+      next[index] = value;
+      return { ...previous, portfolioLinks: next };
+    });
+  };
+
+  const addPortfolioLink = () => {
+    setForm((previous) => ({ ...previous, portfolioLinks: [...previous.portfolioLinks, ''] }));
+  };
+
+  const removePortfolioLink = (index: number) => {
+    setForm((previous) => ({
+      ...previous,
+      portfolioLinks: previous.portfolioLinks.filter((_, i) => i !== index),
+    }));
+  };
+
+  const updateSpeedpaintLink = (index: number, value: string) => {
+    setForm((previous) => {
+      const next = [...previous.speedpaintVideoUrls];
+      next[index] = value;
+      return { ...previous, speedpaintVideoUrls: next };
+    });
+  };
+
+  const addSpeedpaintLink = () => {
+    setForm((previous) => ({ ...previous, speedpaintVideoUrls: [...previous.speedpaintVideoUrls, ''] }));
+  };
+
+  const removeSpeedpaintLink = (index: number) => {
+    setForm((previous) => ({
+      ...previous,
+      speedpaintVideoUrls: previous.speedpaintVideoUrls.filter((_, i) => i !== index),
+    }));
+  };
+
+  const updatePrimaryStyle = (value: string) => {
+    setForm((previous) => ({ ...previous, primaryStyle: value }));
+  };
+
+  const nextStep = () => {
+    if (!canContinue) {
+      toast.error('Please complete this step before continuing.');
+      return;
+    }
+
+    if (stepIndex < steps.length - 1) {
+      setStepIndex((previous) => previous + 1);
+    }
+  };
+
+  const previousStep = () => {
+    if (stepIndex > 0) {
+      setStepIndex((previous) => previous - 1);
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (!canContinue) {
+      if (!form.primaryStyle.trim()) {
+        toast.error('Vui lòng chọn hoặc nhập phong cách vẽ chính.');
+      } else if (!form.speedpaintVideoUrls.some((link) => link.trim().length > 0)) {
+        toast.error('Vui lòng cung cấp link video speedpaint minh chứng.');
+      } else {
+        toast.error('Please complete this step before continuing.');
+      }
+      return;
+    }
+
     setIsSubmitting(true);
+
     try {
+      const portfolioLinks = [
+        ...form.portfolioLinks.map((link) => link.trim()).filter((link) => link.length > 0),
+        ...form.portfolioUploads,
+      ];
+
+      const speedpaintVideoUrls = form.speedpaintVideoUrls.map((link) => link.trim()).filter((link) => link.length > 0);
+
+      const payload = {
+        portfolioLinks,
+        idProofUrl: form.idProofUrl,
+        idProofBackUrl: form.idProofBackUrl,
+        primaryStyle: form.primaryStyle.trim(),
+        speedpaintVideoUrls,
+      };
+
       if (mode === 'edit') {
         await creatorApplicationService.updateApplication(payload);
-        toast.success('Đã cập nhật hồ sơ ứng tuyển.');
+        toast.success('Application updated! It will be reviewed again.');
         onDone?.();
       } else {
         await creatorApplicationService.submitApplication(payload);
-        toast.success('Đã gửi hồ sơ ứng tuyển Creator.');
+        toast.success('Application submitted! Our moderators will review it soon.');
         router.push('/');
       }
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'Không thể gửi hồ sơ ứng tuyển.');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unable to submit your application.';
+      toast.error(message);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const imageSlot = (label: string, value: string, side: 'front' | 'back') => (
-    <label className="space-y-2 text-xs text-[#C7C5CF]">
-      <span>{label}</span>
-      <span className="relative flex aspect-[16/10] cursor-pointer items-center justify-center overflow-hidden rounded-xl border border-dashed border-white/20 bg-white/5">
-        {value ? <><Image src={value} alt={label} fill unoptimized className="object-cover" /><span className="absolute bottom-2 right-2 rounded-full bg-black/60 p-2"><Pencil className="h-4 w-4" /></span></> : <span>{side === 'front' ? frontUpload.isUploading : backUpload.isUploading ? 'Đang tải…' : 'Chọn ảnh'}</span>}
-        <input type="file" accept="image/*" className="sr-only" disabled={uploading} onChange={(event) => { const file = event.target.files?.[0]; if (file) void uploadImage(file, side); event.target.value = ''; }} />
-      </span>
-    </label>
-  );
-
   return (
-    <section className="glass-container mx-auto w-full max-w-3xl rounded-3xl p-5 sm:p-7">
-      <header className="mb-6"><p className="text-xs uppercase tracking-wider text-[#A7ACD9]">{mode === 'edit' ? 'Cập nhật hồ sơ' : 'Ứng tuyển Creator'}</p><h1 className="mt-2 font-h1 text-2xl font-bold text-white">{mode === 'edit' ? 'Bổ sung hồ sơ Creator' : 'Trở thành Creator'}</h1></header>
-      <div className="mb-6 flex gap-2 text-xs text-slate-400">{['Danh tính', 'Portfolio', 'Phong cách'].map((label, index) => <button type="button" key={label} onClick={() => index < step && setStep(index)} className={`flex-1 border-b-2 pb-2 text-left ${step === index ? 'border-[#A7ACD9] text-white' : index < step ? 'border-[#A7ACD9]/40' : 'border-white/10'}`}>{index + 1}. {label}</button>)}</div>
-      <div className="space-y-5">
-        {step === 0 && <div className="grid gap-4 sm:grid-cols-2">{imageSlot('Mặt trước giấy tờ tùy thân', values.idProofUrl, 'front')}{imageSlot('Mặt sau giấy tờ tùy thân', values.idProofBackUrl, 'back')}</div>}
-        {step === 1 && <div className="space-y-4"><div className="space-y-2"><label className="text-xs text-[#C7C5CF]">Portfolio links</label>{values.portfolioLinks.map((link, index) => <div className="flex gap-2" key={index}><input className={inputClass} value={link} placeholder="https://portfolio.example" onChange={(event) => setField('portfolioLinks', values.portfolioLinks.map((item, itemIndex) => itemIndex === index ? event.target.value : item))} />{values.portfolioLinks.length > 1 && <button type="button" aria-label="Xóa link" onClick={() => setField('portfolioLinks', values.portfolioLinks.filter((_, itemIndex) => itemIndex !== index))}><X className="h-4 w-4" /></button>}</div>)}<button type="button" className="text-xs text-[#A7ACD9]" onClick={() => setField('portfolioLinks', [...values.portfolioLinks, ''])}>+ Thêm link</button></div><div className="space-y-2"><label className="text-xs text-[#C7C5CF]">Ảnh sản phẩm mẫu (bắt buộc)</label><div className="grid grid-cols-3 gap-3 sm:grid-cols-4">{values.portfolioUploads.map((url) => <div key={url} className="relative aspect-square overflow-hidden rounded-lg"><Image src={url} alt="Portfolio sample" fill unoptimized className="object-cover" /><button type="button" aria-label="Xóa ảnh" onClick={() => setField('portfolioUploads', values.portfolioUploads.filter((item) => item !== url))} className="absolute right-1 top-1 rounded-full bg-black/70 p-1"><X className="h-3 w-3" /></button></div>)}<label className="flex aspect-square cursor-pointer items-center justify-center rounded-lg border border-dashed border-white/20 text-2xl text-[#A7ACD9]">+<input type="file" accept="image/*" className="sr-only" disabled={uploading} onChange={(event) => { const file = event.target.files?.[0]; if (file) void uploadImage(file, 'portfolio'); event.target.value = ''; }} /></label></div></div></div>}
-        {step === 2 && <div className="space-y-4"><div className="space-y-2"><label className="text-xs text-[#C7C5CF]">Phong cách chính</label><input className={inputClass} list="creator-style-options" value={values.primaryStyle} onChange={(event) => setField('primaryStyle', event.target.value)} /><datalist id="creator-style-options">{styleSuggestions.map((style) => <option key={style} value={style} />)}</datalist></div><div className="space-y-2"><label className="text-xs text-[#C7C5CF]">Video speedpaint</label>{values.speedpaintVideoUrls.map((link, index) => <div className="flex gap-2" key={index}><input className={inputClass} value={link} placeholder="https://youtube.com/watch?..." onChange={(event) => setField('speedpaintVideoUrls', values.speedpaintVideoUrls.map((item, itemIndex) => itemIndex === index ? event.target.value : item))} />{values.speedpaintVideoUrls.length > 1 && <button type="button" aria-label="Xóa speedpaint link" onClick={() => setField('speedpaintVideoUrls', values.speedpaintVideoUrls.filter((_, itemIndex) => itemIndex !== index))}><X className="h-4 w-4" /></button>}</div>)}<button type="button" className="text-xs text-[#A7ACD9]" onClick={() => setField('speedpaintVideoUrls', [...values.speedpaintVideoUrls, ''])}>+ Thêm link</button></div></div>}
+    <div className="glass-container rounded-[32px] p-6 md:p-8 max-w-3xl mx-auto">
+      <div className="mb-8 flex items-start justify-between gap-4">
+        <div>
+          <p className="text-xs uppercase tracking-[0.2em] text-[#A7ACD9]">
+            {mode === 'edit' ? 'Sửa đơn Creator' : 'Become a creator'}
+          </p>
+          <h1 className="font-h1 text-3xl font-bold text-white mt-3">
+            {mode === 'edit' ? 'Cập nhật đơn của bạn' : 'Đăng ký trở thành Creator'}
+          </h1>
+          <p className="mt-2 text-sm text-[#C7C5CF]">
+            {mode === 'edit'
+              ? 'Cập nhật lại thông tin đơn — đơn sẽ được đưa lại vào hàng chờ duyệt.'
+              : 'Hoàn thành 3 bước để gửi đơn xác minh. Moderator sẽ xét duyệt và cấp quyền Creator sau khi đơn được chấp thuận.'}
+          </p>
+        </div>
+        {mode === 'edit' && onDone && (
+          <button
+            type="button"
+            onClick={onDone}
+            className="shrink-0 rounded-xl border border-white/10 px-4 py-2 text-sm text-[#C7C5CF] hover:text-white"
+          >
+            Hủy
+          </button>
+        )}
       </div>
-      {error && <p role="alert" className="mt-4 text-sm text-rose-300">{error}</p>}
-      <footer className="mt-7 flex justify-between gap-3"><button type="button" disabled={step === 0 || isSubmitting} onClick={() => { setError(''); setStep((current) => current - 1); }} className="rounded-lg border border-white/10 px-4 py-2 text-sm text-white disabled:opacity-40">Quay lại</button>{step < 2 ? <button type="button" onClick={() => { if (validateStep()) setStep((current) => current + 1); }} className="rounded-lg bg-[#A7ACD9] px-5 py-2 text-sm font-semibold text-[#1F2335]">Tiếp tục</button> : <button type="button" disabled={isSubmitting || uploading} onClick={() => void submit()} className="rounded-lg bg-[#A7ACD9] px-5 py-2 text-sm font-semibold text-[#1F2335] disabled:opacity-50">{isSubmitting ? 'Đang gửi…' : mode === 'edit' ? 'Lưu hồ sơ' : 'Gửi hồ sơ'}</button>}</footer>
-    </section>
+
+      <div className="mb-8 flex gap-3">
+        {steps.map((step, index) => {
+          const isActive = index === stepIndex;
+          const isDone = index < stepIndex;
+
+          return (
+            <div key={step.key} className="flex-1">
+              <div className="mb-2 flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-[#C7C5CF]">
+                <span
+                  className={`flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-bold ${
+                    isActive ? 'bg-[#A7ACD9] text-[#1F2335]' : isDone ? 'bg-[#A7ACD9]/30 text-white' : 'bg-white/5 text-[#C7C5CF]'
+                  }`}
+                >
+                  {index + 1}
+                </span>
+                {step.label}
+              </div>
+              <div className={`h-1 rounded-full ${isDone || isActive ? 'bg-[#A7ACD9]' : 'bg-white/10'}`} />
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="space-y-6">
+        {currentStep.key === 'identity' && (
+          <>
+            <p className="text-sm text-[#C7C5CF]">
+              Tải lên ảnh CCCD/CMND để xác minh danh tính. Thông tin chỉ dùng để duyệt hồ sơ, không hiển thị công khai.
+            </p>
+            <div className="grid gap-6 md:grid-cols-2">
+              <ImageUploadSlot
+                label="Mặt trước CCCD/CMND"
+                value={form.idProofUrl}
+                isUploading={idFrontUpload.isUploading}
+                onSelectFile={handleIdFrontUpload}
+              />
+              <ImageUploadSlot
+                label="Mặt sau CCCD/CMND"
+                value={form.idProofBackUrl}
+                isUploading={idBackUpload.isUploading}
+                onSelectFile={handleIdBackUpload}
+              />
+            </div>
+          </>
+        )}
+
+        {currentStep.key === 'portfolio' && (
+          <>
+            <div className="space-y-3">
+              <label className="text-xs uppercase tracking-wider text-[#C7C5CF]">
+                Link Behance / ArtStation / Portfolio site
+              </label>
+              {form.portfolioLinks.map((link, index) => (
+                <div key={index} className="flex gap-2">
+                  <input
+                    value={link}
+                    onChange={(event) => updatePortfolioLink(index, event.target.value)}
+                    className={inputClass}
+                    placeholder="https://www.behance.net/yourprofile"
+                  />
+                  {form.portfolioLinks.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => removePortfolioLink(index)}
+                      className="rounded-xl border border-white/10 px-3 text-[#C7C5CF] hover:border-red-400 hover:text-red-400"
+                      aria-label="Remove link"
+                    >
+                      <span className="material-symbols-outlined text-lg">close</span>
+                    </button>
+                  )}
+                </div>
+              ))}
+              <button
+                type="button"
+                onClick={addPortfolioLink}
+                className="text-xs font-semibold text-[#A7ACD9] hover:underline"
+              >
+                + Thêm link khác
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              <label className="text-xs uppercase tracking-wider text-[#C7C5CF]">
+                Upload sản phẩm mẫu (bắt buộc, có thể chọn nhiều ảnh)
+              </label>
+              <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
+                {form.portfolioUploads.map((url) => (
+                  <div key={url} className="group relative aspect-square overflow-hidden rounded-xl border border-white/10">
+                    <Image src={url} alt="Portfolio sample" fill unoptimized className="object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => removePortfolioUpload(url)}
+                      className="absolute right-1 top-1 hidden h-6 w-6 items-center justify-center rounded-full bg-black/70 text-white group-hover:flex"
+                      aria-label="Remove sample"
+                    >
+                      <span className="material-symbols-outlined text-sm">close</span>
+                    </button>
+                  </div>
+                ))}
+                <label
+                  htmlFor="upload-portfolio-sample"
+                  className="flex aspect-square cursor-pointer items-center justify-center rounded-xl border border-dashed border-white/20 bg-white/5 text-[#C7C5CF] transition hover:border-[#A7ACD9]"
+                >
+                  <span className="material-symbols-outlined text-2xl">
+                    {portfolioUpload.isUploading ? 'progress_activity' : 'add'}
+                  </span>
+                  <input
+                    id="upload-portfolio-sample"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    disabled={portfolioUpload.isUploading}
+                    onChange={(event) => {
+                      const file = event.target.files?.[0];
+                      if (file) handlePortfolioFileUpload(file);
+                      event.target.value = '';
+                    }}
+                  />
+                </label>
+              </div>
+            </div>
+          </>
+        )}
+
+        {currentStep.key === 'style' && (
+          <>
+            <div className="space-y-2">
+              <label className="text-xs uppercase tracking-wider text-[#C7C5CF]">
+                Phong cách chính <span className="text-red-400">*</span>
+              </label>
+              <input
+                value={form.primaryStyle}
+                onChange={(event) => updatePrimaryStyle(event.target.value)}
+                className={inputClass}
+                placeholder="Chọn hoặc gõ phong cách của bạn (bắt buộc)"
+                list="primary-style-suggestions"
+              />
+              <datalist id="primary-style-suggestions">
+                {primaryStyleSuggestions.map((style) => (
+                  <option key={style} value={style} />
+                ))}
+              </datalist>
+            </div>
+
+            <div className="space-y-3">
+              <label className="text-xs uppercase tracking-wider text-[#C7C5CF]">
+                Link video Speedpaint (minh chứng vẽ tay) <span className="text-red-400">*</span>
+              </label>
+              {form.speedpaintVideoUrls.map((link, index) => (
+                <div key={index} className="flex gap-2">
+                  <input
+                    value={link}
+                    onChange={(event) => updateSpeedpaintLink(index, event.target.value)}
+                    className={inputClass}
+                    placeholder="https://youtube.com/watch?v=..."
+                  />
+                  {form.speedpaintVideoUrls.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => removeSpeedpaintLink(index)}
+                      className="rounded-xl border border-white/10 px-3 text-[#C7C5CF] hover:border-red-400 hover:text-red-400"
+                      aria-label="Remove link"
+                    >
+                      <span className="material-symbols-outlined text-lg">close</span>
+                    </button>
+                  )}
+                </div>
+              ))}
+              <button
+                type="button"
+                onClick={addSpeedpaintLink}
+                className="text-xs font-semibold text-[#A7ACD9] hover:underline"
+              >
+                + Thêm link khác
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+
+      <div className="mt-8 flex items-center justify-between gap-3">
+        <button
+          type="button"
+          onClick={previousStep}
+          disabled={stepIndex === 0}
+          className="rounded-xl border border-white/10 px-4 py-2 text-sm text-white disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          Previous
+        </button>
+
+        {stepIndex < steps.length - 1 ? (
+          <button
+            type="button"
+            onClick={nextStep}
+            className="rounded-xl bg-[#A7ACD9] px-5 py-2.5 text-sm font-bold text-[#1F2335]"
+          >
+            Continue
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={handleSubmit}
+            disabled={isSubmitting}
+            className="rounded-xl bg-[#A7ACD9] px-5 py-2.5 text-sm font-bold text-[#1F2335] disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {isSubmitting ? 'Submitting...' : mode === 'edit' ? 'Save changes' : 'Submit application'}
+          </button>
+        )}
+      </div>
+    </div>
   );
 }

@@ -7,7 +7,7 @@ import { Compass } from 'lucide-react';
 const QUICK_SCREENS = [
   { label: 'Marketplace', href: '/' },
   { label: 'Moderation', href: '/admin/moderation', active: true },
-  { label: 'Creator Apps', href: '/admin/creator-applications' },
+  { label: 'Creator Apps', href: '/admin/creator-verifications' },
   { label: 'Arbitration', href: '/admin/disputes' },
   { label: 'Fee Policy', href: '/admin/fee-policy' },
   { label: 'Admin KPIs', href: '/admin' },

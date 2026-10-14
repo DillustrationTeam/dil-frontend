@@ -1,6 +1,6 @@
 import { apiClient } from '@/lib/api-client';
 import { ApiResponse } from '@/types/api.types';
-import { getErrorMessage } from '@/lib/api-error';
+import { getApiErrorMessage } from '@/lib/api-error';
 import { UserDto } from '@/types/auth.types';
 import { UpdateProfileRequest } from '@/features/profile-settings/types/profile-settings.types';
 
@@ -9,11 +9,11 @@ export const profileSettingsService = {
     try {
       const response = await apiClient.put<ApiResponse<UserDto>>('/auth/me/profile', data);
       if (response.data.error || !response.data.data) {
-        throw new Error(response.data.error?.details?.join(', ') || response.data.error?.detail || 'Failed to update profile.');
+        throw new Error(response.data.error?.detail || 'Failed to update profile.');
       }
       return response.data.data;
     } catch (err) {
-      throw new Error(getErrorMessage(err, 'Failed to update profile.'));
+      throw new Error(getApiErrorMessage(err, 'Failed to update profile.'));
     }
   },
 };
