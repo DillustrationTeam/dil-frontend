@@ -28,19 +28,22 @@ export function DisputeSettlementForm({
   onResolve,
 }: DisputeSettlementFormProps) {
   const isResolved = dispute.status === 'Resolved';
-  const totalEscrow = dispute.escrowHeldAmount || dispute.finalPrice;
+  const totalEscrow = dispute.escrowHeldAmount ?? dispute.finalPrice;
   const totalSettledAmount =
     (dispute.clientRefundAmount ?? 0) + (dispute.artistPayAmount ?? 0);
   const effectiveTotal = totalSettledAmount > 0 ? totalSettledAmount : totalEscrow;
+  const split = /^Split_([\d.]+)_([\d.]+)$/.exec(dispute.resolution ?? '');
 
   const resolvedClientPercent =
     dispute.clientRefundPercent ??
-    (dispute.clientRefundAmount != null && effectiveTotal > 0
-      ? Math.round((dispute.clientRefundAmount / effectiveTotal) * 100)
+    (split
+      ? Number(split[1])
       : dispute.resolution === 'ClientWin100'
       ? 100
       : dispute.resolution === 'ArtistWin100'
       ? 0
+      : dispute.clientRefundAmount != null && effectiveTotal > 0
+      ? Math.round((dispute.clientRefundAmount / effectiveTotal) * 100)
       : 50);
 
   const resolvedCreatorPercent = 100 - resolvedClientPercent;
@@ -60,8 +63,8 @@ export function DisputeSettlementForm({
     setConfirmModalOpen(false);
   }
 
-  const clientAmount = (totalEscrow * clientRefundPercent) / 100;
-  const creatorAmount = (totalEscrow * (100 - clientRefundPercent)) / 100;
+  const clientAmount = isResolved ? (dispute.clientRefundAmount ?? 0) : (totalEscrow * clientRefundPercent) / 100;
+  const creatorAmount = isResolved ? (dispute.artistPayAmount ?? 0) : (totalEscrow * (100 - clientRefundPercent)) / 100;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -105,7 +108,7 @@ export function DisputeSettlementForm({
                 Admin Arbitration &amp; Refund Settlement
               </h3>
               <p className="text-[11px] text-[#8A8FA9]">
-                Arbitration Protocol SCR-22 • Atomic Escrow Ledger
+                Arbitration Protocol • Atomic Escrow Ledger
               </p>
             </div>
           </div>
@@ -181,7 +184,7 @@ export function DisputeSettlementForm({
         <div className="space-y-4 bg-black/40 p-5 rounded-2xl border border-white/10">
           <div className="flex items-center justify-between">
             <span className="text-[10px] text-[#8A8FA9] font-bold uppercase tracking-wider block">
-              ATOMIC ESCROW REFUND SPLIT (${totalEscrow.toLocaleString('en-US', { minimumFractionDigits: 2 })} TOTAL)
+              {isResolved ? 'SETTLEMENT RESULT' : `ESCROW REFUND SPLIT (${totalEscrow.toLocaleString('vi-VN')} VND)`}
             </span>
             <span className="text-[10px] font-mono text-purple-300 font-bold bg-purple-500/10 px-2 py-0.5 rounded border border-purple-500/30">
               {clientRefundPercent}% / {100 - clientRefundPercent}%

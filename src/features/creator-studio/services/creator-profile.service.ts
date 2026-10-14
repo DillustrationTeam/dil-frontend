@@ -27,6 +27,22 @@ export const creatorProfileService = {
     return response.data.data;
   },
 
+  async getMyArtworks(): Promise<ArtworkDto[]> {
+    const response = await apiClient.get<ApiResponse<ArtworkDto[]>>('/creator/me/artworks');
+    if (response.data.error || !response.data.data) {
+      throw new Error(response.data.error?.details?.join(', ') || 'Failed to load creator artworks.');
+    }
+    return response.data.data;
+  },
+
+  async getTerms(creatorId: string): Promise<CreatorTermsDto> {
+    const response = await apiClient.get<ApiResponse<CreatorTermsDto>>(`/creator/${creatorId}/terms`);
+    if (response.data.error || !response.data.data) {
+      throw new Error(response.data.error?.details?.join(', ') || 'Failed to load creator terms.');
+    }
+    return response.data.data;
+  },
+
   async createProfile(data: CreateCreatorProfileRequest): Promise<CreatorProfileDto> {
     const response = await apiClient.post<ApiResponse<CreatorProfileDto>>('/profile/setup', data);
     if (response.data.error || !response.data.data) {

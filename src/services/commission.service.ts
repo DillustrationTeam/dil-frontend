@@ -2,6 +2,7 @@ import { apiClient } from '@/lib/api-client';
 import { ApiResponse } from '@/types/api.types';
 import {
   Commission,
+  CommissionDispute,
   CreateCommissionPayload,
   RespondToCommissionPayload,
 } from '@/types/commission.types';
@@ -75,6 +76,14 @@ export const commissionService = {
   getFinalDownloadUrl: async (id: string) => {
     const res = await apiClient.get<ApiResponse<{ downloadUrl: string }>>(`/commissions/${id}/final/download`);
     return res.data.data?.downloadUrl as string;
+  },
+  createDispute: async (id: string, payload: { reason: string; evidenceUrls?: string[] }) => {
+    const res = await apiClient.post<ApiResponse<CommissionDispute>>(`/commissions/${id}/disputes`, payload);
+    return res.data.data as CommissionDispute;
+  },
+  getDisputeByCommissionId: async (id: string) => {
+    const res = await apiClient.get<ApiResponse<CommissionDispute>>(`/commissions/${id}/disputes`);
+    return res.data.data as CommissionDispute;
   },
   cancelWithPolicy: async (id: string, payload: { cancellationReason: string; details?: string }) => {
     const res = await apiClient.post<ApiResponse<Commission>>(`/commissions/${id}/cancel`, payload);

@@ -1,6 +1,6 @@
 export type DisputeStatus = 'All' | 'Pending' | 'UnderReview' | 'Resolved';
 
-export type DisputeResolutionType = 'ClientWin100' | 'ArtistWin100' | 'SplitCustom';
+export type DisputeResolutionType = 'ClientWin100' | 'ArtistWin100' | 'SplitCustom' | `Split_${number}_${number}`;
 
 export interface DisputePartyDto {
   userId: string;

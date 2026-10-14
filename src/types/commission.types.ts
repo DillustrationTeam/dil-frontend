@@ -42,13 +42,18 @@ export interface Commission {
   price?: number;
   totalPrice?: number;
   finalPrice?: number;
+  discountAmount?: number;
   escrowHeldAmount?: number;
   escrowStatus?: string;
   currentStage?: number;
   clientName?: string;
   creatorName?: string;
+  disbursedAmount?: number;
   deadlineAt?: string | null;
+  cancellationReason?: string | null;
+  cancellationDetails?: string | null;
   milestones?: Milestone[];
+  review?: Review | null;
   createdAt: string;
 }
 
@@ -63,8 +68,10 @@ export interface RespondToCommissionPayload {
 export interface CreateCommissionPayload {
   creatorId: string;
   packageId: string;
+  licenseType?: 'Personal' | 'Commercial';
   title: string;
   description: string;
+  voucherCode?: string;
   deadlineAt?: string;
 }
 
@@ -78,6 +85,22 @@ export interface Review {
   attachedImages?: string[];
   respondedAt?: string;
   createdAt: string;
+}
+
+export interface CommissionDispute {
+  id: string;
+  commissionId: string;
+  raisedById: string;
+  raisedByName?: string | null;
+  reason: string;
+  evidenceUrls?: string | null;
+  status: string;
+  resolution?: string | null;
+  clientRefundAmount?: number | null;
+  artistPayAmount?: number | null;
+  adminNote?: string | null;
+  createdAt: string;
+  resolvedAt?: string | null;
 }
 
 export type CancelRefundPolicy = 'Full' | 'Partial' | 'EscrowRemainder';

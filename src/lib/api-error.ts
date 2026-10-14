@@ -18,3 +18,5 @@ export function getErrorMessage(error: unknown, fallback: string): string {
 
   return fallback;
 }
+
+export const getApiErrorMessage = getErrorMessage;

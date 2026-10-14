@@ -81,17 +81,17 @@ export const adminDisputeService = {
 
     const data = response.data.data;
     if (data.clientRefundPercent == null && data.status === 'Resolved') {
-      const refund = data.clientRefundAmount ?? 0;
-      const payout = data.artistPayAmount ?? 0;
-      const total = refund + payout > 0 ? refund + payout : (data.escrowHeldAmount || data.finalPrice);
-      if (total > 0) {
-        data.clientRefundPercent = Math.round((refund / total) * 100);
+      const split = /^Split_([\d.]+)_([\d.]+)$/.exec(data.resolution ?? '');
+      if (split) {
+        data.clientRefundPercent = Number(split[1]);
       } else if (data.resolution === 'ClientWin100') {
         data.clientRefundPercent = 100;
       } else if (data.resolution === 'ArtistWin100') {
         data.clientRefundPercent = 0;
       } else {
-        data.clientRefundPercent = 50;
+        const refund = data.clientRefundAmount ?? 0;
+        const escrow = data.escrowHeldAmount ?? 0;
+        data.clientRefundPercent = escrow > 0 ? Math.round((refund / escrow) * 100) : 50;
       }
     }
 

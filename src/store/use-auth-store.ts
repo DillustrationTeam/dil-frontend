@@ -7,6 +7,7 @@ interface AuthState {
   roles: string[];
   accessToken: string | null;
   refreshToken: string | null;
+  sessionId: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   setAuth: (response: AuthResponseDto) => void;
@@ -23,6 +24,7 @@ export const useAuthStore = create<AuthState>()(
       roles: [],
       accessToken: null,
       refreshToken: null,
+      sessionId: null,
       isAuthenticated: false,
       isLoading: false,
 
@@ -56,6 +58,7 @@ export const useAuthStore = create<AuthState>()(
           roles: [],
           accessToken: null,
           refreshToken: null,
+          sessionId: null,
           isAuthenticated: false,
           isLoading: false,
         }),

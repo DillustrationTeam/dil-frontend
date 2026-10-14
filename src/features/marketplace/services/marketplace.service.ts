@@ -53,7 +53,19 @@ export interface CreatorReviewDto {
   reviewerUserId: string;
   rating: number;
   comment?: string | null;
+  reviewerReply?: string | null;
   createdAt: string;
+}
+
+export interface RelatedCreatorDto {
+  id: string;
+  displayName: string;
+  headline?: string | null;
+  specialties?: string | null;
+  ratingAverage: number;
+  ratingCount: number;
+  followerCount: number;
+  availableSlots: number;
 }
 
 export interface CollectionDto {
@@ -72,6 +84,11 @@ const getData = <T>(response: { data: ApiResponse<T> }) => {
 };
 
 export const marketplaceService = {
+  async getCreators(): Promise<RelatedCreatorDto[]> {
+    const response = await apiClient.get<ApiResponse<RelatedCreatorDto[]>>('/marketplace/creators');
+    return getData(response);
+  },
+
   async getArtworks(): Promise<MarketplaceArtwork[]> {
     const response = await apiClient.get<ApiResponse<MarketplaceArtwork[]>>('/artworks');
     return getData(response);
@@ -145,6 +162,11 @@ export const marketplaceService = {
   async followCreator(id: string): Promise<{ following: boolean }> {
     const response = await apiClient.put<ApiResponse<{ following: boolean }>>(`/marketplace/creators/${id}/follow`);
     return getData(response);
+  },
+
+  async getCreatorFollowStatus(id: string): Promise<boolean> {
+    const response = await apiClient.get<ApiResponse<{ following: boolean }>>(`/marketplace/creators/${id}/follow`);
+    return getData(response).following;
   },
 
   async unfollowCreator(id: string): Promise<{ following: boolean }> {

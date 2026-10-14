@@ -8,9 +8,11 @@ import { Commission } from '@/types/commission.types';
 
 const money = (value?: number) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value ?? 0);
 const isActive = (status: Commission['status']) => !['Completed', 'Cancelled'].includes(status);
+const statusOptions = ['All', 'PendingAcceptance', 'InProgress', 'Negotiating', 'SubmittedFinal', 'Delivered', 'Completed', 'Cancelled', 'Disputed'];
 
 export default function ClientDashboardPage() {
   const [commissions, setCommissions] = useState<Commission[]>([]);
+  const [statusFilter, setStatusFilter] = useState('All');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -24,6 +26,10 @@ export default function ClientDashboardPage() {
     awaiting: commissions.filter((commission) => commission.status === 'PendingAcceptance' || commission.status === 'Negotiating' || (commission.status === 'InProgress' && commission.escrowStatus === 'Pending')).length,
     completed: commissions.filter((commission) => commission.status === 'Completed').length,
   }), [commissions]);
+  const visibleCommissions = useMemo(
+    () => statusFilter === 'All' ? commissions : commissions.filter((commission) => commission.status === statusFilter),
+    [commissions, statusFilter],
+  );
 
   return <div className="mx-auto w-full max-w-7xl space-y-6">
     <div className="grid grid-cols-2 gap-3 text-xs lg:grid-cols-4">
@@ -33,8 +39,8 @@ export default function ClientDashboardPage() {
       <Metric label="Completed" value={`${metrics.completed} works`} icon={<Star className="h-4 w-4" />} />
     </div>
     <section id="workrooms" className="rounded-2xl border border-white/10 bg-white/[0.035] p-5 sm:p-6">
-      <div className="flex items-center justify-between border-b border-white/10 pb-4"><h1 className="font-h1 text-base font-bold text-white">Your commissions</h1><span className="text-xs text-slate-400">{commissions.length} total</span></div>
-      {loading ? <div className="flex min-h-48 items-center justify-center text-sm text-slate-400"><LoaderCircle className="mr-2 h-4 w-4 animate-spin" /> Loading commissions…</div> : error ? <p className="py-12 text-center text-sm text-red-300">{error}</p> : commissions.length === 0 ? <EmptyState /> : <div className="mt-5 grid gap-4">{commissions.map((commission) => <CommissionCard key={commission.id} commission={commission} />)}</div>}
+      <div className="flex flex-col gap-3 border-b border-white/10 pb-4 sm:flex-row sm:items-center sm:justify-between"><h1 className="font-h1 text-base font-bold text-white">Your commissions</h1><div className="flex items-center gap-3"><label htmlFor="client-commission-status" className="text-xs text-slate-400">Status</label><select id="client-commission-status" value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)} className="rounded-lg border border-white/10 bg-[#1F2335] px-3 py-2 text-xs text-white">{statusOptions.map((status) => <option key={status} value={status}>{status === 'All' ? 'All statuses' : status}</option>)}</select><span className="text-xs text-slate-400">{visibleCommissions.length} / {commissions.length}</span></div></div>
+      {loading ? <div className="flex min-h-48 items-center justify-center text-sm text-slate-400"><LoaderCircle className="mr-2 h-4 w-4 animate-spin" /> Loading commissions…</div> : error ? <p className="py-12 text-center text-sm text-red-300">{error}</p> : commissions.length === 0 ? <EmptyState /> : visibleCommissions.length === 0 ? <p className="py-12 text-center text-sm text-slate-400">No commissions match this status.</p> : <div className="mt-5 grid gap-4">{visibleCommissions.map((commission) => <CommissionCard key={commission.id} commission={commission} />)}</div>}
     </section>
   </div>;
 }

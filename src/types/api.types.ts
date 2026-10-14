@@ -1,5 +1,6 @@
 export interface ApiErrorDetails {
   title?: string;
+  detail?: string;
   details?: string[];
 }
 

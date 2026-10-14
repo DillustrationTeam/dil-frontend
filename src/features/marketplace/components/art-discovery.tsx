@@ -86,13 +86,13 @@ function ImageSearchModal({ artworks, onClose, onSelectArtwork }: { artworks: Ma
   </div>;
 }
 
-export function ArtDiscovery({ initialSearch = false }: { initialSearch?: boolean }) {
+export function ArtDiscovery({ initialSearch = false, initialQuery = '' }: { initialSearch?: boolean; initialQuery?: string }) {
   const [artworks, setArtworks] = useState<MarketplaceArtwork[]>([]);
   const [followingArtworks, setFollowingArtworks] = useState<MarketplaceArtwork[]>([]);
   const [featuredBanners, setFeaturedBanners] = useState<{ title: string; subtitle: string; imageUrl: string; ctaLabel?: string; ctaUrl?: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [feedTab, setFeedTab] = useState<FeedTab>('recommended');
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState(initialQuery);
   const [selectedStyles, setSelectedStyles] = useState<string[]>([]);
   const [license, setLicense] = useState<License>('all');
   const [onlyOpenSlots, setOnlyOpenSlots] = useState(false);
@@ -103,9 +103,12 @@ export function ArtDiscovery({ initialSearch = false }: { initialSearch?: boolea
   useEffect(() => {
     const loadHome = async () => {
       try {
-        const home = await marketplaceService.getMarketplaceHome(12);
+        const [home, allArtworks, creators] = await Promise.all([marketplaceService.getMarketplaceHome(12), marketplaceService.getArtworks(), marketplaceService.getCreators()]);
         setFeaturedBanners(home.featuredBanners ?? []);
-        setArtworks(home.recommendedArtworks ?? []);
+        setArtworks(allArtworks.map((artwork) => {
+          const creator = creators.find((item) => item.id === artwork.creatorProfileId);
+          return { ...artwork, creatorName: artwork.creatorName || creator?.displayName, creatorHeadline: artwork.creatorHeadline || creator?.headline };
+        }));
         setFollowingArtworks(home.followingArtworks ?? []);
       } catch {
         try {

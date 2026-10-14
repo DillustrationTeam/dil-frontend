@@ -3,9 +3,11 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { FormEvent, useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Bookmark, Heart, MessageCircle, Send, Share2, ShieldCheck, X } from 'lucide-react';
 import { marketplaceService, MarketplaceArtwork } from '../services/marketplace.service';
 import CreateCommissionModal from '@/components/modals/CreateCommissionModal';
+import { useAuthStore } from '@/store/use-auth-store';
 
 const DEFAULT_FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?auto=format&fit=crop&w=1200&q=85';
 
@@ -33,6 +35,8 @@ function SafeArtworkImage({ src, alt }: { src?: string | null; alt: string }) {
 }
 
 export function ArtworkDetail({ id }: { id: string }) {
+  const router = useRouter();
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const [artwork, setArtwork] = useState<MarketplaceArtwork | null>(null);
   const [loading, setLoading] = useState(true);
   const [saved, setSaved] = useState(false);
@@ -70,7 +74,7 @@ export function ArtworkDetail({ id }: { id: string }) {
     void load();
   }, [id]);
 
-  const save = async () => { if (!artwork) return; try { const result = saved ? await marketplaceService.unfavoriteArtwork(artwork.id) : await marketplaceService.toggleFavorite(artwork.id); setSaved(Boolean(result.favorited)); } catch { /* no-op */ } };
+  const save = async () => { if (!isAuthenticated) { router.push(`/login?returnUrl=${encodeURIComponent(`/artworks/${id}`)}`); return; } if (!artwork) return; try { const result = saved ? await marketplaceService.unfavoriteArtwork(artwork.id) : await marketplaceService.toggleFavorite(artwork.id); setSaved(Boolean(result.favorited)); } catch { /* no-op */ } };
   const submit = async (event: FormEvent) => { event.preventDefault(); if (!comment.trim()) return; try { const next = await marketplaceService.createArtworkComment(id, comment.trim()); setComments((items) => [{ name: next.authorName || 'Bạn', text: next.body, time: new Date(next.createdAt).toLocaleDateString('vi-VN') }, ...items]); setComment(''); } catch { setComments((items) => [{ name: 'Bạn', text: comment.trim(), time: 'Vừa xong' }, ...items]); setComment(''); } };
 
   if (loading) return <div className="p-16 text-center text-[#C7C5CF]">Đang tải tác phẩm...</div>;
@@ -79,6 +83,8 @@ export function ArtworkDetail({ id }: { id: string }) {
 }
 
 export function ArtworkDetailModal({ id, onClose }: { id: string; onClose: () => void }) {
+  const router = useRouter();
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const [artwork, setArtwork] = useState<MarketplaceArtwork | null>(null);
   const [loading, setLoading] = useState(true);
   const [saved, setSaved] = useState(false);
@@ -134,6 +140,10 @@ export function ArtworkDetailModal({ id, onClose }: { id: string; onClose: () =>
   }, [id]);
 
   const save = async () => {
+    if (!isAuthenticated) {
+      router.push(`/login?returnUrl=${encodeURIComponent(`/artworks/${id}`)}`);
+      return;
+    }
     if (!artwork) return;
     try {
       const result = saved

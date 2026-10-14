@@ -54,9 +54,6 @@ export function UserHeader({
             <h1 className="text-2xl font-black text-white font-h1 tracking-tight">
               User Account Management & Sanctions
             </h1>
-            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-white/10 text-white/70 border border-white/10">
-              SCR-23
-            </span>
           </div>
           <p className="text-xs text-[#8A8FA9] mt-1">
             Search registered user accounts, edit permissions, and apply temporary suspensions or permanent bans.

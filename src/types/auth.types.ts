@@ -4,6 +4,10 @@ export interface UserDto {
   fullName: string;
   isVerified: boolean;
   createdAt: string;
+  avatarUrl?: string | null;
+  coverUrl?: string | null;
+  bio?: string | null;
+  socialLinks?: string[] | null;
 }
 
 export interface TokenDto {

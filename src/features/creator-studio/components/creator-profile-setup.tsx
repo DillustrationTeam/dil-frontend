@@ -1,29 +1,21 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import toast from 'react-hot-toast';
 import { creatorProfileService } from '@/features/creator-studio/services/creator-profile.service';
 
-const creatorProfileSchema = z.object({
-  displayName: z.string().min(2, 'Display name is required').max(100),
-  headline: z.string().max(200).default(''),
-  bio: z.string().max(2000).default(''),
-  specialties: z.string().max(500).default(''),
-  location: z.string().max(200).default(''),
-  websiteUrl: z.string().default(''),
-  bannerUrl: z.string().default(''),
-  isAcceptingOrders: z.boolean().default(true),
-});
+import { creatorProfileSchema } from '@/features/creator-studio/types/creator-profile.schema';
 
 export type CreatorProfileFormValues = z.infer<typeof creatorProfileSchema>;
 
-export function CreatorProfileSetup() {
+export function CreatorProfileSetup({ mode = 'create' }: { mode?: 'create' | 'edit' }) {
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors, isSubmitting },
   } = useForm({
     resolver: zodResolver(creatorProfileSchema),
@@ -41,20 +33,44 @@ export function CreatorProfileSetup() {
 
   const [isAcceptingOrders, setIsAcceptingOrders] = useState(true);
 
+  useEffect(() => {
+    if (mode !== 'edit') return;
+    let active = true;
+    creatorProfileService.getMyProfile().then((profile) => {
+      if (!active) return;
+      reset({
+        displayName: profile.displayName,
+        headline: profile.headline ?? '',
+        bio: profile.bio ?? '',
+        specialties: profile.specialties ?? '',
+        location: profile.location ?? '',
+        websiteUrl: profile.websiteUrl ?? '',
+        bannerUrl: profile.bannerUrl ?? '',
+        isAcceptingOrders: profile.isAcceptingOrders,
+      });
+      setIsAcceptingOrders(profile.isAcceptingOrders);
+    }).catch((error: unknown) => {
+      toast.error(error instanceof Error ? error.message : 'Unable to load creator profile.');
+    });
+    return () => { active = false; };
+  }, [mode, reset]);
+
   const onSubmit = async (data: CreatorProfileFormValues) => {
     try {
-      await creatorProfileService.createProfile({
+      const payload = {
         displayName: data.displayName,
-        headline: data.headline || undefined,
-        bio: data.bio || undefined,
-        specialties: data.specialties || undefined,
-        location: data.location || undefined,
-        websiteUrl: data.websiteUrl || undefined,
-        bannerUrl: data.bannerUrl || undefined,
+        headline: data.headline || (mode === 'edit' ? '' : undefined),
+        bio: data.bio || (mode === 'edit' ? '' : undefined),
+        specialties: data.specialties || (mode === 'edit' ? '' : undefined),
+        location: data.location || (mode === 'edit' ? '' : undefined),
+        websiteUrl: data.websiteUrl || (mode === 'edit' ? '' : undefined),
+        bannerUrl: data.bannerUrl || (mode === 'edit' ? '' : undefined),
         isAcceptingOrders: isAcceptingOrders,
-      });
+      };
+      if (mode === 'edit') await creatorProfileService.updateMyProfile(payload);
+      else await creatorProfileService.createProfile(payload);
 
-      toast.success('Creator profile created successfully.');
+      toast.success(mode === 'edit' ? 'Creator profile updated.' : 'Creator profile created successfully.');
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Unable to create profile.';
       toast.error(message);
@@ -64,8 +80,8 @@ export function CreatorProfileSetup() {
   return (
     <div className="glass-container rounded-[32px] p-8 max-w-3xl mx-auto">
       <div className="mb-6">
-        <p className="text-xs uppercase tracking-[0.2em] text-[#A7ACD9]">Creator onboarding</p>
-        <h1 className="font-h1 text-3xl font-bold text-white mt-3">Set up your creator profile</h1>
+        <p className="text-xs uppercase tracking-[0.2em] text-[#A7ACD9]">{mode === 'edit' ? 'Creator settings' : 'Creator onboarding'}</p>
+        <h1 className="font-h1 text-3xl font-bold text-white mt-3">{mode === 'edit' ? 'Edit creator profile' : 'Set up your creator profile'}</h1>
       </div>
 
       <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
@@ -163,7 +179,7 @@ export function CreatorProfileSetup() {
           disabled={isSubmitting}
           className="w-full rounded-xl bg-[#A7ACD9] px-5 py-3 text-sm font-bold text-[#1F2335] disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {isSubmitting ? 'Saving profile...' : 'Create profile'}
+          {isSubmitting ? 'Saving profile...' : mode === 'edit' ? 'Save profile' : 'Create profile'}
         </button>
       </form>
     </div>
