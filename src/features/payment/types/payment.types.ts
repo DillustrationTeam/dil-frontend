@@ -13,7 +13,19 @@ export interface BankAccountRequest {
 }
 export interface PayoutDto {
   payoutRequestId: string; amount: number; payoutStatus: string; payoutNote: string | null;
+  processedBy: string | null; transactionRef: string | null;
   createdAt: string; processedAt: string | null; rejectReason?: string | null; bankAccount?: BankAccountDto | null;
+}
+export interface UpdatePayoutStatusRequest {
+  payoutStatus: 'Processed' | 'Rejected';
+  payoutNote?: string | null;
+  transactionRef?: string | null;
+}
+export interface AdminPayoutFilters {
+  status?: 'Pending' | 'Processed' | 'Rejected';
+  userId?: string;
+  cursor?: string;
+  limit?: number;
 }
 export interface VoucherDto {
   voucherId: string; voucherCode: string; name: string | null; discountType: 'Percent' | 'Fixed'; discountValue: number;

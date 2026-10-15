@@ -26,18 +26,59 @@ export class AuctionConflictError extends Error {
   }
 }
 
-type ErrorBody = { detail?: string; title?: string; message?: string; details?: string[]; code?: string };
+type ErrorBody = {
+  detail?: string;
+  title?: string;
+  message?: string;
+  details?: string[];
+  code?: string;
+  errors?: Record<string, string[]> | string[];
+};
 
-export function auctionError(error: unknown) {
-  const body = (error as { response?: { data?: { error?: ErrorBody } & ErrorBody } })?.response?.data;
+export function auctionError(error: unknown): string {
+  const responseData = (error as { response?: { data?: unknown } })?.response?.data;
+  const body = (responseData as { error?: ErrorBody } & ErrorBody) ?? null;
   const info = body?.error ?? body;
+
+  if (info?.errors) {
+    if (Array.isArray(info.errors) && info.errors.length > 0) {
+      return info.errors.join(' · ');
+    }
+    if (typeof info.errors === 'object' && info.errors !== null) {
+      const messages = Object.values(info.errors).flat();
+      if (messages.length > 0) return messages.join(' · ');
+    }
+  }
+
+  if (Array.isArray(info?.details) && info.details.length > 0) {
+    return info.details.join(' · ');
+  }
+
   return (
     info?.detail ||
     info?.message ||
-    info?.details?.join(' · ') ||
     info?.title ||
-    (error instanceof Error && error.message !== 'Network Error' ? error.message : 'Không kết nối được với máy chủ. Vui lòng thử lại.')
+    (error instanceof Error && error.message !== 'Network Error'
+      ? error.message
+      : 'Không kết nối được với máy chủ hoặc phiên đấu giá bị gián đoạn. Vui lòng thử lại.')
   );
+}
+
+export function extractAuctionFieldErrors(error: unknown): Record<string, string> {
+  const responseData = (error as { response?: { data?: unknown } })?.response?.data;
+  const body = (responseData as { error?: ErrorBody } & ErrorBody) ?? null;
+  const info = body?.error ?? body;
+  const result: Record<string, string> = {};
+
+  if (info?.errors && typeof info.errors === 'object' && !Array.isArray(info.errors)) {
+    for (const [key, msgs] of Object.entries(info.errors)) {
+      if (Array.isArray(msgs) && msgs.length > 0) {
+        const normalizedKey = key.charAt(0).toLowerCase() + key.slice(1);
+        result[normalizedKey] = msgs[0];
+      }
+    }
+  }
+  return result;
 }
 
 async function call<T>(
