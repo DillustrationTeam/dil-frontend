@@ -1,5 +1,6 @@
 import { ArtDiscovery } from '@/features/marketplace';
 
-export default function ExplorePage() {
-  return <ArtDiscovery />;
+export default async function ExplorePage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
+  const { q = '' } = await searchParams;
+  return <ArtDiscovery key={q} initialQuery={q} />;
 }

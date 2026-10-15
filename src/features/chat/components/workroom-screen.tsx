@@ -43,6 +43,8 @@ import type { Commission, CommissionStatus, Milestone } from '@/types/commission
 import SubmitMilestoneModal from '@/components/modals/SubmitMilestoneModal';
 import ApprovalRevisionModal from '@/components/modals/ApprovalRevisionModal';
 import FinalDeliveryModal from '@/components/modals/FinalDeliveryModal';
+import CreatorReplyModal from '@/components/modals/CreatorReplyModal';
+import DisputeDetailsModal from '@/components/modals/DisputeDetailsModal';
 import ReviewRatingModal from '@/components/modals/ReviewRatingModal';
 import CancelRefundModal from '@/components/modals/CancelRefundModal';
 import RaiseDisputeModal from '@/components/modals/RaiseDisputeModal';
@@ -103,6 +105,8 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [showDisputeModal, setShowDisputeModal] = useState(false);
+  const [showReplyModal, setShowReplyModal] = useState(false);
+  const [showDisputeDetailsModal, setShowDisputeDetailsModal] = useState(false);
   const [acceptingTerms, setAcceptingTerms] = useState(false);
   const [termsError, setTermsError] = useState<string | null>(null);
 
@@ -1726,6 +1730,14 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
             }}
           />
 
+          {commission && (currentMemberRole === 'client' || currentMemberRole === 'creator') && (
+            <section className="mt-4 space-y-3 rounded-2xl border border-white/10 bg-white/[.03] p-4">
+              {commission.dispute && <button type="button" onClick={() => setShowDisputeDetailsModal(true)} className="rounded-xl border border-[#A7ACD9]/40 px-4 py-2 text-sm text-[#C5C9F8]">Xem hồ sơ tranh chấp</button>}
+              {commission.review && <div className="space-y-2 text-sm text-slate-300"><p className="font-semibold text-white">Đánh giá của khách: {commission.review.rating}/5</p>{commission.review.comment && <p>{commission.review.comment}</p>}{commission.review.reviewerReply ? <p className="border-l-2 border-[#A7ACD9] pl-3">Phản hồi của Creator: {commission.review.reviewerReply}</p> : currentMemberRole === 'creator' && commission.status === 'Completed' ? <button type="button" onClick={() => setShowReplyModal(true)} className="rounded-xl border border-white/15 px-4 py-2">Trả lời đánh giá</button> : null}</div>}
+            </section>
+          )}
+          {showDisputeDetailsModal && <DisputeDetailsModal key={room.commissionId} isOpen commissionId={room.commissionId} onClose={() => setShowDisputeDetailsModal(false)} />}
+          {showReplyModal && <CreatorReplyModal isOpen commissionId={room.commissionId} reviewComment={commission?.review?.comment} reviewRating={commission?.review?.rating} onClose={() => setShowReplyModal(false)} onSuccess={() => { setShowReplyModal(false); refresh(); }} />}
           {commission && (currentMemberRole === 'client' || currentMemberRole === 'creator') && (
             <WorkroomTermsModal
               isOpen={showTermsModal}

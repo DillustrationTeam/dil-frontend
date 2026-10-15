@@ -67,6 +67,7 @@ export interface Commission {
   creatorTermsVersion?: string | null;
   currentWorkroomTermsVersion?: string;
   milestones?: Milestone[];
+  review?: Review | null;
   dispute?: Dispute | null;
   createdAt: string;
 }
@@ -86,6 +87,8 @@ export interface Dispute {
   resolvedAt?: string | null;
   createdAt: string;
 }
+
+export type CommissionDispute = Dispute;
 
 export interface RespondToCommissionPayload {
   action: 'Accept' | 'Reject' | 'Negotiate';

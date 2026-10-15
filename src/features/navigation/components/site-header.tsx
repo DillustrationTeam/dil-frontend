@@ -91,7 +91,7 @@ export function SiteHeader() {
     event.preventDefault();
     const term = keyword.trim();
     setSearchOpen(false);
-    router.push(term ? `/?q=${encodeURIComponent(term)}` : '/');
+    router.push(term ? `/explore?q=${encodeURIComponent(term)}` : '/');
   }
 
   function isActive(match: string[], exact: boolean) {
