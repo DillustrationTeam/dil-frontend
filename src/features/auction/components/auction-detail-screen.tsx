@@ -227,10 +227,18 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
       setError('Vui lòng đăng nhập để tham gia đấu giá.');
       return;
     }
+    if (isSeller) {
+      setError('Bạn là chủ sở hữu (người bán) của phiên đấu giá này, không thể tự đặt giá cho tác phẩm của mình.');
+      return;
+    }
+    if (auction?.auctionStatus !== 'Active') {
+      setError('Phiên đấu giá chưa bắt đầu hoặc đã kết thúc, hiện không nhận lượt đặt giá mới.');
+      return;
+    }
 
     const amountNum = Number(bidAmount);
     if (!auction || amountNum < minimumNextBid) {
-      setError(`Mức giá đặt phải tối thiểu là ${formatVnd(minimumNextBid)}.`);
+      setError(`Mức giá đặt phải từ ${formatVnd(minimumNextBid)} trở lên.`);
       return;
     }
 
@@ -240,11 +248,17 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
         setError(`Giá trần tự động phải lớn hơn hoặc bằng mức giá đặt tối thiểu (${formatVnd(minimumNextBid)}).`);
         return;
       }
+      if (maxNum <= amountNum) {
+        setError(`Giá trần tự động (${formatVnd(maxNum)}) phải lớn hơn mức giá đặt ban đầu (${formatVnd(amountNum)}).`);
+        return;
+      }
     }
 
     // Wallet balance check
     if (wallet && wallet.wallet.balance < amountNum) {
-      setError(`Số dư ví khả dụng không đủ. Cần: ${formatVnd(amountNum)}, Hiện có: ${formatVnd(wallet.wallet.balance)}.`);
+      setError(
+        `Số dư ví khả dụng không đủ để đặt giá! Cần: ${formatVnd(amountNum)}, Hiện có: ${formatVnd(wallet.wallet.balance)} (còn thiếu ${formatVnd(amountNum - wallet.wallet.balance)}).`
+      );
       return;
     }
 
@@ -256,16 +270,20 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
       const autoMaxNum = isAuto && maxAutoBid ? Number(maxAutoBid) : undefined;
       const res = await auctionService.bid(auctionId, amountNum, isAuto, autoMaxNum);
       if (isAuto && autoMaxNum) setActiveAutoBidCap(autoMaxNum);
-      setSuccess(
-        res.bid.bidStatus === 'Leading'
-          ? isAuto
-            ? `Đã kích hoạt Auto-bid với giá trần ${formatVnd(autoMaxNum!)}.`
-            : 'Đặt giá thành công! Giá của bạn đang dẫn đầu.'
-          : 'Đã ghi nhận giá, nhưng bạn đã bị Auto-bid khác vượt qua.',
-      );
 
-      if (res.bid.bidStatus === 'Outbid') {
+      if (res.bid.bidStatus === 'Leading') {
+        setSuccess(
+          isAuto
+            ? `Đã kích hoạt Auto-bid thành công với giá trần ${formatVnd(autoMaxNum!)}. Giá của bạn hiện đang dẫn đầu!`
+            : 'Đặt giá thành công! Giá của bạn đang dẫn đầu phiên đấu giá.'
+        );
+      } else if (res.bid.bidStatus === 'Outbid') {
+        setError(
+          `Lượt đặt giá ${formatVnd(amountNum)} đã được ghi nhận, nhưng bị Auto-bid của đối thủ vượt qua ngay lập tức. Mức giá dẫn đầu hiện tại đã tăng.`
+        );
         await loadDetail();
+      } else {
+        setSuccess('Đã gửi lượt đặt giá lên hệ thống.');
       }
 
       if (res.wallet) {
@@ -288,7 +306,9 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
         const c = err.conflictData;
         setAuction((prev) => (prev ? { ...prev, currentPrice: c.currentPrice, endAt: c.endAt } : prev));
         setBidAmount(c.minimumNextBid.toString());
-        setError(`Xung đột giá: ${err.message} Giá hiện tại đã được cập nhật thành ${formatVnd(c.currentPrice)}.`);
+        setError(
+          `Có người vừa đặt giá trước bạn! Giá hiện tại đã tăng lên ${formatVnd(c.currentPrice)}. Chúng tôi đã tự động cập nhật mức giá tối thiểu mới (${formatVnd(c.minimumNextBid)}), bạn có thể kiểm tra và bấm Đặt giá ngay.`
+        );
       } else {
         setError(auctionError(err));
       }
@@ -299,17 +319,32 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
 
   async function handleBuyNow() {
     if (!userId) {
-      setError('Vui lòng đăng nhập để mua ngay.');
+      setError('Vui lòng đăng nhập để thực hiện mua ngay.');
+      return;
+    }
+    if (isSeller) {
+      setError('Bạn là chủ sở hữu tác phẩm này, không thể tự mua lại.');
       return;
     }
     if (!auction?.buyNowPrice) return;
+    if (auction.auctionStatus !== 'Active') {
+      setError('Phiên đấu giá không ở trạng thái mở để mua ngay.');
+      return;
+    }
+    if (wallet && wallet.wallet.balance < auction.buyNowPrice) {
+      setError(
+        `Số dư ví không đủ để Mua ngay! Cần: ${formatVnd(auction.buyNowPrice)}, Hiện có: ${formatVnd(wallet.wallet.balance)} (còn thiếu ${formatVnd(auction.buyNowPrice - wallet.wallet.balance)}). Vui lòng nạp thêm tiền vào ví.`
+      );
+      return;
+    }
+
     if (!confirm(`Bạn xác nhận mua ngay tác phẩm này với mức giá ${formatVnd(auction.buyNowPrice)}?`)) return;
 
     setBuyingNow(true);
     setError(null);
     try {
       await auctionService.buyNow(auctionId);
-      setSuccess('Mua ngay thành công! Phiên đấu giá đã hoàn tất.');
+      setSuccess('Mua ngay thành công! Bạn đã trở thành người sở hữu tác phẩm này.');
       await loadDetail();
     } catch (err: unknown) {
       setError(auctionError(err));
@@ -324,9 +359,11 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
       const res = await auctionService.download(auctionId);
       if (res.downloadUrl) {
         window.open(res.downloadUrl, '_blank');
+      } else {
+        setError('Liên kết tải về chưa sẵn sàng. Vui lòng thử lại sau vài giây.');
       }
     } catch (err: unknown) {
-      setError(auctionError(err));
+      setError(`Không thể tải tệp gốc: ${auctionError(err)}. Nếu bạn vừa thắng phiên, vui lòng đợi 1–2 phút để hệ thống hoàn tất giải ngân hợp đồng.`);
     } finally {
       setDownloading(false);
     }
@@ -396,9 +433,31 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
       )}
 
       {error && (
-        <div role="alert" className="mb-6 flex items-center gap-2 rounded-2xl border border-red-400/30 bg-red-500/10 p-4 text-sm text-red-200">
-          <CircleAlert size={18} className="shrink-0" />
-          <span>{error}</span>
+        <div role="alert" className="mb-6 flex items-start gap-2.5 rounded-2xl border border-red-400/30 bg-red-500/10 p-4 text-sm text-red-200">
+          <CircleAlert size={18} className="mt-0.5 shrink-0 text-red-300" />
+          <div className="flex-1">
+            <span>{error}</span>
+            {error.toLowerCase().includes('số dư') && (
+              <div className="mt-2.5 flex items-center gap-2">
+                <Link
+                  href="/deposit"
+                  className="inline-flex items-center gap-1.5 rounded-full bg-brand-periwinkle px-3.5 py-1.5 font-h1 text-xs font-bold text-brand-navy shadow hover:brightness-110"
+                >
+                  <Wallet size={13} /> Nạp thêm tiền vào ví ngay
+                </Link>
+              </div>
+            )}
+            {error.toLowerCase().includes('đăng nhập') && (
+              <div className="mt-2.5 flex items-center gap-2">
+                <Link
+                  href="/login"
+                  className="inline-flex items-center gap-1.5 rounded-full bg-brand-periwinkle px-3.5 py-1.5 font-h1 text-xs font-bold text-brand-navy shadow hover:brightness-110"
+                >
+                  Đăng nhập tài khoản
+                </Link>
+              </div>
+            )}
+          </div>
         </div>
       )}
 
@@ -597,8 +656,27 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
                     step={auction.bidStep}
                     value={bidAmount}
                     onChange={(e) => setBidAmount(e.target.value)}
-                    className="w-full rounded-xl border border-white/15 bg-brand-navy/60 px-4 py-3 font-h1 text-lg font-bold text-on-surface focus:border-brand-periwinkle focus:outline-none"
+                    className={`w-full rounded-xl border bg-brand-navy/60 px-4 py-3 font-h1 text-lg font-bold text-on-surface focus:outline-none transition ${
+                      bidAmountNum > 0 && (bidAmountNum < minimumNextBid || isBalanceShortage)
+                        ? 'border-rose-400 focus:border-rose-400'
+                        : 'border-white/15 focus:border-brand-periwinkle'
+                    }`}
                   />
+                  {bidAmountNum > 0 && bidAmountNum < minimumNextBid && (
+                    <p className="mt-1 text-xs text-rose-400">
+                      Mức giá đặt chưa đủ! Tối thiểu là {formatVnd(minimumNextBid)}.
+                    </p>
+                  )}
+                  {isBalanceShortage && (
+                    <p className="mt-1 text-xs text-rose-400 flex items-center justify-between">
+                      <span>
+                        Số dư ví không đủ! Cần {formatVnd(bidAmountNum)}, hiện có {formatVnd(wallet?.wallet.balance ?? 0)} (thiếu {formatVnd(bidAmountNum - (wallet?.wallet.balance ?? 0))}).
+                      </span>
+                      <Link href="/deposit" className="text-brand-periwinkle underline hover:text-white font-semibold ml-1">
+                        Nạp tiền
+                      </Link>
+                    </p>
+                  )}
 
                   {/* FE-03 BidStep Chips */}
                   <div className="mt-2.5 grid grid-cols-2 gap-2 sm:grid-cols-4">
@@ -672,15 +750,35 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
                         value={maxAutoBid}
                         onChange={(e) => setMaxAutoBid(e.target.value)}
                         placeholder={`Tối thiểu ${minimumNextBid}`}
-                        className="w-full rounded-lg border border-white/10 bg-brand-navy px-3 py-2 text-on-surface focus:border-brand-periwinkle focus:outline-none"
+                        className={`w-full rounded-lg border bg-brand-navy px-3 py-2 text-on-surface focus:outline-none transition ${
+                          maxAutoBid && (Number(maxAutoBid) < minimumNextBid || Number(maxAutoBid) <= bidAmountNum)
+                            ? 'border-rose-400 focus:border-rose-400'
+                            : 'border-white/10 focus:border-brand-periwinkle'
+                        }`}
                       />
+                      {maxAutoBid && Number(maxAutoBid) < minimumNextBid && (
+                        <p className="mt-1 text-xs text-rose-400">
+                          Giá trần tự động phải lớn hơn hoặc bằng mức giá đặt tối thiểu ({formatVnd(minimumNextBid)}).
+                        </p>
+                      )}
+                      {maxAutoBid && Number(maxAutoBid) >= minimumNextBid && Number(maxAutoBid) <= bidAmountNum && (
+                        <p className="mt-1 text-xs text-rose-400">
+                          Giá trần tự động ({formatVnd(Number(maxAutoBid))}) phải cao hơn mức giá đặt ban đầu ({formatVnd(bidAmountNum)}).
+                        </p>
+                      )}
                     </div>
                   )}
                 </div>
 
                 <button
                   type="submit"
-                  disabled={submittingBid || clock.isEnded || isBalanceShortage}
+                  disabled={
+                    submittingBid ||
+                    clock.isEnded ||
+                    isBalanceShortage ||
+                    bidAmountNum < minimumNextBid ||
+                    Boolean(isAuto && (!maxAutoBid || Number(maxAutoBid) < minimumNextBid || Number(maxAutoBid) <= bidAmountNum))
+                  }
                   className="w-full rounded-full bg-brand-periwinkle py-3 text-center font-h1 text-sm font-bold text-brand-navy shadow-lg transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <span className="inline-flex items-center gap-2">
@@ -697,16 +795,23 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
 
                 {/* Mua ngay nếu phiên hỗ trợ */}
                 {auction.buyNowPrice && (
-                  <button
-                    type="button"
-                    disabled={buyingNow || clock.isEnded}
-                    onClick={handleBuyNow}
-                    className="w-full rounded-full border border-brand-periwinkle/40 bg-brand-periwinkle/10 py-2.5 text-center font-h1 text-xs font-bold text-brand-periwinkle transition hover:bg-brand-periwinkle hover:text-brand-navy disabled:opacity-50"
-                  >
-                    <span className="inline-flex items-center gap-2">
-                      <Zap size={14} /> {buyingNow ? 'Đang xử lý...' : `Mua ngay với ${formatVnd(auction.buyNowPrice)}`}
-                    </span>
-                  </button>
+                  <div className="space-y-1">
+                    <button
+                      type="button"
+                      disabled={buyingNow || clock.isEnded}
+                      onClick={handleBuyNow}
+                      className="w-full rounded-full border border-brand-periwinkle/40 bg-brand-periwinkle/10 py-2.5 text-center font-h1 text-xs font-bold text-brand-periwinkle transition hover:bg-brand-periwinkle hover:text-brand-navy disabled:opacity-50"
+                    >
+                      <span className="inline-flex items-center gap-2">
+                        <Zap size={14} /> {buyingNow ? 'Đang xử lý...' : `Mua ngay với ${formatVnd(auction.buyNowPrice)}`}
+                      </span>
+                    </button>
+                    {wallet && wallet.wallet.balance < auction.buyNowPrice && (
+                      <p className="text-center text-[11px] text-amber-300/80">
+                        Số dư ví của bạn ({formatVnd(wallet.wallet.balance)}) chưa đủ để Mua ngay (thiếu {formatVnd(auction.buyNowPrice - wallet.wallet.balance)}).
+                      </p>
+                    )}
+                  </div>
                 )}
               </form>
             ) : isSeller ? (

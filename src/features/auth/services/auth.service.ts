@@ -11,7 +11,11 @@ import {
 
 export const authService = {
   async login(data: LoginRequest): Promise<AuthResponseDto> {
-    const response = await apiClient.post<ApiResponse<AuthResponseDto>>('/auth/login', { emailOrUsername: data.email, password: data.password });
+    const payload = {
+      emailOrUsername: data.emailOrUsername || data.email,
+      password: data.password,
+    };
+    const response = await apiClient.post<ApiResponse<AuthResponseDto>>('/auth/login', payload);
     if (response.data.error || !response.data.data) {
       throw new Error(response.data.error?.details?.join(', ') || 'Failed to authenticate.');
     }

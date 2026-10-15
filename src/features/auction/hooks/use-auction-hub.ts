@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { HubConnection, HubConnectionBuilder, HubConnectionState, LogLevel } from '@microsoft/signalr';
 import { useAuthStore } from '@/store/use-auth-store';
-import { ensureFreshAccessToken } from '@/lib/api-client';
+import { ensureFreshAccessToken as getSignalRAccessToken } from '@/lib/api-client';
 import { auctionHubUrl } from '../services/auction-hub';
 import type {
   AuctionExtendedPayload,
@@ -34,6 +34,8 @@ export function useAuctionHub(
   callbacks: AuctionHubCallbacks,
 ): { status: AuctionHubStatus } {
   const accessToken = useAuthStore((state) => state.accessToken);
+  const userId = useAuthStore((state) => state.user?.id ?? null);
+  const hasSession = Boolean(userId && accessToken);
   const [hubState, setHubState] = useState<InternalHubState>({
     auctionId: auctionId ?? '',
     status: 'connecting',
@@ -43,7 +45,7 @@ export function useAuctionHub(
   const processedBidIdsRef = useRef(new Set<string>());
 
   // Trạng thái suy ra (derived state) để tránh setState đồng bộ trong effect
-  const status: AuctionHubStatus = !auctionId || !accessToken
+  const status: AuctionHubStatus = !auctionId || !hasSession
     ? 'disconnected'
     : hubState.auctionId === auctionId
       ? hubState.status
@@ -54,85 +56,90 @@ export function useAuctionHub(
   }, [callbacks]);
 
   useEffect(() => {
-    if (!auctionId || !accessToken) {
+    if (!auctionId || !hasSession) {
       return;
     }
 
-    const connection: HubConnection = new HubConnectionBuilder()
-      .withUrl(auctionHubUrl(), { accessTokenFactory: () => ensureFreshAccessToken() })
-      .withAutomaticReconnect()
-      .configureLogging(LogLevel.Warning)
-      .build();
-
+    let active = true;
+    let connection: HubConnection | null = null;
     const updateStatus = (next: AuctionHubStatus) => {
-      setHubState({ auctionId, status: next });
+      if (active) setHubState({ auctionId, status: next });
     };
 
-    // 1. Lắng nghe BidPlaced với Deduplicate theo bidId
-    connection.on('BidPlaced', (payload: BidPlacedPayload) => {
-      if (payload?.bid?.bidId) {
-        if (processedBidIdsRef.current.has(payload.bid.bidId)) {
-          return; // Skip duplicate event
-        }
-        processedBidIdsRef.current.add(payload.bid.bidId);
+    const startConnection = async () => {
+      try {
+        await getSignalRAccessToken();
+        if (!active) return;
+
+        const hubConnection: HubConnection = new HubConnectionBuilder()
+          .withUrl(auctionHubUrl(), { accessTokenFactory: getSignalRAccessToken })
+          .withAutomaticReconnect()
+          .configureLogging(LogLevel.Warning)
+          .build();
+        connection = hubConnection;
+
+        // 1. Lắng nghe BidPlaced với Deduplicate theo bidId
+        hubConnection.on('BidPlaced', (payload: BidPlacedPayload) => {
+          if (payload?.bid?.bidId) {
+            if (processedBidIdsRef.current.has(payload.bid.bidId)) {
+              return; // Skip duplicate event
+            }
+            processedBidIdsRef.current.add(payload.bid.bidId);
+          }
+          callbacksRef.current.onBidPlaced?.(payload);
+        });
+
+        // 2. Lắng nghe AuctionExtended
+        hubConnection.on('AuctionExtended', (payload: AuctionExtendedPayload) => {
+          callbacksRef.current.onAuctionExtended?.(payload);
+        });
+
+        // 3. Lắng nghe AuctionStatusChanged và Map sang 3 sub-event
+        hubConnection.on('AuctionStatusChanged', (payload: AuctionStatusChangedPayload) => {
+          callbacksRef.current.onStatusChanged?.(payload);
+
+          if (payload?.status === 'Active') {
+            callbacksRef.current.onAuctionStarted?.(payload);
+          } else if (payload?.status === 'Ended') {
+            callbacksRef.current.onAuctionEnded?.(payload);
+          } else if (payload?.status === 'Settled') {
+            callbacksRef.current.onAuctionSettled?.(payload);
+          }
+        });
+
+        // Handle reconnect logic
+        hubConnection.onreconnecting(() => updateStatus('connecting'));
+        hubConnection.onreconnected(() => {
+          updateStatus('connected');
+          hubConnection
+            .invoke('JoinAuction', auctionId)
+            .then(() => callbacksRef.current.onReconnectedRefetch?.())
+            .catch(() => undefined);
+        });
+        hubConnection.onclose(() => updateStatus('disconnected'));
+
+        await hubConnection.start();
+        if (!active) return;
+        await hubConnection.invoke('JoinAuction', auctionId);
+        updateStatus('connected');
+      } catch {
+        updateStatus('disconnected');
       }
-      callbacksRef.current.onBidPlaced?.(payload);
-    });
+    };
 
-    // 2. Lắng nghe AuctionExtended
-    connection.on('AuctionExtended', (payload: AuctionExtendedPayload) => {
-      callbacksRef.current.onAuctionExtended?.(payload);
-    });
-
-    // 3. Lắng nghe AuctionStatusChanged và Map sang 3 sub-event
-    connection.on('AuctionStatusChanged', (payload: AuctionStatusChangedPayload) => {
-      callbacksRef.current.onStatusChanged?.(payload);
-
-      if (payload?.status === 'Active') {
-        callbacksRef.current.onAuctionStarted?.(payload);
-      } else if (payload?.status === 'Ended') {
-        callbacksRef.current.onAuctionEnded?.(payload);
-      } else if (payload?.status === 'Settled') {
-        callbacksRef.current.onAuctionSettled?.(payload);
-      }
-    });
-
-    // Handle reconnect logic
-    connection.onreconnecting(() => updateStatus('connecting'));
-    connection.onreconnected(() => {
-      updateStatus('connected');
-      connection
-        .invoke('JoinAuction', auctionId)
-        .then(() => {
-          callbacksRef.current.onReconnectedRefetch?.();
-        })
-        .catch(() => undefined);
-    });
-    connection.onclose(() => updateStatus('disconnected'));
-
-    let active = true;
-    const startPromise = connection
-      .start()
-      .then(() => connection.invoke('JoinAuction', auctionId))
-      .then(() => {
-        if (active) updateStatus('connected');
-      })
-      .catch(() => {
-        if (active) updateStatus('disconnected');
-      });
+    const startPromise = startConnection();
 
     return () => {
       active = false;
-      // Đợi start() xong rồi mới leave/stop() — gọi stop() khi đang negotiate (StrictMode
-      // double-invoke effect ở dev) làm SignalR log lỗi "stopped during negotiation".
+      // Đợi kết nối khởi động xong trước khi đóng để giữ cách xử lý StrictMode của develop.
       void startPromise.finally(async () => {
-        if (connection.state === HubConnectionState.Connected) {
+        if (connection?.state === HubConnectionState.Connected) {
           await connection.invoke('LeaveAuction', auctionId).catch(() => undefined);
         }
-        await connection.stop().catch(() => undefined);
+        if (connection) await connection.stop().catch(() => undefined);
       });
     };
-  }, [auctionId, accessToken]);
+  }, [auctionId, userId, hasSession]);
 
   return { status };
 }

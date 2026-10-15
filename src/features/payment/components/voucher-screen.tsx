@@ -35,8 +35,8 @@ export function VoucherScreen({ userId, mode = 'client' }: { userId: string | nu
       minOrderAmount: 100000,
       maxDiscountAmount: 50000,
       scope: ['Commission', 'Auction'],
-      startDate: now.toISOString().slice(0, 16),
-      endDate: new Date(now.getTime() + 7 * 86400000).toISOString().slice(0, 16),
+      startDate: now.toISOString().slice(0, 10),
+      endDate: new Date(now.getTime() + 7 * 86400000).toISOString().slice(0, 10),
       usageLimit: 100,
       isActive: true,
     };
@@ -80,11 +80,21 @@ export function VoucherScreen({ userId, mode = 'client' }: { userId: string | nu
     setSubmitting(true);
     setError(null);
     try {
+      const toDateOnly = (val: string) => {
+        if (!val) return '';
+        const d = new Date(val);
+        if (isNaN(d.getTime())) return val.slice(0, 10);
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      };
+
       await paymentService.saveVoucher({
         ...createForm,
         voucherCode: createForm.voucherCode.trim().toUpperCase(),
-        startDate: new Date(createForm.startDate).toISOString(),
-        endDate: new Date(createForm.endDate).toISOString(),
+        startDate: toDateOnly(createForm.startDate),
+        endDate: toDateOnly(createForm.endDate),
       });
       setSuccess('Tạo mã giảm giá thành công!');
       setShowCreate(false);
@@ -96,8 +106,8 @@ export function VoucherScreen({ userId, mode = 'client' }: { userId: string | nu
         minOrderAmount: 100000,
         maxDiscountAmount: 50000,
         scope: ['Commission', 'Auction'],
-        startDate: new Date().toISOString().slice(0, 16),
-        endDate: new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 16),
+        startDate: new Date().toISOString().slice(0, 10),
+        endDate: new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10),
         usageLimit: 100,
         isActive: true,
       });
@@ -232,7 +242,7 @@ export function VoucherScreen({ userId, mode = 'client' }: { userId: string | nu
             <div>
               <label className="mb-1 block text-xs text-on-surface-variant">Ngày bắt đầu</label>
               <input
-                type="datetime-local"
+                type="date"
                 required
                 value={createForm.startDate}
                 onChange={(e) => setCreateForm({ ...createForm, startDate: e.target.value })}
@@ -242,7 +252,7 @@ export function VoucherScreen({ userId, mode = 'client' }: { userId: string | nu
             <div>
               <label className="mb-1 block text-xs text-on-surface-variant">Ngày kết thúc</label>
               <input
-                type="datetime-local"
+                type="date"
                 required
                 value={createForm.endDate}
                 onChange={(e) => setCreateForm({ ...createForm, endDate: e.target.value })}

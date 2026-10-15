@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { ArrowUpRight, Clock, Eye, Gavel, Plus, RefreshCw, Search } from 'lucide-react';
 import { useLanguage } from '@/context/language-context';
-import { auctionService } from '../services/auction.service';
+import { auctionService, auctionError } from '../services/auction.service';
 import { useAuctionClock } from '../hooks/use-auction-clock';
 import { auctionStatusLabels, type AuctionFilters, type AuctionListItemDto } from '../types/auction.types';
 
@@ -132,7 +132,7 @@ export function AuctionListScreen({ userId }: { userId: string | null }) {
       }
       setNextCursor(res.nextCursor);
     } catch (err: unknown) {
-      setError(t(err instanceof Error ? err.message : 'Không tải được danh sách phiên đấu giá.'));
+      setError(t(auctionError(err) || 'Không tải được danh sách phiên đấu giá.'));
     } finally {
       setLoading(false);
       setLoadingMore(false);

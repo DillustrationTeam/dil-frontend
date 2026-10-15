@@ -69,8 +69,8 @@ export function AiChatScreen({ userId }: { userId: string | null }) {
     setError(null);
     try {
       const res = await aiService.messages(convo.aiConversationId);
-      // Hiển thị từ cũ đến mới
-      setMessages([...res.items].reverse());
+      // API đã trả tin nhắn từ cũ đến mới, giữ nguyên thứ tự hỏi/đáp.
+      setMessages(res.items);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Không tải được nội dung hội thoại.');
     } finally {
@@ -83,7 +83,10 @@ export function AiChatScreen({ userId }: { userId: string | null }) {
   }, [messages]);
 
   async function handleCreateNewConvo() {
-    if (!userId) return;
+    if (!userId) {
+      setError('Vui lòng đăng nhập để tạo cuộc trò chuyện mới.');
+      return;
+    }
     setError(null);
     try {
       const newConvo = await aiService.create('Tư vấn nền tảng nghệ thuật', 'General');
@@ -409,7 +412,7 @@ export function AiChatScreen({ userId }: { userId: string | null }) {
                   <div className="rounded-2xl border border-white/5 bg-white/5 p-4 text-xs">
                     <span className="text-outline">Điểm số rủi ro trễ hẹn</span>
                     <p className="mt-1 font-h1 text-2xl font-bold text-brand-periwinkle">
-                      {Math.round(riskData.riskScore * 100)} / 100
+                      {Math.round(riskData.riskScore)} / 100
                     </p>
                   </div>
                   <div className="rounded-2xl border border-white/5 bg-white/5 p-4 text-xs">
