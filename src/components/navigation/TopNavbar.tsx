@@ -86,7 +86,9 @@ export default function TopNavbar<T extends string = string>({
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search commissions, creators, artworks..."
+            onKeyDown={(event) => { if (event.key === 'Enter') router.push(`/explore?q=${encodeURIComponent(searchQuery.trim())}`); }}
+            aria-label="Tìm tác phẩm hoặc tác giả"
+            placeholder="Search artworks, creators..."
             className="w-full h-9 pl-9 pr-4 bg-[#1b1b1e] border border-white/10 rounded-full text-xs text-white placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-[#A7ACD9] focus:border-[#A7ACD9] transition-all"
           />
         </div>

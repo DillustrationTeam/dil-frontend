@@ -66,7 +66,7 @@ export function DisputeArbitrationSection({
   }
 
   const isResolved = dispute.status === 'Resolved';
-  const totalEscrow = dispute.escrowHeldAmount || dispute.finalPrice;
+  const totalEscrow = dispute.escrowHeldAmount ?? dispute.finalPrice;
 
   return (
     <div id="arbitration-dossier" className="space-y-6 scroll-mt-6">

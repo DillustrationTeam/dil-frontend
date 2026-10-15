@@ -59,6 +59,7 @@ export interface CreatorReviewDto {
   reviewerUserId: string;
   rating: number;
   comment?: string | null;
+  reviewerReply?: string | null;
   createdAt: string;
 }
 
