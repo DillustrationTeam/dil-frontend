@@ -28,6 +28,8 @@ import {
   Lock,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useAuthStore } from '@/store/use-auth-store';
+import { creatorProfileService } from '@/features/creator-studio/services/creator-profile.service';
 import type { EventDetailDto } from '../../types/event.types';
 import { eventStatusBadgeStyles, eventStatusLabels } from '../../types/event.types';
 import type {
@@ -35,7 +37,9 @@ import type {
   JurySubmissionItem,
   JuryEvaluationDraft,
   JuryStats,
+  JuryMemberInfo,
 } from '../../types/jury.types';
+import type { CreatorProfileDto } from '@/features/creator-studio/types/creator-profile.types';
 import { eventService } from '../../services/event.service';
 import { juryService } from '../../services/jury.service';
 import { JuryArtworkLightbox } from './jury-artwork-lightbox';
@@ -115,6 +119,12 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
     return false;
   }, [event, now]);
 
+  const [juries, setJuries] = useState<JuryMemberInfo[]>([]);
+  const [myCreatorProfile, setMyCreatorProfile] = useState<CreatorProfileDto | null>(null);
+
+  const currentUser = useAuthStore((state) => state.user);
+  const effectiveUserId = currentUser?.id ?? null;
+
   // Fetch event, criteria, and submissions
   useEffect(() => {
     let isMounted = true;
@@ -122,12 +132,17 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
     async function loadJuryWorkspace() {
       setLoading(true);
       try {
-        const [eventData, criteriaData] = await Promise.all([
+        const [eventData, criteriaData, juriesData, profileData] = await Promise.all([
           eventService.detail(eventId).catch(() => null),
           juryService.getEventCriteria(eventId).catch(() => []),
+          juryService.getEventJuries(eventId).catch(() => []),
+          effectiveUserId ? creatorProfileService.getMyProfile().catch(() => null) : Promise.resolve(null),
         ]);
 
         if (!isMounted) return;
+
+        setJuries(juriesData || []);
+        setMyCreatorProfile(profileData);
 
         if (eventData) {
           setEvent(eventData);
@@ -174,7 +189,31 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
     return () => {
       isMounted = false;
     };
-  }, [eventId]);
+  }, [eventId, effectiveUserId]);
+
+  const currentJury = useMemo(() => {
+    if (!juries || juries.length === 0) return null;
+    const myCreatorId = myCreatorProfile?.id?.toLowerCase();
+    const myUserId = effectiveUserId?.toLowerCase();
+    const myName = (currentUser?.fullName || currentUser?.email || '').toLowerCase().trim();
+
+    return (
+      juries.find((j) => {
+        const jCreatorId = j.creatorId?.toLowerCase();
+        const jId = j.id?.toLowerCase();
+        const jDisplayName = (j.creatorDisplayName || '').toLowerCase().trim();
+        const jName = (j.creatorName || '').toLowerCase().trim();
+
+        if (myCreatorId && jCreatorId === myCreatorId) return true;
+        if (myUserId && (jCreatorId === myUserId || jId === myUserId)) return true;
+        if (myName && ((jDisplayName && jDisplayName === myName) || (jName && jName === myName))) return true;
+
+        return false;
+      }) || null
+    );
+  }, [juries, effectiveUserId, myCreatorProfile, currentUser]);
+
+  const isJuryMember = Boolean(currentJury);
 
   const activeSubmission = useMemo(() => {
     return submissions.find((s) => s.id === selectedSubmissionId) || submissions[0] || null;
@@ -281,6 +320,11 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
     if (e) e.preventDefault();
     if (!activeSubmission) return;
 
+    if (!isJuryMember) {
+      toast.error('Bạn không có quyền chấm điểm vì không được phân công làm Giám khảo cho sự kiện này.');
+      return;
+    }
+
     if (!isJudgingPhase) {
       toast.error('Evaluation is locked until the contest reaches the Judging phase.');
       return;
@@ -347,6 +391,37 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-3">
         <RefreshCw className="w-8 h-8 text-[#A7ACD9] animate-spin" />
         <p className="text-sm text-[#9695a1]">Loading Jury Evaluation Workspace...</p>
+      </div>
+    );
+  }
+
+  if (!isJuryMember) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] px-4 py-12 text-center">
+        <div className="size-16 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 flex items-center justify-center mx-auto mb-5 shadow-inner">
+          <Lock className="w-8 h-8" />
+        </div>
+        <h2 className="font-sora text-xl sm:text-2xl font-bold text-white">
+          Truy cập bị từ chối
+        </h2>
+        <p className="mt-2 text-sm text-[#9695a1] max-w-md mx-auto leading-relaxed">
+          Bạn không được phân công làm Giám khảo (Jury) cho sự kiện này. Chỉ những giám khảo được bổ nhiệm chính thức mới có quyền truy cập không gian chấm thi.
+        </p>
+        <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
+          <Link
+            href={`/events/${eventId}`}
+            className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 px-6 py-2.5 text-xs font-bold text-white hover:brightness-110 transition shadow-lg"
+          >
+            <ChevronLeft size={16} />
+            <span>Quay lại chi tiết sự kiện</span>
+          </Link>
+          <Link
+            href="/events"
+            className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-6 py-2.5 text-xs font-semibold text-[#9695a1] hover:text-white hover:bg-white/10 transition"
+          >
+            <span>Tất cả sự kiện</span>
+          </Link>
+        </div>
       </div>
     );
   }

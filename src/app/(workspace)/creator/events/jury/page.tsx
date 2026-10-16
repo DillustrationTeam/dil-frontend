@@ -20,30 +20,36 @@ export default function CreatorJuryEventsListPage() {
     async function loadEvents() {
       setLoading(true);
       try {
-        const res = await eventService.list({ pageSize: 30 });
+        const res = await eventService.list({ pageSize: 50 });
         const items = res.items || [];
-        setEvents(items);
 
-        // Check Head Jury assignment for each event
+        // Filter to only events where the user is assigned as a Jury member
+        const assignedEvents: EventListItemDto[] = [];
         const map: Record<string, boolean> = {};
+
         await Promise.all(
           items.map(async (evt) => {
             try {
               const juries = await juryService.getEventJuries(evt.id);
-              const isUserHead = juries.some(
+              const matchingJury = juries.find(
                 (j) =>
-                  j.isHeadJury &&
-                  (j.creatorId === user?.id ||
-                    (user?.fullName && (j.creatorName?.includes(user.fullName) || j.creatorDisplayName?.includes(user.fullName))))
+                  j.creatorId === user?.id ||
+                  (user?.fullName && (j.creatorName?.includes(user.fullName) || j.creatorDisplayName?.includes(user.fullName)))
               );
-              if (isUserHead) {
-                map[evt.id] = true;
+
+              if (matchingJury) {
+                assignedEvents.push(evt);
+                if (matchingJury.isHeadJury) {
+                  map[evt.id] = true;
+                }
               }
             } catch {
               // Ignore network fallback
             }
           })
         );
+
+        setEvents(assignedEvents);
         setHeadJuryMap(map);
       } catch {
         setEvents([]);

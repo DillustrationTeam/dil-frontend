@@ -303,6 +303,7 @@ export function EventDetailScreen({ id, userId, isAdmin }: EventDetailScreenProp
         statusStr={statusStr}
         countdown={countdown}
         isCreator={isCreator}
+        isJuryMember={isJuryMember}
         onOpenRulesModal={() => setIsRulesModalOpen(true)}
         onCopyLink={handleCopyLink}
       />

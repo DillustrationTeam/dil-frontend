@@ -1,3 +1,5 @@
+
+
 export type EventStatus = 'Draft' | 'Open' | 'Judging' | 'Ended';
 
 export const eventStatusLabels: Record<string, string> = {
@@ -10,7 +12,7 @@ export const eventStatusLabels: Record<string, string> = {
 export const eventStatusBadgeStyles: Record<string, string> = {
   Open: 'border-emerald-400/30 bg-emerald-950/70 text-emerald-300 shadow-[0_0_15px_rgba(52,211,153,0.15)]',
   Judging: 'border-amber-400/30 bg-amber-950/70 text-amber-300 shadow-[0_0_15px_rgba(251,191,36,0.15)]',
-  Ended: 'border-white/15 bg-white/5 text-on-surface-variant',
+  Ended: 'border-white/15 bg-white/5 text -on-surface-variant',
   Draft: 'border-white/10 bg-white/5 text-outline',
 };
 
