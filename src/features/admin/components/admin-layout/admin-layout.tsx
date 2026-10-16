@@ -39,7 +39,7 @@ export function AdminLayout({
   const pathname = usePathname();
   const administrator = roles.some((role) => role.toLowerCase() === 'administrator');
   const moderator = roles.some((role) => role.toLowerCase() === 'moderator');
-  const adminOnly = ['/admin/users', '/admin/fee-policy', '/admin/platform-config'].some((path) => pathname === path || pathname.startsWith(`${path}/`));
+  const adminOnly = ['/admin/users', '/admin/fee-policy', '/admin/platform-config', '/admin/payouts'].some((path) => pathname === path || pathname.startsWith(`${path}/`));
 
   const toggleMobileNav = () => {
     setIsMobileNavOpen((prev) => !prev);

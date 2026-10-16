@@ -16,6 +16,7 @@ import {
   ChevronRight,
   Shield,
   Calendar,
+  Banknote,
 } from 'lucide-react';
 import { useAuthStore } from '@/store/use-auth-store';
 import { AdminNavItem, AdminNavSection, AdminVerticalNavbarProps } from './types';
@@ -38,6 +39,18 @@ export const DEFAULT_ADMIN_NAV_SECTIONS: AdminNavSection[] = [
         href: '/admin/fee-policy',
         icon: <SlidersHorizontal className="w-4 h-4 shrink-0" />,
         materialIcon: 'tune',
+      },
+    ],
+  },
+  {
+    title: 'Financial Management',
+    items: [
+      {
+        id: 'payout-approvals',
+        label: 'Payout Approvals',
+        href: '/admin/payouts',
+        icon: <Banknote className="w-4 h-4 shrink-0" />,
+        materialIcon: 'payments',
       },
     ],
   },

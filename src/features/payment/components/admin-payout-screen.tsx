@@ -80,6 +80,7 @@ export function AdminPayoutScreen() {
   // Form inputs for modals
   const [transactionRef, setTransactionRef] = useState('');
   const [payoutNote, setPayoutNote] = useState('');
+  const [payoutMethod, setPayoutMethod] = useState<'payos' | 'manual'>('payos');
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const fetchPayouts = useCallback(
@@ -132,6 +133,7 @@ export function AdminPayoutScreen() {
   const openActionModal = (payout: PayoutDto, type: 'approve' | 'reject') => {
     setSelectedPayout(payout);
     setActionType(type);
+    setPayoutMethod('payos');
     setModalError(null);
     setTransactionRef('');
     setPayoutNote('');
@@ -154,7 +156,7 @@ export function AdminPayoutScreen() {
       return;
     }
 
-    if (actionType === 'approve' && !transactionRef.trim()) {
+    if (actionType === 'approve' && payoutMethod === 'manual' && !transactionRef.trim()) {
       setModalError('Vui lòng nhập mã giao dịch ngân hàng đã chuyển khoản thành công.');
       return;
     }
@@ -165,7 +167,7 @@ export function AdminPayoutScreen() {
     const payload: UpdatePayoutStatusRequest = {
       payoutStatus: actionType === 'approve' ? 'Processed' : 'Rejected',
       payoutNote: payoutNote.trim() || null,
-      transactionRef: transactionRef.trim() || null,
+      transactionRef: actionType === 'approve' && payoutMethod === 'manual' ? transactionRef.trim() : null,
     };
 
     try {
@@ -192,73 +194,95 @@ export function AdminPayoutScreen() {
     .reduce((acc, curr) => acc + curr.amount, 0);
 
   return (
-    <div className="space-y-6 text-slate-100 pb-16">
-      {/* Header Banner */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#171927] via-[#1a1d30] to-[#121422] border border-white/10 p-6 md:p-8 shadow-2xl">
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-2">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-semibold tracking-wider uppercase">
-              <Banknote className="w-3.5 h-3.5" />
-              <span>UC-49 / SCR-49 · Financial Management</span>
-            </div>
-            <h1 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">
-              Payout Approval
+    <div className="space-y-8 animate-fadeIn font-body pb-12">
+      {/* 1. Header with Title, Actions & Live Status */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-6">
+        <div>
+          <div className="flex items-center gap-3">
+            <h1 className="font-h1 text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+              Payout Approvals & Settlement
             </h1>
-            <p className="text-sm text-[#8A8FA9] max-w-2xl">
-              Đối soát thông tin tài khoản ngân hàng của Creator, xác nhận giao dịch chuyển tiền qua ngân hàng hoặc từ
-              chối để hệ thống tự động hoàn tiền về ví sàn.
-            </p>
           </div>
+          <p className="text-xs text-[#8A8FA9] mt-1.5 max-w-2xl font-body">
+            Đối soát thông tin tài khoản ngân hàng Creator, phê duyệt giải ngân tự động qua cổng PayOS hoặc xác nhận chuyển khoản thủ công.
+          </p>
+        </div>
 
+        {/* Actions */}
+        <div className="flex items-center gap-2 self-start sm:self-auto">
           <button
-            onClick={() => fetchPayouts()}
+            type="button"
+            onClick={() => void fetchPayouts()}
             disabled={loading}
-            className="self-start md:self-center inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-sm font-medium transition-colors cursor-pointer disabled:opacity-50"
+            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-white transition-all cursor-pointer disabled:opacity-50"
+            title="Làm mới danh sách yêu cầu"
           >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-indigo-400' : ''}`} />
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-[#A7ACD9]' : 'text-[#A7ACD9]'}`} />
             <span>Làm mới</span>
           </button>
         </div>
+      </div>
 
-        {/* Stats Row */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6 pt-6 border-t border-white/5">
-          <div className="p-4 rounded-xl bg-white/[0.03] border border-white/5 flex items-center justify-between">
-            <div>
-              <p className="text-xs text-[#8A8FA9] font-medium">Chờ duyệt trên trang</p>
-              <p className="text-2xl font-bold text-amber-300 mt-1">{pendingCount} yêu cầu</p>
-            </div>
-            <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-300">
-              <Clock className="w-5 h-5" />
+      {/* 2. Executive Financial KPI Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5">
+        {/* Card 1: Pending Requests */}
+        <div className="glass-container bg-[#161926]/85 backdrop-blur-[32px] border border-white/10 rounded-[24px] p-5 space-y-2 shadow-lg">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] text-[#8A8FA9] font-bold uppercase tracking-wider font-space-grotesk">
+              YÊU CẦU CHỜ DUYỆT
+            </span>
+            <div className="p-1.5 rounded-lg bg-amber-400/10 text-amber-400">
+              <Clock className="w-4 h-4" />
             </div>
           </div>
+          <h3 className="font-h1 text-2xl font-extrabold text-amber-300 tracking-tight">
+            {loading && items.length === 0 ? '...' : `${pendingCount} đơn`}
+          </h3>
+          <p className="text-[11px] text-[#8A8FA9]">
+            Đang chờ Admin kiểm tra và giải ngân
+          </p>
+        </div>
 
-          <div className="p-4 rounded-xl bg-white/[0.03] border border-white/5 flex items-center justify-between">
-            <div>
-              <p className="text-xs text-[#8A8FA9] font-medium">Tổng tiền chờ chuyển</p>
-              <p className="text-2xl font-bold text-white mt-1">{formatVnd(pendingTotal)}</p>
-            </div>
-            <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-300">
-              <CreditCard className="w-5 h-5" />
+        {/* Card 2: Total Pending Amount */}
+        <div className="glass-container bg-[#161926]/85 backdrop-blur-[32px] border border-white/10 rounded-[24px] p-5 space-y-2 shadow-lg">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] text-[#8A8FA9] font-bold uppercase tracking-wider font-space-grotesk">
+              TỔNG TIỀN CHỜ CHI
+            </span>
+            <div className="p-1.5 rounded-lg bg-[#C5C9F8]/10 text-[#C5C9F8]">
+              <Banknote className="w-4 h-4" />
             </div>
           </div>
+          <h3 className="font-h1 text-2xl font-extrabold text-white tracking-tight">
+            {loading && items.length === 0 ? '...' : formatVnd(pendingTotal)}
+          </h3>
+          <p className="text-[11px] text-[#8A8FA9]">
+            Cần giải ngân về STK của Creator
+          </p>
+        </div>
 
-          <div className="p-4 rounded-xl bg-white/[0.03] border border-white/5 flex items-center justify-between">
-            <div>
-              <p className="text-xs text-[#8A8FA9] font-medium">Trạng thái bảo mật</p>
-              <p className="text-sm font-bold text-emerald-400 mt-1 flex items-center gap-1.5">
-                <ShieldCheck className="w-4 h-4" /> Snapshot ngân hàng khóa
-              </p>
-            </div>
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-300">
-              <ShieldAlert className="w-5 h-5" />
+        {/* Card 3: Settlement Channel */}
+        <div className="glass-container bg-[#161926]/85 backdrop-blur-[32px] border border-white/10 rounded-[24px] p-5 space-y-2 shadow-lg">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] text-[#8A8FA9] font-bold uppercase tracking-wider font-space-grotesk">
+              KÊNH CHI TIỀN
+            </span>
+            <div className="p-1.5 rounded-lg bg-emerald-400/10 text-emerald-400">
+              <ShieldCheck className="w-4 h-4" />
             </div>
           </div>
+          <h3 className="font-h1 text-lg font-bold text-emerald-400 tracking-tight flex items-center gap-1.5 pt-1">
+            PayOS VietQR + Thủ Công
+          </h3>
+          <p className="text-[11px] text-[#8A8FA9]">
+            Chi hộ tự động qua Napas247 hoặc ủy nhiệm chi
+          </p>
         </div>
       </div>
 
       {/* Success Notification */}
       {successMsg && (
-        <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-between gap-3 text-emerald-300 text-sm">
+        <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-between gap-3 text-emerald-300 text-xs">
           <div className="flex items-center gap-2.5">
             <CheckCircle2 className="w-5 h-5 shrink-0" />
             <span>{successMsg}</span>
@@ -274,14 +298,14 @@ export function AdminPayoutScreen() {
 
       {/* Global Error Banner */}
       {error && (
-        <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 flex items-center gap-3 text-rose-300 text-sm">
-          <AlertCircle className="w-5 h-5 shrink-0" />
+        <div className="p-4 rounded-2xl bg-red-500/10 border border-red-500/30 flex items-center gap-3 text-red-300 text-xs">
+          <AlertCircle className="w-5 h-5 shrink-0 text-red-400" />
           <span>{error}</span>
         </div>
       )}
 
-      {/* Filters & Search Toolbar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 rounded-2xl bg-[#141624] border border-white/10">
+      {/* 3. Filters & Search Toolbar */}
+      <div className="bg-[#161926]/85 backdrop-blur-[32px] border border-white/10 rounded-2xl p-3 flex flex-col md:flex-row items-center justify-between gap-3">
         {/* Status Filter Tabs */}
         <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-xl bg-black/30 border border-white/5">
           {(['Pending', 'All', 'Processed', 'Rejected'] as const).map((tab) => (
@@ -290,10 +314,10 @@ export function AdminPayoutScreen() {
               onClick={() => {
                 setStatusFilter(tab);
               }}
-              className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
                 statusFilter === tab
-                  ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30'
-                  : 'text-[#8A8FA9] hover:text-white hover:bg-white/5'
+                  ? 'bg-[#A7ACD9]/20 text-white border border-[#A7ACD9]/40 shadow-[0_0_12px_rgba(167,172,217,0.2)]'
+                  : 'text-[#8A8FA9] hover:text-white hover:bg-white/5 border border-transparent'
               }`}
             >
               {tab === 'All'
@@ -316,12 +340,12 @@ export function AdminPayoutScreen() {
               placeholder="Lọc theo Creator User ID..."
               value={searchUserId}
               onChange={(e) => setSearchUserId(e.target.value)}
-              className="w-64 sm:w-72 pl-9 pr-3 py-2 rounded-xl bg-black/20 border border-white/10 text-xs text-white placeholder-[#8A8FA9] focus:outline-none focus:border-indigo-500 transition-colors"
+              className="w-full sm:w-72 pl-10 pr-4 py-2 bg-black/40 rounded-xl border border-white/10 text-white placeholder-[#8A8FA9]/60 text-xs focus:outline-none focus:border-[#A7ACD9] focus:ring-1 focus:ring-[#A7ACD9]/40 transition-colors"
             />
           </div>
           <button
             type="submit"
-            className="px-3.5 py-2 rounded-xl bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/30 text-indigo-300 text-xs font-semibold transition-colors cursor-pointer"
+            className="px-3.5 py-2 rounded-xl bg-[#A7ACD9]/20 hover:bg-[#A7ACD9]/30 border border-[#A7ACD9]/30 text-[#C5C9F8] text-xs font-semibold transition-colors cursor-pointer"
           >
             Lọc
           </button>
@@ -342,18 +366,18 @@ export function AdminPayoutScreen() {
       </div>
 
       {/* Main Table Container */}
-      <div className="rounded-2xl bg-[#141624] border border-white/10 overflow-hidden shadow-xl">
+      <div className="glass-container bg-[#161926]/85 backdrop-blur-[32px] border border-white/10 rounded-[24px] overflow-hidden shadow-xl">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-white/5 bg-white/[0.02] text-[#8A8FA9] text-xs uppercase tracking-wider font-semibold">
-                <th className="py-4 px-5">Mã Yêu Cầu</th>
-                <th className="py-4 px-5">Số Tiền Rút</th>
-                <th className="py-4 px-5">Tài Khoản Thụ Hưởng</th>
-                <th className="py-4 px-5">Ghi Chú</th>
-                <th className="py-4 px-5">Thời Gian</th>
-                <th className="py-4 px-5">Trạng Thái</th>
-                <th className="py-4 px-5 text-right">Thao Tác</th>
+              <tr className="border-b border-white/10 bg-white/[0.03] text-[#8A8FA9] text-[11px] font-bold uppercase tracking-wider font-space-grotesk">
+                <th className="py-3.5 px-4">Mã Yêu Cầu</th>
+                <th className="py-3.5 px-4">Số Tiền Rút</th>
+                <th className="py-3.5 px-4">Tài Khoản Thụ Hưởng</th>
+                <th className="py-3.5 px-4">Ghi Chú</th>
+                <th className="py-3.5 px-4">Thời Gian</th>
+                <th className="py-3.5 px-4">Trạng Thái</th>
+                <th className="py-3.5 px-4 text-right">Thao Tác</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5 text-sm">
@@ -361,7 +385,7 @@ export function AdminPayoutScreen() {
                 <tr>
                   <td colSpan={7} className="py-16 text-center text-[#8A8FA9]">
                     <div className="flex flex-col items-center gap-3">
-                      <RefreshCw className="w-6 h-6 animate-spin text-indigo-400" />
+                      <RefreshCw className="w-6 h-6 animate-spin text-[#A7ACD9]" />
                       <span>Đang tải danh sách yêu cầu rút tiền...</span>
                     </div>
                   </td>
@@ -394,10 +418,10 @@ export function AdminPayoutScreen() {
                       className="hover:bg-white/[0.02] transition-colors group"
                     >
                       {/* Payout Request ID */}
-                      <td className="py-4 px-5">
+                      <td className="py-3.5 px-4">
                         <div className="flex items-center gap-2">
                           <span
-                            className="font-mono text-xs text-indigo-300 font-semibold cursor-pointer hover:underline"
+                            className="font-mono text-xs text-[#A7ACD9] font-bold cursor-pointer hover:underline"
                             title={payout.payoutRequestId}
                             onClick={() => handleCopy(payout.payoutRequestId)}
                           >
@@ -418,18 +442,18 @@ export function AdminPayoutScreen() {
                       </td>
 
                       {/* Amount */}
-                      <td className="py-4 px-5">
+                      <td className="py-3.5 px-4">
                         <span className="font-extrabold text-white text-base">
                           {formatVnd(payout.amount)}
                         </span>
                       </td>
 
                       {/* Bank Account */}
-                      <td className="py-4 px-5">
+                      <td className="py-3.5 px-4">
                         {payout.bankAccount ? (
                           <div className="space-y-1">
                             <div className="flex items-center gap-2">
-                              <Building2 className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                              <Building2 className="w-3.5 h-3.5 text-[#A7ACD9] shrink-0" />
                               <span className="font-medium text-white text-xs">
                                 {payout.bankAccount.bankName}
                               </span>
@@ -447,7 +471,7 @@ export function AdminPayoutScreen() {
                       </td>
 
                       {/* Notes / Reason */}
-                      <td className="py-4 px-5 max-w-xs">
+                      <td className="py-3.5 px-4 max-w-xs">
                         <div className="space-y-1 text-xs">
                           {payout.payoutNote && (
                             <p className="text-slate-300 line-clamp-2" title={payout.payoutNote}>
@@ -471,7 +495,7 @@ export function AdminPayoutScreen() {
                       </td>
 
                       {/* Timestamps */}
-                      <td className="py-4 px-5 text-xs text-[#8A8FA9] whitespace-nowrap">
+                      <td className="py-3.5 px-4 text-xs text-[#8A8FA9] whitespace-nowrap">
                         <div>
                           <span>Tạo: </span>
                           <span className="text-slate-300">{formatDate(payout.createdAt)}</span>
@@ -485,7 +509,7 @@ export function AdminPayoutScreen() {
                       </td>
 
                       {/* Status */}
-                      <td className="py-4 px-5 whitespace-nowrap">
+                      <td className="py-3.5 px-4 whitespace-nowrap">
                         <span
                           className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border ${statusInfo.badgeClass}`}
                         >
@@ -495,7 +519,7 @@ export function AdminPayoutScreen() {
                       </td>
 
                       {/* Actions */}
-                      <td className="py-4 px-5 text-right whitespace-nowrap">
+                      <td className="py-3.5 px-4 text-right whitespace-nowrap">
                         {payout.payoutStatus === 'Pending' ? (
                           <div className="inline-flex items-center gap-2">
                             <button
@@ -531,7 +555,7 @@ export function AdminPayoutScreen() {
             <button
               onClick={() => fetchPayouts(nextCursor, true)}
               disabled={loading}
-              className="px-6 py-2.5 rounded-xl bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/30 text-indigo-300 text-xs font-semibold transition-colors cursor-pointer disabled:opacity-50 flex items-center gap-2"
+              className="px-6 py-2.5 rounded-xl bg-[#A7ACD9]/20 hover:bg-[#A7ACD9]/30 border border-[#A7ACD9]/30 text-[#C5C9F8] text-xs font-semibold transition-colors cursor-pointer disabled:opacity-50 flex items-center gap-2"
             >
               {loading && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
               <span>Tải thêm bản ghi tiếp theo</span>
@@ -543,7 +567,7 @@ export function AdminPayoutScreen() {
       {/* Action Modal (Approve or Reject) */}
       {selectedPayout && actionType && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="relative w-full max-w-lg rounded-2xl bg-[#161828] border border-white/10 shadow-2xl overflow-hidden p-6 space-y-6">
+          <div className="relative w-full max-w-lg rounded-[28px] bg-[#161926] border border-white/15 shadow-2xl overflow-hidden p-6 sm:p-7 space-y-6 font-body">
             {/* Modal Header */}
             <div className="flex items-start justify-between gap-4">
               <div className="flex items-center gap-3">
@@ -561,7 +585,7 @@ export function AdminPayoutScreen() {
                   )}
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-white">
+                  <h3 className="text-lg font-bold text-white font-h1">
                     {actionType === 'approve' ? 'Xác Nhận Chuyển Khoản' : 'Từ Chối Yêu Cầu Rút Tiền'}
                   </h3>
                   <p className="text-xs text-[#8A8FA9]">Mã yêu cầu: #{selectedPayout.payoutRequestId}</p>
@@ -623,20 +647,67 @@ export function AdminPayoutScreen() {
             {/* Form Fields */}
             <div className="space-y-4">
               {actionType === 'approve' && (
-                <div>
-                  <label className="block text-xs font-medium text-slate-300 mb-1.5">
-                    Mã Giao Dịch Ngân Hàng (Transaction Ref)
+                <div className="space-y-3">
+                  <label className="block text-xs font-medium text-slate-300">
+                    Phương Thức Chi Tiền
                   </label>
-                  <input
-                    type="text"
-                    placeholder="Ví dụ: FT24050982341..."
-                    value={transactionRef}
-                    onChange={(e) => setTransactionRef(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl bg-black/20 border border-white/10 text-xs text-white placeholder-[#8A8FA9] focus:outline-none focus:border-indigo-500"
-                  />
-                  <p className="text-[11px] text-[#8A8FA9] mt-1">
-                    Nhập mã tham chiếu từ ứng dụng ngân hàng sau khi Admin thực hiện chuyển khoản thành công.
-                  </p>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setPayoutMethod('payos')}
+                      className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                        payoutMethod === 'payos'
+                          ? 'bg-emerald-500/15 border-emerald-500 text-white shadow-sm'
+                          : 'bg-black/20 border-white/10 text-[#8A8FA9] hover:border-white/20'
+                      }`}
+                    >
+                      <div className="font-bold text-xs flex items-center gap-1.5 text-emerald-400">
+                        <span>⚡ Tự động qua PayOS</span>
+                      </div>
+                      <p className="text-[11px] text-[#8A8FA9] mt-1">
+                        Hệ thống tự động phát lệnh chi hộ qua API PayOS về STK của Creator.
+                      </p>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setPayoutMethod('manual')}
+                      className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                        payoutMethod === 'manual'
+                          ? 'bg-[#A7ACD9]/15 border-[#A7ACD9]/60 text-white shadow-sm ring-1 ring-[#A7ACD9]/30'
+                          : 'bg-black/20 border-white/10 text-[#8A8FA9] hover:border-white/20'
+                      }`}
+                    >
+                      <div className="font-bold text-xs flex items-center gap-1.5 text-indigo-400">
+                        <span>📝 Chuyển thủ công</span>
+                      </div>
+                      <p className="text-[11px] text-[#8A8FA9] mt-1">
+                        Admin tự chuyển bằng app ngân hàng rồi nhập mã giao dịch.
+                      </p>
+                    </button>
+                  </div>
+
+                  {payoutMethod === 'manual' ? (
+                    <div className="pt-2">
+                      <label className="block text-xs font-medium text-slate-300 mb-1.5">
+                        Mã Giao Dịch Ngân Hàng (Transaction Ref) <span className="text-rose-400">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Ví dụ: FT24050982341..."
+                        value={transactionRef}
+                        onChange={(e) => setTransactionRef(e.target.value)}
+                        className="w-full px-3 py-2 rounded-xl bg-black/20 border border-white/10 text-xs text-white placeholder-[#8A8FA9] focus:outline-none focus:border-[#A7ACD9] focus:ring-1 focus:ring-[#A7ACD9]/40"
+                      />
+                      <p className="text-[11px] text-[#8A8FA9] mt-1">
+                        Nhập mã tham chiếu từ ứng dụng ngân hàng sau khi Admin thực hiện chuyển khoản thành công.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-300">
+                      Hệ thống sẽ gọi trực tiếp API Kênh chi hộ của PayOS để chuyển <strong>{formatVnd(selectedPayout.amount)}</strong> vào tài khoản thụ hưởng.
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -681,13 +752,19 @@ export function AdminPayoutScreen() {
                 disabled={isSubmitting}
                 className={`px-5 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer flex items-center gap-2 disabled:opacity-50 ${
                   actionType === 'approve'
-                    ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-600/30'
+                    ? payoutMethod === 'payos'
+                      ? 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-lg shadow-emerald-600/30'
+                      : 'bg-[#A7ACD9] hover:bg-[#A7ACD9]/90 text-[#1F2335] font-bold shadow-lg shadow-[#A7ACD9]/20'
                     : 'bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-600/30'
                 }`}
               >
                 {isSubmitting && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
                 <span>
-                  {actionType === 'approve' ? 'Xác nhận Đã Chuyển Tiền' : 'Từ chối & Hoàn Tiền'}
+                  {actionType === 'reject'
+                    ? 'Từ chối & Hoàn Tiền'
+                    : payoutMethod === 'payos'
+                    ? '⚡ Xác Nhận Chi Tự Động (PayOS)'
+                    : 'Xác Nhận Đã Chuyển Thủ Công'}
                 </span>
               </button>
             </div>
