@@ -445,6 +445,12 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
       if (r.commissionId) {
         try {
           const c = await commissionService.getById(r.commissionId);
+          if (!c.dispute) {
+            try {
+              const d = await commissionService.getDispute(r.commissionId);
+              if (d) c.dispute = d;
+            } catch { }
+          }
           setCommission(c);
         } catch { }
       }
@@ -891,11 +897,11 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                     </button>
 
                     {/* Nút Khiếu Nại / Xem Hồ Sơ Tranh Chấp */}
-                    {(commission?.dispute || (commissionStatus !== 'Completed' && commissionStatus !== 'Cancelled' && commissionStatus !== 'Disputed')) && (
+                    {(commission?.dispute || commissionStatus === 'Cancelled' || commissionStatus === 'Disputed' || (commissionStatus !== 'Completed')) && (
                       <button
                         type="button"
-                        onClick={() => commission?.dispute ? setShowDisputeDetailsModal(true) : setShowDisputeModal(true)}
-                        title={commission?.dispute ? 'Xem hồ sơ và kết quả giải quyết tranh chấp' : 'Gửi khiếu nại tranh chấp với Trọng tài sàn'}
+                        onClick={() => (commission?.dispute || commissionStatus === 'Cancelled' || commissionStatus === 'Disputed') ? setShowDisputeDetailsModal(true) : setShowDisputeModal(true)}
+                        title={commission?.dispute || commissionStatus === 'Cancelled' ? 'Xem hồ sơ và kết quả giải quyết tranh chấp' : 'Gửi khiếu nại tranh chấp với Trọng tài sàn'}
                         className="group relative flex size-9 shrink-0 items-center justify-center border border-amber-500/40 bg-[#1C202D] hover:bg-[#232838] hover:border-amber-400 text-amber-400 transition shadow-md [clip-path:polygon(10px_0,100%_0,100%_100%,0_100%,0_10px)]"
                       >
                         <Scale size={18} className="text-amber-400 group-hover:scale-110 transition-transform" />
@@ -1824,7 +1830,11 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
 
           {commission && (currentMemberRole === 'client' || currentMemberRole === 'creator') && (
             <section className="mt-4 space-y-3 rounded-2xl border border-white/10 bg-white/[.03] p-4">
-              {commission.dispute && <button type="button" onClick={() => setShowDisputeDetailsModal(true)} className="rounded-xl border border-[#A7ACD9]/40 px-4 py-2 text-sm text-[#C5C9F8]">Xem hồ sơ tranh chấp</button>}
+              {(commission.dispute || commission.status === 'Cancelled' || commission.status === 'Disputed') && (
+                <button type="button" onClick={() => setShowDisputeDetailsModal(true)} className="rounded-xl border border-[#A7ACD9]/40 px-4 py-2 text-sm text-[#C5C9F8] hover:bg-white/10 transition">
+                  Xem hồ sơ &amp; kết quả tranh chấp
+                </button>
+              )}
               {commission.review && <div className="space-y-2 text-sm text-slate-300"><p className="font-semibold text-white">Đánh giá của khách: {commission.review.rating}/5</p>{commission.review.comment && <p>{commission.review.comment}</p>}{commission.review.reviewerReply ? <p className="border-l-2 border-[#A7ACD9] pl-3">Phản hồi của Creator: {commission.review.reviewerReply}</p> : currentMemberRole === 'creator' && commission.status === 'Completed' ? <button type="button" onClick={() => setShowReplyModal(true)} className="rounded-xl border border-white/15 px-4 py-2">Trả lời đánh giá</button> : null}</div>}
             </section>
           )}

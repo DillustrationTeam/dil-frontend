@@ -10,6 +10,7 @@ import {
   Calendar,
   Sparkles,
   X,
+  ImageOff,
 } from 'lucide-react';
 import { ArtworkInspectionDetailDto } from '@/features/admin/types/moderation.types';
 
@@ -19,6 +20,13 @@ interface ArtworkPreviewCardProps {
 
 export function ArtworkPreviewCard({ artwork }: ArtworkPreviewCardProps) {
   const [showLightbox, setShowLightbox] = useState(false);
+  const [imageError, setImageError] = useState(false);
+  const [prevImageUrl, setPrevImageUrl] = useState(artwork.imageUrl);
+
+  if (artwork.imageUrl !== prevImageUrl) {
+    setPrevImageUrl(artwork.imageUrl);
+    setImageError(false);
+  }
 
   const formatShortId = (id: string) => {
     if (!id) return '#ART-0000';
@@ -61,7 +69,7 @@ export function ArtworkPreviewCard({ artwork }: ArtworkPreviewCardProps) {
 
       {/* Main Image Container */}
       <div className="w-full h-72 sm:h-80 bg-black/60 rounded-2xl border border-white/10 relative overflow-hidden group">
-        {artwork.imageUrl ? (
+        {artwork.imageUrl && !imageError ? (
           <>
             <Image
               src={artwork.imageUrl}
@@ -70,6 +78,7 @@ export function ArtworkPreviewCard({ artwork }: ArtworkPreviewCardProps) {
               sizes="(max-width: 768px) 100vw, 50vw"
               className="object-cover transition-transform duration-300 group-hover:scale-105"
               unoptimized
+              onError={() => setImageError(true)}
             />
             {/* Hover overlay with zoom button */}
             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
@@ -84,9 +93,23 @@ export function ArtworkPreviewCard({ artwork }: ArtworkPreviewCardProps) {
             </div>
           </>
         ) : (
-          <div className="w-full h-full flex flex-col items-center justify-center text-[#C5C9F8] space-y-2">
-            <Sparkles className="w-8 h-8 opacity-50" />
-            <span className="text-xs">No image preview available</span>
+          <div className="w-full h-full flex flex-col items-center justify-center text-red-400/90 space-y-2 p-4 text-center">
+            {imageError ? (
+              <>
+                <ImageOff className="w-8 h-8 opacity-75 text-red-400" />
+                <span className="text-xs font-semibold text-red-300">
+                  Hình ảnh bị hỏng hoặc liên kết không truy cập được
+                </span>
+                <span className="text-[10px] text-[#8A8FA9] max-w-xs truncate">
+                  {artwork.imageUrl}
+                </span>
+              </>
+            ) : (
+              <>
+                <Sparkles className="w-8 h-8 opacity-50 text-[#C5C9F8]" />
+                <span className="text-xs text-[#C5C9F8]">No image preview available</span>
+              </>
+            )}
           </div>
         )}
 

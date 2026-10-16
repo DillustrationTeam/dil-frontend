@@ -53,6 +53,9 @@ export function AiScanMetricsCard({ artwork }: AiScanMetricsCardProps) {
           <h3 className="font-h1 font-bold text-white text-sm">
             Google Cloud Vision AI Scan Confidence
           </h3>
+          <span className="text-[9px] px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 font-bold border border-purple-500/30">
+            Mock / AI Preview
+          </span>
         </div>
         <span className="text-[10px] font-mono text-[#8A8FA9] uppercase">
           SafeSearch API v1

@@ -64,7 +64,9 @@ export function DisputeSettlementForm({
   }
 
   const clientAmount = isResolved ? (dispute.clientRefundAmount ?? 0) : (totalEscrow * clientRefundPercent) / 100;
-  const creatorAmount = isResolved ? (dispute.artistPayAmount ?? 0) : (totalEscrow * (100 - clientRefundPercent)) / 100;
+  const creatorGross = totalEscrow - clientAmount;
+  const platformFee = isResolved ? 0 : Math.round(creatorGross * 0.1);
+  const creatorAmount = isResolved ? (dispute.artistPayAmount ?? 0) : Math.max(0, creatorGross - platformFee);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -140,18 +142,12 @@ export function DisputeSettlementForm({
             </p>
             <div className="pt-2 border-t border-emerald-500/20 text-[11px] flex justify-between font-mono">
               <span className="text-emerald-300">
-                Client Refund: {resolvedClientPercent}% ($
-                {(dispute.clientRefundAmount ?? clientAmount).toLocaleString('en-US', {
-                  minimumFractionDigits: 2,
-                })}
-                )
+                Client Refund: {resolvedClientPercent}% (
+                {(dispute.clientRefundAmount ?? clientAmount).toLocaleString('vi-VN')} ₫)
               </span>
               <span className="text-[#C5C9F8]">
-                Creator Payout: {resolvedCreatorPercent}% ($
-                {(dispute.artistPayAmount ?? creatorAmount).toLocaleString('en-US', {
-                  minimumFractionDigits: 2,
-                })}
-                )
+                Creator Payout: {resolvedCreatorPercent}% (
+                {(dispute.artistPayAmount ?? creatorAmount).toLocaleString('vi-VN')} ₫)
               </span>
             </div>
             {dispute.adminNote && (
@@ -170,13 +166,13 @@ export function DisputeSettlementForm({
               Locked Escrow Pool
             </span>
             <span className="font-mono font-bold text-white text-sm">
-              ${totalEscrow.toLocaleString('en-US', { minimumFractionDigits: 2 })} USD
+              {totalEscrow.toLocaleString('vi-VN')} ₫
             </span>
           </div>
 
           <div className="flex items-center justify-between text-[10px] text-[#8A8FA9] border-t border-white/5 pt-2">
-            <span>Commission Total: ${dispute.finalPrice.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
-            <span>Disbursed so far: ${dispute.disbursedAmount.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+            <span>Commission Total: {dispute.finalPrice.toLocaleString('vi-VN')} ₫</span>
+            <span>Disbursed so far: {dispute.disbursedAmount.toLocaleString('vi-VN')} ₫</span>
           </div>
         </div>
 
@@ -199,7 +195,7 @@ export function DisputeSettlementForm({
                 Client Refund ({clientRefundPercent}%)
               </div>
               <div className="font-mono text-base font-bold text-white">
-                ${clientAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                {clientAmount.toLocaleString('vi-VN')} ₫
               </div>
               <div className="text-[10px] text-[#8A8FA9] truncate">
                 To @{dispute.client.userName}
@@ -212,8 +208,13 @@ export function DisputeSettlementForm({
                 <span className="w-2 h-2 rounded-full bg-[#C5C9F8] inline-block" />
               </div>
               <div className="font-mono text-base font-bold text-white">
-                ${creatorAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                {creatorAmount.toLocaleString('vi-VN')} ₫
               </div>
+              {!isResolved && platformFee > 0 && (
+                <div className="text-[10px] text-amber-300/80 font-medium">
+                  (Đã trừ 10% phí: {platformFee.toLocaleString('vi-VN')} ₫)
+                </div>
+              )}
               <div className="text-[10px] text-[#8A8FA9] truncate">
                 To @{dispute.creator.userName}
               </div>
@@ -370,21 +371,29 @@ export function DisputeSettlementForm({
               <div className="flex justify-between">
                 <span className="text-[#8A8FA9]">Total Escrow:</span>
                 <span className="font-mono font-bold text-white">
-                  ${totalEscrow.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                  {totalEscrow.toLocaleString('vi-VN')} ₫
                 </span>
               </div>
               <div className="flex justify-between text-emerald-400 font-semibold">
                 <span>Client Refund ({clientRefundPercent}%):</span>
                 <span className="font-mono font-bold">
-                  ${clientAmount.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                  {clientAmount.toLocaleString('vi-VN')} ₫
                 </span>
               </div>
               <div className="flex justify-between text-indigo-300 font-semibold">
-                <span>Creator Payout ({100 - clientRefundPercent}%):</span>
+                <span>Creator Payout ({100 - clientRefundPercent}% - 10% phí):</span>
                 <span className="font-mono font-bold">
-                  ${creatorAmount.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                  {creatorAmount.toLocaleString('vi-VN')} ₫
                 </span>
               </div>
+              {platformFee > 0 && (
+                <div className="flex justify-between text-amber-400/90 text-[11px]">
+                  <span>Platform Fee (10%):</span>
+                  <span className="font-mono font-bold">
+                    {platformFee.toLocaleString('vi-VN')} ₫
+                  </span>
+                </div>
+              )}
             </div>
 
             <div className="text-[11px] text-[#8A8FA9] leading-relaxed">

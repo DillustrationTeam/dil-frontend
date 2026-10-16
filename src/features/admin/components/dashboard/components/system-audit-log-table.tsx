@@ -26,9 +26,9 @@ export function SystemAuditLogTable({
   }, [transactions, safeAuditPage]);
 
   const formatCurrency = (amount?: number) => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('vi-VN', {
       style: 'currency',
-      currency: 'USD',
+      currency: 'VND',
       maximumFractionDigits: 0,
     }).format(amount ?? 0);
   };
