@@ -9,6 +9,7 @@ interface DisputeDetailsModalProps {
   isOpen: boolean;
   onClose: () => void;
   commissionId: string;
+  initialDispute?: CommissionDispute | null;
 }
 
 function getEvidenceUrls(value?: string | null): string[] {
@@ -22,9 +23,9 @@ function getEvidenceUrls(value?: string | null): string[] {
   return [];
 }
 
-export default function DisputeDetailsModal({ isOpen, onClose, commissionId }: DisputeDetailsModalProps) {
-  const [dispute, setDispute] = useState<CommissionDispute | null>(null);
-  const [loading, setLoading] = useState(true);
+export default function DisputeDetailsModal({ isOpen, onClose, commissionId, initialDispute }: DisputeDetailsModalProps) {
+  const [dispute, setDispute] = useState<CommissionDispute | null>(initialDispute ?? null);
+  const [loading, setLoading] = useState(!initialDispute);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -67,7 +68,7 @@ export default function DisputeDetailsModal({ isOpen, onClose, commissionId }: D
                 <h3 className="text-xs font-bold uppercase text-slate-400">Bằng chứng</h3>
                 {evidenceUrls.length ? <ul className="space-y-2">{evidenceUrls.map((url) => <li key={url}><a href={url} target="_blank" rel="noreferrer" className="inline-flex max-w-full items-center gap-2 break-all text-sm text-[#C5C9F8] underline"><span>{url}</span><ExternalLink className="h-3.5 w-3.5 shrink-0" /></a></li>)}</ul> : <p className="text-sm text-slate-400">Không có liên kết bằng chứng.</p>}
               </section>
-              {dispute.resolution && <section className="space-y-2 rounded-xl border border-emerald-300/20 bg-emerald-300/5 p-4"><h3 className="text-xs font-bold uppercase text-emerald-200">Kết quả xử lý</h3><p className="text-sm text-white">{dispute.resolution}</p>{dispute.resolvedAt && <p className="text-xs text-slate-400">{new Date(dispute.resolvedAt).toLocaleString('vi-VN')}</p>}{dispute.clientRefundAmount != null && <p className="text-sm text-slate-300">Hoàn khách: {new Intl.NumberFormat('vi-VN').format(dispute.clientRefundAmount)} VND</p>}{dispute.artistPayAmount != null && <p className="text-sm text-slate-300">Creator nhận: {new Intl.NumberFormat('vi-VN').format(dispute.artistPayAmount)} VND</p>}{dispute.adminNote && <p className="whitespace-pre-wrap border-t border-white/10 pt-2 text-sm text-slate-300">{dispute.adminNote}</p>}</section>}
+              {(dispute.resolution || dispute.status === 'Resolved' || dispute.adminNote) && <section className="space-y-2 rounded-xl border border-emerald-300/20 bg-emerald-300/5 p-4"><h3 className="text-xs font-bold uppercase text-emerald-200">Kết quả xử lý &amp; Phán quyết trọng tài</h3>{dispute.resolution && <p className="text-sm font-semibold text-white">Quyết định: {dispute.resolution}</p>}{dispute.adminNote && <p className="text-sm text-slate-200 whitespace-pre-wrap border-t border-white/10 pt-2"><strong>Ghi chú phán quyết:</strong> {dispute.adminNote}</p>}{dispute.resolvedAt && <p className="text-xs text-slate-400">Thời gian giải quyết: {new Date(dispute.resolvedAt).toLocaleString('vi-VN')}</p>}{dispute.clientRefundAmount != null && <p className="text-sm text-slate-300">Hoàn khách: {new Intl.NumberFormat('vi-VN').format(dispute.clientRefundAmount)} VND</p>}{dispute.artistPayAmount != null && <p className="text-sm text-slate-300">Creator nhận: {new Intl.NumberFormat('vi-VN').format(dispute.artistPayAmount)} VND</p>}</section>}
               {dispute.status === 'Resolved' && <p className="flex items-center gap-2 text-xs text-emerald-300"><CheckCircle2 className="h-4 w-4" />Hồ sơ đã được giải quyết.</p>}
             </>
           ) : <p className="py-8 text-center text-sm text-slate-400">Đơn này chưa có hồ sơ tranh chấp.</p>}

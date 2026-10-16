@@ -60,6 +60,7 @@ export interface CreatorReviewDto {
   rating: number;
   comment?: string | null;
   reviewerReply?: string | null;
+  commissionId?: string | null;
   createdAt: string;
 }
 

@@ -3,6 +3,7 @@
 import React, { useState, useRef } from 'react';
 import { X, Upload, FileImage, CheckCircle2, ShieldAlert } from 'lucide-react';
 import { commissionService } from '@/services/commission.service';
+import { extractErrorMessage } from '@/lib/api-client';
 
 interface SubmitMilestoneModalProps {
   isOpen: boolean;
@@ -25,6 +26,7 @@ export default function SubmitMilestoneModal({
   const [creatorNote, setCreatorNote] = useState('');
   const [isUploading, setIsUploading] = useState(false);
   const [uploaded, setUploaded] = useState(false);
+  const [error, setError] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   if (!isOpen) return null;
@@ -45,15 +47,15 @@ export default function SubmitMilestoneModal({
   const handleUpload = async () => {
     if (!file) return;
     setIsUploading(true);
+    setError('');
     try {
       await commissionService.submitMilestone(commissionId, milestoneId, file, creatorNote);
       setUploaded(true);
       setTimeout(() => {
         if (onSuccess) onSuccess();
       }, 1500);
-    } catch (error) {
-      console.error(error);
-      alert('Upload failed.');
+    } catch (cause) {
+      setError(extractErrorMessage(cause, 'Không thể tải bản phác thảo lên. Vui lòng thử lại.'));
     } finally {
       setIsUploading(false);
     }
@@ -73,6 +75,7 @@ export default function SubmitMilestoneModal({
               <p className="text-[11px] text-slate-400">{milestoneTitle}</p>
             </div>
           </div>
+          {error && <p role="alert" className="text-xs text-rose-300">{error}</p>}
           <button
             onClick={onClose}
             className="w-8 h-8 rounded-full bg-white/5 border border-white/10 text-slate-400 hover:text-white flex items-center justify-center transition-colors"

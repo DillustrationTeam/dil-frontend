@@ -890,12 +890,12 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                       <span className={`inline-block size-2 rounded-full ${autoTranslate ? 'bg-brand-periwinkle animate-pulse' : 'bg-white/20'}`} />
                     </button>
 
-                    {/* Nút Khiếu Nại Tranh Chấp (Icon Scale Cái cân Trọng tài) */}
-                    {commissionStatus !== 'Completed' && commissionStatus !== 'Cancelled' && commissionStatus !== 'Disputed' && (
+                    {/* Nút Khiếu Nại / Xem Hồ Sơ Tranh Chấp */}
+                    {(commission?.dispute || (commissionStatus !== 'Completed' && commissionStatus !== 'Cancelled' && commissionStatus !== 'Disputed')) && (
                       <button
                         type="button"
-                        onClick={() => setShowDisputeModal(true)}
-                        title="Gửi khiếu nại tranh chấp với Trọng tài sàn"
+                        onClick={() => commission?.dispute ? setShowDisputeDetailsModal(true) : setShowDisputeModal(true)}
+                        title={commission?.dispute ? 'Xem hồ sơ và kết quả giải quyết tranh chấp' : 'Gửi khiếu nại tranh chấp với Trọng tài sàn'}
                         className="group relative flex size-9 shrink-0 items-center justify-center border border-amber-500/40 bg-[#1C202D] hover:bg-[#232838] hover:border-amber-400 text-amber-400 transition shadow-md [clip-path:polygon(10px_0,100%_0,100%_100%,0_100%,0_10px)]"
                       >
                         <Scale size={18} className="text-amber-400 group-hover:scale-110 transition-transform" />
@@ -913,20 +913,75 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                   </div>
                 </div>
 
-                {/* BANNER CẢNH BÁO KHI ĐANG TRANH CHẤP (DISPUTED) */}
-                {commissionStatus === 'Disputed' && (
-                  <div className="relative z-10 my-3 border border-amber-500/40 bg-amber-500/15 p-3.5 text-xs text-amber-200 flex items-start gap-2.5 shadow-lg [clip-path:polygon(0_0,calc(100%-12px)_0,100%_12px,100%_100%,0_100%)]">
-                    <div className="shrink-0 p-1 bg-amber-500/20 rounded-md text-amber-300 border border-amber-400/40">
-                      <ShieldAlert size={16} />
+                {/* BANNER TRANH CHẤP (ĐANG XỬ LÝ HOẶC ĐÃ CÓ PHÁN QUYẾT RESOLVED) */}
+                {commission?.dispute && (
+                  commission.dispute.status === 'Resolved' || commissionStatus !== 'Disputed' ? (
+                    <div className="relative z-10 my-3 border border-emerald-500/40 bg-emerald-500/15 p-3.5 text-xs text-emerald-200 shadow-lg [clip-path:polygon(0_0,calc(100%-12px)_0,100%_12px,100%_100%,0_100%)]">
+                      <div className="flex items-start gap-2.5">
+                        <div className="shrink-0 p-1 bg-emerald-500/20 rounded-md text-emerald-300 border border-emerald-400/40">
+                          <Scale size={16} />
+                        </div>
+                        <div className="flex-1 space-y-2">
+                          <div className="flex flex-wrap items-center justify-between gap-2">
+                            <p className="font-h1 font-bold text-emerald-300 text-xs uppercase tracking-wider">
+                              Phán quyết tranh chấp trọng tài (Trạng thái: {commission.dispute.status})
+                            </p>
+                            <button
+                              type="button"
+                              onClick={() => setShowDisputeDetailsModal(true)}
+                              className="px-2.5 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-200 text-[11px] font-bold transition"
+                            >
+                              Xem hồ sơ chi tiết
+                            </button>
+                          </div>
+                          <div className="space-y-1 text-[11px] text-emerald-100/90 border-t border-emerald-500/20 pt-2">
+                            {commission.dispute.resolution && (
+                              <p><strong>Phán quyết xử lý:</strong> <span className="text-white font-semibold">{commission.dispute.resolution}</span></p>
+                            )}
+                            {commission.dispute.adminNote && (
+                              <p><strong>Ghi chú quyết định:</strong> <span className="text-white italic">{commission.dispute.adminNote}</span></p>
+                            )}
+                            <div className="flex flex-wrap gap-4 pt-1">
+                              {commission.dispute.clientRefundAmount != null && (
+                                <span><strong>Hoàn khách:</strong> {new Intl.NumberFormat('vi-VN').format(commission.dispute.clientRefundAmount)} VND</span>
+                              )}
+                              {commission.dispute.artistPayAmount != null && (
+                                <span><strong>Creator nhận:</strong> {new Intl.NumberFormat('vi-VN').format(commission.dispute.artistPayAmount)} VND</span>
+                              )}
+                              {commission.dispute.resolvedAt && (
+                                <span className="text-emerald-300/70"><strong>Ngày giải quyết:</strong> {new Date(commission.dispute.resolvedAt).toLocaleString('vi-VN')}</span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex-1">
-                      <p className="font-h1 font-bold text-amber-300 text-xs uppercase tracking-wider">Đơn hàng đang trong quá trình khiếu nại tranh chấp (Disputed)</p>
-                      <p className="text-[11px] text-amber-100/90 leading-relaxed mt-0.5">
-                        Hồ sơ khiếu nại đã được chuyển đến Ban Trọng tài sàn để thẩm định lịch sử trao đổi và sản phẩm. Tiền ký quỹ Escrow được tạm khóa an toàn cho đến khi có phán quyết chính thức.
-                      </p>
-                      {commission?.dispute && <div className="mt-3 space-y-1.5 border-t border-amber-400/20 pt-3 text-[11px]"><p><strong>Lý do:</strong> {commission.dispute.reason}</p><p><strong>Ngày tạo:</strong> {new Date(commission.dispute.createdAt).toLocaleString('vi-VN')}</p><p><strong>Trạng thái:</strong> {commission.dispute.status}{commission.dispute.resolution ? ` · ${commission.dispute.resolution}` : ''}</p>{commission.dispute.adminNote && <p><strong>Kết luận:</strong> {commission.dispute.adminNote}</p>}{commission.dispute.evidenceUrls && <div><strong>Bằng chứng:</strong> <div className="mt-1 flex flex-wrap gap-2">{commission.dispute.evidenceUrls.split(',').filter(Boolean).map((url) => <a key={url} href={url.trim()} target="_blank" rel="noreferrer" className="underline hover:text-white">Mở tệp</a>)}</div></div>}</div>}
+                  ) : (
+                    <div className="relative z-10 my-3 border border-amber-500/40 bg-amber-500/15 p-3.5 text-xs text-amber-200 flex items-start gap-2.5 shadow-lg [clip-path:polygon(0_0,calc(100%-12px)_0,100%_12px,100%_100%,0_100%)]">
+                      <div className="shrink-0 p-1 bg-amber-500/20 rounded-md text-amber-300 border border-amber-400/40">
+                        <ShieldAlert size={16} />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                          <p className="font-h1 font-bold text-amber-300 text-xs uppercase tracking-wider">Đơn hàng đang trong quá trình khiếu nại tranh chấp (Disputed)</p>
+                          <button
+                            type="button"
+                            onClick={() => setShowDisputeDetailsModal(true)}
+                            className="px-2 py-0.5 rounded bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-200 text-[10px] font-bold"
+                          >
+                            Chi tiết
+                          </button>
+                        </div>
+                        <p className="text-[11px] text-amber-100/90 leading-relaxed mt-0.5">
+                          Hồ sơ khiếu nại đã được chuyển đến Ban Trọng tài sàn để thẩm định. Tiền ký quỹ Escrow được tạm khóa an toàn cho đến khi có phán quyết chính thức.
+                        </p>
+                        <div className="mt-2 space-y-1 border-t border-amber-400/20 pt-2 text-[11px]">
+                          <p><strong>Lý do:</strong> {commission.dispute.reason}</p>
+                          <p><strong>Ngày tạo:</strong> {new Date(commission.dispute.createdAt).toLocaleString('vi-VN')}</p>
+                        </div>
+                      </div>
                     </div>
-                  </div>
+                  )
                 )}
 
                 {/* CẢNH BÁO BẢO VỆ ESCROW */}
@@ -1251,8 +1306,9 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                           <div className="flex items-center gap-2">
                             <button
                               type="button"
+                              disabled={!displayedMilestone}
                               onClick={() => setShowSubmitModal(true)}
-                              className="commission-primary inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold shadow transition [clip-path:polygon(0_0,calc(100%-6px)_0,100%_6px,100%_100%,6px_100%,0_calc(100%-6px))]"
+                              className="commission-primary inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold shadow transition disabled:cursor-not-allowed disabled:opacity-40 [clip-path:polygon(0_0,calc(100%-6px)_0,100%_6px,100%_100%,6px_100%,0_calc(100%-6px))]"
                             >
                               <UploadCloud size={14} /> Nộp phác thảo
                             </button>
@@ -1429,8 +1485,9 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                           {isCreator && (
                             <button
                               type="button"
+                            disabled={!displayedMilestone}
                               onClick={() => setShowSubmitModal(true)}
-                              className="commission-primary inline-flex items-center gap-2 px-4 py-2 text-xs font-bold shadow-md transition [clip-path:polygon(0_0,calc(100%-6px)_0,100%_6px,100%_100%,6px_100%,0_calc(100%-6px))]"
+                            className="commission-primary inline-flex items-center gap-2 px-4 py-2 text-xs font-bold shadow-md transition disabled:cursor-not-allowed disabled:opacity-40 [clip-path:polygon(0_0,calc(100%-6px)_0,100%_6px,100%_100%,6px_100%,0_calc(100%-6px))]"
                             >
                               <UploadCloud size={15} /> Tải phác thảo Mốc #{displayedMilestone?.sequence ?? 1}
                             </button>
@@ -1480,6 +1537,38 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                           <div className="flex items-center gap-2.5 border border-white/10 bg-white/5 p-2.5 text-xs text-outline [clip-path:polygon(6px_0,calc(100%-6px)_0,100%_6px,100%_calc(100%-6px),calc(100%-6px)_100%,6px_100%,0_calc(100%-6px),0_6px)]">
                             <Lock size={16} className="shrink-0 text-outline" />
                             <span className="text-[11px]">File vẽ gốc HD sẽ tự động mở khóa sau khi tất cả các mốc phác thảo được duyệt.</span>
+                          </div>
+                        )}
+
+                        {/* ĐÁNH GIÁ CỦA KHÁCH & PHẢN HỒI CỦA CREATOR TRONG WORKROOM */}
+                        {commission?.review && (
+                          <div className="mt-3 border border-white/10 bg-white/[0.03] p-3.5 rounded-xl space-y-2.5 text-xs text-slate-300">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-amber-400 font-bold">★ {commission.review.rating}/5</span>
+                                <span className="font-semibold text-white">Đánh giá của khách hàng</span>
+                              </div>
+                              {commission.review.createdAt && (
+                                <span className="text-[10px] text-slate-500">{new Date(commission.review.createdAt).toLocaleDateString('vi-VN')}</span>
+                              )}
+                            </div>
+                            {commission.review.comment && (
+                              <p className="text-white/90 italic bg-black/20 p-2.5 rounded-lg border border-white/5">&ldquo;{commission.review.comment}&rdquo;</p>
+                            )}
+                            {commission.review.reviewerReply ? (
+                              <div className="border-l-2 border-[#A7ACD9] pl-3 py-1 space-y-0.5">
+                                <p className="text-[11px] font-semibold text-[#A7ACD9]">Phản hồi từ Creator:</p>
+                                <p className="text-white/90">{commission.review.reviewerReply}</p>
+                              </div>
+                            ) : isCreator ? (
+                              <button
+                                type="button"
+                                onClick={() => setShowReplyModal(true)}
+                                className="w-full py-1.5 px-3 rounded-lg bg-[#A7ACD9]/20 hover:bg-[#A7ACD9]/30 border border-[#A7ACD9]/40 text-[#C5C9F8] font-semibold text-xs transition"
+                              >
+                                💬 Trả lời đánh giá này
+                              </button>
+                            ) : null}
                           </div>
                         )}
                       </div>
@@ -1629,7 +1718,10 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                               {isCreator && isCurrent && (
                                 <button
                                   type="button"
-                                  onClick={() => setShowSubmitModal(true)}
+                                  onClick={() => {
+                                    setSelectedMilestoneId(ms.id);
+                                    setShowSubmitModal(true);
+                                  }}
                                   className="commission-primary px-3 py-1 rounded text-[11px] font-bold shadow"
                                 >
                                   <UploadCloud size={12} className="inline mr-1" /> Nộp phác thảo
@@ -1650,18 +1742,18 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
       {/* MODALS NGHIỆP VỤ HỢP ĐỒNG (CÁC MODAL HIỆN CÓ KHÔNG SỬA ĐỔI PROTOCOL) */}
       {room.commissionId && (
         <>
-          <SubmitMilestoneModal
+          {displayedMilestone && <SubmitMilestoneModal
             isOpen={showSubmitModal}
             onClose={() => setShowSubmitModal(false)}
             commissionId={room.commissionId}
-            milestoneId={displayedMilestone?.id || ''}
-            milestoneTitle={displayedMilestone?.title || 'Bản phác thảo mốc hiện tại'}
+            milestoneId={displayedMilestone.id}
+            milestoneTitle={displayedMilestone.title}
             onSuccess={() => {
               setShowSubmitModal(false);
               refresh();
               void chat.sendMessage(`🎨 Creator đã nộp bản phác thảo cho mốc: ${displayedMilestone?.title || 'bản vẽ phác thảo mới'}`, 'SystemEvent').catch(() => null);
             }}
-          />
+          />}
 
           <ApprovalRevisionModal
             isOpen={showApprovalModal}
@@ -1736,7 +1828,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
               {commission.review && <div className="space-y-2 text-sm text-slate-300"><p className="font-semibold text-white">Đánh giá của khách: {commission.review.rating}/5</p>{commission.review.comment && <p>{commission.review.comment}</p>}{commission.review.reviewerReply ? <p className="border-l-2 border-[#A7ACD9] pl-3">Phản hồi của Creator: {commission.review.reviewerReply}</p> : currentMemberRole === 'creator' && commission.status === 'Completed' ? <button type="button" onClick={() => setShowReplyModal(true)} className="rounded-xl border border-white/15 px-4 py-2">Trả lời đánh giá</button> : null}</div>}
             </section>
           )}
-          {showDisputeDetailsModal && <DisputeDetailsModal key={room.commissionId} isOpen commissionId={room.commissionId} onClose={() => setShowDisputeDetailsModal(false)} />}
+          {showDisputeDetailsModal && <DisputeDetailsModal key={room.commissionId} isOpen commissionId={room.commissionId} initialDispute={commission?.dispute} onClose={() => setShowDisputeDetailsModal(false)} />}
           {showReplyModal && <CreatorReplyModal isOpen commissionId={room.commissionId} reviewComment={commission?.review?.comment} reviewRating={commission?.review?.rating} onClose={() => setShowReplyModal(false)} onSuccess={() => { setShowReplyModal(false); refresh(); }} />}
           {commission && (currentMemberRole === 'client' || currentMemberRole === 'creator') && (
             <WorkroomTermsModal

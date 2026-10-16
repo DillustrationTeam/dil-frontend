@@ -7,6 +7,7 @@ import { useAuthStore } from '@/store/use-auth-store';
 import { creatorRateCardService, type RateCardPackage } from '@/features/creator-studio/services/creator-rate-card.service';
 import type { ArtworkDto, CreatorProfileDto } from '@/features/creator-studio/types/creator-profile.types';
 import { marketplaceService, type CreatorReviewDto } from '@/features/marketplace/services/marketplace.service';
+import { commissionService } from '@/services/commission.service';
 import { ProfileLayout, ProfileTabs } from './profile-layout';
 
 type Tab = 'portfolio' | 'rates' | 'reviews';
@@ -22,6 +23,28 @@ export function CreatorProfileScreen({ id }: { id: string }) {
   const [busy, setBusy] = useState(false);
   const [loadedId, setLoadedId] = useState<string | null>(null);
   const [tab, setTab] = useState<Tab>('portfolio');
+  const [replyingReviewId, setReplyingReviewId] = useState<string | null>(null);
+  const [replyText, setReplyText] = useState('');
+  const [replySubmitting, setReplySubmitting] = useState(false);
+
+  const handleReplyReview = async (review: CreatorReviewDto) => {
+    if (!replyText.trim()) return;
+    setReplySubmitting(true);
+    try {
+      const targetId = review.commissionId || review.id;
+      await commissionService.replyReview(targetId, replyText.trim());
+      setReviews((current) =>
+        current.map((r) => (r.id === review.id ? { ...r, reviewerReply: replyText.trim() } : r))
+      );
+      setReplyingReviewId(null);
+      setReplyText('');
+    } catch (err) {
+      console.error(err);
+      alert('Không thể gửi phản hồi đánh giá. Vui lòng thử lại.');
+    } finally {
+      setReplySubmitting(false);
+    }
+  };
 
   useEffect(() => {
     let active = true;
@@ -86,7 +109,58 @@ export function CreatorProfileScreen({ id }: { id: string }) {
       <div className="mt-6">
         {tab === 'portfolio' && (artworks.length ? <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">{artworks.map((artwork) => <Link key={artwork.id} href={`/artworks/${artwork.id}`} className="group overflow-hidden rounded-xl border border-white/10 bg-white/[.03]"><div className="relative aspect-[4/5]"><Image src={artwork.thumbnailUrl || artwork.imageUrl} alt={artwork.title} fill unoptimized className="object-cover transition group-hover:scale-[1.02]" /></div><p className="truncate p-3 text-sm text-white">{artwork.title}</p></Link>)}</div> : <EmptyState>Chưa có tác phẩm được đăng.</EmptyState>)}
         {tab === 'rates' && (rates.length ? <div className="space-y-3">{rates.map((rate) => <article key={rate.id} className="rounded-xl border border-white/10 p-4"><div className="flex justify-between gap-3"><h2 className="font-semibold text-white">{rate.name}</h2><span className="text-[#A7ACD9]">{new Intl.NumberFormat('vi-VN').format(rate.price)} VND</span></div>{rate.description && <p className="mt-2 text-sm text-[#C7C5CF]">{rate.description}</p>}</article>)}</div> : <EmptyState>Creator chưa đăng gói commission.</EmptyState>)}
-        {tab === 'reviews' && (reviews.length ? <div className="space-y-3">{reviews.map((review) => <article key={review.id} className="rounded-xl border border-white/10 p-4"><p className="text-amber-300">{'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}</p>{review.comment && <p className="mt-2 text-sm text-[#C7C5CF]">{review.comment}</p>}{review.reviewerReply && <p className="mt-3 whitespace-pre-wrap border-l-2 border-[#A7ACD9] pl-3 text-sm text-[#C7C5CF]"><span className="font-semibold text-[#A7ACD9]">Phản hồi của Creator: </span>{review.reviewerReply}</p>}</article>)}</div> : <EmptyState>Chưa có đánh giá.</EmptyState>)}
+        {tab === 'reviews' && (reviews.length ? (
+          <div className="space-y-3">
+            {reviews.map((review) => (
+              <article key={review.id} className="rounded-xl border border-white/10 p-4 space-y-2">
+                <p className="text-amber-300">{'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}</p>
+                {review.comment && <p className="text-sm text-[#C7C5CF]">{review.comment}</p>}
+                {review.reviewerReply ? (
+                  <p className="mt-3 whitespace-pre-wrap border-l-2 border-[#A7ACD9] pl-3 text-sm text-[#C7C5CF]">
+                    <span className="font-semibold text-[#A7ACD9]">Phản hồi của Creator: </span>{review.reviewerReply}
+                  </p>
+                ) : isOwnProfile && (
+                  replyingReviewId === review.id ? (
+                    <div className="mt-3 space-y-2 pt-2 border-t border-white/10">
+                      <textarea
+                        value={replyText}
+                        onChange={(e) => setReplyText(e.target.value)}
+                        placeholder="Nhập nội dung phản hồi cho đánh giá này..."
+                        rows={2}
+                        className="w-full rounded-xl border border-white/10 bg-black/40 p-2.5 text-xs text-white placeholder-[#8A8FA9] focus:outline-none focus:border-[#A7ACD9]"
+                      />
+                      <div className="flex justify-end gap-2">
+                        <button
+                          type="button"
+                          onClick={() => { setReplyingReviewId(null); setReplyText(''); }}
+                          className="rounded-lg border border-white/10 px-3 py-1 text-xs text-[#8A8FA9] hover:text-white"
+                        >
+                          Hủy
+                        </button>
+                        <button
+                          type="button"
+                          disabled={replySubmitting || !replyText.trim()}
+                          onClick={() => void handleReplyReview(review)}
+                          className="rounded-lg bg-[#A7ACD9] px-3.5 py-1 text-xs font-semibold text-[#1F2335] disabled:opacity-50"
+                        >
+                          {replySubmitting ? 'Đang gửi...' : 'Gửi phản hồi'}
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => { setReplyingReviewId(review.id); setReplyText(''); }}
+                      className="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold text-[#A7ACD9] hover:underline"
+                    >
+                      💬 Phản hồi đánh giá
+                    </button>
+                  )
+                )}
+              </article>
+            ))}
+          </div>
+        ) : <EmptyState>Chưa có đánh giá.</EmptyState>)}
       </div>
     </ProfileLayout>
   );
