@@ -391,19 +391,22 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
   }
 
   const isLive = auction.auctionStatus === 'Active';
+  const isScheduled = auction.auctionStatus === 'Scheduled';
+  const isFinished = ['Settled', 'Ended', 'Cancelled', 'Expired'].includes(auction.auctionStatus);
+  const isEnded = clock.isEnded || isFinished;
   const isWinner = userId && auction.winnerId === userId;
   const isSeller = userId && auction.seller?.userId === userId;
   const statusLabel = auctionStatusLabels[auction.auctionStatus] || auction.auctionStatus;
   const bidAmountNum = Number(bidAmount) || 0;
   const isBalanceShortage = Boolean(wallet && wallet.wallet.balance < bidAmountNum);
-  const totalSeconds = Math.floor(clock.remainingMs / 1000);
+  const totalSeconds = isFinished ? 0 : Math.floor(clock.remainingMs / 1000);
   const clockUnits = [
-    { label: 'Giờ', value: Math.floor(totalSeconds / 3600).toString().padStart(2, '0') },
-    { label: 'Phút', value: Math.floor((totalSeconds % 3600) / 60).toString().padStart(2, '0') },
-    { label: 'Giây', value: (totalSeconds % 60).toString().padStart(2, '0') },
-    { label: 'ms', value: Math.floor((clock.remainingMs % 1000) / 10).toString().padStart(2, '0') },
+    { label: 'Giờ', value: isFinished ? '00' : Math.floor(totalSeconds / 3600).toString().padStart(2, '0') },
+    { label: 'Phút', value: isFinished ? '00' : Math.floor((totalSeconds % 3600) / 60).toString().padStart(2, '0') },
+    { label: 'Giây', value: isFinished ? '00' : (totalSeconds % 60).toString().padStart(2, '0') },
+    { label: 'ms', value: isFinished ? '00' : Math.floor((clock.remainingMs % 1000) / 10).toString().padStart(2, '0') },
   ];
-  const isUrgent = isLive && clock.remainingMs > 0 && clock.remainingMs <= 5 * 60 * 1000;
+  const isUrgent = isLive && !isFinished && clock.remainingMs > 0 && clock.remainingMs <= 5 * 60 * 1000;
 
   return (
     <div className="mx-auto w-full max-w-[1440px] px-4 py-6 text-on-surface">
@@ -550,32 +553,38 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
 
         {/* Cột phải: Thông tin đấu giá & Đặt giá */}
         <div className="space-y-4">
-          <section className={`glass-container relative overflow-hidden rounded-2xl border p-3 shadow-xl transition-colors duration-500 ${isUrgent ? 'border-rose-500/60 shadow-rose-950/30' : 'border-amber-500/25'}`}>
+          <section className={`glass-container relative overflow-hidden rounded-2xl border p-3 shadow-xl transition-colors duration-500 ${isFinished ? 'border-white/10' : isUrgent ? 'border-rose-500/60 shadow-rose-950/30' : 'border-amber-500/25'}`}>
             <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[radial-gradient(rgba(167,172,217,0.15)_1px,transparent_1px)] [background-size:12px_12px] opacity-30" />
             <div className="relative z-10 mb-2 flex items-center justify-between border-b border-white/10 pb-2">
               <div className="flex items-center gap-2">
                 <span className="relative flex size-2.5">
-                  {isLive && <span className={`absolute inline-flex size-full animate-ping rounded-full opacity-75 motion-reduce:animate-none ${isUrgent ? 'bg-rose-400' : 'bg-emerald-400'}`} />}
-                  <span className={`relative inline-flex size-2.5 rounded-full ${clock.isEnded ? 'bg-outline' : isUrgent ? 'bg-rose-500' : 'bg-emerald-500'}`} />
+                  {isLive && !isFinished && <span className={`absolute inline-flex size-full animate-ping rounded-full opacity-75 motion-reduce:animate-none ${isUrgent ? 'bg-rose-400' : 'bg-emerald-400'}`} />}
+                  <span className={`relative inline-flex size-2.5 rounded-full ${isEnded ? 'bg-outline' : isUrgent ? 'bg-rose-500' : 'bg-emerald-500'}`} />
                 </span>
-                <h2 className={`text-xs font-bold uppercase tracking-wide ${isUrgent ? 'text-rose-400' : 'text-on-surface'}`}>
-                  {clock.isEnded ? (auction?.auctionStatus === 'Scheduled' ? 'Đang mở...' : 'Phiên đã kết thúc') : isUrgent ? 'Sắp chốt phiên' : (auction?.auctionStatus === 'Scheduled' ? 'Bắt đầu sau' : 'Thời gian còn lại')}
+                <h2 className={`text-xs font-bold uppercase tracking-wide ${isFinished ? 'text-slate-400' : isUrgent ? 'text-rose-400' : 'text-on-surface'}`}>
+                  {isFinished
+                    ? (auction?.auctionStatus === 'Settled' ? 'Phiên đã chốt' : auction?.auctionStatus === 'Cancelled' ? 'Phiên đã hủy' : 'Phiên đã kết thúc')
+                    : isEnded
+                      ? (isScheduled ? 'Đang mở...' : 'Phiên đã kết thúc')
+                      : isUrgent
+                        ? 'Sắp chốt phiên'
+                        : (isScheduled ? 'Bắt đầu sau' : 'Thời gian còn lại')}
                 </h2>
               </div>
-              <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${isUrgent ? 'border-rose-500/40 bg-rose-500/15 text-rose-400' : 'border-white/10 bg-brand-navy/80 text-outline'}`}>
-                {isUrgent ? 'ANTI-SNIPE +3M' : statusLabel}
+              <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${isUrgent && !isFinished ? 'border-rose-500/40 bg-rose-500/15 text-rose-400' : 'border-white/10 bg-brand-navy/80 text-outline'}`}>
+                {isUrgent && !isFinished ? 'ANTI-SNIPE +3M' : statusLabel}
               </span>
             </div>
 
-            <div className="relative z-10 flex items-start justify-center gap-1 sm:gap-1.5" role="timer" aria-label={clock.isEnded ? 'Phiên đã hết giờ' : `Còn lại ${clock.formatted}`}>
+            <div className="relative z-10 flex items-start justify-center gap-1 sm:gap-1.5" role="timer" aria-label={isEnded ? 'Phiên đã hết giờ' : `Còn lại ${clock.formatted}`}>
               {clockUnits.map((unit, index) => (
                 <div key={unit.label} className="contents">
-                  {index > 0 && <span aria-hidden="true" className={`pt-2 font-mono text-2xl font-black sm:text-3xl ${isUrgent ? 'text-rose-400' : 'text-amber-400'}`}>:</span>}
+                  {index > 0 && <span aria-hidden="true" className={`pt-2 font-mono text-2xl font-black sm:text-3xl ${isFinished ? 'text-slate-600' : isUrgent ? 'text-rose-400' : 'text-amber-400'}`}>:</span>}
                   <div className="flex min-w-0 flex-1 flex-col items-center">
-                    <div className={`relative w-full max-w-24 overflow-hidden rounded-xl border bg-[#070b14] px-1 py-2 text-center shadow-inner ${isUrgent ? 'border-rose-500/35' : 'border-amber-500/25'}`}>
-                      <span aria-hidden="true" className={`absolute inset-0 flex items-center justify-center font-mono text-3xl font-black opacity-10 sm:text-4xl ${isUrgent ? 'text-rose-500' : 'text-amber-500'}`}>88</span>
-                      <span className={`relative font-mono text-3xl font-black leading-none tracking-tight sm:text-4xl ${isUrgent ? 'text-rose-400 drop-shadow-[0_0_8px_rgba(251,113,133,0.65)]' : 'text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.55)]'}`}>
-                        {clock.isEnded ? '00' : unit.value}
+                    <div className={`relative w-full max-w-24 overflow-hidden rounded-xl border bg-[#070b14] px-1 py-2 text-center shadow-inner ${isFinished ? 'border-white/10' : isUrgent ? 'border-rose-500/35' : 'border-amber-500/25'}`}>
+                      <span aria-hidden="true" className={`absolute inset-0 flex items-center justify-center font-mono text-3xl font-black opacity-10 sm:text-4xl ${isFinished ? 'text-slate-600' : isUrgent ? 'text-rose-500' : 'text-amber-500'}`}>88</span>
+                      <span className={`relative font-mono text-3xl font-black leading-none tracking-tight sm:text-4xl ${isFinished ? 'text-slate-400' : isUrgent ? 'text-rose-400 drop-shadow-[0_0_8px_rgba(251,113,133,0.65)]' : 'text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.55)]'}`}>
+                        {unit.value}
                       </span>
                     </div>
                     <span className="mt-1 text-[9px] font-bold uppercase tracking-wider text-outline">{unit.label}</span>
@@ -774,7 +783,7 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
                   type="submit"
                   disabled={
                     submittingBid ||
-                    clock.isEnded ||
+                    isEnded ||
                     isBalanceShortage ||
                     bidAmountNum < minimumNextBid ||
                     Boolean(isAuto && (!maxAutoBid || Number(maxAutoBid) < minimumNextBid || Number(maxAutoBid) <= bidAmountNum))
@@ -798,7 +807,7 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
                   <div className="space-y-1">
                     <button
                       type="button"
-                      disabled={buyingNow || clock.isEnded}
+                      disabled={buyingNow || isEnded}
                       onClick={handleBuyNow}
                       className="w-full rounded-full border border-brand-periwinkle/40 bg-brand-periwinkle/10 py-2.5 text-center font-h1 text-xs font-bold text-brand-periwinkle transition hover:bg-brand-periwinkle hover:text-brand-navy disabled:opacity-50"
                     >

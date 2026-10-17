@@ -24,10 +24,11 @@ const statusBadgeColors: Record<string, string> = {
 function AuctionCard({ item }: { item: AuctionListItemDto }) {
   const { lang, t } = useLanguage();
   const isScheduled = item.auctionStatus === 'Scheduled';
+  const isFinished = ['Settled', 'Ended', 'Cancelled', 'Expired'].includes(item.auctionStatus);
   const targetTime = isScheduled ? item.startAt : item.endAt;
   const clock = useAuctionClock({ endAt: targetTime });
-  const hasEnded = !isScheduled && clock.isEnded;
-  const displayStatus = hasEnded && item.auctionStatus === 'Active' ? 'Ended' : item.auctionStatus;
+  const hasEnded = isFinished || (!isScheduled && clock.isEnded);
+  const displayStatus = (!isFinished && hasEnded && item.auctionStatus === 'Active') ? 'Ended' : item.auctionStatus;
   const statusText = t(hasEnded && item.auctionStatus === 'Active'
     ? 'Chờ chốt kết quả'
     : auctionStatusLabels[displayStatus] || displayStatus);
@@ -57,9 +58,11 @@ function AuctionCard({ item }: { item: AuctionListItemDto }) {
           </span>
           <span className="absolute bottom-4 right-4 flex items-center gap-1.5 rounded-full border border-white/10 bg-[#11131d]/80 px-3 py-1.5 font-mono text-[11px] tabular-nums text-white backdrop-blur-md">
             <Clock size={12} className="text-brand-periwinkle" />
-            {isScheduled 
-              ? (clock.isEnded ? t('Đang mở...') : clock.formatted)
-              : (clock.isEnded ? t('Đã kết thúc') : clock.formatted)}
+            {isFinished
+              ? (item.auctionStatus === 'Settled' ? t('Đã chốt') : item.auctionStatus === 'Cancelled' ? t('Đã hủy') : t('Đã kết thúc'))
+              : isScheduled 
+                ? (clock.isEnded ? t('Đang mở...') : clock.formatted)
+                : (clock.isEnded ? t('Đã kết thúc') : clock.formatted)}
           </span>
         </div>
 
