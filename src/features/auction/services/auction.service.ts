@@ -177,7 +177,7 @@ export const auctionService = {
 
   settlement: (id: string, signal?: AbortSignal) => call<AuctionSettlementDto>('get', `/auctions/${id}/settlement`, undefined, undefined, signal).then((r) => r.data),
 
-  settle: (id: string) => call<AuctionSettlementDto>('post', `/auctions/${id}/settle`, { force: false }).then((r) => r.data),
+  settle: (id: string, force = false) => call<AuctionSettlementDto>('post', `/auctions/${id}/settle`, { force }).then((r) => r.data),
 
   download: (id: string) => call<{ downloadUrl: string; expiresAt: string; fileName: string }>('post', `/auctions/${id}/settlement/download-url`).then((r) => r.data),
 

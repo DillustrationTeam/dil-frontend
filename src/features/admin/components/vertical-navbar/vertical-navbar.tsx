@@ -74,7 +74,7 @@ export const DEFAULT_ADMIN_NAV_SECTIONS: AdminNavSection[] = [
     ],
   },
   {
-    title: 'Event Management',
+    title: 'Event & Market',
     items: [
       {
         id: 'event-operations',
@@ -82,6 +82,13 @@ export const DEFAULT_ADMIN_NAV_SECTIONS: AdminNavSection[] = [
         href: '/admin/events',
         icon: <Calendar className="w-4 h-4 shrink-0" />,
         materialIcon: 'event',
+      },
+      {
+        id: 'auction-operations',
+        label: 'Auction Operations',
+        href: '/admin/auctions',
+        icon: <Gavel className="w-4 h-4 shrink-0" />,
+        materialIcon: 'gavel',
       },
     ],
   },
