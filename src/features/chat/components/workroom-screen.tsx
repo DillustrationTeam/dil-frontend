@@ -31,7 +31,7 @@ import {
 } from 'lucide-react';
 
 import { chatService } from '../services/chat.service';
-import { deadlineRiskService } from '../services/deadline-risk.service';
+import { WorkroomProgressPanel } from './workroom-progress-panel';
 import { useChatHub } from '../hooks/use-chat-hub';
 import { useAutoTranslate } from '../hooks/use-auto-translate';
 import type { ChatMessageDto, ChatRoomDto } from '../types/chat.types';
@@ -109,24 +109,6 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
   const [showDisputeDetailsModal, setShowDisputeDetailsModal] = useState(false);
   const [acceptingTerms, setAcceptingTerms] = useState(false);
   const [termsError, setTermsError] = useState<string | null>(null);
-
-  // AI Deadline Risk Predictor
-  const [predictingRisk, setPredictingRisk] = useState(false);
-
-  const handlePredictRisk = useCallback(async () => {
-    if (!room?.commissionId || predictingRisk) return;
-    setPredictingRisk(true);
-    try {
-      await deadlineRiskService.predict(room.commissionId);
-      if (room.commissionId) {
-        void commissionService.getById(room.commissionId).then((c) => setCommission(c)).catch(() => null);
-      }
-    } catch (err: unknown) {
-      setError(extractErrorMessage(err, 'Không thể dự đoán tiến độ bằng AI.'));
-    } finally {
-      setPredictingRisk(false);
-    }
-  }, [room, predictingRisk]);
 
   // Auto-detect clipping: Tự động nhận diện khoảng trống lề ngoài để thu gọn tab nếu bị khuất
   const binderRef = useRef<HTMLDivElement>(null);
@@ -279,6 +261,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
   const currentStageNum = displayedMilestone?.sequence ?? commission?.currentStage ?? 1;
 
   const deadlineText = useMemo(() => {
+    if (commissionStatus === 'Cancelled') return 'Đã hủy đơn';
     if (allMilestonesApproved) return 'Hoàn tất';
     if (!commission?.deadlineAt) return 'Đang thực hiện';
 
@@ -305,7 +288,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
     }
 
     return `Còn ${days} ngày`;
-  }, [commission, allMilestonesApproved]);
+  }, [commission, allMilestonesApproved, commissionStatus]);
 
   const rawWipUrl =
     displayedMilestone?.wipPreviewUrl ||
@@ -1658,15 +1641,6 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                       <div className="flex items-center gap-2">
                         <button
                           type="button"
-                          onClick={() => void handlePredictRisk()}
-                          disabled={predictingRisk}
-                          className="commission-primary inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold shadow transition disabled:opacity-50 [clip-path:polygon(0_0,calc(100%-6px)_0,100%_6px,100%_100%,6px_100%,0_calc(100%-6px))]"
-                        >
-                          <Sparkles size={13} className={predictingRisk ? 'animate-spin' : ''} />
-                          {predictingRisk ? 'AI Đang chấm...' : 'AI Chấm lại tiến độ'}
-                        </button>
-                        <button
-                          type="button"
                           onClick={() => setRightPageView('canvas')}
                           className="rounded-lg bg-white/5 border border-white/10 px-3 py-1.5 text-xs font-semibold text-outline hover:text-white transition"
                         >
@@ -1674,6 +1648,16 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                         </button>
                       </div>
                     </div>
+
+                    {commission && (
+                      <WorkroomProgressPanel
+                        commissionId={commission.id}
+                        allApproved={allMilestonesApproved}
+                        isCancelled={commissionStatus === 'Cancelled'}
+                        totalMilestones={sortedMilestones.length}
+                        onCancelClick={!isCommissionEnded ? () => setShowCancelModal(true) : undefined}
+                      />
+                    )}
 
                     <div className="space-y-3 overflow-y-auto pr-1 flex-1">
                       {sortedMilestones.map((ms) => {
