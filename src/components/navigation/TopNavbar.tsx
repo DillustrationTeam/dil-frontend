@@ -7,6 +7,7 @@ import {
   Search,
   ChevronDown,
   User,
+  UserPen,
   Settings,
   LogOut,
   Palette,
@@ -201,13 +202,22 @@ export default function TopNavbar<T extends string = string>({
                 <FolderKanban className="w-4 h-4 text-[#A7ACD9]" /> {isAdmin ? t('Admin Center') : t('My Commissions')}
               </Link>
               {isCreator && (
-                <Link
-                  href="/creator/commissions"
-                  onClick={() => setShowProfileMenu(false)}
-                  className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs text-[#e4e1e5] hover:text-white hover:bg-white/5 transition-colors"
-                >
-                  <Palette className="w-4 h-4 text-[#A7ACD9]" /> {t('Creator Dashboard')}
-                </Link>
+                <>
+                  <Link
+                    href="/creator/commissions"
+                    onClick={() => setShowProfileMenu(false)}
+                    className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs text-[#e4e1e5] hover:text-white hover:bg-white/5 transition-colors"
+                  >
+                    <Palette className="w-4 h-4 text-[#A7ACD9]" /> {t('Creator Dashboard')}
+                  </Link>
+                  <Link
+                    href="/creator/profile/edit"
+                    onClick={() => setShowProfileMenu(false)}
+                    className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs text-[#e4e1e5] hover:text-white hover:bg-white/5 transition-colors"
+                  >
+                    <UserPen className="w-4 h-4 text-[#A7ACD9]" /> {t('Hồ sơ họa sĩ')}
+                  </Link>
+                </>
               )}
               <Link
                 href="/profile"

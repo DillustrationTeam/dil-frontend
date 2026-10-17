@@ -36,17 +36,17 @@ function PublicLayoutContent({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen bg-[#1F2335] text-[#e4e1e5] font-body selection:bg-[#A7ACD9]/30 selection:text-white">
       {/* Top Navigation */}
       <header className="sticky top-0 z-50 w-full bg-[#1F2335]/80 backdrop-blur-xl border-b border-white/10 shadow-[0_0_20px_rgba(167,172,217,0.08)]">
-        <nav className="flex justify-between items-center w-full px-6 max-w-7xl mx-auto h-20">
+        <nav className="flex justify-between items-center w-full px-4 sm:px-6 max-w-7xl 2xl:max-w-[1440px] mx-auto h-20">
           {/* Left: Logo + Nav Links */}
-          <div className="flex min-w-0 items-center gap-8">
+          <div className="flex shrink-0 items-center gap-4 lg:gap-6">
             <Link href="/" className="group flex shrink-0 items-center space-x-2">
               <img
                 src="/weblogo.png"
                 alt="dillustration"
-                className="h-14 md:h-16 w-auto object-contain hover:scale-105 transition-transform"
+                className="h-10 sm:h-11 md:h-12 w-auto object-contain hover:scale-105 transition-transform"
               />
             </Link>
-            <div className="hidden shrink-0 items-center gap-6 text-sm font-medium lg:flex">
+            <div className="hidden shrink-0 items-center gap-4 xl:gap-6 text-sm font-medium lg:flex">
               <Link
                 href="/"
                 aria-current={pathname === '/' ? 'page' : undefined}
@@ -71,11 +71,11 @@ function PublicLayoutContent({ children }: { children: React.ReactNode }) {
           </div>
 
           {/* Right: Search + Auth */}
-          <div className="flex shrink-0 items-center gap-4">
+          <div className="flex shrink-0 items-center gap-3 lg:gap-4">
             {/* Search Input */}
             <form className="relative hidden shrink-0 xl:block" onSubmit={(event) => { event.preventDefault(); router.push(`/explore?q=${encodeURIComponent(searchQuery.trim())}`); }}>
               <input
-                className="bg-[#1b1b1e] border border-[#46464e]/30 rounded-full px-6 py-2 w-64 focus:outline-none focus:ring-1 focus:ring-[#c2c7f6] focus:border-[#c2c7f6] transition-all duration-300 text-sm text-[#e4e1e5] placeholder-white/30"
+                className="bg-[#1b1b1e] border border-[#46464e]/30 rounded-full px-5 py-2 w-48 2xl:w-60 focus:outline-none focus:ring-1 focus:ring-[#c2c7f6] focus:border-[#c2c7f6] transition-all duration-300 text-sm text-[#e4e1e5] placeholder-white/30"
                 placeholder="Search curated art..."
                 type="text"
                 aria-label="Tìm tác phẩm hoặc tác giả"
@@ -142,13 +142,23 @@ function PublicLayoutContent({ children }: { children: React.ReactNode }) {
                           <p className="text-[10px] text-[#A7ACD9]">{user.email}</p>
                         </div>
                         <Link
-                          href={isAdmin ? '/admin' : '/client/commissions'}
+                          href={isAdmin ? '/admin' : roles.includes('Creator') ? '/creator/commissions' : '/client/commissions'}
                           className="flex items-center gap-2 px-3 py-2 text-xs text-[#e4e1e5] hover:bg-white/10 rounded-xl transition-colors"
                           onClick={() => setIsMenuOpen(false)}
                         >
                           <span className="material-symbols-outlined text-sm text-[#A7ACD9]">{isAdmin ? 'admin_panel_settings' : 'dashboard'}</span>
-                          {isAdmin ? 'Admin Center' : 'My Studio'}
+                          {isAdmin ? 'Admin Center' : roles.includes('Creator') ? 'Creator Studio' : 'My Studio'}
                         </Link>
+                        {roles.includes('Creator') && (
+                          <Link
+                            href="/creator/profile/edit"
+                            onClick={() => setIsMenuOpen(false)}
+                            className="flex items-center gap-2 px-3 py-2 text-xs text-[#e4e1e5] hover:bg-white/10 rounded-xl transition-colors"
+                          >
+                            <span className="material-symbols-outlined text-sm text-[#A7ACD9]">brush</span>
+                            Hồ sơ họa sĩ
+                          </Link>
+                        )}
                         <Link
                           href={`/clients/${user.id}`}
                           onClick={() => setIsMenuOpen(false)}
