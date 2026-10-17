@@ -17,8 +17,12 @@ import {
   Lock,
   Sparkles,
   AlertCircle,
+  ChevronLeft,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useAuthStore } from '@/store/use-auth-store';
+import { creatorProfileService } from '@/features/creator-studio/services/creator-profile.service';
+import type { CreatorProfileDto } from '@/features/creator-studio/types/creator-profile.types';
 import type { EventDetailDto } from '../../types/event.types';
 import { eventStatusBadgeStyles, eventStatusLabels } from '../../types/event.types';
 import type {
@@ -28,6 +32,7 @@ import type {
   HeadJuryWorkspaceData,
   ArbitrationCase,
   WinnerApprovalItem,
+  JuryMemberInfo,
 } from '../../types/jury.types';
 import { eventService } from '../../services/event.service';
 import { juryService } from '../../services/jury.service';
@@ -52,6 +57,11 @@ export function EventHeadJuryScreen({ eventId }: EventHeadJuryScreenProps) {
   const [submissions, setSubmissions] = useState<JurySubmissionItem[]>([]);
   const [selectedSubmissionId, setSelectedSubmissionId] = useState<string | null>(null);
   const [headData, setHeadData] = useState<HeadJuryWorkspaceData | null>(null);
+  const [juries, setJuries] = useState<JuryMemberInfo[]>([]);
+  const [myCreatorProfile, setMyCreatorProfile] = useState<CreatorProfileDto | null>(null);
+
+  const currentUser = useAuthStore((state) => state.user);
+  const effectiveUserId = currentUser?.id ?? null;
 
   // Queue search & filters for Tab 'score'
   const [searchQuery, setSearchQuery] = useState('');
@@ -96,15 +106,19 @@ export function EventHeadJuryScreen({ eventId }: EventHeadJuryScreenProps) {
     async function loadWorkspace() {
       setLoading(true);
       try {
-        const [eventData, criteriaData, headWorkspace, subItems, eventJuries] = await Promise.all([
+        const [eventData, criteriaData, headWorkspace, subItems, eventJuries, profileData] = await Promise.all([
           eventService.detail(eventId).catch(() => null),
           juryService.getEventCriteria(eventId).catch(() => []),
           juryService.getHeadJuryWorkspace(eventId).catch(() => null),
           juryService.getAssignedSubmissions(eventId, 'AURA 2026').catch(() => []),
           juryService.getEventJuries(eventId).catch(() => []),
+          effectiveUserId ? creatorProfileService.getMyProfile().catch(() => null) : Promise.resolve(null),
         ]);
 
         if (!isMounted) return;
+
+        setJuries(eventJuries || []);
+        setMyCreatorProfile(profileData);
 
         setEvent(eventData);
         if (eventData?.isHeadJurySignedOff) {
@@ -162,7 +176,31 @@ export function EventHeadJuryScreen({ eventId }: EventHeadJuryScreenProps) {
     return () => {
       isMounted = false;
     };
-  }, [eventId]);
+  }, [eventId, effectiveUserId]);
+
+  const currentJury = useMemo(() => {
+    if (!juries || juries.length === 0 || !effectiveUserId) return null;
+    const myCreatorId = myCreatorProfile?.id?.toLowerCase();
+    const myUserId = effectiveUserId.toLowerCase();
+
+    return (
+      juries.find((j) => {
+        const jCreatorId = j.creatorId?.toLowerCase();
+        const jUserId = (j.userId || j.creatorUserId)?.toLowerCase();
+
+        if (jUserId && jUserId === myUserId) return true;
+        if (myCreatorId && jCreatorId === myCreatorId) return true;
+        if (jCreatorId === myUserId) return true;
+
+        return false;
+      }) || null
+    );
+  }, [juries, effectiveUserId, myCreatorProfile]);
+
+  const isHeadJury = Boolean(
+    (currentJury && currentJury.isHeadJury) ||
+    (event?.createdByAdminId && effectiveUserId === event.createdByAdminId)
+  );
 
   const activeSubmission = useMemo(() => {
     return submissions.find((s) => s.id === selectedSubmissionId) || submissions[0] || null;
@@ -513,6 +551,38 @@ export function EventHeadJuryScreen({ eventId }: EventHeadJuryScreenProps) {
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-3 text-[#9695a1]">
         <RefreshCw className="w-8 h-8 text-[#A7ACD9] animate-spin" />
         <p className="text-sm">Loading Head Jury Control Room...</p>
+      </div>
+    );
+  }
+
+  if (!isHeadJury) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] px-4 py-12 text-center">
+        <div className="size-16 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 flex items-center justify-center mx-auto mb-5 shadow-inner">
+          <Lock className="w-8 h-8" />
+        </div>
+        <h2 className="font-sora text-xl sm:text-2xl font-bold text-white">
+          Truy cập bị từ chối
+        </h2>
+        <p className="mt-2 text-sm text-[#9695a1] max-w-md mx-auto leading-relaxed">
+          Bạn không có quyền Trưởng ban giám khảo (Head Jury) cho sự kiện này. Chỉ Trưởng ban giám khảo được bổ nhiệm chính thức mới có quyền truy cập không gian này.
+        </p>
+        <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
+          <Link
+            href={`/creator/events/${eventId}/jury`}
+            className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 px-6 py-2.5 text-xs font-bold text-white hover:brightness-110 transition shadow-lg"
+          >
+            <Gavel size={16} />
+            <span>Không gian chấm thi thông thường</span>
+          </Link>
+          <Link
+            href={`/events/${eventId}`}
+            className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-6 py-2.5 text-xs font-semibold text-[#9695a1] hover:text-white hover:bg-white/10 transition"
+          >
+            <ChevronLeft size={16} />
+            <span>Quay lại chi tiết sự kiện</span>
+          </Link>
+        </div>
       </div>
     );
   }

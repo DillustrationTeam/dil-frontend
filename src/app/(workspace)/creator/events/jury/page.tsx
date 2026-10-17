@@ -6,6 +6,7 @@ import { Gavel, Clock, Trophy, ChevronRight, RefreshCw, Sparkles, Users, Flame, 
 import { eventService, juryService, eventStatusBadgeStyles, eventStatusLabels, EventSearchFilterBar } from '@/features/event';
 import type { EventListItemDto } from '@/features/event';
 import { useAuthStore } from '@/store/use-auth-store';
+import { creatorProfileService } from '@/features/creator-studio/services/creator-profile.service';
 
 export default function CreatorJuryEventsListPage() {
   const [events, setEvents] = useState<EventListItemDto[]>([]);
@@ -18,39 +19,90 @@ export default function CreatorJuryEventsListPage() {
 
   useEffect(() => {
     async function loadEvents() {
+      if (!user?.id) {
+        setEvents([]);
+        setLoading(false);
+        return;
+      }
+
       setLoading(true);
       try {
-        const res = await eventService.list({ pageSize: 50 });
-        const items = res.items || [];
+        let myCreatorId: string | undefined;
+        try {
+          const profile = await creatorProfileService.getMyProfile();
+          if (profile?.id) myCreatorId = profile.id;
+        } catch {
+          // ignore
+        }
 
-        // Filter to only events where the user is assigned as a Jury member
-        const assignedEvents: EventListItemDto[] = [];
-        const map: Record<string, boolean> = {};
+        // Try fetching user's actual jury assignments by userId / creatorId first
+        const myJuries = await juryService.getMyJuryAssignments(user.id, myCreatorId);
 
-        await Promise.all(
-          items.map(async (evt) => {
-            try {
-              const juries = await juryService.getEventJuries(evt.id);
-              const matchingJury = juries.find(
-                (j) =>
-                  j.creatorId === user?.id ||
-                  (user?.fullName && (j.creatorName?.includes(user.fullName) || j.creatorDisplayName?.includes(user.fullName)))
-              );
+        if (myJuries && myJuries.length > 0) {
+          const eventIds = Array.from(new Set(myJuries.map((j) => j.eventId)));
+          const map: Record<string, boolean> = {};
+          myJuries.forEach((j) => {
+            if (j.isHeadJury) map[j.eventId] = true;
+          });
 
-              if (matchingJury) {
-                assignedEvents.push(evt);
-                if (matchingJury.isHeadJury) {
-                  map[evt.id] = true;
+          const eventList: EventListItemDto[] = [];
+          await Promise.all(
+            eventIds.map(async (eId) => {
+              try {
+                const detail = await eventService.detail(eId);
+                if (detail) {
+                  eventList.push({
+                    ...detail,
+                    isHeadJury: map[detail.id] || false,
+                  });
                 }
+              } catch {
+                // Ignore failure
               }
-            } catch {
-              // Ignore network fallback
-            }
-          })
-        );
+            })
+          );
 
-        setEvents(assignedEvents);
-        setHeadJuryMap(map);
+          setEvents(eventList);
+          setHeadJuryMap(map);
+        } else {
+          // Fallback: Check event juries with STRICT id matching (never substring/loose name matching)
+          const res = await eventService.list({ pageSize: 50 });
+          const items = res.items || [];
+          const assignedEvents: EventListItemDto[] = [];
+          const map: Record<string, boolean> = {};
+
+          await Promise.all(
+            items.map(async (evt) => {
+              try {
+                const juries = await juryService.getEventJuries(evt.id);
+                const matchingJury = juries.find((j) => {
+                  const jCreatorId = j.creatorId?.toLowerCase();
+                  const jUserId = (j.userId || j.creatorUserId)?.toLowerCase();
+                  const uId = user.id.toLowerCase();
+                  const cId = myCreatorId?.toLowerCase();
+
+                  if (jUserId && jUserId === uId) return true;
+                  if (cId && jCreatorId === cId) return true;
+                  if (jCreatorId === uId) return true;
+
+                  return false;
+                });
+
+                if (matchingJury) {
+                  assignedEvents.push(evt);
+                  if (matchingJury.isHeadJury) {
+                    map[evt.id] = true;
+                  }
+                }
+              } catch {
+                // Ignore network fallback
+              }
+            })
+          );
+
+          setEvents(assignedEvents);
+          setHeadJuryMap(map);
+        }
       } catch {
         setEvents([]);
       } finally {
