@@ -232,6 +232,10 @@ export function EventHeadJuryScreen({ eventId }: EventHeadJuryScreenProps) {
   }, [scores, criteria]);
 
   const handleScoreChange = (criteriaId: string, val: number, maxScore: number) => {
+    if (activeSubmission?.isLocked) {
+      toast.error('Điểm của bài dự thi này đã được khóa và không thể chỉnh sửa.');
+      return;
+    }
     const clamped = Math.max(0, Math.min(maxScore, val));
     setScores((prev) => ({
       ...prev,
@@ -241,6 +245,10 @@ export function EventHeadJuryScreen({ eventId }: EventHeadJuryScreenProps) {
 
   const handleSaveDraft = () => {
     if (!activeSubmission) return;
+    if (activeSubmission.isLocked) {
+      toast.error('Điểm của bài dự thi này đã được khóa và không thể chỉnh sửa.');
+      return;
+    }
     const draft: JuryEvaluationDraft = {
       submissionId: activeSubmission.id,
       totalScore,
@@ -272,6 +280,11 @@ export function EventHeadJuryScreen({ eventId }: EventHeadJuryScreenProps) {
     e.preventDefault();
     if (!activeSubmission) return;
 
+    if (activeSubmission.isLocked) {
+      toast.error('Điểm của bài dự thi này đã được khóa và không thể chỉnh sửa.');
+      return;
+    }
+
     if (!noConflict) {
       toast.error('You must confirm no conflict of interest to submit evaluation.');
       return;
@@ -300,6 +313,7 @@ export function EventHeadJuryScreen({ eventId }: EventHeadJuryScreenProps) {
                 gradedScore: totalScore,
                 notes,
                 criteriaScores: scores,
+                isLocked: true,
               }
             : s
         )

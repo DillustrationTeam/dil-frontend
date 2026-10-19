@@ -130,7 +130,7 @@ export const juryService = {
             noConflictOfInterest: draft?.noConflictOfInterest ?? true,
             nominateSpecialAward: draft?.nominateSpecialAward ?? false,
             specialAwardCategory: draft?.specialAwardCategory,
-            isLocked: draft?.isLocked ?? false,
+            isLocked: Boolean(draft?.isLocked || hasScore),
           };
         });
       }
@@ -148,6 +148,11 @@ export const juryService = {
     try {
       if (typeof window === 'undefined') return;
       const key = `${DRAFT_STORAGE_PREFIX}${eventId}_${submissionId}`;
+      const existing = juryService.getDraft(eventId, submissionId);
+      if (existing?.isLocked && !draft.isLocked) {
+        // Prevent unlocking an already locked draft via saveDraft
+        return;
+      }
       window.localStorage.setItem(key, JSON.stringify(draft));
     } catch {
       // Ignore localStorage errors
