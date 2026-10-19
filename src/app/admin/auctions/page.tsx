@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 import {
@@ -14,10 +13,7 @@ import {
   ExternalLink,
   ShieldAlert,
   CheckCircle2,
-  SlidersHorizontal,
-  DollarSign,
   Layers,
-  Sparkles,
 } from 'lucide-react';
 import { auctionService, auctionError } from '@/features/auction/services/auction.service';
 import type { AuctionListItemDto } from '@/features/auction/types/auction.types';
@@ -60,7 +56,29 @@ export default function AdminAuctionsPage() {
   };
 
   useEffect(() => {
-    void fetchAuctions();
+    let ignore = false;
+    const filter = statusFilter === 'ALL' ? {} : { status: statusFilter };
+    auctionService
+      .list(filter)
+      .then((res) => {
+        if (!ignore) {
+          setAuctions(res.items || []);
+        }
+      })
+      .catch((err) => {
+        if (!ignore) {
+          toast.error(auctionError(err));
+        }
+      })
+      .finally(() => {
+        if (!ignore) {
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      ignore = true;
+    };
   }, [statusFilter]);
 
   const filteredAuctions = useMemo(() => {
