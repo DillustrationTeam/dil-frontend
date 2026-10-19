@@ -338,6 +338,7 @@ export function EventDetailScreen({ id, userId, isAdmin }: EventDetailScreenProp
         {/* TAB 2: MY SUBMISSION */}
         {!effectiveIsAdmin && activeTab === 'my-submission' && (
           <EventTabMySubmission
+            isAnnounced={isAnnounced}
             effectiveUserId={effectiveUserId}
             isJuryMember={isJuryMember}
             currentJury={currentJury}
