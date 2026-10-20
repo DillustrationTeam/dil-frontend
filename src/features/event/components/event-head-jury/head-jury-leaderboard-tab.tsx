@@ -23,7 +23,14 @@ export function HeadJuryLeaderboardTab({ combinedScores }: HeadJuryLeaderboardTa
             </tr>
           </thead>
           <tbody className="divide-y divide-white/10 text-[#c8c6cf]">
-            {combinedScores.map((row) => (
+            {combinedScores.length === 0 ? (
+              <tr>
+                <td colSpan={5} className="py-8 text-center text-xs text-[#9695a1]">
+                  No combined scores available yet. Leaderboard will be populated as jury evaluations are completed.
+                </td>
+              </tr>
+            ) : (
+              combinedScores.map((row) => (
               <tr key={row.submissionId} className="hover:bg-white/[0.02]">
                 <td className="py-3 px-3 font-mono font-bold text-amber-300">#{row.rank}</td>
                 <td className="py-3 px-3 font-semibold text-white">{row.title}</td>
@@ -31,7 +38,7 @@ export function HeadJuryLeaderboardTab({ combinedScores }: HeadJuryLeaderboardTa
                 <td className="py-3 px-3 font-mono font-bold text-[#A7ACD9]">{row.headJuryScore}</td>
                 <td className="py-3 px-3 font-mono text-amber-400">{row.deviationPercent}%</td>
               </tr>
-            ))}
+            )))}
           </tbody>
         </table>
       </div>

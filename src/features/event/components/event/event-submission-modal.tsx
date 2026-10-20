@@ -69,13 +69,11 @@ function EventSubmissionModalInner({
 
           const match = juries.some((j) => {
             const jCreatorId = j.creatorId?.toLowerCase();
-            const jId = j.id?.toLowerCase();
-            const jDisplayName = (j.creatorDisplayName || '').toLowerCase().trim();
-            const jName = (j.creatorName || '').toLowerCase().trim();
+            const jUserId = (j.userId || j.creatorUserId)?.toLowerCase();
 
-            if (myCreatorId && jCreatorId === myCreatorId) return true;
-            if (myUserId && (jCreatorId === myUserId || jId === myUserId)) return true;
-            if (myName && ((jDisplayName && jDisplayName === myName) || (jName && jName === myName))) return true;
+            if (myUserId && jUserId && jUserId === myUserId) return true;
+            if (myCreatorId && jCreatorId && jCreatorId === myCreatorId) return true;
+            if (myUserId && jCreatorId === myUserId) return true;
 
             return false;
           });
