@@ -130,12 +130,12 @@ export function HeadJuryScoringTab({
                     {entry.isLocked ? (
                       <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-[11px] font-mono font-bold" title="Điểm đã khóa">
                         <Lock className="w-3 h-3 text-emerald-400" />
-                        <span>{entry.gradedScore ?? 88}</span>
+                        <span>{entry.gradedScore != null ? entry.gradedScore : '—'}</span>
                       </span>
                     ) : entry.isGraded ? (
                       <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-[11px] font-mono font-bold">
                         <Check className="w-3 h-3" />
-                        <span>{entry.gradedScore ?? 88}</span>
+                        <span>{entry.gradedScore != null ? entry.gradedScore : '—'}</span>
                       </span>
                     ) : (
                       <span className="px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[10px]">
@@ -192,7 +192,13 @@ export function HeadJuryScoringTab({
                   Head Jury Score
                 </span>
                 <strong className="text-2xl sm:text-3xl font-sora font-extrabold text-[#A7ACD9] block">
-                  {totalScore} <span className="text-sm font-normal text-[#9695a1]">/ 100</span>
+                  {activeSubmission.isGraded || totalScore > 0 ? (
+                    <>
+                      {totalScore} <span className="text-sm font-normal text-[#9695a1]">/ 100</span>
+                    </>
+                  ) : (
+                    <span className="text-lg sm:text-xl font-medium text-[#9695a1]">Pending</span>
+                  )}
                 </strong>
               </div>
             </div>

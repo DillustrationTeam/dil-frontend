@@ -32,7 +32,7 @@ interface EventDetailScreenProps {
 function formatScore(val?: number | null): string | null {
   if (val === null || val === undefined) return null;
   const num = typeof val === 'number' ? val : parseFloat(String(val));
-  if (isNaN(num)) return null;
+  if (isNaN(num) || num <= 0) return null;
   if (num <= 10) {
     return `${num.toFixed(1)} / 10`;
   }

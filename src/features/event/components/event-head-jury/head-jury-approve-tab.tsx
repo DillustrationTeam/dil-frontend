@@ -52,7 +52,14 @@ export function HeadJuryApproveTab({
               </tr>
             </thead>
             <tbody className="divide-y divide-white/10 text-[#c8c6cf]">
-              {finalWinnersList.map((w, idx) => (
+              {finalWinnersList.length === 0 ? (
+                <tr>
+                  <td colSpan={4} className="py-8 text-center text-xs text-[#9695a1]">
+                    No graded submissions yet. Award allocations will appear after submissions are evaluated.
+                  </td>
+                </tr>
+              ) : (
+                finalWinnersList.map((w, idx) => (
                 <tr key={idx} className="hover:bg-white/[0.02] transition-colors">
                   <td className="py-3 px-3.5 font-sora font-bold text-amber-300">{w.awardName}</td>
                   <td className="py-3 px-3.5 font-semibold text-white">
@@ -82,7 +89,7 @@ export function HeadJuryApproveTab({
                     </span>
                   </td>
                 </tr>
-              ))}
+              )))}
             </tbody>
           </table>
         </div>

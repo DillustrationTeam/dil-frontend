@@ -215,13 +215,20 @@ export function EventHeadJuryScreen({ eventId }: EventHeadJuryScreenProps) {
 
   if (activeSubmission && activeSubmission.id !== prevSubmissionId) {
     setPrevSubmissionId(activeSubmission.id);
+    const draft = juryService.getDraft(eventId, activeSubmission.id);
     const initialScores: Record<string, number> = {};
     criteria.forEach((crit) => {
-      initialScores[crit.id] = activeSubmission.criteriaScores?.[crit.id] ?? Math.round(crit.maxScore * 0.85);
+      if (draft?.criteriaScores && typeof draft.criteriaScores[crit.id] === 'number') {
+        initialScores[crit.id] = draft.criteriaScores[crit.id];
+      } else if (activeSubmission.criteriaScores && typeof activeSubmission.criteriaScores[crit.id] === 'number') {
+        initialScores[crit.id] = activeSubmission.criteriaScores[crit.id];
+      } else {
+        initialScores[crit.id] = 0;
+      }
     });
     setScores(initialScores);
-    setNotes(activeSubmission.notes || 'Strong composition, clear narrative, and sophisticated lighting treatment.');
-    setNoConflict(activeSubmission.noConflictOfInterest ?? true);
+    setNotes(draft?.notes ?? activeSubmission.notes ?? '');
+    setNoConflict(draft?.noConflictOfInterest ?? activeSubmission.noConflictOfInterest ?? true);
   }
 
   const totalScore = useMemo(() => {
@@ -474,7 +481,11 @@ export function EventHeadJuryScreen({ eventId }: EventHeadJuryScreenProps) {
   const finalWinnersList: WinnerApprovalItem[] = useMemo(() => {
     const statusText = isAwardAllocationsConfirmed ? 'Confirmed' : 'Pending Approval';
     const sorted = [...submissions]
-      .filter((s) => typeof s.gradedScore === 'number' || typeof s.score === 'number')
+      .filter(
+        (s) =>
+          (typeof s.gradedScore === 'number' && s.gradedScore > 0) ||
+          (typeof s.score === 'number' && s.score > 0)
+      )
       .sort((a, b) => (Number(b.gradedScore ?? b.score) || 0) - (Number(a.gradedScore ?? a.score) || 0));
 
     if (sorted.length === 0) return [];

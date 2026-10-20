@@ -230,12 +230,12 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
       } else if (activeSubmission.criteriaScores && typeof activeSubmission.criteriaScores[crit.id] === 'number') {
         initialScores[crit.id] = activeSubmission.criteriaScores[crit.id];
       } else {
-        initialScores[crit.id] = Math.round(crit.maxScore * 0.8);
+        initialScores[crit.id] = 0;
       }
     });
 
     setScores(initialScores);
-    setNotes(draft?.notes ?? activeSubmission.notes ?? 'Strong depth in composition, effective focal lighting, and coherent visual storytelling.');
+    setNotes(draft?.notes ?? activeSubmission.notes ?? '');
     setNoConflict(draft?.noConflictOfInterest ?? activeSubmission.noConflictOfInterest ?? true);
   }
 
@@ -697,12 +697,12 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
                         {entry.isLocked ? (
                           <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-[11px] font-mono font-bold" title="Điểm đã khóa">
                             <Lock className="w-3 h-3 text-emerald-400" />
-                            <span>{entry.gradedScore ?? 88}</span>
+                            <span>{entry.gradedScore != null ? entry.gradedScore : '—'}</span>
                           </span>
                         ) : entry.isGraded ? (
                           <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-[11px] font-mono font-bold">
                             <Check className="w-3 h-3" />
-                            <span>{entry.gradedScore ?? 88}</span>
+                            <span>{entry.gradedScore != null ? entry.gradedScore : '—'}</span>
                           </span>
                         ) : (
                           <span className="px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[10px]">
@@ -761,7 +761,13 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
                   <div className="text-right">
                     <span className="text-[10px] text-[#9695a1] uppercase tracking-wider block font-semibold">Total Score</span>
                     <strong className="text-2xl sm:text-3xl font-sora font-extrabold text-[#A7ACD9] block">
-                      {totalScore} <span className="text-sm font-normal text-[#9695a1]">/ 100</span>
+                      {activeSubmission.isGraded || totalScore > 0 ? (
+                        <>
+                          {totalScore} <span className="text-sm font-normal text-[#9695a1]">/ 100</span>
+                        </>
+                      ) : (
+                        <span className="text-lg sm:text-xl font-medium text-[#9695a1]">Pending</span>
+                      )}
                     </strong>
                   </div>
                 </div>
