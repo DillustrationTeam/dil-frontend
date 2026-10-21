@@ -5,11 +5,12 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { X, AlertCircle } from 'lucide-react';
+import { X, AlertCircle, Sparkles, Loader2, Check, RefreshCw, Dice5 } from 'lucide-react';
 import { commissionService } from '@/services/commission.service';
 import { creatorRateCardService, RateCardPackage } from '@/features/creator-studio/services/creator-rate-card.service';
 import { creatorProfileService } from '@/features/creator-studio/services/creator-profile.service';
 import { CreatorTermsDto } from '@/features/creator-studio/types/creator-profile.types';
+import { aiService } from '@/features/ai-assistant/services/ai.service';
 import { extractErrorMessage } from '@/lib/api-client';
 import { acquireBodyScrollLock } from '@/lib/body-scroll-lock';
 
@@ -36,8 +37,11 @@ export default function CreateCommissionModal({ creatorId, creatorName, onClose 
   const [packageError, setPackageError] = useState<string | null>(null);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  const [aiBriefing, setAiBriefing] = useState(false);
+  const [aiSuggestion, setAiSuggestion] = useState<string | null>(null);
+  const [isRandomIdea, setIsRandomIdea] = useState(false);
 
-  const { register, handleSubmit, formState: { errors } } = useForm<Form>({
+  const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<Form>({
     resolver: zodResolver(schema),
     defaultValues: { title: '', description: '', deadlineAt: '', voucherCode: '' },
   });
@@ -71,6 +75,34 @@ export default function CreateCommissionModal({ creatorId, creatorName, onClose 
     window.addEventListener('keydown', onKeyDown);
     return () => { releaseScrollLock(); window.removeEventListener('keydown', onKeyDown); if (previousFocus?.isConnected) previousFocus.focus({ preventScroll: true }); };
   }, []);
+
+  const handleAiBriefHelper = async (random: boolean = false) => {
+    const currentTitle = watch('title');
+    const currentDesc = watch('description');
+    if (!currentTitle?.trim() && !currentDesc?.trim()) {
+      setError('Vui lòng nhập ít nhất tên dự án hoặc vài từ khóa ý tưởng để AI gợi ý brief.');
+      return;
+    }
+    setAiBriefing(true);
+    setIsRandomIdea(random);
+    setError('');
+    try {
+      const res = await aiService.briefHelper({
+        title: currentTitle,
+        description: currentDesc,
+        style: selectedPackage?.name,
+        budget: estimatedTotal,
+        surpriseMe: random,
+      });
+      if (res?.content) {
+        setAiSuggestion(res.content);
+      }
+    } catch (cause) {
+      setError(extractErrorMessage(cause, 'Không thể gọi AI hỗ trợ brief lúc này.'));
+    } finally {
+      setAiBriefing(false);
+    }
+  };
 
   const submit = async (values: Form) => {
     setError('');
@@ -125,9 +157,91 @@ export default function CreateCommissionModal({ creatorId, creatorName, onClose 
           </div>
 
           <div className="space-y-2">
-            <label className={label} htmlFor="commission-brief">MÔ TẢ YÊU CẦU CHI TIẾT <span className="text-red-400">*</span></label>
-            <textarea id="commission-brief" rows={4} className={`${field} ${errors.description ? 'border-red-500/70' : ''}`} placeholder="Mô tả chi tiết phong cách, màu sắc, kích thước và yêu cầu nhân vật…" {...register('description')} />
+            <div className="flex items-center justify-between">
+              <label className={label} htmlFor="commission-brief">MÔ TẢ YÊU CẦU CHI TIẾT <span className="text-red-400">*</span></label>
+              <button
+                type="button"
+                disabled={aiBriefing || busy}
+                onClick={() => handleAiBriefHelper(false)}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-bold text-[#A7ACD9] hover:text-white bg-white/5 hover:bg-white/10 rounded-lg border border-white/10 transition-colors disabled:opacity-50"
+              >
+                {aiBriefing ? <Loader2 className="w-3 h-3 animate-spin text-[#C5C9F8]" /> : <Sparkles className="w-3 h-3 text-[#C5C9F8]" />}
+                <span>{aiBriefing ? 'Đang viết brief…' : '✨ AI Hỗ trợ viết Brief'}</span>
+              </button>
+            </div>
+            <textarea id="commission-brief" rows={5} className={`${field} ${errors.description ? 'border-red-500/70' : ''}`} placeholder="Mô tả chi tiết phong cách, màu sắc, kích thước và yêu cầu nhân vật…" {...register('description')} />
             {errors.description && <p role="alert" className="mt-1 flex items-center gap-1.5 text-xs text-red-300"><AlertCircle className="w-3.5 h-3.5 shrink-0" /> {errors.description.message}</p>}
+
+            {aiSuggestion && (
+              <div className="rounded-2xl border border-[#C5C9F8]/30 bg-[#1A1D2D] p-4 text-xs shadow-xl space-y-3 animate-in fade-in duration-200">
+                <div className="flex items-center justify-between border-b border-white/10 pb-2">
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="w-3.5 h-3.5 text-[#C5C9F8]" />
+                    <span className="font-bold text-white">Gợi ý Brief từ AI</span>
+                    {isRandomIdea && (
+                      <span className="rounded-full bg-purple-500/20 px-2 py-0.5 text-[10px] font-semibold text-purple-300 border border-purple-500/30">
+                        Ý tưởng ngẫu nhiên
+                      </span>
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setAiSuggestion(null)}
+                    className="text-[#8A8FA9] hover:text-white text-xs p-1"
+                    title="Đóng xem trước"
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                <div className="max-h-52 overflow-y-auto whitespace-pre-wrap rounded-xl bg-black/40 p-3 font-mono text-[11px] leading-relaxed text-slate-200 border border-white/5">
+                  {aiSuggestion}
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2 pt-1">
+                  <button
+                    type="button"
+                    disabled={aiBriefing}
+                    onClick={() => {
+                      setValue('description', aiSuggestion, { shouldValidate: true });
+                      setAiSuggestion(null);
+                    }}
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 px-3 py-1.5 text-xs font-bold text-white transition-colors shadow-sm disabled:opacity-50"
+                  >
+                    <Check className="w-3.5 h-3.5" />
+                    <span>Đồng ý với ý tưởng này</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={aiBriefing}
+                    onClick={() => handleAiBriefHelper(false)}
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-white/10 hover:bg-white/15 px-3 py-1.5 text-xs font-semibold text-slate-200 hover:text-white transition-colors disabled:opacity-50"
+                  >
+                    {aiBriefing && !isRandomIdea ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <RefreshCw className="w-3.5 h-3.5" />
+                    )}
+                    <span>Tạo lại</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={aiBriefing}
+                    onClick={() => handleAiBriefHelper(true)}
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-purple-600/30 hover:bg-purple-600/50 border border-purple-500/40 px-3 py-1.5 text-xs font-semibold text-purple-200 hover:text-white transition-colors disabled:opacity-50"
+                  >
+                    {aiBriefing && isRandomIdea ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <Dice5 className="w-3.5 h-3.5 text-purple-300" />
+                    )}
+                    <span>Tạo ý tưởng ngẫu nhiên</span>
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           <fieldset className="space-y-3 border-t border-white/10 pt-5">

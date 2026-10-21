@@ -26,4 +26,7 @@ export const aiService = {
   risk: (id: string, signal?: AbortSignal) => call<DeadlineRiskDto>('get', `/commissions/${id}/deadline-risks`, undefined, undefined, signal).then(r => r.data),
   predict: (id: string) => call<DeadlineRiskDto>('post', `/commissions/${id}/deadline-risks/predict`, {}).then(r => r.data),
   remind: (id: string, remindAt: string, milestoneId?: string) => call<DeadlineReminderDto>('post', `/commissions/${id}/deadline-reminders`, { remindAt, milestoneId, channel: 'InApp' }).then(r => r.data),
+  briefHelper: (data: { description?: string; style?: string; budget?: number; title?: string; surpriseMe?: boolean }) => call<{ content: string }>('post', '/ai/brief-helper', data).then(r => r.data),
+  standardizeRevision: (data: { feedback: string; milestoneTitle?: string }) => call<{ content: string }>('post', '/ai/standardize-revision', data).then(r => r.data),
+  disputeSummary: (disputeId: string) => call<{ summary: string }>('get', `/admin/disputes/${disputeId}/ai-summary`).then(r => r.data),
 };
