@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { X, AlertTriangle, Info, CheckCircle2 } from 'lucide-react';
+import { X, AlertTriangle, Info, CheckCircle2, ShieldAlert, Scale, MessageSquare } from 'lucide-react';
 import { commissionService } from '@/services/commission.service';
 import type { Commission } from '@/types/commission.types';
 
@@ -12,6 +12,7 @@ interface CancelRefundModalProps {
   commission?: Commission | null;
   currentUserId?: string | null;
   isCreator?: boolean;
+  onOpenDispute?: () => void;
   onSuccess?: () => void;
 }
 
@@ -22,12 +23,14 @@ export default function CancelRefundModal({
   commission,
   currentUserId,
   isCreator,
+  onOpenDispute,
   onSuccess,
 }: CancelRefundModalProps) {
   const [reason, setReason] = useState('');
   const [details, setDetails] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [showDisputePrompt, setShowDisputePrompt] = useState(false);
   const [resultMessage, setResultMessage] = useState('');
 
   if (!isOpen) return null;
@@ -61,9 +64,13 @@ export default function CancelRefundModal({
     setIsSubmitting(true);
     try {
       await commissionService.respondCancellationRequest(commissionId, approve);
-      setResultMessage(approve ? 'Đã đồng ý hủy đơn.' : 'Đã từ chối yêu cầu hủy đơn.');
-      setSuccess(true);
-      setTimeout(() => onSuccess?.(), 1000);
+      if (approve) {
+        setResultMessage('Đã đồng ý hủy đơn. Quỹ Escrow đã được xử lý hoàn trả.');
+        setSuccess(true);
+        setTimeout(() => onSuccess?.(), 1000);
+      } else {
+        setShowDisputePrompt(true);
+      }
     } catch (error) {
       console.error(error);
       alert('Không thể phản hồi yêu cầu hủy.');
@@ -96,7 +103,58 @@ export default function CancelRefundModal({
 
         {/* Content Body */}
         <div className="p-6 space-y-4">
-          {!success && pendingRequest ? (
+          {showDisputePrompt ? (
+            <div className="py-4 text-center space-y-4 animate-fadeIn">
+              <div className="w-12 h-12 mx-auto rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center border border-amber-500/30">
+                <ShieldAlert className="w-6 h-6" />
+              </div>
+              <div className="space-y-1">
+                <h4 className="text-sm font-bold text-white">Đã từ chối yêu cầu hủy đơn</h4>
+                <p className="text-xs text-slate-300">
+                  Đơn hàng tiếp tục được duy trì. Quỹ Escrow vẫn được bảo lưu an toàn trên hệ thống.
+                </p>
+              </div>
+
+              <div className="p-3.5 bg-amber-500/10 border border-amber-500/20 rounded-2xl text-left text-xs text-amber-200/90 space-y-1.5">
+                <p className="font-semibold text-amber-300 flex items-center gap-1.5">
+                  <Scale className="w-4 h-4 shrink-0 text-amber-400" />
+                  Bạn có muốn gửi tranh chấp về cho Admin không?
+                </p>
+                <p className="text-[11px] leading-relaxed text-slate-300">
+                  Nếu hai bên có mâu thuẫn không thể tự giải quyết qua chat, bạn có thể gửi Khiếu nại Tranh chấp để thương lượng lại tỷ lệ hoàn tiền hoặc yêu cầu Ban Quản trị phân xử.
+                </p>
+              </div>
+
+              <div className="flex flex-col gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    onClose();
+                    onSuccess?.();
+                  }}
+                  className="w-full py-2.5 rounded-xl text-xs font-bold bg-white/10 hover:bg-white/15 text-white transition-colors flex items-center justify-center gap-1.5"
+                >
+                  <MessageSquare className="w-3.5 h-3.5 text-slate-400" />
+                  <span>Tiếp tục làm việc &amp; Trao đổi qua chat</span>
+                </button>
+
+                {onOpenDispute && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onClose();
+                      onSuccess?.();
+                      onOpenDispute();
+                    }}
+                    className="w-full py-2.5 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 transition-colors shadow-lg shadow-amber-500/20 flex items-center justify-center gap-1.5"
+                  >
+                    <Scale className="w-4 h-4" />
+                    <span>Gửi Khiếu Nại Tranh Chấp (Tới Trọng tài)</span>
+                  </button>
+                )}
+              </div>
+            </div>
+          ) : !success && pendingRequest ? (
             <div className="space-y-4 text-sm text-slate-300">
               <div className="rounded-xl border border-amber-400/20 bg-amber-400/10 p-4">
                 <p className="font-semibold text-amber-200">Yêu cầu hủy đang chờ phản hồi</p>
@@ -180,28 +238,30 @@ export default function CancelRefundModal({
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-white/10 bg-[#161926]/80 flex justify-end gap-2">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 rounded-xl text-xs font-semibold border border-white/10 text-slate-300 hover:bg-white/5"
-          >
-            {success ? 'Close' : 'Keep Commission'}
-          </button>
-          {!success && pendingRequest && canRespond ? (
-            <>
-              <button onClick={() => handleResponse(false)} disabled={isSubmitting} className="px-4 py-2 rounded-xl text-xs font-semibold border border-white/10 text-slate-300 hover:bg-white/5 disabled:opacity-50">Từ chối</button>
-              <button onClick={() => handleResponse(true)} disabled={isSubmitting} className="px-5 py-2 rounded-xl text-xs font-semibold bg-red-500 text-white hover:bg-red-600 disabled:opacity-50">Đồng ý hủy</button>
-            </>
-          ) : !success && !pendingRequest ? (
+        {!showDisputePrompt && (
+          <div className="px-6 py-4 border-t border-white/10 bg-[#161926]/80 flex justify-end gap-2">
             <button
-              onClick={handleCancel}
-              disabled={isSubmitting || !reason}
-              className="px-5 py-2 rounded-xl text-xs font-semibold bg-red-500 text-white shadow-lg shadow-red-500/25 hover:bg-red-600 transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={onClose}
+              className="px-4 py-2 rounded-xl text-xs font-semibold border border-white/10 text-slate-300 hover:bg-white/5"
             >
-              {isSubmitting ? 'Processing...' : 'Confirm Cancel & Refund'}
+              {success ? 'Close' : 'Keep Commission'}
             </button>
-          ) : null}
-        </div>
+            {!success && pendingRequest && canRespond ? (
+              <>
+                <button onClick={() => handleResponse(false)} disabled={isSubmitting} className="px-4 py-2 rounded-xl text-xs font-semibold border border-white/10 text-slate-300 hover:bg-white/5 disabled:opacity-50">Từ chối</button>
+                <button onClick={() => handleResponse(true)} disabled={isSubmitting} className="px-5 py-2 rounded-xl text-xs font-semibold bg-red-500 text-white hover:bg-red-600 disabled:opacity-50">Đồng ý hủy</button>
+              </>
+            ) : !success && !pendingRequest ? (
+              <button
+                onClick={handleCancel}
+                disabled={isSubmitting || !reason}
+                className="px-5 py-2 rounded-xl text-xs font-semibold bg-red-500 text-white shadow-lg shadow-red-500/25 hover:bg-red-600 transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isSubmitting ? 'Processing...' : 'Confirm Cancel & Refund'}
+              </button>
+            ) : null}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -1798,6 +1798,10 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
             commission={commission}
             currentUserId={userId}
             isCreator={isCreator}
+            onOpenDispute={() => {
+              setShowCancelModal(false);
+              setShowDisputeModal(true);
+            }}
             onSuccess={() => {
               setShowCancelModal(false);
               refresh();
