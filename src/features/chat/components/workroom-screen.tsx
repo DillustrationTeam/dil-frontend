@@ -954,7 +954,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                             onClick={() => setShowCancelModal(true)}
                             className="px-3.5 py-1.5 rounded-xl font-bold text-xs bg-rose-500 hover:bg-rose-600 text-white shadow-lg shadow-rose-500/25 transition-all flex items-center gap-1.5 cursor-pointer"
                           >
-                            {commission.cancellationRequestedById !== userId ? 'Xem & Phản hồi yêu cầu hủy' : 'Chi tiết yêu cầu hủy'}
+                            {commission.cancellationRequestedById !== userId ? 'Xem & Phản hồi yêu cầu hủy' : 'Chi tiết / Rút lại yêu cầu'}
                             <ArrowRight size={14} />
                           </button>
                         </div>

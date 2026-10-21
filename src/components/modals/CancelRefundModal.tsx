@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { X, AlertTriangle, Info, CheckCircle2, ShieldAlert, Scale, MessageSquare } from 'lucide-react';
+import { X, AlertTriangle, Info, CheckCircle2, ShieldAlert, Scale, MessageSquare, RotateCcw } from 'lucide-react';
 import { commissionService } from '@/services/commission.service';
 import type { Commission } from '@/types/commission.types';
 
@@ -59,6 +59,24 @@ export default function CancelRefundModal({
 
   const pendingRequest = commission?.cancellationRequestStatus === 'Pending';
   const canRespond = pendingRequest && commission.cancellationRequestedById !== currentUserId;
+
+  const handleWithdraw = async () => {
+    if (!window.confirm('Bạn có chắc chắn muốn rút lại yêu cầu hủy đơn và tiếp tục thực hiện đơn hàng không?')) {
+      return;
+    }
+    setIsSubmitting(true);
+    try {
+      await commissionService.withdrawCancellationRequest(commissionId);
+      setResultMessage('Đã rút lại yêu cầu hủy đơn thành công. Đơn hàng tiếp tục duy trì.');
+      setSuccess(true);
+      setTimeout(() => onSuccess?.(), 1000);
+    } catch (error) {
+      console.error(error);
+      alert('Không thể rút lại yêu cầu hủy đơn.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const handleResponse = async (approve: boolean) => {
     setIsSubmitting(true);
@@ -174,17 +192,26 @@ export default function CancelRefundModal({
                 {commission?.cancellationDetails ? <p className="mt-1 text-xs"><strong>Chi tiết:</strong> {commission.cancellationDetails}</p> : null}
                 {commission?.cancellationRequestExpiresAt ? <p className="mt-1 text-xs"><strong>Hạn phản hồi:</strong> {new Date(commission.cancellationRequestExpiresAt).toLocaleString('vi-VN')}</p> : null}
               </div>
-              <p className="text-xs text-slate-400">{canRespond ? 'Bạn có thể đồng ý hoặc từ chối yêu cầu này.' : 'Đang chờ bên còn lại phản hồi.'}</p>
+              <p className="text-xs text-slate-400">
+                {canRespond
+                  ? 'Bạn có thể đồng ý hoặc từ chối yêu cầu hủy này.'
+                  : 'Đang chờ đối phương phản hồi. Bạn có thể rút lại yêu cầu nếu hai bên đã thống nhất tiếp tục làm việc.'}
+              </p>
             </div>
           ) : !success ? (
             <>
               <div className="p-3.5 bg-red-500/10 border border-red-500/20 rounded-xl flex items-start gap-2.5 text-red-200 text-xs leading-relaxed">
                 <Info className="w-4 h-4 shrink-0 mt-0.5 text-red-400" />
-                <span>
-                  {isUserCreator
-                    ? 'Yêu cầu hủy đơn sẽ giải phóng quỹ ký quỹ Escrow còn lại để hoàn trả về ví của Khách hàng. Các mốc bạn đã hoàn thành và được duyệt trước đó vẫn được bảo lưu doanh thu.'
-                    : 'Yêu cầu hủy sẽ hoàn lại số dư ký quỹ Escrow còn lại về ví của bạn. Các mốc đã duyệt và giải ngân trước đó cho Họa sĩ sẽ không được hoàn trả trực tiếp.'}
-                </span>
+                <div className="space-y-1.5">
+                  <p>
+                    {isUserCreator
+                      ? 'Yêu cầu hủy đơn sẽ giải phóng quỹ ký quỹ Escrow còn lại để hoàn trả về ví của Khách hàng. Các mốc bạn đã hoàn thành và được duyệt trước đó vẫn được bảo lưu doanh thu.'
+                      : 'Yêu cầu hủy sẽ hoàn lại số dư ký quỹ Escrow còn lại về ví của bạn. Các mốc đã duyệt và giải ngân trước đó cho Họa sĩ sẽ không được hoàn trả trực tiếp.'}
+                  </p>
+                  <p className="text-[11px] text-amber-300/90 font-medium pt-1 border-t border-red-500/20">
+                    ⏱️ Yêu cầu sẽ được gửi tới đối phương với thời hạn phản hồi 48 giờ. Bạn có thể rút lại yêu cầu này bất cứ lúc nào khi đối phương chưa phản hồi.
+                  </p>
+                </div>
               </div>
 
               <div>
@@ -281,6 +308,16 @@ export default function CancelRefundModal({
                     Đồng ý hủy đơn
                   </button>
                 </>
+              ) : !success && pendingRequest && !canRespond ? (
+                <button
+                  type="button"
+                  onClick={handleWithdraw}
+                  disabled={isSubmitting}
+                  className="px-4 py-2 rounded-xl text-xs font-semibold border border-amber-500/40 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20 shadow-md transition flex items-center gap-1.5 disabled:opacity-50"
+                >
+                  <RotateCcw size={13} />
+                  <span>{isSubmitting ? 'Đang rút lại...' : 'Rút lại yêu cầu hủy'}</span>
+                </button>
               ) : !success && !pendingRequest ? (
                 <button
                   type="button"

@@ -100,6 +100,10 @@ export const commissionService = {
     const res = await apiClient.patch<ApiResponse<Commission>>(`/commissions/${id}/cancellation-request`, { approve });
     return res.data.data as Commission;
   },
+  withdrawCancellationRequest: async (id: string) => {
+    const res = await apiClient.delete<ApiResponse<Commission>>(`/commissions/${id}/cancellation-request`);
+    return res.data.data as Commission;
+  },
   createReview: async (id: string, payload: { rating: number; comment?: string; attachedImageUrls?: string[] }) => {
     const res = await apiClient.post<ApiResponse<unknown>>(`/commissions/${id}/reviews`, payload);
     return res.data.data;
