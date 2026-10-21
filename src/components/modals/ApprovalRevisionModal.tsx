@@ -308,22 +308,6 @@ export default function ApprovalRevisionModal({
                 Watermarked Preview
               </span>
             </div>
-
-            {/* Redline Visibility Toggle */}
-            {(revisionFeedbackImageUrl || hasDrawn || pins.length > 0) && (
-              <button
-                type="button"
-                onClick={() => setShowRedlineLayer((prev) => !prev)}
-                className={`px-3 py-1.5 rounded-xl border text-[11px] font-bold backdrop-blur-md flex items-center gap-1.5 transition-colors ${
-                  showRedlineLayer
-                    ? 'bg-rose-500/20 text-rose-300 border-rose-500/30'
-                    : 'bg-black/60 text-slate-400 border-white/10 hover:text-white'
-                }`}
-              >
-                {showRedlineLayer ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
-                <span>{showRedlineLayer ? 'Redline (Bật)' : 'Redline (Tắt)'}</span>
-              </button>
-            )}
           </div>
 
           {/* Interactive Artwork Wrapper */}
@@ -388,6 +372,25 @@ export default function ApprovalRevisionModal({
                   )}
                 </div>
               ))}
+
+            {/* Redline Visibility Toggle (Bottom-Right corner of image, simple icon only) */}
+            {(revisionFeedbackImageUrl || hasDrawn || pins.length > 0) && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowRedlineLayer((prev) => !prev);
+                }}
+                title={showRedlineLayer ? 'Ẩn nét vẽ Redline' : 'Hiện nét vẽ Redline'}
+                className={`absolute bottom-3 right-3 z-30 w-8 h-8 rounded-xl border backdrop-blur-md flex items-center justify-center transition-all shadow-lg ${
+                  showRedlineLayer
+                    ? 'bg-rose-500/25 text-rose-300 border-rose-500/40 hover:bg-rose-500/35'
+                    : 'bg-black/70 text-slate-400 border-white/15 hover:text-white hover:bg-black/90'
+                }`}
+              >
+                {showRedlineLayer ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+              </button>
+            )}
           </div>
 
           {/* Floating Toolbar when in Revise Mode */}
