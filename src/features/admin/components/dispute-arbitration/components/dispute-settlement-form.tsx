@@ -241,49 +241,85 @@ export function DisputeSettlementForm({
             </div>
           </div>
 
-          {/* Quick Preset Buttons */}
+          {/* Quick Preset Buttons & Negotiation Offers */}
           {!isResolved && (
-            <div className="pt-2 border-t border-white/5 flex items-center gap-2">
-              <span className="text-[10px] text-[#8A8FA9] font-medium shrink-0">Presets:</span>
-              <div className="flex items-center gap-1.5 flex-wrap">
-                <button
-                  type="button"
-                  disabled={isSubmitting}
-                  onClick={() => setClientRefundPercent(100)}
-                  className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all border ${
-                    clientRefundPercent === 100
-                      ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 shadow-sm'
-                      : 'bg-white/5 text-[#8A8FA9] border-white/5 hover:bg-white/10 hover:text-white'
-                  }`}
-                >
-                  100% Client
-                </button>
+            <div className="pt-2 border-t border-white/5 space-y-2">
+              {(dispute.claimantRefundPercent != null || dispute.respondentRefundPercent != null) && (
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-[10px] text-[#8A8FA9] font-medium shrink-0">Offers:</span>
+                  {dispute.claimantRefundPercent != null && (
+                    <button
+                      type="button"
+                      disabled={isSubmitting}
+                      onClick={() => setClientRefundPercent(dispute.claimantRefundPercent!)}
+                      className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all border ${
+                        clientRefundPercent === dispute.claimantRefundPercent
+                          ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 shadow-sm'
+                          : 'bg-amber-500/10 text-amber-300/80 border-amber-500/20 hover:bg-amber-500/20'
+                      }`}
+                    >
+                      Bên khiếu nại: {dispute.claimantRefundPercent}% hoàn khách
+                    </button>
+                  )}
+                  {dispute.respondentRefundPercent != null && (
+                    <button
+                      type="button"
+                      disabled={isSubmitting}
+                      onClick={() => setClientRefundPercent(dispute.respondentRefundPercent!)}
+                      className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all border ${
+                        clientRefundPercent === dispute.respondentRefundPercent
+                          ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40 shadow-sm'
+                          : 'bg-cyan-500/10 text-cyan-300/80 border-cyan-500/20 hover:bg-cyan-500/20'
+                      }`}
+                    >
+                      Bên phản hồi: {dispute.respondentRefundPercent}% hoàn khách
+                    </button>
+                  )}
+                </div>
+              )}
 
-                <button
-                  type="button"
-                  disabled={isSubmitting}
-                  onClick={() => setClientRefundPercent(50)}
-                  className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all border ${
-                    clientRefundPercent === 50
-                      ? 'bg-purple-500/20 text-purple-300 border-purple-500/40 shadow-sm'
-                      : 'bg-white/5 text-[#8A8FA9] border-white/5 hover:bg-white/10 hover:text-white'
-                  }`}
-                >
-                  50 / 50 Split
-                </button>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] text-[#8A8FA9] font-medium shrink-0">Presets:</span>
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <button
+                    type="button"
+                    disabled={isSubmitting}
+                    onClick={() => setClientRefundPercent(100)}
+                    className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all border ${
+                      clientRefundPercent === 100
+                        ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 shadow-sm'
+                        : 'bg-white/5 text-[#8A8FA9] border-white/5 hover:bg-white/10 hover:text-white'
+                    }`}
+                  >
+                    100% Client
+                  </button>
 
-                <button
-                  type="button"
-                  disabled={isSubmitting}
-                  onClick={() => setClientRefundPercent(0)}
-                  className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all border ${
-                    clientRefundPercent === 0
-                      ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40 shadow-sm'
-                      : 'bg-white/5 text-[#8A8FA9] border-white/5 hover:bg-white/10 hover:text-white'
-                  }`}
-                >
-                  100% Creator
-                </button>
+                  <button
+                    type="button"
+                    disabled={isSubmitting}
+                    onClick={() => setClientRefundPercent(50)}
+                    className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all border ${
+                      clientRefundPercent === 50
+                        ? 'bg-purple-500/20 text-purple-300 border-purple-500/40 shadow-sm'
+                        : 'bg-white/5 text-[#8A8FA9] border-white/5 hover:bg-white/10 hover:text-white'
+                    }`}
+                  >
+                    50 / 50 Split
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={isSubmitting}
+                    onClick={() => setClientRefundPercent(0)}
+                    className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all border ${
+                      clientRefundPercent === 0
+                        ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40 shadow-sm'
+                        : 'bg-white/5 text-[#8A8FA9] border-white/5 hover:bg-white/10 hover:text-white'
+                    }`}
+                  >
+                    100% Creator
+                  </button>
+                </div>
               </div>
             </div>
           )}

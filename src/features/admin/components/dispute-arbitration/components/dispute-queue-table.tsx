@@ -38,6 +38,20 @@ function formatCurrency(amount: number): string {
 
 function getStatusBadge(status: DisputeStatus) {
   switch (status) {
+    case 'Negotiating':
+      return (
+        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 text-[10px] font-bold">
+          <Clock className="w-3 h-3" />
+          Negotiating
+        </span>
+      );
+    case 'MutualSettled':
+      return (
+        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 text-[10px] font-bold">
+          <CheckCircle2 className="w-3 h-3" />
+          Mutual Settled
+        </span>
+      );
     case 'Pending':
       return (
         <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30 text-[10px] font-bold">

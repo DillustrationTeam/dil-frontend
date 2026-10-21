@@ -83,12 +83,24 @@ export interface Dispute {
   clientRefundAmount?: number | null;
   artistPayAmount?: number | null;
   clientRefundPercent?: number | null;
+  claimantRefundPercent?: number | null;
+  respondentRefundPercent?: number | null;
+  respondentResponse?: string | null;
+  respondentEvidenceUrls?: string | null;
+  respondentRespondedAt?: string | null;
   adminNote?: string | null;
   resolvedAt?: string | null;
   createdAt: string;
 }
 
 export type CommissionDispute = Dispute;
+
+export interface RespondDisputePayload {
+  action: 'Accept' | 'Counter';
+  counterRefundPercent?: number;
+  response?: string;
+  evidenceUrls?: string[];
+}
 
 export interface RespondToCommissionPayload {
   action: 'Accept' | 'Reject' | 'Negotiate';

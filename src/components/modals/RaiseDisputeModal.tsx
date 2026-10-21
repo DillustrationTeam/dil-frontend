@@ -20,6 +20,7 @@ export default function RaiseDisputeModal({
 }: RaiseDisputeModalProps) {
   const [reasonCategory, setReasonCategory] = useState('');
   const [details, setDetails] = useState('');
+  const [claimantRefundPercent, setClaimantRefundPercent] = useState<number>(100);
   const [evidenceUrlInput, setEvidenceUrlInput] = useState('');
   const [reasonError, setReasonError] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -55,6 +56,7 @@ export default function RaiseDisputeModal({
       await commissionService.createDispute(commissionId, {
         reason: fullReason,
         evidenceUrls,
+        claimantRefundPercent,
       });
 
       setSuccess(true);
@@ -152,6 +154,74 @@ export default function RaiseDisputeModal({
                     <AlertCircle className="w-3.5 h-3.5 shrink-0" /> {reasonError}
                   </p>
                 )}
+              </div>
+
+              {/* Proposed Settlement Percentage */}
+              <div className="p-4 bg-white/[0.03] border border-white/10 rounded-2xl space-y-3">
+                <div className="flex items-center justify-between">
+                  <label className="text-[11px] font-space-grotesk font-bold text-slate-300 uppercase tracking-wider">
+                    Đề xuất tỷ lệ hoàn tiền cho Khách hàng
+                  </label>
+                  <span className="text-sm font-bold text-amber-400 font-mono">
+                    {claimantRefundPercent}%
+                  </span>
+                </div>
+
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  step="5"
+                  value={claimantRefundPercent}
+                  onChange={(e) => setClaimantRefundPercent(Number(e.target.value))}
+                  className="w-full accent-amber-500 cursor-pointer"
+                />
+
+                <div className="flex items-center justify-between text-[11px] text-slate-400">
+                  <button
+                    type="button"
+                    onClick={() => setClaimantRefundPercent(100)}
+                    className={`px-2 py-1 rounded-md border text-[11px] transition-colors ${
+                      claimantRefundPercent === 100
+                        ? 'border-amber-400/50 bg-amber-400/10 text-amber-300'
+                        : 'border-white/10 hover:bg-white/5'
+                    }`}
+                  >
+                    Hoàn 100% (Khách)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setClaimantRefundPercent(50)}
+                    className={`px-2 py-1 rounded-md border text-[11px] transition-colors ${
+                      claimantRefundPercent === 50
+                        ? 'border-amber-400/50 bg-amber-400/10 text-amber-300'
+                        : 'border-white/10 hover:bg-white/5'
+                    }`}
+                  >
+                    Chia đôi 50/50
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setClaimantRefundPercent(0)}
+                    className={`px-2 py-1 rounded-md border text-[11px] transition-colors ${
+                      claimantRefundPercent === 0
+                        ? 'border-amber-400/50 bg-amber-400/10 text-amber-300'
+                        : 'border-white/10 hover:bg-white/5'
+                    }`}
+                  >
+                    Trả 100% (Creator)
+                  </button>
+                </div>
+
+                <div className="text-[11px] text-slate-400 bg-white/5 p-2.5 rounded-xl border border-white/5 space-y-1">
+                  <div className="flex justify-between">
+                    <span>Khách nhận lại: <strong className="text-white">{claimantRefundPercent}%</strong></span>
+                    <span>Họa sĩ nhận: <strong className="text-white">{100 - claimantRefundPercent}%</strong></span>
+                  </div>
+                  <p className="text-[10px] text-slate-500">
+                    * Hai bên sẽ thương lượng trực tiếp trước. Nếu đối phương đồng ý mức này, hệ thống sẽ tự động tất toán tiền Escrow ngay mà không cần chờ Ban Quản trị.
+                  </p>
+                </div>
               </div>
 
               <div>

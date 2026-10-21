@@ -1,4 +1,4 @@
-export type DisputeStatus = 'All' | 'Pending' | 'UnderReview' | 'Resolved';
+export type DisputeStatus = 'All' | 'Negotiating' | 'Pending' | 'UnderReview' | 'MutualSettled' | 'Resolved';
 
 export type DisputeResolutionType = 'ClientWin100' | 'ArtistWin100' | 'SplitCustom' | `Split_${number}_${number}`;
 
@@ -88,6 +88,11 @@ export interface DisputeArbitrationDetailDto {
   clientRefundAmount?: number | null;
   artistPayAmount?: number | null;
   clientRefundPercent?: number | null;
+  claimantRefundPercent?: number | null;
+  respondentRefundPercent?: number | null;
+  respondentResponse?: string | null;
+  respondentEvidenceUrls?: string[];
+  respondentRespondedAt?: string | null;
   adminNote?: string | null;
   moderatorId?: string | null;
   moderatorName?: string | null;

@@ -117,20 +117,31 @@ export function DisputeEvidencePanel({ dispute }: DisputeEvidencePanelProps) {
                 CL
               </div>
               <span className="font-bold text-emerald-400 text-xs">
-                Client Claim (@{dispute.client.userName}):
+                Client {isClientRaiser ? 'Claim (Filer)' : 'Response'}:
               </span>
-              {isClientRaiser && (
-                <span className="text-[9px] px-1.5 py-0.2 rounded bg-emerald-500/30 text-emerald-200 font-bold uppercase">
-                  Filer
-                </span>
+              <span className="text-xs text-white">@{dispute.client.userName}</span>
+              {isClientRaiser ? (
+                dispute.claimantRefundPercent != null && (
+                  <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/30 text-emerald-200 font-bold font-mono">
+                    Đề xuất hoàn: {dispute.claimantRefundPercent}%
+                  </span>
+                )
+              ) : (
+                dispute.respondentRefundPercent != null && (
+                  <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/30 text-emerald-200 font-bold font-mono">
+                    Đề xuất phản hồi: {dispute.respondentRefundPercent}%
+                  </span>
+                )
               )}
             </div>
             <span className="text-[10px] text-emerald-300/80 font-mono">
               {dispute.client.email}
             </span>
           </div>
-          <p className="text-xs text-emerald-100/90 leading-relaxed font-body">
-            &ldquo;{dispute.reason}&rdquo;
+          <p className="text-xs text-emerald-100/90 leading-relaxed font-body whitespace-pre-wrap">
+            {isClientRaiser
+              ? dispute.reason
+              : dispute.respondentResponse || 'Chưa gửi văn bản phản hồi riêng. Xem trao đổi công việc trong lịch sử chat Workroom bên dưới.'}
           </p>
         </div>
 
@@ -142,22 +153,31 @@ export function DisputeEvidencePanel({ dispute }: DisputeEvidencePanelProps) {
                 CR
               </div>
               <span className="font-bold text-amber-300 text-xs">
-                Creator Claim (@{creatorUserDisplay}):
+                Creator {!isClientRaiser ? 'Claim (Filer)' : 'Response'}:
               </span>
-              {!isClientRaiser && (
-                <span className="text-[9px] px-1.5 py-0.2 rounded bg-amber-500/30 text-amber-200 font-bold uppercase">
-                  Filer
-                </span>
+              <span className="text-xs text-white">@{creatorUserDisplay}</span>
+              {!isClientRaiser ? (
+                dispute.claimantRefundPercent != null && (
+                  <span className="text-[10px] px-2 py-0.5 rounded bg-amber-500/30 text-amber-200 font-bold font-mono">
+                    Đề xuất hoàn khách: {dispute.claimantRefundPercent}%
+                  </span>
+                )
+              ) : (
+                dispute.respondentRefundPercent != null && (
+                  <span className="text-[10px] px-2 py-0.5 rounded bg-amber-500/30 text-amber-200 font-bold font-mono">
+                    Đề xuất hoàn khách: {dispute.respondentRefundPercent}%
+                  </span>
+                )
               )}
             </div>
             <span className="text-[10px] text-amber-300/80 font-mono">
               {creatorEmailDisplay}
             </span>
           </div>
-          <p className="text-xs text-amber-100/90 leading-relaxed font-body">
+          <p className="text-xs text-amber-100/90 leading-relaxed font-body whitespace-pre-wrap">
             {!isClientRaiser
-              ? `\u201C${dispute.reason}\u201D`
-              : 'Chưa có văn bản khiếu nại riêng từ Creator. Xem trao đổi công việc trong lịch sử chat Workroom bên dưới.'}
+              ? dispute.reason
+              : dispute.respondentResponse || 'Chưa gửi văn bản phản hồi riêng. Xem trao đổi công việc trong lịch sử chat Workroom bên dưới.'}
           </p>
         </div>
       </div>
@@ -284,8 +304,8 @@ export function DisputeEvidencePanel({ dispute }: DisputeEvidencePanelProps) {
       {dispute.evidenceUrls.length > 0 && (
         <div className="space-y-2">
           <label className="text-xs font-bold text-white flex items-center gap-1.5">
-            <ImageIcon className="w-3.5 h-3.5 text-[#A7ACD9]" />
-            Submitted Evidence Screenshots & Deliverables
+            <ImageIcon className="w-3.5 h-3.5 text-emerald-400" />
+            Bằng chứng từ Bên khiếu nại (Claimant Evidence)
           </label>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             {dispute.evidenceUrls.map((url, index) => (
@@ -294,11 +314,43 @@ export function DisputeEvidencePanel({ dispute }: DisputeEvidencePanelProps) {
                 href={url}
                 target="_blank"
                 rel="noreferrer"
-                className="group relative block aspect-video rounded-xl overflow-hidden border border-white/10 bg-black/40 hover:border-red-400/50 transition-all"
+                className="group relative block aspect-video rounded-xl overflow-hidden border border-white/10 bg-black/40 hover:border-emerald-400/50 transition-all"
               >
                 <Image
                   src={url}
                   alt={`Evidence item ${index + 1}`}
+                  fill
+                  sizes="(max-width: 768px) 50vw, 25vw"
+                  className="object-cover group-hover:scale-105 transition-transform"
+                />
+                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                  <ExternalLink className="w-4 h-4 text-white" />
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* 5. Respondent Evidence Attachments Gallery */}
+      {dispute.respondentEvidenceUrls && dispute.respondentEvidenceUrls.length > 0 && (
+        <div className="space-y-2">
+          <label className="text-xs font-bold text-white flex items-center gap-1.5">
+            <ImageIcon className="w-3.5 h-3.5 text-cyan-400" />
+            Bằng chứng đối ứng từ Bên phản hồi (Respondent Evidence)
+          </label>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            {dispute.respondentEvidenceUrls.map((url, index) => (
+              <a
+                key={index}
+                href={url}
+                target="_blank"
+                rel="noreferrer"
+                className="group relative block aspect-video rounded-xl overflow-hidden border border-white/10 bg-black/40 hover:border-cyan-400/50 transition-all"
+              >
+                <Image
+                  src={url}
+                  alt={`Respondent evidence item ${index + 1}`}
                   fill
                   sizes="(max-width: 768px) 50vw, 25vw"
                   className="object-cover group-hover:scale-105 transition-transform"
