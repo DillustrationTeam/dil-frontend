@@ -100,7 +100,7 @@ export function PublishTab() {
             title: item.title || item.submissionTitle || 'Untitled Artwork',
             submitterName: item.submitterName || 'Artist',
             artworkImageUrl: item.artworkImageUrl || item.artworkThumbnailUrl,
-            score: typeof item.score === 'number' ? item.score : typeof item.judgeScore === 'number' ? item.judgeScore : null,
+            score: typeof item.score === 'number' && item.score > 0 ? item.score : typeof item.judgeScore === 'number' && item.judgeScore > 0 ? item.judgeScore : null,
             voteCount: item.voteCount ?? 0,
             rank: item.rank || idx + 1,
           }))
@@ -116,7 +116,7 @@ export function PublishTab() {
             title: item.title || 'Untitled Artwork',
             submitterName: item.submitterName || 'Artist',
             artworkImageUrl: item.artworkImageUrl || item.artworkThumbnailUrl,
-            score: typeof item.score === 'number' ? item.score : null,
+            score: typeof item.score === 'number' && item.score > 0 ? item.score : null,
             voteCount: item.voteCount ?? 0,
             rank: idx + 1,
           }))

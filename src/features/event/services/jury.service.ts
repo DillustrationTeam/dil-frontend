@@ -62,6 +62,27 @@ export const juryService = {
   },
 
   /**
+   * Fetch user's jury assignments across all events
+   */
+  getMyJuryAssignments: async (userId: string, creatorId?: string): Promise<JuryMemberInfo[]> => {
+    try {
+      const response = await apiClient.get<ApiResponse<unknown>>('/juries', {
+        params: { userId, creatorId, pageSize: 100 },
+      });
+      const data = response.data?.data;
+      if (Array.isArray(data)) {
+        return data as JuryMemberInfo[];
+      }
+      if (data && typeof data === 'object' && 'items' in data && Array.isArray((data as { items: unknown[] }).items)) {
+        return (data as { items: JuryMemberInfo[] }).items;
+      }
+    } catch {
+      // Fallback
+    }
+    return [];
+  },
+
+  /**
    * Fetch submissions assigned to the jury for the event
    */
   getAssignedSubmissions: async (
@@ -109,7 +130,7 @@ export const juryService = {
             noConflictOfInterest: draft?.noConflictOfInterest ?? true,
             nominateSpecialAward: draft?.nominateSpecialAward ?? false,
             specialAwardCategory: draft?.specialAwardCategory,
-            isLocked: draft?.isLocked ?? false,
+            isLocked: Boolean(draft?.isLocked || hasScore),
           };
         });
       }
@@ -127,6 +148,11 @@ export const juryService = {
     try {
       if (typeof window === 'undefined') return;
       const key = `${DRAFT_STORAGE_PREFIX}${eventId}_${submissionId}`;
+      const existing = juryService.getDraft(eventId, submissionId);
+      if (existing?.isLocked && !draft.isLocked) {
+        // Prevent unlocking an already locked draft via saveDraft
+        return;
+      }
       window.localStorage.setItem(key, JSON.stringify(draft));
     } catch {
       // Ignore localStorage errors
@@ -182,7 +208,12 @@ export const juryService = {
     submissionId: string,
     data: SubmitScoreRequest
   ): Promise<SubmissionScoreResponse> => {
-    // Save draft locally as locked
+    const response = await apiClient.post<ApiResponse<SubmissionScoreResponse>>(
+      `/event-submissions/${submissionId}/score`,
+      data
+    );
+
+    // Save draft locally as locked only after successful submission
     const draft: JuryEvaluationDraft = {
       submissionId,
       totalScore: data.totalScore,
@@ -199,10 +230,6 @@ export const juryService = {
     };
     juryService.saveDraft(eventId, submissionId, draft);
 
-    const response = await apiClient.post<ApiResponse<SubmissionScoreResponse>>(
-      `/event-submissions/${submissionId}/score`,
-      data
-    );
     if (response.data?.data) {
       return response.data.data;
     }
