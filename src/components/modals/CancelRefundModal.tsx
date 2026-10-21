@@ -38,7 +38,7 @@ export default function CancelRefundModal({
   const isUserCreator = isCreator ?? (commission && currentUserId ? commission.clientId !== currentUserId : false);
 
   const handleCancel = async () => {
-    if (!reason) return alert('Please select a reason.');
+    if (!reason) return alert('Vui lòng chọn lý do hủy đơn.');
     setIsSubmitting(true);
     try {
       const updated = await commissionService.cancelWithPolicy(commissionId, { cancellationReason: reason, details });
@@ -51,7 +51,7 @@ export default function CancelRefundModal({
       }, 1500);
     } catch (error) {
       console.error(error);
-      alert('Failed to cancel commission.');
+      alert('Không thể gửi yêu cầu hủy đơn.');
     } finally {
       setIsSubmitting(false);
     }
@@ -89,8 +89,20 @@ export default function CancelRefundModal({
               <AlertTriangle className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-sm font-space-grotesk font-bold text-white">Cancel Commission</h3>
-              <p className="text-[11px] text-slate-400">Request cancellation & refund</p>
+              <h3 className="text-sm font-space-grotesk font-bold text-white">
+                {pendingRequest
+                  ? canRespond
+                    ? 'Phản hồi yêu cầu hủy đơn'
+                    : 'Yêu cầu hủy đang chờ phản hồi'
+                  : 'Yêu cầu hủy đơn hàng'}
+              </h3>
+              <p className="text-[11px] text-slate-400">
+                {pendingRequest
+                  ? canRespond
+                    ? 'Xem lý do và lựa chọn đồng ý hoặc từ chối hủy'
+                    : 'Đang chờ đối phương phản hồi'
+                  : 'Yêu cầu hủy đơn & xử lý quỹ ký quỹ'}
+              </p>
             </div>
           </div>
           <button
@@ -231,7 +243,7 @@ export default function CancelRefundModal({
               <div className="w-12 h-12 mx-auto rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center border border-emerald-500/30">
                 <CheckCircle2 className="w-6 h-6" />
               </div>
-              <h4 className="text-sm font-bold text-white">Cancellation Processed!</h4>
+              <h4 className="text-sm font-bold text-white">Đã xử lý yêu cầu!</h4>
               <p className="text-xs text-slate-400">{resultMessage}</p>
             </div>
           )}
@@ -239,27 +251,47 @@ export default function CancelRefundModal({
 
         {/* Footer */}
         {!showDisputePrompt && (
-          <div className="px-6 py-4 border-t border-white/10 bg-[#161926]/80 flex justify-end gap-2">
+          <div className="px-6 py-4 border-t border-white/10 bg-[#161926]/80 flex items-center justify-between gap-3">
             <button
+              type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-xl text-xs font-semibold border border-white/10 text-slate-300 hover:bg-white/5"
+              disabled={isSubmitting}
+              className="px-4 py-2 rounded-xl text-xs font-semibold border border-white/10 text-slate-300 hover:bg-white/5 disabled:opacity-50 transition"
             >
-              {success ? 'Close' : 'Keep Commission'}
+              {success ? 'Đóng' : pendingRequest && canRespond ? 'Để sau (Đóng)' : 'Đóng'}
             </button>
-            {!success && pendingRequest && canRespond ? (
-              <>
-                <button onClick={() => handleResponse(false)} disabled={isSubmitting} className="px-4 py-2 rounded-xl text-xs font-semibold border border-white/10 text-slate-300 hover:bg-white/5 disabled:opacity-50">Từ chối</button>
-                <button onClick={() => handleResponse(true)} disabled={isSubmitting} className="px-5 py-2 rounded-xl text-xs font-semibold bg-red-500 text-white hover:bg-red-600 disabled:opacity-50">Đồng ý hủy</button>
-              </>
-            ) : !success && !pendingRequest ? (
-              <button
-                onClick={handleCancel}
-                disabled={isSubmitting || !reason}
-                className="px-5 py-2 rounded-xl text-xs font-semibold bg-red-500 text-white shadow-lg shadow-red-500/25 hover:bg-red-600 transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isSubmitting ? 'Processing...' : 'Confirm Cancel & Refund'}
-              </button>
-            ) : null}
+
+            <div className="flex items-center gap-2.5">
+              {!success && pendingRequest && canRespond ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => handleResponse(false)}
+                    disabled={isSubmitting}
+                    className="px-4 py-2 rounded-xl text-xs font-semibold border border-amber-500/30 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20 transition disabled:opacity-50"
+                  >
+                    Từ chối hủy (Tiếp tục đơn)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleResponse(true)}
+                    disabled={isSubmitting}
+                    className="px-5 py-2 rounded-xl text-xs font-semibold bg-red-500 hover:bg-red-600 text-white shadow-lg shadow-red-500/25 transition disabled:opacity-50"
+                  >
+                    Đồng ý hủy đơn
+                  </button>
+                </>
+              ) : !success && !pendingRequest ? (
+                <button
+                  type="button"
+                  onClick={handleCancel}
+                  disabled={isSubmitting || !reason}
+                  className="px-5 py-2 rounded-xl text-xs font-semibold bg-red-500 text-white shadow-lg shadow-red-500/25 hover:bg-red-600 transition flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isSubmitting ? 'Đang xử lý...' : 'Xác nhận hủy & Hoàn tiền'}
+                </button>
+              ) : null}
+            </div>
           </div>
         )}
       </div>
