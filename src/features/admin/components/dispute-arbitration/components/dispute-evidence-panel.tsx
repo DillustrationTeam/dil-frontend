@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
 import {
   FileText,
@@ -8,8 +8,11 @@ import {
   Layers,
   Image as ImageIcon,
   ExternalLink,
+  Sparkles,
+  Loader2,
 } from 'lucide-react';
 import { DisputeArbitrationDetailDto } from '@/features/admin/types/dispute-arbitration.types';
+import { aiService } from '@/features/ai-assistant/services/ai.service';
 
 export interface DisputeEvidencePanelProps {
   dispute: DisputeArbitrationDetailDto;
@@ -24,6 +27,10 @@ function formatCurrency(amount: number): string {
 }
 
 export function DisputeEvidencePanel({ dispute }: DisputeEvidencePanelProps) {
+  const [aiSummary, setAiSummary] = useState<string | null>(null);
+  const [loadingAi, setLoadingAi] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
+
   const isClientRaiser = dispute.raisedBy?.role === 'Client';
   const creatorDisplay =
     dispute.creator.fullName !== 'Unknown' && dispute.creator.fullName
@@ -34,6 +41,22 @@ export function DisputeEvidencePanel({ dispute }: DisputeEvidencePanelProps) {
     dispute.creator.userName || creatorDisplay.toLowerCase().replace(/\s+/g, '');
   const creatorEmailDisplay =
     dispute.creator.email || (creatorUserDisplay ? `${creatorUserDisplay}@dillustration.vn` : 'N/A');
+
+  const handleFetchAiSummary = async () => {
+    setLoadingAi(true);
+    setAiError(null);
+    try {
+      const res = await aiService.disputeSummary(dispute.disputeId);
+      if (res?.summary) {
+        setAiSummary(res.summary);
+      }
+    } catch (err) {
+      console.error('Failed to get dispute summary', err);
+      setAiError('Không thể tạo bản tóm tắt tranh chấp lúc này. Vui lòng thử lại sau.');
+    } finally {
+      setLoadingAi(false);
+    }
+  };
 
   return (
     <div className="glass-container bg-[#161926]/85 backdrop-blur-[32px] border border-white/10 rounded-[28px] p-6 space-y-6">
@@ -47,6 +70,41 @@ export function DisputeEvidencePanel({ dispute }: DisputeEvidencePanelProps) {
         <span className="text-[11px] text-[#8A8FA9] font-mono">
           Case ID: #{dispute.disputeId.substring(0, 8).toUpperCase()}
         </span>
+      </div>
+
+      {/* AI Dispute Summarizer (AI-UC56) */}
+      <div className="p-4 rounded-2xl bg-gradient-to-r from-purple-500/10 via-indigo-500/10 to-transparent border border-purple-500/20 space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-purple-400" />
+            <h4 className="text-xs font-bold text-white uppercase tracking-wider">
+              AI Dispute Arbitration Assistant
+            </h4>
+          </div>
+          <button
+            type="button"
+            disabled={loadingAi}
+            onClick={handleFetchAiSummary}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-purple-500/20 text-purple-200 border border-purple-500/30 hover:bg-purple-500/30 transition-colors disabled:opacity-50"
+          >
+            {loadingAi ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+            <span>{loadingAi ? 'Đang tóm tắt…' : aiSummary ? 'Tóm tắt lại' : '✨ Tóm tắt tranh chấp bằng AI'}</span>
+          </button>
+        </div>
+
+        {aiError && (
+          <p className="text-xs text-red-300 bg-red-500/10 p-2 rounded-lg border border-red-500/20">{aiError}</p>
+        )}
+
+        {aiSummary ? (
+          <div className="text-xs text-slate-200 leading-relaxed whitespace-pre-line bg-black/40 p-4 rounded-xl border border-white/5 font-body">
+            {aiSummary}
+          </div>
+        ) : !loadingAi ? (
+          <p className="text-[11px] text-[#8A8FA9]">
+            Bấm nút để AI tự động đọc và phân tích toàn bộ mốc vẽ, trao đổi chat và khiếu nại giữa 2 bên.
+          </p>
+        ) : null}
       </div>
 
       {/* 1. Client Claim & Creator Claim Statement Boxes */}
