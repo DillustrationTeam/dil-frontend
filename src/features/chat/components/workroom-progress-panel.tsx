@@ -79,12 +79,14 @@ export function WorkroomProgressPanel({
   allApproved,
   isCancelled,
   totalMilestones,
+  isCancellationPending,
 }: {
   commissionId: string;
   onCancelClick?: () => void;
   allApproved?: boolean;
   isCancelled?: boolean;
   totalMilestones?: number;
+  isCancellationPending?: boolean;
 }) {
   const [risk, setRisk] = useState<DeadlineRiskDto | null>(null);
   const [loading, setLoading] = useState(true);
@@ -239,10 +241,14 @@ export function WorkroomProgressPanel({
             <button
               type="button"
               onClick={onCancelClick}
-              className="inline-flex items-center gap-1 rounded-full border border-red-500/40 bg-red-500/10 px-3 py-1 font-semibold text-red-300 hover:bg-red-500/20 transition"
-              title="Hủy đơn hàng hoặc mở khiếu nại"
+              className={`inline-flex items-center gap-1 rounded-full border px-3 py-1 font-semibold transition ${
+                isCancellationPending
+                  ? 'border-rose-400 bg-rose-500/20 text-rose-300 animate-pulse shadow-[0_0_10px_rgba(244,63,94,0.3)]'
+                  : 'border-red-500/40 bg-red-500/10 text-red-300 hover:bg-red-500/20'
+              }`}
+              title={isCancellationPending ? 'Đang có yêu cầu hủy đơn cần phản hồi' : 'Hủy đơn hàng hoặc mở khiếu nại'}
             >
-              <CircleAlert size={12} /> Hủy đơn / Khiếu nại
+              <CircleAlert size={12} /> {isCancellationPending ? 'Phản hồi hủy đơn' : 'Hủy đơn / Khiếu nại'}
             </button>
           )}
         </div>

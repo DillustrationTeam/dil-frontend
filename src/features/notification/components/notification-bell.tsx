@@ -38,14 +38,23 @@ function getIcon(type: string, size = 15) {
 
 /** RefType backend ghi theo tên entity (VD: "Auction", "PaymentOrder", "PayoutRequest"). */
 function getRefLink({ refType, refId, notificationType, notificationTitle, body }: NotificationDto): string | null {
-  if (!refType) return null;
-  const key = refType.toLowerCase();
+  if (!refType && !refId) return null;
+  const key = refType?.toLowerCase() ?? '';
+  const title = (notificationTitle ?? '').toLowerCase();
+  const text = (body ?? '').toLowerCase();
+
   if (key === 'auction' && refId) return `/auctions/${refId}`;
   if (key === 'paymentorder') return '/wallet';
   if (key === 'payoutrequest') return '/payout';
   if (key === 'creatorcommissionrequests') return '/creator/requests';
   if (key === 'clientcommissionrequest' && refId) return `/client/requests/${refId}`;
   if (key === 'commissioncheckout' && refId) return `/payment/checkout/${refId}`;
+
+  // Yêu cầu hủy đơn hoặc Tranh chấp commission
+  if ((title.includes('hủy') || title.includes('tranh chấp') || notificationType === 'DisputeStatusChanged') && refId) {
+    return `/workroom/${refId}?action=cancellation`;
+  }
+
   if (key === 'commission' && refId && notificationType === 'CommissionStatusChanged') {
     if (notificationTitle === 'Bạn có yêu cầu đặt vẽ mới' || notificationTitle === 'Khách hàng đã phản hồi đề nghị giá') {
       return '/creator/requests';
@@ -54,6 +63,12 @@ function getRefLink({ refType, refId, notificationType, notificationTitle, body 
   }
   if (key === 'commission' && refId) return `/workroom/${refId}`;
   if (key === 'chatroom' && refId) return `/workroom/${refId}`;
+
+  // Fallback nếu refId tồn tại và nội dung liên quan tới đơn hàng/commission
+  if (refId && (title.includes('đơn') || text.includes('commission') || text.includes('vẽ'))) {
+    return `/workroom/${refId}`;
+  }
+
   return null;
 }
 
@@ -191,7 +206,13 @@ export function NotificationBell({
       }
     }
     setOpen(false);
-    if (target) router.push(target);
+    if (target) {
+      if (typeof window !== 'undefined' && window.location.pathname + window.location.search === target) {
+        window.location.reload();
+      } else {
+        router.push(target);
+      }
+    }
   }
 
   async function handleMarkAllRead() {

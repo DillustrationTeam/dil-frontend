@@ -38,14 +38,23 @@ function getIcon(type: string) {
 
 /** RefType backend ghi theo tên entity (VD: "Auction", "PaymentOrder", "PayoutRequest"). */
 function getRefLink({ refType, refId, notificationType, notificationTitle, body }: NotificationDto) {
-  if (!refType) return null;
-  const key = refType.toLowerCase();
+  if (!refType && !refId) return null;
+  const key = refType?.toLowerCase() ?? '';
+  const title = (notificationTitle ?? '').toLowerCase();
+  const text = (body ?? '').toLowerCase();
+
   if (key === 'auction' && refId) return { url: `/auctions/${refId}`, label: 'Xem phiên đấu giá' };
   if (key === 'paymentorder') return { url: '/wallet', label: 'Xem ví cá nhân' };
   if (key === 'payoutrequest') return { url: '/payout', label: 'Xem yêu cầu rút tiền' };
   if (key === 'creatorcommissionrequests') return { url: '/creator/requests', label: 'Xem yêu cầu đặt vẽ' };
   if (key === 'clientcommissionrequest' && refId) return { url: `/client/requests/${refId}`, label: 'Xem yêu cầu đặt vẽ' };
   if (key === 'commissioncheckout' && refId) return { url: `/payment/checkout/${refId}`, label: 'Tiến hành ký quỹ' };
+
+  // Yêu cầu hủy đơn hoặc Tranh chấp commission
+  if ((title.includes('hủy') || title.includes('tranh chấp') || notificationType === 'DisputeStatusChanged') && refId) {
+    return { url: `/workroom/${refId}?action=cancellation`, label: 'Xem & Phản hồi yêu cầu hủy' };
+  }
+
   if (key === 'commission' && refId && notificationType === 'CommissionStatusChanged') {
     if (notificationTitle === 'Bạn có yêu cầu đặt vẽ mới' || notificationTitle === 'Khách hàng đã phản hồi đề nghị giá') {
       return { url: '/creator/requests', label: 'Xem yêu cầu đặt vẽ' };
@@ -56,6 +65,11 @@ function getRefLink({ refType, refId, notificationType, notificationTitle, body 
   }
   if (key === 'commission' && refId) return { url: `/workroom/${refId}`, label: 'Mở phòng làm việc' };
   if (key === 'chatroom' && refId) return { url: `/workroom/${refId}`, label: 'Mở cuộc trò chuyện' };
+
+  if (refId && (title.includes('đơn') || text.includes('commission') || text.includes('vẽ'))) {
+    return { url: `/workroom/${refId}`, label: 'Mở phòng làm việc' };
+  }
+
   return null;
 }
 

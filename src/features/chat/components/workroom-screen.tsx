@@ -4,7 +4,9 @@ import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'rea
 import Link from 'next/link';
 import { z } from 'zod';
 import {
+  AlertTriangle,
   ArrowLeft,
+  ArrowRight,
   BookOpen,
   Check,
   CheckCheck,
@@ -135,6 +137,21 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
     checkSpace();
     window.addEventListener('resize', checkSpace);
     return () => window.removeEventListener('resize', checkSpace);
+  }, []);
+
+  // Tự động mở modal hủy đơn nếu URL chứa action=cancellation hoặc action=cancel
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const checkAction = () => {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('action') === 'cancellation' || params.get('action') === 'cancel') {
+          setShowCancelModal(true);
+        }
+      };
+      checkAction();
+      window.addEventListener('popstate', checkAction);
+      return () => window.removeEventListener('popstate', checkAction);
+    }
   }, []);
 
   const currentMemberRole = useMemo(() => {
@@ -435,6 +452,12 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
             } catch { }
           }
           setCommission(c);
+          if (typeof window !== 'undefined') {
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('action') === 'cancellation' || params.get('action') === 'cancel') {
+              setShowCancelModal(true);
+            }
+          }
         } catch { }
       }
       const rawList = [...m.items].reverse();
@@ -688,8 +711,13 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                 type="button"
                 onClick={() => setShowCancelModal(true)}
                 disabled={commissionStatus === 'Completed' || commissionStatus === 'Cancelled' || commissionStatus === 'Disputed'}
-                title="Hủy đơn hàng thông thường"
-                className={`group relative h-[44px] bg-[#1C202D] hover:bg-[#232838] border border-r-0 rounded-l-lg flex items-center justify-end pr-3.5 shadow-xl [clip-path:polygon(10px_0,100%_0,100%_100%,0_100%,0_10px)] [transition:width_0.3s_cubic-bezier(0.34,1.3,0.64,1),background-color_0.2s_ease,border-color_0.2s_ease] cursor-pointer ${!hasLeftSpace
+                title={commission?.cancellationRequestStatus === 'Pending' ? 'Xem & Phản hồi yêu cầu hủy đơn' : 'Hủy đơn hàng thông thường'}
+                className={`group relative h-[44px] bg-[#1C202D] hover:bg-[#232838] border border-r-0 rounded-l-lg flex items-center justify-end pr-3.5 shadow-xl [clip-path:polygon(10px_0,100%_0,100%_100%,0_100%,0_10px)] [transition:width_0.3s_cubic-bezier(0.34,1.3,0.64,1),background-color_0.2s_ease,border-color_0.2s_ease] cursor-pointer ${
+                  commission?.cancellationRequestStatus === 'Pending'
+                    ? !hasLeftSpace
+                      ? 'w-[46px] border-rose-400 bg-rose-500/20 shadow-[0_0_15px_rgba(244,63,94,0.4)] animate-pulse'
+                      : 'w-[145px] border-rose-400 bg-rose-500/20 shadow-[0_0_15px_rgba(244,63,94,0.4)] animate-pulse overflow-hidden'
+                    : !hasLeftSpace
                     ? showCancelModal
                       ? 'w-[46px] border-rose-400 bg-[#232838] shadow-[0_0_12px_rgba(244,63,94,0.35)]'
                       : 'w-[46px] border-[#2F364A] hover:border-rose-400'
@@ -700,20 +728,20 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
               >
                 <span
                   className={`text-xs font-bold text-rose-300 mr-3 pl-3 transition-opacity duration-200 pointer-events-none select-none whitespace-nowrap ${hasLeftSpace
-                      ? showCancelModal
+                      ? (showCancelModal || commission?.cancellationRequestStatus === 'Pending')
                         ? 'opacity-100'
                         : 'opacity-0 group-hover:opacity-100'
                       : 'hidden'
                     }`}
                 >
-                  Hủy đơn
+                  {commission?.cancellationRequestStatus === 'Pending' ? 'Yêu cầu hủy' : 'Hủy đơn'}
                 </span>
                 <div className="flex items-center justify-center shrink-0 w-5">
                   <CircleAlert size={18} className="text-rose-400" />
                 </div>
                 {!hasLeftSpace && (
                   <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none bg-[#161926]/95 border border-rose-500/40 text-rose-300 text-xs font-bold px-2.5 py-1 rounded-lg shadow-2xl backdrop-blur-md whitespace-nowrap z-50">
-                    Hủy đơn thông thường
+                    {commission?.cancellationRequestStatus === 'Pending' ? 'Xem & Phản hồi yêu cầu hủy' : 'Hủy đơn thông thường'}
                   </div>
                 )}
               </button>
@@ -901,6 +929,61 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                     </button>
                   </div>
                 </div>
+
+                {/* BANNER YÊU CẦU HỦY ĐƠN ĐANG CHỜ PHẢN HỒI (PENDING CANCELLATION REQUEST) */}
+                {commission?.cancellationRequestStatus === 'Pending' && (
+                  <div className="relative z-10 my-3 rounded-2xl border border-rose-500/40 bg-gradient-to-r from-rose-950/40 via-[#1F1F22] to-amber-950/30 p-4 text-xs shadow-xl backdrop-blur-md">
+                    <div className="flex items-start gap-3">
+                      <div className="shrink-0 p-2 bg-rose-500/20 rounded-xl text-rose-400 border border-rose-500/30">
+                        <AlertTriangle size={20} className="animate-pulse" />
+                      </div>
+                      <div className="flex-1 space-y-2">
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <div className="flex items-center gap-2">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-rose-500/20 text-rose-300 border border-rose-500/30">
+                              <Clock size={11} /> Đang chờ phản hồi
+                            </span>
+                            <h4 className="font-h1 font-bold text-sm text-white">
+                              {commission.cancellationRequestedById === userId
+                                ? 'Bạn đã gửi yêu cầu hủy đơn hàng'
+                                : `${commission.cancellationRequestedByRole === 'Client' ? 'Khách hàng' : 'Họa sĩ'} đã gửi yêu cầu hủy đơn`}
+                            </h4>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setShowCancelModal(true)}
+                            className="px-3.5 py-1.5 rounded-xl font-bold text-xs bg-rose-500 hover:bg-rose-600 text-white shadow-lg shadow-rose-500/25 transition-all flex items-center gap-1.5 cursor-pointer"
+                          >
+                            {commission.cancellationRequestedById !== userId ? 'Xem & Phản hồi yêu cầu hủy' : 'Chi tiết yêu cầu hủy'}
+                            <ArrowRight size={14} />
+                          </button>
+                        </div>
+
+                        <div className="text-slate-300 space-y-1 text-xs bg-black/20 rounded-xl p-3 border border-white/5">
+                          <p>
+                            <strong className="text-slate-200">Lý do:</strong>{' '}
+                            <span className="text-rose-200 font-medium">{commission.cancellationReason || 'Không có lý do cụ thể'}</span>
+                          </p>
+                          {commission.cancellationDetails && (
+                            <p>
+                              <strong className="text-slate-200">Chi tiết:</strong>{' '}
+                              <span className="text-slate-300">{commission.cancellationDetails}</span>
+                            </p>
+                          )}
+                          {commission.cancellationRequestExpiresAt && (
+                            <p className="text-[11px] text-amber-300/90 flex items-center gap-1 pt-0.5">
+                              <Clock size={12} className="shrink-0 text-amber-400" />
+                              <span>
+                                Hạn chót phản hồi: <strong>{new Date(commission.cancellationRequestExpiresAt).toLocaleString('vi-VN')}</strong>{' '}
+                                {commission.cancellationRequestedById !== userId && '(Nếu quá hạn không phản hồi, đơn sẽ tự động được xử lý theo chính sách sàn)'}
+                              </span>
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {/* BANNER TRANH CHẤP (ĐANG XỬ LÝ HOẶC ĐÃ CÓ PHÁN QUYẾT RESOLVED) */}
                 {commission?.dispute && (
@@ -1655,6 +1738,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                         allApproved={allMilestonesApproved}
                         isCancelled={commissionStatus === 'Cancelled'}
                         totalMilestones={sortedMilestones.length}
+                        isCancellationPending={commission.cancellationRequestStatus === 'Pending'}
                         onCancelClick={!isCommissionEnded ? () => setShowCancelModal(true) : undefined}
                       />
                     )}
