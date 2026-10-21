@@ -1797,6 +1797,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
             commissionId={room.commissionId}
             commission={commission}
             currentUserId={userId}
+            isCreator={isCreator}
             onSuccess={() => {
               setShowCancelModal(false);
               refresh();

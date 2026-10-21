@@ -11,6 +11,7 @@ interface CancelRefundModalProps {
   commissionId: string;
   commission?: Commission | null;
   currentUserId?: string | null;
+  isCreator?: boolean;
   onSuccess?: () => void;
 }
 
@@ -20,6 +21,7 @@ export default function CancelRefundModal({
   commissionId,
   commission,
   currentUserId,
+  isCreator,
   onSuccess,
 }: CancelRefundModalProps) {
   const [reason, setReason] = useState('');
@@ -29,6 +31,8 @@ export default function CancelRefundModal({
   const [resultMessage, setResultMessage] = useState('');
 
   if (!isOpen) return null;
+
+  const isUserCreator = isCreator ?? (commission && currentUserId ? commission.clientId !== currentUserId : false);
 
   const handleCancel = async () => {
     if (!reason) return alert('Please select a reason.');
@@ -104,16 +108,18 @@ export default function CancelRefundModal({
             </div>
           ) : !success ? (
             <>
-              <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl flex items-start gap-2.5 text-red-300 text-[11px]">
+              <div className="p-3.5 bg-red-500/10 border border-red-500/20 rounded-xl flex items-start gap-2.5 text-red-200 text-xs leading-relaxed">
                 <Info className="w-4 h-4 shrink-0 mt-0.5 text-red-400" />
                 <span>
-                  Canceling will refund the remaining Escrow balance to you. Any funds already released for approved milestones cannot be refunded directly.
+                  {isUserCreator
+                    ? 'Yêu cầu hủy đơn sẽ giải phóng quỹ ký quỹ Escrow còn lại để hoàn trả về ví của Khách hàng. Các mốc bạn đã hoàn thành và được duyệt trước đó vẫn được bảo lưu doanh thu.'
+                    : 'Yêu cầu hủy sẽ hoàn lại số dư ký quỹ Escrow còn lại về ví của bạn. Các mốc đã duyệt và giải ngân trước đó cho Họa sĩ sẽ không được hoàn trả trực tiếp.'}
                 </span>
               </div>
 
               <div>
                 <label className="block text-[11px] font-space-grotesk font-bold text-slate-300 uppercase tracking-wider mb-2">
-                  Reason for Cancellation
+                  Lý do yêu cầu hủy đơn <span className="text-red-400">*</span>
                 </label>
                 <select
                   value={reason}
@@ -121,11 +127,31 @@ export default function CancelRefundModal({
                   className="w-full p-3 bg-[#1b1b1e] rounded-xl text-xs text-white focus:outline-none transition-all border border-white/10 focus:border-[#A7ACD9] focus:ring-1 focus:ring-[#A7ACD9]"
                 >
                   <option value="" disabled className="bg-[#1b1b1e] text-slate-400">Chọn lý do hủy đơn...</option>
-                  <option value="Creator unresponsive" className="bg-[#1b1b1e] text-white py-2">Creator không phản hồi</option>
-                  <option value="Missed deadline" className="bg-[#1b1b1e] text-white py-2">Creator đã quá hạn hoàn thành</option>
-                  <option value="Quality issues" className="bg-[#1b1b1e] text-white py-2">Chất lượng không đạt yêu cầu hoặc không đúng thỏa thuận</option>
-                  <option value="Mutual agreement" className="bg-[#1b1b1e] text-white py-2">Hai bên đồng ý hủy đơn</option>
-                  <option value="Other" className="bg-[#1b1b1e] text-white py-2">Lý do khác</option>
+
+                  <optgroup label="Lý do chung" className="bg-[#1b1b1e] text-amber-300 font-bold">
+                    <option value="Hai bên đồng ý hủy đơn" className="bg-[#1b1b1e] text-white py-2">Hai bên đồng ý hủy đơn</option>
+                    <option value="Thay đổi kế hoạch / Bận việc cá nhân" className="bg-[#1b1b1e] text-white py-2">Thay đổi kế hoạch / Bận việc cá nhân đột xuất</option>
+                  </optgroup>
+
+                  {isUserCreator ? (
+                    <optgroup label="Lý do từ phía Họa sĩ (Creator)" className="bg-[#1b1b1e] text-cyan-300 font-bold">
+                      <option value="Khách hàng không phản hồi quá lâu" className="bg-[#1b1b1e] text-white py-2">Khách hàng không phản hồi / Mất liên lạc quá lâu</option>
+                      <option value="Khách hàng yêu cầu vượt quá thỏa thuận brief" className="bg-[#1b1b1e] text-white py-2">Khách hàng yêu cầu vượt quá thỏa thuận brief ban đầu</option>
+                      <option value="Bất đồng quan điểm nghệ thuật không thể thống nhất" className="bg-[#1b1b1e] text-white py-2">Bất đồng quan điểm nghệ thuật không thể thống nhất</option>
+                      <option value="Sự cố cá nhân không thể tiếp tục nhận đơn" className="bg-[#1b1b1e] text-white py-2">Sự cố cá nhân không thể tiếp tục hoàn thành đơn</option>
+                    </optgroup>
+                  ) : (
+                    <optgroup label="Lý do từ phía Khách hàng (Client)" className="bg-[#1b1b1e] text-emerald-300 font-bold">
+                      <option value="Creator không phản hồi" className="bg-[#1b1b1e] text-white py-2">Creator không phản hồi / Mất liên lạc quá lâu</option>
+                      <option value="Creator đã quá hạn hoàn thành" className="bg-[#1b1b1e] text-white py-2">Creator đã quá hạn hoàn thành cam kết</option>
+                      <option value="Chất lượng không đạt yêu cầu hoặc không đúng thỏa thuận" className="bg-[#1b1b1e] text-white py-2">Chất lượng phác thảo không đạt yêu cầu hoặc sai lệch brief</option>
+                      <option value="Khách hàng thay đổi nhu cầu cá nhân" className="bg-[#1b1b1e] text-white py-2">Khách hàng thay đổi nhu cầu cá nhân / Vấn đề tài chính</option>
+                    </optgroup>
+                  )}
+
+                  <optgroup label="Khác" className="bg-[#1b1b1e] text-slate-400 font-bold">
+                    <option value="Lý do khác" className="bg-[#1b1b1e] text-white py-2">Lý do khác (mô tả chi tiết bên dưới)</option>
+                  </optgroup>
                 </select>
               </div>
 
