@@ -1762,7 +1762,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
             onSuccess={() => {
               setShowApprovalModal(false);
               refresh();
-              void chat.sendMessage('🔄 Tiến độ mốc hợp đồng vừa meow cập nhật.', 'SystemEvent').catch(() => null);
+              void chat.sendMessage('🔄 Tiến độ mốc hợp đồng vừa được cập nhật.', 'SystemEvent').catch(() => null);
             }}
           />
 
