@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { X, AlertTriangle, Info, CheckCircle2, ShieldAlert, Scale, MessageSquare, RotateCcw } from 'lucide-react';
 import { commissionService } from '@/services/commission.service';
+import { extractErrorMessage } from '@/lib/api-client';
 import type { Commission } from '@/types/commission.types';
 
 interface CancelRefundModalProps {
@@ -51,7 +52,7 @@ export default function CancelRefundModal({
       }, 1500);
     } catch (error) {
       console.error(error);
-      alert('Không thể gửi yêu cầu hủy đơn.');
+      alert(extractErrorMessage(error, 'Không thể gửi yêu cầu hủy đơn.'));
     } finally {
       setIsSubmitting(false);
     }
@@ -72,7 +73,7 @@ export default function CancelRefundModal({
       setTimeout(() => onSuccess?.(), 1000);
     } catch (error) {
       console.error(error);
-      alert('Không thể rút lại yêu cầu hủy đơn.');
+      alert(extractErrorMessage(error, 'Không thể rút lại yêu cầu hủy đơn.'));
     } finally {
       setIsSubmitting(false);
     }
@@ -91,7 +92,7 @@ export default function CancelRefundModal({
       }
     } catch (error) {
       console.error(error);
-      alert('Không thể phản hồi yêu cầu hủy.');
+      alert(extractErrorMessage(error, 'Không thể phản hồi yêu cầu hủy.'));
     } finally {
       setIsSubmitting(false);
     }
