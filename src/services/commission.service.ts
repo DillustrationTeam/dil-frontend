@@ -66,8 +66,18 @@ export const commissionService = {
     return res.data.data;
   },
   approveMilestone: async (id: string, milestoneId: string) => apiClient.patch(`/commissions/${id}/milestones/${milestoneId}/approve`),
-  requestRevision: async (id: string, milestoneId: string, feedbackComment: string) =>
-    apiClient.post(`/commissions/${id}/milestones/${milestoneId}/request-revision`, { feedbackComment }),
+  requestRevision: async (
+    id: string,
+    milestoneId: string,
+    feedbackComment: string,
+    revisionFeedbackImageUrl?: string,
+    revisionAnnotationsJson?: string
+  ) =>
+    apiClient.post(`/commissions/${id}/milestones/${milestoneId}/request-revision`, {
+      feedbackComment,
+      revisionFeedbackImageUrl,
+      revisionAnnotationsJson,
+    }),
   deliverFinal: async (id: string, file: File) => {
     const body = new FormData();
     body.append('file', file);

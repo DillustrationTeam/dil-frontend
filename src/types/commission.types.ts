@@ -28,7 +28,16 @@ export interface Milestone {
   maxRevisions?: number;
   creatorNote?: string | null;
   revisionFeedback?: string | null;
+  revisionFeedbackImageUrl?: string | null;
+  revisionAnnotationsJson?: string | null;
   price: number;
+}
+
+export interface PinAnnotation {
+  id: number;
+  x: number; // percentage (0 - 100)
+  y: number; // percentage (0 - 100)
+  note?: string;
 }
 
 export interface Commission {

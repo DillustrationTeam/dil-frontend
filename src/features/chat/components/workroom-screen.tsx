@@ -1755,6 +1755,8 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
             revisionCount={displayedMilestone?.revisionCount ?? 0}
             isCreator={isCreator}
             revisionFeedback={displayedMilestone?.revisionFeedback}
+            revisionFeedbackImageUrl={displayedMilestone?.revisionFeedbackImageUrl}
+            revisionAnnotationsJson={displayedMilestone?.revisionAnnotationsJson}
             milestoneStatus={displayedMilestone?.status}
             onOpenSubmitModal={() => setShowSubmitModal(true)}
             onSuccess={() => {
