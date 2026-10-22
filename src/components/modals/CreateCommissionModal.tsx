@@ -1,5 +1,7 @@
 'use client';
 
+import { addonService, addonStage, addonMoney, type CreatorAddon } from '@/services/addon.service';
+
 import { useEffect, useEffectEvent, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
@@ -47,9 +49,17 @@ export default function CreateCommissionModal({ creatorId, creatorName, onClose 
   });
   const selectedPackage = packages.find(item => item.id === selectedPackageId);
   const multiplier = licenseType === 'Commercial' ? terms?.commercialLicenseMultiplier ?? 1.5 : 1;
-  const estimatedTotal = (selectedPackage?.price ?? 0) * multiplier;
+  const [addons, setAddons] = useState<CreatorAddon[]>([]);
+  const [addonIds, setAddonIds] = useState<string[]>([]);
+  const availableAddons = addons.filter(a => a.isActive && (!a.packageId || a.packageId === selectedPackageId) && selectedPackage?.milestones.some(m => a.allowedMilestone === 'Any' || addonStage(m.sequence, selectedPackage.milestones.length) === a.allowedMilestone));
+  const selectedAddons = availableAddons.filter(a => addonIds.includes(a.id));
+  const estimatedTotal = (selectedPackage?.price ?? 0) * multiplier + selectedAddons.reduce((sum, a) => sum + a.price, 0);
+  const milestoneEstimate = (stage: RateCardPackage['milestones'][number]) => stage.price * multiplier + selectedAddons
+    .filter(addon => selectedPackage?.milestones.find(m => addon.allowedMilestone === 'Any' || addonStage(m.sequence, selectedPackage.milestones.length) === addon.allowedMilestone)?.sequence === stage.sequence)
+    .reduce((sum, addon) => sum + addon.price, 0);
 
   useEffect(() => {
+    addonService.creator(creatorId).then(items => { setAddons(items); setAddonIds([]); }).catch(() => setError('Không tải được phụ phí của Creator.'));
     creatorRateCardService.get(creatorId).then(setPackages)
       .catch(() => setError('Không tải được bảng giá Creator.'))
       .finally(() => setLoadingPackages(false));
@@ -118,6 +128,7 @@ export default function CreateCommissionModal({ creatorId, creatorName, onClose 
       const created = await commissionService.create({
         creatorId,
         packageId: selectedPackage.id,
+        addonIds: selectedAddons.map(a => a.id),
         licenseType,
         title: values.title?.trim() || `Đặt vẽ gói ${selectedPackage.name}`,
         description: values.description,
@@ -266,6 +277,11 @@ export default function CreateCommissionModal({ creatorId, creatorName, onClose 
 
             {packageError && <p role="alert" className="mt-1.5 flex items-center gap-1.5 text-xs text-red-300 font-medium"><AlertCircle className="w-3.5 h-3.5 shrink-0" /> {packageError}</p>}
 
+            {selectedPackage && <div className="space-y-3 border-t border-white/10 pt-5">
+              <h3 className="font-h1 text-sm font-bold text-white">PHỤ PHÍ TÙY CHỌN</h3>
+              <p className="text-xs text-[#A7ACD9]">Phụ phí được ký quỹ cùng đơn hàng và thực hiện tại mốc đã ghi.</p>
+              {availableAddons.map(a => <label key={a.id} className="flex items-center gap-3 text-xs text-white"><input type="checkbox" checked={addonIds.includes(a.id)} disabled={busy} onChange={e => setAddonIds(ids => e.target.checked ? [...ids, a.id] : ids.filter(id => id !== a.id))} />{a.title} · {a.allowedMilestone} · +{addonMoney(a.price)} · +{a.extendDays} ngày</label>)}
+            </div>}
             <div className="space-y-3 border-t border-white/10 pt-5">
               <h3 className="font-h1 text-sm font-bold text-white">MỤC ĐÍCH SỬ DỤNG</h3>
               <div className="grid gap-3 sm:grid-cols-2">
@@ -291,7 +307,7 @@ export default function CreateCommissionModal({ creatorId, creatorName, onClose 
                     {selectedPackage.milestones.map(stage => (
                       <li key={stage.sequence} className="flex justify-between gap-3 text-xs text-slate-300">
                         <span>{stage.sequence}. {stage.title}</span>
-                        <span>{money(stage.price)}</span>
+                        <span>{money(milestoneEstimate(stage))}</span>
                       </li>
                     ))}
                   </ol>

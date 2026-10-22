@@ -42,6 +42,7 @@ export interface PinAnnotation {
 
 export interface Commission {
   discountAmount: number;
+  packageId?: string | null;
   id: string;
   clientId: string;
   creatorId: string;
@@ -121,6 +122,7 @@ export interface RespondToCommissionPayload {
 
 export interface CreateCommissionPayload {
   voucherCode?: string;
+  addonIds?: string[];
   creatorId: string;
   packageId: string;
   licenseType: 'Personal' | 'Commercial';

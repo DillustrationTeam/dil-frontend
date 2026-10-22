@@ -5,6 +5,7 @@ import Link from 'next/link';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { Plus, Trash2, Layers } from 'lucide-react';
+import { CreatorAddonManager } from './creator-addon-manager';
 import { creatorProfileService } from '@/features/creator-studio/services/creator-profile.service';
 import { creatorRateCardService, RateCardPackage } from '@/features/creator-studio/services/creator-rate-card.service';
 
@@ -198,6 +199,7 @@ export function CreatorRateCardManager() {
 
   return (
     <div className="w-full space-y-6 text-[#E4E1E5]">
+      {hasProfile && <CreatorAddonManager packages={packages} />}
       {/* Top Header & Slot Manager Bar */}
       <div className="grid gap-6 xl:grid-cols-[1fr_300px]">
         <div className="glass-container rounded-3xl p-6">
