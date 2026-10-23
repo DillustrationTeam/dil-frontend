@@ -31,9 +31,11 @@ import {
   Scale,
   ShieldAlert,
   ShieldCheck,
+  Sparkles,
   TrendingUp,
   UploadCloud,
   X,
+  Smile,
 } from 'lucide-react';
 
 import { chatService } from '../services/chat.service';
@@ -42,6 +44,8 @@ import { useChatHub } from '../hooks/use-chat-hub';
 import { useAutoTranslate } from '../hooks/use-auto-translate';
 import { WorkroomAddons } from './workroom-addons';
 import { WorkroomAddonStore } from './workroom-addon-store';
+import { WorkroomStickyNotes } from './workroom-sticky-notes';
+import { WorkroomEmotePicker } from './workroom-emote-picker';
 import type { ChatMessageDto, ChatRoomDto } from '../types/chat.types';
 import { PageLoader } from '@/features/navigation';
 import { commissionService } from '@/services/commission.service';
@@ -109,6 +113,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
   // States cho các Modal Hợp đồng & Cột mốc
   const [commission, setCommission] = useState<Commission | null>(null);
   const [hasAddonMessages, setHasAddonMessages] = useState(false);
+  const [showEmotePicker, setShowEmotePicker] = useState(false);
   const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [showApprovalModal, setShowApprovalModal] = useState(false);
   const [showDeliveryModal, setShowDeliveryModal] = useState(false);
@@ -122,6 +127,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
 
   // Auto-detect clipping: Tự động nhận diện khoảng trống lề ngoài để thu gọn tab nếu bị khuất
   const binderRef = useRef<HTMLDivElement>(null);
+  const wipCanvasContainerRef = useRef<HTMLDivElement>(null);
   const [hasRightSpace, setHasRightSpace] = useState(true);
   const [hasLeftSpace, setHasLeftSpace] = useState(true);
 
@@ -1161,7 +1167,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                               : 'border border-white/10 bg-white/5 text-on-surface rounded-2xl rounded-tl-none'
                               }`}
                           >
-                            <p className="whitespace-pre-wrap">{msg.body}</p>
+                            <p className={`whitespace-pre-wrap ${/^[p{Emoji}\s]{1,4}$/u.test(msg.body.trim()) ? "text-3xl py-1 leading-normal" : ""}`}>{msg.body}</p>
 
                             {msg.translatedBody && msg.translatedBody.trim() !== msg.body.trim() && (
                               <div className="mt-2 border-t border-black/15 pt-2 text-[11px] italic opacity-90">
@@ -1348,6 +1354,23 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                     }}
                   />
 
+                  {/* BẢNG BIỂU CẢM & EMOTE & KAOMOJI */}
+                  <WorkroomEmotePicker
+                    isOpen={showEmotePicker}
+                    onClose={() => setShowEmotePicker(false)}
+                    onSelectEmote={(emote) => {
+                      setInputBody((prev) => (prev ? `${prev} ${emote}` : emote));
+                    }}
+                    onSendInstant={async (text) => {
+                      setShowEmotePicker(false);
+                      try {
+                        await chat.sendMessage(text);
+                      } catch (err) {
+                        console.error(err);
+                      }
+                    }}
+                  />
+
                   <form onSubmit={handleSendMessage} className="flex items-center gap-2">
 
                     <button
@@ -1358,6 +1381,20 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                       title="Đính kèm tệp phác thảo"
                     >
                       <Paperclip size={16} className={uploading ? 'animate-spin' : ''} />
+                    </button>
+
+                    <button
+                      type="button"
+                      disabled={isChatDisabled}
+                      onClick={() => setShowEmotePicker((v) => !v)}
+                      className={`flex size-10 shrink-0 items-center justify-center border transition [clip-path:polygon(6px_0,100%_0,100%_calc(100%-6px),calc(100%-6px)_100%,0_100%,0_6px)] ${
+                        showEmotePicker
+                          ? 'border-fuchsia-400 bg-fuchsia-500/20 text-fuchsia-300'
+                          : 'border-white/15 bg-white/5 text-outline hover:text-fuchsia-300 hover:border-fuchsia-400/40'
+                      }`}
+                      title="Chèn biểu cảm, Kaomoji & câu nhanh"
+                    >
+                      <Smile size={16} />
                     </button>
 
                     <input
@@ -1496,6 +1533,25 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                     </span>
                     <div className="flex items-center justify-center shrink-0">
                       <Clock size={18} className={rightPageView === 'milestones' ? 'text-purple-300' : 'text-purple-400 group-hover:text-purple-300'} />
+                    </div>
+                  </button>
+
+                  {/* Tab 3: ADD-ON */}
+                  <button
+                    type="button"
+                    onClick={() => setRightPageView((prev) => (prev === 'addons' ? 'canvas' : 'addons'))}
+                    title="Cửa hàng gói Add-on & Phụ phí theo mốc"
+                    className={`group relative w-[40px] sm:w-[42px] h-[52px] hover:h-[115px] bg-[#1C202D] hover:bg-[#232838] border border-t-0 cursor-pointer overflow-hidden flex flex-col items-center justify-end pb-3 shadow-lg [clip-path:polygon(0_0,100%_0,100%_calc(100%-10px),50%_100%,0_calc(100%-10px))] [transition:height_0.32s_cubic-bezier(0.34,1.45,0.7,1),background-color_0.25s_ease,border-color_0.25s_ease] ${rightPageView === 'addons'
+                        ? 'bg-[#232838] border-fuchsia-400 shadow-[0_0_12px_rgba(236,72,153,0.35)]'
+                        : 'border-[#2F364A] hover:border-[#485472]'
+                      }`}
+                  >
+                    <span className={`[writing-mode:vertical-rl] [text-orientation:mixed] rotate-180 text-[10px] font-extrabold tracking-wider transition-opacity duration-200 mb-2 pointer-events-none whitespace-nowrap select-none ${rightPageView === 'addons' ? 'opacity-0 group-hover:opacity-100 text-fuchsia-300' : 'opacity-0 group-hover:opacity-100 text-slate-300'
+                      }`}>
+                      ADD-ON
+                    </span>
+                    <div className="flex items-center justify-center shrink-0">
+                      <Sparkles size={18} className={rightPageView === 'addons' ? 'text-fuchsia-300' : 'text-slate-300 group-hover:text-fuchsia-300'} />
                     </div>
                   </button>
 
@@ -1641,7 +1697,20 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                       </div>
                     )}
 
-                    <div className="flex-1 flex flex-col justify-center items-center my-3 relative overflow-hidden border border-white/10 bg-[#1F1F22] p-4 min-h-[320px] [clip-path:polygon(14px_0,calc(100%-14px)_0,100%_14px,100%_calc(100%-14px),calc(100%-14px)_100%,14px_100%,0_calc(100%-14px),0_14px)]">
+                    <div
+                      ref={wipCanvasContainerRef}
+                      className="flex-1 flex flex-col justify-center items-center my-3 relative overflow-hidden border border-white/10 bg-[#1F1F22] p-4 min-h-[320px] [clip-path:polygon(14px_0,calc(100%-14px)_0,100%_14px,100%_calc(100%-14px),calc(100%-14px)_100%,14px_100%,0_calc(100%-14px),0_14px)]"
+                    >
+                      {/* Floating Cute Sticky Notes on Canvas WIP */}
+                      {commission && (
+                        <WorkroomStickyNotes
+                          commissionId={commission.id}
+                          displayedMilestone={displayedMilestone}
+                          isCreator={isCreator}
+                          containerRef={wipCanvasContainerRef}
+                          onOpenApprovalModal={() => setShowApprovalModal(true)}
+                        />
+                      )}
                       {currentWipPreviewUrl ? (
                         <div className="w-full h-full flex flex-col items-center justify-center relative space-y-3">
                           <div

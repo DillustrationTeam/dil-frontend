@@ -200,7 +200,26 @@ export function WorkroomAddons({
     }
   };
 
-  if (items.length === 0) return null;
+  if (items.length === 0) {
+    return (
+      <div className="my-2 flex items-center justify-between p-2.5 px-3.5 rounded-xl border border-purple-500/20 bg-[#171a2a]/70 hover:bg-[#171a2a]/95 backdrop-blur-md transition shadow-md">
+        <div className="flex items-center gap-2 text-xs text-slate-300">
+          <Sparkles size={14} className="text-purple-400 shrink-0" />
+          <span>{isCreator ? 'Cần phát sinh phụ phí hoặc gói vẽ thêm?' : 'Bạn muốn mua thêm phụ kiện, biểu cảm hoặc quyền lợi?'}</span>
+        </div>
+        {onOpenStore && (
+          <button
+            type="button"
+            onClick={onOpenStore}
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-purple-300 hover:text-white bg-purple-500/20 hover:bg-purple-500/30 border border-purple-400/30 px-3 py-1 rounded-lg transition"
+          >
+            <Plus size={13} />
+            <span>{isCreator ? 'Báo giá phụ phí' : 'Mua gói Add-on'}</span>
+          </button>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="my-2 rounded-2xl border border-white/10 bg-[#171a2a]/95 p-3.5 shadow-lg backdrop-blur-md space-y-3">

@@ -33,3 +33,6 @@ docs/design-suite/
 .agents/
 skills-lock.json
 CLAUDE.md
+
+# preview / mock html files
+public/*preview*.html
