@@ -4,9 +4,16 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { z } from 'zod';
 import { Plus, Trash2, Layers } from 'lucide-react';
+import { CreatorAddonManager } from './creator-addon-manager';
 import { creatorProfileService } from '@/features/creator-studio/services/creator-profile.service';
 import { creatorRateCardService, RateCardPackage } from '@/features/creator-studio/services/creator-rate-card.service';
+
+const rateCardSchema = z.array(z.object({
+  id: z.string(), name: z.string().trim().min(1).max(100), description: z.string().trim().max(2000).nullable().optional(), price: z.number(),
+  milestones: z.array(z.object({ sequence: z.number().int().positive(), title: z.string().trim().min(1).max(200), price: z.number().int().positive().max(1_000_000_000_000), maxRevisions: z.number().int().min(0).max(20) })).min(1).max(10),
+})).max(10);
 
 const money = (value: number) =>
   new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
@@ -16,6 +23,7 @@ const fieldClass =
 const labelClass = 'block text-xs font-semibold uppercase tracking-wider text-[#A7ACD9] mb-1.5';
 
 export function CreatorRateCardManager() {
+  const [tab, setTab] = useState<'packages' | 'addons'>('packages');
   const [packages, setPackages] = useState<RateCardPackage[]>([]);
   const [slots, setSlots] = useState<number>(3);
   const [loading, setLoading] = useState(true);
@@ -35,7 +43,8 @@ export function CreatorRateCardManager() {
       } catch (cause) {
         if (axios.isAxiosError(cause) && cause.response?.status === 400) {
           setError('Tài khoản này chưa có hồ sơ Creator. Hãy tạo hồ sơ trước khi lưu bảng giá.');
-        }
+        } else { setError('Không tải được bảng giá. Vui lòng tải lại trang trước khi chỉnh sửa.'); }
+        setHasProfile(false);
       } finally {
         setLoading(false);
       }
@@ -88,8 +97,8 @@ export function CreatorRateCardManager() {
         description: 'Mô tả phạm vi và quyền sử dụng...',
         price: 300000,
         milestones: [
-          { sequence: 1, title: 'Phác thảo', price: 100000 },
-          { sequence: 2, title: 'Hoàn thiện', price: 200000 },
+          { sequence: 1, title: 'Phác thảo', price: 100000, maxRevisions: 3 },
+          { sequence: 2, title: 'Hoàn thiện', price: 200000, maxRevisions: 3 },
         ],
       },
     ]);
@@ -107,7 +116,7 @@ export function CreatorRateCardManager() {
               ...item,
               milestones: [
                 ...item.milestones,
-                { sequence: item.milestones.length + 1, title: 'Cột mốc mới', price: 100000 },
+                { sequence: item.milestones.length + 1, title: 'Cột mốc mới', price: 100000, maxRevisions: 3 },
               ],
             }
           : item
@@ -137,30 +146,12 @@ export function CreatorRateCardManager() {
       ...item,
       name: item.name.trim(),
       description: item.description?.trim(),
-      milestones: item.milestones.map((stage) => ({ ...stage, title: stage.title.trim() })),
+      milestones: item.milestones.map((stage) => ({ ...stage, title: stage.title.trim(), maxRevisions: stage.maxRevisions ?? 3 })),
     }));
 
-    if (
-      normalized.length > 10 ||
-      normalized.some(
-        (item) =>
-          !item.name ||
-          item.name.length > 100 ||
-          (item.description?.length ?? 0) > 2000 ||
-          item.milestones.length < 1 ||
-          item.milestones.length > 10 ||
-          item.milestones.some(
-            (stage) =>
-              !stage.title ||
-              stage.title.length > 200 ||
-              !Number.isSafeInteger(stage.price) ||
-              stage.price <= 0 ||
-              stage.price > 1_000_000_000_000
-          )
-      )
-    ) {
+    if (!rateCardSchema.safeParse(normalized).success) {
       setError(
-        'Mỗi gói cần tên và 1–10 cột mốc có tên, giá nguyên dương (tối đa 1.000 tỷ VND). Tối đa 10 gói.'
+        'Mỗi gói cần tên và 1–10 cột mốc có tên, giá nguyên dương (tối đa 1.000 tỷ VND). Số lần sửa mỗi mốc từ 0–20. Tối đa 10 gói.'
       );
       toast.error('Vui lòng kiểm tra lại thông tin các gói giá.');
       return;
@@ -198,6 +189,7 @@ export function CreatorRateCardManager() {
 
   return (
     <div className="w-full space-y-6 text-[#E4E1E5]">
+
       {/* Top Header & Slot Manager Bar */}
       <div className="grid gap-6 xl:grid-cols-[1fr_300px]">
         <div className="glass-container rounded-3xl p-6">
@@ -216,7 +208,7 @@ export function CreatorRateCardManager() {
           <div className="mt-4 flex items-center justify-between rounded-2xl border border-white/10 bg-[#171a2a] p-2.5">
             <button
               type="button"
-              onClick={() => updateSlots(Math.max(1, slots - 1))}
+              onClick={() => updateSlots(Math.max(0, slots - 1))}
               className="rounded-xl bg-white/5 px-3 py-1.5 font-bold text-white hover:bg-white/10"
             >
               −
@@ -243,6 +235,9 @@ export function CreatorRateCardManager() {
         </div>
       )}
 
+      <div role="tablist" aria-label="Cấu hình dịch vụ" className="inline-flex flex-wrap gap-1 rounded-2xl border border-white/10 bg-[#141724] p-1.5">{([['packages', 'Gói dịch vụ chính'], ['addons', 'Phụ phí (Add-ons)']] as const).map(([value, label]) => <button key={value} role="tab" aria-selected={tab === value} aria-controls={`panel-${value}`} id={`tab-${value}`} onClick={() => setTab(value)} className={`rounded-xl px-6 py-3 text-sm font-semibold transition ${tab === value ? 'bg-[#A7ACD9] text-[#1F2335] shadow-lg' : 'text-slate-400 hover:text-white'}`}>{label}</button>)}</div>
+      <div id="panel-addons" role="tabpanel" aria-labelledby="tab-addons" hidden={tab !== 'addons'}>{hasProfile && <CreatorAddonManager packages={packages} />}</div>
+      <div id="panel-packages" role="tabpanel" aria-labelledby="tab-packages" hidden={tab !== 'packages'} className="space-y-6">
       {/* Package List */}
       <div className="space-y-6">
         {packages.map((item, packageIndex) => (
@@ -255,7 +250,7 @@ export function CreatorRateCardManager() {
                 <span className="rounded-xl bg-[#A7ACD9]/20 p-2 text-[#A7ACD9]">
                   <Layers className="h-5 w-5" />
                 </span>
-                <h2 className="font-h1 text-lg font-bold text-white">Gói dịch vụ {packageIndex + 1}</h2>
+                <h2 className="font-h1 text-lg font-bold text-white">{item.name || `Gói dịch vụ ${packageIndex + 1}`}</h2>
               </div>
               <button
                 type="button"
@@ -300,14 +295,14 @@ export function CreatorRateCardManager() {
                 <h3 className="text-xs font-bold uppercase tracking-wider text-[#A7ACD9]">
                   Kế hoạch cột mốc (Milestone Breakdown)
                 </h3>
-                <span className="text-xs text-[#919099]">Tổng giá các mốc = Giá gói</span>
+                <span className="text-xs text-[#919099]">Số lần sửa: 0–20 mỗi mốc · 0 = không bao gồm sửa</span>
               </div>
 
               <div className="space-y-2.5">
                 {item.milestones.map((stage, index) => (
                   <div
                     key={index}
-                    className="grid gap-3 rounded-2xl border border-white/10 bg-[#141724] p-3 sm:grid-cols-[60px_1fr_200px_auto] sm:items-center"
+                    className="grid gap-3 rounded-2xl border border-white/10 bg-[#141724] p-3 lg:grid-cols-[60px_1fr_170px_150px_auto] sm:items-center"
                   >
                     <span className="text-center text-xs font-bold text-[#A7ACD9]">
                       Mốc {index + 1}
@@ -335,6 +330,7 @@ export function CreatorRateCardManager() {
                       />
                       <span className="text-xs text-[#919099]">đ</span>
                     </div>
+                    <label className="flex items-center gap-2 text-xs text-slate-400"><input aria-label={`Số lần sửa mốc ${index + 1}`} type="number" min={0} max={20} step={1} value={stage.maxRevisions ?? 3} onChange={event => updateMilestone(item.id, index, { maxRevisions: Number(event.target.value) })} className="w-16 rounded-xl border border-white/10 bg-[#171a2a] px-3 py-2 text-white" />lần sửa</label>
                     <button
                       type="button"
                       disabled={item.milestones.length === 1}
@@ -388,6 +384,7 @@ export function CreatorRateCardManager() {
         </button>
       </div>
 
+      </div>
       {error && (
         <div role="alert" className="rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-xs text-red-200">
           {error}
