@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { addonService, addonSchema, addonMoney, type CreatorAddon, type AddonPreset, type AddonStage } from '@/services/addon.service';
+import { addonService, addonSchema, addonMoney, type CreatorAddon, type AddonPreset } from '@/services/addon.service';
 import { creatorProfileService } from '../services/creator-profile.service';
 import { extractErrorMessage } from '@/lib/api-client';
 import type { RateCardPackage } from '../services/creator-rate-card.service';
@@ -14,7 +14,7 @@ export function CreatorAddonManager({ packages }: { packages: RateCardPackage[] 
   const [presetKey, setPresetKey] = useState<string | null>(null);
   const [title, setTitle] = useState('');
   const [price, setPrice] = useState('');
-  const [stage, setStage] = useState<AddonStage>('Sketch');
+  const [stage, setStage] = useState<string>('Sketch');
   const [days, setDays] = useState('0');
   const [packageId, setPackageId] = useState('');
   const [busy, setBusy] = useState(false);
@@ -36,7 +36,7 @@ export function CreatorAddonManager({ packages }: { packages: RateCardPackage[] 
   return <section className="glass-container space-y-4 rounded-3xl p-6 text-white">
     <h2 className="font-h1 text-lg">Phụ phí theo mốc</h2>
     <p className="text-sm text-[#A7ACD9]">Chọn mẫu của sàn hoặc tạo phụ phí tùy chỉnh. Lưu bảng giá trước khi gắn phụ phí vào một gói mới.</p>
-    <div className="grid gap-2 sm:grid-cols-2">{presets.map(p => <label key={p.key} className="flex items-center gap-2 text-sm"><input type="checkbox" checked={presetKey === p.key} disabled={busy} onChange={e => { reset(); if (e.target.checked) { setPresetKey(p.key); setTitle(p.title); setStage(p.allowedMilestone); } }} />{p.title} · {p.allowedMilestone}</label>)}</div>
+    <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">{presets.map(p => <label key={p.key} className="flex items-center gap-3 rounded-2xl border border-white/10 bg-[#141724] p-4 text-sm hover:border-[#A7ACD9]/40"><input type="checkbox" checked={presetKey === p.key} disabled={busy} onChange={e => { reset(); if (e.target.checked) { setPresetKey(p.key); setTitle(p.title); setStage(p.allowedMilestone); } }} />{p.title} · {p.allowedMilestone}</label>)}</div>
     <form className="grid gap-3 sm:grid-cols-2" onSubmit={async e => {
       e.preventDefault(); setError(''); setNotice('');
       const parsed = addonSchema.safeParse({ title, price: Number(price), allowedMilestone: stage, extendDays: Number(days) });
@@ -48,9 +48,9 @@ export function CreatorAddonManager({ packages }: { packages: RateCardPackage[] 
     }}>
       <label className="grid gap-1 text-xs">Tên phụ phí<input className={field} value={title} disabled={!!presetKey || busy} onChange={e => setTitle(e.target.value)} required maxLength={200} /></label>
       <label className="grid gap-1 text-xs">Giá VND<input className={field} type="number" min={1} step={1} value={price} onChange={e => setPrice(e.target.value)} required disabled={busy} /></label>
-      <label className="grid gap-1 text-xs">Mốc áp dụng<select className={field} value={stage} disabled={!!presetKey || busy} onChange={e => setStage(e.target.value as AddonStage)}>{['Sketch', 'Lineart', 'Final', 'Any'].map(s => <option key={s}>{s}</option>)}</select></label>
+      <fieldset className="rounded-2xl border border-white/10 p-4"><legend className="px-2 text-xs text-[#A7ACD9]">Mốc áp dụng · chọn nhiều mốc</legend><div className="flex flex-wrap gap-3">{['Sketch', 'Lineart', 'Final', 'Any'].map(value => <label key={value} className="flex items-center gap-2 text-sm"><input type="checkbox" checked={stage.split(',').includes(value)} disabled={!!presetKey || busy} onChange={e => { if (value === 'Any') setStage(e.target.checked ? 'Any' : ''); else { const selected = stage.split(',').filter(s => s !== 'Any' && s !== value); if (e.target.checked) selected.push(value); setStage(['Sketch', 'Lineart', 'Final'].filter(s => selected.includes(s)).join(',')); } }} />{value === 'Any' ? 'Mọi mốc' : value}</label>)}</div>{presetKey && <p className="mt-2 text-xs text-slate-400">Mẫu của sàn giữ mốc quy định. Chọn Nhập mới để tạo phụ phí tùy chỉnh.</p>}</fieldset>
       <label className="grid gap-1 text-xs">Gia hạn (ngày)<input className={field} type="number" min={0} max={365} step={1} value={days} onChange={e => setDays(e.target.value)} required disabled={busy} /></label>
-      <label className="grid gap-1 text-xs">Gói dịch vụ<select className={field} value={packageId} onChange={e => setPackageId(e.target.value)} disabled={busy}><option value="">Tất cả gói</option>{packages.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}</select></label>
+      <label className="grid gap-1 text-xs">Gói dịch vụ<select className={field} value={packageId} onChange={e => setPackageId(e.target.value)} disabled={busy}><option value="">Tất cả gói</option>{packageId && !packages.some(p => p.id === packageId) && <option value={packageId}>Gói đã xóa · giữ phạm vi cũ</option>}{packages.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}</select></label>
       <div className="flex items-end gap-3"><button disabled={busy || !profileId} className="rounded-xl bg-[#A7ACD9] p-3 text-sm text-[#1F2335] disabled:opacity-50">{busy ? 'Đang lưu…' : editing ? 'Cập nhật phụ phí' : 'Thêm phụ phí'}</button><button type="button" onClick={reset} className="p-3 text-sm">Nhập mới</button></div>
     </form>
     {items.map(item => <div key={item.id} className="flex flex-wrap items-center justify-between gap-3 border-t border-white/10 pt-3 text-sm"><span>{item.title} · {addonMoney(item.price)} · {item.allowedMilestone}{!item.isActive && ' · Đã tắt'}</span><div className="flex gap-3"><button disabled={busy} onClick={() => { setEditing(item.id); setPresetKey(item.presetKey ?? null); setTitle(item.title); setPrice(String(item.price)); setStage(item.allowedMilestone); setDays(String(item.extendDays)); setPackageId(item.packageId ?? ''); }}>Sửa</button><button disabled={busy} onClick={async () => { setBusy(true); setError(''); try { await addonService.save({ ...item, presetKey: item.presetKey, isActive: !item.isActive }); setItems(await addonService.creator(profileId)); } catch (cause) { setError(extractErrorMessage(cause, 'Không cập nhật được.')); } finally { setBusy(false); } }}>{item.isActive ? 'Tắt' : 'Bật'}</button></div></div>)}

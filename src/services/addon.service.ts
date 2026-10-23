@@ -7,7 +7,7 @@ export type { AddonStage, AddonPreset, CreatorAddon, CommissionAddon } from '@/t
 export const addonSchema = z.object({
   title: z.string().trim().min(1, 'Nhập tên phụ phí').max(200),
   price: z.number().int().positive('Giá phải lớn hơn 0').max(999999999999),
-  allowedMilestone: z.enum(['Sketch', 'Lineart', 'Final', 'Any']),
+  allowedMilestone: z.string().refine(value => /^(Any|(?:Sketch|Lineart|Final)(?:,(?:Sketch|Lineart|Final))*)$/.test(value), 'Chọn ít nhất một mốc áp dụng'),
   extendDays: z.number().int().min(0).max(365),
 });
 export type AddonValues = z.infer<typeof addonSchema>;
@@ -26,3 +26,5 @@ export const addonService = {
 };
 export const addonStage = (sequence: number, count: number): AddonStage => sequence === 1 ? 'Sketch' : sequence === count ? 'Final' : 'Lineart';
 export const addonMoney = (price: number) => `${price.toLocaleString('vi-VN')} VND`;
+
+export const addonAllows = (allowed: string, stage: AddonStage) => allowed === 'Any' || allowed.split(',').includes(stage);

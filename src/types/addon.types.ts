@@ -1,5 +1,5 @@
 export type AddonStage = 'Sketch' | 'Lineart' | 'Final' | 'Any';
-export type AddonPreset = { key: string; title: string; allowedMilestone: AddonStage };
+export type AddonPreset = { key: string; title: string; allowedMilestone: string };
 export type CreatorAddon = {
   id: string;
   creatorId: string;
@@ -7,7 +7,7 @@ export type CreatorAddon = {
   title: string;
   description?: string | null;
   price: number;
-  allowedMilestone: AddonStage;
+  allowedMilestone: string;
   extendDays: number;
   presetKey?: string | null;
   isActive: boolean;
@@ -18,7 +18,7 @@ export type CommissionAddon = {
   title: string;
   description?: string | null;
   price: number;
-  allowedMilestone: AddonStage;
+  allowedMilestone: string;
   milestoneSequence: number;
   extendDays: number;
   status: 'Proposed' | 'Accepted' | 'Rejected';

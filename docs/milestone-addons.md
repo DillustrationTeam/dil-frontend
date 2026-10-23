@@ -11,3 +11,13 @@ WorkroomAddons renders proposal cards within the chat scroll area. A native dial
 Stage mapping matches the backend: first = Sketch, last = Final, intermediate = Lineart; one-stage packages support Sketch/Any. Previously proposed Any extras are still bound to their proposal sequence.
 
 The develop dependencies include qrcode and @types/qrcode. Default .next output contains obsolete generated route types from before develop moved pages. Verification uses a separate NEXT_DIST_DIR and a temporary TypeScript exclusion for old build caches, with `npm run build -- --webpack`; the original tsconfig is restored afterwards. Turbopack could not start its CSS worker in this environment. Add-on components and the booking modal pass targeted ESLint checks.
+
+## Creator Studio display and configuration (2026-10-23)
+
+Services uses package-first tabs with a separate add-on catalog/editor. Custom add-ons allow multiple milestone checkboxes, stored as a comma-separated set, or Any exclusively. System presets retain platform restrictions. Booking and Workroom use the same membership helper. Each package milestone exposes 0–20 included revisions (default 3), also shown in the booking plan. Existing order limits remain unchanged when a creator edits the rate card.
+
+Studio overview at /creator/commissions follows the provided dashboard layout: real revenue summary, Escrow held across creator commissions, wallet balance, available slots, revenue chart with 7/30/90-day ranges and source breakdown, latest requests and recent workrooms. Existing detailed revenue remains at /creator/dashboard.
+
+Verified: webpack production build, scoped ESLint, desktop/mobile UI, revision count save/reload, custom Sketch+Lineart save/reload (demo configuration restored), 131 backend workflow assertions, 26 pricing assertions and 9 SQL transaction assertions.
+
+Dashboard error handling: requests, orders, balance and slots load independently with explicit error states and per-section retry. Failed loads never display an empty-list message or a zero count. Owned add-ons retain removed package scope during edits/toggles; the editor labels removed packages explicitly. New or changed package assignments still require a valid saved package.

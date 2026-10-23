@@ -1,6 +1,6 @@
 'use client';
 
-import { addonService, addonStage, addonMoney, type CreatorAddon } from '@/services/addon.service';
+import { addonService, addonAllows, addonStage, addonMoney, type CreatorAddon } from '@/services/addon.service';
 
 import { useEffect, useEffectEvent, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -47,11 +47,11 @@ export default function CreateCommissionModal({ creatorId, creatorName, onClose 
   const multiplier = licenseType === 'Commercial' ? terms?.commercialLicenseMultiplier ?? 1.5 : 1;
   const [addons, setAddons] = useState<CreatorAddon[]>([]);
   const [addonIds, setAddonIds] = useState<string[]>([]);
-  const availableAddons = addons.filter(a => a.isActive && (!a.packageId || a.packageId === selectedPackageId) && selectedPackage?.milestones.some(m => a.allowedMilestone === 'Any' || addonStage(m.sequence, selectedPackage.milestones.length) === a.allowedMilestone));
+  const availableAddons = addons.filter(a => a.isActive && (!a.packageId || a.packageId === selectedPackageId) && selectedPackage?.milestones.some(m => addonAllows(a.allowedMilestone, addonStage(m.sequence, selectedPackage.milestones.length))));
   const selectedAddons = availableAddons.filter(a => addonIds.includes(a.id));
   const estimatedTotal = (selectedPackage?.price ?? 0) * multiplier + selectedAddons.reduce((sum, a) => sum + a.price, 0);
   const milestoneEstimate = (stage: RateCardPackage['milestones'][number]) => stage.price * multiplier + selectedAddons
-    .filter(addon => selectedPackage?.milestones.find(m => addon.allowedMilestone === 'Any' || addonStage(m.sequence, selectedPackage.milestones.length) === addon.allowedMilestone)?.sequence === stage.sequence)
+    .filter(addon => selectedPackage?.milestones.find(m => addonAllows(addon.allowedMilestone, addonStage(m.sequence, selectedPackage.milestones.length)))?.sequence === stage.sequence)
     .reduce((sum, addon) => sum + addon.price, 0);
 
   useEffect(() => {
@@ -192,7 +192,7 @@ export default function CreateCommissionModal({ creatorId, creatorName, onClose 
                   <ol className="mt-3 space-y-2">
                     {selectedPackage.milestones.map(stage => (
                       <li key={stage.sequence} className="flex justify-between gap-3 text-xs text-slate-300">
-                        <span>{stage.sequence}. {stage.title}</span>
+                        <span>{stage.sequence}. {stage.title}<span className="ml-2 text-slate-400">· {stage.maxRevisions ?? 3} lần sửa</span></span>
                         <span>{money(milestoneEstimate(stage))}</span>
                       </li>
                     ))}

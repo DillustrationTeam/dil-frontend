@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { addonService, addonStage, addonMoney, addonSchema, type CreatorAddon, type CommissionAddon } from '@/services/addon.service';
+import { addonService, addonAllows, addonStage, addonMoney, addonSchema, type CreatorAddon, type CommissionAddon } from '@/services/addon.service';
 import { commissionService } from '@/services/commission.service';
 import { extractErrorMessage } from '@/lib/api-client';
 import type { Commission } from '@/types/commission.types';
@@ -38,7 +38,7 @@ export function WorkroomAddons({ commission, isCreator, onUpdated, onPresenceCha
     const timer = window.setInterval(() => { if (!document.hidden && !dialog.current?.open) void load(); }, 8000);
     return () => { cancelled = true; window.clearInterval(timer); };
   }, [commission.id, commission.creatorId]);
-  const eligible = options.filter(a => a.isActive && (!a.packageId || a.packageId === commission.packageId) && (a.allowedMilestone === 'Any' || a.allowedMilestone === stage));
+  const eligible = options.filter(a => a.isActive && (!a.packageId || a.packageId === commission.packageId) && (addonAllows(a.allowedMilestone, stage)));
   const field = 'w-full rounded-xl border border-white/15 bg-[#1F2335] p-3 text-sm text-white';
   return <div className="space-y-3 text-sm">
     {active && <button type="button" disabled={busy} className="rounded-xl border border-[#A7ACD9]/40 bg-[#A7ACD9]/10 px-4 py-2 text-[#A7ACD9] disabled:opacity-40" onClick={() => { setError(''); setSelected(''); setTitle(''); setPrice(''); setDays('0'); dialog.current?.showModal(); }}>+ Đề xuất phụ phí (Add-on)</button>}
