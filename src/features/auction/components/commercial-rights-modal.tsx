@@ -65,7 +65,6 @@ export function CommercialRightsModal({
 
   useEffect(() => {
     if (!auctionId) {
-      setLoading(false);
       return;
     }
     let active = true;
