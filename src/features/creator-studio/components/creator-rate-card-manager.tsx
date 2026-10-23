@@ -199,7 +199,7 @@ export function CreatorRateCardManager() {
 
   return (
     <div className="w-full space-y-6 text-[#E4E1E5]">
-      {hasProfile && <CreatorAddonManager packages={packages} />}
+      
       {/* Top Header & Slot Manager Bar */}
       <div className="grid gap-6 xl:grid-cols-[1fr_300px]">
         <div className="glass-container rounded-3xl p-6">
@@ -244,6 +244,8 @@ export function CreatorRateCardManager() {
           trước khi thiết lập bảng giá.
         </div>
       )}
+
+      {hasProfile && <CreatorAddonManager packages={packages} />}
 
       {/* Package List */}
       <div className="space-y-6">
@@ -327,7 +329,7 @@ export function CreatorRateCardManager() {
                       <input
                         aria-label={`Giá cột mốc ${index + 1}`}
                         type="number"
-                        min={1}
+                        min={1000}
                         step={1000}
                         className="w-full rounded-xl border border-white/10 bg-[#171a2a] px-3 py-2 text-xs text-white outline-none focus:border-[#A7ACD9]"
                         value={stage.price}

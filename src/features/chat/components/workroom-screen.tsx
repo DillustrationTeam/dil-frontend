@@ -41,6 +41,7 @@ import { WorkroomProgressPanel } from './workroom-progress-panel';
 import { useChatHub } from '../hooks/use-chat-hub';
 import { useAutoTranslate } from '../hooks/use-auto-translate';
 import { WorkroomAddons } from './workroom-addons';
+import { WorkroomAddonStore } from './workroom-addon-store';
 import type { ChatMessageDto, ChatRoomDto } from '../types/chat.types';
 import { PageLoader } from '@/features/navigation';
 import { commissionService } from '@/services/commission.service';
@@ -100,7 +101,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
   const [partnerReadAt, setPartnerReadAt] = useState<string | null>(null);
 
   // States cho Atelier Binder UI Right Page View & Zoom & Milestone Switcher
-  const [rightPageView, setRightPageView] = useState<'canvas' | 'brief' | 'milestones'>('canvas');
+  const [rightPageView, setRightPageView] = useState<'canvas' | 'brief' | 'milestones' | 'addons'>('canvas');
   const [zoomScale] = useState<number>(1);
   const [selectedMilestoneId, setSelectedMilestoneId] = useState<string | null>(null);
   const [collapsedPanel, setCollapsedPanel] = useState<'none' | 'left' | 'right'>('none');
@@ -506,7 +507,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, pending, partnerTyping]);
+  }, [messages, pending, partnerTyping, hasAddonMessages]);
 
   useEffect(() => {
     if (loading || !userId) return;
@@ -959,12 +960,12 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                       <span className={`inline-block size-2 rounded-full ${autoTranslate ? 'bg-brand-periwinkle animate-pulse' : 'bg-white/20'}`} />
                     </button>
 
-                    {/* Nút Khiếu Nại / Xem Hồ Sơ Tranh Chấp */}
-                    {(commission?.dispute || commissionStatus === 'Cancelled' || commissionStatus === 'Disputed' || (commissionStatus !== 'Completed')) && (
+                    {/* Nút Xem Hồ Sơ Tranh Chấp (Chỉ hiển thị khi đơn đang có tranh chấp thực tế) */}
+                    {(commission?.dispute || commissionStatus === 'Disputed') && (
                       <button
                         type="button"
-                        onClick={() => (commission?.dispute || commissionStatus === 'Cancelled' || commissionStatus === 'Disputed') ? setShowDisputeDetailsModal(true) : setShowDisputeModal(true)}
-                        title={commission?.dispute || commissionStatus === 'Cancelled' ? 'Xem hồ sơ và kết quả giải quyết tranh chấp' : 'Gửi khiếu nại tranh chấp với Trọng tài sàn'}
+                        onClick={() => setShowDisputeDetailsModal(true)}
+                        title="Xem hồ sơ và kết quả giải quyết tranh chấp"
                         className="group relative flex size-9 shrink-0 items-center justify-center border border-amber-500/40 bg-[#1C202D] hover:bg-[#232838] hover:border-amber-400 text-amber-400 transition shadow-md [clip-path:polygon(10px_0,100%_0,100%_100%,0_100%,0_10px)]"
                       >
                         <Scale size={18} className="text-amber-400 group-hover:scale-110 transition-transform" />
@@ -1137,7 +1138,6 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
 
                 {/* DANH SÁCH TIN NHẮN REAL-TIME */}
                 <div className="relative z-10 flex-1 overflow-y-auto space-y-3 pr-1 my-2 min-h-[300px] lg:min-h-0">
-                  {commission && <WorkroomAddons commission={commission} isCreator={isCreator} onUpdated={setCommission} onPresenceChanged={setHasAddonMessages} />}
                   {messages.length === 0 && pending.length === 0 && !hasAddonMessages ? (
                     <div className="flex h-full flex-col items-center justify-center text-center text-xs text-outline p-6 space-y-2">
                       <BookOpen size={32} className="text-outline/50" />
@@ -1277,6 +1277,21 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                     </div>
                   ))}
 
+                  {/* VỊ TRÍ ĐỀ XUẤT PHỤ PHÍ NẰM DƯỚI ĐOẠN CHAT MỚI NHẤT */}
+                  {commission && (
+                    <WorkroomAddons
+                      commission={commission}
+                      isCreator={isCreator}
+                      onUpdated={setCommission}
+                      onPresenceChanged={setHasAddonMessages}
+                      onOpenStore={() => setRightPageView('addons')}
+                      onSelectMilestone={(msId) => {
+                        setSelectedMilestoneId(msId);
+                        setRightPageView('canvas');
+                      }}
+                    />
+                  )}
+
                   {partnerTyping && (
                     <div className="flex items-center gap-2 text-[11px] text-outline" aria-live="polite">
                       <span className="flex gap-1">
@@ -1334,15 +1349,6 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                   />
 
                   <form onSubmit={handleSendMessage} className="flex items-center gap-2">
-                    {/* Nút Khiếu Nại Tranh Chấp (Icon Scale Cái cân Trọng tài - Vị trí góc dưới bên trái) */}
-                    <button
-                      type="button"
-                      onClick={() => setShowDisputeModal(true)}
-                      title="Gửi khiếu nại tranh chấp với Trọng tài sàn"
-                      className="group relative flex size-10 shrink-0 items-center justify-center border border-amber-500/40 bg-[#1C202D] hover:bg-[#232838] hover:border-amber-400 text-amber-400 transition shadow-md [clip-path:polygon(10px_0,100%_0,100%_100%,0_100%,0_10px)]"
-                    >
-                      <Scale size={18} className="text-amber-400 group-hover:scale-110 transition-transform" />
-                    </button>
 
                     <button
                       type="button"
@@ -1427,7 +1433,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                   <div className="w-full h-full bg-[#1F2335] p-4 lg:p-6 flex flex-col justify-between relative overflow-hidden animate-in fade-in duration-200">
 
                     {/* CỤM 2 NÚT: THU GỌN VÀ PHÓNG TO KHUNG TRANH (VỊ TRÍ TƯƠNG ĐỐI BẰNG NHAU, CỐ ĐỊNH KHÔNG BỊ NHẢY) */}
-                    <div className="absolute top-3.5 sm:top-4 lg:top-5 right-3.5 sm:right-[130px] z-40 flex items-center gap-1.5">
+                    <div className="absolute top-3.5 sm:top-4 lg:top-5 right-3.5 sm:right-[195px] z-40 flex items-center gap-1.5 p-1 rounded-xl bg-[#171A2A]/90 border border-white/10 shadow-lg backdrop-blur-md">
                       {/* Nút 1: Thu gọn khung tranh sang mép phải */}
                       <button
                         type="button"
@@ -1499,7 +1505,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                 {rightPageView === 'canvas' && (
                   <>
                     <div className="shrink-0 pb-3 border-b border-white/10 flex flex-col space-y-2.5">
-                      <div className="flex flex-wrap items-center justify-between gap-2 sm:pr-64">
+                      <div className="flex flex-wrap items-center justify-between gap-2 sm:pr-[285px]">
                         <div>
                           <div className="flex items-center gap-2">
                             <span className="border border-brand-periwinkle/30 bg-brand-periwinkle/15 px-2.5 py-0.5 text-[10px] font-bold text-brand-periwinkle rounded-full">
@@ -1787,7 +1793,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                 {/* VIEW 2: BRIEF PAGE */}
                 {rightPageView === 'brief' && (
                   <div className="flex-1 flex flex-col justify-between overflow-y-auto space-y-4">
-                    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3 sm:pr-64">
+                    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3 sm:pr-[285px]">
                       <div className="flex items-center gap-2">
                         <FileText size={18} className="text-brand-periwinkle" />
                         <h3 className="font-h1 text-sm font-bold text-on-surface">Brief Yêu Cầu Dự Án Commission</h3>
@@ -1849,10 +1855,20 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                   </div>
                 )}
 
+                {/* VIEW 4: ADDONS STORE PAGE */}
+                {rightPageView === 'addons' && commission && (
+                  <WorkroomAddonStore
+                    commission={commission}
+                    isCreator={isCreator}
+                    onUpdated={setCommission}
+                    onBackToCanvas={() => setRightPageView('canvas')}
+                  />
+                )}
+
                 {/* VIEW 3: MILESTONES PAGE */}
                 {rightPageView === 'milestones' && (
                   <div className="flex-1 flex flex-col justify-between overflow-y-auto space-y-4">
-                    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3 sm:pr-64">
+                    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3 sm:pr-[285px]">
                       <div className="flex items-center gap-2">
                         <Clock size={18} className="text-brand-periwinkle" />
                         <h3 className="font-h1 text-sm font-bold text-on-surface">Chi Tiết Danh Sách Mốc Tiến Độ</h3>

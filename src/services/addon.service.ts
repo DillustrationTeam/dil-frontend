@@ -7,7 +7,12 @@ export type { AddonStage, AddonPreset, CreatorAddon, CommissionAddon } from '@/t
 export const addonSchema = z.object({
   title: z.string().trim().min(1, 'Nhập tên phụ phí').max(200),
   price: z.number().int().positive('Giá phải lớn hơn 0').max(999999999999),
-  allowedMilestone: z.enum(['Sketch', 'Lineart', 'Final', 'Any']),
+  allowedMilestone: z.string().refine((val) => {
+    if (!val || !val.trim()) return false;
+    if (val === 'Any') return true;
+    const parts = val.split(',').map((s) => s.trim()).filter(Boolean);
+    return parts.length > 0 && parts.every((p) => ['Sketch', 'Lineart', 'Final'].includes(p));
+  }, { message: 'Mốc áp dụng không hợp lệ.' }),
   extendDays: z.number().int().min(0).max(365),
 });
 export type AddonValues = z.infer<typeof addonSchema>;

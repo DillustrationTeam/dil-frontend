@@ -1,4 +1,4 @@
-export type AddonStage = 'Sketch' | 'Lineart' | 'Final' | 'Any';
+export type AddonStage = 'Sketch' | 'Lineart' | 'Final' | 'Any' | (string & {});
 export type AddonPreset = { key: string; title: string; allowedMilestone: AddonStage };
 export type CreatorAddon = {
   id: string;
