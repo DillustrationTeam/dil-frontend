@@ -18,6 +18,7 @@ export interface AuctionArtworkDto {
   fileSizeBytes?: number | null;
   fileFormat?: string | null;
   deliverableCount?: number;
+  hasMasterFilePack?: boolean;
 }
 
 export interface AuctionListItemDto {
@@ -76,6 +77,9 @@ export interface AuctionRequest {
   buyNowPrice?: number | null;
   startAt: string;
   endAt: string;
+  masterFileUrl?: string | null;
+  masterFileName?: string | null;
+  masterFileSizeBytes?: number | null;
 }
 
 export interface AuctionFilters {
@@ -184,4 +188,101 @@ export interface AuctionStatusChangedPayload {
   currentPrice: number;
   endAt: string;
 }
+
+export interface DeliverableDownloadDto {
+  downloadUrl: string;
+  expiresAt: string;
+  fileName: string;
+  mimeType?: string | null;
+  fileSizeBytes?: number | null;
+  certificateNumber?: string | null;
+  licenseType?: string | null;
+  artworkImageUrl?: string | null;
+  artworkImageDownloadUrl?: string | null;
+  artworkTitle?: string | null;
+  hasMasterPack?: boolean;
+}
+
+export interface AuctionCertificateDto {
+  certificateNumber: string;
+  auctionId: string;
+  artworkId: string;
+  artworkTitle: string;
+  artworkImageUrl?: string | null;
+  style?: string | null;
+  creatorId: string;
+  creatorName?: string | null;
+  ownerId: string;
+  ownerName?: string | null;
+  finalPrice: number;
+  issuedAt: string;
+  verificationCode: string;
+  digitalSignature: string;
+  licenseType: string;
+}
+
+export interface MyCollectionItemDto {
+  artworkId: string;
+  title: string;
+  thumbnailUrl: string | null;
+  imageUrl: string;
+  style: string | null;
+  creatorId: string;
+  creatorName: string;
+  acquiredAt: string;
+  auctionId: string | null;
+  finalPrice: number | null;
+  certificateNumber: string | null;
+  hasMasterFile: boolean;
+  exclusiveBadge: string;
+}
+
+export interface ArtworkProvenanceHistoryItemDto {
+  ownerId: string;
+  ownerName: string;
+  acquiredAt: string;
+  releasedAt: string | null;
+  transferReason: string;
+  auctionId: string | null;
+  price: number | null;
+  isCurrent: boolean;
+}
+
+export interface ArtworkProvenanceDto {
+  artworkId: string;
+  artworkTitle: string;
+  imageUrl: string | null;
+  creatorId: string;
+  creatorName: string;
+  createdAt: string;
+  currentOwnerId: string | null;
+  currentOwnerName: string | null;
+  isCurrentOwnerCollector: boolean;
+  exclusiveBadge: string;
+  history: ArtworkProvenanceHistoryItemDto[];
+}
+
+export interface CommercialRightsDeedDto {
+  auctionId: string;
+  artworkId: string;
+  artworkTitle: string;
+  artworkImageUrl?: string | null;
+  certificateNumber: string;
+  verificationCode: string;
+  digitalSignature: string;
+  creatorId: string;
+  creatorName: string;
+  ownerId: string;
+  ownerName: string;
+  finalPrice: number;
+  settledAt: string;
+  scopeOfRights: string;
+  commercialExploitationAllowed: boolean;
+  vtuberAndGameDevAllowed: boolean;
+  resellAllowed: boolean;
+  moralRightsRetainedByArtist: boolean;
+  termsAndConditions: string;
+}
+
+
 

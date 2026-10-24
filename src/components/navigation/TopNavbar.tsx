@@ -15,6 +15,7 @@ import {
   ShieldCheck,
   Wallet,
   FolderKanban,
+  Crown,
   Menu,
 } from 'lucide-react';
 import { useAuthStore } from '@/store/use-auth-store';
@@ -193,6 +194,13 @@ export default function TopNavbar<T extends string = string>({
                 className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs text-[#e4e1e5] hover:text-white hover:bg-white/5 transition-colors"
               >
                 <Wallet className="w-4 h-4 text-[#A7ACD9]" /> {t('Ví của tôi')}
+              </Link>
+              <Link
+                href="/collections"
+                onClick={() => setShowProfileMenu(false)}
+                className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs text-[#e4e1e5] hover:text-white hover:bg-white/5 transition-colors"
+              >
+                <Crown className="w-4 h-4 text-[#A7ACD9]" /> {t('Bộ sưu tập tranh đấu giá')}
               </Link>
               <Link
                 href={isAdmin ? '/admin' : '/client/commissions'}
