@@ -144,31 +144,10 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
         setJuries(juriesData || []);
         setMyCreatorProfile(profileData);
 
-        if (eventData) {
-          setEvent(eventData);
-        } else {
-          setEvent({
-            id: eventId,
-            title: 'AURA 2026',
-            description: 'Annual digital illustration and visual arts competition on Dillustration.',
-            bannerUrl: null,
-            maxVote: 1,
-            status: 'Judging',
-            submissionStartAt: '2026-10-01T00:00:00Z',
-            submissionEndAt: '2026-11-15T23:59:59Z',
-            judgingStartAt: '2026-11-16T00:00:00Z',
-            judgingEndAt: '2026-11-28T23:59:59Z',
-            votingStartAt: '2026-11-20T00:00:00Z',
-            votingEndAt: '2026-11-28T23:59:59Z',
-            resultAnnouncementAt: '2026-12-01T12:00:00Z',
-            submissionCount: 24,
-            createdAt: '2026-10-01T00:00:00Z',
-          });
-        }
+        setEvent(eventData || null);
+        setCriteria(criteriaData || []);
 
-        setCriteria(criteriaData);
-
-        const eventTitle = eventData?.title || 'AURA 2026';
+        const eventTitle = eventData?.title || 'Contest';
         const subItems = await juryService.getAssignedSubmissions(eventId, eventTitle);
 
         if (!isMounted) return;
@@ -436,8 +415,29 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
     );
   }
 
-  const deadlineFormatted = formatDisplayDate(event?.judgingEndAt);
-  const eventTitle = event?.title || 'AURA 2026';
+  if (!event) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] px-4 py-12 text-center">
+        <h2 className="font-sora text-xl sm:text-2xl font-bold text-white">
+          Không tìm thấy sự kiện
+        </h2>
+        <p className="mt-2 text-sm text-[#9695a1] max-w-md mx-auto leading-relaxed">
+          Sự kiện này không tồn tại hoặc đã bị xóa khỏi hệ thống.
+        </p>
+        <div className="mt-6">
+          <Link
+            href="/events"
+            className="inline-flex items-center gap-2 rounded-xl bg-white/10 hover:bg-white/15 px-6 py-2.5 text-xs font-semibold text-white transition"
+          >
+            <span>Tất cả sự kiện</span>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const deadlineFormatted = formatDisplayDate(event.judgingEndAt);
+  const eventTitle = event.title;
 
   return (
     <div className="min-h-screen text-[#e4e1e5] relative pb-16">

@@ -27,7 +27,7 @@ export function HeadJuryApproveTab({
           <div>
             <h2 className="text-xl font-bold font-sora text-white">Final Contest Results</h2>
             <p className="text-xs text-[#9695a1] mt-0.5">
-              Official ranking and award allocations for AURA 2026.
+              Official ranking and award allocations for this contest.
             </p>
           </div>
           <span

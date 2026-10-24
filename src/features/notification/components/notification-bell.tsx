@@ -3,7 +3,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ArrowRight, Bell, BriefcaseBusiness, CheckCheck, CircleAlert, Clock, Gavel, Info, LockKeyhole, Megaphone, RefreshCw, Scale, ShieldAlert, Wallet } from 'lucide-react';
+import { ArrowRight, Award, Bell, BriefcaseBusiness, Check, CheckCheck, CircleAlert, Clock, Gavel, Info, LockKeyhole, Megaphone, RefreshCw, Scale, ShieldAlert, Wallet, X } from 'lucide-react';
+import toast from 'react-hot-toast';
+import { getApiErrorMessage } from '@/lib/api-error';
 import { notificationService } from '../services/notification.service';
 import { useNotificationHub } from '../hooks/use-notification-hub';
 import { notificationTypeLabels, type NotificationDto } from '../types/notification.types';
@@ -31,12 +33,21 @@ function getIcon(type: string, size = 15) {
       return <LockKeyhole size={size} className="text-emerald-400" />;
     case 'DisputeStatusChanged':
       return <Scale size={size} className="text-amber-400" />;
+    case 'InvitationReceived':
+      return <Award size={size} className="text-amber-400" />;
+    case 'InvitationAccepted':
+      return <Award size={size} className="text-emerald-400" />;
+    case 'InvitationDeclined':
+      return <Award size={size} className="text-rose-400" />;
+    case 'InvitationCanceled':
+    case 'InvitationExpired':
+      return <Award size={size} className="text-outline" />;
     default:
       return <Info size={size} className="text-outline" />;
   }
 }
 
-/** RefType backend ghi theo tên entity (VD: "Auction", "PaymentOrder", "PayoutRequest"). */
+/** RefType backend ghi theo tên entity (VD: "Auction", "PaymentOrder", "PayoutRequest", "Invitation"). */
 function getRefLink({ refType, refId, notificationType, notificationTitle, body }: NotificationDto): string | null {
   if (!refType) return null;
   const key = refType.toLowerCase();
@@ -54,6 +65,7 @@ function getRefLink({ refType, refId, notificationType, notificationTitle, body 
   }
   if (key === 'commission' && refId) return `/workroom/${refId}`;
   if (key === 'chatroom' && refId) return `/workroom/${refId}`;
+  if (key === 'invitation' && refId) return `/notifications?invitationId=${refId}`;
   return null;
 }
 
@@ -96,8 +108,59 @@ export function NotificationBell({
   const [error, setError] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [markingAll, setMarkingAll] = useState(false);
+  const [replyingInvId, setReplyingInvId] = useState<string | null>(null);
 
   const wrapRef = useRef<HTMLDivElement>(null);
+
+  async function handleQuickAccept(e: React.MouseEvent, item: NotificationDto) {
+    e.stopPropagation();
+    if (!item.refId) return;
+    setReplyingInvId(item.refId);
+    try {
+      await notificationService.acceptInvitation(item.refId);
+      toast.success('Bạn đã chấp nhận lời mời tham gia sự kiện!');
+      setItems((prev) =>
+        prev.map((n) =>
+          n.notificationId === item.notificationId
+            ? { ...n, notificationType: 'InvitationAccepted', isRead: true }
+            : n
+        )
+      );
+      if (!item.isRead) {
+        await notificationService.markRead(item.notificationId);
+        setUnreadCount((c) => Math.max(0, c - 1));
+      }
+    } catch (err: unknown) {
+      toast.error(getApiErrorMessage(err, 'Không thể chấp nhận lời mời.'));
+    } finally {
+      setReplyingInvId(null);
+    }
+  }
+
+  async function handleQuickDecline(e: React.MouseEvent, item: NotificationDto) {
+    e.stopPropagation();
+    if (!item.refId) return;
+    setReplyingInvId(item.refId);
+    try {
+      await notificationService.declineInvitation(item.refId);
+      toast.success('Đã từ chối lời mời tham gia sự kiện.');
+      setItems((prev) =>
+        prev.map((n) =>
+          n.notificationId === item.notificationId
+            ? { ...n, notificationType: 'InvitationDeclined', isRead: true }
+            : n
+        )
+      );
+      if (!item.isRead) {
+        await notificationService.markRead(item.notificationId);
+        setUnreadCount((c) => Math.max(0, c - 1));
+      }
+    } catch (err: unknown) {
+      toast.error(getApiErrorMessage(err, 'Không thể từ chối lời mời.'));
+    } finally {
+      setReplyingInvId(null);
+    }
+  }
 
   /** Chỉ lấy badge số chưa đọc — nhẹ, gọi được cả khi panel đang đóng. */
   const refreshBadge = useCallback(async () => {
@@ -283,38 +346,90 @@ export function NotificationBell({
               </div>
             ) : (
               <ul className="divide-y divide-white/5">
-                {items.map((item) => (
-                  <li key={item.notificationId}>
-                    <button
-                      type="button"
-                      onClick={() => handleOpenItem(item)}
-                      disabled={busyId === item.notificationId}
-                      className={`flex w-full items-start gap-3 px-4 py-3 text-left transition hover:bg-white/5 disabled:opacity-60 ${
-                        item.isRead ? 'opacity-70' : ''
-                      }`}
-                    >
-                      <span className="mt-0.5 shrink-0">{getIcon(item.notificationType)}</span>
+                {items.map((item) => {
+                  const isInv = item.refType?.toLowerCase() === 'invitation' && !!item.refId;
+                  const isInvReceived = item.notificationType === 'InvitationReceived';
 
-                      <span className="min-w-0 flex-1">
-                        <span className="flex items-center gap-2">
-                          <span className={`truncate text-xs ${item.isRead ? 'font-medium text-on-surface-variant' : 'font-bold text-on-surface'}`}>
-                            {item.notificationTitle}
+                  return (
+                    <li key={item.notificationId} className="group transition hover:bg-white/5">
+                      <div
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => handleOpenItem(item)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            handleOpenItem(item);
+                          }
+                        }}
+                        className={`flex w-full cursor-pointer items-start gap-3 px-4 py-3 text-left ${
+                          item.isRead ? 'opacity-70' : ''
+                        } ${busyId === item.notificationId ? 'opacity-60 pointer-events-none' : ''}`}
+                      >
+                        <span className="mt-0.5 shrink-0">{getIcon(item.notificationType)}</span>
+
+                        <span className="min-w-0 flex-1">
+                          <span className="flex items-center gap-2">
+                            <span className={`truncate text-xs ${item.isRead ? 'font-medium text-on-surface-variant' : 'font-bold text-on-surface'}`}>
+                              {item.notificationTitle}
+                            </span>
+                            {!item.isRead && <span className="size-1.5 shrink-0 rounded-full bg-brand-periwinkle" />}
                           </span>
-                          {!item.isRead && <span className="size-1.5 shrink-0 rounded-full bg-brand-periwinkle" />}
-                        </span>
-                        <span className="mt-0.5 line-clamp-2 block text-[11px] leading-relaxed text-outline">
-                          {item.body}
-                        </span>
-                        <span className="mt-1 flex items-center gap-2 text-[10px] text-outline">
-                          <span className="rounded-full border border-white/10 px-1.5 py-px">
-                            {notificationTypeLabels[item.notificationType] ?? item.notificationType}
+                          <span className="mt-0.5 line-clamp-2 block text-[11px] leading-relaxed text-outline">
+                            {item.body}
                           </span>
-                          <span>{formatRelativeTime(item.createdAt)}</span>
+
+                          {/* Phản hồi nhanh lời mời sự kiện trong dropdown */}
+                          {isInv && isInvReceived && (
+                            <div className="mt-2 flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                              <button
+                                type="button"
+                                disabled={replyingInvId === item.refId}
+                                onClick={(e) => handleQuickAccept(e, item)}
+                                className="inline-flex items-center gap-1 rounded-lg border border-emerald-500/40 bg-emerald-500/20 px-2.5 py-1 text-[11px] font-semibold text-emerald-300 transition hover:bg-emerald-500/30 active:scale-95 disabled:opacity-50"
+                              >
+                                {replyingInvId === item.refId ? (
+                                  <RefreshCw size={10} className="animate-spin" />
+                                ) : (
+                                  <Check size={11} />
+                                )}
+                                Chấp nhận
+                              </button>
+                              <button
+                                type="button"
+                                disabled={replyingInvId === item.refId}
+                                onClick={(e) => handleQuickDecline(e, item)}
+                                className="inline-flex items-center gap-1 rounded-lg border border-rose-500/30 bg-rose-500/10 px-2 py-1 text-[11px] text-rose-300 transition hover:bg-rose-500/20 active:scale-95 disabled:opacity-50"
+                              >
+                                <X size={11} />
+                                Từ chối
+                              </button>
+                            </div>
+                          )}
+
+                          {isInv && item.notificationType === 'InvitationAccepted' && (
+                            <span className="mt-1.5 inline-flex items-center gap-1 font-semibold text-[10px] text-emerald-400">
+                              <Check size={11} /> Đã chấp nhận lời mời
+                            </span>
+                          )}
+
+                          {isInv && item.notificationType === 'InvitationDeclined' && (
+                            <span className="mt-1.5 inline-flex items-center gap-1 font-semibold text-[10px] text-rose-400">
+                              <X size={11} /> Đã từ chối lời mời
+                            </span>
+                          )}
+
+                          <span className="mt-1.5 flex items-center gap-2 text-[10px] text-outline">
+                            <span className="rounded-full border border-white/10 px-1.5 py-px">
+                              {notificationTypeLabels[item.notificationType] ?? item.notificationType}
+                            </span>
+                            <span>{formatRelativeTime(item.createdAt)}</span>
+                          </span>
                         </span>
-                      </span>
-                    </button>
-                  </li>
-                ))}
+                      </div>
+                    </li>
+                  );
+                })}
               </ul>
             )}
           </div>

@@ -96,6 +96,8 @@ export interface JuryProgressItem {
   totalAssigned: number;
   statusLabel: string;
   isCompleted: boolean;
+  isHeadJury?: boolean;
+  gradedSubmissionIds?: string[];
 }
 
 export interface CombinedScoreItem {

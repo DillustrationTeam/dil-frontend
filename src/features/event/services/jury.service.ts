@@ -104,7 +104,7 @@ export const juryService = {
           const isGraded = Boolean(draft?.isLocked || hasScore);
           const gradedScore = draft?.totalScore ?? (hasScore ? Number(sub.score) : null);
 
-          // Infer a mock or real category for illustration contests
+          // Artwork category classification
           const categories = ['Illustration', 'Concept Art', 'Digital Art', 'Mixed Media', 'Character Design'];
           const category = categories[index % categories.length];
 
@@ -364,6 +364,22 @@ export const juryService = {
    */
   cancelInvitation: async (invitationId: string): Promise<void> => {
     await apiClient.put(`/invitations/${invitationId}/cancel`);
+  },
+
+  /**
+   * Accept an invitation (For invited Creator)
+   */
+  acceptInvitation: async (invitationId: string): Promise<unknown> => {
+    const response = await apiClient.put<ApiResponse<unknown>>(`/invitations/${invitationId}/accept`);
+    return response.data?.data;
+  },
+
+  /**
+   * Decline an invitation (For invited Creator)
+   */
+  declineInvitation: async (invitationId: string): Promise<unknown> => {
+    const response = await apiClient.put<ApiResponse<unknown>>(`/invitations/${invitationId}/decline`);
+    return response.data?.data;
   },
 
   /**
