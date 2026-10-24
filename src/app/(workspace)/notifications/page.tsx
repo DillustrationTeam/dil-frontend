@@ -1,6 +1,6 @@
 'use client';
 
-import { useSyncExternalStore } from 'react';
+import { Suspense, useSyncExternalStore } from 'react';
 import { NotificationScreen } from '@/features/notification';
 import { useAuthStore } from '@/store/use-auth-store';
 
@@ -16,5 +16,9 @@ export default function NotificationsPage() {
   const accessToken = useAuthStore((state) => state.accessToken);
   const userId = ready && accessToken ? user?.id ?? null : null;
 
-  return <NotificationScreen userId={userId} />;
+  return (
+    <Suspense fallback={<div className="min-h-[50vh] flex items-center justify-center text-outline text-xs">Đang tải thông báo...</div>}>
+      <NotificationScreen userId={userId} />
+    </Suspense>
+  );
 }

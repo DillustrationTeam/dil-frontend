@@ -1,4 +1,4 @@
-
+import type { JuryCriterion } from './jury.types';
 
 export type EventStatus = 'Draft' | 'Open' | 'Judging' | 'Ended';
 
@@ -45,11 +45,15 @@ export interface EventListItemDto {
   isHeadJury?: boolean;
   isHeadJurySignedOff?: boolean;
   headJurySignedOffAt?: string | null;
+  criteria?: JuryCriterion[];
+  eventCriteria?: JuryCriterion[];
 }
 
 export interface EventDetailDto extends EventListItemDto {
   submissions?: EventSubmissionDto[];
   leaderboard?: EventLeaderboardItemDto[];
+  criteria?: JuryCriterion[];
+  eventCriteria?: JuryCriterion[];
 }
 
 export interface EventSubmissionDto {
@@ -166,6 +170,8 @@ export interface EventRequestPayload {
   votingStartAt: string;
   votingEndAt: string;
   resultAnnouncementAt: string;
+  criteria?: Array<Partial<JuryCriterion>>;
+  eventCriteria?: Array<Partial<JuryCriterion>>;
 }
 
 export interface CreateSubmissionDisputeRequest {
