@@ -4,6 +4,7 @@ export { AuctionCreateScreen } from './components/auction-create-screen';
 export { AuctionCertificateCard } from './components/auction-certificate-card';
 export { CommercialRightsModal } from './components/commercial-rights-modal';
 export { DeliverablesDownloadModal } from './components/deliverables-download-modal';
+export { PhysicalDeliveryCard } from './components/physical-delivery-card';
 export { MyCollectionScreen } from './components/my-collection-screen';
 export { ArtworkProvenanceCard } from './components/artwork-provenance-card';
 export { auctionService, auctionError, extractAuctionFieldErrors, AuctionConflictError } from './services/auction.service';

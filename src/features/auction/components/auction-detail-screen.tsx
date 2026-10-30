@@ -41,6 +41,7 @@ import { SellerTransparencyCard } from './seller-transparency-card';
 import { AuctionCertificateCard } from './auction-certificate-card';
 import { CommercialRightsModal } from './commercial-rights-modal';
 import { DeliverablesDownloadModal } from './deliverables-download-modal';
+import { PhysicalDeliveryCard } from './physical-delivery-card';
 import { PageLoader } from '@/features/navigation';
 import { auctionStatusLabels, type DeliverableDownloadDto } from '../types/auction.types';
 
@@ -435,7 +436,7 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
 
   const isLive = auction.auctionStatus === 'Active';
   const isScheduled = auction.auctionStatus === 'Scheduled';
-  const isFinished = ['Settled', 'Ended', 'Cancelled', 'Expired'].includes(auction.auctionStatus);
+  const isFinished = ['Settled', 'Ended', 'Cancelled', 'Expired', 'AwaitingPhysical', 'InTransit', 'Completed'].includes(auction.auctionStatus);
   const isEnded = clock.isEnded || isFinished;
   const isWinner = userId && auction.winnerId === userId;
   const isSeller = userId && auction.seller?.userId === userId;
@@ -606,7 +607,17 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
                 </span>
                 <h2 className={`text-xs font-bold uppercase tracking-wide ${isFinished ? 'text-slate-400' : isUrgent ? 'text-rose-400' : 'text-on-surface'}`}>
                   {isFinished
-                    ? (auction?.auctionStatus === 'Settled' ? 'Phiên đã chốt' : auction?.auctionStatus === 'Cancelled' ? 'Phiên đã hủy' : 'Phiên đã kết thúc')
+                    ? (auction?.auctionStatus === 'Settled'
+                        ? 'Phiên đã chốt'
+                        : auction?.auctionStatus === 'AwaitingPhysical'
+                          ? 'Chờ xác nhận tranh vật lý'
+                          : auction?.auctionStatus === 'InTransit'
+                            ? 'Đang giao tranh vật lý'
+                            : auction?.auctionStatus === 'Completed'
+                              ? 'Giao dịch hoàn tất'
+                              : auction?.auctionStatus === 'Cancelled'
+                                ? 'Phiên đã hủy'
+                                : 'Phiên đã kết thúc')
                     : isEnded
                       ? (isScheduled ? 'Đang mở...' : 'Phiên đã kết thúc')
                       : isUrgent
@@ -751,6 +762,13 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
                     </div>
                   )}
                 </div>
+              </div>
+            )}
+
+            {/* Quản lý giao nhận tranh vật lý & Biên lai ký quỹ/bưu cục (UC35) */}
+            {auction.hasPhysicalCopy && (
+              <div className="mb-6">
+                <PhysicalDeliveryCard auction={auction} userId={userId} onReload={loadDetail} />
               </div>
             )}
 

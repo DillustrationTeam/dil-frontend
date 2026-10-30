@@ -10,6 +10,7 @@ import {
   FileText,
   FolderArchive,
   Gavel,
+  Package,
   RefreshCw,
   ShieldCheck,
   Trash2,
@@ -33,6 +34,8 @@ const auctionSchema = z.object({
   masterFileUrl: z.string().min(1, 'Đường dẫn file nén không hợp lệ').nullable().optional(),
   masterFileName: z.string().nullable().optional(),
   masterFileSizeBytes: z.number().nullable().optional(),
+  hasPhysicalCopy: z.boolean().optional(),
+  physicalDescription: z.string().max(500, 'Mô tả tranh vật lý không quá 500 ký tự').nullable().optional(),
 }).superRefine((value, ctx) => {
   const start = new Date(value.startAt);
   const end = new Date(value.endAt);
@@ -68,6 +71,8 @@ export function AuctionCreateScreen({ userId }: { userId: string | null }) {
       masterFileUrl: null,
       masterFileName: null,
       masterFileSizeBytes: null,
+      hasPhysicalCopy: false,
+      physicalDescription: '',
     };
   });
 
@@ -434,6 +439,48 @@ export function AuctionCreateScreen({ userId }: { userId: string | null }) {
               <p className="text-xs text-rose-400 flex items-center gap-1.5">
                 <CircleAlert size={13} /> {uploadError}
               </p>
+            )}
+          </div>
+
+          {/* Bàn giao tranh vật lý (Tùy chọn) */}
+          <div className="rounded-2xl border border-white/10 bg-white/5 p-4 space-y-3">
+            <div className="flex items-start gap-3">
+              <input
+                id="hasPhysicalCopy"
+                type="checkbox"
+                checked={form.hasPhysicalCopy || false}
+                onChange={(e) => setForm((prev) => ({ ...prev, hasPhysicalCopy: e.target.checked }))}
+                className="mt-1 h-4 w-4 rounded border-white/20 bg-white/5 text-brand-periwinkle focus:ring-brand-periwinkle/30"
+              />
+              <div className="space-y-1">
+                <label htmlFor="hasPhysicalCopy" className="text-sm font-semibold text-white flex items-center gap-2 cursor-pointer">
+                  <Package size={16} className="text-amber-400" />
+                  Có thể cung cấp bản tranh vật lý cho người thắng cuộc
+                </label>
+                <p className="text-xs text-outline">
+                  Người xem sẽ thấy huy hiệu <span className="text-amber-300 font-semibold">[🖼️ Có bản vật lý]</span> để quyết định đấu giá.
+                  Nếu người thắng yêu cầu nhận tranh thật, tiền sẽ được sàn tạm giữ ký quỹ cho đến khi người mua ký nhận PoD từ bưu cục.
+                </p>
+              </div>
+            </div>
+
+            {form.hasPhysicalCopy && (
+              <div className="pt-2 border-t border-white/10 space-y-2">
+                <label className="text-xs font-medium text-white block">
+                  Mô tả bản tranh vật lý (kích thước, chất liệu khung, tình trạng, phương thức đóng gói):
+                </label>
+                <textarea
+                  value={form.physicalDescription || ''}
+                  onChange={(e) => setForm((prev) => ({ ...prev, physicalDescription: e.target.value }))}
+                  maxLength={500}
+                  rows={3}
+                  placeholder="Ví dụ: Tranh sơn dầu trên toan hạt mịn 60x80cm, có đóng khung gỗ sồi kèm lót màng xốp khí chống va đập khi gửi bưu điện..."
+                  className="w-full rounded-xl border border-white/10 bg-white/5 p-3 text-xs text-white placeholder-white/30 focus:border-brand-periwinkle focus:outline-none"
+                />
+                <p className="text-[11px] text-outline text-right">
+                  {(form.physicalDescription || '').length}/500 ký tự
+                </p>
+              </div>
             )}
           </div>
 

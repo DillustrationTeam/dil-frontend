@@ -3,10 +3,12 @@ import type { ApiResponse } from '@/types/api.types';
 import type {
   AuctionBidConflictDto,
   AuctionCertificateDto,
+  AuctionDeliveryDto,
   AuctionDetailDto,
   AuctionFilters,
   AuctionListItemDto,
   AuctionPage,
+  AuctionReceiptDto,
   AuctionRequest,
   AuctionSettlementDto,
   BidDto,
@@ -17,7 +19,9 @@ import type {
   MyActiveBidsMeta,
   MyCollectionItemDto,
   ArtworkProvenanceDto,
+  RequestPhysicalDeliveryPayload,
   SellerStatisticsDto,
+  UpdateShippingPayload,
   WalletOverviewDto,
 } from '../types/auction.types';
 
@@ -245,5 +249,23 @@ export const auctionService = {
     }
     return res.data.data;
   },
+
+  requestPhysicalDelivery: (auctionId: string, payload: RequestPhysicalDeliveryPayload): Promise<AuctionDeliveryDto> =>
+    call<AuctionDeliveryDto>('post', `/auctions/${auctionId}/delivery/request-physical`, payload).then((r) => r.data),
+
+  declinePhysicalDelivery: (auctionId: string): Promise<{ message: string }> =>
+    call<{ message: string }>('post', `/auctions/${auctionId}/delivery/decline-physical`).then((r) => r.data),
+
+  updateShipping: (auctionId: string, payload: UpdateShippingPayload): Promise<AuctionDeliveryDto> =>
+    call<AuctionDeliveryDto>('post', `/auctions/${auctionId}/delivery/ship`, payload).then((r) => r.data),
+
+  confirmDelivery: (auctionId: string, payload?: { deliveryReceiptUrl?: string }): Promise<AuctionDeliveryDto> =>
+    call<AuctionDeliveryDto>('post', `/auctions/${auctionId}/delivery/confirm`, payload).then((r) => r.data),
+
+  disputeDelivery: (auctionId: string, payload: { reason: string; evidenceUrl?: string }): Promise<AuctionDeliveryDto> =>
+    call<AuctionDeliveryDto>('post', `/auctions/${auctionId}/delivery/dispute`, payload).then((r) => r.data),
+
+  getReceipts: (auctionId: string, signal?: AbortSignal): Promise<AuctionReceiptDto[]> =>
+    call<AuctionReceiptDto[]>('get', `/auctions/${auctionId}/receipts`, undefined, undefined, signal).then((r) => r.data),
 };
 

@@ -2,9 +2,12 @@ export const auctionStatusLabels: Record<string, string> = {
   Scheduled: 'Sắp diễn ra',
   Active: 'Đang diễn ra',
   Ended: 'Đã kết thúc',
-  Settled: 'Đã chốt',
+  Settled: 'Đã chốt (File số)',
   Cancelled: 'Đã hủy',
   Expired: 'Hết hạn thanh toán',
+  AwaitingPhysical: 'Chờ xác nhận tranh vật lý',
+  InTransit: 'Đang giao tranh vật lý',
+  Completed: 'Hoàn tất giao dịch',
 };
 
 export interface AuctionArtworkDto {
@@ -30,6 +33,8 @@ export interface AuctionListItemDto {
   endAt: string;
   auctionStatus: string;
   watchCount: number;
+  hasPhysicalCopy?: boolean;
+  physicalDescription?: string | null;
 }
 
 export interface AuctionDetailDto extends AuctionListItemDto {
@@ -49,6 +54,61 @@ export interface AuctionDetailDto extends AuctionListItemDto {
   isWatching: boolean;
   serverTime?: string;
   participants: AuctionParticipantDto[];
+  requiresPhysicalDelivery?: boolean | null;
+  physicalChoiceDeadline?: string | null;
+  delivery?: AuctionDeliveryDto | null;
+  receipts?: AuctionReceiptDto[] | null;
+}
+
+export interface AuctionDeliveryDto {
+  id: string;
+  auctionId: string;
+  recipientId: string;
+  recipientName: string;
+  recipientPhone: string;
+  shippingAddress: string;
+  noteToSeller?: string | null;
+  carrierName?: string | null;
+  trackingCode?: string | null;
+  trackingUrl?: string | null;
+  shippingReceiptUrl?: string | null;
+  packageImageUrl?: string | null;
+  deliveryReceiptUrl?: string | null;
+  status: 'AwaitingShipment' | 'InTransit' | 'Delivered' | 'Disputed' | 'Cancelled' | string;
+  shippedAt?: string | null;
+  deliveredAt?: string | null;
+  confirmedAt?: string | null;
+  disputeReason?: string | null;
+  disputeEvidenceUrl?: string | null;
+}
+
+export interface AuctionReceiptDto {
+  receiptType: 'EscrowDeposit' | 'CarrierShipping' | 'ProofOfDelivery' | 'SettlementPayout' | string;
+  receiptNumber: string;
+  issuedAt: string;
+  amount: number;
+  feeAmount?: number | null;
+  netAmount?: number | null;
+  title: string;
+  proofImageUrl?: string | null;
+  description?: string | null;
+  payerId?: string | null;
+  payeeId?: string | null;
+}
+
+export interface RequestPhysicalDeliveryPayload {
+  recipientName: string;
+  recipientPhone: string;
+  shippingAddress: string;
+  noteToSeller?: string | null;
+}
+
+export interface UpdateShippingPayload {
+  carrierName: string;
+  trackingCode: string;
+  trackingUrl?: string | null;
+  shippingReceiptUrl?: string | null;
+  packageImageUrl?: string | null;
 }
 
 export interface AuctionParticipantDto {
@@ -80,6 +140,8 @@ export interface AuctionRequest {
   masterFileUrl?: string | null;
   masterFileName?: string | null;
   masterFileSizeBytes?: number | null;
+  hasPhysicalCopy?: boolean;
+  physicalDescription?: string | null;
 }
 
 export interface AuctionFilters {
