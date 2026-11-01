@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { CreatorAddonManager } from '@/features/creator-studio/components/creator-addon-manager';
 import axios from 'axios';
 import { creatorProfileService } from '@/features/creator-studio/services/creator-profile.service';
 import { creatorRateCardService, RateCardPackage } from '@/features/creator-studio/services/creator-rate-card.service';
@@ -67,6 +68,7 @@ export default function CreatorRateCardPage() {
       <div className="space-y-3 border-t border-white/10 pt-5"><h3 className="text-xs font-bold text-white">MILESTONE PLAN</h3>{item.milestones.map((stage, index) => <div key={index} className="grid gap-2 sm:grid-cols-[1fr_160px_auto]"><input aria-label={`Tên cột mốc ${index + 1} gói ${packageIndex + 1}`} className={field} value={stage.title} onChange={event => updateMilestone(item.id, index, { title: event.target.value })} /><input aria-label={`Giá cột mốc ${index + 1} gói ${packageIndex + 1}`} type="number" min={1} step={1} className={field} value={stage.price} onChange={event => updateMilestone(item.id, index, { price: Number(event.target.value) })} /><button type="button" disabled={item.milestones.length === 1} onClick={() => removeMilestone(item.id, index)} className="rounded-xl border border-white/10 px-3 py-2 text-xs text-slate-300 disabled:opacity-40">Xóa</button></div>)}<button type="button" disabled={item.milestones.length >= 10} onClick={() => addMilestone(item.id)} className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-xs font-bold text-white disabled:opacity-40">Thêm cột mốc</button></div>
       <p className="text-right text-sm text-[#C5C9F8]">Giá gói: <strong>{money(item.milestones.reduce((sum, stage) => sum + stage.price, 0))}</strong></p>
     </section>)}<button type="button" disabled={!hasProfile || packages.length >= 10} onClick={addPackage} className="rounded-xl border border-[#A7ACD9]/40 bg-[#A7ACD9]/10 px-5 py-3 text-xs font-bold text-white disabled:opacity-40">Thêm gói giá</button><div className="flex flex-wrap items-center justify-between gap-4 border-t border-white/10 pt-5"><Link href="/creator/commissions" className="text-xs text-[#C5C9F8] underline">Về Studio</Link><button type="button" disabled={!hasProfile || saving} onClick={save} className="rounded-xl bg-white px-8 py-3.5 text-xs font-extrabold text-[#0d0e15] disabled:opacity-50">{saving ? 'Đang lưu…' : 'Lưu bảng giá'}</button></div></div>}
+    {hasProfile && <CreatorAddonManager packages={packages} />}
     {error && <p role="alert" className="rounded-xl border border-red-400/30 bg-red-400/10 px-4 py-3 text-xs text-red-200">{error}</p>}{message && <p role="status" className="text-xs text-emerald-300">{message}</p>}
   </main>;
 }

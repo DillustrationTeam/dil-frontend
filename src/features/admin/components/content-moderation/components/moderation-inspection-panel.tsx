@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { ArtworkScanPanel } from '@/features/artwork-ai';
 import { Loader2, ShieldCheck, X } from 'lucide-react';
 import {
   ArtworkInspectionDetailDto,
@@ -37,7 +38,7 @@ export function ModerationInspectionPanel({
           Loading Artwork Inspection Details...
         </p>
         <p className="text-xs text-[#8A8FA9]">
-          Retrieving Google Cloud Vision AI metrics and metadata.
+          Đang tải thông tin tác phẩm và kết quả kiểm tra.
         </p>
       </div>
     );
@@ -90,6 +91,7 @@ export function ModerationInspectionPanel({
         <div className="md:col-span-6 glass-container bg-[#161926]/85 backdrop-blur-[32px] border border-white/10 rounded-[28px] p-6 space-y-6 flex flex-col justify-between">
           {/* AI Confidence Scores */}
           <AiScanMetricsCard artwork={artwork} />
+          <ArtworkScanPanel key={artwork.artworkId} artworkId={artwork.artworkId} canRetry={['Pending', 'Flagged'].includes(artwork.moderationStatus)} />
 
           {/* Moderator Decision Form */}
           <ModerationDecisionForm

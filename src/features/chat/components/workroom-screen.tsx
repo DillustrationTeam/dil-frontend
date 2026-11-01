@@ -14,6 +14,7 @@ import {
   Download,
   Eye,
   FileArchive,
+  FolderOpen,
   FileText,
   Globe,
   Lock,
@@ -24,7 +25,6 @@ import {
   Scale,
   ShieldAlert,
   ShieldCheck,
-  Sparkles,
   TrendingUp,
   UploadCloud,
   X,
@@ -34,7 +34,9 @@ import { chatService } from '../services/chat.service';
 import { WorkroomProgressPanel } from './workroom-progress-panel';
 import { useChatHub } from '../hooks/use-chat-hub';
 import { useAutoTranslate } from '../hooks/use-auto-translate';
+import { WorkroomAddons } from './workroom-addons';
 import type { ChatMessageDto, ChatRoomDto } from '../types/chat.types';
+import { CreatorAssetPicker } from '@/features/creator-studio';
 import { PageLoader } from '@/features/navigation';
 import { commissionService } from '@/services/commission.service';
 import { extractErrorMessage } from '@/lib/api-client';
@@ -80,6 +82,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [inputBody, setInputBody] = useState('');
+  const [showAssetPicker, setShowAssetPicker] = useState(false);
   const [sending, setSending] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [depositingEscrow, setDepositingEscrow] = useState(false);
@@ -99,6 +102,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
 
   // States cho các Modal Hợp đồng & Cột mốc
   const [commission, setCommission] = useState<Commission | null>(null);
+  const [hasAddonMessages, setHasAddonMessages] = useState(false);
   const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [showApprovalModal, setShowApprovalModal] = useState(false);
   const [showDeliveryModal, setShowDeliveryModal] = useState(false);
@@ -174,7 +178,8 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
     setAcceptingTerms(true);
     setTermsError(null);
     try {
-      setCommission(await commissionService.acceptWorkroomTerms(commission.id));
+      const updated = await commissionService.acceptWorkroomTerms(commission.id);
+      setCommission(current => current ? { ...current, ...updated } : updated);
     } catch (err: unknown) {
       setTermsError(extractErrorMessage(err, 'Không thể ghi nhận xác nhận điều khoản.'));
     } finally {
@@ -548,7 +553,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
     try {
       const updated = await commissionService.depositEscrow(room.commissionId);
       if (updated) {
-        setCommission(updated);
+        setCommission(current => current ? { ...current, ...updated } : updated);
       }
       refresh();
       void chat.sendMessage('🛡️ Khách hàng đã nạp tiền ký quỹ Escrow thành công. Creator có thể bắt đầu vẽ!').catch(() => null);
@@ -988,7 +993,8 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
 
                 {/* DANH SÁCH TIN NHẮN REAL-TIME */}
                 <div className="relative z-10 flex-1 overflow-y-auto space-y-3 pr-1 my-2 min-h-[300px] lg:min-h-0">
-                  {messages.length === 0 && pending.length === 0 ? (
+                  {commission && <WorkroomAddons commission={commission} isCreator={isCreator} onUpdated={setCommission} onPresenceChanged={setHasAddonMessages} />}
+                  {messages.length === 0 && pending.length === 0 && !hasAddonMessages ? (
                     <div className="flex h-full flex-col items-center justify-center text-center text-xs text-outline p-6 space-y-2">
                       <BookOpen size={32} className="text-outline/50" />
                       <p className="font-semibold text-on-surface">Chưa có tin nhắn nào trong phòng làm việc</p>
@@ -1183,6 +1189,12 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                     }}
                   />
 
+                  {showAssetPicker && isCreator && !isChatDisabled && <CreatorAssetPicker onClose={() => setShowAssetPicker(false)} onSelect={body => {
+                    const combined = [inputBody, body].filter(Boolean).join('\n\n');
+                    const parsed = workroomMessageSchema.safeParse(combined);
+                    if (!parsed.success) { setError('Nội dung tài nguyên và tin nhắn vượt 4000 ký tự. Hãy rút gọn ghi chú trước khi chèn.'); setShowAssetPicker(false); return; }
+                    setInputBody(parsed.data); setShowAssetPicker(false);
+                  }} />}
                   <form onSubmit={handleSendMessage} className="flex items-center gap-2">
                     {/* Nút Khiếu Nại Tranh Chấp (Icon Scale Cái cân Trọng tài - Vị trí góc dưới bên trái) */}
                     <button
@@ -1204,8 +1216,12 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                       <Paperclip size={16} className={uploading ? 'animate-spin' : ''} />
                     </button>
 
-                    <input
-                      type="text"
+                    {isCreator && <button type="button" disabled={sending || uploading || isChatDisabled} onClick={() => setShowAssetPicker(true)}
+                      title="Thư viện tài nguyên" aria-label="Thư viện tài nguyên" className="flex size-10 shrink-0 items-center justify-center border border-white/15 bg-white/5 text-[#A7ACD9] disabled:opacity-50"><FolderOpen size={16} /></button>}
+
+                    <textarea
+                      rows={2}
+                      aria-label="Nội dung tin nhắn"
                       maxLength={4000}
                       disabled={isChatDisabled}
                       value={inputBody}
@@ -1213,8 +1229,14 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                         setInputBody(e.target.value);
                         chat.notifyTyping();
                       }}
+                      onKeyDown={(event) => {
+                        if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) {
+                          event.preventDefault();
+                          event.currentTarget.form?.requestSubmit();
+                        }
+                      }}
                       placeholder={isChatDisabled ? 'Phòng trao đổi đã đóng.' : 'Nhập tin nhắn hoặc trao đổi với đối tác...'}
-                      className="flex-1 border border-white/15 bg-slate-950/80 px-3.5 py-2.5 text-xs text-on-surface placeholder:text-outline focus:border-brand-periwinkle focus:outline-none disabled:opacity-50 [clip-path:polygon(8px_0,100%_0,100%_calc(100%-8px),calc(100%-8px)_100%,0_100%,0_8px)]"
+                      className="min-w-0 max-h-40 flex-1 resize-y border border-white/15 bg-slate-950/80 px-3.5 py-2.5 text-xs text-on-surface placeholder:text-outline focus:border-brand-periwinkle focus:outline-none disabled:opacity-50 [clip-path:polygon(8px_0,100%_0,100%_calc(100%-8px),calc(100%-8px)_100%,0_100%,0_8px)]"
                     />
 
                     <button
@@ -1226,6 +1248,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                       {sending || uploading ? <RefreshCw size={15} className="animate-spin" /> : <Send size={15} />}
                     </button>
                   </form>
+                  <p className="mt-1 text-right text-[10px] text-outline">Enter để gửi · Shift+Enter để xuống dòng</p>
                 </div>
               </div>
 
