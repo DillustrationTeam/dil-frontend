@@ -13,7 +13,7 @@ import { NotificationBell } from '@/features/notification';
 const navLinks = [
   { href: '/', label: 'Marketplace', match: ['/'], exact: true, requiresAuth: false },
   { href: '/#artists', label: 'Artists', match: [] as string[], exact: false, requiresAuth: false },
-  { href: '/#bento', label: 'Collections', match: [] as string[], exact: false, requiresAuth: false },
+  { href: '/collections', label: 'Bộ sưu tập', match: ['/collections'], exact: false, requiresAuth: false },
   // Đấu giá và Phòng làm việc chỉ hiện khi đã đăng nhập.
   { href: '/auctions', label: 'Đấu giá', match: ['/auctions'], exact: false, requiresAuth: true },
   { href: '/workroom', label: 'Phòng làm việc', match: ['/workroom'], exact: false, requiresAuth: true },
@@ -256,6 +256,15 @@ export function SiteHeader() {
                   >
                     <span className="material-symbols-outlined text-base text-[#c2c7f6]">account_balance_wallet</span>
                     <span>{t('Ví của tôi')}</span>
+                  </Link>
+
+                  <Link
+                    href="/collections"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs text-[#c7c5cf] transition-colors hover:bg-white/10 hover:text-white"
+                  >
+                    <span className="material-symbols-outlined text-base text-[#c2c7f6]">collections_bookmark</span>
+                    <span>{t('Bộ sưu tập tranh đấu giá')}</span>
                   </Link>
 
                   <Link
