@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import {
   Save,
@@ -12,9 +12,13 @@ import {
   Image as ImageIcon,
   Lock,
   Clock,
+  Plus,
+  Trash2,
+  ListChecks,
 } from 'lucide-react';
 import type { EventStatus, EventListItemDto } from '../../../types/event.types';
 import { eventService } from '../../../services/event.service';
+import { eventCriteriaService } from '../../../services/event-criteria.service';
 import { creatorProfileService } from '@/features/creator-studio/services/creator-profile.service';
 
 function formatDateForInput(dateStr?: string | null): string {
@@ -74,6 +78,31 @@ export function EventCreateForm({
   const [votingEndAt, setVotingEndAt] = useState(() => formatDateForInput(selectedEvent?.votingEndAt));
   const [resultAnnouncementAt, setResultAnnouncementAt] = useState(() => formatDateForInput(selectedEvent?.resultAnnouncementAt));
 
+  // Scoring Criteria State
+  const [criteriaList, setCriteriaList] = useState<Array<{
+    id?: string;
+    name: string;
+    description: string;
+    maxScore: number | string;
+    weight: number | string;
+    displayOrder: number;
+  }>>(() => {
+    const existing = selectedEvent?.criteria || selectedEvent?.eventCriteria;
+    if (existing && existing.length > 0) {
+      return existing.map((c, i) => ({
+        id: c.id,
+        name: c.name || '',
+        description: c.description || '',
+        maxScore: c.maxScore ?? 10,
+        weight: c.weight ?? 1,
+        displayOrder: c.displayOrder ?? i + 1,
+      }));
+    }
+    return [
+      { name: '', description: '', maxScore: 10, weight: 1, displayOrder: 1 },
+    ];
+  });
+
   const [submitting, setSubmitting] = useState(false);
 
   // Synchronize state during render if selectedEvent prop changes
@@ -95,7 +124,39 @@ export function EventCreateForm({
     setVotingStartAt(formatDateForInput(selectedEvent?.votingStartAt));
     setVotingEndAt(formatDateForInput(selectedEvent?.votingEndAt));
     setResultAnnouncementAt(formatDateForInput(selectedEvent?.resultAnnouncementAt));
+
+    const existing = selectedEvent?.criteria || selectedEvent?.eventCriteria;
+    if (existing && existing.length > 0) {
+      setCriteriaList(existing.map((c, i) => ({
+        id: c.id,
+        name: c.name || '',
+        description: c.description || '',
+        maxScore: c.maxScore ?? 10,
+        weight: c.weight ?? 1,
+        displayOrder: c.displayOrder ?? i + 1,
+      })));
+    }
   }
+
+  // Fetch criteria from backend if editing and criteria not preloaded
+  useEffect(() => {
+    if (selectedEvent?.id && (!selectedEvent.criteria || selectedEvent.criteria.length === 0) && (!selectedEvent.eventCriteria || selectedEvent.eventCriteria.length === 0)) {
+      eventCriteriaService.getEventCriteria(selectedEvent.id)
+        .then((data) => {
+          if (data && data.length > 0) {
+            setCriteriaList(data.map((c, i) => ({
+              id: c.id,
+              name: c.name || '',
+              description: c.description || '',
+              maxScore: c.maxScore ?? 10,
+              weight: c.weight ?? 1,
+              displayOrder: c.displayOrder ?? i + 1,
+            })));
+          }
+        })
+        .catch(() => {});
+    }
+  }, [selectedEvent?.id]);
 
   // Calculate backend milestone locks and active stages matching UpdateEventCommandValidator.cs
   const now = new Date();
@@ -130,6 +191,64 @@ export function EventCreateForm({
 
   const isEventEnded = isEditing && (status === 'Ended' || isResultAnnouncementPassed);
 
+  // Criteria can only be edited before judging starts
+  const isCriteriaLocked = useMemo(() => {
+    if (!isEditing || !selectedEvent) return false;
+    const statusStr = String(status).toLowerCase();
+    const origStatusStr = String(selectedEvent.status).toLowerCase();
+    const isJudgingOrLaterStatus =
+      statusStr === 'judging' ||
+      statusStr === '3' ||
+      statusStr === 'ended' ||
+      statusStr === '4' ||
+      origStatusStr === 'judging' ||
+      origStatusStr === '3' ||
+      origStatusStr === 'ended' ||
+      origStatusStr === '4';
+
+    return Boolean(isJudgingStartPassed || isJudgingActive || isJudgingEndPassed || isJudgingOrLaterStatus);
+  }, [isEditing, selectedEvent, status, isJudgingStartPassed, isJudgingActive, isJudgingEndPassed]);
+
+  const handleAddCriterion = () => {
+    if (isCriteriaLocked) {
+      toast.error('Scoring criteria cannot be added after the judging stage has started.');
+      return;
+    }
+    setCriteriaList((prev) => [
+      ...prev,
+      {
+        name: '',
+        description: '',
+        maxScore: 10,
+        weight: 1,
+        displayOrder: prev.length + 1,
+      },
+    ]);
+  };
+
+  const handleRemoveCriterion = (index: number) => {
+    if (isCriteriaLocked) {
+      toast.error('Scoring criteria cannot be removed after the judging stage has started.');
+      return;
+    }
+    if (criteriaList.length <= 1) {
+      toast.error('Event must have at least one scoring criterion.');
+      return;
+    }
+    setCriteriaList((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleCriterionChange = (
+    index: number,
+    field: 'name' | 'description' | 'maxScore' | 'weight',
+    value: string | number
+  ) => {
+    if (isCriteriaLocked) return;
+    setCriteriaList((prev) =>
+      prev.map((c, i) => (i === index ? { ...c, [field]: value } : c))
+    );
+  };
+
   const handleBannerFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -149,8 +268,8 @@ export function EventCreateForm({
     setBannerPreviewUrl(preview);
   };
 
-  const handleSaveLocalMock = () => {
-    toast.success('Event draft saved successfully!');
+  const handleSaveDraft = async () => {
+    await performSave(true);
   };
 
   // Helper to check if an input field value was actually modified by the user compared to original formatted date
@@ -257,23 +376,24 @@ export function EventCreateForm({
     return errors;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const performSave = async (isDraft = false) => {
     if (!title.trim()) {
       toast.error('Event title is required!');
       return;
     }
 
-    if (maxVote <= 0) {
-      toast.error('Max vote must be greater than 0.');
-      return;
-    }
+    if (!isDraft) {
+      if (maxVote <= 0) {
+        toast.error('Max vote must be greater than 0.');
+        return;
+      }
 
-    // Run backend validation checks
-    const validationErrors = validateTimelineTransitions();
-    if (validationErrors.length > 0) {
-      toast.error(validationErrors[0]);
-      return;
+      // Run backend validation checks
+      const validationErrors = validateTimelineTransitions();
+      if (validationErrors.length > 0) {
+        toast.error(validationErrors[0]);
+        return;
+      }
     }
 
     setSubmitting(true);
@@ -310,8 +430,6 @@ export function EventCreateForm({
       const formatIsoUtc = (inputStr: string, origIsoStr?: string | null): string => {
         if (origIsoStr && !isFieldChanged(inputStr, origIsoStr)) {
           return origIsoStr;
-
-
         }
         const d = new Date(inputStr);
         return isNaN(d.getTime()) ? new Date().toISOString() : d.toISOString();
@@ -323,8 +441,8 @@ export function EventCreateForm({
         bannerUrl: finalBannerUrl || null,
         rules: rules.trim() || null,
         prize: prize.trim() || null,
-        maxVote: Number(maxVote) || 1,
-        status: mapStatusToEnum(status),
+        maxVote: Number(maxVote) > 0 ? Number(maxVote) : 1,
+        status: isDraft ? 1 : mapStatusToEnum(status),
         isFeatured,
         submissionStartAt: formatIsoUtc(submissionStartAt, selectedEvent?.submissionStartAt),
         submissionEndAt: formatIsoUtc(submissionEndAt, selectedEvent?.submissionEndAt),
@@ -333,44 +451,85 @@ export function EventCreateForm({
         votingStartAt: formatIsoUtc(votingStartAt, selectedEvent?.votingStartAt),
         votingEndAt: formatIsoUtc(votingEndAt, selectedEvent?.votingEndAt),
         resultAnnouncementAt: formatIsoUtc(resultAnnouncementAt, selectedEvent?.resultAnnouncementAt),
+        criteria: criteriaList
+          .filter((c) => c.name.trim().length > 0)
+          .map((c, i) => ({
+            id: c.id,
+            name: c.name.trim(),
+            description: c.description.trim() || undefined,
+            maxScore: Number(c.maxScore) > 0 ? Number(c.maxScore) : 10,
+            weight: Number(c.weight) > 0 ? Number(c.weight) : 1,
+            displayOrder: i + 1,
+          })),
+        eventCriteria: criteriaList
+          .filter((c) => c.name.trim().length > 0)
+          .map((c, i) => ({
+            id: c.id,
+            name: c.name.trim(),
+            description: c.description.trim() || undefined,
+            maxScore: Number(c.maxScore) > 0 ? Number(c.maxScore) : 10,
+            weight: Number(c.weight) > 0 ? Number(c.weight) : 1,
+            displayOrder: i + 1,
+          })),
       };
 
       let savedData: EventListItemDto;
       if (isEditing && selectedEvent) {
         const updated = await eventService.update(selectedEvent.id, payload as unknown as Record<string, unknown>);
-        savedData = (updated as unknown as EventListItemDto) || {
-          ...selectedEvent,
-          ...payload,
-          bannerUrl: payload.bannerUrl ?? null,
-          rules: payload.rules ?? null,
-          prize: payload.prize ?? null,
-          updatedAt: new Date().toISOString(),
+        if (!updated || !updated.id) {
+          throw new Error('Failed to update event: backend returned invalid response.');
+        }
+        savedData = {
+          id: updated.id,
+          title: updated.title,
+          description: updated.description,
+          bannerUrl: updated.bannerUrl ?? null,
+          rules: updated.rules ?? null,
+          prize: updated.prize ?? null,
+          maxVote: updated.maxVote,
+          status: updated.status,
+          isFeatured: updated.isFeatured,
+          submissionStartAt: updated.submissionStartAt,
+          submissionEndAt: updated.submissionEndAt,
+          judgingStartAt: updated.judgingStartAt,
+          judgingEndAt: updated.judgingEndAt,
+          votingStartAt: updated.votingStartAt,
+          votingEndAt: updated.votingEndAt,
+          resultAnnouncementAt: updated.resultAnnouncementAt,
+          submissionCount: updated.submissionCount ?? selectedEvent.submissionCount ?? 0,
+          totalVoteCount: updated.totalVoteCount ?? selectedEvent.totalVoteCount ?? 0,
+          createdAt: updated.createdAt || selectedEvent.createdAt,
+          updatedAt: updated.updatedAt || new Date().toISOString(),
         };
-        toast.success(`Event "${title}" updated successfully!`);
+        toast.success(isDraft ? `Draft "${title}" saved successfully!` : `Event "${title}" updated successfully!`);
       } else {
         const created = await eventService.create(payload as unknown as Record<string, unknown>);
-        savedData = (created as unknown as EventListItemDto) || {
-          id: `evt-${Date.now()}`,
-          title: payload.title,
-          description: payload.description,
-          bannerUrl: payload.bannerUrl ?? null,
-          rules: payload.rules ?? null,
-          prize: payload.prize ?? null,
-          maxVote: payload.maxVote,
-          status: payload.status,
-          isFeatured: payload.isFeatured,
-          submissionStartAt: payload.submissionStartAt,
-          submissionEndAt: payload.submissionEndAt,
-          judgingStartAt: payload.judgingStartAt,
-          judgingEndAt: payload.judgingEndAt,
-          votingStartAt: payload.votingStartAt,
-          votingEndAt: payload.votingEndAt,
-          resultAnnouncementAt: payload.resultAnnouncementAt,
-          submissionCount: 0,
-          totalVoteCount: 0,
-          createdAt: new Date().toISOString(),
+        if (!created || !created.id) {
+          throw new Error('Failed to create event: backend returned invalid response.');
+        }
+        savedData = {
+          id: created.id,
+          title: created.title,
+          description: created.description,
+          bannerUrl: created.bannerUrl ?? null,
+          rules: created.rules ?? null,
+          prize: created.prize ?? null,
+          maxVote: created.maxVote,
+          status: created.status,
+          isFeatured: created.isFeatured,
+          submissionStartAt: created.submissionStartAt,
+          submissionEndAt: created.submissionEndAt,
+          judgingStartAt: created.judgingStartAt,
+          judgingEndAt: created.judgingEndAt,
+          votingStartAt: created.votingStartAt,
+          votingEndAt: created.votingEndAt,
+          resultAnnouncementAt: created.resultAnnouncementAt,
+          submissionCount: created.submissionCount ?? 0,
+          totalVoteCount: created.totalVoteCount ?? 0,
+          createdAt: created.createdAt || new Date().toISOString(),
+          updatedAt: created.updatedAt,
         };
-        toast.success(`New event "${title}" created successfully!`);
+        toast.success(isDraft ? `Draft "${title}" saved to backend!` : `New event "${title}" created successfully!`);
       }
 
       onSaveSuccess(savedData);
@@ -379,6 +538,11 @@ export function EventCreateForm({
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await performSave(false);
   };
 
   return (
@@ -776,12 +940,156 @@ export function EventCreateForm({
         </div>
       </div>
 
+      {/* 5. Scoring Criteria & Rubrics */}
+      <div className="space-y-4 pt-4 border-t border-white/10">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h3 className="text-xs font-bold text-brand-periwinkle uppercase tracking-wider flex items-center gap-1.5">
+              <ListChecks size={15} /> 5. Event Scoring Criteria & Rubrics
+            </h3>
+            <p className="text-[11px] text-[#8A8FA9] mt-0.5">
+              Configure evaluation criteria and rubrics for the Jury during the judging stage.
+            </p>
+          </div>
+          {isCriteriaLocked ? (
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-semibold">
+              <Lock size={13} />
+              <span>Criteria Locked</span>
+            </span>
+          ) : (
+            <button
+              type="button"
+              onClick={handleAddCriterion}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-brand-periwinkle/30 bg-brand-periwinkle/10 hover:bg-brand-periwinkle/20 text-brand-periwinkle text-xs font-semibold transition cursor-pointer"
+            >
+              <Plus size={14} />
+              <span>Add Criterion</span>
+            </button>
+          )}
+        </div>
+
+        {/* Warning if criteria is locked */}
+        {isCriteriaLocked && (
+          <div className="flex items-start gap-2.5 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-200 text-xs">
+            <Lock size={15} className="text-amber-400 shrink-0 mt-0.5" />
+            <div>
+              <p className="font-semibold text-amber-300">Criteria editing is locked</p>
+              <p className="text-[11px] text-amber-200/80 mt-0.5">
+                Evaluation criteria can only be modified before the judging stage begins. Once judging is active or has concluded, scoring criteria are read-only to ensure grading consistency.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Summary pill */}
+        <div className="flex flex-wrap items-center gap-3 text-xs bg-white/5 border border-white/10 rounded-xl px-4 py-2">
+          <span className="text-[#8A8FA9]">Total Criteria: <strong className="text-white">{criteriaList.length}</strong></span>
+          <span className="text-[#8A8FA9]">·</span>
+          <span className="text-[#8A8FA9]">Max Score Total: <strong className="text-amber-300">{criteriaList.reduce((sum, c) => sum + (Number(c.maxScore) || 0), 0)}</strong></span>
+          <span className="text-[#8A8FA9]">·</span>
+          <span className="text-[#8A8FA9]">Total Weight: <strong className="text-emerald-300">{criteriaList.reduce((sum, c) => sum + (Number(c.weight) || 0), 0).toFixed(2)}</strong></span>
+        </div>
+
+        {/* Criteria items list */}
+        <div className="space-y-3">
+          {criteriaList.map((crit, idx) => (
+            <div
+              key={crit.id || `crit-${idx}`}
+              className="p-3.5 rounded-xl border border-white/10 bg-[#0c0e18]/80 hover:border-white/20 transition space-y-3"
+            >
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-xs font-bold text-white flex items-center gap-1.5">
+                  <span className="size-5 rounded-full bg-brand-periwinkle/20 text-brand-periwinkle text-[11px] flex items-center justify-center font-mono">
+                    {idx + 1}
+                  </span>
+                  Criterion #{idx + 1}
+                </span>
+                {criteriaList.length > 1 && !isCriteriaLocked && (
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveCriterion(idx)}
+                    className="p-1 rounded-lg text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 transition cursor-pointer"
+                    title="Remove this criterion"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                )}
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
+                <div className="sm:col-span-6">
+                  <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#A7ACD9] mb-1">
+                    Criterion Name <span className="text-rose-400">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    disabled={isCriteriaLocked}
+                    value={crit.name}
+                    onChange={(e) => handleCriterionChange(idx, 'name', e.target.value)}
+                    placeholder="e.g. Creativity & Concept"
+                    className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-white placeholder-[#8A8FA9] focus:border-brand-periwinkle focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed"
+                  />
+                </div>
+
+                <div className="sm:col-span-3">
+                  <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#A7ACD9] mb-1">
+                    Max Score
+                  </label>
+                  <input
+                    type="number"
+                    min={1}
+                    max={1000}
+                    step="any"
+                    disabled={isCriteriaLocked}
+                    value={crit.maxScore}
+                    onChange={(e) => handleCriterionChange(idx, 'maxScore', e.target.value)}
+                    className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-white focus:border-brand-periwinkle focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed"
+                  />
+                </div>
+
+                <div className="sm:col-span-3">
+                  <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#A7ACD9] mb-1">
+                    Weight
+                  </label>
+                  <input
+                    type="number"
+                    min={0.01}
+                    max={100}
+                    step="any"
+                    disabled={isCriteriaLocked}
+                    value={crit.weight}
+                    onChange={(e) => handleCriterionChange(idx, 'weight', e.target.value)}
+                    className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-white focus:border-brand-periwinkle focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed"
+                  />
+                </div>
+
+                <div className="sm:col-span-12">
+                  <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#A7ACD9] mb-1">
+                    Scoring Guide & Description
+                  </label>
+                  <input
+                    type="text"
+                    disabled={isCriteriaLocked}
+                    value={crit.description}
+                    onChange={(e) => handleCriterionChange(idx, 'description', e.target.value)}
+                    placeholder="e.g. Originality, visual storytelling, and adherence to the contest theme..."
+                    className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-white placeholder-[#8A8FA9] focus:border-brand-periwinkle focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed"
+                  />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* Footer Actions */}
       <div className="flex flex-wrap items-center justify-end gap-3 pt-4 border-t border-white/10">
         <button
           type="button"
-          onClick={handleSaveLocalMock}
-          className="rounded-xl border border-white/10 px-5 py-2.5 text-xs font-semibold text-[#A7ACD9] hover:bg-white/5 hover:text-white transition cursor-pointer flex items-center gap-1.5"
+          onClick={handleSaveDraft}
+          disabled={submitting}
+          className="rounded-xl border border-white/10 px-5 py-2.5 text-xs font-semibold text-[#A7ACD9] hover:bg-white/5 hover:text-white transition cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
         >
           <Save size={14} className="text-brand-periwinkle" />
           <span>Save Draft</span>

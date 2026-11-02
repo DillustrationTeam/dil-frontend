@@ -32,7 +32,7 @@ interface EventDetailScreenProps {
 function formatScore(val?: number | null): string | null {
   if (val === null || val === undefined) return null;
   const num = typeof val === 'number' ? val : parseFloat(String(val));
-  if (isNaN(num)) return null;
+  if (isNaN(num) || num <= 0) return null;
   if (num <= 10) {
     return `${num.toFixed(1)} / 10`;
   }
@@ -107,26 +107,23 @@ export function EventDetailScreen({ id, userId, isAdmin }: EventDetailScreenProp
   }, [id, wallSort, effectiveUserId]);
 
   const currentJury = useMemo(() => {
-    if (!juries || juries.length === 0) return null;
+    if (!juries || juries.length === 0 || !effectiveUserId) return null;
     const myCreatorId = myCreatorProfile?.id?.toLowerCase();
-    const myUserId = effectiveUserId?.toLowerCase();
-    const myName = (currentUser?.fullName || currentUser?.email || '').toLowerCase().trim();
+    const myUserId = effectiveUserId.toLowerCase();
 
     return (
       juries.find((j) => {
         const jCreatorId = j.creatorId?.toLowerCase();
-        const jId = j.id?.toLowerCase();
-        const jDisplayName = (j.creatorDisplayName || '').toLowerCase().trim();
-        const jName = (j.creatorName || '').toLowerCase().trim();
+        const jUserId = (j.userId || j.creatorUserId)?.toLowerCase();
 
+        if (jUserId && jUserId === myUserId) return true;
         if (myCreatorId && jCreatorId === myCreatorId) return true;
-        if (myUserId && (jCreatorId === myUserId || jId === myUserId)) return true;
-        if (myName && ((jDisplayName && jDisplayName === myName) || (jName && jName === myName))) return true;
+        if (jCreatorId === myUserId) return true;
 
         return false;
       }) || null
     );
-  }, [juries, effectiveUserId, myCreatorProfile, currentUser]);
+  }, [juries, effectiveUserId, myCreatorProfile]);
 
   const isJuryMember = Boolean(currentJury);
 
@@ -303,6 +300,7 @@ export function EventDetailScreen({ id, userId, isAdmin }: EventDetailScreenProp
         statusStr={statusStr}
         countdown={countdown}
         isCreator={isCreator}
+        isJuryMember={isJuryMember}
         onOpenRulesModal={() => setIsRulesModalOpen(true)}
         onCopyLink={handleCopyLink}
       />
@@ -340,6 +338,7 @@ export function EventDetailScreen({ id, userId, isAdmin }: EventDetailScreenProp
         {/* TAB 2: MY SUBMISSION */}
         {!effectiveIsAdmin && activeTab === 'my-submission' && (
           <EventTabMySubmission
+            isAnnounced={isAnnounced}
             effectiveUserId={effectiveUserId}
             isJuryMember={isJuryMember}
             currentJury={currentJury}

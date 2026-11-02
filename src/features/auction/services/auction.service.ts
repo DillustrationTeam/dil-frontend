@@ -2,17 +2,26 @@ import { apiClient } from '@/lib/api-client';
 import type { ApiResponse } from '@/types/api.types';
 import type {
   AuctionBidConflictDto,
+  AuctionCertificateDto,
+  AuctionDeliveryDto,
   AuctionDetailDto,
   AuctionFilters,
   AuctionListItemDto,
   AuctionPage,
+  AuctionReceiptDto,
   AuctionRequest,
   AuctionSettlementDto,
   BidDto,
+  CommercialRightsDeedDto,
+  DeliverableDownloadDto,
   EligibleArtworkDto,
   MyActiveBidDto,
   MyActiveBidsMeta,
+  MyCollectionItemDto,
+  ArtworkProvenanceDto,
+  RequestPhysicalDeliveryPayload,
   SellerStatisticsDto,
+  UpdateShippingPayload,
   WalletOverviewDto,
 } from '../types/auction.types';
 
@@ -179,7 +188,19 @@ export const auctionService = {
 
   settle: (id: string, force = false) => call<AuctionSettlementDto>('post', `/auctions/${id}/settle`, { force }).then((r) => r.data),
 
-  download: (id: string) => call<{ downloadUrl: string; expiresAt: string; fileName: string }>('post', `/auctions/${id}/settlement/download-url`).then((r) => r.data),
+  download: (id: string) => call<DeliverableDownloadDto>('post', `/auctions/${id}/settlement/download-url`).then((r) => r.data),
+
+  getCertificate: (id: string, signal?: AbortSignal) =>
+    call<AuctionCertificateDto>('get', `/auctions/${id}/certificate`, undefined, undefined, signal).then((r) => r.data),
+
+  getMyCollection: (signal?: AbortSignal): Promise<MyCollectionItemDto[]> =>
+    call<MyCollectionItemDto[]>('get', '/auctions/my-collection', undefined, undefined, signal).then((r) => r.data),
+
+  getProvenance: (artworkId: string, signal?: AbortSignal): Promise<ArtworkProvenanceDto> =>
+    call<ArtworkProvenanceDto>('get', `/auctions/artworks/${artworkId}/provenance`, undefined, undefined, signal).then((r) => r.data),
+
+  getCommercialRights: (auctionId: string, signal?: AbortSignal): Promise<CommercialRightsDeedDto> =>
+    call<CommercialRightsDeedDto>('get', `/auctions/${auctionId}/commercial-rights`, undefined, undefined, signal).then((r) => r.data),
 
   getMyActiveBids: async (
     cursor?: string,
@@ -210,5 +231,41 @@ export const auctionService = {
 
   getWallet: (signal?: AbortSignal): Promise<WalletOverviewDto> =>
     call<WalletOverviewDto>('get', '/wallets/me', undefined, undefined, signal).then((r) => r.data),
+
+  uploadMasterPack: async (file: File): Promise<{ fileUrl: string; fileName: string; fileSizeBytes: number }> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const res = await apiClient.post<ApiResponse<{ fileUrl: string; fileName: string; fileSizeBytes: number }>>(
+      '/auctions/upload-master-pack',
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
+    if (!res.data.data) {
+      throw new Error(res.data.error?.detail || 'Không thể tải lên file gốc.');
+    }
+    return res.data.data;
+  },
+
+  requestPhysicalDelivery: (auctionId: string, payload: RequestPhysicalDeliveryPayload): Promise<AuctionDeliveryDto> =>
+    call<AuctionDeliveryDto>('post', `/auctions/${auctionId}/delivery/request-physical`, payload).then((r) => r.data),
+
+  declinePhysicalDelivery: (auctionId: string): Promise<{ message: string }> =>
+    call<{ message: string }>('post', `/auctions/${auctionId}/delivery/decline-physical`).then((r) => r.data),
+
+  updateShipping: (auctionId: string, payload: UpdateShippingPayload): Promise<AuctionDeliveryDto> =>
+    call<AuctionDeliveryDto>('post', `/auctions/${auctionId}/delivery/ship`, payload).then((r) => r.data),
+
+  confirmDelivery: (auctionId: string, payload?: { deliveryReceiptUrl?: string }): Promise<AuctionDeliveryDto> =>
+    call<AuctionDeliveryDto>('post', `/auctions/${auctionId}/delivery/confirm`, payload).then((r) => r.data),
+
+  disputeDelivery: (auctionId: string, payload: { reason: string; evidenceUrl?: string }): Promise<AuctionDeliveryDto> =>
+    call<AuctionDeliveryDto>('post', `/auctions/${auctionId}/delivery/dispute`, payload).then((r) => r.data),
+
+  getReceipts: (auctionId: string, signal?: AbortSignal): Promise<AuctionReceiptDto[]> =>
+    call<AuctionReceiptDto[]>('get', `/auctions/${auctionId}/receipts`, undefined, undefined, signal).then((r) => r.data),
 };
 

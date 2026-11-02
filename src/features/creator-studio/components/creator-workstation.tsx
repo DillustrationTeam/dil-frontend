@@ -1,5 +1,7 @@
 'use client';
 
+import { ArtworkMetadataAssistant, ArtworkScanPanel } from '@/features/artwork-ai';
+
 import { ChangeEvent, FormEvent, useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -10,10 +12,7 @@ import {
   Check,
   ChevronLeft,
   ChevronRight,
-  FileImage,
-  FolderOpen,
   GripVertical,
-  ImagePlus,
   List,
   Pencil,
   Plus,
@@ -24,10 +23,10 @@ import {
 import { creatorProfileService } from '../services/creator-profile.service';
 import { commissionService } from '@/services/commission.service';
 import type { Commission, CommissionStatus } from '@/types/commission.types';
+import { CreatorAssetLibrary } from './creator-asset-library';
 import { CreatorRateCardManager } from './creator-rate-card-manager';
 import type {
   ArtworkDto,
-  CreatorAssetDto,
   CreatorWorkstationState,
 } from '../types/creator-profile.types';
 
@@ -54,11 +53,7 @@ const defaultState: CreatorWorkstationState = {
     { id: 'faq-2', question: 'Thời gian hoàn thành?', answer: 'Tùy gói dịch vụ, thường từ 3–7 ngày.', displayOrder: 2 },
   ],
   workItems: [],
-  assets: [
-    { id: 'asset-1', assetType: 'Pose', name: 'Dynamic pose', assetUrl: '', metadataJson: '{"type":"pose"}', createdAt: '2026-09-22T00:00:00Z' },
-    { id: 'asset-2', assetType: 'Palette', name: 'Moonlight', assetUrl: '', metadataJson: '{"colors":["#E9D5A1","#CB8A71","#6A4C66","#32364A"]}', createdAt: '2026-09-21T00:00:00Z' },
-    { id: 'asset-3', assetType: 'Preset', name: 'Soft shading', assetUrl: '', metadataJson: '{"preset":"soft"}', createdAt: '2026-09-20T00:00:00Z' },
-  ],
+  assets: [],
 };
 
 function Shell({ view, children }: { view: WorkstationView; children: React.ReactNode }) {
@@ -131,6 +126,7 @@ function Artworks() {
   const [editDescription, setEditDescription] = useState('');
   const [editTags, setEditTags] = useState('');
   const [loadingArtworks, setLoadingArtworks] = useState(true);
+  const [scanNotices, setScanNotices] = useState<Record<string, string>>({});
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -208,13 +204,16 @@ function Artworks() {
       });
       setError('');
       setSaved(true);
-      setArtworks(await creatorProfileService.getMyArtworks(artworkSearch, artworkStatus === 'All' ? undefined : artworkStatus));
+      setScanNotices(current => ({ ...current, [uploaded.id]: uploaded.imageUrl }));
+      setArtworkSearch('');
+      setArtworkStatus('All');
+      setArtworks(current => [uploaded, ...current.filter(item => item.id !== uploaded.id)]);
       setImageFile(null);
       setPreview(null);
       setTitle('');
       setDescription('');
       setTags([]);
-      toast.success(`Đã lưu tác phẩm ${uploaded.title}`);
+      toast.success(`Đã lưu ${uploaded.title}. Theo dõi kiểm tra AI trong portfolio bên dưới.`);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Không thể lưu tác phẩm.');
       toast.error(err instanceof Error ? err.message : 'Không thể lưu tác phẩm.');
@@ -259,6 +258,7 @@ function Artworks() {
         tags: editTags.split(',').map((value) => value.trim()).filter(Boolean),
         ...(imageUrl ? { imageUrl, thumbnailUrl: imageUrl } : {}),
       });
+      if (imageUrl) setScanNotices(current => ({ ...current, [editingArtwork.id]: imageUrl }));
       setArtworks(await creatorProfileService.getMyArtworks(artworkSearch, artworkStatus === 'All' ? undefined : artworkStatus));
       setEditingArtwork(null);
       setEditingImageFile(null);
@@ -310,6 +310,8 @@ function Artworks() {
               <input maxLength={200} required value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Ví dụ: Violet afternoon" className="mt-2 w-full rounded-2xl border border-white/10 bg-[#171a2a] px-4 py-3 text-white outline-none focus:border-[#A7ACD9]" />
             </label>
 
+            <ArtworkMetadataAssistant file={imageFile} onApply={value => { setTitle(value.title); setDescription(value.description); setTags(value.tags); }} />
+
             <label className="text-sm text-[#C7C5CF]">
               Mô tả
               <textarea value={description} onChange={(event) => setDescription(event.target.value)} placeholder="Chia sẻ cảm hứng hoặc câu chuyện phía sau tác phẩm..." className="mt-2 min-h-28 w-full rounded-2xl border border-white/10 bg-[#171a2a] px-4 py-3 text-white outline-none focus:border-[#A7ACD9]" />
@@ -346,12 +348,13 @@ function Artworks() {
           <h2 className="font-h1 text-lg font-semibold text-white">Thông tin xuất bản</h2>
           <Toggle label="Tác phẩm tạo bằng AI" description="Bật nếu bạn dùng AI để tạo hình ảnh này." checked={isAiGenerated} onChange={setIsAiGenerated} />
           <p className="mt-5 text-xs leading-5 text-[#919099]">Tác phẩm sẽ được kiểm duyệt trước khi xuất hiện công khai. Bạn có thể chỉnh sửa và theo dõi trạng thái trong portfolio bên dưới.</p>
+          <p className="mt-3 rounded-xl border border-[#A7ACD9]/25 bg-[#A7ACD9]/5 p-3 text-xs leading-5 text-[#C7C5CF]">Sau khi bấm Lưu tác phẩm, hệ thống tự động kiểm tra ảnh AI. Tiến trình và điểm nghi ngờ sẽ hiện trên tác phẩm trong portfolio; chọn file thôi chưa bắt đầu quét.</p>
 
           <button type="submit" disabled={uploading || !profileReady} className="mt-6 w-full rounded-2xl bg-[#A7ACD9] px-5 py-3 text-sm font-bold text-[#1F2335] disabled:opacity-60">
             {uploading ? 'Đang tải lên...' : 'Lưu tác phẩm'}
           </button>
 
-          {saved ? <p className="mt-3 flex items-center gap-2 text-sm text-[#BCE6B8]"><Check className="h-4 w-4" /> Đã lưu thành công.</p> : null}
+          {saved ? <p role="status" className="mt-3 flex items-center gap-2 text-sm text-[#BCE6B8]"><Check className="h-4 w-4 shrink-0" /> Đã lưu. Xem trạng thái kiểm tra AI trong portfolio bên dưới.</p> : null}
           {error ? <p className="mt-3 text-sm text-[#ff9aa2]">{error}</p> : null}
         </aside>
       </form>
@@ -390,6 +393,14 @@ function Artworks() {
                     </div>
                   </div>
                   {artwork.tags.length ? <div className="flex flex-wrap gap-1.5">{artwork.tags.map((item) => <span key={item} className="rounded-full bg-white/5 px-2 py-1 text-[10px] text-[#C7C5CF]">#{item}</span>)}</div> : null}
+                  <ArtworkScanPanel key={`${artwork.id}:${artwork.imageUrl}`} artworkId={artwork.id} compact onCompleted={scanNotices[artwork.id] === artwork.imageUrl ? () => {
+                    setScanNotices(current => {
+                      if (current[artwork.id] !== artwork.imageUrl) return current;
+                      const next = { ...current };
+                      delete next[artwork.id];
+                      return next;
+                    });
+                  } : undefined} />
                 </div>
               </article>
             ))}
@@ -804,90 +815,7 @@ function Waitlist() {
 }
 
 function Assets() {
-  const [tab, setTab] = useState<'poses' | 'palettes' | 'presets'>('poses');
-  const [assets, setAssets] = useState<CreatorAssetDto[]>([]);
-
-  useEffect(() => {
-    const loadAssets = async () => {
-      try {
-        const state = await creatorProfileService.getWorkstationState();
-        setAssets(state.assets ?? []);
-      } catch {
-        setAssets(defaultState.assets);
-      }
-    };
-
-    void loadAssets();
-  }, []);
-
-  const addAsset = async () => {
-    const assetType = tab === 'poses' ? 'Pose' : tab === 'palettes' ? 'Palette' : 'Preset';
-    const name = `${assetType} ${assets.filter((item) => item.assetType === assetType).length + 1}`;
-
-    try {
-      const created = await creatorProfileService.saveAsset({
-        assetType,
-        name,
-        assetUrl: '',
-        metadataJson: JSON.stringify({ category: tab }),
-      });
-      setAssets((current) => [created, ...current]);
-      toast.success('Đã lưu asset mới.');
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Không thể lưu asset.';
-      toast.error(message);
-    }
-  };
-
-  const cards = assets.length ? assets.filter((item) => item.assetType === (tab === 'poses' ? 'Pose' : tab === 'palettes' ? 'Palette' : 'Preset')).map((item) => item.name) : [];
-
-  return (
-    <Shell view="assets">
-      <div className="mb-6 flex gap-2 rounded-full bg-white/5 p-1 w-fit">
-        {([
-          ['poses', 'Pose mẫu'],
-          ['palettes', 'Bảng màu'],
-          ['presets', 'Presets'],
-        ] as const).map(([value, label]) => (
-          <button key={value} type="button" onClick={() => setTab(value)} className={`rounded-full px-4 py-2 text-sm ${tab === value ? 'bg-[#A7ACD9] font-semibold text-[#1F2335]' : 'text-[#C7C5CF]'}`}>
-            {label}
-          </button>
-        ))}
-      </div>
-
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <button type="button" onClick={addAsset} className="flex min-h-52 flex-col items-center justify-center rounded-3xl border border-dashed border-[#A7ACD9]/50 bg-[#A7ACD9]/[.04] text-[#A7ACD9]">
-          <ImagePlus className="h-7 w-7" />
-          <span className="mt-3 text-sm font-semibold">Thêm {tab === 'palettes' ? 'bảng màu' : 'asset mới'}</span>
-        </button>
-
-        {cards.map((card, index) => (
-          <article key={card} className="group overflow-hidden rounded-3xl border border-white/10 bg-white/[.035]">
-            <div className={`relative flex aspect-[16/10] items-center justify-center ${index === 0 ? 'bg-gradient-to-br from-[#a7acd9] to-[#5d6092]' : index === 1 ? 'bg-gradient-to-br from-[#d8a976] to-[#705641]' : 'bg-gradient-to-br from-[#665581] to-[#342c4b]'}`}>
-              {tab === 'palettes' ? (
-                <div className="flex gap-2">
-                  {['#E9D5A1', '#CB8A71', '#6A4C66', '#32364A'].map((color) => (
-                    <i key={color} className="h-9 w-9 rounded-full border border-white/30" style={{ background: color }} />
-                  ))}
-                </div>
-              ) : (
-                <FileImage className="h-8 w-8 text-white/70" />
-              )}
-            </div>
-            <div className="flex items-center justify-between p-4">
-              <div>
-                <h2 className="text-sm font-semibold text-white">{card}</h2>
-                <p className="mt-1 text-xs text-[#919099]">Cập nhật hôm nay</p>
-              </div>
-              <button type="button" className="rounded-xl p-2 text-[#C7C5CF] hover:bg-white/10">
-                <FolderOpen className="h-4 w-4" />
-              </button>
-            </div>
-          </article>
-        ))}
-      </div>
-    </Shell>
-  );
+  return <Shell view="assets"><CreatorAssetLibrary /></Shell>;
 }
 
 export function CreatorWorkstation({ view }: { view: WorkstationView }) {

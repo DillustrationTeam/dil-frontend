@@ -1,6 +1,6 @@
 import { apiClient } from '@/lib/api-client';
 import type { ApiResponse } from '@/types/api.types';
-import type { NotificationDto, NotificationPage } from '../types/notification.types';
+import type { EventInvitationDto, NotificationDto, NotificationPage } from '../types/notification.types';
 
 export interface NotificationListOptions {
   isRead?: boolean;
@@ -66,5 +66,29 @@ export const notificationService = {
   async markAllRead(): Promise<void> {
     const res = await apiClient.put<ApiResponse<unknown>>('/notifications/read-all');
     if (res.data.error) throw new Error('Không thể đánh dấu tất cả là đã đọc.');
+  },
+
+  async getInvitation(invitationId: string): Promise<EventInvitationDto> {
+    const res = await apiClient.get<ApiResponse<EventInvitationDto>>(`/invitations/${invitationId}`);
+    if (res.data.error) {
+      throw new Error(res.data.error.details?.join(' · ') || res.data.error.title || 'Không tìm thấy lời mời.');
+    }
+    return res.data.data!;
+  },
+
+  async acceptInvitation(invitationId: string): Promise<EventInvitationDto> {
+    const res = await apiClient.put<ApiResponse<EventInvitationDto>>(`/invitations/${invitationId}/accept`);
+    if (res.data.error) {
+      throw new Error(res.data.error.details?.join(' · ') || res.data.error.title || 'Không thể chấp nhận lời mời.');
+    }
+    return res.data.data!;
+  },
+
+  async declineInvitation(invitationId: string): Promise<EventInvitationDto> {
+    const res = await apiClient.put<ApiResponse<EventInvitationDto>>(`/invitations/${invitationId}/decline`);
+    if (res.data.error) {
+      throw new Error(res.data.error.details?.join(' · ') || res.data.error.title || 'Không thể từ chối lời mời.');
+    }
+    return res.data.data!;
   },
 };

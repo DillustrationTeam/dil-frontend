@@ -1,4 +1,4 @@
-import axios, { AxiosError } from 'axios';
+import axios from 'axios';
 import { ApiErrorDetails, ApiResponse } from '@/types/api.types';
 
 /**
@@ -7,21 +7,42 @@ import { ApiErrorDetails, ApiResponse } from '@/types/api.types';
  * (err.message chỉ là chuỗi chung chung kiểu "Request failed with status code 400").
  */
 export function getApiErrorMessage(err: unknown, fallback: string): string {
-  const axiosError = err as AxiosError<{ error?: ApiErrorDetails }>;
-  const apiError = axiosError.response?.data?.error;
+  if (axios.isAxiosError(err)) {
+    const data = err.response?.data as {
+      error?: ApiErrorDetails & { details?: string[] | string };
+      message?: string;
+    } | undefined;
+    const apiError = data?.error;
 
-  if (apiError?.errors) {
-    const fieldMessages = Object.values(apiError.errors).flat();
-    if (fieldMessages.length > 0) {
-      return fieldMessages.join(' ');
+    if (apiError?.errors) {
+      const fieldMessages = Object.values(apiError.errors).flat();
+      if (fieldMessages.length > 0) {
+        return fieldMessages.join(' ');
+      }
+    }
+
+    if (apiError?.detail) {
+      return apiError.detail;
+    }
+
+    if (Array.isArray(apiError?.details) && apiError.details.length > 0) {
+      return apiError.details.join(' ');
+    }
+
+    if (typeof apiError?.details === 'string' && apiError.details.trim()) {
+      return apiError.details;
+    }
+
+    if (data?.message) {
+      return data.message;
+    }
+
+    if (apiError?.title && apiError.title !== 'Bad Request') {
+      return apiError.title;
     }
   }
 
-  if (apiError?.detail) {
-    return apiError.detail;
-  }
-
-  if (err instanceof Error && err.message) {
+  if (err instanceof Error && err.message && !err.message.includes('status code')) {
     return err.message;
   }
 

@@ -2,9 +2,12 @@ export const auctionStatusLabels: Record<string, string> = {
   Scheduled: 'Sắp diễn ra',
   Active: 'Đang diễn ra',
   Ended: 'Đã kết thúc',
-  Settled: 'Đã chốt',
+  Settled: 'Đã chốt (File số)',
   Cancelled: 'Đã hủy',
   Expired: 'Hết hạn thanh toán',
+  AwaitingPhysical: 'Chờ xác nhận tranh vật lý',
+  InTransit: 'Đang giao tranh vật lý',
+  Completed: 'Hoàn tất giao dịch',
 };
 
 export interface AuctionArtworkDto {
@@ -18,6 +21,7 @@ export interface AuctionArtworkDto {
   fileSizeBytes?: number | null;
   fileFormat?: string | null;
   deliverableCount?: number;
+  hasMasterFilePack?: boolean;
 }
 
 export interface AuctionListItemDto {
@@ -29,6 +33,8 @@ export interface AuctionListItemDto {
   endAt: string;
   auctionStatus: string;
   watchCount: number;
+  hasPhysicalCopy?: boolean;
+  physicalDescription?: string | null;
 }
 
 export interface AuctionDetailDto extends AuctionListItemDto {
@@ -48,6 +54,61 @@ export interface AuctionDetailDto extends AuctionListItemDto {
   isWatching: boolean;
   serverTime?: string;
   participants: AuctionParticipantDto[];
+  requiresPhysicalDelivery?: boolean | null;
+  physicalChoiceDeadline?: string | null;
+  delivery?: AuctionDeliveryDto | null;
+  receipts?: AuctionReceiptDto[] | null;
+}
+
+export interface AuctionDeliveryDto {
+  id: string;
+  auctionId: string;
+  recipientId: string;
+  recipientName: string;
+  recipientPhone: string;
+  shippingAddress: string;
+  noteToSeller?: string | null;
+  carrierName?: string | null;
+  trackingCode?: string | null;
+  trackingUrl?: string | null;
+  shippingReceiptUrl?: string | null;
+  packageImageUrl?: string | null;
+  deliveryReceiptUrl?: string | null;
+  status: 'AwaitingShipment' | 'InTransit' | 'Delivered' | 'Disputed' | 'Cancelled' | string;
+  shippedAt?: string | null;
+  deliveredAt?: string | null;
+  confirmedAt?: string | null;
+  disputeReason?: string | null;
+  disputeEvidenceUrl?: string | null;
+}
+
+export interface AuctionReceiptDto {
+  receiptType: 'EscrowDeposit' | 'CarrierShipping' | 'ProofOfDelivery' | 'SettlementPayout' | string;
+  receiptNumber: string;
+  issuedAt: string;
+  amount: number;
+  feeAmount?: number | null;
+  netAmount?: number | null;
+  title: string;
+  proofImageUrl?: string | null;
+  description?: string | null;
+  payerId?: string | null;
+  payeeId?: string | null;
+}
+
+export interface RequestPhysicalDeliveryPayload {
+  recipientName: string;
+  recipientPhone: string;
+  shippingAddress: string;
+  noteToSeller?: string | null;
+}
+
+export interface UpdateShippingPayload {
+  carrierName: string;
+  trackingCode: string;
+  trackingUrl?: string | null;
+  shippingReceiptUrl?: string | null;
+  packageImageUrl?: string | null;
 }
 
 export interface AuctionParticipantDto {
@@ -76,6 +137,11 @@ export interface AuctionRequest {
   buyNowPrice?: number | null;
   startAt: string;
   endAt: string;
+  masterFileUrl?: string | null;
+  masterFileName?: string | null;
+  masterFileSizeBytes?: number | null;
+  hasPhysicalCopy?: boolean;
+  physicalDescription?: string | null;
 }
 
 export interface AuctionFilters {
@@ -184,4 +250,101 @@ export interface AuctionStatusChangedPayload {
   currentPrice: number;
   endAt: string;
 }
+
+export interface DeliverableDownloadDto {
+  downloadUrl: string;
+  expiresAt: string;
+  fileName: string;
+  mimeType?: string | null;
+  fileSizeBytes?: number | null;
+  certificateNumber?: string | null;
+  licenseType?: string | null;
+  artworkImageUrl?: string | null;
+  artworkImageDownloadUrl?: string | null;
+  artworkTitle?: string | null;
+  hasMasterPack?: boolean;
+}
+
+export interface AuctionCertificateDto {
+  certificateNumber: string;
+  auctionId: string;
+  artworkId: string;
+  artworkTitle: string;
+  artworkImageUrl?: string | null;
+  style?: string | null;
+  creatorId: string;
+  creatorName?: string | null;
+  ownerId: string;
+  ownerName?: string | null;
+  finalPrice: number;
+  issuedAt: string;
+  verificationCode: string;
+  digitalSignature: string;
+  licenseType: string;
+}
+
+export interface MyCollectionItemDto {
+  artworkId: string;
+  title: string;
+  thumbnailUrl: string | null;
+  imageUrl: string;
+  style: string | null;
+  creatorId: string;
+  creatorName: string;
+  acquiredAt: string;
+  auctionId: string | null;
+  finalPrice: number | null;
+  certificateNumber: string | null;
+  hasMasterFile: boolean;
+  exclusiveBadge: string;
+}
+
+export interface ArtworkProvenanceHistoryItemDto {
+  ownerId: string;
+  ownerName: string;
+  acquiredAt: string;
+  releasedAt: string | null;
+  transferReason: string;
+  auctionId: string | null;
+  price: number | null;
+  isCurrent: boolean;
+}
+
+export interface ArtworkProvenanceDto {
+  artworkId: string;
+  artworkTitle: string;
+  imageUrl: string | null;
+  creatorId: string;
+  creatorName: string;
+  createdAt: string;
+  currentOwnerId: string | null;
+  currentOwnerName: string | null;
+  isCurrentOwnerCollector: boolean;
+  exclusiveBadge: string;
+  history: ArtworkProvenanceHistoryItemDto[];
+}
+
+export interface CommercialRightsDeedDto {
+  auctionId: string;
+  artworkId: string;
+  artworkTitle: string;
+  artworkImageUrl?: string | null;
+  certificateNumber: string;
+  verificationCode: string;
+  digitalSignature: string;
+  creatorId: string;
+  creatorName: string;
+  ownerId: string;
+  ownerName: string;
+  finalPrice: number;
+  settledAt: string;
+  scopeOfRights: string;
+  commercialExploitationAllowed: boolean;
+  vtuberAndGameDevAllowed: boolean;
+  resellAllowed: boolean;
+  moralRightsRetainedByArtist: boolean;
+  termsAndConditions: string;
+}
+
+
 

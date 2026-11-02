@@ -36,6 +36,7 @@ interface EventTabMySubmissionProps {
   onCopyLink: () => void;
   currentUserFullName?: string | null;
   onWithdrawSubmission?: (submissionId: string) => void;
+  isAnnounced?: boolean;
 }
 
 export function EventTabMySubmission({
@@ -51,6 +52,7 @@ export function EventTabMySubmission({
   onCopyLink,
   currentUserFullName,
   onWithdrawSubmission,
+  isAnnounced = false,
 }: EventTabMySubmissionProps) {
   return (
     <div className="space-y-6">
@@ -230,10 +232,22 @@ export function EventTabMySubmission({
                     Jury Evaluation
                   </span>
                   <p className="mt-1 font-h1 text-2xl font-extrabold text-white">
-                    {mySubmission.score ? `${mySubmission.score} / 100` : 'Pending Review'}
+                    {isAnnounced && mySubmission.score ? `${mySubmission.score} / 100` : 'Pending Review'}
                   </p>
                 </div>
               </div>
+
+              {isAnnounced && mySubmission.adminNote && (
+                <div className="rounded-2xl border border-brand-periwinkle/20 bg-brand-periwinkle/5 p-4 space-y-1">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-brand-periwinkle flex items-center gap-1.5">
+                    <Sparkles size={13} />
+                    Jury Feedback &amp; Notes
+                  </span>
+                  <p className="text-xs text-[#A7ACD9] leading-relaxed whitespace-pre-line italic">
+                    &ldquo;{mySubmission.adminNote}&rdquo;
+                  </p>
+                </div>
+              )}
 
               <div className="pt-2 flex flex-wrap gap-3">
                 {mySubmission.artworkId && (

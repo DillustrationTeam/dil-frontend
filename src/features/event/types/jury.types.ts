@@ -78,6 +78,8 @@ export interface JuryMemberInfo {
   eventId: string;
   eventTitle?: string;
   creatorId: string;
+  creatorUserId?: string;
+  userId?: string;
   creatorName?: string;
   creatorDisplayName?: string;
   creatorEmail?: string;
@@ -94,6 +96,8 @@ export interface JuryProgressItem {
   totalAssigned: number;
   statusLabel: string;
   isCompleted: boolean;
+  isHeadJury?: boolean;
+  gradedSubmissionIds?: string[];
 }
 
 export interface CombinedScoreItem {

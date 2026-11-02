@@ -1,5 +1,7 @@
 'use client';
 
+import { ArtworkRecommendations } from '@/features/artwork-ai';
+
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { ArrowRight, CircleDollarSign, Clock, FolderKanban, LoaderCircle, ShieldCheck, Star } from 'lucide-react';
@@ -34,6 +36,7 @@ export default function ClientDashboardPage() {
       <Metric label="Awaiting response" value={`${metrics.awaiting} requests`} icon={<Clock className="h-4 w-4" />} />
       <Metric label="Completed" value={`${metrics.completed} works`} icon={<Star className="h-4 w-4" />} />
     </div>
+    <ArtworkRecommendations />
     <section id="workrooms" className="rounded-2xl border border-white/10 bg-white/[0.035] p-5 sm:p-6">
       <div className="flex items-center justify-between gap-3 border-b border-white/10 pb-4"><h1 className="font-h1 text-base font-bold text-white">Your commissions</h1><div className="flex items-center gap-3"><select aria-label="Filter commissions by status" value={statusFilter} onChange={(event) => setStatusFilter(event.target.value as CommissionStatus | 'All')} className="rounded-lg border border-white/10 bg-[#1F2335] px-3 py-2 text-xs text-white"><option value="All">All statuses</option>{(['PendingAcceptance', 'Negotiating', 'InProgress', 'SubmittedFinal', 'Delivered', 'Completed', 'Cancelled', 'Disputed'] as CommissionStatus[]).map(status => <option key={status} value={status}>{status}</option>)}</select><span className="text-xs text-slate-400">{visibleCommissions.length} shown</span></div></div>
       {loading ? <div className="flex min-h-48 items-center justify-center text-sm text-slate-400"><LoaderCircle className="mr-2 h-4 w-4 animate-spin" /> Loading commissions…</div> : error ? <p className="py-12 text-center text-sm text-red-300">{error}</p> : visibleCommissions.length === 0 ? <EmptyState /> : <div className="mt-5 grid gap-4">{visibleCommissions.map((commission) => <CommissionCard key={commission.id} commission={commission} />)}</div>}

@@ -36,7 +36,7 @@ export function ArtworkPreviewCard({ artwork }: ArtworkPreviewCardProps) {
   };
 
   const formatFileSize = (bytes?: number | null) => {
-    if (!bytes) return '18.4MB';
+    if (bytes == null || !Number.isFinite(bytes) || bytes <= 0) return 'Chưa có dữ liệu';
     if (bytes >= 1048576) {
       return `${(bytes / 1048576).toFixed(1)}MB`;
     }
@@ -62,7 +62,7 @@ export function ArtworkPreviewCard({ artwork }: ArtworkPreviewCardProps) {
         {artwork.isAiGenerated && (
           <span className="px-2.5 py-1 rounded-full bg-purple-500/20 text-purple-300 text-[10px] font-bold border border-purple-500/30 flex items-center gap-1">
             <Bot className="w-3 h-3" />
-            <span>AI Verified</span>
+            <span>Được đánh dấu là ảnh AI</span>
           </span>
         )}
       </div>
@@ -115,7 +115,7 @@ export function ArtworkPreviewCard({ artwork }: ArtworkPreviewCardProps) {
 
         {/* Resolution & File Size overlay badge */}
         <div className="absolute bottom-3 left-3 px-3 py-1 bg-black/75 backdrop-blur-md rounded-full text-[10px] text-white font-mono border border-white/15 flex items-center gap-2 shadow-lg">
-          <span>Res: {artwork.resolution || '3840x2160'}</span>
+          <span>Res: {artwork.resolution?.trim() || 'Chưa có dữ liệu'}</span>
           <span>•</span>
           <span>Size: {formatFileSize(artwork.fileSizeBytes)}</span>
         </div>
@@ -175,11 +175,11 @@ export function ArtworkPreviewCard({ artwork }: ArtworkPreviewCardProps) {
         </div>
       </div>
 
-      {/* AI Auto-Extracted Tag Pills */}
+      {/* Stored artwork tags do not include AI provenance. */}
       <div className="space-y-2 pt-1 border-t border-white/10">
         <div className="flex items-center gap-1.5 text-[10px] text-[#8A8FA9] font-bold uppercase tracking-wider">
           <Tag className="w-3 h-3" />
-          <span>AI Auto-Extracted Tag Pills</span>
+          <span>Tags của tác phẩm</span>
         </div>
 
         <div className="flex flex-wrap gap-2 text-[11px]">
@@ -193,17 +193,7 @@ export function ArtworkPreviewCard({ artwork }: ArtworkPreviewCardProps) {
               </span>
             ))
           ) : (
-            <>
-              <span className="px-3 py-1 rounded-full bg-[#C5C9F8]/15 text-[#C5C9F8] font-bold">
-                #Cyberpunk
-              </span>
-              <span className="px-3 py-1 rounded-full bg-[#C5C9F8]/15 text-[#C5C9F8] font-bold">
-                #Anime
-              </span>
-              <span className="px-3 py-1 rounded-full bg-[#C5C9F8]/15 text-[#C5C9F8] font-bold">
-                #DigitalPainting
-              </span>
-            </>
+            <span className="text-[#8A8FA9]">Chưa gắn tag</span>
           )}
 
           {/* AI generated status pill */}
@@ -215,7 +205,7 @@ export function ArtworkPreviewCard({ artwork }: ArtworkPreviewCardProps) {
             }`}
           >
             <Bot className="w-3 h-3" />
-            <span>Tag.IsAiGenerated: {artwork.isAiGenerated ? 'True' : 'False'}</span>
+            <span>{artwork.isAiGenerated ? 'Được đánh dấu là ảnh AI' : 'Chưa đánh dấu là ảnh AI'}</span>
           </span>
         </div>
       </div>

@@ -3,6 +3,8 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { Package, Sparkles, ChevronLeft, ChevronRight, X } from 'lucide-react';
+import CreateCommissionModal from '@/components/modals/CreateCommissionModal';
 import { useAuthStore } from '@/store/use-auth-store';
 import { creatorRateCardService, type RateCardPackage } from '@/features/creator-studio/services/creator-rate-card.service';
 import type { ArtworkDto, CreatorProfileDto } from '@/features/creator-studio/types/creator-profile.types';
@@ -13,6 +15,7 @@ import { ProfileLayout, ProfileTabs } from './profile-layout';
 type Tab = 'portfolio' | 'rates' | 'reviews';
 
 export function CreatorProfileScreen({ id }: { id: string }) {
+
   const currentUserId = useAuthStore((state) => state.user?.id);
   const authenticated = useAuthStore((state) => state.isAuthenticated);
   const [profile, setProfile] = useState<CreatorProfileDto | null>(null);
@@ -23,6 +26,39 @@ export function CreatorProfileScreen({ id }: { id: string }) {
   const [busy, setBusy] = useState(false);
   const [loadedId, setLoadedId] = useState<string | null>(null);
   const [tab, setTab] = useState<Tab>('portfolio');
+  const [lightboxData, setLightboxData] = useState<{ urls: string[]; index: number } | null>(null);
+  const [activeSampleIndexes, setActiveSampleIndexes] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    if (!lightboxData) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setLightboxData(null);
+      if (e.key === 'ArrowLeft') {
+        setLightboxData((prev) =>
+          prev
+            ? {
+                ...prev,
+                index: (prev.index - 1 + prev.urls.length) % prev.urls.length,
+              }
+            : null
+        );
+      }
+      if (e.key === 'ArrowRight') {
+        setLightboxData((prev) =>
+          prev
+            ? {
+                ...prev,
+                index: (prev.index + 1) % prev.urls.length,
+              }
+            : null
+        );
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [lightboxData]);
+  const [showCommissionModal, setShowCommissionModal] = useState(false);
+  const [selectedCommissionPackageId, setSelectedCommissionPackageId] = useState<string | null>(null);
   const [replyingReviewId, setReplyingReviewId] = useState<string | null>(null);
   const [replyText, setReplyText] = useState('');
   const [replySubmitting, setReplySubmitting] = useState(false);
@@ -108,7 +144,160 @@ export function CreatorProfileScreen({ id }: { id: string }) {
       <ProfileTabs tabs={tabs} value={tab} onChange={setTab} />
       <div className="mt-6">
         {tab === 'portfolio' && (artworks.length ? <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">{artworks.map((artwork) => <Link key={artwork.id} href={`/artworks/${artwork.id}`} className="group overflow-hidden rounded-xl border border-white/10 bg-white/[.03]"><div className="relative aspect-[4/5]"><Image src={artwork.thumbnailUrl || artwork.imageUrl} alt={artwork.title} fill unoptimized className="object-cover transition group-hover:scale-[1.02]" /></div><p className="truncate p-3 text-sm text-white">{artwork.title}</p></Link>)}</div> : <EmptyState>Chưa có tác phẩm được đăng.</EmptyState>)}
-        {tab === 'rates' && (rates.length ? <div className="space-y-3">{rates.map((rate) => <article key={rate.id} className="rounded-xl border border-white/10 p-4"><div className="flex justify-between gap-3"><h2 className="font-semibold text-white">{rate.name}</h2><span className="text-[#A7ACD9]">{new Intl.NumberFormat('vi-VN').format(rate.price)} VND</span></div>{rate.description && <p className="mt-2 text-sm text-[#C7C5CF]">{rate.description}</p>}</article>)}</div> : <EmptyState>Creator chưa đăng gói commission.</EmptyState>)}
+        {tab === 'rates' && (
+          rates.length ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+              {rates.map((rate) => {
+                const orderCount = rate.orderCount ?? 0;
+                const sampleList = rate.sampleUrls ?? [];
+                const currentIndex = activeSampleIndexes[rate.id] ?? 0;
+                const safeIndex = sampleList.length > 0 ? currentIndex % sampleList.length : 0;
+                const currentImage = sampleList[safeIndex];
+
+                const handlePrevSample = (e: React.MouseEvent) => {
+                  e.stopPropagation();
+                  setActiveSampleIndexes((prev) => ({
+                    ...prev,
+                    [rate.id]: (safeIndex - 1 + sampleList.length) % sampleList.length,
+                  }));
+                };
+
+                const handleNextSample = (e: React.MouseEvent) => {
+                  e.stopPropagation();
+                  setActiveSampleIndexes((prev) => ({
+                    ...prev,
+                    [rate.id]: (safeIndex + 1) % sampleList.length,
+                  }));
+                };
+
+                return (
+                  <article
+                    key={rate.id}
+                    className="flex flex-col rounded-2xl border border-white/10 bg-[#141724]/85 backdrop-blur-md overflow-hidden hover:border-[#A7ACD9]/50 hover:shadow-xl transition group"
+                  >
+                    {/* Top Media / Sample Cover with Arrow Controls */}
+                    <div className="relative aspect-[16/10] w-full bg-[#10121d] overflow-hidden select-none">
+                      {currentImage ? (
+                        <Image
+                          src={currentImage}
+                          alt={`${rate.name} - Sample ${safeIndex + 1}`}
+                          fill
+                          unoptimized
+                          className="object-cover group-hover:scale-105 transition duration-300 cursor-pointer"
+                          onClick={() => setLightboxData({ urls: sampleList, index: safeIndex })}
+                        />
+                      ) : (
+                        <div className="w-full h-full flex flex-col items-center justify-center p-4 bg-gradient-to-br from-[#1b1f33] to-[#121422] text-slate-500">
+                          <Package className="h-8 w-8 text-[#A7ACD9]/30 mb-1" />
+                          <span className="text-[11px] text-slate-400">Chưa gắn ảnh mẫu</span>
+                        </div>
+                      )}
+
+                      {/* Order Count Badge Overlay */}
+                      <div className="absolute top-3 right-3 flex items-center gap-1.5 rounded-full bg-black/75 backdrop-blur-md px-3 py-1 text-[11px] font-semibold border border-white/10 text-white shadow pointer-events-none z-10">
+                        {orderCount > 0 ? (
+                          <>
+                            <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                            <span className="font-mono text-emerald-300 font-bold">{orderCount}</span> đơn đã đặt
+                          </>
+                        ) : (
+                          <span className="text-slate-300 font-medium">Gói mới</span>
+                        )}
+                      </div>
+
+                      {/* Arrow Navigation on Card Cover */}
+                      {sampleList.length > 1 && (
+                        <>
+                          <button
+                            type="button"
+                            onClick={handlePrevSample}
+                            className="absolute left-2.5 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-black/60 hover:bg-black/90 text-white flex items-center justify-center backdrop-blur-sm border border-white/10 opacity-75 group-hover:opacity-100 transition shadow hover:scale-110 z-10"
+                            title="Xem ảnh mẫu trước"
+                          >
+                            <ChevronLeft className="h-4 w-4" />
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={handleNextSample}
+                            className="absolute right-2.5 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-black/60 hover:bg-black/90 text-white flex items-center justify-center backdrop-blur-sm border border-white/10 opacity-75 group-hover:opacity-100 transition shadow hover:scale-110 z-10"
+                            title="Xem ảnh mẫu tiếp theo"
+                          >
+                            <ChevronRight className="h-4 w-4" />
+                          </button>
+
+                          {/* Image Counter Indicator */}
+                          <div className="absolute bottom-2.5 left-1/2 -translate-x-1/2 flex items-center gap-1.5 rounded-full bg-black/75 backdrop-blur-md px-2.5 py-0.5 text-[10px] font-mono text-white/90 border border-white/10 shadow pointer-events-none z-10">
+                            <span>
+                              {safeIndex + 1} / {sampleList.length}
+                            </span>
+                          </div>
+                        </>
+                      )}
+                    </div>
+
+                    {/* Content Body */}
+                    <div className="flex-1 p-4 sm:p-5 flex flex-col justify-between space-y-4">
+                      <div className="space-y-2">
+                        {/* Title & Price */}
+                        <div className="space-y-1">
+                          <h3 className="font-bold text-base text-white group-hover:text-[#A7ACD9] transition line-clamp-1">
+                            {rate.name}
+                          </h3>
+                          <div className="flex items-baseline gap-1.5">
+                            <span className="text-lg font-bold font-mono text-emerald-400">
+                              {new Intl.NumberFormat('vi-VN').format(rate.price)} ₫
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Description */}
+                        {rate.description ? (
+                          <p className="text-xs text-[#C7C5CF] line-clamp-2 leading-relaxed">
+                            {rate.description}
+                          </p>
+                        ) : (
+                          <p className="text-xs text-slate-500 italic">Không có mô tả chi tiết.</p>
+                        )}
+                      </div>
+
+                      {/* Footer Specs & Action CTA */}
+                      <div className="space-y-3 pt-3 border-t border-white/5">
+                        <div className="flex items-center justify-between text-[11px] text-slate-400">
+                          <span>{rate.milestones?.length || 1} cột mốc thanh toán</span>
+                          <span>{rate.maxRevisions ?? 3} lần sửa free</span>
+                        </div>
+
+                        {isOwnProfile ? (
+                          <Link
+                            href="/creator/services"
+                            className="w-full flex items-center justify-center gap-1.5 rounded-xl border border-white/10 bg-white/5 py-2.5 text-xs font-semibold text-slate-300 hover:text-white hover:bg-white/10 transition"
+                          >
+                            Chỉnh sửa gói
+                          </Link>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSelectedCommissionPackageId(rate.id);
+                              setShowCommissionModal(true);
+                            }}
+                            className="w-full flex items-center justify-center gap-1.5 rounded-xl bg-[#A7ACD9] py-2.5 text-xs font-bold text-[#1F2335] shadow hover:bg-[#b8bde4] hover:shadow-lg transition"
+                          >
+                            <Sparkles className="h-3.5 w-3.5" />
+                            Đặt vẽ gói này
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          ) : (
+            <EmptyState>Creator chưa đăng gói commission.</EmptyState>
+          )
+        )}
         {tab === 'reviews' && (reviews.length ? (
           <div className="space-y-3">
             {reviews.map((review) => (
@@ -162,6 +351,95 @@ export function CreatorProfileScreen({ id }: { id: string }) {
           </div>
         ) : <EmptyState>Chưa có đánh giá.</EmptyState>)}
       </div>
+      {/* Lightbox for Sample Artwork Full View with Arrow Navigation */}
+      {lightboxData && lightboxData.urls.length > 0 && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-md p-4"
+          onClick={() => setLightboxData(null)}
+        >
+          <div
+            className="relative max-w-5xl max-h-[92vh] w-full flex flex-col items-center justify-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Top Toolbar */}
+            <div className="w-full flex items-center justify-between pb-3 text-xs text-white">
+              <span className="font-mono text-slate-300 font-semibold bg-white/10 px-3 py-1 rounded-full">
+                Ảnh {lightboxData.index + 1} / {lightboxData.urls.length}
+              </span>
+              <button
+                type="button"
+                onClick={() => setLightboxData(null)}
+                className="rounded-full bg-white/10 px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-white/20 transition flex items-center gap-1.5"
+              >
+                <X className="h-4 w-4" /> Đóng
+              </button>
+            </div>
+
+            {/* Main Stage with Left / Right Arrows */}
+            <div className="relative w-full h-[76vh] flex items-center justify-center">
+              {lightboxData.urls.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() =>
+                    setLightboxData((prev) =>
+                      prev
+                        ? {
+                            ...prev,
+                            index: (prev.index - 1 + prev.urls.length) % prev.urls.length,
+                          }
+                        : null
+                    )
+                  }
+                  className="absolute left-2 z-20 h-12 w-12 rounded-full bg-black/75 hover:bg-black text-white flex items-center justify-center border border-white/20 backdrop-blur-md transition hover:scale-110 shadow-2xl"
+                  title="Ảnh trước (Phím ←)"
+                >
+                  <ChevronLeft className="h-6 w-6" />
+                </button>
+              )}
+
+              <Image
+                src={lightboxData.urls[lightboxData.index]}
+                alt={`Sample Artwork ${lightboxData.index + 1}`}
+                fill
+                unoptimized
+                className="object-contain rounded-2xl shadow-2xl select-none"
+              />
+
+              {lightboxData.urls.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() =>
+                    setLightboxData((prev) =>
+                      prev
+                        ? {
+                            ...prev,
+                            index: (prev.index + 1) % prev.urls.length,
+                          }
+                        : null
+                    )
+                  }
+                  className="absolute right-2 z-20 h-12 w-12 rounded-full bg-black/75 hover:bg-black text-white flex items-center justify-center border border-white/20 backdrop-blur-md transition hover:scale-110 shadow-2xl"
+                  title="Ảnh tiếp theo (Phím →)"
+                >
+                  <ChevronRight className="h-6 w-6" />
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Create Commission Modal */}
+      {showCommissionModal && profile && (
+        <CreateCommissionModal
+          creatorId={profile.id}
+          creatorName={profile.displayName}
+          initialPackageId={selectedCommissionPackageId || undefined}
+          onClose={() => {
+            setShowCommissionModal(false);
+            setSelectedCommissionPackageId(null);
+          }}
+        />
+      )}
     </ProfileLayout>
   );
 }

@@ -145,6 +145,18 @@ export const creatorProfileService = {
     return response.data.data;
   },
 
+  async getAssets(): Promise<CreatorAssetDto[]> {
+    const response = await apiClient.get<ApiResponse<CreatorAssetDto[]>>('/creator/workstation/assets');
+    if (response.data.error || !response.data.data) throw new Error(response.data.error?.detail || 'Không thể tải thư viện.');
+    return response.data.data;
+  },
+
+  async updateAsset(id: string, data: CreateCreatorAssetRequest): Promise<CreatorAssetDto> {
+    const response = await apiClient.put<ApiResponse<CreatorAssetDto>>(`/creator/workstation/assets/${id}`, data);
+    if (response.data.error || !response.data.data) throw new Error(response.data.error?.detail || 'Không thể cập nhật tài nguyên.');
+    return response.data.data;
+  },
+
   async saveAsset(data: CreateCreatorAssetRequest): Promise<CreatorAssetDto> {
     const response = await apiClient.post<ApiResponse<CreatorAssetDto>>('/creator/workstation/assets', data);
     if (response.data.error || !response.data.data) {

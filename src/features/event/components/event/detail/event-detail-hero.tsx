@@ -28,6 +28,7 @@ interface EventDetailHeroProps {
     formatted: string;
   };
   isCreator: boolean;
+  isJuryMember?: boolean;
   onOpenRulesModal: () => void;
   onCopyLink: () => void;
 }
@@ -39,6 +40,7 @@ export function EventDetailHero({
   statusStr,
   countdown,
   isCreator,
+  isJuryMember,
   onOpenRulesModal,
   onCopyLink,
 }: EventDetailHeroProps) {
@@ -55,13 +57,15 @@ export function EventDetailHero({
         </Link>
 
         <div className="flex items-center gap-3">
-          <Link
-            href={`/events/${event.id}/jury`}
-            className="inline-flex items-center gap-2 rounded-xl border border-[#A7ACD9]/40 bg-[#A7ACD9]/15 px-4 py-2 text-xs font-bold text-white transition hover:bg-[#A7ACD9]/25 hover:border-[#A7ACD9] shadow-sm"
-          >
-            <Gavel size={15} className="text-[#A7ACD9]" />
-            <span>Jury Workspace</span>
-          </Link>
+          {isJuryMember && (
+            <Link
+              href={`/events/${event.id}/jury`}
+              className="inline-flex items-center gap-2 rounded-xl border border-[#A7ACD9]/40 bg-[#A7ACD9]/15 px-4 py-2 text-xs font-bold text-white transition hover:bg-[#A7ACD9]/25 hover:border-[#A7ACD9] shadow-sm"
+            >
+              <Gavel size={15} className="text-[#A7ACD9]" />
+              <span>Jury Workspace</span>
+            </Link>
+          )}
 
           <button
             type="button"
@@ -178,7 +182,7 @@ export function EventDetailHero({
       </section>
 
       {/* Jury Judging Callout Banner */}
-      {(countdown.phase === 'Judging' || statusStr === 'Judging' || isCreator) && (
+      {isJuryMember && (countdown.phase === 'Judging' || statusStr === 'Judging') && (
         <div className="mt-8 rounded-2xl border border-[#A7ACD9]/30 bg-gradient-to-r from-[#A7ACD9]/15 via-[#A7ACD9]/5 to-transparent p-4 sm:p-5 backdrop-blur-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3.5">
             <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-[#A7ACD9]/20 text-[#A7ACD9] border border-[#A7ACD9]/30">

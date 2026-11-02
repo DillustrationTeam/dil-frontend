@@ -17,8 +17,12 @@ import {
   Lock,
   Sparkles,
   AlertCircle,
+  ChevronLeft,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useAuthStore } from '@/store/use-auth-store';
+import { creatorProfileService } from '@/features/creator-studio/services/creator-profile.service';
+import type { CreatorProfileDto } from '@/features/creator-studio/types/creator-profile.types';
 import type { EventDetailDto } from '../../types/event.types';
 import { eventStatusBadgeStyles, eventStatusLabels } from '../../types/event.types';
 import type {
@@ -28,6 +32,7 @@ import type {
   HeadJuryWorkspaceData,
   ArbitrationCase,
   WinnerApprovalItem,
+  JuryMemberInfo,
 } from '../../types/jury.types';
 import { eventService } from '../../services/event.service';
 import { juryService } from '../../services/jury.service';
@@ -52,6 +57,11 @@ export function EventHeadJuryScreen({ eventId }: EventHeadJuryScreenProps) {
   const [submissions, setSubmissions] = useState<JurySubmissionItem[]>([]);
   const [selectedSubmissionId, setSelectedSubmissionId] = useState<string | null>(null);
   const [headData, setHeadData] = useState<HeadJuryWorkspaceData | null>(null);
+  const [juries, setJuries] = useState<JuryMemberInfo[]>([]);
+  const [myCreatorProfile, setMyCreatorProfile] = useState<CreatorProfileDto | null>(null);
+
+  const currentUser = useAuthStore((state) => state.user);
+  const effectiveUserId = currentUser?.id ?? null;
 
   // Queue search & filters for Tab 'score'
   const [searchQuery, setSearchQuery] = useState('');
@@ -96,15 +106,19 @@ export function EventHeadJuryScreen({ eventId }: EventHeadJuryScreenProps) {
     async function loadWorkspace() {
       setLoading(true);
       try {
-        const [eventData, criteriaData, headWorkspace, subItems, eventJuries] = await Promise.all([
-          eventService.detail(eventId).catch(() => null),
+        const eventData = await eventService.detail(eventId).catch(() => null);
+        const [criteriaData, headWorkspace, subItems, eventJuries, profileData] = await Promise.all([
           juryService.getEventCriteria(eventId).catch(() => []),
           juryService.getHeadJuryWorkspace(eventId).catch(() => null),
-          juryService.getAssignedSubmissions(eventId, 'AURA 2026').catch(() => []),
+          juryService.getAssignedSubmissions(eventId, eventData?.title).catch(() => []),
           juryService.getEventJuries(eventId).catch(() => []),
+          effectiveUserId ? creatorProfileService.getMyProfile().catch(() => null) : Promise.resolve(null),
         ]);
 
         if (!isMounted) return;
+
+        setJuries(eventJuries || []);
+        setMyCreatorProfile(profileData);
 
         setEvent(eventData);
         if (eventData?.isHeadJurySignedOff) {
@@ -114,9 +128,10 @@ export function EventHeadJuryScreen({ eventId }: EventHeadJuryScreenProps) {
 
         setCriteria(criteriaData);
 
+        const gradedCount = subItems.filter((s) => s.isGraded).length;
         const finalHeadWorkspace: HeadJuryWorkspaceData = headWorkspace || {
           totalSubmissions: subItems.length,
-          gradedSubmissions: subItems.filter((s) => s.isGraded).length,
+          gradedSubmissions: gradedCount,
           completedJuryCount: 0,
           totalJuryCount: eventJuries.length,
           anomalyFlagsCount: 0,
@@ -132,17 +147,25 @@ export function EventHeadJuryScreen({ eventId }: EventHeadJuryScreenProps) {
         };
 
         if (finalHeadWorkspace.juryProgressList.length === 0 && eventJuries.length > 0) {
-          finalHeadWorkspace.juryProgressList = eventJuries.map((j) => ({
-            id: j.id,
-            name: (j.creatorDisplayName || j.creatorName || 'Jury Member') + (j.isHeadJury ? ' (Head Jury)' : ''),
-            gradedPercent: 0,
-            completedCount: 0,
-            totalAssigned: subItems.length,
-            statusLabel: 'Đang chấm',
-            isCompleted: false,
-            isHeadJury: j.isHeadJury,
-          }));
+          finalHeadWorkspace.juryProgressList = eventJuries.map((j) => {
+            const isCompleted = subItems.length > 0 && gradedCount >= subItems.length;
+            const completedCount = j.isHeadJury ? gradedCount : 0;
+            const gradedPercent = subItems.length > 0 ? Math.round((completedCount / subItems.length) * 100) : 0;
+            return {
+              id: j.id,
+              name: (j.creatorDisplayName || j.creatorName || 'Jury Member') + (j.isHeadJury ? ' (Head Jury)' : ''),
+              gradedPercent,
+              completedCount,
+              totalAssigned: subItems.length,
+              statusLabel: isCompleted ? 'Completed' : (completedCount > 0 ? 'In Progress' : 'Pending'),
+              isCompleted: j.isHeadJury ? isCompleted : false,
+              isHeadJury: j.isHeadJury,
+            };
+          });
           finalHeadWorkspace.totalJuryCount = eventJuries.length;
+          finalHeadWorkspace.completedJuryCount = finalHeadWorkspace.juryProgressList.filter((j) => j.isCompleted).length;
+          finalHeadWorkspace.allJuryCompleted =
+            eventJuries.length > 0 && finalHeadWorkspace.completedJuryCount === eventJuries.length;
         }
 
         setHeadData(finalHeadWorkspace);
@@ -162,7 +185,31 @@ export function EventHeadJuryScreen({ eventId }: EventHeadJuryScreenProps) {
     return () => {
       isMounted = false;
     };
-  }, [eventId]);
+  }, [eventId, effectiveUserId]);
+
+  const currentJury = useMemo(() => {
+    if (!juries || juries.length === 0 || !effectiveUserId) return null;
+    const myCreatorId = myCreatorProfile?.id?.toLowerCase();
+    const myUserId = effectiveUserId.toLowerCase();
+
+    return (
+      juries.find((j) => {
+        const jCreatorId = j.creatorId?.toLowerCase();
+        const jUserId = (j.userId || j.creatorUserId)?.toLowerCase();
+
+        if (jUserId && jUserId === myUserId) return true;
+        if (myCreatorId && jCreatorId === myCreatorId) return true;
+        if (jCreatorId === myUserId) return true;
+
+        return false;
+      }) || null
+    );
+  }, [juries, effectiveUserId, myCreatorProfile]);
+
+  const isHeadJury = Boolean(
+    (currentJury && currentJury.isHeadJury) ||
+    (event?.createdByAdminId && effectiveUserId === event.createdByAdminId)
+  );
 
   const activeSubmission = useMemo(() => {
     return submissions.find((s) => s.id === selectedSubmissionId) || submissions[0] || null;
@@ -177,13 +224,20 @@ export function EventHeadJuryScreen({ eventId }: EventHeadJuryScreenProps) {
 
   if (activeSubmission && activeSubmission.id !== prevSubmissionId) {
     setPrevSubmissionId(activeSubmission.id);
+    const draft = juryService.getDraft(eventId, activeSubmission.id);
     const initialScores: Record<string, number> = {};
     criteria.forEach((crit) => {
-      initialScores[crit.id] = activeSubmission.criteriaScores?.[crit.id] ?? Math.round(crit.maxScore * 0.85);
+      if (draft?.criteriaScores && typeof draft.criteriaScores[crit.id] === 'number') {
+        initialScores[crit.id] = draft.criteriaScores[crit.id];
+      } else if (activeSubmission.criteriaScores && typeof activeSubmission.criteriaScores[crit.id] === 'number') {
+        initialScores[crit.id] = activeSubmission.criteriaScores[crit.id];
+      } else {
+        initialScores[crit.id] = 0;
+      }
     });
     setScores(initialScores);
-    setNotes(activeSubmission.notes || 'Strong composition, clear narrative, and sophisticated lighting treatment.');
-    setNoConflict(activeSubmission.noConflictOfInterest ?? true);
+    setNotes(draft?.notes ?? activeSubmission.notes ?? '');
+    setNoConflict(draft?.noConflictOfInterest ?? activeSubmission.noConflictOfInterest ?? true);
   }
 
   const totalScore = useMemo(() => {
@@ -194,6 +248,10 @@ export function EventHeadJuryScreen({ eventId }: EventHeadJuryScreenProps) {
   }, [scores, criteria]);
 
   const handleScoreChange = (criteriaId: string, val: number, maxScore: number) => {
+    if (activeSubmission?.isLocked) {
+      toast.error('Điểm của bài dự thi này đã được khóa và không thể chỉnh sửa.');
+      return;
+    }
     const clamped = Math.max(0, Math.min(maxScore, val));
     setScores((prev) => ({
       ...prev,
@@ -203,6 +261,10 @@ export function EventHeadJuryScreen({ eventId }: EventHeadJuryScreenProps) {
 
   const handleSaveDraft = () => {
     if (!activeSubmission) return;
+    if (activeSubmission.isLocked) {
+      toast.error('Điểm của bài dự thi này đã được khóa và không thể chỉnh sửa.');
+      return;
+    }
     const draft: JuryEvaluationDraft = {
       submissionId: activeSubmission.id,
       totalScore,
@@ -234,6 +296,11 @@ export function EventHeadJuryScreen({ eventId }: EventHeadJuryScreenProps) {
     e.preventDefault();
     if (!activeSubmission) return;
 
+    if (activeSubmission.isLocked) {
+      toast.error('Điểm của bài dự thi này đã được khóa và không thể chỉnh sửa.');
+      return;
+    }
+
     if (!noConflict) {
       toast.error('You must confirm no conflict of interest to submit evaluation.');
       return;
@@ -262,6 +329,7 @@ export function EventHeadJuryScreen({ eventId }: EventHeadJuryScreenProps) {
                 gradedScore: totalScore,
                 notes,
                 criteriaScores: scores,
+                isLocked: true,
               }
             : s
         )
@@ -422,7 +490,11 @@ export function EventHeadJuryScreen({ eventId }: EventHeadJuryScreenProps) {
   const finalWinnersList: WinnerApprovalItem[] = useMemo(() => {
     const statusText = isAwardAllocationsConfirmed ? 'Confirmed' : 'Pending Approval';
     const sorted = [...submissions]
-      .filter((s) => typeof s.gradedScore === 'number' || typeof s.score === 'number')
+      .filter(
+        (s) =>
+          (typeof s.gradedScore === 'number' && s.gradedScore > 0) ||
+          (typeof s.score === 'number' && s.score > 0)
+      )
       .sort((a, b) => (Number(b.gradedScore ?? b.score) || 0) - (Number(a.gradedScore ?? a.score) || 0));
 
     if (sorted.length === 0) return [];
@@ -486,20 +558,24 @@ export function EventHeadJuryScreen({ eventId }: EventHeadJuryScreenProps) {
 
   const selectedJuryAssignments = useMemo(() => {
     if (!selectedJury) return [];
-    const seed = Array.from(selectedJury.id).reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
-    const items = Array.from({ length: selectedJury.totalAssigned }, (_, i) => {
-      const source = submissions.length > 0 ? submissions[i % submissions.length] : null;
-      return {
-        id: `${selectedJury.id}-${i}`,
-        code: `#AUR-${String(((i * 37 + seed) % 900) + 100).padStart(4, '0')}`,
-        title: source?.title ?? `Submission ${i + 1}`,
-        category: source?.category ?? 'Illustration',
-        order: (i * 7919 + seed) % selectedJury.totalAssigned,
-      };
-    });
-    const ranked = [...items].sort((a, b) => a.order - b.order);
-    const doneIds = new Set(ranked.slice(0, selectedJury.completedCount).map((x) => x.id));
-    return items.map((x) => ({ ...x, isCompleted: doneIds.has(x.id) }));
+    if (submissions.length > 0) {
+      const gradedSet = new Set(selectedJury.gradedSubmissionIds ?? []);
+      return submissions.map((sub, index) => {
+        const isCompleted =
+          selectedJury.isCompleted ||
+          gradedSet.has(sub.id) ||
+          (selectedJury.isHeadJury && sub.isGraded) ||
+          index < selectedJury.completedCount;
+        return {
+          id: sub.id,
+          code: sub.code,
+          title: sub.title,
+          category: sub.category ?? 'Illustration',
+          isCompleted,
+        };
+      });
+    }
+    return [];
   }, [selectedJury, submissions]);
 
   const filteredJuryAssignments = useMemo(() => {
@@ -517,12 +593,65 @@ export function EventHeadJuryScreen({ eventId }: EventHeadJuryScreenProps) {
     );
   }
 
-  const eventTitle = event?.title || 'AURA 2026';
-  const statusColor = event?.status ? eventStatusBadgeStyles[event.status] || 'bg-slate-500/20 text-slate-300 border-slate-500/30' : 'bg-[#A7ACD9]/20 text-[#A7ACD9] border-[#A7ACD9]/30';
-  const statusLabel = event?.status ? eventStatusLabels[event.status] || event.status : 'Judging';
-  const deadlineFormatted = event?.judgingEndAt
+  if (!isHeadJury) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] px-4 py-12 text-center">
+        <div className="size-16 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 flex items-center justify-center mx-auto mb-5 shadow-inner">
+          <Lock className="w-8 h-8" />
+        </div>
+        <h2 className="font-sora text-xl sm:text-2xl font-bold text-white">
+          Truy cập bị từ chối
+        </h2>
+        <p className="mt-2 text-sm text-[#9695a1] max-w-md mx-auto leading-relaxed">
+          Bạn không có quyền Trưởng ban giám khảo (Head Jury) cho sự kiện này. Chỉ Trưởng ban giám khảo được bổ nhiệm chính thức mới có quyền truy cập không gian này.
+        </p>
+        <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
+          <Link
+            href={`/creator/events/${eventId}/jury`}
+            className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 px-6 py-2.5 text-xs font-bold text-white hover:brightness-110 transition shadow-lg"
+          >
+            <Gavel size={16} />
+            <span>Không gian chấm thi thông thường</span>
+          </Link>
+          <Link
+            href={`/events/${eventId}`}
+            className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-6 py-2.5 text-xs font-semibold text-[#9695a1] hover:text-white hover:bg-white/10 transition"
+          >
+            <ChevronLeft size={16} />
+            <span>Quay lại chi tiết sự kiện</span>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  if (!event) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] px-4 py-12 text-center">
+        <h2 className="font-sora text-xl sm:text-2xl font-bold text-white">
+          Không tìm thấy sự kiện
+        </h2>
+        <p className="mt-2 text-sm text-[#9695a1] max-w-md mx-auto leading-relaxed">
+          Sự kiện này không tồn tại hoặc đã bị xóa khỏi hệ thống.
+        </p>
+        <div className="mt-6">
+          <Link
+            href="/events"
+            className="inline-flex items-center gap-2 rounded-xl bg-white/10 hover:bg-white/15 px-6 py-2.5 text-xs font-semibold text-white transition"
+          >
+            <span>Tất cả sự kiện</span>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const eventTitle = event.title;
+  const statusColor = event.status ? eventStatusBadgeStyles[event.status] || 'bg-slate-500/20 text-slate-300 border-slate-500/30' : 'bg-[#A7ACD9]/20 text-[#A7ACD9] border-[#A7ACD9]/30';
+  const statusLabel = event.status ? eventStatusLabels[event.status] || event.status : 'Judging';
+  const deadlineFormatted = event.judgingEndAt
     ? new Date(event.judgingEndAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-    : 'Nov 28, 2026';
+    : 'Chưa xác định';
   const isJudgingPhase = event?.status === 'Judging';
 
   return (

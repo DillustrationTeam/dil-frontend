@@ -56,6 +56,11 @@ function AuctionCard({ item }: { item: AuctionListItemDto }) {
           <span className={`absolute left-4 top-4 rounded-full border px-3 py-1 text-[11px] font-semibold backdrop-blur-md ${statusColor}`}>
             {statusText}
           </span>
+          {item.hasPhysicalCopy && (
+            <span className="absolute left-4 top-13 rounded-full border border-amber-500/40 bg-amber-950/60 px-2.5 py-0.5 text-[10px] font-semibold text-amber-300 backdrop-blur-md">
+              🖼️ {t('Có bản vật lý')}
+            </span>
+          )}
           <span className="absolute bottom-4 right-4 flex items-center gap-1.5 rounded-full border border-white/10 bg-[#11131d]/80 px-3 py-1.5 font-mono text-[11px] tabular-nums text-white backdrop-blur-md">
             <Clock size={12} className="text-brand-periwinkle" />
             {isFinished

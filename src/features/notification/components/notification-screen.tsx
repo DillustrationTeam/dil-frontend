@@ -2,10 +2,32 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { Bell, BriefcaseBusiness, Check, CheckCheck, CircleAlert, Clock, ExternalLink, Gavel, Info, LockKeyhole, Megaphone, RefreshCw, Scale, ShieldAlert, Wallet } from 'lucide-react';
+import {
+  Award,
+  Bell,
+  BriefcaseBusiness,
+  Check,
+  CheckCheck,
+  CircleAlert,
+  Clock,
+  ExternalLink,
+  Eye,
+  Gavel,
+  Info,
+  LockKeyhole,
+  Megaphone,
+  RefreshCw,
+  Scale,
+  ShieldAlert,
+  Wallet,
+  X,
+} from 'lucide-react';
+import toast from 'react-hot-toast';
+import { getApiErrorMessage } from '@/lib/api-error';
 import { notificationService } from '../services/notification.service';
 import { useNotificationHub } from '../hooks/use-notification-hub';
 import { notificationCategories, notificationTypeLabels, type NotificationDto } from '../types/notification.types';
+import { InvitationDetailModal } from './invitation-detail-modal';
 
 function getIcon(type: string) {
   switch (type) {
@@ -31,12 +53,21 @@ function getIcon(type: string) {
       return <LockKeyhole size={18} className="text-emerald-400" />;
     case 'DisputeStatusChanged':
       return <Scale size={18} className="text-amber-400" />;
+    case 'InvitationReceived':
+      return <Award size={18} className="text-amber-400" />;
+    case 'InvitationAccepted':
+      return <Award size={18} className="text-emerald-400" />;
+    case 'InvitationDeclined':
+      return <Award size={18} className="text-rose-400" />;
+    case 'InvitationCanceled':
+    case 'InvitationExpired':
+      return <Award size={18} className="text-outline" />;
     default:
       return <Info size={18} className="text-outline" />;
   }
 }
 
-/** RefType backend ghi theo tên entity (VD: "Auction", "PaymentOrder", "PayoutRequest"). */
+/** RefType backend ghi theo tên entity (VD: "Auction", "PaymentOrder", "PayoutRequest", "Invitation"). */
 function getRefLink({ refType, refId, notificationType, notificationTitle, body }: NotificationDto) {
   if (!refType) return null;
   const key = refType.toLowerCase();
@@ -56,6 +87,7 @@ function getRefLink({ refType, refId, notificationType, notificationTitle, body 
   }
   if (key === 'commission' && refId) return { url: `/workroom/${refId}`, label: 'Mở phòng làm việc' };
   if (key === 'chatroom' && refId) return { url: `/workroom/${refId}`, label: 'Mở cuộc trò chuyện' };
+  if (key === 'invitation' && refId) return { url: `/notifications?invitationId=${refId}`, label: 'Xem chi tiết lời mời' };
   return null;
 }
 
@@ -66,6 +98,12 @@ export function NotificationScreen({ userId }: { userId: string | null }) {
   const [error, setError] = useState<string | null>(null);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [loadingMore, setLoadingMore] = useState(false);
+
+  // Lời mời sự kiện (Invitations)
+  const [selectedInvitationId, setSelectedInvitationId] = useState<string | null>(null);
+  const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
+  const [confirmDeclineId, setConfirmDeclineId] = useState<string | null>(null);
+  const [respondedInvitations, setRespondedInvitations] = useState<Record<string, 'Accepted' | 'Declined'>>({});
 
   // Bộ lọc (SCR-45): tab phân loại (Tất cả + 4 nhóm) và công tắc "chỉ chưa đọc".
   const [activeTab, setActiveTab] = useState<string>('all');
@@ -141,6 +179,47 @@ export function NotificationScreen({ userId }: { userId: string | null }) {
       setUnreadCount(0);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Không thể đánh dấu tất cả đã đọc.');
+    }
+  }
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const invId = params.get('invitationId');
+      if (invId) {
+        void Promise.resolve().then(() => {
+          setSelectedInvitationId(invId);
+        });
+      }
+    }
+  }, []);
+
+  async function handleAcceptInvitation(invitationId: string, notificationId: string) {
+    setActionLoadingId(invitationId);
+    try {
+      await notificationService.acceptInvitation(invitationId);
+      toast.success('Bạn đã chấp nhận lời mời tham gia Ban giám khảo sự kiện!');
+      setRespondedInvitations((prev) => ({ ...prev, [invitationId]: 'Accepted' }));
+      await handleMarkRead(notificationId);
+    } catch (err: unknown) {
+      toast.error(getApiErrorMessage(err, 'Không thể chấp nhận lời mời.'));
+    } finally {
+      setActionLoadingId(null);
+    }
+  }
+
+  async function handleDeclineInvitation(invitationId: string, notificationId: string) {
+    setActionLoadingId(invitationId);
+    try {
+      await notificationService.declineInvitation(invitationId);
+      toast.success('Đã từ chối lời mời tham gia Ban giám khảo sự kiện.');
+      setRespondedInvitations((prev) => ({ ...prev, [invitationId]: 'Declined' }));
+      setConfirmDeclineId(null);
+      await handleMarkRead(notificationId);
+    } catch (err: unknown) {
+      toast.error(getApiErrorMessage(err, 'Không thể từ chối lời mời.'));
+    } finally {
+      setActionLoadingId(null);
     }
   }
 
@@ -262,13 +341,117 @@ export function NotificationScreen({ userId }: { userId: string | null }) {
 
                   <p className="mt-1 text-xs leading-relaxed text-on-surface-variant">{n.body}</p>
 
+                  {/* Lời mời tham gia Ban giám khảo sự kiện (Invitation Event Reply) */}
+                  {n.refType?.toLowerCase() === 'invitation' && n.refId && (
+                    <div className="mt-3 rounded-2xl border border-white/10 bg-white/[0.03] p-3 text-xs">
+                      {respondedInvitations[n.refId] === 'Accepted' || n.notificationType === 'InvitationAccepted' ? (
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <span className="inline-flex items-center gap-1.5 font-semibold text-emerald-400">
+                            <Check size={14} /> Bạn đã chấp nhận lời mời này
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => setSelectedInvitationId(n.refId!)}
+                            className="inline-flex items-center gap-1 rounded-xl border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-medium text-outline hover:text-white transition"
+                          >
+                            <Eye size={12} /> Chi tiết sự kiện
+                          </button>
+                        </div>
+                      ) : respondedInvitations[n.refId] === 'Declined' || n.notificationType === 'InvitationDeclined' ? (
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <span className="inline-flex items-center gap-1.5 font-semibold text-rose-400">
+                            <X size={14} /> Bạn đã từ chối lời mời này
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => setSelectedInvitationId(n.refId!)}
+                            className="inline-flex items-center gap-1 rounded-xl border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-medium text-outline hover:text-white transition"
+                          >
+                            <Eye size={12} /> Chi tiết
+                          </button>
+                        </div>
+                      ) : n.notificationType === 'InvitationCanceled' ? (
+                        <span className="text-[11px] text-outline">
+                          Lời mời đã bị Ban tổ chức hủy bỏ.
+                        </span>
+                      ) : n.notificationType === 'InvitationExpired' ? (
+                        <span className="text-[11px] text-outline">
+                          Lời mời đã hết hạn phản hồi.
+                        </span>
+                      ) : (
+                        <div>
+                          {confirmDeclineId === n.refId ? (
+                            <div className="flex flex-wrap items-center justify-between gap-2">
+                              <span className="text-[11px] font-medium text-rose-300">
+                                Xác nhận từ chối lời mời tham gia sự kiện?
+                              </span>
+                              <div className="flex items-center gap-2">
+                                <button
+                                  type="button"
+                                  disabled={actionLoadingId === n.refId}
+                                  onClick={() => handleDeclineInvitation(n.refId!, n.notificationId)}
+                                  className="inline-flex items-center gap-1 rounded-xl bg-rose-500 px-3 py-1 text-[11px] font-bold text-white transition hover:bg-rose-600 disabled:opacity-50"
+                                >
+                                  {actionLoadingId === n.refId ? (
+                                    <RefreshCw size={11} className="animate-spin" />
+                                  ) : (
+                                    <X size={12} />
+                                  )}
+                                  Xác nhận từ chối
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setConfirmDeclineId(null)}
+                                  className="rounded-xl border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] text-on-surface-variant hover:text-white"
+                                >
+                                  Hủy
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="flex flex-wrap items-center gap-2.5">
+                              <button
+                                type="button"
+                                disabled={actionLoadingId === n.refId}
+                                onClick={() => handleAcceptInvitation(n.refId!, n.notificationId)}
+                                className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-500/40 bg-emerald-500/20 px-3.5 py-1.5 text-xs font-bold text-emerald-300 shadow-sm transition hover:bg-emerald-500/30 active:scale-95 disabled:opacity-50"
+                              >
+                                {actionLoadingId === n.refId ? (
+                                  <RefreshCw size={13} className="animate-spin" />
+                                ) : (
+                                  <Check size={14} />
+                                )}
+                                Chấp nhận tham gia
+                              </button>
+                              <button
+                                type="button"
+                                disabled={actionLoadingId === n.refId}
+                                onClick={() => setConfirmDeclineId(n.refId!)}
+                                className="inline-flex items-center gap-1.5 rounded-xl border border-rose-500/30 bg-rose-500/10 px-3 py-1.5 text-xs font-medium text-rose-300 transition hover:bg-rose-500/20 active:scale-95 disabled:opacity-50"
+                              >
+                                <X size={13} /> Từ chối
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setSelectedInvitationId(n.refId!)}
+                                className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-on-surface-variant hover:bg-white/10 hover:text-white transition"
+                              >
+                                <Eye size={13} /> Chi tiết lời mời
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
                   <div className="mt-3 flex flex-wrap items-center justify-between gap-3 text-xs">
                     <span className="rounded-full border border-white/10 px-2.5 py-0.5 text-[10px] text-outline">
                       {notificationTypeLabels[n.notificationType] || n.notificationType}
                     </span>
 
                     <div className="flex items-center gap-3">
-                      {refLink && (
+                      {refLink && n.refType?.toLowerCase() !== 'invitation' && (
                         <Link
                           href={refLink.url}
                           className="inline-flex items-center gap-1 font-semibold text-brand-periwinkle hover:underline"
@@ -313,6 +496,16 @@ export function NotificationScreen({ userId }: { userId: string | null }) {
           </button>
         </div>
       )}
+
+      {/* Modal chi tiết & phản hồi lời mời */}
+      <InvitationDetailModal
+        invitationId={selectedInvitationId}
+        isOpen={selectedInvitationId !== null}
+        onClose={() => setSelectedInvitationId(null)}
+        onResponded={(id, status) => {
+          setRespondedInvitations((prev) => ({ ...prev, [id]: status }));
+        }}
+      />
     </div>
   );
 }

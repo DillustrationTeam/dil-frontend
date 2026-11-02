@@ -57,8 +57,12 @@ function PublicLayoutContent({ children }: { children: React.ReactNode }) {
               <Link href="/#artists" className="shrink-0 whitespace-nowrap text-[#c7c5cf] transition-colors hover:text-white">
                 {t('Artists')}
               </Link>
-              <Link href="/#bento" className="shrink-0 whitespace-nowrap text-[#c7c5cf] transition-colors hover:text-white">
-                {t('Collections')}
+              <Link
+                href="/collections"
+                aria-current={pathname === '/collections' ? 'page' : undefined}
+                className={`shrink-0 whitespace-nowrap ${pathname === '/collections' ? 'text-[#c2c7f6] border-b-2 border-[#c2c7f6] pb-1' : 'text-[#c7c5cf] hover:text-white'} transition-colors`}
+              >
+                {t('Bộ sưu tập')}
               </Link>
               <Link
                 href="/auctions"
@@ -148,6 +152,14 @@ function PublicLayoutContent({ children }: { children: React.ReactNode }) {
                         >
                           <span className="material-symbols-outlined text-sm text-[#A7ACD9]">{isAdmin ? 'admin_panel_settings' : 'dashboard'}</span>
                           {isAdmin ? 'Admin Center' : roles.includes('Creator') ? 'Creator Studio' : 'My Studio'}
+                        </Link>
+                        <Link
+                          href="/collections"
+                          onClick={() => setIsMenuOpen(false)}
+                          className="flex items-center gap-2 px-3 py-2 text-xs text-[#e4e1e5] hover:bg-white/10 rounded-xl transition-colors"
+                        >
+                          <span className="material-symbols-outlined text-sm text-[#A7ACD9]">collections_bookmark</span>
+                          Bộ sưu tập tranh đấu giá
                         </Link>
                         {roles.includes('Creator') && (
                           <Link

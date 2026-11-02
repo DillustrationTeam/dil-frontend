@@ -17,6 +17,23 @@ export interface NotificationPage {
   nextCursor: string | null;
 }
 
+export interface EventInvitationDto {
+  id: string;
+  eventId: string;
+  eventTitle: string | null;
+  eventBannerUrl: string | null;
+  sentFromAdminId: string;
+  sentFromAdminName: string | null;
+  sentToCreatorId: string;
+  sentToCreatorName: string | null;
+  sentToCreatorEmail: string | null;
+  sentToCreatorAvatarUrl: string | null;
+  isHeadJury: boolean;
+  status: 'Pending' | 'Accepted' | 'Declined' | 'Canceled' | 'Expired' | string;
+  createdAt: string;
+  respondedAt: string | null;
+}
+
 /**
  * Nhãn tiếng Việt cho `NotificationType` — khớp đúng enum
  * `ArtCommission.Domain.Enums.NotificationType` ở backend.
@@ -34,6 +51,12 @@ export const notificationTypeLabels: Record<string, string> = {
   CommissionStatusChanged: 'Trạng thái đặt vẽ',
   EscrowStatusChanged: 'Trạng thái ký quỹ',
   DisputeStatusChanged: 'Trạng thái tranh chấp',
+  CreatorApplicationStatusChanged: 'Đơn đăng ký Creator',
+  InvitationReceived: 'Lời mời sự kiện',
+  InvitationAccepted: 'Chấp nhận lời mời sự kiện',
+  InvitationDeclined: 'Từ chối lời mời sự kiện',
+  InvitationCanceled: 'Lời mời sự kiện đã hủy',
+  InvitationExpired: 'Lời mời sự kiện hết hạn',
 };
 
 /** Danh sách loại hợp lệ, dùng cho bộ lọc và kiểm tra dữ liệu. */
