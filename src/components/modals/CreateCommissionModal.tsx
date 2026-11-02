@@ -3,6 +3,7 @@
 import { addonService, addonAllows, addonStage, addonMoney, type CreatorAddon } from '@/services/addon.service';
 
 import { useEffect, useEffectEvent, useRef, useState } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -27,12 +28,12 @@ const money = (value: number) => new Intl.NumberFormat('vi-VN', { style: 'curren
 const field = 'w-full px-4 py-3.5 bg-black/40 rounded-xl border border-white/10 text-white text-xs font-semibold focus:outline-none focus:border-[#C5C9F8] transition-colors';
 const label = 'block text-[10px] uppercase font-bold tracking-wider text-[#8A8FA9]';
 
-export default function CreateCommissionModal({ creatorId, creatorName, onClose }: { creatorId: string; creatorName: string; onClose: () => void }) {
+export default function CreateCommissionModal({ creatorId, creatorName, onClose, initialPackageId }: { creatorId: string; creatorName: string; onClose: () => void; initialPackageId?: string }) {
   const router = useRouter();
   const dialogRef = useRef<HTMLDivElement>(null);
   const [packages, setPackages] = useState<RateCardPackage[]>([]);
   const [loadingPackages, setLoadingPackages] = useState(true);
-  const [selectedPackageId, setSelectedPackageId] = useState('');
+  const [selectedPackageId, setSelectedPackageId] = useState(initialPackageId ?? '');
   const [licenseType, setLicenseType] = useState<'Personal' | 'Commercial'>('Personal');
   const [terms, setTerms] = useState<CreatorTermsDto | null>(null);
   const [packageError, setPackageError] = useState<string | null>(null);
@@ -157,6 +158,18 @@ export default function CreateCommissionModal({ creatorId, creatorName, onClose 
                     <span className="ml-auto font-bold text-[#C5C9F8]">{money(item.price)}</span>
                   </span>
                   {item.description && <span className="mt-2 block text-slate-400">{item.description}</span>}
+                  {item.sampleUrls && item.sampleUrls.length > 0 && (
+                    <div className="mt-3 flex items-center gap-2 overflow-x-auto pb-1">
+                      {item.sampleUrls.map((sUrl, sIdx) => (
+                        <div
+                          key={sIdx}
+                          className="relative h-14 w-14 shrink-0 rounded-lg overflow-hidden border border-white/10"
+                        >
+                          <Image src={sUrl} alt="Sample preview" fill unoptimized className="object-cover" />
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </label>
               ))
             )}
