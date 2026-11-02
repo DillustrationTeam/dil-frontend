@@ -2,7 +2,17 @@ import { apiClient } from '@/lib/api-client';
 import { ApiResponse } from '@/types/api.types';
 
 export type RateCardMilestone = { sequence: number; title: string; price: number; maxRevisions?: number };
-export type RateCardPackage = { id: string; name: string; description?: string | null; price: number; milestones: RateCardMilestone[] };
+export type RateCardPackage = {
+  id: string;
+  name: string;
+  description?: string | null;
+  price: number;
+  milestones: RateCardMilestone[];
+  maxRevisions?: number;
+  extraRevisionPrice?: number;
+  sampleUrls?: string[];
+  orderCount?: number;
+};
 
 export const creatorRateCardService = {
   async get(creatorId: string): Promise<RateCardPackage[]> {

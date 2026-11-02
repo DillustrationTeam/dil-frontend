@@ -6,6 +6,7 @@ import type { AddonStage, AddonPreset, CreatorAddon, CommissionAddon } from '@/t
 export type { AddonStage, AddonPreset, CreatorAddon, CommissionAddon } from '@/types/addon.types';
 export const addonSchema = z.object({
   title: z.string().trim().min(1, 'Nhập tên phụ phí').max(200),
+  description: z.string().trim().max(1000).nullable().optional(),
   price: z.number().int().positive('Giá phải lớn hơn 0').max(999999999999),
   allowedMilestone: z.string().refine(value => /^(Any|(?:Sketch|Lineart|Final)(?:,(?:Sketch|Lineart|Final))*)$/.test(value), 'Chọn ít nhất một mốc áp dụng'),
   extendDays: z.number().int().min(0).max(365),
