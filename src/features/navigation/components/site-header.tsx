@@ -14,6 +14,7 @@ const navLinks = [
   { href: '/', label: 'Marketplace', match: ['/'], exact: true, requiresAuth: false },
   { href: '/#artists', label: 'Artists', match: [] as string[], exact: false, requiresAuth: false },
   { href: '/collections', label: 'Bộ sưu tập', match: ['/collections'], exact: false, requiresAuth: false },
+  { href: '/events', label: 'Sự kiện', match: ['/events'], exact: false, requiresAuth: false },
   // Đấu giá và Phòng làm việc chỉ hiện khi đã đăng nhập.
   { href: '/auctions', label: 'Đấu giá', match: ['/auctions'], exact: false, requiresAuth: true },
   { href: '/workroom', label: 'Phòng làm việc', match: ['/workroom'], exact: false, requiresAuth: true },
