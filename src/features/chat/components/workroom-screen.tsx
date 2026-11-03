@@ -14,6 +14,7 @@ import {
   Download,
   Eye,
   FileArchive,
+  FolderOpen,
   FileText,
   Globe,
   Lock,
@@ -21,21 +22,21 @@ import {
   Paperclip,
   RefreshCw,
   Send,
-  Ban,
   Scale,
   ShieldAlert,
   ShieldCheck,
-  Sparkles,
   TrendingUp,
   UploadCloud,
   X,
 } from 'lucide-react';
 
 import { chatService } from '../services/chat.service';
-import { deadlineRiskService } from '../services/deadline-risk.service';
+import { WorkroomProgressPanel } from './workroom-progress-panel';
 import { useChatHub } from '../hooks/use-chat-hub';
 import { useAutoTranslate } from '../hooks/use-auto-translate';
+import { WorkroomAddons } from './workroom-addons';
 import type { ChatMessageDto, ChatRoomDto } from '../types/chat.types';
+import { CreatorAssetPicker } from '@/features/creator-studio';
 import { PageLoader } from '@/features/navigation';
 import { commissionService } from '@/services/commission.service';
 import { extractErrorMessage } from '@/lib/api-client';
@@ -44,9 +45,12 @@ import type { Commission, CommissionStatus, Milestone } from '@/types/commission
 import SubmitMilestoneModal from '@/components/modals/SubmitMilestoneModal';
 import ApprovalRevisionModal from '@/components/modals/ApprovalRevisionModal';
 import FinalDeliveryModal from '@/components/modals/FinalDeliveryModal';
+import CreatorReplyModal from '@/components/modals/CreatorReplyModal';
+import DisputeDetailsModal from '@/components/modals/DisputeDetailsModal';
 import ReviewRatingModal from '@/components/modals/ReviewRatingModal';
 import CancelRefundModal from '@/components/modals/CancelRefundModal';
 import RaiseDisputeModal from '@/components/modals/RaiseDisputeModal';
+import WorkroomTermsModal from '@/components/modals/WorkroomTermsModal';
 
 /** Tin nhắn đã hiện trên UI nhưng server chưa phát lại (chờ SignalR). */
 interface PendingMessage {
@@ -78,6 +82,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [inputBody, setInputBody] = useState('');
+  const [showAssetPicker, setShowAssetPicker] = useState(false);
   const [sending, setSending] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [depositingEscrow, setDepositingEscrow] = useState(false);
@@ -97,30 +102,17 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
 
   // States cho các Modal Hợp đồng & Cột mốc
   const [commission, setCommission] = useState<Commission | null>(null);
+  const [hasAddonMessages, setHasAddonMessages] = useState(false);
   const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [showApprovalModal, setShowApprovalModal] = useState(false);
   const [showDeliveryModal, setShowDeliveryModal] = useState(false);
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [showDisputeModal, setShowDisputeModal] = useState(false);
-
-  // AI Deadline Risk Predictor
-  const [predictingRisk, setPredictingRisk] = useState(false);
-
-  const handlePredictRisk = useCallback(async () => {
-    if (!room?.commissionId || predictingRisk) return;
-    setPredictingRisk(true);
-    try {
-      await deadlineRiskService.predict(room.commissionId);
-      if (room.commissionId) {
-        void commissionService.getById(room.commissionId).then((c) => setCommission(c)).catch(() => null);
-      }
-    } catch (err: unknown) {
-      setError(extractErrorMessage(err, 'Không thể dự đoán tiến độ bằng AI.'));
-    } finally {
-      setPredictingRisk(false);
-    }
-  }, [room, predictingRisk]);
+  const [showReplyModal, setShowReplyModal] = useState(false);
+  const [showDisputeDetailsModal, setShowDisputeDetailsModal] = useState(false);
+  const [acceptingTerms, setAcceptingTerms] = useState(false);
+  const [termsError, setTermsError] = useState<string | null>(null);
 
   // Auto-detect clipping: Tự động nhận diện khoảng trống lề ngoài để thu gọn tab nếu bị khuất
   const binderRef = useRef<HTMLDivElement>(null);
@@ -149,11 +141,13 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
     return () => window.removeEventListener('resize', checkSpace);
   }, []);
 
-  const isCreator = useMemo(() => {
-    if (!userId) return false;
+  const currentMemberRole = useMemo(() => {
+    if (!userId) return undefined;
     const member = room?.members.find((m) => m.userId.toLowerCase() === userId.toLowerCase());
-    return member?.memberRole?.toLowerCase() === 'creator';
+    return member?.memberRole?.toLowerCase();
   }, [room, userId]);
+
+  const isCreator = currentMemberRole === 'creator';
 
   const partnerDisplayName = useMemo(() => {
     if (!room?.members || !userId) return isCreator ? 'Khách hàng' : 'Họa sĩ';
@@ -161,9 +155,37 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
     return partner?.fullName || (isCreator ? 'Khách hàng' : 'Họa sĩ');
   }, [room, userId, isCreator]);
 
-  const isClient = !isCreator;
+  const isClient = currentMemberRole === 'client';
   const activeRole: 'client' | 'creator' = isCreator ? 'creator' : 'client';
   const commissionStatus: CommissionStatus = commission?.status ?? 'InProgress';
+
+  const acceptedTermsVersion = currentMemberRole === 'client'
+    ? commission?.clientTermsVersion
+    : currentMemberRole === 'creator'
+      ? commission?.creatorTermsVersion
+      : null;
+  const currentTermsVersion = commission?.currentWorkroomTermsVersion ?? '1.0';
+  const showTermsModal = Boolean(
+    commission
+    && commission.status !== 'Completed'
+    && commission.status !== 'Cancelled'
+    && (currentMemberRole === 'client' || currentMemberRole === 'creator')
+    && acceptedTermsVersion !== currentTermsVersion,
+  );
+
+  const handleAcceptWorkroomTerms = useCallback(async () => {
+    if (!commission || acceptingTerms) return;
+    setAcceptingTerms(true);
+    setTermsError(null);
+    try {
+      const updated = await commissionService.acceptWorkroomTerms(commission.id);
+      setCommission(current => current ? { ...current, ...updated } : updated);
+    } catch (err: unknown) {
+      setTermsError(extractErrorMessage(err, 'Không thể ghi nhận xác nhận điều khoản.'));
+    } finally {
+      setAcceptingTerms(false);
+    }
+  }, [commission, acceptingTerms]);
 
   const isCommissionEnded = useMemo(() => {
     return (
@@ -244,6 +266,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
   const currentStageNum = displayedMilestone?.sequence ?? commission?.currentStage ?? 1;
 
   const deadlineText = useMemo(() => {
+    if (commissionStatus === 'Cancelled') return 'Đã hủy đơn';
     if (allMilestonesApproved) return 'Hoàn tất';
     if (!commission?.deadlineAt) return 'Đang thực hiện';
 
@@ -270,7 +293,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
     }
 
     return `Còn ${days} ngày`;
-  }, [commission, allMilestonesApproved]);
+  }, [commission, allMilestonesApproved, commissionStatus]);
 
   const rawWipUrl =
     displayedMilestone?.wipPreviewUrl ||
@@ -410,6 +433,12 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
       if (r.commissionId) {
         try {
           const c = await commissionService.getById(r.commissionId);
+          if (!c.dispute) {
+            try {
+              const d = await commissionService.getDispute(r.commissionId);
+              if (d) c.dispute = d;
+            } catch { }
+          }
           setCommission(c);
         } catch { }
       }
@@ -524,7 +553,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
     try {
       const updated = await commissionService.depositEscrow(room.commissionId);
       if (updated) {
-        setCommission(updated);
+        setCommission(current => current ? { ...current, ...updated } : updated);
       }
       refresh();
       void chat.sendMessage('🛡️ Khách hàng đã nạp tiền ký quỹ Escrow thành công. Creator có thể bắt đầu vẽ!').catch(() => null);
@@ -658,11 +687,13 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
               </div>
             </div>
 
-            {/* DẢI TAB CỐ ĐỊNH MÉP TRÁI (KHIẾU NẠI - TỰ ĐỘNG THU GỌN NẾU BỊ KHUẤT) */}
+            {/* DẢI TAB CỐ ĐỊNH MÉP TRÁI (HỦY ĐƠN - TỰ ĐỘNG THU GỌN NẾU BỊ KHUẤT) */}
             <div className="hidden lg:flex absolute right-full bottom-20 flex-col gap-3 z-50 items-end">
               <button
                 type="button"
                 onClick={() => setShowCancelModal(true)}
+                disabled={commissionStatus === 'Completed' || commissionStatus === 'Cancelled' || commissionStatus === 'Disputed'}
+                title="Hủy đơn hàng thông thường"
                 className={`group relative h-[44px] bg-[#1C202D] hover:bg-[#232838] border border-r-0 rounded-l-lg flex items-center justify-end pr-3.5 shadow-xl [clip-path:polygon(10px_0,100%_0,100%_100%,0_100%,0_10px)] [transition:width_0.3s_cubic-bezier(0.34,1.3,0.64,1),background-color_0.2s_ease,border-color_0.2s_ease] cursor-pointer ${!hasLeftSpace
                     ? showCancelModal
                       ? 'w-[46px] border-rose-400 bg-[#232838] shadow-[0_0_12px_rgba(244,63,94,0.35)]'
@@ -680,16 +711,14 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                       : 'hidden'
                     }`}
                 >
-                  Khiếu nại
+                  Hủy đơn
                 </span>
                 <div className="flex items-center justify-center shrink-0 w-5">
                   <CircleAlert size={18} className="text-rose-400" />
                 </div>
-
-                {/* Smart Tooltip khi ở dạng thu gọn (khi bị khuất/hẹp lề) */}
                 {!hasLeftSpace && (
                   <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none bg-[#161926]/95 border border-rose-500/40 text-rose-300 text-xs font-bold px-2.5 py-1 rounded-lg shadow-2xl backdrop-blur-md whitespace-nowrap z-50">
-                    Khiếu nại / Hỗ trợ
+                    Hủy đơn thông thường
                   </div>
                 )}
               </button>
@@ -855,27 +884,15 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                       <span className={`inline-block size-2 rounded-full ${autoTranslate ? 'bg-brand-periwinkle animate-pulse' : 'bg-white/20'}`} />
                     </button>
 
-                    {/* Nút Khiếu Nại Tranh Chấp (Icon Scale Cái cân Trọng tài) */}
-                    {commissionStatus !== 'Completed' && commissionStatus !== 'Cancelled' && commissionStatus !== 'Disputed' && (
+                    {/* Nút Khiếu Nại / Xem Hồ Sơ Tranh Chấp */}
+                    {(commission?.dispute || commissionStatus === 'Cancelled' || commissionStatus === 'Disputed' || (commissionStatus !== 'Completed')) && (
                       <button
                         type="button"
-                        onClick={() => setShowDisputeModal(true)}
-                        title="Gửi khiếu nại tranh chấp với Trọng tài sàn"
+                        onClick={() => (commission?.dispute || commissionStatus === 'Cancelled' || commissionStatus === 'Disputed') ? setShowDisputeDetailsModal(true) : setShowDisputeModal(true)}
+                        title={commission?.dispute || commissionStatus === 'Cancelled' ? 'Xem hồ sơ và kết quả giải quyết tranh chấp' : 'Gửi khiếu nại tranh chấp với Trọng tài sàn'}
                         className="group relative flex size-9 shrink-0 items-center justify-center border border-amber-500/40 bg-[#1C202D] hover:bg-[#232838] hover:border-amber-400 text-amber-400 transition shadow-md [clip-path:polygon(10px_0,100%_0,100%_100%,0_100%,0_10px)]"
                       >
                         <Scale size={18} className="text-amber-400 group-hover:scale-110 transition-transform" />
-                      </button>
-                    )}
-
-                    {/* Nút Hủy đơn hàng (Icon Ban Hủy đơn) */}
-                    {commissionStatus !== 'Completed' && commissionStatus !== 'Cancelled' && commissionStatus !== 'Disputed' && (
-                      <button
-                        type="button"
-                        onClick={() => setShowCancelModal(true)}
-                        title="Hủy đơn hàng & Hoàn tiền Escrow"
-                        className="inline-flex items-center gap-1.5 rounded-full border border-rose-500/40 bg-rose-500/10 px-2.5 py-1 text-[11px] font-semibold text-rose-300 hover:bg-rose-500/20 transition"
-                      >
-                        <Ban size={12} className="text-rose-400" /> Hủy đơn
                       </button>
                     )}
 
@@ -890,19 +907,75 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                   </div>
                 </div>
 
-                {/* BANNER CẢNH BÁO KHI ĐANG TRANH CHẤP (DISPUTED) */}
-                {commissionStatus === 'Disputed' && (
-                  <div className="relative z-10 my-3 border border-amber-500/40 bg-amber-500/15 p-3.5 text-xs text-amber-200 flex items-start gap-2.5 shadow-lg [clip-path:polygon(0_0,calc(100%-12px)_0,100%_12px,100%_100%,0_100%)]">
-                    <div className="shrink-0 p-1 bg-amber-500/20 rounded-md text-amber-300 border border-amber-400/40">
-                      <ShieldAlert size={16} />
+                {/* BANNER TRANH CHẤP (ĐANG XỬ LÝ HOẶC ĐÃ CÓ PHÁN QUYẾT RESOLVED) */}
+                {commission?.dispute && (
+                  commission.dispute.status === 'Resolved' || commissionStatus !== 'Disputed' ? (
+                    <div className="relative z-10 my-3 border border-emerald-500/40 bg-emerald-500/15 p-3.5 text-xs text-emerald-200 shadow-lg [clip-path:polygon(0_0,calc(100%-12px)_0,100%_12px,100%_100%,0_100%)]">
+                      <div className="flex items-start gap-2.5">
+                        <div className="shrink-0 p-1 bg-emerald-500/20 rounded-md text-emerald-300 border border-emerald-400/40">
+                          <Scale size={16} />
+                        </div>
+                        <div className="flex-1 space-y-2">
+                          <div className="flex flex-wrap items-center justify-between gap-2">
+                            <p className="font-h1 font-bold text-emerald-300 text-xs uppercase tracking-wider">
+                              Phán quyết tranh chấp trọng tài (Trạng thái: {commission.dispute.status})
+                            </p>
+                            <button
+                              type="button"
+                              onClick={() => setShowDisputeDetailsModal(true)}
+                              className="px-2.5 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-200 text-[11px] font-bold transition"
+                            >
+                              Xem hồ sơ chi tiết
+                            </button>
+                          </div>
+                          <div className="space-y-1 text-[11px] text-emerald-100/90 border-t border-emerald-500/20 pt-2">
+                            {commission.dispute.resolution && (
+                              <p><strong>Phán quyết xử lý:</strong> <span className="text-white font-semibold">{commission.dispute.resolution}</span></p>
+                            )}
+                            {commission.dispute.adminNote && (
+                              <p><strong>Ghi chú quyết định:</strong> <span className="text-white italic">{commission.dispute.adminNote}</span></p>
+                            )}
+                            <div className="flex flex-wrap gap-4 pt-1">
+                              {commission.dispute.clientRefundAmount != null && (
+                                <span><strong>Hoàn khách:</strong> {new Intl.NumberFormat('vi-VN').format(commission.dispute.clientRefundAmount)} VND</span>
+                              )}
+                              {commission.dispute.artistPayAmount != null && (
+                                <span><strong>Creator nhận:</strong> {new Intl.NumberFormat('vi-VN').format(commission.dispute.artistPayAmount)} VND</span>
+                              )}
+                              {commission.dispute.resolvedAt && (
+                                <span className="text-emerald-300/70"><strong>Ngày giải quyết:</strong> {new Date(commission.dispute.resolvedAt).toLocaleString('vi-VN')}</span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex-1">
-                      <p className="font-h1 font-bold text-amber-300 text-xs uppercase tracking-wider">Đơn hàng đang trong quá trình khiếu nại tranh chấp (Disputed)</p>
-                      <p className="text-[11px] text-amber-100/90 leading-relaxed mt-0.5">
-                        Hồ sơ khiếu nại đã được chuyển đến Ban Trọng tài sàn để thẩm định lịch sử trao đổi và sản phẩm. Tiền ký quỹ Escrow được tạm khóa an toàn cho đến khi có phán quyết chính thức.
-                      </p>
+                  ) : (
+                    <div className="relative z-10 my-3 border border-amber-500/40 bg-amber-500/15 p-3.5 text-xs text-amber-200 flex items-start gap-2.5 shadow-lg [clip-path:polygon(0_0,calc(100%-12px)_0,100%_12px,100%_100%,0_100%)]">
+                      <div className="shrink-0 p-1 bg-amber-500/20 rounded-md text-amber-300 border border-amber-400/40">
+                        <ShieldAlert size={16} />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                          <p className="font-h1 font-bold text-amber-300 text-xs uppercase tracking-wider">Đơn hàng đang trong quá trình khiếu nại tranh chấp (Disputed)</p>
+                          <button
+                            type="button"
+                            onClick={() => setShowDisputeDetailsModal(true)}
+                            className="px-2 py-0.5 rounded bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-200 text-[10px] font-bold"
+                          >
+                            Chi tiết
+                          </button>
+                        </div>
+                        <p className="text-[11px] text-amber-100/90 leading-relaxed mt-0.5">
+                          Hồ sơ khiếu nại đã được chuyển đến Ban Trọng tài sàn để thẩm định. Tiền ký quỹ Escrow được tạm khóa an toàn cho đến khi có phán quyết chính thức.
+                        </p>
+                        <div className="mt-2 space-y-1 border-t border-amber-400/20 pt-2 text-[11px]">
+                          <p><strong>Lý do:</strong> {commission.dispute.reason}</p>
+                          <p><strong>Ngày tạo:</strong> {new Date(commission.dispute.createdAt).toLocaleString('vi-VN')}</p>
+                        </div>
+                      </div>
                     </div>
-                  </div>
+                  )
                 )}
 
                 {/* CẢNH BÁO BẢO VỆ ESCROW */}
@@ -920,7 +993,8 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
 
                 {/* DANH SÁCH TIN NHẮN REAL-TIME */}
                 <div className="relative z-10 flex-1 overflow-y-auto space-y-3 pr-1 my-2 min-h-[300px] lg:min-h-0">
-                  {messages.length === 0 && pending.length === 0 ? (
+                  {commission && <WorkroomAddons commission={commission} isCreator={isCreator} onUpdated={setCommission} onPresenceChanged={setHasAddonMessages} />}
+                  {messages.length === 0 && pending.length === 0 && !hasAddonMessages ? (
                     <div className="flex h-full flex-col items-center justify-center text-center text-xs text-outline p-6 space-y-2">
                       <BookOpen size={32} className="text-outline/50" />
                       <p className="font-semibold text-on-surface">Chưa có tin nhắn nào trong phòng làm việc</p>
@@ -1115,6 +1189,12 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                     }}
                   />
 
+                  {showAssetPicker && isCreator && !isChatDisabled && <CreatorAssetPicker onClose={() => setShowAssetPicker(false)} onSelect={body => {
+                    const combined = [inputBody, body].filter(Boolean).join('\n\n');
+                    const parsed = workroomMessageSchema.safeParse(combined);
+                    if (!parsed.success) { setError('Nội dung tài nguyên và tin nhắn vượt 4000 ký tự. Hãy rút gọn ghi chú trước khi chèn.'); setShowAssetPicker(false); return; }
+                    setInputBody(parsed.data); setShowAssetPicker(false);
+                  }} />}
                   <form onSubmit={handleSendMessage} className="flex items-center gap-2">
                     {/* Nút Khiếu Nại Tranh Chấp (Icon Scale Cái cân Trọng tài - Vị trí góc dưới bên trái) */}
                     <button
@@ -1136,8 +1216,12 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                       <Paperclip size={16} className={uploading ? 'animate-spin' : ''} />
                     </button>
 
-                    <input
-                      type="text"
+                    {isCreator && <button type="button" disabled={sending || uploading || isChatDisabled} onClick={() => setShowAssetPicker(true)}
+                      title="Thư viện tài nguyên" aria-label="Thư viện tài nguyên" className="flex size-10 shrink-0 items-center justify-center border border-white/15 bg-white/5 text-[#A7ACD9] disabled:opacity-50"><FolderOpen size={16} /></button>}
+
+                    <textarea
+                      rows={2}
+                      aria-label="Nội dung tin nhắn"
                       maxLength={4000}
                       disabled={isChatDisabled}
                       value={inputBody}
@@ -1145,8 +1229,14 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                         setInputBody(e.target.value);
                         chat.notifyTyping();
                       }}
+                      onKeyDown={(event) => {
+                        if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) {
+                          event.preventDefault();
+                          event.currentTarget.form?.requestSubmit();
+                        }
+                      }}
                       placeholder={isChatDisabled ? 'Phòng trao đổi đã đóng.' : 'Nhập tin nhắn hoặc trao đổi với đối tác...'}
-                      className="flex-1 border border-white/15 bg-slate-950/80 px-3.5 py-2.5 text-xs text-on-surface placeholder:text-outline focus:border-brand-periwinkle focus:outline-none disabled:opacity-50 [clip-path:polygon(8px_0,100%_0,100%_calc(100%-8px),calc(100%-8px)_100%,0_100%,0_8px)]"
+                      className="min-w-0 max-h-40 flex-1 resize-y border border-white/15 bg-slate-950/80 px-3.5 py-2.5 text-xs text-on-surface placeholder:text-outline focus:border-brand-periwinkle focus:outline-none disabled:opacity-50 [clip-path:polygon(8px_0,100%_0,100%_calc(100%-8px),calc(100%-8px)_100%,0_100%,0_8px)]"
                     />
 
                     <button
@@ -1158,6 +1248,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                       {sending || uploading ? <RefreshCw size={15} className="animate-spin" /> : <Send size={15} />}
                     </button>
                   </form>
+                  <p className="mt-1 text-right text-[10px] text-outline">Enter để gửi · Shift+Enter để xuống dòng</p>
                 </div>
               </div>
 
@@ -1206,22 +1297,6 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                     </div>
                   </button>
 
-                  {/* Tab 3: KHIẾU NẠI TRANH CHẤP */}
-                  {commissionStatus !== 'Completed' && commissionStatus !== 'Cancelled' && commissionStatus !== 'Disputed' && (
-                    <button
-                      type="button"
-                      onClick={() => setShowDisputeModal(true)}
-                      title="Gửi khiếu nại tranh chấp với Trọng tài"
-                      className="group relative w-[40px] sm:w-[42px] h-[52px] hover:h-[115px] bg-[#1C202D] hover:bg-[#232838] border border-t-0 border-amber-500/40 hover:border-amber-400 cursor-pointer overflow-hidden flex flex-col items-center justify-end pb-3 shadow-lg [clip-path:polygon(0_0,100%_0,100%_calc(100%-10px),50%_100%,0_calc(100%-10px))] [transition:height_0.32s_cubic-bezier(0.34,1.45,0.7,1),background-color_0.25s_ease,border-color_0.25s_ease]"
-                    >
-                      <span className="[writing-mode:vertical-rl] [text-orientation:mixed] rotate-180 text-[10px] font-extrabold tracking-wider transition-opacity duration-200 mb-2 pointer-events-none whitespace-nowrap select-none opacity-0 group-hover:opacity-100 text-amber-300">
-                        KHIẾU NẠI
-                      </span>
-                      <div className="flex items-center justify-center shrink-0">
-                        <Scale size={18} className="text-amber-400 group-hover:text-amber-300" />
-                      </div>
-                    </button>
-                  )}
                 </div>
 
                 {/* VIEW 1: DEFAULT STUDIO CANVAS VIEW */}
@@ -1243,8 +1318,9 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                           <div className="flex items-center gap-2">
                             <button
                               type="button"
+                              disabled={!displayedMilestone}
                               onClick={() => setShowSubmitModal(true)}
-                              className="commission-primary inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold shadow transition [clip-path:polygon(0_0,calc(100%-6px)_0,100%_6px,100%_100%,6px_100%,0_calc(100%-6px))]"
+                              className="commission-primary inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold shadow transition disabled:cursor-not-allowed disabled:opacity-40 [clip-path:polygon(0_0,calc(100%-6px)_0,100%_6px,100%_100%,6px_100%,0_calc(100%-6px))]"
                             >
                               <UploadCloud size={14} /> Nộp phác thảo
                             </button>
@@ -1421,8 +1497,9 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                           {isCreator && (
                             <button
                               type="button"
+                            disabled={!displayedMilestone}
                               onClick={() => setShowSubmitModal(true)}
-                              className="commission-primary inline-flex items-center gap-2 px-4 py-2 text-xs font-bold shadow-md transition [clip-path:polygon(0_0,calc(100%-6px)_0,100%_6px,100%_100%,6px_100%,0_calc(100%-6px))]"
+                            className="commission-primary inline-flex items-center gap-2 px-4 py-2 text-xs font-bold shadow-md transition disabled:cursor-not-allowed disabled:opacity-40 [clip-path:polygon(0_0,calc(100%-6px)_0,100%_6px,100%_100%,6px_100%,0_calc(100%-6px))]"
                             >
                               <UploadCloud size={15} /> Tải phác thảo Mốc #{displayedMilestone?.sequence ?? 1}
                             </button>
@@ -1472,6 +1549,38 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                           <div className="flex items-center gap-2.5 border border-white/10 bg-white/5 p-2.5 text-xs text-outline [clip-path:polygon(6px_0,calc(100%-6px)_0,100%_6px,100%_calc(100%-6px),calc(100%-6px)_100%,6px_100%,0_calc(100%-6px),0_6px)]">
                             <Lock size={16} className="shrink-0 text-outline" />
                             <span className="text-[11px]">File vẽ gốc HD sẽ tự động mở khóa sau khi tất cả các mốc phác thảo được duyệt.</span>
+                          </div>
+                        )}
+
+                        {/* ĐÁNH GIÁ CỦA KHÁCH & PHẢN HỒI CỦA CREATOR TRONG WORKROOM */}
+                        {commission?.review && (
+                          <div className="mt-3 border border-white/10 bg-white/[0.03] p-3.5 rounded-xl space-y-2.5 text-xs text-slate-300">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-amber-400 font-bold">★ {commission.review.rating}/5</span>
+                                <span className="font-semibold text-white">Đánh giá của khách hàng</span>
+                              </div>
+                              {commission.review.createdAt && (
+                                <span className="text-[10px] text-slate-500">{new Date(commission.review.createdAt).toLocaleDateString('vi-VN')}</span>
+                              )}
+                            </div>
+                            {commission.review.comment && (
+                              <p className="text-white/90 italic bg-black/20 p-2.5 rounded-lg border border-white/5">&ldquo;{commission.review.comment}&rdquo;</p>
+                            )}
+                            {commission.review.reviewerReply ? (
+                              <div className="border-l-2 border-[#A7ACD9] pl-3 py-1 space-y-0.5">
+                                <p className="text-[11px] font-semibold text-[#A7ACD9]">Phản hồi từ Creator:</p>
+                                <p className="text-white/90">{commission.review.reviewerReply}</p>
+                              </div>
+                            ) : isCreator ? (
+                              <button
+                                type="button"
+                                onClick={() => setShowReplyModal(true)}
+                                className="w-full py-1.5 px-3 rounded-lg bg-[#A7ACD9]/20 hover:bg-[#A7ACD9]/30 border border-[#A7ACD9]/40 text-[#C5C9F8] font-semibold text-xs transition"
+                              >
+                                💬 Trả lời đánh giá này
+                              </button>
+                            ) : null}
                           </div>
                         )}
                       </div>
@@ -1555,15 +1664,6 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                       <div className="flex items-center gap-2">
                         <button
                           type="button"
-                          onClick={() => void handlePredictRisk()}
-                          disabled={predictingRisk}
-                          className="commission-primary inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold shadow transition disabled:opacity-50 [clip-path:polygon(0_0,calc(100%-6px)_0,100%_6px,100%_100%,6px_100%,0_calc(100%-6px))]"
-                        >
-                          <Sparkles size={13} className={predictingRisk ? 'animate-spin' : ''} />
-                          {predictingRisk ? 'AI Đang chấm...' : 'AI Chấm lại tiến độ'}
-                        </button>
-                        <button
-                          type="button"
                           onClick={() => setRightPageView('canvas')}
                           className="rounded-lg bg-white/5 border border-white/10 px-3 py-1.5 text-xs font-semibold text-outline hover:text-white transition"
                         >
@@ -1571,6 +1671,16 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                         </button>
                       </div>
                     </div>
+
+                    {commission && (
+                      <WorkroomProgressPanel
+                        commissionId={commission.id}
+                        allApproved={allMilestonesApproved}
+                        isCancelled={commissionStatus === 'Cancelled'}
+                        totalMilestones={sortedMilestones.length}
+                        onCancelClick={!isCommissionEnded ? () => setShowCancelModal(true) : undefined}
+                      />
+                    )}
 
                     <div className="space-y-3 overflow-y-auto pr-1 flex-1">
                       {sortedMilestones.map((ms) => {
@@ -1621,7 +1731,10 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                               {isCreator && isCurrent && (
                                 <button
                                   type="button"
-                                  onClick={() => setShowSubmitModal(true)}
+                                  onClick={() => {
+                                    setSelectedMilestoneId(ms.id);
+                                    setShowSubmitModal(true);
+                                  }}
                                   className="commission-primary px-3 py-1 rounded text-[11px] font-bold shadow"
                                 >
                                   <UploadCloud size={12} className="inline mr-1" /> Nộp phác thảo
@@ -1642,18 +1755,18 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
       {/* MODALS NGHIỆP VỤ HỢP ĐỒNG (CÁC MODAL HIỆN CÓ KHÔNG SỬA ĐỔI PROTOCOL) */}
       {room.commissionId && (
         <>
-          <SubmitMilestoneModal
+          {displayedMilestone && <SubmitMilestoneModal
             isOpen={showSubmitModal}
             onClose={() => setShowSubmitModal(false)}
             commissionId={room.commissionId}
-            milestoneId={displayedMilestone?.id || ''}
-            milestoneTitle={displayedMilestone?.title || 'Bản phác thảo mốc hiện tại'}
+            milestoneId={displayedMilestone.id}
+            milestoneTitle={displayedMilestone.title}
             onSuccess={() => {
               setShowSubmitModal(false);
               refresh();
               void chat.sendMessage(`🎨 Creator đã nộp bản phác thảo cho mốc: ${displayedMilestone?.title || 'bản vẽ phác thảo mới'}`, 'SystemEvent').catch(() => null);
             }}
-          />
+          />}
 
           <ApprovalRevisionModal
             isOpen={showApprovalModal}
@@ -1663,6 +1776,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
             wipPreviewUrl={currentWipPreviewUrl || 'https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?auto=format&fit=crop&w=1200&q=80'}
             maxRevisions={displayedMilestone?.maxRevisions ?? 3}
             revisionCount={displayedMilestone?.revisionCount ?? 0}
+            milestoneSequence={displayedMilestone?.sequence ?? 1}
             isCreator={isCreator}
             revisionFeedback={displayedMilestone?.revisionFeedback}
             milestoneStatus={displayedMilestone?.status}
@@ -1703,6 +1817,8 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
             isOpen={showCancelModal}
             onClose={() => setShowCancelModal(false)}
             commissionId={room.commissionId}
+            commission={commission}
+            currentUserId={userId}
             onSuccess={() => {
               setShowCancelModal(false);
               refresh();
@@ -1719,6 +1835,29 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
               void chat.sendMessage('⚖️ Đã gửi yêu cầu khiếu nại tranh chấp tới Trọng tài sàn.', 'SystemEvent').catch(() => null);
             }}
           />
+
+          {commission && (currentMemberRole === 'client' || currentMemberRole === 'creator') && (
+            <section className="mt-4 space-y-3 rounded-2xl border border-white/10 bg-white/[.03] p-4">
+              {(commission.dispute || commission.status === 'Cancelled' || commission.status === 'Disputed') && (
+                <button type="button" onClick={() => setShowDisputeDetailsModal(true)} className="rounded-xl border border-[#A7ACD9]/40 px-4 py-2 text-sm text-[#C5C9F8] hover:bg-white/10 transition">
+                  Xem hồ sơ &amp; kết quả tranh chấp
+                </button>
+              )}
+              {commission.review && <div className="space-y-2 text-sm text-slate-300"><p className="font-semibold text-white">Đánh giá của khách: {commission.review.rating}/5</p>{commission.review.comment && <p>{commission.review.comment}</p>}{commission.review.reviewerReply ? <p className="border-l-2 border-[#A7ACD9] pl-3">Phản hồi của Creator: {commission.review.reviewerReply}</p> : currentMemberRole === 'creator' && commission.status === 'Completed' ? <button type="button" onClick={() => setShowReplyModal(true)} className="rounded-xl border border-white/15 px-4 py-2">Trả lời đánh giá</button> : null}</div>}
+            </section>
+          )}
+          {showDisputeDetailsModal && <DisputeDetailsModal key={room.commissionId} isOpen commissionId={room.commissionId} initialDispute={commission?.dispute} onClose={() => setShowDisputeDetailsModal(false)} />}
+          {showReplyModal && <CreatorReplyModal isOpen commissionId={room.commissionId} reviewComment={commission?.review?.comment} reviewRating={commission?.review?.rating} onClose={() => setShowReplyModal(false)} onSuccess={() => { setShowReplyModal(false); refresh(); }} />}
+          {commission && (currentMemberRole === 'client' || currentMemberRole === 'creator') && (
+            <WorkroomTermsModal
+              isOpen={showTermsModal}
+              role={currentMemberRole}
+              commission={commission}
+              isSubmitting={acceptingTerms}
+              error={termsError}
+              onConfirm={handleAcceptWorkroomTerms}
+            />
+          )}
         </>
       )}
     </div>

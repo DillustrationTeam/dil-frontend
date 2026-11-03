@@ -2,12 +2,12 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Check, ChevronDown, CircleAlert, Image as ImageIcon, RefreshCw } from 'lucide-react';
-import { auctionService } from '../services/auction.service';
+import { auctionService, auctionError } from '../services/auction.service';
 import type { EligibleArtworkDto } from '../types/auction.types';
 
 export interface EligibleArtworkSelectorProps {
   selectedArtworkId: string;
-  onSelect: (artworkId: string) => void;
+  onSelect: (artworkId: string, artwork?: EligibleArtworkDto) => void;
   reloadTrigger?: number;
 }
 
@@ -36,7 +36,7 @@ export function EligibleArtworkSelector({ selectedArtworkId, onSelect, reloadTri
       }
       setNextCursor(res.nextCursor);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Không tải được danh sách tranh đủ điều kiện.');
+      setError(auctionError(err) || 'Không tải được danh sách tranh đủ điều kiện.');
     } finally {
       setLoading(false);
       setLoadingMore(false);
@@ -140,13 +140,13 @@ export function EligibleArtworkSelector({ selectedArtworkId, onSelect, reloadTri
                     aria-selected={isSelected}
                     tabIndex={0}
                     onClick={() => {
-                      onSelect(item.artworkId);
+                      onSelect(item.artworkId, item);
                       setIsOpen(false);
                     }}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault();
-                        onSelect(item.artworkId);
+                        onSelect(item.artworkId, item);
                         setIsOpen(false);
                       }
                     }}

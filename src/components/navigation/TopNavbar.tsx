@@ -7,6 +7,7 @@ import {
   Search,
   ChevronDown,
   User,
+  UserPen,
   Settings,
   LogOut,
   Palette,
@@ -14,6 +15,7 @@ import {
   ShieldCheck,
   Wallet,
   FolderKanban,
+  Crown,
   Menu,
 } from 'lucide-react';
 import { useAuthStore } from '@/store/use-auth-store';
@@ -86,7 +88,9 @@ export default function TopNavbar<T extends string = string>({
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search commissions, creators, artworks..."
+            onKeyDown={(event) => { if (event.key === 'Enter') router.push(`/explore?q=${encodeURIComponent(searchQuery.trim())}`); }}
+            aria-label="Tìm tác phẩm hoặc tác giả"
+            placeholder="Search artworks, creators..."
             className="w-full h-9 pl-9 pr-4 bg-[#1b1b1e] border border-white/10 rounded-full text-xs text-white placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-[#A7ACD9] focus:border-[#A7ACD9] transition-all"
           />
         </div>
@@ -192,6 +196,13 @@ export default function TopNavbar<T extends string = string>({
                 <Wallet className="w-4 h-4 text-[#A7ACD9]" /> {t('Ví của tôi')}
               </Link>
               <Link
+                href="/collections"
+                onClick={() => setShowProfileMenu(false)}
+                className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs text-[#e4e1e5] hover:text-white hover:bg-white/5 transition-colors"
+              >
+                <Crown className="w-4 h-4 text-[#A7ACD9]" /> {t('Bộ sưu tập tranh đấu giá')}
+              </Link>
+              <Link
                 href={isAdmin ? '/admin' : '/client/commissions'}
                 onClick={() => setShowProfileMenu(false)}
                 className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs text-[#e4e1e5] hover:text-white hover:bg-white/5 transition-colors"
@@ -199,13 +210,22 @@ export default function TopNavbar<T extends string = string>({
                 <FolderKanban className="w-4 h-4 text-[#A7ACD9]" /> {isAdmin ? t('Admin Center') : t('My Commissions')}
               </Link>
               {isCreator && (
-                <Link
-                  href="/creator/commissions"
-                  onClick={() => setShowProfileMenu(false)}
-                  className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs text-[#e4e1e5] hover:text-white hover:bg-white/5 transition-colors"
-                >
-                  <Palette className="w-4 h-4 text-[#A7ACD9]" /> {t('Creator Dashboard')}
-                </Link>
+                <>
+                  <Link
+                    href="/creator/commissions"
+                    onClick={() => setShowProfileMenu(false)}
+                    className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs text-[#e4e1e5] hover:text-white hover:bg-white/5 transition-colors"
+                  >
+                    <Palette className="w-4 h-4 text-[#A7ACD9]" /> {t('Creator Dashboard')}
+                  </Link>
+                  <Link
+                    href="/creator/profile/edit"
+                    onClick={() => setShowProfileMenu(false)}
+                    className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs text-[#e4e1e5] hover:text-white hover:bg-white/5 transition-colors"
+                  >
+                    <UserPen className="w-4 h-4 text-[#A7ACD9]" /> {t('Hồ sơ họa sĩ')}
+                  </Link>
+                </>
               )}
               <Link
                 href="/profile"

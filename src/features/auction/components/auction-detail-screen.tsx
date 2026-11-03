@@ -4,20 +4,25 @@ import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
   ArrowLeft,
+  Award,
   CheckCircle2,
   CalendarDays,
   CircleAlert,
   Clock,
   Download,
+  ExternalLink,
+  FileCheck2,
   Gavel,
   Heart,
   FileType2,
   LoaderCircle,
   PackageCheck,
   RefreshCw,
+  ShieldCheck,
   User,
   Users,
   Wallet,
+  X,
   Zap,
 } from 'lucide-react';
 import {
@@ -26,14 +31,19 @@ import {
   auctionService,
   useAuctionClock,
   useAuctionHub,
+  type AuctionCertificateDto,
   type AuctionDetailDto,
   type BidDto,
   type AuctionParticipantDto,
   type WalletOverviewDto,
 } from '@/features/auction';
 import { SellerTransparencyCard } from './seller-transparency-card';
+import { AuctionCertificateCard } from './auction-certificate-card';
+import { CommercialRightsModal } from './commercial-rights-modal';
+import { DeliverablesDownloadModal } from './deliverables-download-modal';
+import { PhysicalDeliveryCard } from './physical-delivery-card';
 import { PageLoader } from '@/features/navigation';
-import { auctionStatusLabels } from '../types/auction.types';
+import { auctionStatusLabels, type DeliverableDownloadDto } from '../types/auction.types';
 
 function formatVnd(value: number) {
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 }).format(value);
@@ -97,6 +107,18 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
   const [watching, setWatching] = useState<boolean>(false);
   const [buyingNow, setBuyingNow] = useState<boolean>(false);
   const [downloading, setDownloading] = useState<boolean>(false);
+  const [certificate, setCertificate] = useState<AuctionCertificateDto | null>(null);
+  const [loadingCert, setLoadingCert] = useState<boolean>(false);
+  const [showCertModal, setShowCertModal] = useState<boolean>(false);
+  const [showCommercialDeed, setShowCommercialDeed] = useState<boolean>(false);
+  const [showRulesModal, setShowRulesModal] = useState<boolean>(false);
+  const [downloadDeliverable, setDownloadDeliverable] = useState<DeliverableDownloadDto | null>(null);
+  const [deliverableInfo, setDeliverableInfo] = useState<{
+    fileName: string;
+    mimeType?: string | null;
+    certNumber?: string | null;
+    licenseType?: string | null;
+  } | null>(null);
 
   // FE-01 Đồng hồ đếm ngược với serverTime
   const clock = useAuctionClock({
@@ -227,10 +249,18 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
       setError('Vui lòng đăng nhập để tham gia đấu giá.');
       return;
     }
+    if (isSeller) {
+      setError('Bạn là chủ sở hữu (người bán) của phiên đấu giá này, không thể tự đặt giá cho tác phẩm của mình.');
+      return;
+    }
+    if (auction?.auctionStatus !== 'Active') {
+      setError('Phiên đấu giá chưa bắt đầu hoặc đã kết thúc, hiện không nhận lượt đặt giá mới.');
+      return;
+    }
 
     const amountNum = Number(bidAmount);
     if (!auction || amountNum < minimumNextBid) {
-      setError(`Mức giá đặt phải tối thiểu là ${formatVnd(minimumNextBid)}.`);
+      setError(`Mức giá đặt phải từ ${formatVnd(minimumNextBid)} trở lên.`);
       return;
     }
 
@@ -240,11 +270,17 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
         setError(`Giá trần tự động phải lớn hơn hoặc bằng mức giá đặt tối thiểu (${formatVnd(minimumNextBid)}).`);
         return;
       }
+      if (maxNum <= amountNum) {
+        setError(`Giá trần tự động (${formatVnd(maxNum)}) phải lớn hơn mức giá đặt ban đầu (${formatVnd(amountNum)}).`);
+        return;
+      }
     }
 
     // Wallet balance check
     if (wallet && wallet.wallet.balance < amountNum) {
-      setError(`Số dư ví khả dụng không đủ. Cần: ${formatVnd(amountNum)}, Hiện có: ${formatVnd(wallet.wallet.balance)}.`);
+      setError(
+        `Số dư ví khả dụng không đủ để đặt giá! Cần: ${formatVnd(amountNum)}, Hiện có: ${formatVnd(wallet.wallet.balance)} (còn thiếu ${formatVnd(amountNum - wallet.wallet.balance)}).`
+      );
       return;
     }
 
@@ -256,16 +292,20 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
       const autoMaxNum = isAuto && maxAutoBid ? Number(maxAutoBid) : undefined;
       const res = await auctionService.bid(auctionId, amountNum, isAuto, autoMaxNum);
       if (isAuto && autoMaxNum) setActiveAutoBidCap(autoMaxNum);
-      setSuccess(
-        res.bid.bidStatus === 'Leading'
-          ? isAuto
-            ? `Đã kích hoạt Auto-bid với giá trần ${formatVnd(autoMaxNum!)}.`
-            : 'Đặt giá thành công! Giá của bạn đang dẫn đầu.'
-          : 'Đã ghi nhận giá, nhưng bạn đã bị Auto-bid khác vượt qua.',
-      );
 
-      if (res.bid.bidStatus === 'Outbid') {
+      if (res.bid.bidStatus === 'Leading') {
+        setSuccess(
+          isAuto
+            ? `Đã kích hoạt Auto-bid thành công với giá trần ${formatVnd(autoMaxNum!)}. Giá của bạn hiện đang dẫn đầu!`
+            : 'Đặt giá thành công! Giá của bạn đang dẫn đầu phiên đấu giá.'
+        );
+      } else if (res.bid.bidStatus === 'Outbid') {
+        setError(
+          `Lượt đặt giá ${formatVnd(amountNum)} đã được ghi nhận, nhưng bị Auto-bid của đối thủ vượt qua ngay lập tức. Mức giá dẫn đầu hiện tại đã tăng.`
+        );
         await loadDetail();
+      } else {
+        setSuccess('Đã gửi lượt đặt giá lên hệ thống.');
       }
 
       if (res.wallet) {
@@ -288,7 +328,9 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
         const c = err.conflictData;
         setAuction((prev) => (prev ? { ...prev, currentPrice: c.currentPrice, endAt: c.endAt } : prev));
         setBidAmount(c.minimumNextBid.toString());
-        setError(`Xung đột giá: ${err.message} Giá hiện tại đã được cập nhật thành ${formatVnd(c.currentPrice)}.`);
+        setError(
+          `Có người vừa đặt giá trước bạn! Giá hiện tại đã tăng lên ${formatVnd(c.currentPrice)}. Chúng tôi đã tự động cập nhật mức giá tối thiểu mới (${formatVnd(c.minimumNextBid)}), bạn có thể kiểm tra và bấm Đặt giá ngay.`
+        );
       } else {
         setError(auctionError(err));
       }
@@ -299,17 +341,32 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
 
   async function handleBuyNow() {
     if (!userId) {
-      setError('Vui lòng đăng nhập để mua ngay.');
+      setError('Vui lòng đăng nhập để thực hiện mua ngay.');
+      return;
+    }
+    if (isSeller) {
+      setError('Bạn là chủ sở hữu tác phẩm này, không thể tự mua lại.');
       return;
     }
     if (!auction?.buyNowPrice) return;
+    if (auction.auctionStatus !== 'Active') {
+      setError('Phiên đấu giá không ở trạng thái mở để mua ngay.');
+      return;
+    }
+    if (wallet && wallet.wallet.balance < auction.buyNowPrice) {
+      setError(
+        `Số dư ví không đủ để Mua ngay! Cần: ${formatVnd(auction.buyNowPrice)}, Hiện có: ${formatVnd(wallet.wallet.balance)} (còn thiếu ${formatVnd(auction.buyNowPrice - wallet.wallet.balance)}). Vui lòng nạp thêm tiền vào ví.`
+      );
+      return;
+    }
+
     if (!confirm(`Bạn xác nhận mua ngay tác phẩm này với mức giá ${formatVnd(auction.buyNowPrice)}?`)) return;
 
     setBuyingNow(true);
     setError(null);
     try {
       await auctionService.buyNow(auctionId);
-      setSuccess('Mua ngay thành công! Phiên đấu giá đã hoàn tất.');
+      setSuccess('Mua ngay thành công! Bạn đã trở thành người sở hữu tác phẩm này.');
       await loadDetail();
     } catch (err: unknown) {
       setError(auctionError(err));
@@ -322,13 +379,37 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
     setDownloading(true);
     try {
       const res = await auctionService.download(auctionId);
-      if (res.downloadUrl) {
-        window.open(res.downloadUrl, '_blank');
+      if (res) {
+        setDeliverableInfo({
+          fileName: res.fileName,
+          mimeType: res.mimeType,
+          certNumber: res.certificateNumber,
+          licenseType: res.licenseType,
+        });
+        setDownloadDeliverable(res);
+      } else {
+        setError('Liên kết tải về chưa sẵn sàng. Vui lòng thử lại sau vài giây.');
       }
     } catch (err: unknown) {
-      setError(auctionError(err));
+      setError(`Không thể tải tệp gốc: ${auctionError(err)}. Nếu bạn vừa thắng phiên, vui lòng đợi 1–2 phút để hệ thống hoàn tất giải ngân hợp đồng.`);
     } finally {
       setDownloading(false);
+    }
+  }
+
+  async function handleViewCertificate() {
+    if (!isWinner && !isSeller) {
+      return;
+    }
+    setLoadingCert(true);
+    try {
+      const cert = await auctionService.getCertificate(auctionId);
+      setCertificate(cert);
+      setShowCertModal(true);
+    } catch (err: unknown) {
+      setError(`Không thể tải chứng nhận số: ${auctionError(err)}`);
+    } finally {
+      setLoadingCert(false);
     }
   }
 
@@ -354,19 +435,22 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
   }
 
   const isLive = auction.auctionStatus === 'Active';
+  const isScheduled = auction.auctionStatus === 'Scheduled';
+  const isFinished = ['Settled', 'Ended', 'Cancelled', 'Expired', 'AwaitingPhysical', 'InTransit', 'Completed'].includes(auction.auctionStatus);
+  const isEnded = clock.isEnded || isFinished;
   const isWinner = userId && auction.winnerId === userId;
   const isSeller = userId && auction.seller?.userId === userId;
   const statusLabel = auctionStatusLabels[auction.auctionStatus] || auction.auctionStatus;
   const bidAmountNum = Number(bidAmount) || 0;
   const isBalanceShortage = Boolean(wallet && wallet.wallet.balance < bidAmountNum);
-  const totalSeconds = Math.floor(clock.remainingMs / 1000);
+  const totalSeconds = isFinished ? 0 : Math.floor(clock.remainingMs / 1000);
   const clockUnits = [
-    { label: 'Giờ', value: Math.floor(totalSeconds / 3600).toString().padStart(2, '0') },
-    { label: 'Phút', value: Math.floor((totalSeconds % 3600) / 60).toString().padStart(2, '0') },
-    { label: 'Giây', value: (totalSeconds % 60).toString().padStart(2, '0') },
-    { label: 'ms', value: Math.floor((clock.remainingMs % 1000) / 10).toString().padStart(2, '0') },
+    { label: 'Giờ', value: isFinished ? '00' : Math.floor(totalSeconds / 3600).toString().padStart(2, '0') },
+    { label: 'Phút', value: isFinished ? '00' : Math.floor((totalSeconds % 3600) / 60).toString().padStart(2, '0') },
+    { label: 'Giây', value: isFinished ? '00' : (totalSeconds % 60).toString().padStart(2, '0') },
+    { label: 'ms', value: isFinished ? '00' : Math.floor((clock.remainingMs % 1000) / 10).toString().padStart(2, '0') },
   ];
-  const isUrgent = isLive && clock.remainingMs > 0 && clock.remainingMs <= 5 * 60 * 1000;
+  const isUrgent = isLive && !isFinished && clock.remainingMs > 0 && clock.remainingMs <= 5 * 60 * 1000;
 
   return (
     <div className="mx-auto w-full max-w-[1440px] px-4 py-6 text-on-surface">
@@ -396,9 +480,31 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
       )}
 
       {error && (
-        <div role="alert" className="mb-6 flex items-center gap-2 rounded-2xl border border-red-400/30 bg-red-500/10 p-4 text-sm text-red-200">
-          <CircleAlert size={18} className="shrink-0" />
-          <span>{error}</span>
+        <div role="alert" className="mb-6 flex items-start gap-2.5 rounded-2xl border border-red-400/30 bg-red-500/10 p-4 text-sm text-red-200">
+          <CircleAlert size={18} className="mt-0.5 shrink-0 text-red-300" />
+          <div className="flex-1">
+            <span>{error}</span>
+            {error.toLowerCase().includes('số dư') && (
+              <div className="mt-2.5 flex items-center gap-2">
+                <Link
+                  href="/deposit"
+                  className="inline-flex items-center gap-1.5 rounded-full bg-brand-periwinkle px-3.5 py-1.5 font-h1 text-xs font-bold text-brand-navy shadow hover:brightness-110"
+                >
+                  <Wallet size={13} /> Nạp thêm tiền vào ví ngay
+                </Link>
+              </div>
+            )}
+            {error.toLowerCase().includes('đăng nhập') && (
+              <div className="mt-2.5 flex items-center gap-2">
+                <Link
+                  href="/login"
+                  className="inline-flex items-center gap-1.5 rounded-full bg-brand-periwinkle px-3.5 py-1.5 font-h1 text-xs font-bold text-brand-navy shadow hover:brightness-110"
+                >
+                  Đăng nhập tài khoản
+                </Link>
+              </div>
+            )}
+          </div>
         </div>
       )}
 
@@ -452,7 +558,7 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
               <p className="flex items-center gap-2"><User size={14} className="shrink-0 text-brand-periwinkle" /><span className="text-outline">Tác giả:</span> <strong className="truncate">{auction.seller?.fullName || 'Nghệ sĩ ẩn danh'}</strong></p>
               <p className="flex items-center gap-2"><CalendarDays size={14} className="shrink-0 text-brand-periwinkle" /><span className="text-outline">Ngày tạo:</span> <strong>{auction.artwork?.createdAt ? new Date(auction.artwork.createdAt).toLocaleDateString('vi-VN') : 'Chưa cập nhật'}</strong></p>
               <p className="flex items-center gap-2"><FileType2 size={14} className="shrink-0 text-brand-periwinkle" /><span className="text-outline">Định dạng:</span> <strong>{[auction.artwork?.fileFormat, auction.artwork?.resolution, formatFileSize(auction.artwork?.fileSizeBytes)].filter(Boolean).join(' · ') || 'Chưa cập nhật'}</strong></p>
-              <p className="flex items-center gap-2"><PackageCheck size={14} className="shrink-0 text-brand-periwinkle" /><span className="text-outline">Deliverable:</span> <strong>{auction.artwork?.deliverableCount ?? 0} tệp bàn giao</strong></p>
+              <p className="flex items-center gap-2"><PackageCheck size={14} className="shrink-0 text-brand-periwinkle" /><span className="text-outline">Tệp bàn giao:</span> <strong className={auction.artwork?.hasMasterFilePack ? 'text-amber-300 font-bold' : ''}>{auction.artwork?.hasMasterFilePack ? 'Đính kèm Master File Pack (.zip)' : `${auction.artwork?.deliverableCount ?? 0} tệp tiêu chuẩn`}</strong></p>
             </div>
           </div>
 
@@ -491,32 +597,48 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
 
         {/* Cột phải: Thông tin đấu giá & Đặt giá */}
         <div className="space-y-4">
-          <section className={`glass-container relative overflow-hidden rounded-2xl border p-3 shadow-xl transition-colors duration-500 ${isUrgent ? 'border-rose-500/60 shadow-rose-950/30' : 'border-amber-500/25'}`}>
+          <section className={`glass-container relative overflow-hidden rounded-2xl border p-3 shadow-xl transition-colors duration-500 ${isFinished ? 'border-white/10' : isUrgent ? 'border-rose-500/60 shadow-rose-950/30' : 'border-amber-500/25'}`}>
             <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[radial-gradient(rgba(167,172,217,0.15)_1px,transparent_1px)] [background-size:12px_12px] opacity-30" />
             <div className="relative z-10 mb-2 flex items-center justify-between border-b border-white/10 pb-2">
               <div className="flex items-center gap-2">
                 <span className="relative flex size-2.5">
-                  {isLive && <span className={`absolute inline-flex size-full animate-ping rounded-full opacity-75 motion-reduce:animate-none ${isUrgent ? 'bg-rose-400' : 'bg-emerald-400'}`} />}
-                  <span className={`relative inline-flex size-2.5 rounded-full ${clock.isEnded ? 'bg-outline' : isUrgent ? 'bg-rose-500' : 'bg-emerald-500'}`} />
+                  {isLive && !isFinished && <span className={`absolute inline-flex size-full animate-ping rounded-full opacity-75 motion-reduce:animate-none ${isUrgent ? 'bg-rose-400' : 'bg-emerald-400'}`} />}
+                  <span className={`relative inline-flex size-2.5 rounded-full ${isEnded ? 'bg-outline' : isUrgent ? 'bg-rose-500' : 'bg-emerald-500'}`} />
                 </span>
-                <h2 className={`text-xs font-bold uppercase tracking-wide ${isUrgent ? 'text-rose-400' : 'text-on-surface'}`}>
-                  {clock.isEnded ? (auction?.auctionStatus === 'Scheduled' ? 'Đang mở...' : 'Phiên đã kết thúc') : isUrgent ? 'Sắp chốt phiên' : (auction?.auctionStatus === 'Scheduled' ? 'Bắt đầu sau' : 'Thời gian còn lại')}
+                <h2 className={`text-xs font-bold uppercase tracking-wide ${isFinished ? 'text-slate-400' : isUrgent ? 'text-rose-400' : 'text-on-surface'}`}>
+                  {isFinished
+                    ? (auction?.auctionStatus === 'Settled'
+                        ? 'Phiên đã chốt'
+                        : auction?.auctionStatus === 'AwaitingPhysical'
+                          ? 'Chờ xác nhận tranh vật lý'
+                          : auction?.auctionStatus === 'InTransit'
+                            ? 'Đang giao tranh vật lý'
+                            : auction?.auctionStatus === 'Completed'
+                              ? 'Giao dịch hoàn tất'
+                              : auction?.auctionStatus === 'Cancelled'
+                                ? 'Phiên đã hủy'
+                                : 'Phiên đã kết thúc')
+                    : isEnded
+                      ? (isScheduled ? 'Đang mở...' : 'Phiên đã kết thúc')
+                      : isUrgent
+                        ? 'Sắp chốt phiên'
+                        : (isScheduled ? 'Bắt đầu sau' : 'Thời gian còn lại')}
                 </h2>
               </div>
-              <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${isUrgent ? 'border-rose-500/40 bg-rose-500/15 text-rose-400' : 'border-white/10 bg-brand-navy/80 text-outline'}`}>
-                {isUrgent ? 'ANTI-SNIPE +3M' : statusLabel}
+              <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${isUrgent && !isFinished ? 'border-rose-500/40 bg-rose-500/15 text-rose-400' : 'border-white/10 bg-brand-navy/80 text-outline'}`}>
+                {isUrgent && !isFinished ? 'ANTI-SNIPE +3M' : statusLabel}
               </span>
             </div>
 
-            <div className="relative z-10 flex items-start justify-center gap-1 sm:gap-1.5" role="timer" aria-label={clock.isEnded ? 'Phiên đã hết giờ' : `Còn lại ${clock.formatted}`}>
+            <div className="relative z-10 flex items-start justify-center gap-1 sm:gap-1.5" role="timer" aria-label={isEnded ? 'Phiên đã hết giờ' : `Còn lại ${clock.formatted}`}>
               {clockUnits.map((unit, index) => (
                 <div key={unit.label} className="contents">
-                  {index > 0 && <span aria-hidden="true" className={`pt-2 font-mono text-2xl font-black sm:text-3xl ${isUrgent ? 'text-rose-400' : 'text-amber-400'}`}>:</span>}
+                  {index > 0 && <span aria-hidden="true" className={`pt-2 font-mono text-2xl font-black sm:text-3xl ${isFinished ? 'text-slate-600' : isUrgent ? 'text-rose-400' : 'text-amber-400'}`}>:</span>}
                   <div className="flex min-w-0 flex-1 flex-col items-center">
-                    <div className={`relative w-full max-w-24 overflow-hidden rounded-xl border bg-[#070b14] px-1 py-2 text-center shadow-inner ${isUrgent ? 'border-rose-500/35' : 'border-amber-500/25'}`}>
-                      <span aria-hidden="true" className={`absolute inset-0 flex items-center justify-center font-mono text-3xl font-black opacity-10 sm:text-4xl ${isUrgent ? 'text-rose-500' : 'text-amber-500'}`}>88</span>
-                      <span className={`relative font-mono text-3xl font-black leading-none tracking-tight sm:text-4xl ${isUrgent ? 'text-rose-400 drop-shadow-[0_0_8px_rgba(251,113,133,0.65)]' : 'text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.55)]'}`}>
-                        {clock.isEnded ? '00' : unit.value}
+                    <div className={`relative w-full max-w-24 overflow-hidden rounded-xl border bg-[#070b14] px-1 py-2 text-center shadow-inner ${isFinished ? 'border-white/10' : isUrgent ? 'border-rose-500/35' : 'border-amber-500/25'}`}>
+                      <span aria-hidden="true" className={`absolute inset-0 flex items-center justify-center font-mono text-3xl font-black opacity-10 sm:text-4xl ${isFinished ? 'text-slate-600' : isUrgent ? 'text-rose-500' : 'text-amber-500'}`}>88</span>
+                      <span className={`relative font-mono text-3xl font-black leading-none tracking-tight sm:text-4xl ${isFinished ? 'text-slate-400' : isUrgent ? 'text-rose-400 drop-shadow-[0_0_8px_rgba(251,113,133,0.65)]' : 'text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.55)]'}`}>
+                        {unit.value}
                       </span>
                     </div>
                     <span className="mt-1 text-[9px] font-bold uppercase tracking-wider text-outline">{unit.label}</span>
@@ -565,17 +687,88 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
 
             {/* Winner Badge & Download */}
             {isWinner && (
-              <div className="mb-6 rounded-2xl border border-emerald-400/30 bg-emerald-500/10 p-4 text-xs text-emerald-200">
-                <p className="font-bold">Chúc mừng! Bạn đã thắng phiên đấu giá này.</p>
-                <p className="mt-1">Bạn có quyền sở hữu tác phẩm và tải tệp gốc chất lượng cao.</p>
-                <button
-                  type="button"
-                  disabled={downloading}
-                  onClick={handleDownloadOriginal}
-                  className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-emerald-400 px-4 py-2 font-h1 font-bold text-brand-navy shadow hover:brightness-110"
-                >
-                  <Download size={14} /> {downloading ? 'Đang tạo liên kết...' : 'Tải xuống tệp tranh gốc'}
-                </button>
+              <div className="mb-6 rounded-2xl border border-emerald-400/30 bg-emerald-500/10 p-5 text-xs text-emerald-200">
+                <div className="flex items-center gap-2 text-sm font-bold text-emerald-300">
+                  <Award size={18} />
+                  <span>Chúc mừng! Bạn đã thắng phiên đấu giá này.</span>
+                </div>
+                <p className="mt-1 text-emerald-200/80">
+                  Bạn nắm giữ quyền sở hữu độc bản 1-of-1 và toàn quyền khai thác thương mại tác phẩm.
+                </p>
+
+                {deliverableInfo && (
+                  <div className="mt-3 rounded-xl border border-emerald-400/20 bg-black/20 p-3 space-y-1 text-[11px] text-emerald-100 font-mono">
+                    <p>• Tệp bàn giao: <span className="font-bold text-white">{deliverableInfo.fileName}</span> {deliverableInfo.mimeType ? `(${deliverableInfo.mimeType})` : ''}</p>
+                    {deliverableInfo.certNumber && <p>• Mã chứng nhận: <span className="text-emerald-300">{deliverableInfo.certNumber}</span></p>}
+                    {deliverableInfo.licenseType && <p>• Giấy phép: <span className="text-white">{deliverableInfo.licenseType}</span></p>}
+                  </div>
+                )}
+
+                <div className="mt-4 flex flex-wrap gap-2.5">
+                  <button
+                    type="button"
+                    disabled={downloading}
+                    onClick={handleDownloadOriginal}
+                    className="inline-flex items-center gap-1.5 rounded-full bg-emerald-400 px-4 py-2 font-h1 font-bold text-brand-navy shadow hover:brightness-110 disabled:opacity-50"
+                  >
+                    <Download size={14} /> {downloading ? 'Đang tạo liên kết...' : 'Tải xuống tệp gốc / Master Pack'}
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={loadingCert}
+                    onClick={handleViewCertificate}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/50 bg-emerald-950/40 px-4 py-2 font-h1 font-bold text-emerald-200 shadow hover:bg-emerald-900/50 disabled:opacity-50"
+                  >
+                    <ShieldCheck size={14} /> {loadingCert ? 'Đang tải chứng nhận...' : 'Xem Chứng nhận sở hữu 1-of-1'}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setShowCommercialDeed(true)}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/40 bg-amber-400/10 px-4 py-2 font-h1 font-bold text-amber-300 shadow hover:bg-amber-400/20"
+                  >
+                    <FileCheck2 size={14} /> Giấy bàn giao quyền thương mại
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Trạng thái phiên chốt: Chỉ Seller mới có nút xem hợp đồng/chứng chỉ, người lạ chỉ thấy thông báo */}
+            {auction.auctionStatus === 'Settled' && !isWinner && (
+              <div className="mb-6 rounded-2xl border border-brand-periwinkle/20 bg-brand-periwinkle/5 p-4 text-xs text-on-surface-variant">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 font-semibold text-brand-periwinkle">
+                    <ShieldCheck size={16} />
+                    <span>Phiên đấu giá đã chốt quyền sở hữu độc bản 1-of-1</span>
+                  </div>
+                  {isSeller && (
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setShowCommercialDeed(true)}
+                        className="text-[11px] font-bold text-amber-300 hover:underline cursor-pointer"
+                      >
+                        Quyền thương mại
+                      </button>
+                      <button
+                        type="button"
+                        disabled={loadingCert}
+                        onClick={handleViewCertificate}
+                        className="inline-flex items-center gap-1 text-[11px] font-bold text-brand-periwinkle hover:underline disabled:opacity-50 cursor-pointer"
+                      >
+                        {loadingCert ? 'Đang tải...' : 'Xem chứng chỉ'} <ExternalLink size={12} />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Quản lý giao nhận tranh vật lý & Biên lai ký quỹ/bưu cục (UC35) */}
+            {auction.hasPhysicalCopy && (
+              <div className="mb-6">
+                <PhysicalDeliveryCard auction={auction} userId={userId} onReload={loadDetail} />
               </div>
             )}
 
@@ -597,8 +790,27 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
                     step={auction.bidStep}
                     value={bidAmount}
                     onChange={(e) => setBidAmount(e.target.value)}
-                    className="w-full rounded-xl border border-white/15 bg-brand-navy/60 px-4 py-3 font-h1 text-lg font-bold text-on-surface focus:border-brand-periwinkle focus:outline-none"
+                    className={`w-full rounded-xl border bg-brand-navy/60 px-4 py-3 font-h1 text-lg font-bold text-on-surface focus:outline-none transition ${
+                      bidAmountNum > 0 && (bidAmountNum < minimumNextBid || isBalanceShortage)
+                        ? 'border-rose-400 focus:border-rose-400'
+                        : 'border-white/15 focus:border-brand-periwinkle'
+                    }`}
                   />
+                  {bidAmountNum > 0 && bidAmountNum < minimumNextBid && (
+                    <p className="mt-1 text-xs text-rose-400">
+                      Mức giá đặt chưa đủ! Tối thiểu là {formatVnd(minimumNextBid)}.
+                    </p>
+                  )}
+                  {isBalanceShortage && (
+                    <p className="mt-1 text-xs text-rose-400 flex items-center justify-between">
+                      <span>
+                        Số dư ví không đủ! Cần {formatVnd(bidAmountNum)}, hiện có {formatVnd(wallet?.wallet.balance ?? 0)} (thiếu {formatVnd(bidAmountNum - (wallet?.wallet.balance ?? 0))}).
+                      </span>
+                      <Link href="/deposit" className="text-brand-periwinkle underline hover:text-white font-semibold ml-1">
+                        Nạp tiền
+                      </Link>
+                    </p>
+                  )}
 
                   {/* FE-03 BidStep Chips */}
                   <div className="mt-2.5 grid grid-cols-2 gap-2 sm:grid-cols-4">
@@ -672,15 +884,35 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
                         value={maxAutoBid}
                         onChange={(e) => setMaxAutoBid(e.target.value)}
                         placeholder={`Tối thiểu ${minimumNextBid}`}
-                        className="w-full rounded-lg border border-white/10 bg-brand-navy px-3 py-2 text-on-surface focus:border-brand-periwinkle focus:outline-none"
+                        className={`w-full rounded-lg border bg-brand-navy px-3 py-2 text-on-surface focus:outline-none transition ${
+                          maxAutoBid && (Number(maxAutoBid) < minimumNextBid || Number(maxAutoBid) <= bidAmountNum)
+                            ? 'border-rose-400 focus:border-rose-400'
+                            : 'border-white/10 focus:border-brand-periwinkle'
+                        }`}
                       />
+                      {maxAutoBid && Number(maxAutoBid) < minimumNextBid && (
+                        <p className="mt-1 text-xs text-rose-400">
+                          Giá trần tự động phải lớn hơn hoặc bằng mức giá đặt tối thiểu ({formatVnd(minimumNextBid)}).
+                        </p>
+                      )}
+                      {maxAutoBid && Number(maxAutoBid) >= minimumNextBid && Number(maxAutoBid) <= bidAmountNum && (
+                        <p className="mt-1 text-xs text-rose-400">
+                          Giá trần tự động ({formatVnd(Number(maxAutoBid))}) phải cao hơn mức giá đặt ban đầu ({formatVnd(bidAmountNum)}).
+                        </p>
+                      )}
                     </div>
                   )}
                 </div>
 
                 <button
                   type="submit"
-                  disabled={submittingBid || clock.isEnded || isBalanceShortage}
+                  disabled={
+                    submittingBid ||
+                    isEnded ||
+                    isBalanceShortage ||
+                    bidAmountNum < minimumNextBid ||
+                    Boolean(isAuto && (!maxAutoBid || Number(maxAutoBid) < minimumNextBid || Number(maxAutoBid) <= bidAmountNum))
+                  }
                   className="w-full rounded-full bg-brand-periwinkle py-3 text-center font-h1 text-sm font-bold text-brand-navy shadow-lg transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <span className="inline-flex items-center gap-2">
@@ -697,17 +929,40 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
 
                 {/* Mua ngay nếu phiên hỗ trợ */}
                 {auction.buyNowPrice && (
-                  <button
-                    type="button"
-                    disabled={buyingNow || clock.isEnded}
-                    onClick={handleBuyNow}
-                    className="w-full rounded-full border border-brand-periwinkle/40 bg-brand-periwinkle/10 py-2.5 text-center font-h1 text-xs font-bold text-brand-periwinkle transition hover:bg-brand-periwinkle hover:text-brand-navy disabled:opacity-50"
-                  >
-                    <span className="inline-flex items-center gap-2">
-                      <Zap size={14} /> {buyingNow ? 'Đang xử lý...' : `Mua ngay với ${formatVnd(auction.buyNowPrice)}`}
-                    </span>
-                  </button>
+                  <div className="space-y-1">
+                    <button
+                      type="button"
+                      disabled={buyingNow || isEnded}
+                      onClick={handleBuyNow}
+                      className="w-full rounded-full border border-brand-periwinkle/40 bg-brand-periwinkle/10 py-2.5 text-center font-h1 text-xs font-bold text-brand-periwinkle transition hover:bg-brand-periwinkle hover:text-brand-navy disabled:opacity-50"
+                    >
+                      <span className="inline-flex items-center gap-2">
+                        <Zap size={14} /> {buyingNow ? 'Đang xử lý...' : `Mua ngay với ${formatVnd(auction.buyNowPrice)}`}
+                      </span>
+                    </button>
+                    {wallet && wallet.wallet.balance < auction.buyNowPrice && (
+                      <p className="text-center text-[11px] text-amber-300/80">
+                        Số dư ví của bạn ({formatVnd(wallet.wallet.balance)}) chưa đủ để Mua ngay (thiếu {formatVnd(auction.buyNowPrice - wallet.wallet.balance)}).
+                      </p>
+                    )}
+                  </div>
                 )}
+
+                {/* Dòng ghi chú nhỏ quy chế và điều lệ đấu giá */}
+                <div className="flex items-center justify-center gap-1.5 pt-1 text-center text-[11px] text-outline">
+                  <ShieldCheck size={13} className="text-brand-periwinkle shrink-0" />
+                  <span>
+                    Bằng việc đặt giá hoặc mua ngay tác phẩm này, bạn đồng ý với{' '}
+                    <button
+                      type="button"
+                      onClick={() => setShowRulesModal(true)}
+                      className="text-brand-periwinkle font-medium underline decoration-brand-periwinkle/40 underline-offset-2 hover:text-white transition cursor-pointer"
+                    >
+                      Quy chế sàn đấu giá &amp; Điều lệ bản quyền
+                    </button>
+                    .
+                  </span>
+                </div>
               </form>
             ) : isSeller ? (
               <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-center text-xs text-outline">
@@ -777,6 +1032,115 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
           </section>
         </div>
       </div>
+
+      {/* Modal Chứng nhận quyền sở hữu số 1-of-1 VIP Card (chỉ Winner hoặc Seller) */}
+      {showCertModal && certificate && (isWinner || isSeller) && (
+        <AuctionCertificateCard
+          certificate={certificate}
+          onClose={() => setShowCertModal(false)}
+          onOpenCommercialRights={() => {
+            setShowCertModal(false);
+            setShowCommercialDeed(true);
+          }}
+        />
+      )}
+
+      {/* Modal Hợp đồng bàn giao quyền thương mại (chỉ Winner hoặc Seller) */}
+      {showCommercialDeed && (isWinner || isSeller) && (
+        <CommercialRightsModal
+          auctionId={auctionId}
+          onClose={() => setShowCommercialDeed(false)}
+        />
+      )}
+
+      {/* Modal Tải bàn giao Master Pack & Tranh gốc HD (cho Winner) */}
+      {downloadDeliverable && (
+        <DeliverablesDownloadModal
+          deliverable={downloadDeliverable}
+          onClose={() => setDownloadDeliverable(null)}
+        />
+      )}
+
+      {/* Modal Quy chế sàn đấu giá & Điều lệ bản quyền */}
+      {showRulesModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-in fade-in duration-200">
+          <div className="relative w-full max-w-lg rounded-3xl border border-white/15 bg-[#1F2335]/95 p-6 shadow-2xl backdrop-blur-2xl text-on-surface space-y-4">
+            <button
+              type="button"
+              onClick={() => setShowRulesModal(false)}
+              className="absolute right-5 top-5 rounded-full p-1.5 text-outline hover:bg-white/10 hover:text-white transition cursor-pointer"
+              aria-label="Đóng"
+            >
+              <X size={18} />
+            </button>
+
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-periwinkle/15 text-brand-periwinkle">
+                <ShieldCheck size={22} />
+              </div>
+              <div>
+                <h3 className="font-h1 text-base font-bold text-white">Quy chế sàn &amp; Điều lệ bản quyền</h3>
+                <p className="text-[11px] text-outline">Quy định giao dịch đấu giá minh bạch trên Dillustration</p>
+              </div>
+            </div>
+
+            <div className="space-y-3 pt-1 text-xs text-on-surface leading-relaxed">
+              <div className="flex items-start gap-2.5 rounded-xl border border-white/5 bg-black/20 p-3">
+                <CheckCircle2 size={16} className="text-emerald-400 shrink-0 mt-0.5" />
+                <div>
+                  <strong className="text-white">Ký quỹ tự động &amp; Hoàn cọc 100% (Escrow):</strong>
+                  <p className="text-outline mt-0.5">
+                    Khi bạn đặt giá, số tiền cọc tương ứng được tạm khóa trong ví. Nếu có người trả giá cao hơn, tiền cọc của bạn lập tức được tự động mở khóa hoàn trả 100% về ví ngay tức thì (không giam tiền).
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-2.5 rounded-xl border border-white/5 bg-black/20 p-3">
+                <CheckCircle2 size={16} className="text-emerald-400 shrink-0 mt-0.5" />
+                <div>
+                  <strong className="text-white">Quyền khai thác thương mại 100% cho Người thắng:</strong>
+                  <p className="text-outline mt-0.5">
+                    Người thắng phiên nhận quyền tài sản độc quyền: toàn quyền sử dụng hình ảnh sinh lời (Game, VTuber, Merchandise...), quyền niêm yết bán lại thứ cấp, tải tệp tranh gốc chất lượng cao kèm tệp nén Master Pack và Giấy chứng nhận độc bản 1-of-1.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-2.5 rounded-xl border border-amber-400/30 bg-amber-400/10 p-3">
+                <ShieldCheck size={16} className="text-amber-400 shrink-0 mt-0.5" />
+                <div>
+                  <strong className="text-amber-300">Bảo hộ Quyền nhân thân cho Họa sĩ gốc:</strong>
+                  <p className="text-white/90 mt-0.5">
+                    Theo Luật Sở hữu trí tuệ, danh tính Họa sĩ sáng tác gốc là bất biến và vĩnh viễn không thay đổi qua mọi đời chủ sở hữu.
+                  </p>
+                  <p className="text-outline mt-0.5">
+                    Người thắng phiên sở hữu quyền thương mại nhưng <strong className="text-amber-200">tuyệt đối không được mạo danh mình là tác giả sáng tác ra tác phẩm</strong>.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-2.5 rounded-xl border border-white/5 bg-black/20 p-3">
+                <CheckCircle2 size={16} className="text-brand-periwinkle shrink-0 mt-0.5" />
+                <div>
+                  <strong className="text-white">Tính ràng buộc của lệnh đặt giá:</strong>
+                  <p className="text-outline mt-0.5">
+                    Lệnh đặt giá hoặc mua ngay một khi đã xác nhận thành công là cam kết thanh toán hợp lệ, không thể tự ý hủy ngang giữa chừng và chỉ được giải phóng khi có người trả giá cao hơn.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end pt-2 border-t border-white/10">
+              <button
+                type="button"
+                onClick={() => setShowRulesModal(false)}
+                className="rounded-full bg-brand-periwinkle px-5 py-2 text-xs font-bold text-brand-navy hover:brightness-110 transition cursor-pointer"
+              >
+                Đã hiểu &amp; Đóng
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

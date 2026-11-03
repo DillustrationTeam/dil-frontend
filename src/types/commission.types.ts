@@ -33,6 +33,7 @@ export interface Milestone {
 
 export interface Commission {
   discountAmount: number;
+  packageId?: string | null;
   id: string;
   clientId: string;
   creatorId: string;
@@ -52,9 +53,43 @@ export interface Commission {
   clientName?: string;
   creatorName?: string;
   deadlineAt?: string | null;
+  cancellationReason?: string | null;
+  cancellationDetails?: string | null;
+  cancellationRequestedById?: string | null;
+  cancellationRequestedByRole?: 'Client' | 'Creator' | null;
+  cancellationRequestStatus?: 'Pending' | 'Approved' | 'Rejected' | 'Expired' | null;
+  cancellationRequestedAt?: string | null;
+  cancellationRequestExpiresAt?: string | null;
+  isOverdue?: boolean;
+  overdueGraceEndsAt?: string | null;
+  clientTermsAcceptedAt?: string | null;
+  clientTermsVersion?: string | null;
+  creatorTermsAcceptedAt?: string | null;
+  creatorTermsVersion?: string | null;
+  currentWorkroomTermsVersion?: string;
   milestones?: Milestone[];
+  review?: Review | null;
+  dispute?: Dispute | null;
   createdAt: string;
 }
+
+export interface Dispute {
+  id: string;
+  commissionId: string;
+  raisedById: string;
+  reason: string;
+  evidenceUrls?: string | null;
+  status: string;
+  resolution?: string | null;
+  clientRefundAmount?: number | null;
+  artistPayAmount?: number | null;
+  clientRefundPercent?: number | null;
+  adminNote?: string | null;
+  resolvedAt?: string | null;
+  createdAt: string;
+}
+
+export type CommissionDispute = Dispute;
 
 export interface RespondToCommissionPayload {
   action: 'Accept' | 'Reject' | 'Negotiate';
@@ -66,6 +101,7 @@ export interface RespondToCommissionPayload {
 
 export interface CreateCommissionPayload {
   voucherCode?: string;
+  addonIds?: string[];
   creatorId: string;
   packageId: string;
   licenseType: 'Personal' | 'Commercial';

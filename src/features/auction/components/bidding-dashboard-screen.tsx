@@ -13,7 +13,7 @@ import {
   Sparkles,
   TrendingUp,
 } from 'lucide-react';
-import { auctionService } from '../services/auction.service';
+import { auctionService, auctionError } from '../services/auction.service';
 import { useAuctionClock } from '../hooks/use-auction-clock';
 import type { MyActiveBidDto, MyActiveBidsMeta } from '../types/auction.types';
 import { PageLoader } from '@/features/navigation';
@@ -116,7 +116,7 @@ export function BiddingDashboardScreen() {
       }
       setMeta(res.meta);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Không tải được danh sách phiên đấu giá.');
+      setError(auctionError(err) || 'Không tải được danh sách phiên đấu giá.');
     } finally {
       setLoading(false);
       setLoadingMore(false);

@@ -1,7 +1,7 @@
 import { apiClient } from '@/lib/api-client';
 import type { ApiResponse } from '@/types/api.types';
 import { getWalletErrorMessage } from './wallet.service';
-import type { BankAccountDto, BankAccountRequest, PaymentOrderDto, PayoutDto, RevenueBreakdownDto, RevenuePointDto, RevenueSnapshotDto, RevenueSummaryDto, VoucherDetailDto, VoucherDto, VoucherRedeemedDto, VoucherRequest, VoucherValidationDto } from '../types/payment.types';
+import type { AdminPayoutFilters, BankAccountDto, BankAccountRequest, PaymentOrderDto, PayoutDto, RevenueBreakdownDto, RevenuePointDto, RevenueSnapshotDto, RevenueSummaryDto, UpdatePayoutStatusRequest, VoucherDetailDto, VoucherDto, VoucherRedeemedDto, VoucherRequest, VoucherValidationDto } from '../types/payment.types';
 
 export interface PaymentPage<T> { items: T[]; nextCursor: string | null }
 
@@ -31,13 +31,15 @@ async function list<T>(url: string, params: object, signal?: AbortSignal): Promi
 }
 
 export const paymentService = {
-  createOrder: (amount: number, returnUrl: string, cancelUrl: string) => call<PaymentOrderDto>('post', '/payments/orders', { amount, gateway: 'SePay', returnUrl, cancelUrl }).then(r => r.data),
+  createOrder: (amount: number, returnUrl: string, cancelUrl: string) => call<PaymentOrderDto>('post', '/payments/orders', { amount, gateway: 'PayOS', returnUrl, cancelUrl }).then(r => r.data),
   order: (id: string, signal?: AbortSignal) => call<PaymentOrderDto>('get', `/payments/orders/${id}`, undefined, undefined, signal).then(r => r.data),
   orders: (cursor?: string, signal?: AbortSignal) => list<PaymentOrderDto>('/payments/orders', { cursor, limit: 10 }, signal),
   banks: (signal?: AbortSignal) => call<BankAccountDto[]>('get', '/bank-accounts', undefined, undefined, signal).then(r => r.data),
   saveBank: (values: BankAccountRequest, id?: string) => call<BankAccountDto>(id ? 'put' : 'post', id ? `/bank-accounts/${id}` : '/bank-accounts', values).then(r => r.data),
   deleteBank: (id: string) => call<{ message: string }>('delete', `/bank-accounts/${id}`).then(r => r.data),
   payouts: (cursor?: string, signal?: AbortSignal) => list<PayoutDto>('/payout-requests', { cursor, limit: 10 }, signal),
+  adminPayouts: (filters: AdminPayoutFilters, signal?: AbortSignal) => list<PayoutDto>('/payout-requests', filters, signal),
+  updatePayoutStatus: (id: string, values: UpdatePayoutStatusRequest) => call<PayoutDto>('put', `/payout-requests/${id}/status`, values).then(r => r.data),
   payout: (amount: number, bankAccountId: string, payoutNote: string) => call<PayoutDto>('post', '/payout-requests', { amount, bankAccountId, payoutNote }).then(r => r.data),
   vouchers: (voucherStatus: string, cursor?: string, signal?: AbortSignal) => list<VoucherDto>('/vouchers', { voucherStatus: voucherStatus || undefined, cursor, limit: 10 }, signal),
   voucher: (id: string, signal?: AbortSignal) => call<VoucherDetailDto>('get', `/vouchers/${id}`, undefined, undefined, signal).then(r => r.data),

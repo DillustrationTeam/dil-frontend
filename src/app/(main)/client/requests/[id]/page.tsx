@@ -66,7 +66,7 @@ export default function ClientRequestPage() {
         <div className="mt-4 flex flex-wrap gap-3"><button disabled={busy} onClick={() => void respond(true)} className="commission-primary rounded-xl px-5 py-2.5 text-sm disabled:opacity-50">Chấp nhận giá</button><button disabled={busy} onClick={() => void respond(false)} className="rounded-xl border border-white/20 px-5 py-2.5 text-sm disabled:opacity-50">Từ chối</button></div>
       </div>}
       {awaitingEscrow && <Link href={`/payment/checkout/${id}`} className="commission-primary mt-6 inline-block rounded-xl px-5 py-2.5 text-sm">Ký quỹ để mở Workroom</Link>}
-      {commission.status === 'Cancelled' && <p className="mt-6 text-sm text-slate-400">Yêu cầu đã kết thúc.</p>}
+      {commission.status === 'Cancelled' && <div className="mt-6 rounded-xl border border-rose-400/20 bg-rose-400/10 p-4 text-sm text-slate-300"><p>Yêu cầu đã kết thúc.</p>{commission.cancellationReason && <p className="mt-2"><strong>Lý do:</strong> {commission.cancellationReason}</p>}{commission.cancellationDetails && <p className="mt-1 text-xs text-slate-400">{commission.cancellationDetails}</p>}</div>}
       {!awaitingCreator && !negotiating && !awaitingEscrow && !['Cancelled'].includes(commission.status) && <Link href={`/workroom/${id}`} className="commission-primary mt-6 inline-block rounded-xl px-5 py-2.5 text-sm">Mở Workroom</Link>}
       {error && <p role="alert" className="mt-4 text-sm text-red-300">{error}</p>}
     </section>

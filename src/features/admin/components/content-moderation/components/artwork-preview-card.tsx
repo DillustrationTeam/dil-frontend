@@ -10,6 +10,7 @@ import {
   Calendar,
   Sparkles,
   X,
+  ImageOff,
 } from 'lucide-react';
 import { ArtworkInspectionDetailDto } from '@/features/admin/types/moderation.types';
 
@@ -19,6 +20,13 @@ interface ArtworkPreviewCardProps {
 
 export function ArtworkPreviewCard({ artwork }: ArtworkPreviewCardProps) {
   const [showLightbox, setShowLightbox] = useState(false);
+  const [imageError, setImageError] = useState(false);
+  const [prevImageUrl, setPrevImageUrl] = useState(artwork.imageUrl);
+
+  if (artwork.imageUrl !== prevImageUrl) {
+    setPrevImageUrl(artwork.imageUrl);
+    setImageError(false);
+  }
 
   const formatShortId = (id: string) => {
     if (!id) return '#ART-0000';
@@ -28,7 +36,7 @@ export function ArtworkPreviewCard({ artwork }: ArtworkPreviewCardProps) {
   };
 
   const formatFileSize = (bytes?: number | null) => {
-    if (!bytes) return '18.4MB';
+    if (bytes == null || !Number.isFinite(bytes) || bytes <= 0) return 'Chưa có dữ liệu';
     if (bytes >= 1048576) {
       return `${(bytes / 1048576).toFixed(1)}MB`;
     }
@@ -54,14 +62,14 @@ export function ArtworkPreviewCard({ artwork }: ArtworkPreviewCardProps) {
         {artwork.isAiGenerated && (
           <span className="px-2.5 py-1 rounded-full bg-purple-500/20 text-purple-300 text-[10px] font-bold border border-purple-500/30 flex items-center gap-1">
             <Bot className="w-3 h-3" />
-            <span>AI Verified</span>
+            <span>Được đánh dấu là ảnh AI</span>
           </span>
         )}
       </div>
 
       {/* Main Image Container */}
       <div className="w-full h-72 sm:h-80 bg-black/60 rounded-2xl border border-white/10 relative overflow-hidden group">
-        {artwork.imageUrl ? (
+        {artwork.imageUrl && !imageError ? (
           <>
             <Image
               src={artwork.imageUrl}
@@ -70,6 +78,7 @@ export function ArtworkPreviewCard({ artwork }: ArtworkPreviewCardProps) {
               sizes="(max-width: 768px) 100vw, 50vw"
               className="object-cover transition-transform duration-300 group-hover:scale-105"
               unoptimized
+              onError={() => setImageError(true)}
             />
             {/* Hover overlay with zoom button */}
             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
@@ -84,15 +93,29 @@ export function ArtworkPreviewCard({ artwork }: ArtworkPreviewCardProps) {
             </div>
           </>
         ) : (
-          <div className="w-full h-full flex flex-col items-center justify-center text-[#C5C9F8] space-y-2">
-            <Sparkles className="w-8 h-8 opacity-50" />
-            <span className="text-xs">No image preview available</span>
+          <div className="w-full h-full flex flex-col items-center justify-center text-red-400/90 space-y-2 p-4 text-center">
+            {imageError ? (
+              <>
+                <ImageOff className="w-8 h-8 opacity-75 text-red-400" />
+                <span className="text-xs font-semibold text-red-300">
+                  Hình ảnh bị hỏng hoặc liên kết không truy cập được
+                </span>
+                <span className="text-[10px] text-[#8A8FA9] max-w-xs truncate">
+                  {artwork.imageUrl}
+                </span>
+              </>
+            ) : (
+              <>
+                <Sparkles className="w-8 h-8 opacity-50 text-[#C5C9F8]" />
+                <span className="text-xs text-[#C5C9F8]">No image preview available</span>
+              </>
+            )}
           </div>
         )}
 
         {/* Resolution & File Size overlay badge */}
         <div className="absolute bottom-3 left-3 px-3 py-1 bg-black/75 backdrop-blur-md rounded-full text-[10px] text-white font-mono border border-white/15 flex items-center gap-2 shadow-lg">
-          <span>Res: {artwork.resolution || '3840x2160'}</span>
+          <span>Res: {artwork.resolution?.trim() || 'Chưa có dữ liệu'}</span>
           <span>•</span>
           <span>Size: {formatFileSize(artwork.fileSizeBytes)}</span>
         </div>
@@ -152,11 +175,11 @@ export function ArtworkPreviewCard({ artwork }: ArtworkPreviewCardProps) {
         </div>
       </div>
 
-      {/* AI Auto-Extracted Tag Pills */}
+      {/* Stored artwork tags do not include AI provenance. */}
       <div className="space-y-2 pt-1 border-t border-white/10">
         <div className="flex items-center gap-1.5 text-[10px] text-[#8A8FA9] font-bold uppercase tracking-wider">
           <Tag className="w-3 h-3" />
-          <span>AI Auto-Extracted Tag Pills</span>
+          <span>Tags của tác phẩm</span>
         </div>
 
         <div className="flex flex-wrap gap-2 text-[11px]">
@@ -170,17 +193,7 @@ export function ArtworkPreviewCard({ artwork }: ArtworkPreviewCardProps) {
               </span>
             ))
           ) : (
-            <>
-              <span className="px-3 py-1 rounded-full bg-[#C5C9F8]/15 text-[#C5C9F8] font-bold">
-                #Cyberpunk
-              </span>
-              <span className="px-3 py-1 rounded-full bg-[#C5C9F8]/15 text-[#C5C9F8] font-bold">
-                #Anime
-              </span>
-              <span className="px-3 py-1 rounded-full bg-[#C5C9F8]/15 text-[#C5C9F8] font-bold">
-                #DigitalPainting
-              </span>
-            </>
+            <span className="text-[#8A8FA9]">Chưa gắn tag</span>
           )}
 
           {/* AI generated status pill */}
@@ -192,7 +205,7 @@ export function ArtworkPreviewCard({ artwork }: ArtworkPreviewCardProps) {
             }`}
           >
             <Bot className="w-3 h-3" />
-            <span>Tag.IsAiGenerated: {artwork.isAiGenerated ? 'True' : 'False'}</span>
+            <span>{artwork.isAiGenerated ? 'Được đánh dấu là ảnh AI' : 'Chưa đánh dấu là ảnh AI'}</span>
           </span>
         </div>
       </div>

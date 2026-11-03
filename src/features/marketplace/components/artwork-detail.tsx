@@ -9,6 +9,7 @@ import CreateCommissionModal from '@/components/modals/CreateCommissionModal';
 import { ImageLightbox } from '@/components/image-lightbox';
 import { ArtworkActions } from './artwork-actions';
 import { useArtworkComments } from './use-artwork-comments';
+import { ArtworkProvenanceCard } from '@/features/auction';
 
 const DEFAULT_FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?auto=format&fit=crop&w=1200&q=85';
 
@@ -139,6 +140,9 @@ export function ArtworkDetail({ id }: { id: string }) {
                 </div>
               </dl>
             </div>
+
+            {/* Quyền định danh và lịch sử tác phẩm (Provenance) */}
+            <ArtworkProvenanceCard artworkId={artwork.id} />
 
             {artwork.description && (
               <p className="rounded-3xl border border-white/10 bg-white/[.035] p-5 text-sm leading-6 text-[#C7C5CF]">

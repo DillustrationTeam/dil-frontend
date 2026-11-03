@@ -8,6 +8,7 @@ import { Commission } from '@/types/commission.types';
 import { useAuthStore } from '@/store/use-auth-store';
 import { walletService } from '@/services/wallet.service';
 import { LockKeyhole, ShieldCheck, Wallet } from 'lucide-react';
+import WorkroomTermsModal from '@/components/modals/WorkroomTermsModal';
 
 const money = (value: number) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
 
@@ -20,6 +21,8 @@ export default function CheckoutPage() {
   const [error, setError] = useState('');
   const [balance, setBalance] = useState<number | null>(null);
   const [walletError, setWalletError] = useState(false);
+  const [acceptingTerms, setAcceptingTerms] = useState(false);
+  const [termsError, setTermsError] = useState('');
 
   useEffect(() => {
     commissionService.getById(id).then(setCommission).catch(() => setError('Không tải được đơn vẽ.'));
@@ -27,7 +30,20 @@ export default function CheckoutPage() {
   }, [id]);
 
   const canDeposit = commission?.clientId === userId && commission?.status === 'InProgress' && commission?.escrowStatus === 'Pending';
+  const needsTerms = commission?.clientTermsVersion !== (commission?.currentWorkroomTermsVersion ?? '1.0');
   const gap = Math.max(0, (commission?.finalPrice ?? 0) - (balance ?? 0));
+  const acceptTerms = async () => {
+    if (!commission) return;
+    setAcceptingTerms(true);
+    setTermsError('');
+    try {
+      setCommission(await commissionService.acceptWorkroomTerms(id));
+    } catch {
+      setTermsError('Không thể ghi nhận xác nhận điều khoản. Vui lòng thử lại.');
+    } finally {
+      setAcceptingTerms(false);
+    }
+  };
   const deposit = async () => {
     setLoading(true);
     setError('');
@@ -69,5 +85,15 @@ export default function CheckoutPage() {
       {canDeposit ? <button disabled={loading || balance === null || gap > 0} onClick={deposit} className="commission-primary flex w-full items-center justify-center gap-2 rounded-2xl py-4 text-xs font-extrabold transition-all disabled:opacity-50"><LockKeyhole className="h-4 w-4" />{loading ? 'Đang xử lý…' : `Xác nhận ký quỹ ${money(commission.finalPrice ?? 0)}`}</button> : <div className="rounded-xl border border-white/10 bg-white/[0.035] p-5 text-center"><p className="text-xs text-[#8A8FA9]">Đơn chưa thể ký quỹ hoặc đã được ký quỹ.</p><Link href={commission.status === 'PendingAcceptance' || commission.status === 'Negotiating' ? `/client/requests/${id}` : `/workroom/${id}`} className="mt-3 inline-block text-xs text-[#C5C9F8] underline">{commission.status === 'PendingAcceptance' || commission.status === 'Negotiating' ? 'Xem yêu cầu' : 'Xem Workroom'}</Link></div>}
       <Link className="inline-block text-xs text-[#C5C9F8] underline" href="/wallet">Xem ví hoặc nạp tiền</Link>
     </div>
+    {needsTerms && (
+      <WorkroomTermsModal
+        isOpen
+        role="client"
+        commission={commission}
+        isSubmitting={acceptingTerms}
+        error={termsError}
+        onConfirm={acceptTerms}
+      />
+    )}
   </main>;
 }

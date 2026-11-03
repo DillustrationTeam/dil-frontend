@@ -2,17 +2,26 @@ import { apiClient } from '@/lib/api-client';
 import type { ApiResponse } from '@/types/api.types';
 import type {
   AuctionBidConflictDto,
+  AuctionCertificateDto,
+  AuctionDeliveryDto,
   AuctionDetailDto,
   AuctionFilters,
   AuctionListItemDto,
   AuctionPage,
+  AuctionReceiptDto,
   AuctionRequest,
   AuctionSettlementDto,
   BidDto,
+  CommercialRightsDeedDto,
+  DeliverableDownloadDto,
   EligibleArtworkDto,
   MyActiveBidDto,
   MyActiveBidsMeta,
+  MyCollectionItemDto,
+  ArtworkProvenanceDto,
+  RequestPhysicalDeliveryPayload,
   SellerStatisticsDto,
+  UpdateShippingPayload,
   WalletOverviewDto,
 } from '../types/auction.types';
 
@@ -26,18 +35,59 @@ export class AuctionConflictError extends Error {
   }
 }
 
-type ErrorBody = { detail?: string; title?: string; message?: string; details?: string[]; code?: string };
+type ErrorBody = {
+  detail?: string;
+  title?: string;
+  message?: string;
+  details?: string[];
+  code?: string;
+  errors?: Record<string, string[]> | string[];
+};
 
-export function auctionError(error: unknown) {
-  const body = (error as { response?: { data?: { error?: ErrorBody } & ErrorBody } })?.response?.data;
+export function auctionError(error: unknown): string {
+  const responseData = (error as { response?: { data?: unknown } })?.response?.data;
+  const body = (responseData as { error?: ErrorBody } & ErrorBody) ?? null;
   const info = body?.error ?? body;
+
+  if (info?.errors) {
+    if (Array.isArray(info.errors) && info.errors.length > 0) {
+      return info.errors.join(' · ');
+    }
+    if (typeof info.errors === 'object' && info.errors !== null) {
+      const messages = Object.values(info.errors).flat();
+      if (messages.length > 0) return messages.join(' · ');
+    }
+  }
+
+  if (Array.isArray(info?.details) && info.details.length > 0) {
+    return info.details.join(' · ');
+  }
+
   return (
     info?.detail ||
     info?.message ||
-    info?.details?.join(' · ') ||
     info?.title ||
-    (error instanceof Error && error.message !== 'Network Error' ? error.message : 'Không kết nối được với máy chủ. Vui lòng thử lại.')
+    (error instanceof Error && error.message !== 'Network Error'
+      ? error.message
+      : 'Không kết nối được với máy chủ hoặc phiên đấu giá bị gián đoạn. Vui lòng thử lại.')
   );
+}
+
+export function extractAuctionFieldErrors(error: unknown): Record<string, string> {
+  const responseData = (error as { response?: { data?: unknown } })?.response?.data;
+  const body = (responseData as { error?: ErrorBody } & ErrorBody) ?? null;
+  const info = body?.error ?? body;
+  const result: Record<string, string> = {};
+
+  if (info?.errors && typeof info.errors === 'object' && !Array.isArray(info.errors)) {
+    for (const [key, msgs] of Object.entries(info.errors)) {
+      if (Array.isArray(msgs) && msgs.length > 0) {
+        const normalizedKey = key.charAt(0).toLowerCase() + key.slice(1);
+        result[normalizedKey] = msgs[0];
+      }
+    }
+  }
+  return result;
 }
 
 async function call<T>(
@@ -136,9 +186,21 @@ export const auctionService = {
 
   settlement: (id: string, signal?: AbortSignal) => call<AuctionSettlementDto>('get', `/auctions/${id}/settlement`, undefined, undefined, signal).then((r) => r.data),
 
-  settle: (id: string) => call<AuctionSettlementDto>('post', `/auctions/${id}/settle`, { force: false }).then((r) => r.data),
+  settle: (id: string, force = false) => call<AuctionSettlementDto>('post', `/auctions/${id}/settle`, { force }).then((r) => r.data),
 
-  download: (id: string) => call<{ downloadUrl: string; expiresAt: string; fileName: string }>('post', `/auctions/${id}/settlement/download-url`).then((r) => r.data),
+  download: (id: string) => call<DeliverableDownloadDto>('post', `/auctions/${id}/settlement/download-url`).then((r) => r.data),
+
+  getCertificate: (id: string, signal?: AbortSignal) =>
+    call<AuctionCertificateDto>('get', `/auctions/${id}/certificate`, undefined, undefined, signal).then((r) => r.data),
+
+  getMyCollection: (signal?: AbortSignal): Promise<MyCollectionItemDto[]> =>
+    call<MyCollectionItemDto[]>('get', '/auctions/my-collection', undefined, undefined, signal).then((r) => r.data),
+
+  getProvenance: (artworkId: string, signal?: AbortSignal): Promise<ArtworkProvenanceDto> =>
+    call<ArtworkProvenanceDto>('get', `/auctions/artworks/${artworkId}/provenance`, undefined, undefined, signal).then((r) => r.data),
+
+  getCommercialRights: (auctionId: string, signal?: AbortSignal): Promise<CommercialRightsDeedDto> =>
+    call<CommercialRightsDeedDto>('get', `/auctions/${auctionId}/commercial-rights`, undefined, undefined, signal).then((r) => r.data),
 
   getMyActiveBids: async (
     cursor?: string,
@@ -169,5 +231,41 @@ export const auctionService = {
 
   getWallet: (signal?: AbortSignal): Promise<WalletOverviewDto> =>
     call<WalletOverviewDto>('get', '/wallets/me', undefined, undefined, signal).then((r) => r.data),
+
+  uploadMasterPack: async (file: File): Promise<{ fileUrl: string; fileName: string; fileSizeBytes: number }> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const res = await apiClient.post<ApiResponse<{ fileUrl: string; fileName: string; fileSizeBytes: number }>>(
+      '/auctions/upload-master-pack',
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
+    if (!res.data.data) {
+      throw new Error(res.data.error?.detail || 'Không thể tải lên file gốc.');
+    }
+    return res.data.data;
+  },
+
+  requestPhysicalDelivery: (auctionId: string, payload: RequestPhysicalDeliveryPayload): Promise<AuctionDeliveryDto> =>
+    call<AuctionDeliveryDto>('post', `/auctions/${auctionId}/delivery/request-physical`, payload).then((r) => r.data),
+
+  declinePhysicalDelivery: (auctionId: string): Promise<{ message: string }> =>
+    call<{ message: string }>('post', `/auctions/${auctionId}/delivery/decline-physical`).then((r) => r.data),
+
+  updateShipping: (auctionId: string, payload: UpdateShippingPayload): Promise<AuctionDeliveryDto> =>
+    call<AuctionDeliveryDto>('post', `/auctions/${auctionId}/delivery/ship`, payload).then((r) => r.data),
+
+  confirmDelivery: (auctionId: string, payload?: { deliveryReceiptUrl?: string }): Promise<AuctionDeliveryDto> =>
+    call<AuctionDeliveryDto>('post', `/auctions/${auctionId}/delivery/confirm`, payload).then((r) => r.data),
+
+  disputeDelivery: (auctionId: string, payload: { reason: string; evidenceUrl?: string }): Promise<AuctionDeliveryDto> =>
+    call<AuctionDeliveryDto>('post', `/auctions/${auctionId}/delivery/dispute`, payload).then((r) => r.data),
+
+  getReceipts: (auctionId: string, signal?: AbortSignal): Promise<AuctionReceiptDto[]> =>
+    call<AuctionReceiptDto[]>('get', `/auctions/${auctionId}/receipts`, undefined, undefined, signal).then((r) => r.data),
 };
 

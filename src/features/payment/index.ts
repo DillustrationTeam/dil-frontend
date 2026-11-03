@@ -1,6 +1,7 @@
 export { WalletScreen } from './components/wallet-screen';
 export { DepositScreen } from './components/deposit-screen';
 export { PayoutScreen } from './components/payout-screen';
+export { AdminPayoutScreen } from './components/admin-payout-screen';
 export { VoucherScreen } from './components/voucher-screen';
 export { RevenueScreen } from './components/revenue-screen';
 /** Ô nhập & áp mã giảm giá — màn thanh toán Brief nhúng component này (SCR-50). */
@@ -24,6 +25,7 @@ export type {
   BankAccountDto,
   BankAccountRequest,
   PayoutDto,
+  UpdatePayoutStatusRequest,
   VoucherDto,
   VoucherRequest,
   VoucherDetailDto,

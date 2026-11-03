@@ -3,8 +3,8 @@ export interface SubmitCreatorApplicationRequest {
   socialLinks?: string[];
   idProofUrl: string;
   idProofBackUrl: string;
-  primaryStyle?: string;
-  speedpaintVideoUrls?: string[];
+  primaryStyle: string;
+  speedpaintVideoUrls: string[];
 }
 
 export interface SubmitCreatorApplicationResponse {

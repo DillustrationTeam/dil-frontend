@@ -167,9 +167,11 @@ export function WorkroomProgressPanel({
     );
   }
 
-  const style = riskLevels[risk.riskLevel];
-  const percent = Math.round(Math.min(1, Math.max(0, risk.riskScore)) * 100);
-  const needsAttention = risk.riskLevel === 'high' || risk.riskLevel === 'critical';
+  const isEnded = Boolean(allApproved || isCancelled);
+  const effectiveLevel = isEnded ? 'low' : risk.riskLevel;
+  const style = riskLevels[effectiveLevel];
+  const percent = isEnded ? 0 : Math.round(Math.min(1, Math.max(0, risk.riskScore)) * 100);
+  const needsAttention = !isEnded && (risk.riskLevel === 'high' || risk.riskLevel === 'critical');
   const RiskIcon = needsAttention ? TrendingDown : TrendingUp;
 
   return (
@@ -185,7 +187,7 @@ export function WorkroomProgressPanel({
         </span>
 
         <span className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${style.badge}`}>
-          <RiskIcon size={11} /> Rủi ro trễ hạn: {style.label} · {percent}%
+          <RiskIcon size={11} /> Rủi ro trễ hạn: {isEnded ? 'An toàn (Đã kết thúc)' : `${style.label} · ${percent}%`}
         </span>
 
         {isCancelled ? (
@@ -202,7 +204,7 @@ export function WorkroomProgressPanel({
           </span>
         )}
 
-        {countdown && (
+        {!isEnded && countdown && (
           <span
             className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${
               countdown.overdue ? 'border-red-400/40 bg-red-500/10 text-red-300' : 'border-white/10 text-on-surface-variant'
@@ -225,7 +227,8 @@ export function WorkroomProgressPanel({
           <button
             type="button"
             onClick={handlePredict}
-            disabled={predicting}
+            disabled={predicting || isEnded}
+            title={isEnded ? 'Đơn hàng đã kết thúc, không cần chấm lại rủi ro' : 'Chấm lại bằng AI'}
             className="inline-flex items-center gap-1 rounded-full bg-brand-periwinkle px-3 py-1 font-semibold text-brand-navy hover:brightness-110 disabled:opacity-50"
           >
             {predicting ? <RefreshCw size={12} className="animate-spin" /> : <Sparkles size={12} />}

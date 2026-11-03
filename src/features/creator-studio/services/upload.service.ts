@@ -58,6 +58,13 @@ export const uploadService = {
   },
 
   async uploadFile(file: File, folder: string, transformation?: string): Promise<string> {
+    if (folder === 'profile-avatars') {
+      const avatarData = new FormData();
+      avatarData.append('file', file);
+      const response = await apiClient.post<ApiResponse<{ url: string }>>('/uploads/profile-avatar', avatarData);
+      if (response.data.error || !response.data.data?.url) throw new Error(response.data.error?.detail || 'Không thể tải ảnh đại diện.');
+      return response.data.data.url;
+    }
     const signature = await this.getUploadSignature(folder, transformation);
     return this.uploadToCloudinary(file, signature);
   },

@@ -40,11 +40,12 @@ export function ModerationDecisionForm({
   const [selectedAction, setSelectedAction] = useState<ModerationActionType>('approve');
   const [auditNote, setAuditNote] = useState('');
   const [touched, setTouched] = useState(false);
+  const [confirming, setConfirming] = useState(false);
 
   const isRejectAction = selectedAction === 'reject';
   const isNoteInvalid = isRejectAction && !auditNote.trim();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleStartSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setTouched(true);
 
@@ -52,11 +53,21 @@ export function ModerationDecisionForm({
     if (!parsed.success) {
       return;
     }
+    setConfirming(true);
+  };
+
+  const handleExecute = async () => {
+    const parsed = moderationSchema.safeParse({ action: selectedAction, note: auditNote });
+    if (!parsed.success) {
+      setConfirming(false);
+      return;
+    }
 
     const success = await onExecuteDecision(artworkId, parsed.data.action, parsed.data.note);
     if (success) {
       setAuditNote('');
       setTouched(false);
+      setConfirming(false);
     }
   };
 
@@ -77,7 +88,7 @@ export function ModerationDecisionForm({
 
   return (
     <form
-      onSubmit={handleSubmit}
+      onSubmit={handleStartSubmit}
       className="space-y-4 text-xs pt-4 border-t border-white/10"
     >
       <div className="space-y-2">
@@ -92,7 +103,10 @@ export function ModerationDecisionForm({
         <select
           id="moderation-action-select"
           value={selectedAction}
-          onChange={(e) => setSelectedAction(e.target.value as ModerationActionType)}
+          onChange={(e) => {
+            setSelectedAction(e.target.value as ModerationActionType);
+            setConfirming(false);
+          }}
           disabled={isSubmitting}
           className="w-full px-4 py-3 rounded-xl bg-black/50 border border-white/15 text-white font-bold text-xs focus:border-red-400 focus:outline-none transition-colors cursor-pointer"
         >
@@ -185,24 +199,61 @@ export function ModerationDecisionForm({
         )}
       </div>
 
-      {/* Action Button */}
-      <button
-        type="submit"
-        disabled={isSubmitting}
-        className={`w-full py-3.5 font-extrabold rounded-xl text-xs transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${getActionButtonStyle()}`}
-      >
-        {isSubmitting ? (
-          <>
-            <Loader2 className="w-4 h-4 animate-spin" />
-            <span>Executing Moderation Decision...</span>
-          </>
-        ) : (
-          <>
-            <Send className="w-4 h-4" />
-            <span>Execute Moderation Decision</span>
-          </>
-        )}
-      </button>
+      {/* Action Button & Confirmation Step */}
+      {confirming ? (
+        <div className="p-3.5 rounded-xl bg-black/60 border border-amber-400/30 space-y-3">
+          <p className="text-white text-xs font-semibold">
+            Xác nhận thực hiện hành động{' '}
+            <strong className="text-amber-300 uppercase">{selectedAction}</strong> đối với tác phẩm này?
+          </p>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              disabled={isSubmitting}
+              onClick={handleExecute}
+              className={`flex-1 py-2.5 font-bold rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 ${getActionButtonStyle()}`}
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <span>Đang xử lý...</span>
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  <span>Xác nhận thực thi</span>
+                </>
+              )}
+            </button>
+            <button
+              type="button"
+              disabled={isSubmitting}
+              onClick={() => setConfirming(false)}
+              className="px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white font-bold rounded-xl text-xs transition-all cursor-pointer"
+            >
+              Hủy
+            </button>
+          </div>
+        </div>
+      ) : (
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className={`w-full py-3.5 font-extrabold rounded-xl text-xs transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${getActionButtonStyle()}`}
+        >
+          {isSubmitting ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <span>Executing Moderation Decision...</span>
+            </>
+          ) : (
+            <>
+              <Send className="w-4 h-4" />
+              <span>Execute Moderation Decision</span>
+            </>
+          )}
+        </button>
+      )}
     </form>
   );
 }

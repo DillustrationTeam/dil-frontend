@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { ArtworkScanPanel } from '@/features/artwork-ai';
 import { Loader2, RefreshCw, ShieldCheck, X } from 'lucide-react';
 import {
   ArtworkInspectionDetailDto,
@@ -108,11 +109,8 @@ export function ModerationInspectionPanel({
         {/* Right Column: AI NSFW Metrics Breakdown & Moderator Action Form (50% / col-span-6) */}
         <div className="md:col-span-6 glass-container bg-[#161926]/85 backdrop-blur-[32px] border border-white/10 rounded-[28px] p-6 space-y-6 flex flex-col justify-between">
           {/* AI Confidence Scores */}
-          <AiScanMetricsCard
-            artwork={artwork}
-            isRescanning={isRescanning}
-            onRescanArtwork={onRescanArtwork}
-          />
+          <AiScanMetricsCard artwork={artwork} />
+          <ArtworkScanPanel key={artwork.artworkId} artworkId={artwork.artworkId} canRetry={['Pending', 'Flagged'].includes(artwork.moderationStatus)} />
 
           {/* Moderator Decision Form */}
           <ModerationDecisionForm

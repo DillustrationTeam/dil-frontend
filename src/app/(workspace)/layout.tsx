@@ -1,58 +1,39 @@
-'use client';
+import type { Metadata } from 'next';
+import { AiAssistantLauncher, SiteHeader } from '@/features/navigation';
 
-import React, { useState } from 'react';
-import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
-import TopNavbar from '@/components/navigation/TopNavbar';
-import CollapsibleSidebar from '@/components/navigation/CollapsibleSidebar';
-import { AiAssistantLauncher } from '@/features/navigation';
-import { useAuthStore } from '@/store/use-auth-store';
+export const metadata: Metadata = {
+  title: 'Không gian tài khoản | Dillustration',
+  description: 'Trợ lý AI và các màn hình độc lập chưa có trong sidebar workspace.',
+};
 
+/**
+ * Layout riêng cho các màn hình KHÔNG nằm trong sidebar workspace: `ai`,
+ * `checkout`, `notifications`.
+ *
+ * Trước đây nhóm này còn giữ cả wallet/deposit/payout/my-auctions/workroom/
+ * creator/dashboard — nhưng các trang đó đều được `CollapsibleSidebar`
+ * (`src/components/navigation/CollapsibleSidebar.tsx`) link tới, nên việc tách
+ * riêng route group khiến mỗi lần bấm sidebar lại unmount toàn bộ
+ * TopNavbar + CollapsibleSidebar của `(main)/layout.tsx` rồi mount `SiteHeader`
+ * ở đây thay vào — trông như "load lại cả trang". Các trang đó đã được chuyển
+ * sang `(main)/...` để dùng chung shell với `My Commissions`; route group
+ * `(workspace)` giờ chỉ còn 3 trang không nằm trong sidebar.
+ *
+ * VÌ SAO VẪN TÁCH LAYOUT RIÊNG MÀ KHÔNG PHẢI `src/app/layout.tsx`:
+ * `src/app/layout.tsx` là file dùng chung — nhiều nhánh khác cũng sửa nó
+ * (feature/de190291-admin, feature/de190123-commission). Đặt header ở layout
+ * gốc sẽ khiến mọi lần merge đều xung đột. Route group `(workspace)` là không
+ * gian riêng cho các trang lẻ này: không nhánh nào khác dùng, nên merge luôn sạch.
+ *
+ * Route group `(workspace)` KHÔNG xuất hiện trong URL:
+ *   src/app/(workspace)/notifications/page.tsx  →  /notifications
+ */
 export default function WorkspaceLayout({ children }: { children: React.ReactNode }) {
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [currentRole, setCurrentRole] = useState<'client' | 'creator'>('client');
-  const pathname = usePathname();
-  const router = useRouter();
-  const isCreator = useAuthStore(state => state.roles.some(role => role.toLowerCase() === 'creator'));
-  const activeRole = pathname?.startsWith('/creator/') ? 'creator' : currentRole;
-
-  const handleRoleChange = (role: 'client' | 'creator') => {
-    setCurrentRole(role);
-    router.push(role === 'creator' ? '/creator/commissions' : '/client/commissions');
-  };
-
   return (
-    <div className="min-h-screen bg-[#1F2335] text-[#e4e1e5] flex flex-col font-sora">
-      {/* Top Navbar */}
-      <TopNavbar
-        currentRole={activeRole}
-        onRoleChange={handleRoleChange}
-      />
-
-      <nav aria-label="Mobile navigation" className="flex gap-2 overflow-x-auto border-b border-white/10 px-4 py-2 text-xs md:hidden">
-        <Link href="/client/commissions" className="shrink-0 rounded-lg bg-white/5 px-3 py-2">My commissions</Link>
-        {isCreator && <Link href="/creator/commissions" className="shrink-0 rounded-lg bg-white/5 px-3 py-2">Creator studio</Link>}
-        <Link href="/wallet" className="shrink-0 rounded-lg bg-white/5 px-3 py-2">Wallet</Link>
-      </nav>
-
-      {/* Main Body with Sidebar + Content */}
-      <div className="flex-1 flex w-full relative">
-        {/* Collapsible Sidebar */}
-        <CollapsibleSidebar
-          key={activeRole}
-          isCollapsed={isSidebarCollapsed}
-          onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-          role={activeRole}
-        />
-
-        {/* Dynamic Page Content */}
-        <main className="flex-1 min-w-0 overflow-y-auto p-4 lg:p-8">
-          {children}
-        </main>
-      </div>
-
+    <>
+      <SiteHeader />
+      {children}
       <AiAssistantLauncher />
-    </div>
+    </>
   );
 }
-

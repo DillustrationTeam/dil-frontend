@@ -1,63 +1,68 @@
 'use client';
 
+import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
-import { ArrowUpRight, Lock, Package, Palette } from 'lucide-react';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/use-auth-store';
-import { commissionService } from '@/services/commission.service';
-import { Commission } from '@/types/commission.types';
-import { creatorProfileService } from '@/features/creator-studio/services/creator-profile.service';
-import { Collections } from './collections';
-import { ProfileLayout, ProfileTabs } from './profile-layout';
-
-type PersonalTab = 'requested' | 'saved' | 'liked';
-const tabs: { id: PersonalTab; label: string }[] = [{ id: 'requested', label: 'Đơn đã đặt' }, { id: 'saved', label: 'Đã lưu' }, { id: 'liked', label: 'Yêu thích' }];
-const money = (value: number) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
+import { uploadService } from '@/features/creator-studio/services/upload.service';
+import { profileSettingsService } from '@/features/profile-settings/services/profile-settings.service';
+import toast from 'react-hot-toast';
 
 export function PersonalProfileScreen() {
-  const user = useAuthStore((s) => s.user);
-  const authenticated = useAuthStore((s) => s.isAuthenticated);
-  const isCreator = useAuthStore((s) => s.roles.some((role) => role.toLowerCase() === 'creator'));
-  const [tab, setTab] = useState<PersonalTab>('requested');
-  const [items, setItems] = useState<Commission[]>([]);
-  const [creatorId, setCreatorId] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [retry, setRetry] = useState(0);
+  const router = useRouter();
+  const user = useAuthStore((state) => state.user);
+  const authenticated = useAuthStore((state) => state.isAuthenticated);
+  const [uploading, setUploading] = useState(false);
+  const avatarInput = useRef<HTMLInputElement>(null);
+
+  const uploadAvatar = async (file?: File) => {
+    if (!file || uploading) return;
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || file.size > 5 * 1024 * 1024) {
+      toast.error('Chọn ảnh JPG, PNG hoặc WebP tối đa 5MB.');
+      return;
+    }
+    setUploading(true);
+    try {
+      const avatarUrl = await uploadService.uploadFile(file, 'profile-avatars', 'c_fill,w_400,h_400,q_auto,f_auto');
+      const updatedUser = await profileSettingsService.updateProfile({ avatarUrl });
+      const auth = useAuthStore.getState();
+      auth.setUser(updatedUser, auth.roles);
+      toast.success('Đã cập nhật ảnh đại diện.');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Không thể tải ảnh lên.');
+    } finally {
+      setUploading(false);
+      if (avatarInput.current) avatarInput.current.value = '';
+    }
+  };
 
   useEffect(() => {
-    let active = true;
-    const load = async () => {
-      setLoading(true); setError(''); setItems([]); setCreatorId(null);
-      if (!authenticated) { setLoading(false); return; }
-      const [commissions, profile] = await Promise.allSettled([commissionService.getByClient(), isCreator ? creatorProfileService.getMyProfile() : Promise.resolve(null)]);
-      if (!active) return;
-      if (commissions.status === 'fulfilled') setItems(commissions.value);
-      else setError('Không thể tải đơn đã đặt. Vui lòng thử lại.');
-      if (profile.status === 'fulfilled') setCreatorId(profile.value?.id ?? null);
-      setLoading(false);
-    };
-    void load();
-    return () => { active = false; };
-  }, [authenticated, user?.id, isCreator, retry]);
+    if (!authenticated || !user) router.replace('/login?returnUrl=%2Fprofile%2Fme');
+  }, [authenticated, router, user]);
 
-  if (!authenticated || !user) return <div className="py-20 text-center"><h1 className="font-h1 text-2xl">Hồ sơ của bạn</h1><Link href="/login" className="mt-4 inline-block text-[#A7ACD9]">Đăng nhập để xem hồ sơ</Link></div>;
-  return <ProfileLayout name={user.fullName} sidebar={<>
-    <p className="mb-2 text-[10px] font-semibold uppercase tracking-[.2em] text-[#A7ACD9]">Personal profile</p>
-    <h1 className="break-words font-h1 text-3xl font-semibold text-white">{user.fullName}</h1>
-    <p className="mt-2 text-sm text-[#919099]">Thành viên Dillustration</p>
-    <Link href="/client/commissions" className="mt-6 block rounded-full border border-white/10 bg-white/5 px-4 py-3 text-center text-sm font-semibold hover:bg-white/10">Quản lý đơn đặt tranh</Link>
-    {creatorId ? <Link href={`/creators/${creatorId}`} className="mt-3 flex items-center justify-center gap-2 rounded-full bg-[#A7ACD9] px-4 py-3 text-sm font-semibold text-[#1F2335]"><Palette size={16} />Xem profile nghệ sĩ</Link> : !isCreator ? <Link href="/creator-setup" className="mt-3 block rounded-full border border-[#A7ACD9]/30 px-4 py-3 text-center text-sm text-[#A7ACD9]">Trở thành nghệ sĩ</Link> : null}
-    <p className="mt-7 text-sm leading-7 text-[#C7C5CF]">Không gian của bạn để theo dõi các dự án, lưu cảm hứng và tìm lại tác phẩm yêu thích.</p>
-    <details className="mt-8 border-t border-white/10 pt-5 text-sm"><summary className="cursor-pointer font-medium">Thông tin tài khoản</summary><p className="mt-3 break-words text-[#919099]">{user.email}</p><p className="mt-2 text-[#919099]">Tham gia từ {new Date(user.createdAt).toLocaleDateString('vi-VN')}</p></details>
-  </>}>
-    <ProfileTabs tabs={tabs} value={tab} onChange={setTab} />
-    <p className="mt-4 flex items-center gap-2 text-xs text-[#919099]"><Lock size={13} />Chỉ bạn xem được nội dung hồ sơ cá nhân này.</p>
-    <div id={`profile-panel-${tab}`} role="tabpanel" aria-labelledby={`profile-tab-${tab}`} tabIndex={0} className="mt-7 focus-visible:outline-[#A7ACD9]">
-      {tab !== 'requested' ? <Collections key={`${user.id}:${tab}`} embedded mode={tab} /> : loading ? <p className="py-16 text-center text-[#919099]">Đang tải đơn đặt tranh...</p> : error ? <div role="alert" className="glass-container rounded-3xl p-8 text-sm"><p>{error}</p><button type="button" onClick={() => setRetry((value) => value + 1)} className="mt-3 text-[#A7ACD9] underline">Thử lại</button></div> : items.length ? <div className="space-y-4">{items.map((item) => {
-        const href = ['PendingAcceptance', 'Negotiating', 'Cancelled'].includes(item.status) ? `/client/requests/${item.id}` : item.status === 'InProgress' && item.escrowStatus === 'Pending' ? `/payment/checkout/${item.id}` : `/workroom/${item.id}`;
-        return <Link key={item.id} href={href} className="glass-container group flex items-center gap-4 rounded-3xl p-5 transition hover:border-[#A7ACD9]/40 sm:p-7"><span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[#A7ACD9]/10 text-[#A7ACD9]"><Package size={24} /></span><span className="min-w-0 flex-1"><span className="text-[10px] text-[#A7ACD9]">{item.status}</span><span className="mt-1 block break-words font-h1 text-base font-semibold text-white">{item.title}</span><span className="mt-2 block text-xs text-[#919099]">{item.creatorName || 'Nghệ sĩ'} · {money(item.finalPrice ?? item.totalPrice ?? item.price ?? 0)}</span></span><ArrowUpRight size={20} className="shrink-0 text-[#919099] group-hover:text-[#A7ACD9]" /></Link>;
-      })}</div> : <div className="glass-container rounded-[32px] px-6 py-20 text-center"><Package size={30} className="mx-auto text-[#A7ACD9]/60" /><h2 className="mt-5 font-h1 text-lg">Chưa có đơn đặt tranh</h2><p className="mt-2 text-sm text-[#919099]">Các yêu cầu và dự án của bạn sẽ xuất hiện tại đây.</p><Link href="/explore" className="mt-5 inline-block rounded-full bg-[#A7ACD9] px-5 py-3 text-sm font-semibold text-[#1F2335]">Khám phá nghệ sĩ</Link></div>}
-    </div>
-  </ProfileLayout>;
+  if (!authenticated || !user) {
+    return <main className="grid min-h-[60vh] place-items-center bg-[#1F2335] text-sm text-[#C7C5CF]">Đang chuyển tới đăng nhập…</main>;
+  }
+
+  return (
+    <main className="min-h-[70vh] bg-[#1F2335] px-4 py-10 text-[#E4E1E5] sm:px-6">
+      <div className="mx-auto max-w-3xl">
+        {user.coverUrl && <div className="relative mb-6 h-48 overflow-hidden rounded-2xl"><Image src={user.coverUrl} alt="Ảnh bìa hồ sơ" fill unoptimized className="object-cover" /></div>}
+        <div className="mb-6 flex items-center gap-4">
+          {user.avatarUrl ? <Image src={user.avatarUrl} alt={`Ảnh đại diện ${user.fullName}`} width={96} height={96} unoptimized className="h-24 w-24 rounded-full object-cover" /> : <span className="grid h-24 w-24 place-items-center rounded-full bg-[#A7ACD9]/20 text-3xl text-[#A7ACD9]">{user.fullName.charAt(0)}</span>}
+          <div><button type="button" disabled={uploading} onClick={() => avatarInput.current?.click()} className="rounded-xl border border-white/15 px-4 py-2 text-sm text-white disabled:opacity-50">{uploading ? 'Đang tải…' : 'Tải ảnh đại diện'}</button><p className="mt-2 text-xs text-[#919099]">JPG, PNG, WebP · tối đa 5MB</p></div>
+          <input ref={avatarInput} type="file" aria-label="Chọn ảnh đại diện" accept="image/jpeg,image/png,image/webp" disabled={uploading} className="hidden" onChange={(event) => void uploadAvatar(event.target.files?.[0])} />
+        </div>
+        <p className="text-xs uppercase tracking-[.18em] text-[#A7ACD9]">Hồ sơ cá nhân</p>
+        <h1 className="mt-2 font-h1 text-3xl font-bold text-white">{user.fullName}</h1>
+        {user.bio && <p className="mt-3 max-w-2xl whitespace-pre-line text-sm leading-6 text-[#C7C5CF]">{user.bio}</p>}
+        {user.socialLinks?.length ? <ul className="mt-4 flex flex-wrap gap-3">{user.socialLinks.map((url) => <li key={url}><a href={url} target="_blank" rel="noreferrer" className="text-sm text-[#A7ACD9] underline">{url}</a></li>)}</ul> : null}
+        <div className="mt-8 flex flex-wrap gap-3">
+          <Link href="/settings" className="rounded-xl bg-[#A7ACD9] px-4 py-2.5 text-sm font-semibold text-[#1F2335]">Chỉnh sửa hồ sơ</Link>
+          <Link href="/client/commissions" className="rounded-xl border border-white/15 px-4 py-2.5 text-sm text-white">Đơn commission</Link>
+        </div>
+      </div>
+    </main>
+  );
 }

@@ -11,7 +11,12 @@ import toast from 'react-hot-toast';
 import { authService } from '@/services/auth.service';
 import { useAuthStore } from '@/store/use-auth-store';
 import { useGoogleAuth } from '@/features/auth/hooks/use-google-auth';
-import { isTwoFactorRequired } from '@/types/auth.types';
+import { AccountPasswordSetupForm } from '@/features/auth/components/account-password-setup-form';
+import {
+  isGoogleRegistrationRequired,
+  isPasswordSetupRequired,
+  isTwoFactorRequired,
+} from '@/types/auth.types';
 
 const loginSchema = z.object({
   emailOrUsername: z.string().min(1, 'Email or username is required'),
@@ -22,12 +27,10 @@ const loginSchema = z.object({
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 const seedAccounts = [
-  { label: 'Client', email: 'client1@seed.dillustration.art' },
-  { label: 'Creator', email: 'artist1@seed.dillustration.art' },
-  { label: 'Moderator', email: 'moderator@seed.dillustration.art' },
-  { label: 'Admin', email: 'admin@seed.dillustration.art' },
+  { label: 'Client', email: 'client.demo@dillustration.test', password: 'Demo@123456' },
+  { label: 'Creator', email: 'creator.demo@dillustration.test', password: 'Demo@123456' },
+  { label: 'Admin', email: 'admin.demo@dillustration.local', password: 'Seed123!' },
 ] as const;
-const SEED_PASSWORD = 'Seed@123456';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -38,10 +41,28 @@ export default function LoginPage() {
   const [pendingEmail, setPendingEmail] = useState('');
   const [twoFactorCode, setTwoFactorCode] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
-  const googleLogin = useGoogleAuth((email, ticket) => {
-    setPendingEmail(email);
-    setTwoFactorTicket(ticket);
-  });
+  const [googleRegistration, setGoogleRegistration] = useState<{
+    ticket: string;
+    email: string;
+    fullName: string | null;
+  } | null>(null);
+  const [passwordSetup, setPasswordSetup] = useState<{
+    ticket: string;
+    email: string;
+    fullName: string | null;
+  } | null>(null);
+  const googleLogin = useGoogleAuth(
+    (email, ticket) => {
+      setPendingEmail(email);
+      setTwoFactorTicket(ticket);
+    },
+    (registrationTicket, suggestedEmail, suggestedFullName) => {
+      setGoogleRegistration({ ticket: registrationTicket, email: suggestedEmail, fullName: suggestedFullName });
+    },
+    (passwordSetupTicket, email, fullName) => {
+      setPasswordSetup({ ticket: passwordSetupTicket, email, fullName });
+    }
+  );
 
   const {
     register,
@@ -52,9 +73,9 @@ export default function LoginPage() {
     resolver: zodResolver(loginSchema),
   });
 
-  const fillSeedAccount = (email: string) => {
-    setValue('emailOrUsername', email, { shouldValidate: true });
-    setValue('password', SEED_PASSWORD, { shouldValidate: true });
+  const fillSeedAccount = (account: (typeof seedAccounts)[number]) => {
+    setValue('emailOrUsername', account.email, { shouldValidate: true });
+    setValue('password', account.password, { shouldValidate: true });
   };
 
   const onSubmit = async (data: LoginFormValues) => {
@@ -68,6 +89,12 @@ export default function LoginPage() {
       if (isTwoFactorRequired(result)) {
         setTwoFactorTicket(result.twoFactorTicket);
         setPendingEmail(result.email);
+        return;
+      }
+
+      if (isGoogleRegistrationRequired(result) || isPasswordSetupRequired(result)) {
+        // Endpoint /auth/login không bao giờ trả 2 case này (chỉ /auth/google) — giữ để type-narrow an toàn.
+        toast.error('Unexpected response from server. Please try again.');
         return;
       }
 
@@ -93,13 +120,21 @@ export default function LoginPage() {
 
     setIsVerifying(true);
     try {
-      const authResponse = await authService.verifyTwoFactorLogin({
+      const result = await authService.verifyTwoFactorLogin({
         email: pendingEmail,
         twoFactorTicket,
         code: twoFactorCode.trim(),
       });
-      setAuth(authResponse);
-      toast.success(`Welcome back, ${authResponse.user.fullName}!`);
+
+      if (isPasswordSetupRequired(result)) {
+        setPasswordSetup({ ticket: result.passwordSetupTicket, email: result.email, fullName: result.fullName });
+        setTwoFactorTicket(null);
+        setTwoFactorCode('');
+        return;
+      }
+
+      setAuth(result);
+      toast.success(`Welcome back, ${result.user.fullName}!`);
       router.push('/');
     } catch (err: unknown) {
       const errorObj = err as { message?: string };
@@ -155,7 +190,71 @@ export default function LoginPage() {
             </p>
           </header>
 
-          {!twoFactorTicket ? (
+          {passwordSetup ? (
+            <AccountPasswordSetupForm
+              introText={
+                <>
+                  <p className="text-sm text-[#C7C5CF]">
+                    Welcome back{passwordSetup.fullName ? `, ${passwordSetup.fullName}` : ''}! Signed in as{' '}
+                    <span className="text-white font-medium">{passwordSetup.email}</span>.
+                  </p>
+                  <p className="text-sm text-[#C7C5CF] mt-2">
+                    This account doesn&apos;t have a username and password yet — set them now before
+                    continuing.
+                  </p>
+                </>
+              }
+              submitLabel="Finish & Continue"
+              submittingLabel="Saving..."
+              onSubmit={(username, password) =>
+                authService.completeAccountPasswordSetup({
+                  email: passwordSetup.email,
+                  setupTicket: passwordSetup.ticket,
+                  username,
+                  password,
+                })
+              }
+              onSuccess={(authResponse) => {
+                setAuth(authResponse);
+                setPasswordSetup(null);
+                toast.success(`Welcome back, ${authResponse.user.fullName}!`);
+                router.push('/');
+              }}
+              onCancel={() => setPasswordSetup(null)}
+            />
+          ) : googleRegistration ? (
+            <AccountPasswordSetupForm
+              introText={
+                <>
+                  <p className="text-sm text-[#C7C5CF]">
+                    Welcome{googleRegistration.fullName ? `, ${googleRegistration.fullName}` : ''}! Signed in
+                    with Google as{' '}
+                    <span className="text-white font-medium">{googleRegistration.email}</span>.
+                  </p>
+                  <p className="text-sm text-[#C7C5CF] mt-2">
+                    Google accounts don&apos;t come with a password here — choose a username and
+                    password to finish creating your account.
+                  </p>
+                </>
+              }
+              submitLabel="Finish Creating Account"
+              submittingLabel="Creating Account..."
+              onSubmit={(username, password) =>
+                authService.completeGoogleRegistration({
+                  registrationTicket: googleRegistration.ticket,
+                  username,
+                  password,
+                })
+              }
+              onSuccess={(authResponse) => {
+                setAuth(authResponse);
+                setGoogleRegistration(null);
+                toast.success(`Account created! Welcome, ${authResponse.user.fullName}!`);
+                router.push('/');
+              }}
+              onCancel={() => setGoogleRegistration(null)}
+            />
+          ) : !twoFactorTicket ? (
             <>
           {/* Dev-only: điền nhanh tài khoản seed theo role */}
           {process.env.NODE_ENV !== 'production' && (
@@ -168,7 +267,7 @@ export default function LoginPage() {
                   <button
                     key={account.email}
                     type="button"
-                    onClick={() => fillSeedAccount(account.email)}
+                    onClick={() => fillSeedAccount(account)}
                     className="rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5 text-xs font-medium text-[#A7ACD9] hover:bg-white/10 transition-colors cursor-pointer"
                   >
                     {account.label}

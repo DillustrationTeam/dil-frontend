@@ -58,7 +58,11 @@ export function RevenueTrendChart({ revenueTrend }: RevenueTrendChartProps) {
           ? Math.max(8, Math.min(155, Math.round((rev / maxRevenue) * 155)))
           : 8; // flat 8px indicator if revenue is 0
       const formattedVal =
-        rev >= 1000 ? `$${(rev / 1000).toFixed(1)}k` : `$${rev.toLocaleString()}`;
+        rev >= 1_000_000
+          ? `${(rev / 1_000_000).toFixed(1)}M ₫`
+          : rev >= 1_000
+          ? `${(rev / 1_000).toFixed(0)}k ₫`
+          : `${rev.toLocaleString('vi-VN')} ₫`;
 
       return {
         month: monthLabel,
@@ -74,7 +78,7 @@ export function RevenueTrendChart({ revenueTrend }: RevenueTrendChartProps) {
       <div className="flex justify-between items-center border-b border-white/10 pb-4">
         <div>
           <h3 className="font-h1 font-bold text-white text-base">
-            Platform Revenue Trend ($USD)
+            Platform Revenue Trend (VND)
           </h3>
           <p className="text-[11px] text-[#8A8FA9]">Monthly revenue trend (max 4 months)</p>
         </div>

@@ -32,9 +32,12 @@ const dictionary: Record<string, { VIE: string; ENG: string }> = {
   'Workstation': { VIE: 'Khu vực làm việc', ENG: 'Workstation' },
   'Artworks Portfolio': { VIE: 'Bộ sưu tập tác phẩm', ENG: 'Artworks Portfolio' },
   'Rate Card & Services': { VIE: 'Bảng giá & Dịch vụ', ENG: 'Rate Card & Services' },
+  'Creator Profile': { VIE: 'Hồ sơ họa sĩ', ENG: 'Creator Profile' },
   'Terms & Licensing': { VIE: 'Điều khoản & Bản quyền', ENG: 'Terms & Licensing' },
   'AI Auto-reply': { VIE: 'Tự động phản hồi AI', ENG: 'AI Auto-reply' },
   'Asset & Presets': { VIE: 'Tài nguyên & Presets', ENG: 'Asset & Presets' },
+  'Hồ sơ họa sĩ': { VIE: 'Hồ sơ họa sĩ', ENG: 'Creator Profile' },
+  'Chỉnh sửa profile họa sĩ': { VIE: 'Chỉnh sửa profile họa sĩ', ENG: 'Edit Artist Profile' },
   
   // Header / Actions
   'Client Mode': { VIE: 'Chế độ Client', ENG: 'Client Mode' },

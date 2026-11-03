@@ -62,7 +62,7 @@ export function DepositScreen({ userId }: { userId: string | null }) {
     setLoading(true);
     try {
       const returnUrl = typeof window !== 'undefined' ? `${window.location.origin}/wallet` : 'http://localhost:3000/wallet';
-      const cancelUrl = typeof window !== 'undefined' ? `${window.location.origin}/checkout` : 'http://localhost:3000/checkout';
+      const cancelUrl = typeof window !== 'undefined' ? `${window.location.origin}/deposit` : 'http://localhost:3000/deposit';
       const res = await paymentService.createOrder(parsed.data, returnUrl, cancelUrl);
       setOrder(res);
     } catch (err: unknown) {
@@ -167,7 +167,7 @@ export function DepositScreen({ userId }: { userId: string | null }) {
             </div>
 
             <div className="rounded-2xl border border-brand-periwinkle/20 bg-brand-periwinkle/5 p-4 text-xs text-on-surface-variant">
-              Phương thức thanh toán: <strong>VietQR qua SePay</strong>. Hệ thống ghi nhận tiền vào ví sau khi SePay gửi IPN xác nhận giao dịch.
+              Phương thức thanh toán: <strong>VietQR qua PayOS</strong>. Hệ thống ghi nhận tiền vào ví sau khi PayOS xác nhận giao dịch.
             </div>
 
             <button
@@ -219,7 +219,7 @@ export function DepositScreen({ userId }: { userId: string | null }) {
                   ) : (
                     <div className="flex size-56 flex-col items-center justify-center rounded-xl bg-black/20 p-4 text-center text-xs text-outline">
                       <QrCode size={28} className="mb-2 opacity-60" />
-                      SePay sẽ hiển thị VietQR trên trang thanh toán bảo mật.
+                      PayOS sẽ hiển thị VietQR trên trang thanh toán bảo mật.
                     </div>
                   )}
                   {qrImageSrc && qrFailed && (
@@ -236,7 +236,7 @@ export function DepositScreen({ userId }: { userId: string | null }) {
                         type="submit"
                         className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand-periwinkle hover:underline"
                       >
-                        Mở cổng thanh toán SePay <ExternalLink size={14} />
+                        Mở cổng thanh toán PayOS <ExternalLink size={14} />
                       </button>
                     </form>
                   ) : order.paymentUrl ? (
@@ -299,7 +299,7 @@ export function DepositScreen({ userId }: { userId: string | null }) {
                       </div>
                     ) : (
                       <p className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-on-surface-variant">
-                        Mở cổng SePay để lấy VietQR đã gắn đúng số tiền và mã đơn. Không tự sửa nội dung thanh toán.
+                        Mở cổng PayOS để lấy VietQR đã gắn đúng số tiền và mã đơn. Không tự sửa nội dung thanh toán.
                       </p>
                     )}
                     {copied && <p className="text-xs text-emerald-400">Đã sao chép vào bộ nhớ tạm!</p>}

@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { ArrowUpRight, Clock, Eye, Gavel, Plus, RefreshCw, Search } from 'lucide-react';
 import { useLanguage } from '@/context/language-context';
-import { auctionService } from '../services/auction.service';
+import { auctionService, auctionError } from '../services/auction.service';
 import { useAuctionClock } from '../hooks/use-auction-clock';
 import { auctionStatusLabels, type AuctionFilters, type AuctionListItemDto } from '../types/auction.types';
 
@@ -24,10 +24,11 @@ const statusBadgeColors: Record<string, string> = {
 function AuctionCard({ item }: { item: AuctionListItemDto }) {
   const { lang, t } = useLanguage();
   const isScheduled = item.auctionStatus === 'Scheduled';
+  const isFinished = ['Settled', 'Ended', 'Cancelled', 'Expired'].includes(item.auctionStatus);
   const targetTime = isScheduled ? item.startAt : item.endAt;
   const clock = useAuctionClock({ endAt: targetTime });
-  const hasEnded = !isScheduled && clock.isEnded;
-  const displayStatus = hasEnded && item.auctionStatus === 'Active' ? 'Ended' : item.auctionStatus;
+  const hasEnded = isFinished || (!isScheduled && clock.isEnded);
+  const displayStatus = (!isFinished && hasEnded && item.auctionStatus === 'Active') ? 'Ended' : item.auctionStatus;
   const statusText = t(hasEnded && item.auctionStatus === 'Active'
     ? 'Chờ chốt kết quả'
     : auctionStatusLabels[displayStatus] || displayStatus);
@@ -55,11 +56,18 @@ function AuctionCard({ item }: { item: AuctionListItemDto }) {
           <span className={`absolute left-4 top-4 rounded-full border px-3 py-1 text-[11px] font-semibold backdrop-blur-md ${statusColor}`}>
             {statusText}
           </span>
+          {item.hasPhysicalCopy && (
+            <span className="absolute left-4 top-13 rounded-full border border-amber-500/40 bg-amber-950/60 px-2.5 py-0.5 text-[10px] font-semibold text-amber-300 backdrop-blur-md">
+              🖼️ {t('Có bản vật lý')}
+            </span>
+          )}
           <span className="absolute bottom-4 right-4 flex items-center gap-1.5 rounded-full border border-white/10 bg-[#11131d]/80 px-3 py-1.5 font-mono text-[11px] tabular-nums text-white backdrop-blur-md">
             <Clock size={12} className="text-brand-periwinkle" />
-            {isScheduled 
-              ? (clock.isEnded ? t('Đang mở...') : clock.formatted)
-              : (clock.isEnded ? t('Đã kết thúc') : clock.formatted)}
+            {isFinished
+              ? (item.auctionStatus === 'Settled' ? t('Đã chốt') : item.auctionStatus === 'Cancelled' ? t('Đã hủy') : t('Đã kết thúc'))
+              : isScheduled 
+                ? (clock.isEnded ? t('Đang mở...') : clock.formatted)
+                : (clock.isEnded ? t('Đã kết thúc') : clock.formatted)}
           </span>
         </div>
 
@@ -132,7 +140,7 @@ export function AuctionListScreen({ userId }: { userId: string | null }) {
       }
       setNextCursor(res.nextCursor);
     } catch (err: unknown) {
-      setError(t(err instanceof Error ? err.message : 'Không tải được danh sách phiên đấu giá.'));
+      setError(t(auctionError(err) || 'Không tải được danh sách phiên đấu giá.'));
     } finally {
       setLoading(false);
       setLoadingMore(false);

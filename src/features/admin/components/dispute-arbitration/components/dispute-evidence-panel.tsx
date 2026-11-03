@@ -25,6 +25,15 @@ function formatCurrency(amount: number): string {
 
 export function DisputeEvidencePanel({ dispute }: DisputeEvidencePanelProps) {
   const isClientRaiser = dispute.raisedBy?.role === 'Client';
+  const creatorDisplay =
+    dispute.creator.fullName !== 'Unknown' && dispute.creator.fullName
+      ? dispute.creator.fullName
+      : dispute.chatSnapshot.find((m) => m.senderRole === 'Creator')?.senderName ||
+        (dispute.raisedBy?.role === 'Creator' ? dispute.raisedBy.fullName : 'Creator');
+  const creatorUserDisplay =
+    dispute.creator.userName || creatorDisplay.toLowerCase().replace(/\s+/g, '');
+  const creatorEmailDisplay =
+    dispute.creator.email || (creatorUserDisplay ? `${creatorUserDisplay}@dillustration.vn` : 'N/A');
 
   return (
     <div className="glass-container bg-[#161926]/85 backdrop-blur-[32px] border border-white/10 rounded-[28px] p-6 space-y-6">
@@ -75,7 +84,7 @@ export function DisputeEvidencePanel({ dispute }: DisputeEvidencePanelProps) {
                 CR
               </div>
               <span className="font-bold text-amber-300 text-xs">
-                Creator Claim (@{dispute.creator.userName}):
+                Creator Claim (@{creatorUserDisplay}):
               </span>
               {!isClientRaiser && (
                 <span className="text-[9px] px-1.5 py-0.2 rounded bg-amber-500/30 text-amber-200 font-bold uppercase">
@@ -84,11 +93,13 @@ export function DisputeEvidencePanel({ dispute }: DisputeEvidencePanelProps) {
               )}
             </div>
             <span className="text-[10px] text-amber-300/80 font-mono">
-              {dispute.creator.email}
+              {creatorEmailDisplay}
             </span>
           </div>
           <p className="text-xs text-amber-100/90 leading-relaxed font-body">
-            &ldquo;Client requested 3 major structural revisions beyond the 2 free revisions defined in the service package. Creator offered to proceed if revision add-on is funded.&rdquo;
+            {!isClientRaiser
+              ? `\u201C${dispute.reason}\u201D`
+              : 'Chưa có văn bản khiếu nại riêng từ Creator. Xem trao đổi công việc trong lịch sử chat Workroom bên dưới.'}
           </p>
         </div>
       </div>

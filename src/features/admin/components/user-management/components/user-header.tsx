@@ -115,6 +115,7 @@ export function UserHeader({
             <option value="Client" className="bg-[#161926] text-white">Client Only</option>
             <option value="Creator" className="bg-[#161926] text-white">Creator Only</option>
             <option value="Dual-Role" className="bg-[#161926] text-white">Dual-Role</option>
+            <option value="Moderator" className="bg-[#161926] text-white">Moderator</option>
             <option value="Administrator" className="bg-[#161926] text-white">Administrator</option>
           </select>
 
