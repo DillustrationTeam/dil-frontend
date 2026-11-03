@@ -24,6 +24,11 @@ export interface ModerationState {
     error: string | null;
     successMessage: string | null;
   };
+  rescan: {
+    submitting: boolean;
+    error: string | null;
+    successMessage: string | null;
+  };
 }
 
 export const initialModerationState: ModerationState = {
@@ -55,6 +60,11 @@ export const initialModerationState: ModerationState = {
     error: null,
     successMessage: null,
   },
+  rescan: {
+    submitting: false,
+    error: null,
+    successMessage: null,
+  },
 };
 
 export type ModerationAction =
@@ -74,6 +84,9 @@ export type ModerationAction =
   | { type: 'EXECUTE_DECISION_REQUEST' }
   | { type: 'EXECUTE_DECISION_SUCCESS'; payload: string }
   | { type: 'EXECUTE_DECISION_FAILURE'; payload: string }
+  | { type: 'RESCAN_ARTWORK_REQUEST' }
+  | { type: 'RESCAN_ARTWORK_SUCCESS'; payload: string }
+  | { type: 'RESCAN_ARTWORK_FAILURE'; payload: string }
   | { type: 'CLEAR_FEEDBACK' };
 
 export function moderationReducer(
@@ -221,11 +234,46 @@ export function moderationReducer(
         },
       };
 
+    case 'RESCAN_ARTWORK_REQUEST':
+      return {
+        ...state,
+        rescan: {
+          submitting: true,
+          error: null,
+          successMessage: null,
+        },
+      };
+
+    case 'RESCAN_ARTWORK_SUCCESS':
+      return {
+        ...state,
+        rescan: {
+          submitting: false,
+          error: null,
+          successMessage: action.payload,
+        },
+      };
+
+    case 'RESCAN_ARTWORK_FAILURE':
+      return {
+        ...state,
+        rescan: {
+          submitting: false,
+          error: action.payload,
+          successMessage: null,
+        },
+      };
+
     case 'CLEAR_FEEDBACK':
       return {
         ...state,
         decision: {
           ...state.decision,
+          error: null,
+          successMessage: null,
+        },
+        rescan: {
+          ...state.rescan,
           error: null,
           successMessage: null,
         },
