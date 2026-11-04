@@ -1,3 +1,4 @@
+import { BugReportFloatingButton } from '@/components/feedback/BugReportFloatingButton';
 import type { Metadata } from "next";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { LanguageProvider } from "@/context/language-context";
@@ -34,6 +35,7 @@ export default function RootLayout({
           <LanguageProvider>
             {children}
             <AiAssistantLauncher />
+            <BugReportFloatingButton />
             <AppToaster />
           </LanguageProvider>
         </GoogleOAuthProvider>
