@@ -42,14 +42,15 @@ export function BugReportFloatingButton() {
 
   return (
     <>
+      {/* Nút Báo lỗi dạng pill/icon xếp ngay trên nút AI (bottom-24) */}
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-full border border-rose-500/30 bg-[#2A1E2B]/90 px-4 py-2.5 text-xs font-semibold text-rose-300 shadow-lg backdrop-blur-md transition-all hover:scale-105 hover:bg-rose-950/80 hover:text-rose-200"
+        className="fixed bottom-24 right-4 z-50 flex items-center gap-2 rounded-full border border-rose-500/30 bg-[#251A27]/90 px-3.5 py-2 text-xs font-semibold text-rose-300 shadow-xl backdrop-blur-md transition-all hover:scale-105 hover:bg-rose-950/90 hover:text-white sm:right-6"
         title="Báo cáo lỗi hệ thống"
       >
         <Bug className="h-4 w-4 text-rose-400" />
-        <span>Báo lỗi</span>
+        <span className="hidden sm:inline">Báo lỗi</span>
       </button>
 
       {isOpen && (
