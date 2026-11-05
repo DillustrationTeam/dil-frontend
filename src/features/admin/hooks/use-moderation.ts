@@ -160,6 +160,41 @@ export function useModeration() {
     [inspectArtwork, loadQueue]
   );
 
+  const rescanArtwork = useCallback(
+    async (artworkId: string) => {
+      dispatch({ type: 'RESCAN_ARTWORK_REQUEST' });
+
+      try {
+        const response = await adminModerationService.rescanArtwork(artworkId);
+
+        dispatch({
+          type: 'RESCAN_ARTWORK_SUCCESS',
+          payload: response.message,
+        });
+
+        toast.success(response.message || 'AI re-scan requested successfully.');
+
+        // Refresh queue and inspection details
+        await loadQueue();
+        await inspectArtwork(artworkId);
+
+        return true;
+      } catch (error) {
+        const errorMsg = getErrorMessage(
+          error,
+          'Failed to request AI re-scan.'
+        );
+        dispatch({
+          type: 'RESCAN_ARTWORK_FAILURE',
+          payload: errorMsg,
+        });
+        toast.error(errorMsg);
+        return false;
+      }
+    },
+    [inspectArtwork, loadQueue]
+  );
+
   const clearFeedback = useCallback(() => {
     dispatch({ type: 'CLEAR_FEEDBACK' });
   }, []);
@@ -187,10 +222,13 @@ export function useModeration() {
     isQueueLoading: state.queue.loading,
     isInspectionLoading: state.selectedArtwork.loading,
     isDecisionSubmitting: state.decision.submitting,
+    isRescanSubmitting: state.rescan.submitting,
     queueError: state.queue.error,
     inspectionError: state.selectedArtwork.error,
     decisionError: state.decision.error,
     decisionSuccess: state.decision.successMessage,
+    rescanError: state.rescan.error,
+    rescanSuccess: state.rescan.successMessage,
     // Actions
     loadQueue,
     inspectArtwork,
@@ -199,6 +237,7 @@ export function useModeration() {
     setSearchFilter,
     setPage,
     executeDecision,
+    rescanArtwork,
     clearFeedback,
   };
 }

@@ -99,4 +99,23 @@ export const adminModerationService = {
 
     return response.data.data;
   },
+
+  /**
+   * Yêu cầu quét lại AI cho tác phẩm (SCR-20 / UC28)
+   */
+  async rescanArtwork(artworkId: string): Promise<{ message: string }> {
+    const response = await apiClient.post<ApiResponse<{ message: string }>>(
+      `/admin/moderation/${artworkId}/rescan`
+    );
+
+    if (response.data.error || !response.data.data) {
+      throw new Error(
+        response.data.error?.details?.join(', ') ||
+          response.data.error?.title ||
+          'Failed to request AI rescan.'
+      );
+    }
+
+    return response.data.data;
+  },
 };

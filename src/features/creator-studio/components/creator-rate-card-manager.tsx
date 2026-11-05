@@ -225,7 +225,7 @@ export function CreatorRateCardManager() {
         item.id === id
           ? {
               ...item,
-              milestones: item.milestones.map((stage, i) =>
+              milestones: (item.milestones ?? []).map((stage, i) =>
                 i === index ? { ...stage, ...patch } : stage
               ),
             }
@@ -263,9 +263,9 @@ export function CreatorRateCardManager() {
           ? {
               ...item,
               milestones: [
-                ...item.milestones,
+                ...(item.milestones ?? []),
                 {
-                  sequence: item.milestones.length + 1,
+                  sequence: (item.milestones?.length ?? 0) + 1,
                   title: `Cột mốc ${item.milestones.length + 1}`,
                   price: 100000,
                   maxRevisions: item.maxRevisions ?? 2,
@@ -283,7 +283,7 @@ export function CreatorRateCardManager() {
         item.id === id
           ? {
               ...item,
-              milestones: item.milestones
+              milestones: (item.milestones ?? [])
                 .filter((_, i) => i !== index)
                 .map((stage, i) => ({ ...stage, sequence: i + 1 })),
             }
@@ -299,7 +299,7 @@ export function CreatorRateCardManager() {
       name: item.name.trim(),
       description: item.description?.trim(),
       sampleUrls: item.sampleUrls ?? [],
-      milestones: item.milestones.map((stage) => ({
+      milestones: (item.milestones ?? []).map((stage) => ({
         ...stage,
         title: stage.title.trim(),
         maxRevisions: stage.maxRevisions ?? item.maxRevisions ?? 2,
@@ -318,7 +318,7 @@ export function CreatorRateCardManager() {
       const saved = await creatorRateCardService.save(
         normalized.map((item) => ({
           ...item,
-          price: item.milestones.reduce((sum, stage) => sum + stage.price, 0),
+          price: (item.milestones ?? []).reduce((sum, stage) => sum + stage.price, 0),
         }))
       );
       setPackages(saved);
@@ -434,7 +434,7 @@ export function CreatorRateCardManager() {
 
           <div className="space-y-4">
             {packages.map((item, index) => {
-              const packageTotal = item.milestones.reduce((sum, m) => sum + m.price, 0);
+              const packageTotal = (item.milestones ?? []).reduce((sum, m) => sum + m.price, 0);
               const isCollapsed = Boolean(collapsedIds[item.id]);
               return (
                 <div
@@ -460,7 +460,7 @@ export function CreatorRateCardManager() {
                         </span>
                         {isCollapsed && (
                           <span className="text-[11px] text-slate-400">
-                            · {item.milestones.length} mốc · {item.maxRevisions ?? 2} lần sửa
+                            · {item.milestones?.length ?? 0} mốc · {item.maxRevisions ?? 2} lần sửa
                           </span>
                         )}
                       </div>
@@ -570,7 +570,7 @@ export function CreatorRateCardManager() {
                     </div>
 
                     <div className="space-y-2">
-                      {item.milestones.map((stage, mIndex) => (
+                      {(item.milestones ?? []).map((stage, mIndex) => (
                         <div
                           key={mIndex}
                           className="flex flex-wrap sm:flex-nowrap items-center gap-2.5 rounded-xl bg-white/[0.02] border border-white/5 p-2"
@@ -603,7 +603,7 @@ export function CreatorRateCardManager() {
                           </div>
                           <button
                             type="button"
-                            disabled={item.milestones.length === 1}
+                            disabled={(item.milestones?.length ?? 0) <= 1}
                             onClick={() => removeMilestone(item.id, mIndex)}
                             className="rounded-lg p-1.5 text-slate-400 hover:text-rose-400 disabled:opacity-30 transition"
                           >
@@ -615,7 +615,7 @@ export function CreatorRateCardManager() {
 
                     <button
                       type="button"
-                      disabled={item.milestones.length >= 10}
+                      disabled={(item.milestones?.length ?? 0) >= 10}
                       onClick={() => addMilestone(item.id)}
                       className="inline-flex items-center gap-1 text-xs text-[#A7ACD9] hover:underline pt-1"
                     >
