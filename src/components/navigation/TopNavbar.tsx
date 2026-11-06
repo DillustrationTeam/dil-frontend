@@ -17,11 +17,13 @@ import {
   FolderKanban,
   Crown,
   Menu,
+  ArrowLeftRight,
 } from 'lucide-react';
 import { useAuthStore } from '@/store/use-auth-store';
 import { useRouter } from 'next/navigation';
 import { useLanguage } from '@/context/language-context';
 import { NotificationBell } from '@/features/notification';
+import TradeAuthRequiredModal from '@/components/modals/TradeAuthRequiredModal';
 
 interface TopNavbarProps<T extends string = string> {
   currentRole?: 'client' | 'creator' | 'admin';
@@ -41,6 +43,7 @@ export default function TopNavbar<T extends string = string>({
   className = '',
 }: TopNavbarProps<T>) {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [showTradeAuthModal, setShowTradeAuthModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const { user, roles, clearAuth } = useAuthStore();
   const router = useRouter();
@@ -76,7 +79,7 @@ export default function TopNavbar<T extends string = string>({
             width={180}
             height={48}
             priority
-            style={{ width: 'auto' }}
+            style={{ width: 'auto', height: 'auto' }}
             className="h-11 md:h-12 w-auto object-contain transition-transform group-hover:scale-105"
           />
         </Link>
@@ -98,6 +101,27 @@ export default function TopNavbar<T extends string = string>({
 
       {/* Right: Role Switcher, Quick Create, Notifications, Profile */}
       <div className="flex items-center gap-3.5">
+        {/* Trade Link (Default Create Art Trade) */}
+        {!user ? (
+          <button
+            type="button"
+            onClick={() => setShowTradeAuthModal(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-sora font-medium bg-[#A7ACD9]/10 text-[#A7ACD9] hover:text-white hover:bg-[#A7ACD9]/20 border border-[#A7ACD9]/30 transition-all shadow-sm cursor-pointer"
+            title={t('Sign in to Trade')}
+          >
+            <ArrowLeftRight className="h-3.5 w-3.5 text-[#A7ACD9]" />
+            <span>{t('Trade')}</span>
+          </button>
+        ) : (isCreator || isAdmin) ? (
+          <Link
+            href="/art-trades/create"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-sora font-medium bg-[#A7ACD9]/10 text-[#A7ACD9] hover:text-white hover:bg-[#A7ACD9]/20 border border-[#A7ACD9]/30 transition-all shadow-sm"
+            title={t('Create Art Trade')}
+          >
+            <ArrowLeftRight className="h-3.5 w-3.5 text-[#A7ACD9]" />
+            <span>{t('Trade')}</span>
+          </Link>
+        ) : null}
         {/* Role Switcher Pill */}
         {showRoleSwitcher && (isCreator || isAdmin) && (
           <div className="hidden sm:flex bg-[#161926] p-1 rounded-xl border border-white/10 items-center gap-1">
@@ -212,6 +236,13 @@ export default function TopNavbar<T extends string = string>({
               {isCreator && (
                 <>
                   <Link
+                    href="/art-trades"
+                    onClick={() => setShowProfileMenu(false)}
+                    className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs text-[#e4e1e5] hover:text-white hover:bg-white/5 transition-colors"
+                  >
+                    <ArrowLeftRight className="w-4 h-4 text-[#A7ACD9]" /> {t('My Trades')}
+                  </Link>
+                  <Link
                     href="/creator/commissions"
                     onClick={() => setShowProfileMenu(false)}
                     className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs text-[#e4e1e5] hover:text-white hover:bg-white/5 transition-colors"
@@ -270,6 +301,10 @@ export default function TopNavbar<T extends string = string>({
           )}
         </div>
       </div>
+      <TradeAuthRequiredModal
+        isOpen={showTradeAuthModal}
+        onClose={() => setShowTradeAuthModal(false)}
+      />
     </header>
   );
 }

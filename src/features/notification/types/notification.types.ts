@@ -57,6 +57,14 @@ export const notificationTypeLabels: Record<string, string> = {
   InvitationDeclined: 'Từ chối lời mời sự kiện',
   InvitationCanceled: 'Lời mời sự kiện đã hủy',
   InvitationExpired: 'Lời mời sự kiện hết hạn',
+  ArtTradeProposed: 'Lời mời trao đổi tác phẩm',
+  ArtTradeAccepted: 'Chấp nhận trao đổi tác phẩm',
+  ArtTradeDeclined: 'Từ chối trao đổi tác phẩm',
+  ArtTradeCancelled: 'Hủy trao đổi tác phẩm',
+  ArtTradeArtworkSubmitted: 'Đối tác đã nộp tác phẩm',
+  ArtTradeCompleted: 'Giao dịch trao đổi hoàn tất',
+  TradeDisputeCreated: 'Khiếu nại trao đổi tác phẩm',
+  TradeDisputeResolved: 'Phân xử khiếu nại trao đổi',
 };
 
 /** Danh sách loại hợp lệ, dùng cho bộ lọc và kiểm tra dữ liệu. */

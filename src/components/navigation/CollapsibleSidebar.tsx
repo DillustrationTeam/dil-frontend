@@ -29,6 +29,7 @@ import {
   User,
   UserPen,
   Settings,
+  ArrowLeftRight,
 } from 'lucide-react';
 
 interface SidebarItem {
@@ -85,6 +86,13 @@ const CREATOR_NAV_SECTIONS: SidebarSection[] = [
       { label: 'Incoming Requests', href: '/creator/requests', icon: Clock },
       { label: 'Waitlist', href: '/creator/waitlist', icon: ListChecks },
       { label: 'Workroom Chat', href: '/workroom', icon: MessageSquare },
+    ],
+  },
+  {
+    title: 'Trade & Exchange',
+    items: [
+      { label: 'Trade', href: '/art-trades/create', icon: ArrowLeftRight },
+      { label: 'My Trades', href: '/art-trades', icon: FolderKanban },
     ],
   },
   {

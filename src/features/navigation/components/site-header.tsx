@@ -18,6 +18,7 @@ const navLinks = [
   // Đấu giá và Phòng làm việc chỉ hiện khi đã đăng nhập.
   { href: '/auctions', label: 'Đấu giá', match: ['/auctions'], exact: false, requiresAuth: true },
   { href: '/workroom', label: 'Phòng làm việc', match: ['/workroom'], exact: false, requiresAuth: true },
+  { href: '/art-trades/create', label: 'Trade', match: ['/art-trades'], exact: false, requiresAuth: true, creatorOnly: true },
 ];
 
 const focusRing = 'focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#c2c7f6]';
@@ -34,6 +35,7 @@ export function SiteHeader() {
   const { user, roles, refreshToken, isAuthenticated, clearAuth } = useAuthStore();
   const { t } = useLanguage();
   const isAdmin = roles.some((r) => ['Administrator', 'Admin', 'Moderator'].includes(r));
+  const isCreator = roles.some((r) => r.toLowerCase() === 'creator');
 
   const [searchOpen, setSearchOpen] = useState(false);
   const [keyword, setKeyword] = useState('');
@@ -128,7 +130,7 @@ export function SiteHeader() {
 
         <div className="hidden items-center justify-center gap-5 text-sm font-medium lg:flex xl:gap-8">
           {navLinks
-            .filter((link) => !link.requiresAuth || isAuthenticated)
+            .filter((link) => (!link.requiresAuth || isAuthenticated) && (!(link as any).creatorOnly || isCreator || isAdmin))
             .map(({ href, label, match, exact }) => {
               const active = isActive(match ?? [], Boolean(exact));
               return (
