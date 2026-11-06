@@ -73,37 +73,55 @@ export function DisputeEvidencePanel({ dispute }: DisputeEvidencePanelProps) {
       </div>
 
       {/* AI Dispute Summarizer (AI-UC56) */}
-      <div className="p-4 rounded-2xl bg-gradient-to-r from-purple-500/10 via-indigo-500/10 to-transparent border border-purple-500/20 space-y-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-purple-400" />
-            <h4 className="text-xs font-bold text-white uppercase tracking-wider">
-              AI Dispute Arbitration Assistant
-            </h4>
+      <div className="rounded-2xl border border-brand-periwinkle/25 bg-[#181B28]/80 backdrop-blur-md p-5 space-y-3.5 shadow-lg shadow-black/20">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-brand-periwinkle/15 border border-brand-periwinkle/30 flex items-center justify-center shrink-0">
+              <Sparkles className="w-4 h-4 text-brand-periwinkle" />
+            </div>
+            <div>
+              <h4 className="text-xs font-bold font-h1 text-white uppercase tracking-wider">
+                Trợ lý phân tích tranh chấp AI (Arbitration Assistant)
+              </h4>
+              <p className="text-[11px] text-outline font-body">
+                Tự động tổng hợp hồ sơ, trích dẫn mốc tiến độ và lịch sử trao đổi giữa hai bên
+              </p>
+            </div>
           </div>
           <button
             type="button"
             disabled={loadingAi}
             onClick={handleFetchAiSummary}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-purple-500/20 text-purple-200 border border-purple-500/30 hover:bg-purple-500/30 transition-colors disabled:opacity-50 cursor-pointer"
+            className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold font-h1 transition-all active:scale-95 disabled:opacity-50 cursor-pointer ${
+              aiSummary
+                ? 'border border-brand-periwinkle/30 bg-brand-periwinkle/10 text-brand-periwinkle hover:bg-brand-periwinkle/20'
+                : 'bg-brand-periwinkle text-brand-navy shadow-md hover:brightness-110'
+            }`}
           >
-            {loadingAi ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
-            <span>{loadingAi ? 'Đang tóm tắt…' : aiSummary ? 'Tóm tắt lại' : '✨ Tóm tắt tranh chấp bằng AI'}</span>
+            {loadingAi ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            ) : (
+              <Sparkles className="w-3.5 h-3.5" />
+            )}
+            <span>{loadingAi ? 'Đang phân tích hồ sơ…' : aiSummary ? 'Phân tích lại' : 'Tóm tắt tranh chấp bằng AI'}</span>
           </button>
         </div>
 
         {aiError && (
-          <p className="text-xs text-red-300 bg-red-500/10 p-2 rounded-lg border border-red-500/20">{aiError}</p>
+          <div className="text-xs text-red-300 bg-red-500/10 p-3 rounded-xl border border-red-500/20 font-body">
+            {aiError}
+          </div>
         )}
 
         {aiSummary ? (
-          <div className="text-xs text-slate-200 leading-relaxed whitespace-pre-line bg-black/40 p-4 rounded-xl border border-white/5 font-body">
+          <div className="rounded-xl border border-white/10 bg-black/50 p-4 font-body text-xs leading-relaxed text-[#E4E1E5] whitespace-pre-line selection:bg-brand-periwinkle/30">
             {aiSummary}
           </div>
         ) : !loadingAi ? (
-          <p className="text-[11px] text-[#8A8FA9]">
-            Bấm nút để AI tự động đọc và phân tích toàn bộ mốc vẽ, trao đổi chat và khiếu nại giữa 2 bên.
-          </p>
+          <div className="flex items-center gap-2 rounded-xl bg-white/[0.02] border border-white/5 p-3 text-xs text-[#8A8FA9] font-body">
+            <span className="w-1.5 h-1.5 rounded-full bg-brand-periwinkle shrink-0" />
+            <span>Bấm nút phía trên để AI tiến hành trích xuất bằng chứng khách quan, hỗ trợ Moderator ra phán quyết nhanh chóng.</span>
+          </div>
         ) : null}
       </div>
 

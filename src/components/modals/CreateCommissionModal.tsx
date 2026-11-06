@@ -175,13 +175,13 @@ export default function CreateCommissionModal({ creatorId, creatorName, onClose,
                 type="button"
                 disabled={aiBriefing}
                 onClick={() => handleAiBriefHelper(false)}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 px-2.5 py-1 text-[11px] font-semibold text-white shadow-sm hover:from-purple-500 hover:to-indigo-500 disabled:opacity-50 transition-all cursor-pointer"
+                className="inline-flex items-center gap-1.5 rounded-xl border border-brand-periwinkle/30 bg-brand-periwinkle/10 hover:bg-brand-periwinkle/20 text-brand-periwinkle px-3 py-1 text-[11px] font-bold font-h1 transition-all hover:border-brand-periwinkle/60 shadow-sm shadow-brand-periwinkle/5 active:scale-95 disabled:opacity-50 cursor-pointer"
                 title="Gợi ý brief chuẩn artist từ ý tưởng thô"
               >
                 {aiBriefing && !isRandomIdea ? (
-                  <Loader2 className="w-3 h-3 animate-spin" />
+                  <Loader2 className="w-3.5 h-3.5 animate-spin text-brand-periwinkle" />
                 ) : (
-                  <Sparkles className="w-3 h-3 text-amber-300" />
+                  <Sparkles className="w-3.5 h-3.5 text-brand-periwinkle" />
                 )}
                 <span>AI Brief Helper</span>
               </button>
@@ -190,13 +190,17 @@ export default function CreateCommissionModal({ creatorId, creatorName, onClose,
             {errors.description && <p role="alert" className="mt-1 flex items-center gap-1.5 text-xs text-red-300"><AlertCircle className="w-3.5 h-3.5 shrink-0" /> {errors.description.message}</p>}
 
             {aiSuggestion && (
-              <div className="mt-2 rounded-2xl border border-purple-500/30 bg-purple-950/20 p-3.5 space-y-2.5">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1.5 text-xs font-bold text-purple-300">
-                    <Sparkles className="w-4 h-4 text-amber-400" />
-                    <span>Gợi ý Brief từ AI</span>
+              <div className="mt-3 rounded-2xl border border-brand-periwinkle/25 bg-[#181B28]/95 backdrop-blur-md p-4 space-y-3 shadow-xl shadow-black/40 animate-fadeIn">
+                <div className="flex items-center justify-between border-b border-white/5 pb-2.5">
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-lg bg-brand-periwinkle/15 border border-brand-periwinkle/30 flex items-center justify-center">
+                      <Sparkles className="w-3.5 h-3.5 text-brand-periwinkle" />
+                    </div>
+                    <span className="font-h1 text-xs font-bold text-white tracking-wide">
+                      Gợi ý Brief từ AI
+                    </span>
                     {isRandomIdea && (
-                      <span className="ml-1 rounded-full bg-purple-500/20 px-2 py-0.5 text-[10px] font-semibold text-purple-300 border border-purple-500/30">
+                      <span className="rounded-full bg-brand-periwinkle/15 px-2 py-0.5 text-[10px] font-medium text-brand-periwinkle border border-brand-periwinkle/25">
                         Ý tưởng ngẫu nhiên
                       </span>
                     )}
@@ -204,14 +208,14 @@ export default function CreateCommissionModal({ creatorId, creatorName, onClose,
                   <button
                     type="button"
                     onClick={() => setAiSuggestion(null)}
-                    className="text-[#8A8FA9] hover:text-white text-xs p-1"
+                    className="w-6 h-6 rounded-full bg-white/5 hover:bg-white/10 text-[#8A8FA9] hover:text-white flex items-center justify-center text-xs transition-colors"
                     title="Đóng xem trước"
                   >
                     ✕
                   </button>
                 </div>
 
-                <div className="max-h-52 overflow-y-auto whitespace-pre-wrap rounded-xl bg-black/40 p-3 font-mono text-[11px] leading-relaxed text-slate-200 border border-white/5">
+                <div className="max-h-56 overflow-y-auto whitespace-pre-wrap rounded-xl bg-black/50 p-3.5 font-body text-xs leading-relaxed text-[#E4E1E5] border border-white/10 selection:bg-brand-periwinkle/30">
                   {aiSuggestion}
                 </div>
 
@@ -223,17 +227,17 @@ export default function CreateCommissionModal({ creatorId, creatorName, onClose,
                       setValue('description', aiSuggestion, { shouldValidate: true });
                       setAiSuggestion(null);
                     }}
-                    className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 px-3 py-1.5 text-xs font-bold text-white transition-colors shadow-sm disabled:opacity-50"
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-brand-periwinkle hover:brightness-110 px-3.5 py-1.5 font-h1 text-xs font-bold text-brand-navy shadow-md transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
                   >
                     <Check className="w-3.5 h-3.5" />
-                    <span>Đồng ý với ý tưởng này</span>
+                    <span>Áp dụng gợi ý này</span>
                   </button>
 
                   <button
                     type="button"
                     disabled={aiBriefing}
                     onClick={() => handleAiBriefHelper(false)}
-                    className="inline-flex items-center gap-1.5 rounded-lg bg-white/10 hover:bg-white/15 px-3 py-1.5 text-xs font-semibold text-slate-200 hover:text-white transition-colors disabled:opacity-50"
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20 px-3 py-1.5 font-h1 text-xs font-semibold text-slate-200 hover:text-white transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
                   >
                     {aiBriefing && !isRandomIdea ? (
                       <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -247,14 +251,14 @@ export default function CreateCommissionModal({ creatorId, creatorName, onClose,
                     type="button"
                     disabled={aiBriefing}
                     onClick={() => handleAiBriefHelper(true)}
-                    className="inline-flex items-center gap-1.5 rounded-lg bg-purple-600/30 hover:bg-purple-600/50 border border-purple-500/40 px-3 py-1.5 text-xs font-semibold text-purple-200 hover:text-white transition-colors disabled:opacity-50"
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-brand-periwinkle/30 bg-brand-periwinkle/10 hover:bg-brand-periwinkle/20 px-3 py-1.5 font-h1 text-xs font-semibold text-brand-periwinkle transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
                   >
                     {aiBriefing && isRandomIdea ? (
                       <Loader2 className="w-3.5 h-3.5 animate-spin" />
                     ) : (
-                      <Dice5 className="w-3.5 h-3.5 text-purple-300" />
+                      <Dice5 className="w-3.5 h-3.5 text-brand-periwinkle" />
                     )}
-                    <span>Tạo ý tưởng ngẫu nhiên</span>
+                    <span>Gợi ý ngẫu nhiên</span>
                   </button>
                 </div>
               </div>

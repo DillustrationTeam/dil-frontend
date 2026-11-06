@@ -238,14 +238,15 @@ export default function ApprovalRevisionModal({
                       type="button"
                       disabled={isStandardizing || !feedback.trim()}
                       onClick={handleStandardizeFeedback}
-                      className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-bold text-amber-300 hover:text-amber-200 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 rounded-lg transition-colors disabled:opacity-40 cursor-pointer"
+                      className="inline-flex items-center gap-1.5 rounded-xl border border-brand-periwinkle/30 bg-brand-periwinkle/10 hover:bg-brand-periwinkle/20 text-brand-periwinkle px-3 py-1 text-[11px] font-bold font-h1 transition-all hover:border-brand-periwinkle/60 shadow-sm active:scale-95 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                      title="AI chuyển đổi phản hồi của bạn thành checklist kỹ thuật rõ ràng cho artist"
                     >
                       {isStandardizing ? (
-                        <Loader2 className="w-3 h-3 animate-spin text-amber-300" />
+                        <Loader2 className="w-3.5 h-3.5 animate-spin text-brand-periwinkle" />
                       ) : (
-                        <Sparkles className="w-3 h-3 text-amber-300" />
+                        <Sparkles className="w-3.5 h-3.5 text-brand-periwinkle" />
                       )}
-                      <span>{isStandardizing ? 'Đang chuẩn hóa…' : '✨ AI Chuẩn hóa yêu cầu'}</span>
+                      <span>{isStandardizing ? 'Đang chuẩn hóa…' : 'AI Chuẩn hóa Checklist'}</span>
                     </button>
                   </div>
                   <textarea
