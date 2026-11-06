@@ -2,9 +2,10 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
-import { X, CheckCircle2, MessageSquare, AlertTriangle, ShieldCheck, DollarSign } from 'lucide-react';
+import { X, CheckCircle2, MessageSquare, AlertTriangle, ShieldCheck, DollarSign, Sparkles, Loader2 } from 'lucide-react';
 import { commissionService } from '@/services/commission.service';
 import { addonService } from '@/services/addon.service';
+import { aiService } from '@/features/ai-assistant/services/ai.service';
 import toast from 'react-hot-toast';
 import type { MilestoneStatus } from '@/types/commission.types';
 
@@ -44,10 +45,27 @@ export default function ApprovalRevisionModal({
   const [mode, setMode] = useState<'view' | 'revise'>('view');
   const [feedback, setFeedback] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isStandardizing, setIsStandardizing] = useState(false);
 
   if (!isOpen) return null;
 
   const revisionsLeft = maxRevisions - revisionCount;
+
+  const handleStandardizeFeedback = async () => {
+    if (!feedback.trim()) return;
+    setIsStandardizing(true);
+    try {
+      const res = await aiService.standardizeRevision({ feedback });
+      if (res?.content) {
+        setFeedback(res.content);
+      }
+    } catch (err) {
+      console.error('Failed to standardize revision', err);
+      toast.error('Không thể chuẩn hóa phản hồi lúc này.');
+    } finally {
+      setIsStandardizing(false);
+    }
+  };
 
   const handleApprove = async () => {
     setIsSubmitting(true);
@@ -212,9 +230,24 @@ export default function ApprovalRevisionModal({
                   </div>
                 )}
                 <div>
-                  <label className="block text-[11px] font-space-grotesk font-bold text-amber-400 uppercase tracking-wider mb-2 flex items-center gap-2">
-                    <AlertTriangle className="w-3.5 h-3.5" /> Chi tiết cần sửa đổi
-                  </label>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-[11px] font-space-grotesk font-bold text-amber-400 uppercase tracking-wider flex items-center gap-2">
+                      <AlertTriangle className="w-3.5 h-3.5" /> Chi tiết cần sửa đổi
+                    </label>
+                    <button
+                      type="button"
+                      disabled={isStandardizing || !feedback.trim()}
+                      onClick={handleStandardizeFeedback}
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-bold text-amber-300 hover:text-amber-200 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 rounded-lg transition-colors disabled:opacity-40 cursor-pointer"
+                    >
+                      {isStandardizing ? (
+                        <Loader2 className="w-3 h-3 animate-spin text-amber-300" />
+                      ) : (
+                        <Sparkles className="w-3 h-3 text-amber-300" />
+                      )}
+                      <span>{isStandardizing ? 'Đang chuẩn hóa…' : '✨ AI Chuẩn hóa yêu cầu'}</span>
+                    </button>
+                  </div>
                   <textarea
                     rows={6}
                     value={feedback}
