@@ -80,7 +80,7 @@ export function DisputeEvidencePanel({ dispute }: DisputeEvidencePanelProps) {
               <Sparkles className="w-4 h-4 text-brand-periwinkle" />
             </div>
             <div>
-              <h4 className="text-xs font-bold font-h1 text-white uppercase tracking-wider">
+              <h4 className="text-xs font-bold text-white uppercase tracking-wider">
                 Trợ lý phân tích tranh chấp AI (Arbitration Assistant)
               </h4>
               <p className="text-[11px] text-outline font-body">
@@ -92,7 +92,7 @@ export function DisputeEvidencePanel({ dispute }: DisputeEvidencePanelProps) {
             type="button"
             disabled={loadingAi}
             onClick={handleFetchAiSummary}
-            className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold font-h1 transition-all active:scale-95 disabled:opacity-50 cursor-pointer ${
+            className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all active:scale-95 disabled:opacity-50 cursor-pointer ${
               aiSummary
                 ? 'border border-brand-periwinkle/30 bg-brand-periwinkle/10 text-brand-periwinkle hover:bg-brand-periwinkle/20'
                 : 'bg-brand-periwinkle text-brand-navy shadow-md hover:brightness-110'

@@ -238,7 +238,7 @@ export default function ApprovalRevisionModal({
                       type="button"
                       disabled={isStandardizing || !feedback.trim()}
                       onClick={handleStandardizeFeedback}
-                      className="inline-flex items-center gap-1.5 rounded-xl border border-brand-periwinkle/30 bg-brand-periwinkle/10 hover:bg-brand-periwinkle/20 text-brand-periwinkle px-3 py-1 text-[11px] font-bold font-h1 transition-all hover:border-brand-periwinkle/60 shadow-sm active:scale-95 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                      className="inline-flex items-center gap-1.5 rounded-xl border border-brand-periwinkle/30 bg-brand-periwinkle/10 hover:bg-brand-periwinkle/20 text-brand-periwinkle px-3 py-1 text-[11px] font-bold transition-all hover:border-brand-periwinkle/60 shadow-sm active:scale-95 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                       title="AI chuyển đổi phản hồi của bạn thành checklist kỹ thuật rõ ràng cho artist"
                     >
                       {isStandardizing ? (

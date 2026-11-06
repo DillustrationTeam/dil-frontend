@@ -175,7 +175,7 @@ export default function CreateCommissionModal({ creatorId, creatorName, onClose,
                 type="button"
                 disabled={aiBriefing}
                 onClick={() => handleAiBriefHelper(false)}
-                className="inline-flex items-center gap-1.5 rounded-xl border border-brand-periwinkle/30 bg-brand-periwinkle/10 hover:bg-brand-periwinkle/20 text-brand-periwinkle px-3 py-1 text-[11px] font-bold font-h1 transition-all hover:border-brand-periwinkle/60 shadow-sm shadow-brand-periwinkle/5 active:scale-95 disabled:opacity-50 cursor-pointer"
+                className="inline-flex items-center gap-1.5 rounded-xl border border-brand-periwinkle/30 bg-brand-periwinkle/10 hover:bg-brand-periwinkle/20 text-brand-periwinkle px-3 py-1 text-[11px] font-bold transition-all hover:border-brand-periwinkle/60 shadow-sm shadow-brand-periwinkle/5 active:scale-95 disabled:opacity-50 cursor-pointer"
                 title="Gợi ý brief chuẩn artist từ ý tưởng thô"
               >
                 {aiBriefing && !isRandomIdea ? (
@@ -196,7 +196,7 @@ export default function CreateCommissionModal({ creatorId, creatorName, onClose,
                     <div className="w-6 h-6 rounded-lg bg-brand-periwinkle/15 border border-brand-periwinkle/30 flex items-center justify-center">
                       <Sparkles className="w-3.5 h-3.5 text-brand-periwinkle" />
                     </div>
-                    <span className="font-h1 text-xs font-bold text-white tracking-wide">
+                    <span className="text-xs font-bold text-white tracking-wide">
                       Gợi ý Brief từ AI
                     </span>
                     {isRandomIdea && (
@@ -227,7 +227,7 @@ export default function CreateCommissionModal({ creatorId, creatorName, onClose,
                       setValue('description', aiSuggestion, { shouldValidate: true });
                       setAiSuggestion(null);
                     }}
-                    className="inline-flex items-center gap-1.5 rounded-xl bg-brand-periwinkle hover:brightness-110 px-3.5 py-1.5 font-h1 text-xs font-bold text-brand-navy shadow-md transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-brand-periwinkle hover:brightness-110 px-3.5 py-1.5 text-xs font-bold text-brand-navy shadow-md transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
                   >
                     <Check className="w-3.5 h-3.5" />
                     <span>Áp dụng gợi ý này</span>
@@ -237,7 +237,7 @@ export default function CreateCommissionModal({ creatorId, creatorName, onClose,
                     type="button"
                     disabled={aiBriefing}
                     onClick={() => handleAiBriefHelper(false)}
-                    className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20 px-3 py-1.5 font-h1 text-xs font-semibold text-slate-200 hover:text-white transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20 px-3 py-1.5 text-xs font-semibold text-slate-200 hover:text-white transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
                   >
                     {aiBriefing && !isRandomIdea ? (
                       <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -251,7 +251,7 @@ export default function CreateCommissionModal({ creatorId, creatorName, onClose,
                     type="button"
                     disabled={aiBriefing}
                     onClick={() => handleAiBriefHelper(true)}
-                    className="inline-flex items-center gap-1.5 rounded-xl border border-brand-periwinkle/30 bg-brand-periwinkle/10 hover:bg-brand-periwinkle/20 px-3 py-1.5 font-h1 text-xs font-semibold text-brand-periwinkle transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-brand-periwinkle/30 bg-brand-periwinkle/10 hover:bg-brand-periwinkle/20 px-3 py-1.5 text-xs font-semibold text-brand-periwinkle transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
                   >
                     {aiBriefing && isRandomIdea ? (
                       <Loader2 className="w-3.5 h-3.5 animate-spin" />
