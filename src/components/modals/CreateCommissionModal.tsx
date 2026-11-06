@@ -8,7 +8,8 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { X, AlertCircle } from 'lucide-react';
+import { X, AlertCircle, Sparkles, Loader2, Check, RefreshCw, Dice5 } from 'lucide-react';
+import { aiService } from '@/features/ai-assistant/services/ai.service';
 import { commissionService } from '@/services/commission.service';
 import { creatorRateCardService, RateCardPackage } from '@/features/creator-studio/services/creator-rate-card.service';
 import { creatorProfileService } from '@/features/creator-studio/services/creator-profile.service';
@@ -39,8 +40,11 @@ export default function CreateCommissionModal({ creatorId, creatorName, onClose,
   const [packageError, setPackageError] = useState<string | null>(null);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  const [aiBriefing, setAiBriefing] = useState(false);
+  const [aiSuggestion, setAiSuggestion] = useState<string | null>(null);
+  const [isRandomIdea, setIsRandomIdea] = useState(false);
 
-  const { register, handleSubmit, formState: { errors } } = useForm<Form>({
+  const { register, handleSubmit, setValue, getValues, formState: { errors } } = useForm<Form>({
     resolver: zodResolver(schema),
     defaultValues: { title: '', description: '', deadlineAt: '', voucherCode: '' },
   });
@@ -82,6 +86,34 @@ export default function CreateCommissionModal({ creatorId, creatorName, onClose,
     window.addEventListener('keydown', onKeyDown);
     return () => { releaseScrollLock(); window.removeEventListener('keydown', onKeyDown); if (previousFocus?.isConnected) previousFocus.focus({ preventScroll: true }); };
   }, []);
+
+  const handleAiBriefHelper = async (random: boolean = false) => {
+    const currentTitle = getValues('title');
+    const currentDesc = getValues('description');
+    if (!currentTitle?.trim() && !currentDesc?.trim()) {
+      setError('Vui lòng nhập ít nhất tên dự án hoặc vài từ khóa ý tưởng để AI gợi ý brief.');
+      return;
+    }
+    setAiBriefing(true);
+    setIsRandomIdea(random);
+    setError('');
+    try {
+      const res = await aiService.briefHelper({
+        title: currentTitle,
+        description: currentDesc,
+        style: selectedPackage?.name,
+        budget: estimatedTotal,
+        surpriseMe: random,
+      });
+      if (res?.content) {
+        setAiSuggestion(res.content);
+      }
+    } catch (cause) {
+      setError(extractErrorMessage(cause, 'Không thể gọi AI hỗ trợ brief lúc này.'));
+    } finally {
+      setAiBriefing(false);
+    }
+  };
 
   const submit = async (values: Form) => {
     setError('');
@@ -137,9 +169,96 @@ export default function CreateCommissionModal({ creatorId, creatorName, onClose,
           </div>
 
           <div className="space-y-2">
-            <label className={label} htmlFor="commission-brief">MÔ TẢ YÊU CẦU CHI TIẾT <span className="text-red-400">*</span></label>
+            <div className="flex items-center justify-between gap-2">
+              <label className={label} htmlFor="commission-brief">MÔ TẢ YÊU CẦU CHI TIẾT <span className="text-red-400">*</span></label>
+              <button
+                type="button"
+                disabled={aiBriefing}
+                onClick={() => handleAiBriefHelper(false)}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 px-2.5 py-1 text-[11px] font-semibold text-white shadow-sm hover:from-purple-500 hover:to-indigo-500 disabled:opacity-50 transition-all cursor-pointer"
+                title="Gợi ý brief chuẩn artist từ ý tưởng thô"
+              >
+                {aiBriefing && !isRandomIdea ? (
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                ) : (
+                  <Sparkles className="w-3 h-3 text-amber-300" />
+                )}
+                <span>AI Brief Helper</span>
+              </button>
+            </div>
             <textarea id="commission-brief" rows={4} className={`${field} ${errors.description ? 'border-red-500/70' : ''}`} placeholder="Mô tả chi tiết phong cách, màu sắc, kích thước và yêu cầu nhân vật…" {...register('description')} />
             {errors.description && <p role="alert" className="mt-1 flex items-center gap-1.5 text-xs text-red-300"><AlertCircle className="w-3.5 h-3.5 shrink-0" /> {errors.description.message}</p>}
+
+            {aiSuggestion && (
+              <div className="mt-2 rounded-2xl border border-purple-500/30 bg-purple-950/20 p-3.5 space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-purple-300">
+                    <Sparkles className="w-4 h-4 text-amber-400" />
+                    <span>Gợi ý Brief từ AI</span>
+                    {isRandomIdea && (
+                      <span className="ml-1 rounded-full bg-purple-500/20 px-2 py-0.5 text-[10px] font-semibold text-purple-300 border border-purple-500/30">
+                        Ý tưởng ngẫu nhiên
+                      </span>
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setAiSuggestion(null)}
+                    className="text-[#8A8FA9] hover:text-white text-xs p-1"
+                    title="Đóng xem trước"
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                <div className="max-h-52 overflow-y-auto whitespace-pre-wrap rounded-xl bg-black/40 p-3 font-mono text-[11px] leading-relaxed text-slate-200 border border-white/5">
+                  {aiSuggestion}
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2 pt-1">
+                  <button
+                    type="button"
+                    disabled={aiBriefing}
+                    onClick={() => {
+                      setValue('description', aiSuggestion, { shouldValidate: true });
+                      setAiSuggestion(null);
+                    }}
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 px-3 py-1.5 text-xs font-bold text-white transition-colors shadow-sm disabled:opacity-50"
+                  >
+                    <Check className="w-3.5 h-3.5" />
+                    <span>Đồng ý với ý tưởng này</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={aiBriefing}
+                    onClick={() => handleAiBriefHelper(false)}
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-white/10 hover:bg-white/15 px-3 py-1.5 text-xs font-semibold text-slate-200 hover:text-white transition-colors disabled:opacity-50"
+                  >
+                    {aiBriefing && !isRandomIdea ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <RefreshCw className="w-3.5 h-3.5" />
+                    )}
+                    <span>Tạo lại</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={aiBriefing}
+                    onClick={() => handleAiBriefHelper(true)}
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-purple-600/30 hover:bg-purple-600/50 border border-purple-500/40 px-3 py-1.5 text-xs font-semibold text-purple-200 hover:text-white transition-colors disabled:opacity-50"
+                  >
+                    {aiBriefing && isRandomIdea ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <Dice5 className="w-3.5 h-3.5 text-purple-300" />
+                    )}
+                    <span>Tạo ý tưởng ngẫu nhiên</span>
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           <fieldset className="space-y-3 border-t border-white/10 pt-5">
