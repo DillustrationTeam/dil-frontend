@@ -94,6 +94,29 @@ export const commissionService = {
     const res = await apiClient.post<ApiResponse<unknown>>(`/commissions/${id}/reviews`, payload);
     return res.data.data;
   },
+  rename: async (id: string, title: string) => {
+    const res = await apiClient.patch<ApiResponse<{
+      commissionId: string;
+      newTitle: string;
+      updatedBy: string;
+      roomId?: string;
+      messageId?: string;
+      messageBody?: string;
+      sentAt?: string;
+    }>>(`/commissions/${id}/rename`, { title });
+    return res.data.data;
+  },
+  sendTip: async (id: string, payload: { amount: number; message?: string }) => {
+    const res = await apiClient.post<ApiResponse<{
+      commissionId: string;
+      amount: number;
+      clientRemainingBalance: number;
+      creatorName: string;
+      createdAt: string;
+      message?: string;
+    }>>(`/commissions/${id}/tip`, payload);
+    return res.data.data;
+  },
   replyReview: async (id: string, replyComment: string) => {
     const res = await apiClient.post<ApiResponse<unknown>>(`/commissions/${id}/reviews/reply`, { replyComment });
     return res.data.data;
