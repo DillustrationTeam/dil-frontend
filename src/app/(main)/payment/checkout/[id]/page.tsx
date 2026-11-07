@@ -95,5 +95,5 @@ export default function CheckoutPage() {
         onConfirm={acceptTerms}
       />
     )}
-  </main>;
+</main>;
 }
