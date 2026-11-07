@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import {
   ArrowLeftRight,
@@ -13,16 +13,15 @@ import {
   ChevronRight,
   ShieldCheck,
   Loader2,
-  Filter,
   Palette,
+  RotateCcw,
 } from 'lucide-react';
 import { artTradeService } from '@/services/art-trade.service';
 import { ArtTradeSummaryDto, TradeSlotStatusDto, TradeStatus } from '@/types/art-trade.types';
+import { EventSearchFilterBar } from '@/features/event';
 import { useAuthStore } from '@/store/use-auth-store';
 import { useLanguage } from '@/context/language-context';
 import toast from 'react-hot-toast';
-
-type TradeTab = 'ALL' | 'ACTIVE' | 'PROPOSALS' | 'COMPLETED' | 'DISPUTED';
 
 export default function MyTradesPage() {
   const currentUser = useAuthStore((state) => state.user);
@@ -36,7 +35,9 @@ export default function MyTradesPage() {
   const [trades, setTrades] = useState<ArtTradeSummaryDto[]>([]);
   const [slotStatus, setSlotStatus] = useState<TradeSlotStatusDto | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<TradeTab>('ALL');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('ALL');
+  const [sortBy, setSortBy] = useState('latest');
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
 
   // Load trades and slot quota
@@ -155,20 +156,60 @@ export default function MyTradesPage() {
     );
   };
 
-  const filteredTrades = trades.filter((trade) => {
-    switch (activeTab) {
-      case 'ACTIVE':
-        return isAcceptedStatus(trade.status) || isBothSubmittedStatus(trade.status);
-      case 'PROPOSALS':
-        return isProposedStatus(trade.status);
-      case 'COMPLETED':
-        return isCompletedStatus(trade.status);
-      case 'DISPUTED':
-        return isDisputedStatus(trade.status) || isCancelledStatus(trade.status);
-      default:
-        return true;
+  const filteredTrades = useMemo(() => {
+    let list = [...trades];
+
+    // 1. Search Query Filter (Title, Partner name, or Trade ID)
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      list = list.filter((trade) => {
+        const titleMatch = trade.title?.toLowerCase().includes(q);
+        const partnerNameMatch = trade.partner?.fullName?.toLowerCase().includes(q);
+        const idMatch = trade.id?.toLowerCase().includes(q);
+        return titleMatch || partnerNameMatch || idMatch;
+      });
     }
-  });
+
+    // 2. Status Filter
+    if (statusFilter && statusFilter !== 'ALL') {
+      switch (statusFilter) {
+        case 'ACTIVE':
+          list = list.filter((trade) => isAcceptedStatus(trade.status) || isBothSubmittedStatus(trade.status));
+          break;
+        case 'PROPOSALS':
+          list = list.filter((trade) => isProposedStatus(trade.status));
+          break;
+        case 'COMPLETED':
+          list = list.filter((trade) => isCompletedStatus(trade.status));
+          break;
+        case 'DISPUTED':
+          list = list.filter((trade) => isDisputedStatus(trade.status) || isCancelledStatus(trade.status));
+          break;
+      }
+    }
+
+    // 3. Sort & Role Filter
+    if (sortBy === 'oldest') {
+      list.sort((a, b) => new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime());
+    } else if (sortBy === 'deadline') {
+      list.sort((a, b) => {
+        const tA = a.submissionDeadlineAt ? new Date(a.submissionDeadlineAt).getTime() : Infinity;
+        const tB = b.submissionDeadlineAt ? new Date(b.submissionDeadlineAt).getTime() : Infinity;
+        return tA - tB;
+      });
+    } else if (sortBy === 'initiator_only') {
+      list = list.filter((t) => t.role?.toLowerCase() === 'initiator');
+    } else if (sortBy === 'receiver_only') {
+      list = list.filter((t) => t.role?.toLowerCase() !== 'initiator');
+    } else if (sortBy === 'title_asc') {
+      list.sort((a, b) => (a.title || '').localeCompare(b.title || ''));
+    } else {
+      // Default: Latest created first
+      list.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
+    }
+
+    return list;
+  }, [trades, searchQuery, statusFilter, sortBy]);
 
   if (!isCreator && !isAdmin) {
     return (
@@ -267,50 +308,112 @@ export default function MyTradesPage() {
         )}
       </div>
 
-      {/* Tab Filter Navigation */}
-      <div className="flex items-center gap-2 pb-6 overflow-x-auto border-b border-white/5 mb-6">
-        {[
-          { key: 'ALL', label: isVie ? 'Tất cả' : 'All Trades' },
-          { key: 'ACTIVE', label: isVie ? 'Đang thực hiện' : 'Active Sessions' },
-          { key: 'PROPOSALS', label: isVie ? 'Đề xuất chờ duyệt' : 'Proposals' },
-          { key: 'COMPLETED', label: isVie ? 'Đã hoàn tất' : 'Completed' },
-          { key: 'DISPUTED', label: isVie ? 'Khiếu nại & Lịch sử' : 'Disputes & History' },
-        ].map((tab) => (
+      {/* Search & Dropdown Filter Bar (Jury Style) */}
+      <EventSearchFilterBar
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        searchPlaceholder={
+          isVie
+            ? 'Tìm theo tên đề xuất trao đổi, tên đối tác...'
+            : 'Search by trade title, partner name...'
+        }
+        statusValue={statusFilter}
+        onStatusChange={setStatusFilter}
+        statusOptions={[
+          { value: 'ALL', label: isVie ? 'Tất cả trạng thái (Mặc định)' : 'All Statuses (Default)' },
+          { value: 'ACTIVE', label: isVie ? 'Đang thực hiện (In Progress)' : 'In Progress (Active)' },
+          { value: 'PROPOSALS', label: isVie ? 'Đề xuất chờ duyệt' : 'Proposals (Pending)' },
+          { value: 'COMPLETED', label: isVie ? 'Đã hoàn tất' : 'Completed' },
+          { value: 'DISPUTED', label: isVie ? 'Khiếu nại & Đã hủy' : 'Disputes & Cancelled' },
+        ]}
+        sortValue={sortBy}
+        onSortChange={setSortBy}
+        sortOptions={[
+          { value: 'latest', label: isVie ? 'Mới nhất (Mặc định)' : 'Latest (Default)' },
+          { value: 'oldest', label: isVie ? 'Cũ nhất' : 'Oldest' },
+          { value: 'deadline', label: isVie ? 'Hạn nộp gần nhất' : 'Upcoming Deadline' },
+          { value: 'initiator_only', label: isVie ? 'Do tôi đề xuất' : 'Proposed by Me' },
+          { value: 'receiver_only', label: isVie ? 'Nhận từ đối tác' : 'Received from Partner' },
+          { value: 'title_asc', label: isVie ? 'Tiêu đề (A-Z)' : 'Title (A-Z)' },
+        ]}
+        className="mb-4"
+      />
+
+      {/* Filter Status & Counter Info */}
+      <div className="flex items-center justify-between gap-3 pb-4 mb-2 text-xs text-gray-400">
+        <span>
+          {isVie
+            ? `Hiển thị ${filteredTrades.length} trên tổng số ${trades.length} lượt trao đổi`
+            : `Showing ${filteredTrades.length} of ${trades.length} trade sessions`}
+        </span>
+        {(searchQuery || statusFilter !== 'ALL' || sortBy !== 'latest') && (
           <button
-            key={tab.key}
             type="button"
-            onClick={() => setActiveTab(tab.key as TradeTab)}
-            className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all whitespace-nowrap cursor-pointer ${
-              activeTab === tab.key
-                ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
-                : 'bg-white/5 text-gray-400 hover:text-white hover:bg-white/10'
-            }`}
+            onClick={() => {
+              setSearchQuery('');
+              setStatusFilter('ALL');
+              setSortBy('latest');
+            }}
+            className="inline-flex items-center gap-1.5 text-indigo-400 hover:text-indigo-300 font-medium transition cursor-pointer"
           >
-            {tab.label}
+            <RotateCcw className="w-3.5 h-3.5" />
+            <span>{isVie ? 'Đặt lại bộ lọc' : 'Reset filters'}</span>
           </button>
-        ))}
+        )}
       </div>
 
       {/* Trades List */}
       {loading ? (
         <div className="min-h-[300px] flex flex-col items-center justify-center p-8 text-center text-gray-400">
           <Loader2 className="w-8 h-8 animate-spin text-indigo-400 mb-3" />
-          <p className="text-xs font-medium">Loading your trades...</p>
+          <p className="text-xs font-medium">{isVie ? 'Đang tải danh sách trao đổi...' : 'Loading your trades...'}</p>
         </div>
       ) : filteredTrades.length === 0 ? (
-        <div className="p-12 text-center rounded-3xl border border-white/10 bg-white/[0.02] max-w-lg mx-auto">
-          <ArrowLeftRight className="w-12 h-12 mx-auto mb-3 text-gray-500 opacity-60" />
-          <h3 className="text-base font-bold text-white mb-1">No Art Trades Found</h3>
-          <p className="text-xs text-gray-400 mb-6">
-            You don&apos;t have any trade sessions matching this category.
-          </p>
-          <Link
-            href="/art-trades/create"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-lg shadow-indigo-600/30 transition"
-          >
-            <Plus className="w-4 h-4" /> Propose a Trade
-          </Link>
-        </div>
+        trades.length === 0 ? (
+          <div className="p-12 text-center rounded-3xl border border-white/10 bg-white/[0.02] max-w-lg mx-auto">
+            <ArrowLeftRight className="w-12 h-12 mx-auto mb-3 text-gray-500 opacity-60" />
+            <h3 className="text-base font-bold text-white mb-1">
+              {isVie ? 'Chưa có lượt trao đổi nào' : 'No Art Trades Found'}
+            </h3>
+            <p className="text-xs text-gray-400 mb-6">
+              {isVie
+                ? 'Bạn chưa tham gia lượt trao đổi tranh nào. Hãy bắt đầu tạo một đề nghị trao đổi mới!'
+                : 'You do not have any trade sessions yet. Start by proposing a new art trade!'}
+            </p>
+            <Link
+              href="/art-trades/create"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-lg shadow-indigo-600/30 transition"
+            >
+              <Plus className="w-4 h-4" /> {isVie ? 'Tạo đề nghị trao đổi' : 'Propose a Trade'}
+            </Link>
+          </div>
+        ) : (
+          <div className="p-12 text-center rounded-3xl border border-white/10 bg-white/[0.02] max-w-lg mx-auto space-y-3">
+            <ArrowLeftRight className="w-12 h-12 mx-auto mb-2 text-gray-500 opacity-60" />
+            <h3 className="text-base font-bold text-white font-sora">
+              {isVie ? 'Không tìm thấy lượt trao đổi phù hợp' : 'No Matching Trades Found'}
+            </h3>
+            <p className="text-xs text-gray-400 max-w-sm mx-auto">
+              {isVie
+                ? 'Không có lượt trao đổi nào khớp với từ khóa tìm kiếm hoặc tiêu chí lọc hiện tại của bạn.'
+                : 'There are currently no trade sessions matching your search or filter criteria.'}
+            </p>
+            <div className="pt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchQuery('');
+                  setStatusFilter('ALL');
+                  setSortBy('latest');
+                }}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-white transition cursor-pointer"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span>{isVie ? 'Đặt lại bộ lọc' : 'Reset Search & Filters'}</span>
+              </button>
+            </div>
+          </div>
+        )
       ) : (
         <div className="grid grid-cols-1 gap-4">
           {filteredTrades.map((trade) => {

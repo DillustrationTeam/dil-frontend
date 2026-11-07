@@ -12,7 +12,6 @@ import {
   ShieldCheck,
   AlertCircle,
   Sparkles,
-  Download,
   ImageIcon,
   Loader2,
   XCircle,
@@ -47,13 +46,15 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
   const [loading, setLoading] = useState<boolean>(!initialData && !!tradeId && isValidGuid(tradeId));
   const [uploadingSide, setUploadingSide] = useState<'initiator' | 'receiver' | null>(null);
   const [confirming, setConfirming] = useState<boolean>(false);
-  const [downloading, setDownloading] = useState<boolean>(false);
   const [respondingProposal, setRespondingProposal] = useState<boolean>(false);
   const [sideBNote, setSideBNote] = useState<string>('');
   const [sideBImages, setSideBImages] = useState<string[]>([]);
   const [isUploadingSideBAttachment, setIsUploadingSideBAttachment] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<'reference' | 'submission'>('reference');
   const [previewModalUrl, setPreviewModalUrl] = useState<string | null>(null);
+  const [showCancelModal, setShowCancelModal] = useState<boolean>(false);
+  const [cancelReason, setCancelReason] = useState<string>('');
+  const [cancelling, setCancelling] = useState<boolean>(false);
 
   const initiatorFileInputRef = useRef<HTMLInputElement>(null);
   const receiverFileInputRef = useRef<HTMLInputElement>(null);
@@ -259,39 +260,53 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
     }
   };
 
+  // Handle trade cancellation with modal
+  const handleConfirmCancelTrade = async () => {
+    if (!trade?.id) return;
+    const finalReason = cancelReason.trim();
+    if (!finalReason) {
+      toast.error(isVie ? 'Vui lòng nhập lý do hủy giao dịch.' : 'Please enter a cancellation reason.');
+      return;
+    }
+
+    try {
+      setCancelling(true);
+      const updated = await artTradeService.cancel(trade.id, { reason: finalReason });
+      setTrade(updated);
+      setShowCancelModal(false);
+      setCancelReason('');
+      toast.success(isVie ? 'Đã hủy cuộc trao đổi tranh.' : 'Trade cancelled successfully.');
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Failed to cancel trade.';
+      toast.error(msg);
+    } finally {
+      setCancelling(false);
+    }
+  };
+
   // Handle confirmation
   const handleConfirmSatisfaction = async (side: 'initiator' | 'receiver') => {
     if (!trade?.id) return;
 
     try {
       setConfirming(true);
-      const updated = await artTradeService.confirm(trade.id);
+      const updated = await artTradeService.confirm(trade.id, side);
       setTrade(updated);
       toast.success(isVie ? 'Đã xác nhận hài lòng!' : 'Satisfaction confirmed!');
     } catch (err: unknown) {
       console.error(err);
-      toast.error(isVie ? 'Không thể xác nhận sự hài lòng.' : 'Could not confirm trade satisfaction.');
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      toast.error(msg || (isVie ? 'Không thể xác nhận sự hài lòng.' : 'Could not confirm trade satisfaction.'));
     } finally {
       setConfirming(false);
     }
   };
 
-  // Handle download original
-  const handleDownloadOriginal = async () => {
-    if (!trade?.id) return;
-
-    try {
-      setDownloading(true);
-      const result = await artTradeService.getDownloadUrl(trade.id);
-      window.open(result.downloadUrl, '_blank');
-      toast.success(isVie ? `Đang bắt đầu tải về: ${result.fileName}` : `Download started for ${result.fileName}!`);
-    } catch (err: unknown) {
-      console.error(err);
-      toast.error(isVie ? 'Không thể lấy liên kết tải file gốc.' : 'Unable to fetch download URL.');
-    } finally {
-      setDownloading(false);
-    }
-  };
+  const isWatermarkRemoved =
+    trade?.status === 'Completed' ||
+    (trade?.status as unknown) === 4 ||
+    (trade?.status as unknown) === '4' ||
+    (Boolean(trade?.isInitiatorConfirmed) && Boolean(trade?.isReceiverConfirmed));
 
   const getStatusBadge = (status: TradeStatus) => {
     const s = status as unknown;
@@ -356,7 +371,7 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
 
     return (
       <div className="w-full max-w-4xl mx-auto px-4 py-8">
-        {/* Back Link */}
+        {/* Back Link & Actions */}
         <div className="mb-6 flex items-center justify-between">
           <Link
             href="/art-trades"
@@ -365,7 +380,20 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
             <ArrowLeft className="w-4 h-4 text-indigo-400" />
             <span>{isVie ? 'Quay lại danh sách Trao đổi' : 'Back to My Trades'}</span>
           </Link>
-          {getStatusBadge(trade.status)}
+          <div className="flex items-center gap-3">
+            {getStatusBadge(trade.status)}
+            <button
+              type="button"
+              onClick={() => {
+                setCancelReason('');
+                setShowCancelModal(true);
+              }}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 text-xs font-semibold transition cursor-pointer"
+            >
+              <XCircle className="w-3.5 h-3.5 text-rose-400" />
+              <span>{isVie ? 'Hủy đề nghị' : 'Cancel Proposal'}</span>
+            </button>
+          </div>
         </div>
 
         <div className="glass-container rounded-3xl p-6 md:p-10 border border-white/10 bg-[#14151e]/85 backdrop-blur-xl shadow-2xl relative overflow-hidden">
@@ -850,8 +878,8 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
      ========================================================================= */
   return (
     <div className="w-full max-w-5xl mx-auto px-4 py-8">
-      {/* Back Link */}
-      <div className="mb-6">
+      {/* Back Link & Actions */}
+      <div className="mb-6 flex items-center justify-between">
         <Link
           href="/art-trades"
           className="inline-flex items-center gap-2 text-xs font-semibold text-gray-400 hover:text-white transition"
@@ -859,6 +887,22 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
           <ArrowLeft className="w-4 h-4 text-indigo-400" />
           <span>{isVie ? 'Quay lại danh sách Trao đổi' : 'Back to My Trades'}</span>
         </Link>
+        <div className="flex items-center gap-3">
+          {getStatusBadge(trade.status)}
+          {trade.status !== 'Completed' && (
+            <button
+              type="button"
+              onClick={() => {
+                setCancelReason('');
+                setShowCancelModal(true);
+              }}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 text-xs font-semibold transition cursor-pointer"
+            >
+              <XCircle className="w-3.5 h-3.5 text-rose-400" />
+              <span>{isVie ? 'Hủy giao dịch' : 'Cancel Trade'}</span>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Main Trade Room Container */}
@@ -888,10 +932,23 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
             )}
           </div>
 
-          {/* Secure Trade Protection Badge */}
-          <div className="flex items-center gap-2 bg-indigo-950/40 border border-indigo-500/20 px-3.5 py-2 rounded-xl text-xs text-indigo-300">
-            <ShieldCheck className="w-4 h-4 text-indigo-400 shrink-0" />
-            <span>{isVie ? 'Watermark xem trước & Ký quỹ an toàn' : 'Watermarked Preview & Dual Escrow Protection'}</span>
+          {/* Secure Trade Protection / Completion Badge */}
+          <div className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs border ${
+            isWatermarkRemoved
+              ? 'bg-emerald-950/40 border-emerald-500/30 text-emerald-300'
+              : 'bg-indigo-950/40 border-indigo-500/20 text-indigo-300'
+          }`}>
+            {isWatermarkRemoved ? (
+              <>
+                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span>{isVie ? 'Giao dịch hoàn tất • Đã gỡ bỏ Watermark' : 'Trade Completed • Watermarks Removed'}</span>
+              </>
+            ) : (
+              <>
+                <ShieldCheck className="w-4 h-4 text-indigo-400 shrink-0" />
+                <span>{isVie ? 'Watermark xem trước & Ký quỹ an toàn' : 'Watermarked Preview & Dual Escrow Protection'}</span>
+              </>
+            )}
           </div>
         </div>
 
@@ -1141,21 +1198,33 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
                   <img
                     src={trade.initiatorPreviewUrl}
                     alt="Side A Submitted Artwork"
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    onClick={() => setPreviewModalUrl(trade.initiatorPreviewUrl || null)}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 cursor-pointer"
+                    title={isVie ? 'Click để phóng to tác phẩm' : 'Click to zoom artwork'}
                   />
 
-                  {/* Watermark Diagonal Overlay */}
-                  <div className="absolute inset-0 bg-black/25 pointer-events-none flex items-center justify-center overflow-hidden">
-                    <div className="select-none text-white/30 font-black text-xl md:text-2xl tracking-[0.3em] uppercase -rotate-45 border-y-2 border-white/20 py-3 px-12 text-center whitespace-nowrap bg-black/40 backdrop-blur-[1px]">
-                      DILLUSTRATION • PREVIEW ONLY
+                  {isWatermarkRemoved ? (
+                    /* Watermark Removed Badge Indicator */
+                    <div className="absolute top-3 right-3 bg-emerald-950/80 backdrop-blur-md px-2.5 py-1 rounded-lg border border-emerald-500/30 text-[11px] text-emerald-300 font-medium flex items-center gap-1.5 shadow-lg">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>{isVie ? 'Đã gỡ Watermark' : 'Watermark Removed'}</span>
                     </div>
-                  </div>
+                  ) : (
+                    <>
+                      {/* Watermark Diagonal Overlay */}
+                      <div className="absolute inset-0 bg-black/25 pointer-events-none flex items-center justify-center overflow-hidden">
+                        <div className="select-none text-white/30 font-black text-xl md:text-2xl tracking-[0.3em] uppercase -rotate-45 border-y-2 border-white/20 py-3 px-12 text-center whitespace-nowrap bg-black/40 backdrop-blur-[1px]">
+                          DILLUSTRATION • PREVIEW ONLY
+                        </div>
+                      </div>
 
-                  {/* Watermark Badge Indicator */}
-                  <div className="absolute top-3 right-3 bg-black/70 backdrop-blur-md px-2.5 py-1 rounded-lg border border-white/15 text-[11px] text-white/90 font-medium flex items-center gap-1.5 shadow-lg">
-                    <ShieldCheck className="w-3.5 h-3.5 text-indigo-400" />
-                    <span>Watermark Protected</span>
-                  </div>
+                      {/* Watermark Badge Indicator */}
+                      <div className="absolute top-3 right-3 bg-black/70 backdrop-blur-md px-2.5 py-1 rounded-lg border border-white/15 text-[11px] text-white/90 font-medium flex items-center gap-1.5 shadow-lg">
+                        <ShieldCheck className="w-3.5 h-3.5 text-indigo-400" />
+                        <span>Watermark Protected</span>
+                      </div>
+                    </>
+                  )}
                 </>
               ) : (
                 /* Empty / Upload State for Side A */
@@ -1226,21 +1295,33 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
                   <img
                     src={trade.receiverPreviewUrl}
                     alt="Side B Submitted Artwork"
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    onClick={() => setPreviewModalUrl(trade.receiverPreviewUrl || null)}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 cursor-pointer"
+                    title={isVie ? 'Click để phóng to tác phẩm' : 'Click to zoom artwork'}
                   />
 
-                  {/* Watermark Diagonal Overlay */}
-                  <div className="absolute inset-0 bg-black/25 pointer-events-none flex items-center justify-center overflow-hidden">
-                    <div className="select-none text-white/30 font-black text-xl md:text-2xl tracking-[0.3em] uppercase -rotate-45 border-y-2 border-white/20 py-3 px-12 text-center whitespace-nowrap bg-black/40 backdrop-blur-[1px]">
-                      DILLUSTRATION • PREVIEW ONLY
+                  {isWatermarkRemoved ? (
+                    /* Watermark Removed Badge Indicator */
+                    <div className="absolute top-3 right-3 bg-emerald-950/80 backdrop-blur-md px-2.5 py-1 rounded-lg border border-emerald-500/30 text-[11px] text-emerald-300 font-medium flex items-center gap-1.5 shadow-lg">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>{isVie ? 'Đã gỡ Watermark' : 'Watermark Removed'}</span>
                     </div>
-                  </div>
+                  ) : (
+                    <>
+                      {/* Watermark Diagonal Overlay */}
+                      <div className="absolute inset-0 bg-black/25 pointer-events-none flex items-center justify-center overflow-hidden">
+                        <div className="select-none text-white/30 font-black text-xl md:text-2xl tracking-[0.3em] uppercase -rotate-45 border-y-2 border-white/20 py-3 px-12 text-center whitespace-nowrap bg-black/40 backdrop-blur-[1px]">
+                          DILLUSTRATION • PREVIEW ONLY
+                        </div>
+                      </div>
 
-                  {/* Watermark Badge Indicator */}
-                  <div className="absolute top-3 right-3 bg-black/70 backdrop-blur-md px-2.5 py-1 rounded-lg border border-white/15 text-[11px] text-white/90 font-medium flex items-center gap-1.5 shadow-lg">
-                    <ShieldCheck className="w-3.5 h-3.5 text-purple-400" />
-                    <span>Watermark Protected</span>
-                  </div>
+                      {/* Watermark Badge Indicator */}
+                      <div className="absolute top-3 right-3 bg-black/70 backdrop-blur-md px-2.5 py-1 rounded-lg border border-white/15 text-[11px] text-white/90 font-medium flex items-center gap-1.5 shadow-lg">
+                        <ShieldCheck className="w-3.5 h-3.5 text-purple-400" />
+                        <span>Watermark Protected</span>
+                      </div>
+                    </>
+                  )}
                 </>
               ) : (
                 /* Empty / Upload State for Side B */
@@ -1288,7 +1369,7 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
           </div>
         </div>
 
-        {/* TWO PARTS FOR CONFIRMATION BUTTONS FOR BOTH PARTIES */}
+        {/* TWO PARTS FOR CONFIRMATION BUTTONS FOR BOTH PARTIES — Both can confirm satisfaction at the same time */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-white/10">
           {/* Confirmation Part A (For Participant 1) */}
           <div className="glass-panel p-5 rounded-2xl border border-white/5 bg-white/[0.02] flex flex-col justify-between">
@@ -1301,7 +1382,7 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
                   <CheckCircle2 className="w-3.5 h-3.5" /> Confirmed
                 </span>
               ) : (
-                <span className="text-xs text-gray-400">Not Confirmed</span>
+                <span className="text-xs text-gray-400">Pending Confirmation</span>
               )}
             </div>
 
@@ -1310,11 +1391,11 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
                 <CheckCircle2 className="w-4 h-4 text-emerald-400" />
                 <span>Confirmed Satisfaction</span>
               </div>
-            ) : isCurrentUserInitiator ? (
+            ) : (
               <button
                 type="button"
                 onClick={() => handleConfirmSatisfaction('initiator')}
-                disabled={confirming || !trade.initiatorPreviewUrl || !trade.receiverPreviewUrl}
+                disabled={confirming}
                 className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold tracking-wide uppercase shadow-lg shadow-emerald-900/30 transition flex items-center justify-center gap-2 disabled:opacity-40 disabled:pointer-events-none cursor-pointer"
               >
                 {confirming ? (
@@ -1327,10 +1408,6 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
                   </>
                 )}
               </button>
-            ) : (
-              <div className="w-full py-3 px-4 rounded-xl bg-white/5 border border-white/10 text-gray-400 text-xs font-medium text-center">
-                Waiting for {trade.initiator.fullName} to confirm
-              </div>
             )}
           </div>
 
@@ -1345,7 +1422,7 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
                   <CheckCircle2 className="w-3.5 h-3.5" /> Confirmed
                 </span>
               ) : (
-                <span className="text-xs text-gray-400">Not Confirmed</span>
+                <span className="text-xs text-gray-400">Pending Confirmation</span>
               )}
             </div>
 
@@ -1354,11 +1431,11 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
                 <CheckCircle2 className="w-4 h-4 text-emerald-400" />
                 <span>Confirmed Satisfaction</span>
               </div>
-            ) : isCurrentUserReceiver ? (
+            ) : (
               <button
                 type="button"
                 onClick={() => handleConfirmSatisfaction('receiver')}
-                disabled={confirming || !trade.initiatorPreviewUrl || !trade.receiverPreviewUrl}
+                disabled={confirming}
                 className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold tracking-wide uppercase shadow-lg shadow-emerald-900/30 transition flex items-center justify-center gap-2 disabled:opacity-40 disabled:pointer-events-none cursor-pointer"
               >
                 {confirming ? (
@@ -1371,44 +1448,54 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
                   </>
                 )}
               </button>
-            ) : (
-              <div className="w-full py-3 px-4 rounded-xl bg-white/5 border border-white/10 text-gray-400 text-xs font-medium text-center">
-                Waiting for {trade.receiver.fullName} to confirm
-              </div>
             )}
           </div>
         </div>
 
+        {/* Cancellation Bar at Bottom of VIEW 3 */}
+        {trade.status !== 'Completed' && (
+          <div className="mt-8 pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="text-center sm:text-left">
+              <span className="text-xs font-bold text-gray-300 block">
+                {isVie ? 'Hủy giao dịch trao đổi?' : 'Need to cancel this trade?'}
+              </span>
+              <span className="text-[11px] text-gray-500">
+                {isVie
+                  ? 'Nếu có sự cố hoặc hai bên đồng thuận dừng lại, bạn có thể hủy để giải phóng slot vẽ.'
+                  : 'If issues arise or by mutual agreement, you can cancel to free up your trade slot.'}
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setCancelReason('');
+                setShowCancelModal(true);
+              }}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 text-xs font-semibold transition cursor-pointer shrink-0"
+            >
+              <XCircle className="w-4 h-4 text-rose-400" />
+              <span>{isVie ? 'Hủy giao dịch này' : 'Cancel This Trade'}</span>
+            </button>
+          </div>
+        )}
+
         </section>
         )}
 
-        {/* COMPLETED CELEBRATION & DOWNLOAD PRESIGNED URL */}
+        {/* COMPLETED CELEBRATION (No download button, watermark removed on both sides) */}
         {trade.status === 'Completed' && (
           <div className="mt-8 p-6 rounded-2xl bg-gradient-to-r from-emerald-950/60 via-teal-950/40 to-indigo-950/60 border border-emerald-500/30 text-center flex flex-col items-center">
             <div className="w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center mb-3">
               <Sparkles className="w-6 h-6 animate-bounce" />
             </div>
-            <h3 className="text-lg font-bold text-white mb-1">Art Trade Successfully Completed!</h3>
-            <p className="text-xs text-gray-300 max-w-md mb-5">
-              Both parties have confirmed satisfaction. Ownership has been transferred and original files are now unlocked.
+            <h3 className="text-lg font-bold text-white mb-1">
+              {isVie ? 'Giao dịch trao đổi hoàn tất thành công!' : 'Art Trade Successfully Completed!'}
+            </h3>
+            <p className="text-xs text-gray-300 max-w-md">
+              {isVie
+                ? 'Cả hai bên đã xác nhận hài lòng. Hình mờ (watermark) đã được gỡ bỏ hoàn toàn cho tác phẩm của cả hai bên.'
+                : 'Both parties have confirmed satisfaction. Watermarks have been removed from the artworks of both sides.'}
             </p>
-
-            <button
-              type="button"
-              onClick={handleDownloadOriginal}
-              disabled={downloading}
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-xs uppercase tracking-wider shadow-xl shadow-emerald-500/20 transition hover:scale-105 active:scale-95 disabled:opacity-50 cursor-pointer"
-            >
-              {downloading ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" /> Generating Download Link...
-                </>
-              ) : (
-                <>
-                  <Download className="w-4 h-4" /> Download Partner&apos;s Original File
-                </>
-              )}
-            </button>
           </div>
         )}
       </form>
@@ -1429,6 +1516,101 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
             >
               <X className="w-4 h-4" />
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Cancellation Modal Dialog */}
+      {showCancelModal && (
+        <div
+          onClick={() => setShowCancelModal(false)}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4"
+        >
+          <div
+            className="relative w-full max-w-md rounded-3xl border border-rose-500/30 bg-[#161726] p-6 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center shrink-0">
+                <AlertCircle className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-white">
+                  {isVie ? 'Hủy cuộc trao đổi tranh' : 'Cancel Art Trade'}
+                </h3>
+                <p className="text-xs text-gray-400">
+                  {isVie ? 'Thao tác này sẽ chấm dứt lượt trao đổi và không thể hoàn tác.' : 'This will end the trade session and cannot be undone.'}
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-3 mb-5">
+              <label className="block text-xs font-semibold text-gray-300">
+                {isVie ? 'Lý do hủy giao dịch *' : 'Reason for cancellation *'}
+              </label>
+
+              <div className="flex flex-wrap gap-2">
+                {[
+                  isVie ? 'Hai bên thỏa thuận hủy' : 'Mutual agreement',
+                  isVie ? 'Đối tác không phản hồi' : 'Partner unresponsive',
+                  isVie ? 'Thay đổi kế hoạch cá nhân' : 'Change of plans',
+                  isVie ? 'Không thống nhất được yêu cầu vẽ' : 'Cannot agree on request',
+                ].map((quickR) => (
+                  <button
+                    key={quickR}
+                    type="button"
+                    onClick={() => setCancelReason(quickR)}
+                    className={`text-[11px] px-2.5 py-1 rounded-lg border transition cursor-pointer ${
+                      cancelReason === quickR
+                        ? 'bg-rose-500/25 border-rose-500/50 text-rose-200 font-semibold'
+                        : 'bg-white/5 border-white/10 text-gray-400 hover:text-white'
+                    }`}
+                  >
+                    {quickR}
+                  </button>
+                ))}
+              </div>
+
+              <textarea
+                value={cancelReason}
+                onChange={(e) => setCancelReason(e.target.value)}
+                placeholder={isVie ? 'Nhập chi tiết lý do bạn muốn hủy giao dịch này...' : 'Describe why you want to cancel this trade...'}
+                rows={3}
+                className="w-full px-3.5 py-2.5 bg-[#10111a] border border-white/10 rounded-xl text-xs text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-rose-500 focus:border-rose-500 transition resize-none"
+              />
+            </div>
+
+            <div className="flex items-center justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowCancelModal(false);
+                  setCancelReason('');
+                }}
+                disabled={cancelling}
+                className="px-4 py-2 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-xs font-semibold text-gray-300 transition cursor-pointer"
+              >
+                {isVie ? 'Đóng' : 'Keep Trade'}
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmCancelTrade}
+                disabled={cancelling || !cancelReason.trim()}
+                className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold transition shadow-lg shadow-rose-900/30 cursor-pointer disabled:opacity-50"
+              >
+                {cancelling ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>{isVie ? 'Đang hủy...' : 'Cancelling...'}</span>
+                  </>
+                ) : (
+                  <>
+                    <XCircle className="w-3.5 h-3.5" />
+                    <span>{isVie ? 'Xác nhận hủy' : 'Confirm Cancel'}</span>
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </div>
       )}

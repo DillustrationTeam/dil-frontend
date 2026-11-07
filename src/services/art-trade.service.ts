@@ -75,8 +75,10 @@ export const artTradeService = {
     return res.data.data;
   },
 
-  confirm: async (id: string): Promise<ArtTradeDto> => {
-    const res = await apiClient.post<ApiResponse<ArtTradeDto>>(`/art-trades/${id}/confirm`);
+  confirm: async (id: string, side?: 'initiator' | 'receiver'): Promise<ArtTradeDto> => {
+    const res = await apiClient.post<ApiResponse<ArtTradeDto>>(`/art-trades/${id}/confirm`, null, {
+      params: side ? { side } : undefined,
+    });
     if (!res.data.data) throw new Error('Failed to confirm satisfaction');
     return res.data.data;
   },
