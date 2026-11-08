@@ -12,7 +12,6 @@ import {
   ChevronRight,
   Clock,
   CheckCircle,
-  Crown,
   ListChecks,
   MessageSquare,
   Ticket,
@@ -53,7 +52,6 @@ const CLIENT_NAV_SECTIONS: SidebarSection[] = [
     title: 'Client Workspace',
     items: [
       { label: 'My Commissions', href: '/client/commissions', icon: FolderKanban },
-      { label: 'Bộ sưu tập tranh đấu giá', href: '/collections', icon: Crown },
       { label: 'My Vouchers', href: '/vouchers', icon: Ticket },
       { label: 'My Auctions', href: '/my-auctions', icon: Gavel },
       { label: 'Workroom Chat', href: '/workroom', icon: MessageSquare },
