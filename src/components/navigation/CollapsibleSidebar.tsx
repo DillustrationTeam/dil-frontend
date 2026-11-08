@@ -30,6 +30,7 @@ import {
   UserPen,
   Settings,
   ArrowLeftRight,
+  Sparkles,
 } from 'lucide-react';
 
 interface SidebarItem {
@@ -53,6 +54,7 @@ const CLIENT_NAV_SECTIONS: SidebarSection[] = [
   {
     title: 'Client Workspace',
     items: [
+      { label: 'Tác phẩm đã sở hữu', href: '/client/owned-artworks', icon: Sparkles },
       { label: 'My Commissions', href: '/client/commissions', icon: FolderKanban },
       { label: 'Bộ sưu tập tranh đấu giá', href: '/collections', icon: Crown },
       { label: 'My Vouchers', href: '/vouchers', icon: Ticket },

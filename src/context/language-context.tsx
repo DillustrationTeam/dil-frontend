@@ -7,6 +7,8 @@ export type Language = 'VIE' | 'ENG';
 
 const dictionary: Record<string, { VIE: string; ENG: string }> = {
   // Navigation & Workspace
+  'Tác phẩm đã sở hữu': { VIE: 'Tác phẩm đã sở hữu', ENG: 'Owned Artworks' },
+  'Owned Artworks': { VIE: 'Tác phẩm đã sở hữu', ENG: 'Owned Artworks' },
   'My Commissions': { VIE: 'Đơn vẽ của tôi', ENG: 'My Commissions' },
   'Auctions & Trade': { VIE: 'Đấu giá & Mua bán', ENG: 'Auctions & Trade' },
   'Workroom Chat': { VIE: 'Phòng làm việc', ENG: 'Workroom Chat' },
