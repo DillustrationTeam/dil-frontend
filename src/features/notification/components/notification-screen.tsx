@@ -195,8 +195,11 @@ export function NotificationScreen({ userId }: { userId: string | null }) {
       await notificationService.markAllRead();
       setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true, readAt: new Date().toISOString() })));
       setUnreadCount(0);
+      toast.success('Đã đánh dấu tất cả là đã đọc.');
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Không thể đánh dấu tất cả đã đọc.');
+      const msg = err instanceof Error ? err.message : 'Không thể đánh dấu tất cả đã đọc.';
+      setError(msg);
+      toast.error(msg);
     }
   }
 
