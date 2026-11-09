@@ -4,7 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
-  BarChart3, Bug,
+  BarChart3,
   Users,
   UserCheck,
   ShieldAlert,
@@ -25,13 +25,6 @@ export const DEFAULT_ADMIN_NAV_SECTIONS: AdminNavSection[] = [
   {
     title: 'Platform Overview',
     items: [
-      {
-        id: 'bug-reports',
-        label: 'Báo cáo sự cố',
-        href: '/admin/bugs',
-        icon: <Bug className="w-4 h-4 shrink-0 text-rose-400" />,
-        materialIcon: 'bug_report',
-      },
       {
         id: 'system-overview',
         label: 'System Overview KPIs',

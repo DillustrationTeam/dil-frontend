@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useSyncExternalStore } from 'react';
+import { useSyncExternalStore } from 'react';
 import { AuctionCreateScreen } from '@/features/auction';
 import { useAuthStore } from '@/store/use-auth-store';
 
@@ -16,9 +16,5 @@ export default function AuctionCreatePage() {
   const accessToken = useAuthStore((state) => state.accessToken);
   const userId = ready && accessToken ? user?.id ?? null : null;
 
-  return (
-    <Suspense fallback={<div className="py-20 text-center text-xs text-outline">Đang tải trình tạo phiên đấu giá...</div>}>
-      <AuctionCreateScreen userId={userId} />
-    </Suspense>
-  );
+  return <AuctionCreateScreen userId={userId} />;
 }

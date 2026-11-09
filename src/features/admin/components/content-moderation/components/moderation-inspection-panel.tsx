@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { ArtworkScanPanel } from '@/features/artwork-ai';
-import { Loader2, RefreshCw, ShieldCheck, X } from 'lucide-react';
+import { Loader2, ShieldCheck, X } from 'lucide-react';
 import {
   ArtworkInspectionDetailDto,
   ModerationActionType,
@@ -15,13 +15,11 @@ interface ModerationInspectionPanelProps {
   artwork: ArtworkInspectionDetailDto | null;
   isLoading: boolean;
   isSubmitting: boolean;
-  isRescanning?: boolean;
   onExecuteDecision: (
     artworkId: string,
     action: ModerationActionType,
     moderationNote?: string
   ) => Promise<boolean>;
-  onRescanArtwork?: (artworkId: string) => Promise<boolean>;
   onClose?: () => void;
 }
 
@@ -29,9 +27,7 @@ export function ModerationInspectionPanel({
   artwork,
   isLoading,
   isSubmitting,
-  isRescanning = false,
   onExecuteDecision,
-  onRescanArtwork,
   onClose,
 }: ModerationInspectionPanelProps) {
   if (isLoading && !artwork) {
@@ -42,7 +38,7 @@ export function ModerationInspectionPanel({
           Loading Artwork Inspection Details...
         </p>
         <p className="text-xs text-[#8A8FA9]">
-          Retrieving AI moderation metrics and metadata.
+          Đang tải thông tin tác phẩm và kết quả kiểm tra.
         </p>
       </div>
     );
@@ -72,31 +68,16 @@ export function ModerationInspectionPanel({
           </span>
         </h2>
 
-        <div className="flex items-center gap-3">
-          {onRescanArtwork && (
-            <button
-              type="button"
-              disabled={isRescanning}
-              onClick={() => onRescanArtwork(artwork.artworkId)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-purple-500/10 text-purple-300 border border-purple-500/20 hover:bg-purple-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-              title="Request an on-demand AI scan via Gemini"
-            >
-              <RefreshCw className={`w-3.5 h-3.5 ${isRescanning ? 'animate-spin' : ''}`} />
-              <span>{isRescanning ? 'Re-scanning...' : 'Re-scan with AI'}</span>
-            </button>
-          )}
-
-          {onClose && (
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex items-center gap-1 text-xs text-[#8A8FA9] hover:text-white transition-colors"
-            >
-              <X className="w-4 h-4" />
-              <span>Collapse Panel</span>
-            </button>
-          )}
-        </div>
+        {onClose && (
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex items-center gap-1 text-xs text-[#8A8FA9] hover:text-white transition-colors"
+          >
+            <X className="w-4 h-4" />
+            <span>Collapse Panel</span>
+          </button>
+        )}
       </div>
 
       {/* Detailed Inspection Panel (Selected Item) matching SCR-20 grid */}

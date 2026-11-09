@@ -3,7 +3,6 @@
 import { addonService, addonAllows, addonStage, addonMoney, type CreatorAddon } from '@/services/addon.service';
 
 import { useEffect, useEffectEvent, useRef, useState } from 'react';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -34,7 +33,7 @@ export default function CreateCommissionModal({ creatorId, creatorName, onClose,
   const dialogRef = useRef<HTMLDivElement>(null);
   const [packages, setPackages] = useState<RateCardPackage[]>([]);
   const [loadingPackages, setLoadingPackages] = useState(true);
-  const [selectedPackageId, setSelectedPackageId] = useState(initialPackageId ?? '');
+  const [selectedPackageId, setSelectedPackageId] = useState(initialPackageId || '');
   const [licenseType, setLicenseType] = useState<'Personal' | 'Commercial'>('Personal');
   const [terms, setTerms] = useState<CreatorTermsDto | null>(null);
   const [packageError, setPackageError] = useState<string | null>(null);
@@ -281,18 +280,6 @@ export default function CreateCommissionModal({ creatorId, creatorName, onClose,
                     <span className="ml-auto font-bold text-[#C5C9F8]">{money(item.price)}</span>
                   </span>
                   {item.description && <span className="mt-2 block text-slate-400">{item.description}</span>}
-                  {item.sampleUrls && item.sampleUrls.length > 0 && (
-                    <div className="mt-3 flex items-center gap-2 overflow-x-auto pb-1">
-                      {item.sampleUrls.map((sUrl, sIdx) => (
-                        <div
-                          key={sIdx}
-                          className="relative h-14 w-14 shrink-0 rounded-lg overflow-hidden border border-white/10"
-                        >
-                          <Image src={sUrl} alt="Sample preview" fill unoptimized className="object-cover" />
-                        </div>
-                      ))}
-                    </div>
-                  )}
                 </label>
               ))
             )}

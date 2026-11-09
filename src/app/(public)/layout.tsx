@@ -20,6 +20,7 @@ function PublicLayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname() ?? '';
   const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const handleLogout = async () => {
     if (refreshToken) {
@@ -56,12 +57,8 @@ function PublicLayoutContent({ children }: { children: React.ReactNode }) {
               <Link href="/#artists" className="shrink-0 whitespace-nowrap text-[#c7c5cf] transition-colors hover:text-white">
                 {t('Artists')}
               </Link>
-              <Link
-                href="/collections"
-                aria-current={pathname === '/collections' ? 'page' : undefined}
-                className={`shrink-0 whitespace-nowrap ${pathname === '/collections' ? 'text-[#c2c7f6] border-b-2 border-[#c2c7f6] pb-1' : 'text-[#c7c5cf] hover:text-white'} transition-colors`}
-              >
-                {t('Bộ sưu tập')}
+              <Link href="/#bento" className="shrink-0 whitespace-nowrap text-[#c7c5cf] transition-colors hover:text-white">
+                {t('Collections')}
               </Link>
               <Link
                 href="/auctions"
@@ -70,18 +67,25 @@ function PublicLayoutContent({ children }: { children: React.ReactNode }) {
               >
                 {t('Đấu giá')}
               </Link>
-              <Link
-                href="/events"
-                aria-current={pathname === '/events' || pathname.startsWith('/events/') ? 'page' : undefined}
-                className={`shrink-0 whitespace-nowrap ${pathname === '/events' || pathname.startsWith('/events/') ? 'text-[#c2c7f6] border-b-2 border-[#c2c7f6] pb-1' : 'text-[#c7c5cf] hover:text-white'} transition-colors`}
-              >
-                {t('Events')}
-              </Link>
             </div>
           </div>
 
           {/* Right: Search + Auth */}
           <div className="flex shrink-0 items-center gap-3 lg:gap-4">
+            {/* Search Input */}
+            <form className="relative hidden shrink-0 xl:block" onSubmit={(event) => { event.preventDefault(); router.push(`/explore?q=${encodeURIComponent(searchQuery.trim())}`); }}>
+              <input
+                className="bg-[#1b1b1e] border border-[#46464e]/30 rounded-full px-5 py-2 w-48 2xl:w-60 focus:outline-none focus:ring-1 focus:ring-[#c2c7f6] focus:border-[#c2c7f6] transition-all duration-300 text-sm text-[#e4e1e5] placeholder-white/30"
+                placeholder="Search curated art..."
+                type="text"
+                aria-label="Tìm tác phẩm hoặc tác giả"
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+              />
+              <button type="submit" aria-label="Tìm kiếm" className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-[#919099] text-xl">
+                search
+              </button>
+            </form>
 
               <div className="flex shrink-0 items-center gap-4">
               {isAuthenticated && user ? (
@@ -144,14 +148,6 @@ function PublicLayoutContent({ children }: { children: React.ReactNode }) {
                         >
                           <span className="material-symbols-outlined text-sm text-[#A7ACD9]">{isAdmin ? 'admin_panel_settings' : 'dashboard'}</span>
                           {isAdmin ? 'Admin Center' : roles.includes('Creator') ? 'Creator Studio' : 'My Studio'}
-                        </Link>
-                        <Link
-                          href="/collections"
-                          onClick={() => setIsMenuOpen(false)}
-                          className="flex items-center gap-2 px-3 py-2 text-xs text-[#e4e1e5] hover:bg-white/10 rounded-xl transition-colors"
-                        >
-                          <span className="material-symbols-outlined text-sm text-[#A7ACD9]">collections_bookmark</span>
-                          Bộ sưu tập tranh đấu giá
                         </Link>
                         {roles.includes('Creator') && (
                           <Link
@@ -224,6 +220,10 @@ function PublicLayoutContent({ children }: { children: React.ReactNode }) {
             </div>
           </div>
         </nav>
+        <form className="mx-auto flex max-w-7xl gap-2 px-6 pb-3 xl:hidden" onSubmit={(event) => { event.preventDefault(); router.push(`/explore?q=${encodeURIComponent(searchQuery.trim())}`); }}>
+          <input aria-label="Tìm tác phẩm hoặc tác giả" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} placeholder="Tìm tên tranh hoặc tác giả…" className="min-w-0 flex-1 rounded-full border border-white/10 bg-[#1b1b1e] px-4 py-2 text-sm text-white outline-none focus:border-[#A7ACD9]" />
+          <button type="submit" className="rounded-full bg-[#A7ACD9] px-4 text-sm font-semibold text-[#1F2335]">Tìm kiếm</button>
+        </form>
       </header>
 
       {/* Page Content */}
