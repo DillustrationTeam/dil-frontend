@@ -36,6 +36,8 @@ export interface ChatRoomDto {
   chatRoomTitle: string;
   /** Commission gắn với phòng — null với phòng đấu giá / phòng hỗ trợ. */
   commissionId: string | null;
+  /** Art Trade gắn với phòng (khi chatRoomType = ArtTrade). */
+  artTradeId?: string | null;
   lastMessageAt: string | null;
   isLocked: boolean;
   members: ChatRoomMemberDto[];

@@ -20,6 +20,7 @@ import {
   X,
   Gavel,
   ShieldAlert,
+  MessageSquare,
 } from 'lucide-react';
 import { ArtTradeDto, TradeStatus } from '@/types/art-trade.types';
 import { artTradeService } from '@/services/art-trade.service';
@@ -30,6 +31,7 @@ import type { NotificationDto } from '@/features/notification/types/notification
 import { useArtTradeRealtime } from '../hooks/use-art-trade-realtime';
 import { TradeDisputeBanner } from './TradeDisputeBanner';
 import { TradeDisputeModal } from './TradeDisputeModal';
+import { TradeChatRoom } from './TradeChatRoom';
 import toast from 'react-hot-toast';
 
 interface TradeStationProps {
@@ -54,8 +56,18 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
   const [sideBNote, setSideBNote] = useState<string>('');
   const [sideBImages, setSideBImages] = useState<string[]>([]);
   const [isUploadingSideBAttachment, setIsUploadingSideBAttachment] = useState<boolean>(false);
-  const [activeTab, setActiveTab] = useState<'reference' | 'submission'>('reference');
+  const [activeTab, setActiveTab] = useState<'reference' | 'submission' | 'chat'>('reference');
   const [previewModalUrl, setPreviewModalUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const tabParam = params.get('tab');
+      if (tabParam === 'chat' || tabParam === 'submission' || tabParam === 'reference') {
+        setActiveTab(tabParam);
+      }
+    }
+  }, []);
   const [showCancelModal, setShowCancelModal] = useState<boolean>(false);
   const [cancelReason, setCancelReason] = useState<string>('');
   const [cancelling, setCancelling] = useState<boolean>(false);
@@ -901,8 +913,7 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
       )}
 
       {/* Main Trade Room Container */}
-      <form
-        onSubmit={(e) => e.preventDefault()}
+      <div
         className="glass-container rounded-3xl p-6 md:p-10 border border-white/10 bg-[#14151e]/80 backdrop-blur-xl shadow-2xl relative overflow-hidden"
       >
         {/* Subtle Ambient Background Glows */}
@@ -946,6 +957,20 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
                 </>
               )}
             </div>
+
+            {/* Quick Switch to Chat */}
+            <button
+              type="button"
+              onClick={() => setActiveTab('chat')}
+              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold border transition cursor-pointer ${
+                activeTab === 'chat'
+                  ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white border-transparent shadow-lg shadow-indigo-900/30'
+                  : 'bg-white/5 border-white/10 text-gray-300 hover:text-white hover:bg-white/10'
+              }`}
+            >
+              <MessageSquare className="w-4 h-4 text-purple-400" />
+              <span>{isVie ? 'Phòng trò chuyện' : 'Trade Chat'}</span>
+            </button>
           </div>
         </div>
 
@@ -1032,11 +1057,12 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
           </div>
         </div>
 
-        {/* TAB NAVBAR: Reference <-> Artwork Submission */}
+        {/* TAB NAVBAR: Reference <-> Artwork Submission <-> Trade Chat */}
         <div className="mb-6 flex items-center gap-1 rounded-2xl border border-white/10 bg-white/[0.03] p-1.5">
           {([
             { key: 'reference', label: isVie ? 'Tham khảo' : 'Reference', Icon: ImageIcon },
             { key: 'submission', label: isVie ? 'Nộp tranh' : 'Artwork Submission', Icon: Upload },
+            { key: 'chat', label: isVie ? 'Phòng trao đổi' : 'Trade Chat', Icon: MessageSquare },
           ] as const).map(({ key, label, Icon }) => (
             <button
               key={key}
@@ -1521,6 +1547,17 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
         </section>
         )}
 
+        {/* TAB 3 — TRADE CHAT ROOM */}
+        {activeTab === 'chat' && (
+          <section className="mb-8">
+            <TradeChatRoom
+              trade={trade}
+              currentUser={currentUser}
+              onOpenDispute={() => setShowDisputeModal(true)}
+            />
+          </section>
+        )}
+
         {/* COMPLETED CELEBRATION (No download button, watermark removed on both sides) */}
         {trade.status === 'Completed' && (
           <div className="mt-8 p-6 rounded-2xl bg-gradient-to-r from-emerald-950/60 via-teal-950/40 to-indigo-950/60 border border-emerald-500/30 text-center flex flex-col items-center">
@@ -1537,7 +1574,7 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
             </p>
           </div>
         )}
-      </form>
+      </div>
 
       {/* Image Preview Lightbox Modal */}
       {previewModalUrl && (

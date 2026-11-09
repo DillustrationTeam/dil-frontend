@@ -15,6 +15,7 @@ import {
   Loader2,
   Palette,
   RotateCcw,
+  MessageSquare,
 } from 'lucide-react';
 import { artTradeService } from '@/services/art-trade.service';
 import { ArtTradeSummaryDto, TradeSlotStatusDto, TradeStatus } from '@/types/art-trade.types';
@@ -511,29 +512,56 @@ export default function MyTradesPage() {
                       </Link>
                     </div>
                   ) : isAcceptedStatus(trade.status) || isBothSubmittedStatus(trade.status) ? (
-                    <Link
-                      href={`/art-trades/${trade.id}`}
-                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white border border-indigo-500/30 text-xs font-bold transition shadow-sm"
-                    >
-                      <span>{isVie ? 'Vào phòng vẽ trao đổi' : 'Enter Trade Room'}</span>
-                      <ChevronRight className="w-3.5 h-3.5" />
-                    </Link>
+                    <div className="flex items-center gap-2">
+                      <Link
+                        href={`/art-trades/${trade.id}?tab=chat`}
+                        title={isVie ? 'Mở phòng trò chuyện' : 'Open Trade Chat'}
+                        className="p-2 rounded-xl bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 border border-purple-500/30 transition hover:scale-105"
+                      >
+                        <MessageSquare className="w-4 h-4" />
+                      </Link>
+                      <Link
+                        href={`/art-trades/${trade.id}`}
+                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white border border-indigo-500/30 text-xs font-bold transition shadow-sm"
+                      >
+                        <span>{isVie ? 'Vào phòng vẽ trao đổi' : 'Enter Trade Room'}</span>
+                        <ChevronRight className="w-3.5 h-3.5" />
+                      </Link>
+                    </div>
                   ) : isCompletedStatus(trade.status) ? (
-                    <Link
-                      href={`/art-trades/${trade.id}`}
-                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600/20 hover:bg-emerald-600 text-emerald-300 hover:text-white border border-emerald-500/30 text-xs font-semibold transition shadow-sm"
-                    >
-                      <span>{isVie ? 'Xem kết quả trao đổi' : 'View Completed Trade'}</span>
-                      <ChevronRight className="w-3.5 h-3.5" />
-                    </Link>
+                    <div className="flex items-center gap-2">
+                      <Link
+                        href={`/art-trades/${trade.id}?tab=chat`}
+                        title={isVie ? 'Xem lịch sử trò chuyện' : 'View Chat History'}
+                        className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white border border-white/10 transition"
+                      >
+                        <MessageSquare className="w-4 h-4" />
+                      </Link>
+                      <Link
+                        href={`/art-trades/${trade.id}`}
+                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600/20 hover:bg-emerald-600 text-emerald-300 hover:text-white border border-emerald-500/30 text-xs font-semibold transition shadow-sm"
+                      >
+                        <span>{isVie ? 'Xem kết quả trao đổi' : 'View Completed Trade'}</span>
+                        <ChevronRight className="w-3.5 h-3.5" />
+                      </Link>
+                    </div>
                   ) : (
-                    <Link
-                      href={`/art-trades/${trade.id}`}
-                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-gray-300 border border-white/10 text-xs font-semibold transition shadow-sm"
-                    >
-                      <span>{isVie ? 'Xem chi tiết' : 'View Details'}</span>
-                      <ChevronRight className="w-3.5 h-3.5" />
-                    </Link>
+                    <div className="flex items-center gap-2">
+                      <Link
+                        href={`/art-trades/${trade.id}?tab=chat`}
+                        title={isVie ? 'Mở phòng trò chuyện' : 'Open Trade Chat'}
+                        className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white border border-white/10 transition"
+                      >
+                        <MessageSquare className="w-4 h-4" />
+                      </Link>
+                      <Link
+                        href={`/art-trades/${trade.id}`}
+                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-gray-300 border border-white/10 text-xs font-semibold transition shadow-sm"
+                      >
+                        <span>{isVie ? 'Xem chi tiết' : 'View Details'}</span>
+                        <ChevronRight className="w-3.5 h-3.5" />
+                      </Link>
+                    </div>
                   )}
                 </div>
               </div>
