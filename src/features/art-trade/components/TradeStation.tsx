@@ -18,6 +18,8 @@ import {
   ArrowLeft,
   Calendar,
   X,
+  Gavel,
+  ShieldAlert,
 } from 'lucide-react';
 import { ArtTradeDto, TradeStatus } from '@/types/art-trade.types';
 import { artTradeService } from '@/services/art-trade.service';
@@ -26,6 +28,8 @@ import { useAuthStore } from '@/store/use-auth-store';
 import { useLanguage } from '@/context/language-context';
 import type { NotificationDto } from '@/features/notification/types/notification.types';
 import { useArtTradeRealtime } from '../hooks/use-art-trade-realtime';
+import { TradeDisputeBanner } from './TradeDisputeBanner';
+import { TradeDisputeModal } from './TradeDisputeModal';
 import toast from 'react-hot-toast';
 
 interface TradeStationProps {
@@ -55,6 +59,7 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
   const [showCancelModal, setShowCancelModal] = useState<boolean>(false);
   const [cancelReason, setCancelReason] = useState<string>('');
   const [cancelling, setCancelling] = useState<boolean>(false);
+  const [showDisputeModal, setShowDisputeModal] = useState<boolean>(false);
 
   const initiatorFileInputRef = useRef<HTMLInputElement>(null);
   const receiverFileInputRef = useRef<HTMLInputElement>(null);
@@ -172,6 +177,21 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
   const isReceiverRole = isCurrentUserReceiver || !isCurrentUserInitiator;
 
   const isProposed = trade.status === 'Proposed' || (trade.status as unknown) === 1 || (trade.status as unknown) === '1';
+  const isAccepted =
+    trade.status === 'Accepted' ||
+    trade.status === 'BothSubmitted' ||
+    (trade.status as unknown) === 2 ||
+    (trade.status as unknown) === '2' ||
+    (trade.status as unknown) === 3 ||
+    (trade.status as unknown) === '3';
+  const isCompleted =
+    trade.status === 'Completed' ||
+    (trade.status as unknown) === 4 ||
+    (trade.status as unknown) === '4';
+  const isDisputed =
+    trade.status === 'Disputed' ||
+    (trade.status as unknown) === 7 ||
+    (trade.status as unknown) === '7';
   const isCancelledOrRejected =
     trade.status === 'Cancelled' ||
     trade.status === 'Rejected' ||
@@ -371,7 +391,7 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
 
     return (
       <div className="w-full max-w-4xl mx-auto px-4 py-8">
-        {/* Back Link & Actions */}
+        {/* Back Link */}
         <div className="mb-6 flex items-center justify-between">
           <Link
             href="/art-trades"
@@ -380,20 +400,6 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
             <ArrowLeft className="w-4 h-4 text-indigo-400" />
             <span>{isVie ? 'Quay lại danh sách Trao đổi' : 'Back to My Trades'}</span>
           </Link>
-          <div className="flex items-center gap-3">
-            {getStatusBadge(trade.status)}
-            <button
-              type="button"
-              onClick={() => {
-                setCancelReason('');
-                setShowCancelModal(true);
-              }}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 text-xs font-semibold transition cursor-pointer"
-            >
-              <XCircle className="w-3.5 h-3.5 text-rose-400" />
-              <span>{isVie ? 'Hủy đề nghị' : 'Cancel Proposal'}</span>
-            </button>
-          </div>
         </div>
 
         <div className="glass-container rounded-3xl p-6 md:p-10 border border-white/10 bg-[#14151e]/85 backdrop-blur-xl shadow-2xl relative overflow-hidden">
@@ -878,7 +884,7 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
      ========================================================================= */
   return (
     <div className="w-full max-w-5xl mx-auto px-4 py-8">
-      {/* Back Link & Actions */}
+      {/* Back Link */}
       <div className="mb-6 flex items-center justify-between">
         <Link
           href="/art-trades"
@@ -887,23 +893,12 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
           <ArrowLeft className="w-4 h-4 text-indigo-400" />
           <span>{isVie ? 'Quay lại danh sách Trao đổi' : 'Back to My Trades'}</span>
         </Link>
-        <div className="flex items-center gap-3">
-          {getStatusBadge(trade.status)}
-          {trade.status !== 'Completed' && (
-            <button
-              type="button"
-              onClick={() => {
-                setCancelReason('');
-                setShowCancelModal(true);
-              }}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 text-xs font-semibold transition cursor-pointer"
-            >
-              <XCircle className="w-3.5 h-3.5 text-rose-400" />
-              <span>{isVie ? 'Hủy giao dịch' : 'Cancel Trade'}</span>
-            </button>
-          )}
-        </div>
       </div>
+
+      {/* Trade Dispute Status Banner (shown when trade is currently under dispute) */}
+      {isDisputed && (
+        <TradeDisputeBanner trade={trade} className="mb-6" />
+      )}
 
       {/* Main Trade Room Container */}
       <form
@@ -932,23 +927,25 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
             )}
           </div>
 
-          {/* Secure Trade Protection / Completion Badge */}
-          <div className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs border ${
-            isWatermarkRemoved
-              ? 'bg-emerald-950/40 border-emerald-500/30 text-emerald-300'
-              : 'bg-indigo-950/40 border-indigo-500/20 text-indigo-300'
-          }`}>
-            {isWatermarkRemoved ? (
-              <>
-                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>{isVie ? 'Giao dịch hoàn tất • Đã gỡ bỏ Watermark' : 'Trade Completed • Watermarks Removed'}</span>
-              </>
-            ) : (
-              <>
-                <ShieldCheck className="w-4 h-4 text-indigo-400 shrink-0" />
-                <span>{isVie ? 'Watermark xem trước & Ký quỹ an toàn' : 'Watermarked Preview & Dual Escrow Protection'}</span>
-              </>
-            )}
+          <div className="flex flex-wrap items-center gap-3">
+            {/* Secure Trade Protection / Completion Badge */}
+            <div className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs border ${
+              isWatermarkRemoved
+                ? 'bg-emerald-950/40 border-emerald-500/30 text-emerald-300'
+                : 'bg-indigo-950/40 border-indigo-500/20 text-indigo-300'
+            }`}>
+              {isWatermarkRemoved ? (
+                <>
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <span>{isVie ? 'Giao dịch hoàn tất • Đã gỡ bỏ Watermark' : 'Trade Completed • Watermarks Removed'}</span>
+                </>
+              ) : (
+                <>
+                  <ShieldCheck className="w-4 h-4 text-indigo-400 shrink-0" />
+                  <span>{isVie ? 'Watermark xem trước & Ký quỹ an toàn' : 'Watermarked Preview & Dual Escrow Protection'}</span>
+                </>
+              )}
+            </div>
           </div>
         </div>
 
@@ -1251,7 +1248,7 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
                       <button
                         type="button"
                         onClick={() => initiatorFileInputRef.current?.click()}
-                        disabled={uploadingSide === 'initiator'}
+                        disabled={uploadingSide === 'initiator' || isDisputed}
                         className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-lg shadow-indigo-600/30 transition disabled:opacity-50 cursor-pointer"
                       >
                         {uploadingSide === 'initiator' ? (
@@ -1264,6 +1261,11 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
                           </>
                         )}
                       </button>
+                      {isDisputed && (
+                        <span className="text-[11px] text-red-400 mt-2 block">
+                          {isVie ? 'Tạm khóa do đang có khiếu nại' : 'Submission locked due to active dispute'}
+                        </span>
+                      )}
                     </>
                   )}
                 </div>
@@ -1348,7 +1350,7 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
                       <button
                         type="button"
                         onClick={() => receiverFileInputRef.current?.click()}
-                        disabled={uploadingSide === 'receiver'}
+                        disabled={uploadingSide === 'receiver' || isDisputed}
                         className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold shadow-lg shadow-purple-600/30 transition disabled:opacity-50 cursor-pointer"
                       >
                         {uploadingSide === 'receiver' ? (
@@ -1361,6 +1363,11 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
                           </>
                         )}
                       </button>
+                      {isDisputed && (
+                        <span className="text-[11px] text-red-400 mt-2 block">
+                          {isVie ? 'Tạm khóa do đang có khiếu nại' : 'Submission locked due to active dispute'}
+                        </span>
+                      )}
                     </>
                   )}
                 </div>
@@ -1395,7 +1402,7 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
               <button
                 type="button"
                 onClick={() => handleConfirmSatisfaction('initiator')}
-                disabled={confirming}
+                disabled={confirming || isDisputed}
                 className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold tracking-wide uppercase shadow-lg shadow-emerald-900/30 transition flex items-center justify-center gap-2 disabled:opacity-40 disabled:pointer-events-none cursor-pointer"
               >
                 {confirming ? (
@@ -1408,6 +1415,11 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
                   </>
                 )}
               </button>
+            )}
+            {isDisputed && !trade.isInitiatorConfirmed && (
+              <p className="text-[11px] text-red-400 mt-2 text-center">
+                {isVie ? 'Tạm khóa do đang có khiếu nại' : 'Locked due to active dispute'}
+              </p>
             )}
           </div>
 
@@ -1435,7 +1447,7 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
               <button
                 type="button"
                 onClick={() => handleConfirmSatisfaction('receiver')}
-                disabled={confirming}
+                disabled={confirming || isDisputed}
                 className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold tracking-wide uppercase shadow-lg shadow-emerald-900/30 transition flex items-center justify-center gap-2 disabled:opacity-40 disabled:pointer-events-none cursor-pointer"
               >
                 {confirming ? (
@@ -1449,33 +1461,60 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
                 )}
               </button>
             )}
+            {isDisputed && !trade.isReceiverConfirmed && (
+              <p className="text-[11px] text-red-400 mt-2 text-center">
+                {isVie ? 'Tạm khóa do đang có khiếu nại' : 'Locked due to active dispute'}
+              </p>
+            )}
           </div>
         </div>
 
-        {/* Cancellation Bar at Bottom of VIEW 3 */}
+        {/* Cancellation & Dispute Bar at Bottom of VIEW 3 */}
         {trade.status !== 'Completed' && (
           <div className="mt-8 pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="text-center sm:text-left">
               <span className="text-xs font-bold text-gray-300 block">
-                {isVie ? 'Hủy giao dịch trao đổi?' : 'Need to cancel this trade?'}
+                {isDisputed
+                  ? (isVie ? 'Giao dịch đang có khiếu nại tranh chấp' : 'Trade Under Active Dispute')
+                  : (isVie ? 'Vấn đề phát sinh hoặc hủy giao dịch?' : 'Need to report an issue or cancel?')}
               </span>
               <span className="text-[11px] text-gray-500">
-                {isVie
-                  ? 'Nếu có sự cố hoặc hai bên đồng thuận dừng lại, bạn có thể hủy để giải phóng slot vẽ.'
-                  : 'If issues arise or by mutual agreement, you can cancel to free up your trade slot.'}
+                {isDisputed
+                  ? (isVie
+                    ? 'Quản trị viên đang phân xử hồ sơ. Các thao tác hủy hoặc hoàn tất tạm thời bị khóa.'
+                    : 'Administrators are arbitrating. Cancellation and completion are locked.')
+                  : (isVie
+                    ? 'Bạn có thể hủy nếu hai bên đồng thuận, hoặc gửi khiếu nại nếu đối tác nộp tranh AI, vi phạm bản quyền.'
+                    : 'You can cancel by mutual agreement, or file a dispute if your partner submitted AI art or violated terms.')}
               </span>
             </div>
-            <button
-              type="button"
-              onClick={() => {
-                setCancelReason('');
-                setShowCancelModal(true);
-              }}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 text-xs font-semibold transition cursor-pointer shrink-0"
-            >
-              <XCircle className="w-4 h-4 text-rose-400" />
-              <span>{isVie ? 'Hủy giao dịch này' : 'Cancel This Trade'}</span>
-            </button>
+
+            <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+              {isAccepted && !isCompleted && !isDisputed && (
+                <button
+                  type="button"
+                  onClick={() => setShowDisputeModal(true)}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 text-red-300 text-xs font-semibold transition cursor-pointer"
+                >
+                  <Gavel className="w-4 h-4 text-red-400" />
+                  <span>{isVie ? 'Khiếu nại vi phạm' : 'Raise Dispute'}</span>
+                </button>
+              )}
+
+              {!isDisputed && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCancelReason('');
+                    setShowCancelModal(true);
+                  }}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 text-xs font-semibold transition cursor-pointer shrink-0"
+                >
+                  <XCircle className="w-4 h-4 text-rose-400" />
+                  <span>{isVie ? 'Hủy giao dịch này' : 'Cancel This Trade'}</span>
+                </button>
+              )}
+            </div>
           </div>
         )}
 
@@ -1613,6 +1652,22 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Trade Dispute Filing Modal */}
+      {trade && (
+        <TradeDisputeModal
+          isOpen={showDisputeModal}
+          onClose={() => setShowDisputeModal(false)}
+          trade={trade}
+          onDisputeSuccess={(updated) => {
+            if (updated) {
+              setTrade(updated);
+            } else if (trade.id) {
+              void artTradeService.getById(trade.id).then(setTrade);
+            }
+          }}
+        />
       )}
     </div>
   );

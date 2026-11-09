@@ -106,5 +106,19 @@ export const artTradeService = {
     if (!res.data.data?.url) throw new Error('Failed to upload attachment');
     return res.data.data.url;
   },
+
+  createDispute: async (payload: {
+    artTradeId: string;
+    category?: string;
+    reason: string;
+    evidenceUrls?: string[];
+  }): Promise<{ message: string; disputeId: string }> => {
+    const res = await apiClient.post<ApiResponse<{ message: string; disputeId: string }>>(
+      '/trade-disputes',
+      payload
+    );
+    if (!res.data.data) throw new Error('Failed to submit dispute');
+    return res.data.data;
+  },
 };
 
