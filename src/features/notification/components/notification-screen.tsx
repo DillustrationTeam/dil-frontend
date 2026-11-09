@@ -1,8 +1,10 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import {
+  useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import {
+  ArrowLeftRight,
   Award,
   Bell,
   BriefcaseBusiness,
@@ -60,8 +62,22 @@ function getIcon(type: string) {
     case 'InvitationDeclined':
       return <Award size={18} className="text-rose-400" />;
     case 'InvitationCanceled':
-    case 'InvitationExpired':
+        case 'InvitationExpired':
       return <Award size={18} className="text-outline" />;
+    case 'ArtTradeProposed':
+      return <ArrowLeftRight size={18} className="text-amber-400" />;
+    case 'ArtTradeAccepted':
+      return <ArrowLeftRight size={18} className="text-emerald-400" />;
+    case 'ArtTradeDeclined':
+    case 'ArtTradeCancelled':
+      return <ArrowLeftRight size={18} className="text-rose-400" />;
+    case 'ArtTradeArtworkSubmitted':
+      return <ArrowLeftRight size={18} className="text-brand-periwinkle" />;
+    case 'ArtTradeCompleted':
+      return <ArrowLeftRight size={18} className="text-emerald-400" />;
+    case 'TradeDisputeCreated':
+    case 'TradeDisputeResolved':
+      return <Scale size={18} className="text-amber-400" />;
     default:
       return <Info size={18} className="text-outline" />;
   }
@@ -88,6 +104,8 @@ function getRefLink({ refType, refId, notificationType, notificationTitle, body 
   if (key === 'commission' && refId) return { url: `/workroom/${refId}`, label: 'Mở phòng làm việc' };
   if (key === 'chatroom' && refId) return { url: `/workroom/${refId}`, label: 'Mở cuộc trò chuyện' };
   if (key === 'invitation' && refId) return { url: `/notifications?invitationId=${refId}`, label: 'Xem chi tiết lời mời' };
+  if (key === 'arttrade' && refId) return { url: `/art-trades/${refId}`, label: 'Xem chi tiết trao đổi' };
+  if (key === 'tradedispute' && refId) return { url: `/art-trades/${refId}`, label: 'Xem chi tiết trao đổi' };
   return null;
 }
 
@@ -177,8 +195,11 @@ export function NotificationScreen({ userId }: { userId: string | null }) {
       await notificationService.markAllRead();
       setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true, readAt: new Date().toISOString() })));
       setUnreadCount(0);
+      toast.success('Đã đánh dấu tất cả là đã đọc.');
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Không thể đánh dấu tất cả đã đọc.');
+      const msg = err instanceof Error ? err.message : 'Không thể đánh dấu tất cả đã đọc.';
+      setError(msg);
+      toast.error(msg);
     }
   }
 

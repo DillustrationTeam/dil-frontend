@@ -9,6 +9,7 @@ import { useAuthStore } from '@/store/use-auth-store';
 import { authService } from '@/services/auth.service';
 import toast from 'react-hot-toast';
 import { NotificationBell } from '@/features/notification';
+import TradeAuthRequiredModal from '@/components/modals/TradeAuthRequiredModal';
 
 export default function PublicLayout({ children, artworkModal }: { children: React.ReactNode; artworkModal: React.ReactNode }) {
   return <Suspense fallback={children}><PublicLayoutContent>{children}</PublicLayoutContent>{artworkModal}</Suspense>;
@@ -20,6 +21,7 @@ function PublicLayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname() ?? '';
   const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showTradeAuthModal, setShowTradeAuthModal] = useState(false);
 
   const handleLogout = async () => {
     if (refreshToken) {
@@ -77,6 +79,23 @@ function PublicLayoutContent({ children }: { children: React.ReactNode }) {
               >
                 {t('Events')}
               </Link>
+              {!isAuthenticated || !user ? (
+                <button
+                  type="button"
+                  onClick={() => setShowTradeAuthModal(true)}
+                  className="shrink-0 whitespace-nowrap text-[#c7c5cf] hover:text-white transition-colors cursor-pointer text-sm font-medium"
+                >
+                  {t('Trade')}
+                </button>
+              ) : (roles.includes('Creator') || isAdmin) ? (
+                <Link
+                  href="/art-trades/create"
+                aria-current={pathname.startsWith('/art-trades') ? 'page' : undefined}
+                className={`shrink-0 whitespace-nowrap ${pathname.startsWith('/art-trades') ? 'text-[#c2c7f6] border-b-2 border-[#c2c7f6] pb-1' : 'text-[#c7c5cf] hover:text-white'} transition-colors`}
+              >
+                {t('Trade')}
+                </Link>
+              ) : null}
             </div>
           </div>
 
@@ -224,6 +243,7 @@ function PublicLayoutContent({ children }: { children: React.ReactNode }) {
             </div>
           </div>
         </nav>
+        <TradeAuthRequiredModal isOpen={showTradeAuthModal} onClose={() => setShowTradeAuthModal(false)} />
       </header>
 
       {/* Page Content */}

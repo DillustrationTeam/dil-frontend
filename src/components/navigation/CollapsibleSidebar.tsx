@@ -29,6 +29,8 @@ import {
   User,
   UserPen,
   Settings,
+  ArrowLeftRight,
+  Sparkles,
 } from 'lucide-react';
 
 interface SidebarItem {
@@ -52,6 +54,7 @@ const CLIENT_NAV_SECTIONS: SidebarSection[] = [
   {
     title: 'Client Workspace',
     items: [
+      { label: 'Tác phẩm đã sở hữu', href: '/client/owned-artworks', icon: Sparkles },
       { label: 'My Commissions', href: '/client/commissions', icon: FolderKanban },
       { label: 'Bộ sưu tập tranh đấu giá', href: '/collections', icon: Crown },
       { label: 'My Vouchers', href: '/vouchers', icon: Ticket },
@@ -85,6 +88,13 @@ const CREATOR_NAV_SECTIONS: SidebarSection[] = [
       { label: 'Incoming Requests', href: '/creator/requests', icon: Clock },
       { label: 'Waitlist', href: '/creator/waitlist', icon: ListChecks },
       { label: 'Workroom Chat', href: '/workroom', icon: MessageSquare },
+    ],
+  },
+  {
+    title: 'Trade & Exchange',
+    items: [
+      { label: 'Trade', href: '/art-trades/create', icon: ArrowLeftRight },
+      { label: 'My Trades', href: '/art-trades', icon: FolderKanban },
     ],
   },
   {

@@ -64,7 +64,7 @@ export const notificationService = {
   },
 
   async markAllRead(): Promise<void> {
-    const res = await apiClient.put<ApiResponse<unknown>>('/notifications/read-all');
+    const res = await apiClient.put<ApiResponse<unknown>>('/notifications/read-all', {});
     if (res.data.error) throw new Error('Không thể đánh dấu tất cả là đã đọc.');
   },
 
