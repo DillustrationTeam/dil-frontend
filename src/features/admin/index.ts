@@ -14,6 +14,7 @@ export * from './services/user.service';
 export * from './services/platform-fee.service';
 export * from './services/moderation.service';
 export * from './services/dispute.service';
+export * from './services/trade-operations.service';
 export * from './reducers/dashboard.reducer';
 export * from './reducers/creator.reducer';
 export * from './reducers/user.reducer';
@@ -25,4 +26,5 @@ export * from './types/platform-fee.types';
 export * from './types/moderation.types';
 export * from './types/user-management.types';
 export * from './types/dispute-arbitration.types';
+export * from './types/trade-operations.types';
 

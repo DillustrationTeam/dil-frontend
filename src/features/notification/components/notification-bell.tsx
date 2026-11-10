@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ArrowRight, Award, Bell, BriefcaseBusiness, Check, CheckCheck, CircleAlert, Clock, Gavel, Info, LockKeyhole, Megaphone, RefreshCw, Scale, ShieldAlert, Wallet, X } from 'lucide-react';
+import { ArrowLeftRight, ArrowRight, Award, Bell, BriefcaseBusiness, Check, CheckCheck, CircleAlert, Clock, Gavel, Info, LockKeyhole, Megaphone, RefreshCw, Scale, ShieldAlert, Wallet, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { getApiErrorMessage } from '@/lib/api-error';
 import { notificationService } from '../services/notification.service';
@@ -33,6 +33,18 @@ function getIcon(type: string, size = 15) {
       return <LockKeyhole size={size} className="text-emerald-400" />;
     case 'DisputeStatusChanged':
       return <Scale size={size} className="text-amber-400" />;
+    case 'TradeDisputeCreated':
+      return <Scale size={size} className="text-rose-400" />;
+    case 'TradeDisputeResolved':
+      return <Scale size={size} className="text-emerald-400" />;
+    case 'ArtTradeProposed':
+    case 'ArtTradeAccepted':
+    case 'ArtTradeArtworkSubmitted':
+    case 'ArtTradeCompleted':
+      return <ArrowLeftRight size={size} className="text-brand-periwinkle" />;
+    case 'ArtTradeDeclined':
+    case 'ArtTradeCancelled':
+      return <ArrowLeftRight size={size} className="text-rose-400" />;
     case 'InvitationReceived':
       return <Award size={size} className="text-amber-400" />;
     case 'InvitationAccepted':
@@ -66,6 +78,7 @@ function getRefLink({ refType, refId, notificationType, notificationTitle, body 
   if (key === 'commission' && refId) return `/workroom/${refId}`;
   if (key === 'chatroom' && refId) return `/workroom/${refId}`;
   if (key === 'invitation' && refId) return `/notifications?invitationId=${refId}`;
+  if ((key === 'arttrade' || key === 'tradedispute') && refId) return `/art-trades/${refId}`;
   return null;
 }
 
@@ -263,8 +276,11 @@ export function NotificationBell({
       await notificationService.markAllRead();
       setItems((prev) => prev.map((n) => ({ ...n, isRead: true })));
       setUnreadCount(0);
+      toast.success('Đã đánh dấu tất cả là đã đọc.');
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Không đánh dấu được tất cả là đã đọc.');
+      const msg = err instanceof Error ? err.message : 'Không đánh dấu được tất cả là đã đọc.';
+      setError(msg);
+      toast.error(msg);
     } finally {
       setMarkingAll(false);
     }

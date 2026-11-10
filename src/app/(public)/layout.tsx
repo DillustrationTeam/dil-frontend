@@ -9,6 +9,7 @@ import { useAuthStore } from '@/store/use-auth-store';
 import { authService } from '@/services/auth.service';
 import toast from 'react-hot-toast';
 import { NotificationBell } from '@/features/notification';
+import TradeAuthRequiredModal from '@/components/modals/TradeAuthRequiredModal';
 
 export default function PublicLayout({ children, artworkModal }: { children: React.ReactNode; artworkModal: React.ReactNode }) {
   return <Suspense fallback={children}><PublicLayoutContent>{children}</PublicLayoutContent>{artworkModal}</Suspense>;
@@ -21,6 +22,7 @@ function PublicLayoutContent({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showTradeAuthModal, setShowTradeAuthModal] = useState(false);
 
   const handleLogout = async () => {
     if (refreshToken) {
@@ -67,6 +69,30 @@ function PublicLayoutContent({ children }: { children: React.ReactNode }) {
               >
                 {t('Đấu giá')}
               </Link>
+              <Link
+                href="/events"
+                aria-current={pathname === '/events' || pathname.startsWith('/events/') ? 'page' : undefined}
+                className={`shrink-0 whitespace-nowrap ${pathname === '/events' || pathname.startsWith('/events/') ? 'text-[#c2c7f6] border-b-2 border-[#c2c7f6] pb-1' : 'text-[#c7c5cf] hover:text-white'} transition-colors`}
+              >
+                {t('Events')}
+              </Link>
+              {!isAuthenticated || !user ? (
+                <button
+                  type="button"
+                  onClick={() => setShowTradeAuthModal(true)}
+                  className="shrink-0 whitespace-nowrap text-[#c7c5cf] hover:text-white transition-colors cursor-pointer text-sm font-medium"
+                >
+                  {t('Trade')}
+                </button>
+              ) : (roles.includes('Creator') || isAdmin) ? (
+                <Link
+                  href="/art-trades/create"
+                  aria-current={pathname.startsWith('/art-trades') ? 'page' : undefined}
+                  className={`shrink-0 whitespace-nowrap ${pathname.startsWith('/art-trades') ? 'text-[#c2c7f6] border-b-2 border-[#c2c7f6] pb-1' : 'text-[#c7c5cf] hover:text-white'} transition-colors`}
+                >
+                  {t('Trade')}
+                </Link>
+              ) : null}
             </div>
           </div>
 
@@ -224,6 +250,7 @@ function PublicLayoutContent({ children }: { children: React.ReactNode }) {
           <input aria-label="Tìm tác phẩm hoặc tác giả" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} placeholder="Tìm tên tranh hoặc tác giả…" className="min-w-0 flex-1 rounded-full border border-white/10 bg-[#1b1b1e] px-4 py-2 text-sm text-white outline-none focus:border-[#A7ACD9]" />
           <button type="submit" className="rounded-full bg-[#A7ACD9] px-4 text-sm font-semibold text-[#1F2335]">Tìm kiếm</button>
         </form>
+        <TradeAuthRequiredModal isOpen={showTradeAuthModal} onClose={() => setShowTradeAuthModal(false)} />
       </header>
 
       {/* Page Content */}

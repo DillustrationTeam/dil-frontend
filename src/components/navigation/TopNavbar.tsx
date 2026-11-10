@@ -16,6 +16,7 @@ import {
   Wallet,
   FolderKanban,
   Menu,
+  ArrowLeftRight,
 } from 'lucide-react';
 import { useAuthStore } from '@/store/use-auth-store';
 import { useRouter } from 'next/navigation';
@@ -75,7 +76,7 @@ export default function TopNavbar<T extends string = string>({
             width={180}
             height={48}
             priority
-            style={{ width: 'auto' }}
+            style={{ width: 'auto', height: 'auto' }}
             className="h-11 md:h-12 w-auto object-contain transition-transform group-hover:scale-105"
           />
         </Link>
@@ -203,6 +204,13 @@ export default function TopNavbar<T extends string = string>({
               </Link>
               {isCreator && (
                 <>
+                  <Link
+                    href="/art-trades"
+                    onClick={() => setShowProfileMenu(false)}
+                    className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs text-[#e4e1e5] hover:text-white hover:bg-white/5 transition-colors"
+                  >
+                    <ArrowLeftRight className="w-4 h-4 text-[#A7ACD9]" /> {t('My Trades')}
+                  </Link>
                   <Link
                     href="/creator/commissions"
                     onClick={() => setShowProfileMenu(false)}

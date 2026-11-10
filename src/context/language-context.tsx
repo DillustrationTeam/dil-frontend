@@ -7,6 +7,9 @@ export type Language = 'VIE' | 'ENG';
 
 const dictionary: Record<string, { VIE: string; ENG: string }> = {
   // Navigation & Workspace
+  'Tác phẩm đã sở hữu': { VIE: 'Tác phẩm đã sở hữu', ENG: 'Owned Artworks' },
+  'Owned Artworks': { VIE: 'Tác phẩm đã sở hữu', ENG: 'Owned Artworks' },
+  'Trade Operations': { VIE: 'Vận hành Trao đổi tranh', ENG: 'Trade Operations' },
   'My Commissions': { VIE: 'Đơn vẽ của tôi', ENG: 'My Commissions' },
   'Auctions & Trade': { VIE: 'Đấu giá & Mua bán', ENG: 'Auctions & Trade' },
   'Workroom Chat': { VIE: 'Phòng làm việc', ENG: 'Workroom Chat' },
@@ -61,11 +64,22 @@ const dictionary: Record<string, { VIE: string; ENG: string }> = {
   'Cuộc thi': { VIE: 'Cuộc thi', ENG: 'Contests' },
   'Events': { VIE: 'Sự kiện', ENG: 'Events' },
   'Auctions': { VIE: 'Đấu giá', ENG: 'Auctions' },
+  'Trade': { VIE: 'Trao đổi', ENG: 'Trade' },
+  'Trao đổi': { VIE: 'Trao đổi', ENG: 'Trade' },
+  'Trade & Exchange': { VIE: 'Trao đổi & Giao lưu', ENG: 'Trade & Exchange' },
+  'My Trades': { VIE: 'Trao đổi của tôi', ENG: 'My Trades' },
+  'Art Trade': { VIE: 'Trao đổi tranh', ENG: 'Art Trade' },
+  'Sign in to Trade': { VIE: 'Đăng nhập để trao đổi', ENG: 'Sign in to Trade' },
+  'Create Art Trade': { VIE: 'Tạo lời mời trao đổi', ENG: 'Create Art Trade' },
 };
 
 // Global DOM Auto-Translation Map for Client-side text node replacement
 const translationMap: Record<string, string> = {
   // Marketplace & Art Discovery
+  'Trao đổi': 'Trade',
+  'TRAO ĐỔI': 'TRADE',
+  'Trao đổi tranh': 'Art Trade',
+  'Trao đổi của tôi': 'My Trades',
   'Khám phá nghệ thuật': 'Explore Art',
   'KHÁM PHÁ NGHỆ THUẬT': 'EXPLORE ART',
   'Chợ tranh dành riêng cho bạn': 'Curated Art Marketplace for You',
