@@ -2,12 +2,17 @@
 
 import { ArtworkMetadataAssistant, ArtworkScanPanel } from '@/features/artwork-ai';
 
-import { ChangeEvent, FormEvent, useEffect, useRef, useState } from 'react';
+import { ChangeEvent, FormEvent, useCallback, useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 import {
+  AlertCircle,
+  Ban,
   Bot,
+  Eye,
+  RotateCcw,
+  ShieldCheck,
   CalendarDays,
   Check,
   ChevronLeft,
@@ -24,6 +29,12 @@ import { creatorProfileService } from '../services/creator-profile.service';
 import { commissionService } from '@/services/commission.service';
 import type { Commission, CommissionStatus } from '@/types/commission.types';
 import { CreatorAssetLibrary } from './creator-asset-library';
+import {
+  CreatorTermsOverview,
+  CREATOR_TERMS_PRESETS,
+  DEFAULT_EXTENDED_TERMS,
+  normalizeCreatorTerms,
+} from '@/components/terms/CreatorTermsOverview';
 import { CreatorRateCardManager } from './creator-rate-card-manager';
 import type {
   ArtworkDto,
@@ -39,7 +50,7 @@ type FaqDraft = { q: string; a: string };
 const titles: Record<WorkstationView, [string, string]> = {
   artworks: ['Đăng tải & quản lý tác phẩm', 'Xây dựng portfolio với thiết lập AI hỗ trợ.'],
   services: ['Bảng giá & dịch vụ', 'Thiết lập gói commission và số slot nhận đơn.'],
-  terms: ['Điều khoản & bản quyền', 'Cài đặt chính sách phù hợp với cách làm việc của bạn.'],
+  terms: ['Điều khoản & bản quyền', 'Thiết lập phụ phí thương mại, phạm vi vẽ và điều khoản riêng.'],
   'ai-rules': ['AI Auto-reply & rules', 'Tự động phản hồi brief và câu hỏi thường gặp.'],
   waitlist: ['Quản lý hàng chờ', 'Theo dõi mọi commission theo từng giai đoạn.'],
   assets: ['Thư viện asset & presets', 'Tổ chức pose mẫu, palette và preset cá nhân.'],
@@ -56,44 +67,54 @@ const defaultState: CreatorWorkstationState = {
   assets: [],
 };
 
-function Shell({ view, children }: { view: WorkstationView; children: React.ReactNode }) {
+function Shell({ view, actions, children }: { view: WorkstationView; actions?: React.ReactNode; children: React.ReactNode }) {
   const [title, subtitle] = titles[view];
 
   return (
     <div className="w-full space-y-6">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[.2em] text-[#A7ACD9]">Creator studio</p>
-          <h1 className="mt-2 font-h1 text-2xl font-bold text-white sm:text-3xl">{title}</h1>
-          <p className="mt-2 text-sm text-[#C7C5CF]">{subtitle}</p>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="min-w-0">
+          <h1 className="font-h1 text-balance text-2xl font-bold text-white sm:text-3xl">{title}</h1>
+          <p className="mt-1.5 text-sm text-[#C7C5CF]">{subtitle}</p>
         </div>
+        {actions && <div className="flex flex-wrap items-center gap-2.5">{actions}</div>}
       </div>
       {children}
     </div>
   );
 }
 
-function Toggle({ label, description, checked, onChange }: { label: string; description: string; checked: boolean; onChange: (value: boolean) => void }) {
+function Toggle({ label, description, checked, disabled = false, onChange }: { label: string; description: string; checked: boolean; disabled?: boolean; onChange: (value: boolean) => void }) {
   return (
-    <label className="mt-5 flex cursor-pointer items-center justify-between gap-3">
-      <span>
-        <span className="block text-sm text-white">{label}</span>
-        <span className="mt-1 block text-xs text-[#919099]">{description}</span>
-      </span>
-      <input checked={checked} onChange={(event) => onChange(event.target.checked)} type="checkbox" className="h-5 w-9 accent-[#A7ACD9]" />
-    </label>
+    <div className="mt-4 flex items-center justify-between gap-4 py-1.5">
+      <div className="min-w-0">
+        <p className="text-sm font-medium text-white">{label}</p>
+        <p className="mt-0.5 text-xs text-[#B8B6C4]">{description}</p>
+      </div>
+      <button
+        type="button"
+        role="switch"
+        aria-checked={checked}
+        aria-label={label}
+        disabled={disabled}
+        onClick={() => onChange(!checked)}
+        className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#A7ACD9] disabled:cursor-not-allowed disabled:opacity-50 ${checked ? "bg-[#A7ACD9]" : "bg-white/15"}`}
+      >
+        <span className={`inline-block h-4 w-4 rounded-full bg-[#171a2a] shadow transition-transform ${checked ? "translate-x-6" : "translate-x-1"}`} />
+      </button>
+    </div>
   );
 }
 
 function LicenseRow({ title, detail, value }: { title: string; detail: string; value: string }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/[.025] p-4">
-      <div className="flex justify-between gap-3">
+    <div className="rounded-2xl bg-white/[.035] p-4">
+      <div className="flex items-center justify-between gap-3">
         <div>
           <p className="text-sm font-medium text-white">{title}</p>
           <p className="mt-1 text-xs text-[#C7C5CF]">{detail}</p>
         </div>
-        <strong className="text-sm text-[#A7ACD9]">{value}</strong>
+        <strong className="shrink-0 font-mono text-sm text-[#A7ACD9]">{value}</strong>
       </div>
     </div>
   );
@@ -506,74 +527,564 @@ function Services() {
   );
 }
 
+type DraftClause = { id: string; title: string; content: string };
+
+const CLAUSE_SNIPPETS: Array<{ title: string; content: string }> = [
+  { title: "Phí làm gấp", content: "Đơn cần hoàn thành gấp hơn thời hạn tiêu chuẩn sẽ áp dụng phụ phí thỏa thuận theo mức độ ưu tiên." },
+  { title: "Giữ kín (NDA)", content: "Nếu cần bảo mật tuyệt đối và không đăng mẫu công khai trong mọi thời điểm, vui lòng thỏa thuận NDA trước khi ký quỹ." },
+  { title: "Tệp nguồn (.PSD / .CLIP)", content: "Sản phẩm mặc định giao định dạng ảnh/PDF phẳng độ phân giải cao; tệp nguồn tách lớp cần thỏa thuận riêng." },
+];
+
+const makeClauseId = () => (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function" ? crypto.randomUUID() : `clause-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`);
+
 function Terms() {
-  const [commercial, setCommercial] = useState('1.5');
-  const [revision, setRevision] = useState('02 lần chỉnh sửa miễn phí trong giai đoạn sketch.');
-  const [cancellation, setCancellation] = useState('Hoàn tiền theo tiến độ hoàn thành. Phí hủy có thể áp dụng sau khi duyệt sketch.');
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [showPreview, setShowPreview] = useState(false);
+  const [pendingPresetIdx, setPendingPresetIdx] = useState<number | null>(null);
+  const [commercial, setCommercial] = useState("1.5");
+  const [extended, setExtended] = useState(DEFAULT_EXTENDED_TERMS);
+  const [draftClauses, setDraftClauses] = useState<DraftClause[]>([]);
+  const [updatedAt, setUpdatedAt] = useState<string | null>(null);
+  const [savedSnapshot, setSavedSnapshot] = useState<string | null>(null);
+  const savedTermsRef = useRef<{ commercial: string; extended: typeof DEFAULT_EXTENDED_TERMS; clauses: DraftClause[] } | null>(null);
 
-  useEffect(() => {
-    const loadState = async () => {
-      try {
-        const state = await creatorProfileService.getWorkstationState();
-        setCommercial(String(state.terms.commercialLicenseMultiplier ?? 1.5));
-        setRevision(state.terms.revisionPolicy ?? '02 lần chỉnh sửa miễn phí trong giai đoạn sketch.');
-        setCancellation(state.terms.cancellationPolicy ?? 'Hoàn tiền theo tiến độ hoàn thành. Phí hủy có thể áp dụng sau khi duyệt sketch.');
-      } catch {
-        // keep demo defaults
-      }
-    };
+  const toSnapshot = (mult: string, ext: typeof DEFAULT_EXTENDED_TERMS, clauses: DraftClause[]) =>
+    JSON.stringify({
+      mult: mult.trim(),
+      willDraw: (ext.willDraw ?? "").trim(),
+      wontDraw: (ext.wontDraw ?? "").trim(),
+      commercialScope: (ext.commercialScope ?? "").trim(),
+      usageRestrictions: (ext.usageRestrictions ?? "").trim(),
+      allowPortfolioDisplay: Boolean(ext.allowPortfolioDisplay),
+      requireCredit: Boolean(ext.requireCredit),
+      prohibitAiTraining: Boolean(ext.prohibitAiTraining),
+      prohibitResale: Boolean(ext.prohibitResale),
+      clauses: clauses.map((c) => ({ title: c.title.trim(), content: c.content.trim() })),
+    });
 
-    void loadState();
+  const applyNormalized = useCallback((norm: ReturnType<typeof normalizeCreatorTerms>) => {
+    const multStr = String(norm.commercialLicenseMultiplier);
+    const clauses: DraftClause[] = (norm.extended.customClauses ?? []).map((c) => ({
+      id: makeClauseId(),
+      title: c.title,
+      content: c.content,
+    }));
+    setCommercial(multStr);
+    setExtended(norm.extended);
+    setDraftClauses(clauses);
+    setUpdatedAt(norm.updatedAt ?? null);
+    savedTermsRef.current = { commercial: multStr, extended: norm.extended, clauses };
+    setSavedSnapshot(toSnapshot(multStr, norm.extended, clauses));
   }, []);
 
-  const save = async () => {
+  const loadState = useCallback(async () => {
+    setLoading(true);
+    setLoadError(null);
     try {
-      await creatorProfileService.saveTerms({
-        commercialLicenseMultiplier: Number(commercial || 1.5),
-        revisionPolicy: revision,
-        cancellationPolicy: cancellation,
-      });
-      toast.success('Đã lưu điều khoản & bản quyền.');
+      const state = await creatorProfileService.getWorkstationState();
+      applyNormalized(normalizeCreatorTerms(state.terms));
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Không thể lưu điều khoản.';
-      toast.error(message);
+      const message = error instanceof Error ? error.message : "Không thể tải cấu hình điều khoản hiện tại.";
+      setLoadError(message);
+    } finally {
+      setLoading(false);
     }
+  }, [applyNormalized]);
+
+  useEffect(() => {
+    let active = true;
+    creatorProfileService
+      .getWorkstationState()
+      .then((state) => {
+        if (active) applyNormalized(normalizeCreatorTerms(state.terms));
+      })
+      .catch((error) => {
+        if (!active) return;
+        const message = error instanceof Error ? error.message : "Không thể tải cấu hình điều khoản hiện tại.";
+        setLoadError(message);
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [loadState]);
+
+  const canEdit = !loading && !loadError;
+  const parsedMultiplier = Number(commercial);
+  const multiplierValid = commercial.trim() !== "" && Number.isFinite(parsedMultiplier) && parsedMultiplier >= 1 && parsedMultiplier <= 10;
+  const currentSnapshot = toSnapshot(commercial, extended, draftClauses);
+  const isDirty = Boolean(savedSnapshot && currentSnapshot !== savedSnapshot);
+
+  const clauseErrorAt = (c: DraftClause): string | null => {
+    if (!c.title.trim() && !c.content.trim()) return "Nhập tiêu đề và nội dung hoặc xóa mục trống.";
+    if (!c.title.trim()) return "Vui lòng nhập tiêu đề cho điều khoản này.";
+    if (c.title.trim().length > 150) return "Tiêu đề tối đa 150 ký tự.";
+    if (c.content.trim().length > 1500) return "Nội dung tối đa 1.500 ký tự.";
+    return null;
+  };
+  const hasInvalidClause = draftClauses.some((c) => clauseErrorAt(c) !== null);
+
+  useEffect(() => {
+    if (!isDirty) return;
+    const onBeforeUnload = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+    };
+    window.addEventListener("beforeunload", onBeforeUnload);
+    return () => window.removeEventListener("beforeunload", onBeforeUnload);
+  }, [isDirty]);
+
+  useEffect(() => {
+    if (!showPreview) return;
+    const onEsc = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setShowPreview(false);
+    };
+    window.addEventListener("keydown", onEsc);
+    return () => window.removeEventListener("keydown", onEsc);
+  }, [showPreview]);
+
+  const commitPreset = (presetIndex: number, keepCustomClauses: boolean) => {
+    const preset = CREATOR_TERMS_PRESETS[presetIndex];
+    if (!preset) return;
+    const norm = normalizeCreatorTerms(preset.terms);
+    const nextClauses: DraftClause[] = keepCustomClauses
+      ? draftClauses
+      : (norm.extended.customClauses ?? []).map((c) => ({ id: makeClauseId(), title: c.title, content: c.content }));
+    setCommercial(String(norm.commercialLicenseMultiplier));
+    setExtended((prev) => ({ ...norm.extended, version: prev.version }));
+    setDraftClauses(nextClauses);
+    setPendingPresetIdx(null);
+    toast.success(`Đã áp dụng "${preset.label}" (chưa lưu lên hệ thống).`);
   };
 
+  const requestApplyPreset = (presetIndex: number) => {
+    if (!canEdit) return;
+    if (isDirty || draftClauses.length > 0) {
+      setPendingPresetIdx(presetIndex);
+      return;
+    }
+    commitPreset(presetIndex, false);
+  };
+
+  const revertChanges = () => {
+    const saved = savedTermsRef.current;
+    if (!saved) return;
+    setCommercial(saved.commercial);
+    setExtended(saved.extended);
+    setDraftClauses(saved.clauses);
+    setPendingPresetIdx(null);
+    setSaveError(null);
+  };
+
+  const addCustomClause = (preset?: { title: string; content: string }) => {
+    if (!canEdit) return;
+    if (draftClauses.length >= 10) {
+      toast.error("Tối đa 10 điều khoản bổ sung.");
+      return;
+    }
+    setDraftClauses((prev) => [...prev, { id: makeClauseId(), title: preset?.title ?? "", content: preset?.content ?? "" }]);
+  };
+
+  const updateCustomClause = (id: string, field: "title" | "content", value: string) => {
+    setDraftClauses((prev) => prev.map((item) => (item.id === id ? { ...item, [field]: value } : item)));
+  };
+
+  const removeCustomClause = (id: string) => {
+    setDraftClauses((prev) => prev.filter((item) => item.id !== id));
+  };
+
+  const save = useCallback(async () => {
+    if (!canEdit || saving) return;
+    if (!multiplierValid) {
+      setSaveError("Hệ số thương mại phải nằm trong khoảng 1.0 đến 10.0.");
+      return;
+    }
+    if (hasInvalidClause) {
+      setSaveError("Vui lòng hoàn thiện hoặc xóa điều khoản bổ sung đang bị lỗi.");
+      return;
+    }
+    setSaving(true);
+    setSaveError(null);
+    try {
+      const payloadExtended = {
+        ...extended,
+        customClauses: draftClauses.map((c) => ({ title: c.title.trim(), content: c.content.trim() })),
+      };
+      const saved = await creatorProfileService.saveTerms({
+        commercialLicenseMultiplier: Math.round(parsedMultiplier * 100) / 100,
+        revisionPolicy: null,
+        cancellationPolicy: null,
+        extended: payloadExtended,
+      });
+      applyNormalized(normalizeCreatorTerms(saved));
+      toast.success(`Đã lưu điều khoản & bản quyền (v${saved.extended?.version ?? extended.version}).`);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Không thể lưu điều khoản.";
+      setSaveError(message);
+      toast.error(message);
+    } finally {
+      setSaving(false);
+    }
+  }, [canEdit, saving, multiplierValid, hasInvalidClause, extended, draftClauses, parsedMultiplier, applyNormalized]);
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "s") {
+        event.preventDefault();
+        void save();
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [save]);
+
+  const previewTerms = {
+    commercialLicenseMultiplier: multiplierValid ? parsedMultiplier : 1.5,
+    extended: {
+      ...extended,
+      customClauses: draftClauses
+        .filter((c) => Boolean(c.title.trim() || c.content.trim()))
+        .map((c) => ({ title: c.title.trim() || "Điều khoản bổ sung", content: c.content.trim() })),
+    },
+    updatedAt,
+  };
+
+  const headerActions = (
+    <>
+      <span className={`rounded-xl px-3 py-2 text-xs font-medium ${isDirty ? "bg-amber-400/15 text-amber-200" : "bg-white/[.05] text-[#C7C5CF]"}`}>
+        {loading
+          ? "Đang tải..."
+          : isDirty
+            ? "Chưa lưu thay đổi"
+            : updatedAt
+              ? `v${extended.version} · Đã lưu ${new Date(updatedAt).toLocaleDateString("vi-VN")}`
+              : `Phiên bản v${extended.version}`}
+      </span>
+      {isDirty && (
+        <button
+          type="button"
+          disabled={saving}
+          onClick={revertChanges}
+          className="inline-flex items-center gap-1.5 rounded-2xl bg-white/10 px-3.5 py-2.5 text-xs font-semibold text-white transition hover:bg-white/15 disabled:opacity-50"
+        >
+          <RotateCcw className="h-3.5 w-3.5" />
+          Hoàn tác
+        </button>
+      )}
+      <button
+        type="button"
+        disabled={!canEdit}
+        onClick={() => setShowPreview(true)}
+        className="inline-flex items-center gap-1.5 rounded-2xl bg-white/10 px-4 py-2.5 text-xs font-semibold text-[#DDE0FF] transition hover:bg-white/15 disabled:opacity-45"
+      >
+        <Eye className="h-3.5 w-3.5" />
+        Xem trước
+      </button>
+      <button
+        type="button"
+        disabled={!canEdit || saving || !multiplierValid || hasInvalidClause}
+        onClick={() => void save()}
+        className="rounded-2xl bg-[#A7ACD9] px-5 py-2.5 text-xs font-bold text-[#1F2335] transition hover:bg-[#b8bde4] disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        {saving ? "Đang lưu..." : "Lưu điều khoản"}
+      </button>
+    </>
+  );
+
   return (
-    <Shell view="terms">
+    <Shell view="terms" actions={headerActions}>
+      {loadError && (
+        <div role="alert" className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-rose-500/15 px-4 py-3 text-sm text-rose-200">
+          <span className="flex items-center gap-2">
+            <AlertCircle className="h-4 w-4 shrink-0" />
+            {loadError}
+          </span>
+          <button
+            type="button"
+            onClick={() => void loadState()}
+            className="rounded-xl bg-white/10 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-white/20"
+          >
+            Thử tải lại
+          </button>
+        </div>
+      )}
+
+      {saveError && (
+        <div role="alert" className="flex items-center gap-2 rounded-2xl bg-rose-500/15 px-4 py-3 text-xs text-rose-200">
+          <AlertCircle className="h-4 w-4 shrink-0" />
+          <span>{saveError}</span>
+        </div>
+      )}
+
       <div className="grid gap-5 xl:grid-cols-2">
         <section className="glass-container rounded-3xl p-6">
-          <h2 className="font-h1 text-lg font-bold text-white">Bản quyền sử dụng</h2>
-          <p className="mt-2 text-sm text-[#C7C5CF]">Thiết lập phụ phí theo mục đích sử dụng của client.</p>
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <h2 className="font-h1 text-balance text-lg font-bold text-white">Bản quyền sử dụng</h2>
+              <p className="mt-1.5 text-pretty text-sm text-[#C7C5CF]">Phụ phí thương mại và quyền khai thác tác phẩm.</p>
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {CREATOR_TERMS_PRESETS.map((preset, idx) => (
+                <button
+                  key={preset.id}
+                  type="button"
+                  disabled={!canEdit}
+                  onClick={() => requestApplyPreset(idx)}
+                  title={preset.description}
+                  className="rounded-xl bg-white/10 px-3 py-1.5 text-xs font-medium text-[#DDE0FF] transition hover:bg-white/15 disabled:opacity-45"
+                >
+                  {preset.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {pendingPresetIdx !== null && (
+            <div className="mt-4 rounded-2xl bg-amber-400/10 p-3.5 text-xs text-amber-100">
+              <p className="font-semibold">Áp dụng &ldquo;{CREATOR_TERMS_PRESETS[pendingPresetIdx]?.label}&rdquo; sẽ thay đổi nội dung hiện tại.</p>
+              <div className="mt-2.5 flex flex-wrap gap-2">
+                <button type="button" onClick={() => commitPreset(pendingPresetIdx, true)} className="rounded-xl bg-[#A7ACD9] px-3 py-1.5 font-bold text-[#1F2335]">Áp dụng &amp; giữ điều khoản riêng</button>
+                <button type="button" onClick={() => commitPreset(pendingPresetIdx, false)} className="rounded-xl bg-white/15 px-3 py-1.5 font-semibold text-white">Ghi đè toàn bộ</button>
+                <button type="button" onClick={() => setPendingPresetIdx(null)} className="rounded-xl px-2.5 py-1.5 text-slate-300 hover:text-white">Hủy</button>
+              </div>
+            </div>
+          )}
+
           <div className="mt-6 space-y-3">
-            <LicenseRow title="Personal use" detail="Dùng cá nhân, không kinh doanh" value="1.0× giá gốc" />
-            <label className="block rounded-2xl border border-[#A7ACD9]/30 bg-[#A7ACD9]/[.06] p-4">
-              <span className="text-sm font-medium text-white">Commercial use</span>
-              <span className="mt-1 block text-xs text-[#C7C5CF]">Sử dụng thương mại / branding</span>
+            <LicenseRow title="Cá nhân (Personal)" detail="Dùng cá nhân, phi thương mại" value="1.0× giá gốc" />
+            <div className="rounded-2xl bg-[#A7ACD9]/[.08] p-4">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <p className="text-sm font-medium text-white">Thương mại (Commercial)</p>
+                  <p className="mt-0.5 text-xs text-[#C7C5CF]">Branding / livestream / kinh doanh</p>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  {[1.5, 2, 2.5].map((presetMult) => (
+                    <button
+                      key={presetMult}
+                      type="button"
+                      disabled={!canEdit}
+                      onClick={() => setCommercial(String(presetMult))}
+                      className={`rounded-lg px-2 py-1 font-mono text-xs transition ${Number(commercial) === presetMult ? "bg-[#A7ACD9] font-bold text-[#1F2335]" : "bg-white/10 text-[#C7C5CF] hover:bg-white/15"}`}
+                    >
+                      {presetMult}×
+                    </button>
+                  ))}
+                </div>
+              </div>
               <div className="mt-3 flex items-center gap-2">
-                <input value={commercial} onChange={(event) => setCommercial(event.target.value)} className="w-20 rounded-xl border border-white/10 bg-[#171a2a] px-3 py-2 text-center text-sm outline-none" />
+                <input
+                  type="number"
+                  min={1}
+                  max={10}
+                  step="0.1"
+                  disabled={!canEdit}
+                  value={commercial}
+                  onChange={(event) => setCommercial(event.target.value)}
+                  aria-label="Hệ số thương mại"
+                  className="w-20 rounded-xl border border-white/10 bg-[#171a2a] px-3 py-2 text-center font-mono text-sm text-white outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none focus:border-[#A7ACD9] disabled:opacity-50"
+                />
                 <span className="text-sm text-[#DDE0FF]">× giá gốc</span>
               </div>
-            </label>
+              {!multiplierValid && (
+                <p role="alert" className="mt-2 text-xs text-rose-300">Nhập hệ số từ 1.0 đến 10.0.</p>
+              )}
+              <label className="mt-4 block text-sm text-[#C7C5CF]">
+                Phạm vi thương mại được phép
+                <textarea
+                  rows={2}
+                  disabled={!canEdit}
+                  value={extended.commercialScope ?? ""}
+                  onChange={(event) => setExtended((prev) => ({ ...prev, commercialScope: event.target.value }))}
+                  className="mt-2 min-h-20 w-full rounded-2xl border border-white/10 bg-[#171a2a] p-3 text-sm text-white outline-none focus:border-[#A7ACD9] disabled:opacity-50"
+                />
+              </label>
+            </div>
+          </div>
+
+          <div className="mt-4 divide-y divide-white/10 border-t border-white/10 pt-2">
+            <Toggle
+              label="Cho phép Creator đăng Portfolio"
+              description="Đăng mẫu có watermark lên hồ sơ/MXH sau khi bàn giao."
+              checked={Boolean(extended.allowPortfolioDisplay)}
+              disabled={!canEdit}
+              onChange={(value) => setExtended((prev) => ({ ...prev, allowPortfolioDisplay: value }))}
+            />
+            <Toggle
+              label="Yêu cầu ghi nguồn (Credit)"
+              description="Client cần ghi tên/tài khoản Creator khi đăng tải tác phẩm."
+              checked={Boolean(extended.requireCredit)}
+              disabled={!canEdit}
+              onChange={(value) => setExtended((prev) => ({ ...prev, requireCredit: value }))}
+            />
+            <Toggle
+              label="Cấm AI training / NFT"
+              description="Nghiêm cấm nạp tranh vào mô hình AI hoặc đúc NFT/Crypto."
+              checked={Boolean(extended.prohibitAiTraining)}
+              disabled={!canEdit}
+              onChange={(value) => setExtended((prev) => ({ ...prev, prohibitAiTraining: value }))}
+            />
+            <Toggle
+              label="Chống bán lại tệp gốc (gói Cá nhân)"
+              description="Không chuyển nhượng hoặc bán lại file khi đặt gói Cá nhân."
+              checked={Boolean(extended.prohibitResale)}
+              disabled={!canEdit}
+              onChange={(value) => setExtended((prev) => ({ ...prev, prohibitResale: value }))}
+            />
           </div>
         </section>
 
         <section className="glass-container rounded-3xl p-6">
-          <h2 className="font-h1 text-lg font-bold text-white">Chỉnh sửa & hủy đơn</h2>
+          <div>
+            <h2 className="font-h1 text-balance text-lg font-bold text-white">Phạm vi vẽ &amp; điều khoản riêng</h2>
+            <p className="mt-1.5 text-sm text-[#C7C5CF]">Nội dung nhận vẽ, giới hạn và các quy định bổ sung của bạn.</p>
+          </div>
+
+          <p className="mt-4 rounded-2xl bg-white/[.03] px-3.5 py-2.5 text-xs leading-5 text-[#B8B6C4]">
+            <strong className="text-white">Quy chế chung của sàn:</strong> Ký quỹ Escrow theo mốc, số lần sửa theo Rate Card, hủy đơn 48h và tự động nghiệm thu 72h áp dụng thống nhất.
+          </p>
+
           <label className="mt-5 block text-sm text-[#C7C5CF]">
-            Quy định chỉnh sửa
-            <textarea value={revision} onChange={(event) => setRevision(event.target.value)} className="mt-2 min-h-28 w-full rounded-2xl border border-white/10 bg-[#171a2a] p-3 text-sm text-white outline-none focus:border-[#A7ACD9]" />
+            <span className="inline-flex items-center gap-1.5 font-medium text-emerald-300">
+              <ShieldCheck className="h-4 w-4" /> Nhận vẽ (Will Draw)
+            </span>
+            <textarea
+              disabled={!canEdit}
+              value={extended.willDraw ?? ""}
+              onChange={(event) => setExtended((prev) => ({ ...prev, willDraw: event.target.value }))}
+              className="mt-2 min-h-24 w-full rounded-2xl border border-emerald-500/20 bg-[#171a2a] p-3 text-sm text-white outline-none focus:border-emerald-400/60 disabled:opacity-50"
+            />
           </label>
+
           <label className="mt-5 block text-sm text-[#C7C5CF]">
-            Chính sách hủy đơn
-            <textarea value={cancellation} onChange={(event) => setCancellation(event.target.value)} className="mt-2 min-h-28 w-full rounded-2xl border border-white/10 bg-[#171a2a] p-3 text-sm text-white outline-none focus:border-[#A7ACD9]" />
+            <span className="inline-flex items-center gap-1.5 font-medium text-rose-300">
+              <Ban className="h-4 w-4" /> Từ chối vẽ (Won&apos;t Draw)
+            </span>
+            <textarea
+              disabled={!canEdit}
+              value={extended.wontDraw ?? ""}
+              onChange={(event) => setExtended((prev) => ({ ...prev, wontDraw: event.target.value }))}
+              className="mt-2 min-h-24 w-full rounded-2xl border border-rose-500/20 bg-[#171a2a] p-3 text-sm text-white outline-none focus:border-rose-400/60 disabled:opacity-50"
+            />
           </label>
-          <button type="button" onClick={save} className="mt-5 rounded-2xl bg-[#A7ACD9] px-5 py-3 text-sm font-bold text-[#1F2335]">
-            Lưu điều khoản
-          </button>
+
+          <label className="mt-5 block text-sm text-[#C7C5CF]">
+            Lưu ý &amp; hạn chế sử dụng
+            <textarea
+              disabled={!canEdit}
+              value={extended.usageRestrictions ?? ""}
+              onChange={(event) => setExtended((prev) => ({ ...prev, usageRestrictions: event.target.value }))}
+              className="mt-2 min-h-20 w-full rounded-2xl border border-white/10 bg-[#171a2a] p-3 text-sm text-white outline-none focus:border-[#A7ACD9] disabled:opacity-50"
+            />
+          </label>
+
+          <div className="mt-6 border-t border-white/10 pt-5">
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <h3 className="font-h1 text-base font-bold text-white">Điều khoản bổ sung riêng</h3>
+                <p className="mt-0.5 text-pretty text-xs text-[#B8B6C4]">Thêm tối đa 10 điều khoản theo cách làm việc của bạn.</p>
+              </div>
+              <button
+                type="button"
+                disabled={!canEdit || draftClauses.length >= 10}
+                onClick={() => addCustomClause()}
+                className="inline-flex items-center gap-1.5 rounded-xl bg-white/10 px-3 py-2 text-xs font-semibold text-[#DDE0FF] transition hover:bg-white/15 disabled:opacity-45"
+              >
+                <Plus className="h-3.5 w-3.5" /> Thêm điều khoản
+              </button>
+            </div>
+
+            <div className="mb-3 flex flex-wrap gap-1.5">
+              {CLAUSE_SNIPPETS.map((snippet) => (
+                <button
+                  key={snippet.title}
+                  type="button"
+                  disabled={!canEdit || draftClauses.length >= 10}
+                  onClick={() => addCustomClause(snippet)}
+                  className="rounded-lg bg-white/[.05] px-2.5 py-1 text-[11px] text-[#C7C5CF] transition hover:bg-white/10 hover:text-white disabled:opacity-45"
+                >
+                  + {snippet.title}
+                </button>
+              ))}
+            </div>
+
+            {draftClauses.length > 0 && (
+              <div className="space-y-3">
+                {draftClauses.map((clause, index) => {
+                  const clauseErr = clauseErrorAt(clause);
+                  return (
+                    <article key={clause.id} className="rounded-2xl bg-white/[.035] p-4">
+                      <div className="flex items-center justify-between gap-2">
+                        <input
+                          disabled={!canEdit}
+                          maxLength={150}
+                          value={clause.title}
+                          onChange={(event) => updateCustomClause(clause.id, "title", event.target.value)}
+                          placeholder={`Tiêu đề điều khoản #${index + 1}`}
+                          className="w-full bg-transparent text-sm font-medium text-white outline-none placeholder:text-slate-500"
+                        />
+                        <button
+                          type="button"
+                          disabled={!canEdit}
+                          onClick={() => removeCustomClause(clause.id)}
+                          aria-label={`Xóa điều khoản ${index + 1}`}
+                          className="rounded-xl bg-white/5 p-1.5 text-[#B8B6C4] transition hover:text-rose-300 disabled:opacity-45"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                      <textarea
+                        disabled={!canEdit}
+                        maxLength={1500}
+                        value={clause.content}
+                        onChange={(event) => updateCustomClause(clause.id, "content", event.target.value)}
+                        placeholder="Nội dung chi tiết..."
+                        className="mt-3 min-h-20 w-full rounded-2xl border border-white/10 bg-[#171a2a] p-3 text-sm text-white outline-none focus:border-[#A7ACD9] disabled:opacity-50"
+                      />
+                      {clauseErr && <p role="alert" className="mt-2 text-xs text-rose-300">{clauseErr}</p>}
+                    </article>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </section>
       </div>
+
+      {showPreview && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setShowPreview(false);
+          }}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Xem trước điều khoản dịch vụ"
+            className="flex max-h-[88vh] w-full max-w-3xl flex-col overflow-hidden rounded-3xl border border-white/10 bg-[#141724] shadow-2xl"
+          >
+            <header className="flex items-center justify-between border-b border-white/10 px-6 py-4">
+              <h2 className="font-h1 text-base font-bold text-white">Xem trước hiển thị với khách hàng</h2>
+              <button
+                type="button"
+                onClick={() => setShowPreview(false)}
+                aria-label="Đóng xem trước"
+                className="rounded-xl bg-white/5 p-2 text-slate-300 transition hover:bg-white/10 hover:text-white"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </header>
+            <div className="min-h-0 flex-1 overflow-y-auto p-6">
+              <CreatorTermsOverview terms={previewTerms} />
+            </div>
+          </div>
+        </div>
+      )}
     </Shell>
   );
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
 import {
   FileText,
@@ -8,8 +8,11 @@ import {
   Layers,
   Image as ImageIcon,
   ExternalLink,
+  Sparkles,
+  Loader2,
 } from 'lucide-react';
 import { DisputeArbitrationDetailDto } from '@/features/admin/types/dispute-arbitration.types';
+import { aiService } from '@/features/ai-assistant/services/ai.service';
 
 export interface DisputeEvidencePanelProps {
   dispute: DisputeArbitrationDetailDto;
@@ -24,6 +27,26 @@ function formatCurrency(amount: number): string {
 }
 
 export function DisputeEvidencePanel({ dispute }: DisputeEvidencePanelProps) {
+  const [aiSummary, setAiSummary] = useState<string | null>(null);
+  const [loadingAi, setLoadingAi] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
+
+  const handleFetchAiSummary = async () => {
+    setLoadingAi(true);
+    setAiError(null);
+    try {
+      const res = await aiService.disputeSummary(dispute.disputeId);
+      if (res?.summary) {
+        setAiSummary(res.summary);
+      }
+    } catch (err) {
+      console.error('Failed to get dispute summary', err);
+      setAiError('Không thể tạo bản tóm tắt tranh chấp lúc này. Vui lòng thử lại sau.');
+    } finally {
+      setLoadingAi(false);
+    }
+  };
+
   const isClientRaiser = dispute.raisedBy?.role === 'Client';
   const creatorDisplay =
     dispute.creator.fullName !== 'Unknown' && dispute.creator.fullName
@@ -47,6 +70,59 @@ export function DisputeEvidencePanel({ dispute }: DisputeEvidencePanelProps) {
         <span className="text-[11px] text-[#8A8FA9] font-mono">
           Case ID: #{dispute.disputeId.substring(0, 8).toUpperCase()}
         </span>
+      </div>
+
+      {/* AI Dispute Summarizer (AI-UC56) */}
+      <div className="rounded-2xl border border-brand-periwinkle/25 bg-[#181B28]/80 backdrop-blur-md p-5 space-y-3.5 shadow-lg shadow-black/20">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-brand-periwinkle/15 border border-brand-periwinkle/30 flex items-center justify-center shrink-0">
+              <Sparkles className="w-4 h-4 text-brand-periwinkle" />
+            </div>
+            <div>
+              <h4 className="text-xs font-bold text-white uppercase tracking-wider">
+                Trợ lý phân tích tranh chấp AI (Arbitration Assistant)
+              </h4>
+              <p className="text-[11px] text-outline font-body">
+                Tự động tổng hợp hồ sơ, trích dẫn mốc tiến độ và lịch sử trao đổi giữa hai bên
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            disabled={loadingAi}
+            onClick={handleFetchAiSummary}
+            className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all active:scale-95 disabled:opacity-50 cursor-pointer ${
+              aiSummary
+                ? 'border border-brand-periwinkle/30 bg-brand-periwinkle/10 text-brand-periwinkle hover:bg-brand-periwinkle/20'
+                : 'bg-brand-periwinkle text-brand-navy shadow-md hover:brightness-110'
+            }`}
+          >
+            {loadingAi ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            ) : (
+              <Sparkles className="w-3.5 h-3.5" />
+            )}
+            <span>{loadingAi ? 'Đang phân tích hồ sơ…' : aiSummary ? 'Phân tích lại' : 'Tóm tắt tranh chấp bằng AI'}</span>
+          </button>
+        </div>
+
+        {aiError && (
+          <div className="text-xs text-red-300 bg-red-500/10 p-3 rounded-xl border border-red-500/20 font-body">
+            {aiError}
+          </div>
+        )}
+
+        {aiSummary ? (
+          <div className="rounded-xl border border-white/10 bg-black/50 p-4 font-body text-xs leading-relaxed text-[#E4E1E5] whitespace-pre-line selection:bg-brand-periwinkle/30">
+            {aiSummary}
+          </div>
+        ) : !loadingAi ? (
+          <div className="flex items-center gap-2 rounded-xl bg-white/[0.02] border border-white/5 p-3 text-xs text-[#8A8FA9] font-body">
+            <span className="w-1.5 h-1.5 rounded-full bg-brand-periwinkle shrink-0" />
+            <span>Bấm nút phía trên để AI tiến hành trích xuất bằng chứng khách quan, hỗ trợ Moderator ra phán quyết nhanh chóng.</span>
+          </div>
+        ) : null}
       </div>
 
       {/* 1. Client Claim & Creator Claim Statement Boxes */}

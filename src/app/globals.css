@@ -20,7 +20,7 @@
   --color-on-surface: #E4E1E5;
   --color-on-surface-variant: #C7C5CF;
   --color-outline: #919099;
-  --font-h1: 'Sora', sans-serif;
+  --font-h1: 'Sora', 'Space Grotesk', sans-serif;
   --font-body: 'Space Grotesk', sans-serif;
 }
 
@@ -39,11 +39,11 @@ h4,
 h5,
 h6,
 .font-h1 {
-  font-family: 'Sora', sans-serif;
+  font-family: 'Sora', 'Space Grotesk', sans-serif;
 }
 
 .font-h1 {
-  font-family: 'Sora', sans-serif !important;
+  font-family: 'Sora', 'Space Grotesk', sans-serif !important;
 }
 
 .font-body {
@@ -123,7 +123,7 @@ h6,
   opacity: 0.03;
   pointer-events: none;
   user-select: none;
-  font-family: 'Sora', sans-serif;
+  font-family: 'Sora', 'Space Grotesk', sans-serif;
   font-weight: 800;
 }
 

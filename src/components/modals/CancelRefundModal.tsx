@@ -11,7 +11,7 @@ interface CancelRefundModalProps {
   commissionId: string;
   commission?: Commission | null;
   currentUserId?: string | null;
-  onSuccess?: () => void;
+  onSuccess?: (action: 'cancelled_immediately' | 'cancel_requested' | 'cancel_approved' | 'cancel_rejected') => void;
 }
 
 export default function CancelRefundModal({
@@ -40,7 +40,7 @@ export default function CancelRefundModal({
         : 'Yêu cầu hủy đã được gửi. Bên còn lại có 48 giờ để phản hồi.');
       setSuccess(true);
       setTimeout(() => {
-        if (onSuccess) onSuccess();
+        if (onSuccess) onSuccess(updated.status === 'Cancelled' ? 'cancelled_immediately' : 'cancel_requested');
       }, 1500);
     } catch (error) {
       console.error(error);
@@ -59,7 +59,7 @@ export default function CancelRefundModal({
       await commissionService.respondCancellationRequest(commissionId, approve);
       setResultMessage(approve ? 'Đã đồng ý hủy đơn.' : 'Đã từ chối yêu cầu hủy đơn.');
       setSuccess(true);
-      setTimeout(() => onSuccess?.(), 1000);
+      setTimeout(() => onSuccess?.(approve ? 'cancel_approved' : 'cancel_rejected'), 1000);
     } catch (error) {
       console.error(error);
       alert('Không thể phản hồi yêu cầu hủy.');
