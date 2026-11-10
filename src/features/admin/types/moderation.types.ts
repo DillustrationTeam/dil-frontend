@@ -1,4 +1,4 @@
-// ==========================================
+﻿// ==========================================
 // SCREEN 20 (SCR-20 / UC28): CONTENT & AI MODERATION QUEUE
 // ==========================================
 
@@ -80,6 +80,31 @@ export interface ArtworkInspectionDetailDto {
 export interface ExecuteModerationDecisionRequest {
   action: ModerationActionType;
   moderationNote?: string;
+}
+
+export interface ArtworkDuplicateMatchDto {
+  artworkId: string;
+  title: string;
+  thumbnailUrl?: string | null;
+  imageUrl: string;
+  creatorProfileId: string;
+  creatorName: string;
+  moderationStatus: string;
+  createdAt: string;
+  matchType: 'ExactFile' | 'ReuploadedWatermark' | 'VisualSimilar' | string;
+  similarityPercent: number;
+  hammingDistance: number;
+  sameCreator: boolean;
+  receiptToken?: string | null;
+}
+
+export interface ArtworkDuplicateCheckResultDto {
+  artworkId: string;
+  hasDuplicates: boolean;
+  comparedArtworksCount: number;
+  sourceSha256?: string | null;
+  sourceVisualHash?: number | null;
+  matches: ArtworkDuplicateMatchDto[];
 }
 
 export interface ModerationQueueMeta {

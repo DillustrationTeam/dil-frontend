@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React from 'react';
 import { ArtworkScanPanel } from '@/features/artwork-ai';
@@ -9,6 +9,7 @@ import {
 } from '@/features/admin/types/moderation.types';
 import { ArtworkPreviewCard } from './artwork-preview-card';
 import { AiScanMetricsCard } from './ai-scan-metrics-card';
+import { ArtworkDuplicateCheckCard } from './artwork-duplicate-check-card';
 import { ModerationDecisionForm } from './moderation-decision-form';
 
 interface ModerationInspectionPanelProps {
@@ -91,6 +92,7 @@ export function ModerationInspectionPanel({
         <div className="md:col-span-6 glass-container bg-[#161926]/85 backdrop-blur-[32px] border border-white/10 rounded-[28px] p-6 space-y-6 flex flex-col justify-between">
           {/* AI Confidence Scores */}
           <AiScanMetricsCard artwork={artwork} />
+          <ArtworkDuplicateCheckCard key={`dup-${artwork.artworkId}`} artworkId={artwork.artworkId} />
           <ArtworkScanPanel key={artwork.artworkId} artworkId={artwork.artworkId} canRetry={['Pending', 'Flagged'].includes(artwork.moderationStatus)} />
 
           {/* Moderator Decision Form */}
