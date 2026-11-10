@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React from 'react';
 import Link from 'next/link';
@@ -55,6 +55,7 @@ const CLIENT_NAV_SECTIONS: SidebarSection[] = [
       { label: 'My Vouchers', href: '/vouchers', icon: Ticket },
       { label: 'My Auctions', href: '/my-auctions', icon: Gavel },
       { label: 'Workroom Chat', href: '/workroom', icon: MessageSquare },
+      { label: 'Forensic Watermark', href: '/forensic', icon: ShieldCheck },
     ],
   },
   {
@@ -101,6 +102,7 @@ const CREATOR_NAV_SECTIONS: SidebarSection[] = [
       { label: 'Event Jury', href: '/creator/events/jury', icon: Gavel },
       { label: 'My Vouchers', href: '/creator/vouchers', icon: Ticket },
       { label: 'Terms & Licensing', href: '/creator/terms', icon: ShieldCheck },
+      { label: 'Forensic Watermark', href: '/forensic', icon: ShieldCheck },
       { label: 'AI Auto-reply', href: '/creator/ai-rules', icon: Bot },
       { label: 'Asset & Presets', href: '/creator/assets', icon: Palette },
     ],

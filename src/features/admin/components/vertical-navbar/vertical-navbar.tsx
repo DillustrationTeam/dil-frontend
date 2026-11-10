@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React from 'react';
 import Link from 'next/link';
@@ -108,6 +108,13 @@ export const DEFAULT_ADMIN_NAV_SECTIONS: AdminNavSection[] = [
         href: '/admin/disputes',
         icon: <Gavel className="w-4 h-4 shrink-0" />,
         materialIcon: 'gavel',
+      },
+      {
+        id: 'forensic-watermark',
+        label: 'Forensic Watermark',
+        href: '/admin/forensic',
+        icon: <Shield className="w-4 h-4 shrink-0" />,
+        materialIcon: 'verified_user',
       },
     ],
   },
