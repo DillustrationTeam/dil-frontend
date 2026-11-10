@@ -82,6 +82,27 @@ export interface AuctionDeliveryDto {
   disputeEvidenceUrl?: string | null;
 }
 
+export interface PhysicalDeliveryListItemDto {
+  auctionId: string;
+  artworkId: string;
+  artworkTitle: string;
+  artworkImageUrl?: string | null;
+  artworkStyle?: string | null;
+  sellerId: string;
+  sellerName: string;
+  winnerId?: string | null;
+  winnerName?: string | null;
+  auctionStatus: string;
+  currentPrice: number;
+  finalPrice?: number | null;
+  hasPhysicalCopy: boolean;
+  physicalDescription?: string | null;
+  physicalChoiceDeadline?: string | null;
+  requiresPhysicalDelivery?: boolean | null;
+  delivery?: AuctionDeliveryDto | null;
+  escrowStatus: string;
+}
+
 export interface AuctionReceiptDto {
   receiptType: 'EscrowDeposit' | 'CarrierShipping' | 'ProofOfDelivery' | 'SettlementPayout' | string;
   receiptNumber: string;

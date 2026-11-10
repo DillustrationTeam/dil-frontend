@@ -19,6 +19,7 @@ import type {
   MyActiveBidsMeta,
   MyCollectionItemDto,
   ArtworkProvenanceDto,
+  PhysicalDeliveryListItemDto,
   RequestPhysicalDeliveryPayload,
   SellerStatisticsDto,
   UpdateShippingPayload,
@@ -267,5 +268,8 @@ export const auctionService = {
 
   getReceipts: (auctionId: string, signal?: AbortSignal): Promise<AuctionReceiptDto[]> =>
     call<AuctionReceiptDto[]>('get', `/auctions/${auctionId}/receipts`, undefined, undefined, signal).then((r) => r.data),
+
+  getPhysicalDeliveries: (params?: { role?: string; status?: string }, signal?: AbortSignal): Promise<PhysicalDeliveryListItemDto[]> =>
+    call<PhysicalDeliveryListItemDto[]>('get', '/auctions/deliveries', params, undefined, signal).then((r) => r.data),
 };
 

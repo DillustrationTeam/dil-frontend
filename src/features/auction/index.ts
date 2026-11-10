@@ -5,6 +5,8 @@ export { AuctionCertificateCard } from './components/auction-certificate-card';
 export { CommercialRightsModal } from './components/commercial-rights-modal';
 export { DeliverablesDownloadModal } from './components/deliverables-download-modal';
 export { PhysicalDeliveryCard } from './components/physical-delivery-card';
+export { PhysicalDeliveryManager } from './components/physical-delivery-manager';
+export { AdminDeliveryDashboard } from './components/admin-delivery-dashboard';
 export { MyCollectionScreen } from './components/my-collection-screen';
 export { ArtworkProvenanceCard } from './components/artwork-provenance-card';
 export { auctionService, auctionError, extractAuctionFieldErrors, AuctionConflictError } from './services/auction.service';
