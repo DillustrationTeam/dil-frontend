@@ -66,7 +66,6 @@ export default function ReviewRatingModal({
   // Fetch wallet balance when opening modal
   useEffect(() => {
     if (isOpen) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsLoadingWallet(true);
       walletService.getMine()
         .then((res) => {
@@ -85,7 +84,6 @@ export default function ReviewRatingModal({
 
   useEffect(() => {
     if (existingReview) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setRating(existingReview.rating || 5);
       setReviewText(existingReview.comment || '');
       setSelectedTip(50000);
