@@ -18,6 +18,7 @@ import {
   Calendar,
   Banknote,
   ArrowLeftRight,
+  Truck,
 } from 'lucide-react';
 import { useAuthStore } from '@/store/use-auth-store';
 import { AdminNavItem, AdminNavSection, AdminVerticalNavbarProps } from './types';
@@ -104,6 +105,13 @@ export const DEFAULT_ADMIN_NAV_SECTIONS: AdminNavSection[] = [
         href: '/admin/trades',
         icon: <ArrowLeftRight className="w-4 h-4 shrink-0" />,
         materialIcon: 'sync_alt',
+      },
+      {
+        id: 'physical-deliveries',
+        label: 'Shipping & Escrow',
+        href: '/admin/deliveries',
+        icon: <Truck className="w-4 h-4 shrink-0" />,
+        materialIcon: 'local_shipping',
       },
     ],
   },

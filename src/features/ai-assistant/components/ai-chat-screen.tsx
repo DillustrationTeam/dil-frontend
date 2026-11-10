@@ -258,9 +258,10 @@ export function AiChatScreen({ userId }: { userId: string | null }) {
                   <div className="mb-3 flex size-12 items-center justify-center rounded-2xl bg-brand-periwinkle/10 text-brand-periwinkle">
                     <Sparkles size={24} />
                   </div>
-                  <h3 className="font-h1 text-base font-bold">Trợ lý nghệ thuật Dillustration</h3>
+                  <h3 className="font-h1 text-base font-bold">Trợ lý hướng dẫn Dillustration</h3>
                   <p className="mx-auto mt-1 max-w-sm text-xs text-on-surface-variant">
-                    Giải đáp mọi thắc mắc về quy trình ký quỹ, mở phiên đấu giá tranh, thỏa thuận hợp đồng và bản quyền tác phẩm.
+                    Chỉ hỗ trợ cách dùng nền tảng: ký quỹ, mở phiên đấu giá, đặt vẽ, ví, nạp rút tiền và khiếu nại.
+                    Câu hỏi ngoài phạm vi (toán, nấu ăn, lập trình...) sẽ được từ chối.
                   </p>
 
                   {/* Gợi ý câu hỏi nhanh */}
@@ -350,7 +351,7 @@ export function AiChatScreen({ userId }: { userId: string | null }) {
                 type="text"
                 value={inputPrompt}
                 onChange={(e) => setInputPrompt(e.target.value)}
-                placeholder="Đặt câu hỏi cho trợ lý nghệ thuật..."
+                placeholder="Hỏi cách sử dụng Dillustration (đấu giá, ký quỹ, nạp tiền...)"
                 className="flex-1 rounded-2xl border border-white/15 bg-brand-navy/80 px-4 py-3 text-xs text-on-surface placeholder:text-outline focus:border-brand-periwinkle focus:outline-none"
               />
               <button
