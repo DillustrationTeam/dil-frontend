@@ -11,7 +11,7 @@ import { ArtworkInteractions, CollectionDto, marketplaceService } from '../servi
 
 export const collectionNameSchema = z.string().trim().min(1, 'Nhập tên album.').max(100, 'Tên album tối đa 100 ký tự.');
 
-export function ArtworkActions({ artworkId }: { artworkId: string }) {
+export function ArtworkActions({ artworkId, compact = false }: { artworkId: string; compact?: boolean }) {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const userId = useAuthStore((s) => s.user?.id);
   const [status, setStatus] = useState<ArtworkInteractions | null>(null);
@@ -126,13 +126,13 @@ export function ArtworkActions({ artworkId }: { artworkId: string }) {
   }, [picker]);
 
   const bookmarked = Boolean(status?.collectionIds.length);
-  return <div className="min-w-0 flex-1 space-y-2">
-    <div className="flex gap-2">
-      <button type="button" aria-pressed={status?.isLiked ?? false} disabled={busy || !status || loadedFor !== identity} onClick={() => void like()} title="Thả tim cho tác phẩm" className={`inline-flex min-w-0 flex-1 items-center justify-center gap-2 rounded-2xl px-3 py-3 text-sm font-semibold disabled:opacity-50 ${status?.isLiked ? 'bg-[#d989a7] text-white' : 'bg-white/10 text-[#E4E1E5] hover:bg-white/15'}`}><Heart className={`h-4 w-4 shrink-0 ${status?.isLiked ? 'fill-current' : ''}`} />{status?.isLiked ? 'Đã thích' : 'Yêu thích'}{status ? <span className="text-xs">{status.likeCount}</span> : <Loader2 className="h-4 w-4 animate-spin" />}</button>
-      <button type="button" aria-pressed={bookmarked} disabled={busy || !status || loadedFor !== identity} onClick={() => void openPicker()} title="Lưu tranh vào album để xem lại" className={`inline-flex items-center justify-center gap-2 rounded-2xl border px-3 py-3 text-sm disabled:opacity-50 ${bookmarked ? 'border-[#A7ACD9] bg-[#A7ACD9]/15 text-white' : 'border-white/15 text-[#C7C5CF]'}`}><Bookmark className={`h-4 w-4 ${bookmarked ? 'fill-current' : ''}`} />{bookmarked ? 'Đã lưu' : 'Lưu tranh'}</button>
+  return <div className={compact ? 'inline-flex flex-col items-end gap-1' : 'min-w-0 flex-1 space-y-2'}>
+    <div className="flex items-center gap-1.5">
+      <button type="button" aria-pressed={status?.isLiked ?? false} disabled={busy || !status || loadedFor !== identity} onClick={() => void like()} title="Thả tim cho tác phẩm" aria-label="Yêu thích tác phẩm" className={compact ? `inline-flex h-10 min-w-[40px] items-center justify-center gap-1.5 rounded-[10px] border px-2.5 text-xs font-semibold tabular-nums transition disabled:opacity-50 ${status?.isLiked ? 'border-rose-400/35 bg-rose-500/15 text-rose-300' : 'border-white/[0.07] bg-[#1e2230] text-slate-200 hover:bg-[#262b3d] hover:text-white'}` : `inline-flex min-w-0 flex-1 items-center justify-center gap-2 rounded-2xl px-3 py-3 text-sm font-semibold disabled:opacity-50 ${status?.isLiked ? 'bg-[#d989a7] text-white' : 'bg-white/10 text-[#E4E1E5] hover:bg-white/15'}`}><Heart className={`h-4 w-4 shrink-0 ${status?.isLiked ? 'fill-current' : ''}`} />{!compact && (status?.isLiked ? 'Đã thích' : 'Yêu thích')}{status ? <span className="text-xs">{status.likeCount}</span> : <Loader2 className="h-3.5 w-3.5 animate-spin" />}</button>
+      <button type="button" aria-pressed={bookmarked} disabled={busy || !status || loadedFor !== identity} onClick={() => void openPicker()} title="Lưu tranh vào album để xem lại" aria-label="Lưu tác phẩm vào bộ sưu tập" className={compact ? `inline-flex h-10 w-10 items-center justify-center rounded-[10px] border transition disabled:opacity-50 ${bookmarked ? 'border-[#b3b7ee]/40 bg-[#b3b7ee]/15 text-[#b3b7ee]' : 'border-white/[0.07] bg-[#1e2230] text-slate-200 hover:bg-[#262b3d] hover:text-white'}` : `inline-flex items-center justify-center gap-2 rounded-2xl border px-3 py-3 text-sm disabled:opacity-50 ${bookmarked ? 'border-[#A7ACD9] bg-[#A7ACD9]/15 text-white' : 'border-white/15 text-[#C7C5CF]'}`}><Bookmark className={`h-4 w-4 ${bookmarked ? 'fill-current' : ''}`} />{!compact && (bookmarked ? 'Đã lưu' : 'Lưu tranh')}</button>
     </div>
     {error ? <p role="alert" className="text-xs text-rose-200">{error} <button type="button" onClick={() => setRetry((n) => n + 1)} className="underline">Thử lại</button></p> : null}
-    {!isAuthenticated ? <Link href="/login" className="inline-block text-xs text-[#A7ACD9] hover:underline">Đăng nhập để thích và lưu tranh</Link> : null}
+    {!compact && !isAuthenticated ? <Link href="/login" className="inline-block text-xs text-[#A7ACD9] hover:underline">Đăng nhập để thích và lưu tranh</Link> : null}
     {picker ? <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 p-4" onClick={(event) => { if (event.target === event.currentTarget && !lock.current) setPicker(false); }}>
       <section ref={dialogRef} role="dialog" aria-modal="true" aria-label="Lưu tranh vào bộ sưu tập" className="w-full max-w-md rounded-3xl border border-white/15 bg-[#1F2335] p-5 shadow-2xl">
         <header className="flex items-center justify-between gap-3"><h2 className="font-h1 text-lg font-semibold text-white">Lưu vào bộ sưu tập</h2><button type="button" disabled={busy} onClick={() => setPicker(false)} aria-label="Đóng chọn album" className="rounded-xl p-2 text-[#C7C5CF] disabled:opacity-50"><X className="h-5 w-5" /></button></header>

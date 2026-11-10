@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { ShieldCheck, RefreshCw, AlertTriangle, X, EyeOff } from 'lucide-react';
@@ -7,6 +7,8 @@ import { ApiResponse } from '@/types/api.types';
 
 const DEFAULT_FALLBACK_IMAGE =
   'https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?auto=format&fit=crop&w=1200&q=85';
+
+const API_ORIGIN = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5075/api/v1').replace(/\/api\/v1\/?$/, '');
 
 interface ViewReceipt {
   receiptId: string;
@@ -125,6 +127,9 @@ export function ProtectedArtworkViewer({
     if (!rawUrl || rawUrl.startsWith('blob:')) {
       return DEFAULT_FALLBACK_IMAGE;
     }
+    if (rawUrl.startsWith('/api/v1/')) {
+      return `${API_ORIGIN}${rawUrl}`;
+    }
     return rawUrl;
   }, [rawUrl, fallbackImageUrl, isFallbackGif, isRawGif]);
 
@@ -222,6 +227,9 @@ export function ProtectedArtworkViewer({
   useEffect(() => {
     let isCancelled = false;
     const img = new window.Image();
+    if (effectiveUrl.startsWith(API_ORIGIN)) {
+      img.crossOrigin = 'anonymous';
+    }
 
     img.onload = () => {
       if (isCancelled) return;
