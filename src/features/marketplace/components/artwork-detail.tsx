@@ -10,6 +10,7 @@ import { ImageLightbox } from '@/components/image-lightbox';
 import { ArtworkActions } from './artwork-actions';
 import { useArtworkComments } from './use-artwork-comments';
 import { ArtworkProvenanceCard } from '@/features/auction';
+import { ProtectedArtworkViewer, ProtectedArtworkLightbox } from './protected-artwork-viewer';
 
 const DEFAULT_FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?auto=format&fit=crop&w=1200&q=85';
 
@@ -85,20 +86,26 @@ export function ArtworkDetail({ id }: { id: string }) {
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1.2fr)_390px]">
           <section className="relative overflow-hidden rounded-[32px] border border-white/10 bg-[#131624]">
             <div className="relative aspect-[4/5] w-full max-h-[78vh]">
-              <SafeArtworkImage src={artwork.imageUrl} alt={artwork.title} />
-              <div className="watermark pointer-events-none absolute inset-0 flex rotate-[-24deg] items-center justify-center text-4xl font-black tracking-[.3em] text-white/15 sm:text-6xl">
+              <ProtectedArtworkViewer
+                artworkId={id}
+                fallbackImageUrl={artwork.imageUrl}
+                alt={artwork.title}
+                className="h-full w-full"
+                onOpenLightbox={() => setIsLightboxOpen(true)}
+              />
+              <div className="hidden">
                 DILLUSTRATION
               </div>
               <button
                 type="button"
                 onClick={() => setIsLightboxOpen(true)}
-                className="absolute top-4 right-4 z-10 inline-flex items-center gap-1.5 rounded-full bg-[#111424]/75 px-3 py-2 text-xs font-medium text-[#E4E1E5] backdrop-blur transition hover:bg-[#111424] hover:text-white"
+                className="absolute top-4 right-4 z-20 inline-flex items-center gap-1.5 rounded-full bg-[#111424]/75 px-3 py-2 text-xs font-medium text-[#E4E1E5] backdrop-blur transition hover:bg-[#111424] hover:text-white"
                 aria-label="Xem toàn màn hình"
               >
                 <Maximize2 className="h-4 w-4 text-[#A7ACD9]" />
-                <span>Xem ảnh gốc</span>
+                <span>Xem toàn màn hình</span>
               </button>
-              <div className="absolute bottom-4 left-4 inline-flex items-center gap-2 rounded-full bg-[#111424]/75 px-3 py-2 text-xs text-[#E4E1E5] backdrop-blur">
+              <div className="hidden">
                 <ShieldCheck className="h-4 w-4 text-[#A7ACD9]" />
                 Ảnh có watermark bảo vệ
               </div>
@@ -213,11 +220,11 @@ export function ArtworkDetail({ id }: { id: string }) {
       )}
 
       {isLightboxOpen && (
-        <ImageLightbox
-          images={[{ src: artwork.imageUrl || DEFAULT_FALLBACK_IMAGE, alt: artwork.title }]}
-          index={0}
+        <ProtectedArtworkLightbox artworkId={id} imageUrl={artwork.imageUrl} alt={artwork.title}
+
+
           onClose={() => setIsLightboxOpen(false)}
-          onNavigate={() => {}}
+
         />
       )}
     </main>
@@ -290,20 +297,26 @@ export function ArtworkDetailModal({ id, onClose }: { id: string; onClose: () =>
             <div className="grid gap-8 lg:grid-cols-[minmax(0,1.2fr)_360px]">
               <section className="relative overflow-hidden rounded-[28px] border border-white/10 bg-[#131624]">
                 <div className="relative aspect-[4/5] w-full max-h-[70vh]">
-                  <SafeArtworkImage src={artwork.imageUrl} alt={artwork.title} />
-                  <div className="watermark absolute inset-0 flex rotate-[-24deg] items-center justify-center text-4xl font-black tracking-[.3em] text-white/15 pointer-events-none sm:text-6xl">
+                  <ProtectedArtworkViewer
+                artworkId={id}
+                fallbackImageUrl={artwork.imageUrl}
+                alt={artwork.title}
+                className="h-full w-full"
+                onOpenLightbox={() => setIsLightboxOpen(true)}
+              />
+                  <div className="hidden">
                     DILLUSTRATION
                   </div>
                   <button
                     type="button"
                     onClick={() => setIsLightboxOpen(true)}
-                    className="absolute top-4 right-4 z-10 inline-flex items-center gap-1.5 rounded-full bg-[#111424]/75 px-3 py-2 text-xs font-medium text-[#E4E1E5] backdrop-blur transition hover:bg-[#111424] hover:text-white"
+                    className="absolute top-4 right-4 z-20 inline-flex items-center gap-1.5 rounded-full bg-[#111424]/75 px-3 py-2 text-xs font-medium text-[#E4E1E5] backdrop-blur transition hover:bg-[#111424] hover:text-white"
                     aria-label="Xem toàn màn hình"
                   >
                     <Maximize2 className="h-4 w-4 text-[#A7ACD9]" />
-                    <span>Xem ảnh gốc</span>
+                    <span>Xem toàn màn hình</span>
                   </button>
-                  <div className="absolute bottom-4 left-4 inline-flex items-center gap-2 rounded-full bg-[#111424]/85 px-3 py-2 text-xs text-[#E4E1E5] backdrop-blur">
+                  <div className="hidden">
                     <ShieldCheck className="h-4 w-4 text-[#A7ACD9]" />
                     Ảnh có watermark bảo vệ
                   </div>
@@ -421,11 +434,11 @@ export function ArtworkDetailModal({ id, onClose }: { id: string; onClose: () =>
       )}
 
       {isLightboxOpen && artwork && (
-        <ImageLightbox
-          images={[{ src: artwork.imageUrl || DEFAULT_FALLBACK_IMAGE, alt: artwork.title }]}
-          index={0}
+        <ProtectedArtworkLightbox artworkId={id} imageUrl={artwork.imageUrl} alt={artwork.title}
+
+
           onClose={() => setIsLightboxOpen(false)}
-          onNavigate={() => {}}
+
         />
       )}
     </div>

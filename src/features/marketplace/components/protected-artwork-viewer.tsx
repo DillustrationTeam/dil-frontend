@@ -25,6 +25,8 @@ interface ProtectedArtworkViewerProps {
   className?: string;
   fitMode?: 'cover' | 'contain';
   onOpenLightbox?: () => void;
+  skipViewSession?: boolean;
+  showWatermarkBadge?: boolean;
 }
 
 export function ProtectedArtworkViewer({
@@ -34,6 +36,8 @@ export function ProtectedArtworkViewer({
   className = '',
   fitMode = 'cover',
   onOpenLightbox,
+  skipViewSession = false,
+  showWatermarkBadge = true,
 }: ProtectedArtworkViewerProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -46,9 +50,33 @@ export function ProtectedArtworkViewer({
   // Bẫy chống chụp màn hình (kích hoạt khi cửa sổ mất focus do mở Snipping Tool / Zalo / PrtScn)
   const [captureShieldActive, setCaptureShieldActive] = useState<boolean>(false);
 
-  // 1. Tạo phiên xem bảo mật & nhận Biên lai số từ Backend API
+  // 1. Tạo phiên xem bảo mật & nhận Biên lai số từ Backend API (hoặc dùng bảo vệ cục bộ cho WIP Workroom)
   useEffect(() => {
+    const validFallback =
+      fallbackImageUrl && !fallbackImageUrl.startsWith('blob:')
+        ? fallbackImageUrl
+        : DEFAULT_FALLBACK_IMAGE;
+
     let isMounted = true;
+    if (skipViewSession) {
+      Promise.resolve().then(() => {
+        if (!isMounted) return;
+        setReceipt({
+          receiptId: 'workroom-session',
+          receiptToken: `WIP-${artworkId.replace(/-/g, "").slice(0, 12).toUpperCase()}`,
+          watermarkedImageUrl: validFallback,
+          displayTitle: alt,
+          creatorName: 'DIL Workroom',
+          createdAt: new Date().toISOString(),
+          overlayMaskText: `DIL Workroom • WIP-${artworkId.slice(0, 8).toUpperCase()} • ${new Date().toLocaleDateString('vi-VN')}`,
+        });
+        setLoading(false);
+      });
+      return () => {
+        isMounted = false;
+      };
+    }
+
     const fetchSession = async () => {
       try {
         setLoading(true);
@@ -64,13 +92,9 @@ export function ProtectedArtworkViewer({
       } catch (err) {
         console.warn('Không thể kết nối lấy view-session, sử dụng fallback bảo vệ cục bộ:', err);
         if (isMounted) {
-          const validFallback =
-            fallbackImageUrl && !fallbackImageUrl.startsWith('blob:')
-              ? fallbackImageUrl
-              : DEFAULT_FALLBACK_IMAGE;
           setReceipt({
             receiptId: 'local-session',
-            receiptToken: `WR-${artworkId.replace(/-/g, '').slice(0, 12).toUpperCase()}`,
+            receiptToken: `WR-${artworkId.replace(/-/g, "").slice(0, 12).toUpperCase()}`,
             watermarkedImageUrl: validFallback,
             displayTitle: alt,
             creatorName: 'DIL Verified',
@@ -87,7 +111,7 @@ export function ProtectedArtworkViewer({
     return () => {
       isMounted = false;
     };
-  }, [artworkId, fallbackImageUrl, alt]);
+  }, [artworkId, fallbackImageUrl, alt, skipViewSession]);
 
   const rawUrl = receipt?.watermarkedImageUrl || fallbackImageUrl;
   const isFallbackGif = Boolean(fallbackImageUrl && /\.gif(\?|#|$)/i.test(fallbackImageUrl));
@@ -375,10 +399,12 @@ export function ProtectedArtworkViewer({
       )}
 
       {/* Badge bảo vệ gọn gàng ở góc dưới (không hiện mã biên lai) */}
-      <div className="pointer-events-none absolute bottom-4 left-4 z-20 inline-flex items-center gap-2 rounded-full bg-[#111424]/80 px-3.5 py-1.5 text-xs text-[#E4E1E5] backdrop-blur-md border border-white/10 shadow-lg">
-        <ShieldCheck className="h-3.5 w-3.5 text-[#A7ACD9] shrink-0" />
-        <span>Ảnh có watermark bảo vệ</span>
-      </div>
+      {showWatermarkBadge && (
+        <div className="pointer-events-none absolute bottom-4 left-4 z-20 inline-flex items-center gap-2 rounded-full bg-[#111424]/80 px-3.5 py-1.5 text-xs text-[#E4E1E5] backdrop-blur-md border border-white/10 shadow-lg">
+          <ShieldCheck className="h-3.5 w-3.5 text-[#A7ACD9] shrink-0" />
+          <span>Ảnh có watermark bảo vệ</span>
+        </div>
+      )}
 
       {/* Cảnh báo khi người dùng cố tình chuột phải hoặc nhấn phím tắt sao chép */}
       {copyWarning && (
