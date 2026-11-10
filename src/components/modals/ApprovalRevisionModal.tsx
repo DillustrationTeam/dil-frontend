@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import Image from 'next/image';
+import { ProtectedArtworkViewer } from '@/features/marketplace/components/protected-artwork-viewer';
 import { X, CheckCircle2, MessageSquare, AlertTriangle, ShieldCheck, Sparkles, Loader2 } from 'lucide-react';
 import { commissionService } from '@/services/commission.service';
 import { aiService } from '@/features/ai-assistant/services/ai.service';
@@ -21,7 +21,7 @@ interface ApprovalRevisionModalProps {
   revisionFeedback?: string | null;
   milestoneStatus?: MilestoneStatus;
   onOpenSubmitModal?: () => void;
-  onSuccess?: () => void;
+  onSuccess?: (result: { action: 'approved' | 'revision_requested'; feedback?: string }) => void;
 }
 
 export default function ApprovalRevisionModal({
@@ -67,7 +67,7 @@ export default function ApprovalRevisionModal({
     setIsSubmitting(true);
     try {
       await commissionService.approveMilestone(commissionId, milestoneId);
-      if (onSuccess) onSuccess();
+      if (onSuccess) onSuccess({ action: 'approved' });
     } catch (error) {
       console.error(error);
       alert('Failed to approve milestone.');
@@ -81,7 +81,7 @@ export default function ApprovalRevisionModal({
     setIsSubmitting(true);
     try {
       await commissionService.requestRevision(commissionId, milestoneId, feedback);
-      if (onSuccess) onSuccess();
+      if (onSuccess) onSuccess({ action: 'revision_requested', feedback });
     } catch (error) {
       console.error(error);
       alert('Failed to request revision. Maybe you exceeded the limit.');
@@ -97,13 +97,14 @@ export default function ApprovalRevisionModal({
         {/* Left Side: Image Viewer */}
         <div className="w-full md:w-3/5 bg-black/40 border-r border-white/10 p-6 flex flex-col justify-center items-center relative min-h-[300px]">
           {wipPreviewUrl ? (
-            <Image
-              src={wipPreviewUrl}
+            <ProtectedArtworkViewer
+              artworkId={milestoneId || commissionId}
+              fallbackImageUrl={wipPreviewUrl}
               alt="Milestone Preview"
-              width={1200}
-              height={900}
-              unoptimized
-              className="max-w-full max-h-[70vh] object-contain rounded-xl shadow-lg pointer-events-none"
+              fitMode="contain"
+              skipViewSession
+              showWatermarkBadge={false}
+              className="h-[65vh] w-full rounded-xl bg-[#0d101b]"
             />
           ) : (
             <p className="text-slate-500 text-sm">No preview available.</p>

@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { z } from 'zod';
 import {
   ArrowLeft,
-  Award,
   BookOpen,
   Check,
   CheckCheck,
@@ -50,7 +49,7 @@ import FinalDeliveryModal from '@/components/modals/FinalDeliveryModal';
 import CreatorReplyModal from '@/components/modals/CreatorReplyModal';
 import DisputeDetailsModal from '@/components/modals/DisputeDetailsModal';
 import ReviewRatingModal from '@/components/modals/ReviewRatingModal';
-import DigitalCertificateModal from '@/components/modals/DigitalCertificateModal';
+import { ProtectedArtworkViewer } from '@/features/marketplace/components/protected-artwork-viewer';
 
 function parseReviewComment(raw?: string | null) {
   if (!raw) return { userComment: '', tags: [] as string[] };
@@ -130,7 +129,6 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
   const [termsError, setTermsError] = useState<string | null>(null);
 
   // States & handlers cho tính năng đổi tên dự án (Workroom title)
-  const [showCertificateModal, setShowCertificateModal] = useState(false);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [editTitleInput, setEditTitleInput] = useState('');
   const [isSavingTitle, setIsSavingTitle] = useState(false);
@@ -607,8 +605,34 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
     }
   }
 
+  function formatEscrowDepositNotice(stage: number, isStaged: boolean, milestoneTitle?: string, amount?: number) {
+    const amountText = amount && amount > 0 ? ` (${amount.toLocaleString('vi-VN')}đ)` : '';
+    if (isStaged) {
+      return `🛡️ Khách hàng đã nạp ký quỹ Escrow cho Mốc #${stage}${milestoneTitle ? ` (${milestoneTitle})` : ''}${amountText}. Creator có thể bắt đầu vẽ Mốc #${stage}!`;
+    }
+    return `🛡️ Khách hàng đã nạp đủ 100% ký quỹ Escrow${amountText} cho toàn bộ đơn hàng. Creator có thể bắt đầu vẽ từ Mốc #1!`;
+  }
+
+  const checkoutNoticeSentRef = useRef(false);
+  useEffect(() => {
+    if (chat.status !== 'connected' || !commission || checkoutNoticeSentRef.current) return;
+    const params = new URLSearchParams(window.location.search);
+    const stageParam = params.get('depositedStage');
+    if (!stageParam) return;
+    checkoutNoticeSentRef.current = true;
+    const stage = Number(stageParam) || commission.currentStage || 1;
+    const isStaged = params.get('staged') === '1';
+    const amount = Number(params.get('depositAmount')) || 0;
+    const milestoneTitle = sortedMilestones.find((m) => m.sequence === stage)?.title;
+    void chat.sendMessage(formatEscrowDepositNotice(stage, isStaged, milestoneTitle, amount), 'SystemEvent').catch(() => null);
+    window.history.replaceState(null, '', window.location.pathname);
+  }, [chat, commission, sortedMilestones]);
+
   async function handleDepositEscrow() {
     if (!room?.commissionId || depositingEscrow) return;
+    const plannedAmount = (commission?.nextEscrowDepositAmount ?? 0) > 0
+      ? (commission?.nextEscrowDepositAmount ?? 0)
+      : (commission?.finalPrice ?? 0);
     setDepositingEscrow(true);
     setError(null);
     try {
@@ -617,7 +641,10 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
         setCommission(current => current ? { ...current, ...updated } : updated);
       }
       refresh();
-      void chat.sendMessage('🛡️ Khách hàng đã nạp tiền ký quỹ Escrow thành công. Creator có thể bắt đầu vẽ!').catch(() => null);
+      const stage = updated?.currentStage ?? commission?.currentStage ?? 1;
+      const isStaged = updated?.isStagedEscrow ?? commission?.isStagedEscrow ?? false;
+      const milestoneTitle = (updated?.milestones ?? sortedMilestones).find((m) => m.sequence === stage)?.title;
+      void chat.sendMessage(formatEscrowDepositNotice(stage, isStaged, milestoneTitle, plannedAmount), 'SystemEvent').catch(() => null);
     } catch (err: unknown) {
       setError(extractErrorMessage(err, 'Không thể nạp tiền ký quỹ Escrow.'));
     } finally {
@@ -1436,7 +1463,8 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                           <div className="flex items-center gap-2">
                             <button
                               type="button"
-                              disabled={!displayedMilestone}
+                              disabled={!displayedMilestone || commission?.escrowStatus === 'Pending'}
+                              title={commission?.escrowStatus === 'Pending' ? 'Chờ khách hàng nạp ký quỹ Escrow cho mốc này' : undefined}
                               onClick={() => setShowSubmitModal(true)}
                               className="commission-primary inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold shadow transition disabled:cursor-not-allowed disabled:opacity-40 [clip-path:polygon(0_0,calc(100%-6px)_0,100%_6px,100%_100%,6px_100%,0_calc(100%-6px))]"
                             >
@@ -1539,7 +1567,11 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                             <ShieldCheck size={18} />
                           </div>
                           <div>
-                            <p className="font-h1 font-bold text-amber-300 text-xs">Nạp tiền Escrow bảo đảm đơn hàng ({(commission.finalPrice ?? 0).toLocaleString('vi-VN')}đ)</p>
+                            <p className="font-h1 font-bold text-amber-300 text-xs">
+                              {commission.isStagedEscrow
+                                ? `Nạp tiền Escrow Mốc #${commission.currentStage ?? 1} (${((commission.nextEscrowDepositAmount ?? 0) > 0 ? (commission.nextEscrowDepositAmount ?? 0) : (commission.finalPrice ?? 0)).toLocaleString('vi-VN')}đ)`
+                                : `Nạp tiền Escrow bảo đảm đơn hàng (${(commission.finalPrice ?? 0).toLocaleString('vi-VN')}đ)`}
+                            </p>
                             <p className="mt-0.5 text-[11px] text-amber-200/80">
                               Khoản tiền sẽ được giữ an toàn bởi hệ thống và chỉ giải ngân cho họa sĩ sau khi bạn nghiệm thu từng mốc.
                             </p>
@@ -1562,21 +1594,24 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                         <div className="w-full h-full flex flex-col items-center justify-center relative space-y-3">
                           <div
                             onClick={() => setShowApprovalModal(true)}
-                            className="group relative cursor-pointer flex items-center justify-center max-h-[380px] w-full overflow-hidden border border-white/10 bg-black/60 p-2 transition duration-300 [clip-path:polygon(10px_0,calc(100%-10px)_0,100%_10px,100%_calc(100%-10px),calc(100%-10px)_100%,10px_100%,0_calc(100%-10px),0_10px)]"
+                            className="group relative cursor-pointer flex items-center justify-center max-h-[380px] w-full overflow-hidden rounded-xl border border-white/10 bg-[#141620] p-2 transition duration-300"
                           >
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img
-                              src={currentWipPreviewUrl}
+                            <ProtectedArtworkViewer
+                              artworkId={displayedMilestone?.id || commission?.id || roomId}
+                              fallbackImageUrl={currentWipPreviewUrl}
                               alt={displayedMilestone?.title || 'Bản vẽ phác thảo'}
-                              style={{ transform: `scale(${zoomScale})` }}
-                              className="max-h-[360px] w-full object-contain transition duration-300 group-hover:scale-[1.02]"
+                              fitMode="contain"
+                              skipViewSession
+                              showWatermarkBadge={false}
+                              onOpenLightbox={() => setShowApprovalModal(true)}
+                              className="h-[340px] w-full rounded-lg bg-[#141620]"
                             />
 
-                            <div className="absolute top-3 left-3 flex items-center gap-1.5 border border-emerald-400/40 bg-black/80 px-2.5 py-1 text-[10px] font-bold text-emerald-300 backdrop-blur-md [clip-path:polygon(4px_0,100%_0,100%_calc(100%-4px),calc(100%-4px)_100%,0_100%,0_4px)]">
+                            <div className="pointer-events-none absolute top-3 left-3 z-10 flex items-center gap-1.5 rounded-md border border-emerald-400/40 bg-black/80 px-2.5 py-1 text-[10px] font-bold text-emerald-300">
                               <ShieldCheck size={12} className="text-emerald-400" /> Bản phác thảo xem thử
                             </div>
 
-                            <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 backdrop-blur-[2px] transition duration-200 group-hover:opacity-100">
+                            <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center bg-black/55 opacity-0 transition duration-200 group-hover:opacity-100">
                               <span className="commission-primary inline-flex items-center gap-2 px-4 py-2 text-xs font-bold shadow-lg [clip-path:polygon(0_0,calc(100%-8px)_0,100%_8px,100%_100%,8px_100%,0_calc(100%-8px))]">
                                 <Maximize2 size={16} /> Xem chi tiết &amp; Phản hồi Mốc #{displayedMilestone?.sequence}
                               </span>
@@ -1615,11 +1650,12 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                           {isCreator && (
                             <button
                               type="button"
-                            disabled={!displayedMilestone}
+                            disabled={!displayedMilestone || commission?.escrowStatus === 'Pending'}
+                              title={commission?.escrowStatus === 'Pending' ? 'Chờ khách hàng nạp ký quỹ Escrow cho mốc này' : undefined}
                               onClick={() => setShowSubmitModal(true)}
                             className="commission-primary inline-flex items-center gap-2 px-4 py-2 text-xs font-bold shadow-md transition disabled:cursor-not-allowed disabled:opacity-40 [clip-path:polygon(0_0,calc(100%-6px)_0,100%_6px,100%_100%,6px_100%,0_calc(100%-6px))]"
                             >
-                              <UploadCloud size={15} /> Tải phác thảo Mốc #{displayedMilestone?.sequence ?? 1}
+                              <UploadCloud size={15} /> {commission?.escrowStatus === 'Pending' ? `Chờ ký quỹ Mốc #${displayedMilestone?.sequence ?? 1}` : `Tải phác thảo Mốc #${displayedMilestone?.sequence ?? 1}`}
                             </button>
                           )}
                         </div>
@@ -1649,8 +1685,20 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                             <div className="flex items-center gap-3">
                               <FileArchive size={24} className="text-emerald-400" />
                               <div>
-                                <p className="text-xs font-bold text-emerald-300">File gốc HD đã được bàn giao!</p>
-                                <p className="text-[10px] text-emerald-200/80">Bấm để nghiệm thu &amp; tải tệp về thiết bị.</p>
+                                <p className="text-xs font-bold text-emerald-300">
+                                  {commissionStatus === 'Completed'
+                                    ? 'Sản phẩm gốc HD đã nghiệm thu!'
+                                    : isCreator
+                                      ? 'Đã tải tệp lên Kho Bàn giao (chờ khách nghiệm thu)'
+                                      : 'File gốc HD đã được bàn giao!'}
+                                </p>
+                                <p className="text-[10px] text-emerald-200/80">
+                                  {commissionStatus === 'Completed'
+                                    ? 'Bấm để mở lại Kho Tệp Gốc & Chứng thư.'
+                                    : isCreator
+                                      ? 'Bấm để xem, thêm hoặc gỡ tệp trước khi khách hàng xác nhận hoàn tất.'
+                                      : 'Bấm để tải kiểm tra kỹ từng tệp & xác nhận hoàn tất đơn hàng.'}
+                                </p>
                               </div>
                             </div>
                             <Download size={16} className="text-emerald-300" />
@@ -1670,29 +1718,10 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                           </div>
                         )}
 
-                        {/* ĐÁNH GIÁ CỦA KHÁCH & PHẢN HỒI CỦA CREATOR TRONG WORKROOM */}
                         {commissionStatus === 'Completed' && (
-                          <div className="mt-3 p-4 rounded-2xl bg-gradient-to-r from-[#171D2D] to-[#0E121E] border border-brand-periwinkle/30 shadow-lg space-y-3">
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-2">
-                                <Award className="text-[#E5B358] w-5 h-5 shrink-0" />
-                                <div>
-                                  <h4 className="font-h1 font-bold text-xs text-white">Chứng thư Bản quyền Số &amp; Kho Tệp Gốc</h4>
-                                  <p className="text-[10px] text-slate-400">Đơn hàng đã hoàn tất &amp; bảo hộ bản quyền chính thức</p>
-                                </div>
-                              </div>
-                              <span className="font-mono text-[10px] text-[#E5B358] bg-[#E5B358]/10 px-2 py-0.5 rounded border border-[#E5B358]/20">
-                                VERIFIED
-                              </span>
-                            </div>
-                            <button
-                              type="button"
-                              onClick={() => setShowCertificateModal(true)}
-                              className="w-full py-2.5 px-4 rounded-xl bg-brand-periwinkle hover:bg-[#B8BCDF] text-brand-navy font-bold text-xs flex items-center justify-center gap-2 transition shadow-md"
-                            >
-                              <span>📜 Mở Chứng thư Bản quyền &amp; Tải Tệp Master</span>
-                            </button>
-                          </div>
+                          <p className="text-[11px] text-emerald-300/85">
+                            Chứng thư Bản quyền Số đã được gửi qua Gmail và đính kèm ngay trong Kho Tệp Bàn giao ở trên.
+                          </p>
                         )}
                         
                         {commission?.review && (() => {
@@ -1787,9 +1816,10 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                               {commission?.escrowStatus === 'Released'
                                 ? 'Đã giải ngân (Hoàn tất)'
                                 : commission?.escrowStatus === 'PartialReleased'
-                                  ? 'Đã nạp (Đang giải ngân)'
+
+                                    ? (commission.isStagedEscrow ? `Đang giữ ${(commission.escrowHeldAmount ?? 0).toLocaleString('vi-VN')}đ (Đã trả ${(commission.disbursedAmount ?? 0).toLocaleString('vi-VN')}đ)` : 'Đã nạp (Đang giải ngân)')
                                   : commission?.escrowStatus === 'Deposited'
-                                    ? 'Đã nạp Escrow'
+                                    ? (commission.isStagedEscrow ? `Đã nạp Mốc #${commission.currentStage ?? 1} (${(commission.escrowHeldAmount ?? 0).toLocaleString('vi-VN')}đ)` : 'Đã nạp Escrow')
                                     : commission?.escrowStatus === 'Refunded'
                                       ? 'Đã hoàn tiền'
                                       : 'Chờ nạp Escrow'}
@@ -1928,10 +1958,16 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
             commissionId={room.commissionId}
             milestoneId={displayedMilestone.id}
             milestoneTitle={displayedMilestone.title}
-            onSuccess={() => {
+            isRevision={displayedMilestone.status === 'RevisionRequested'}
+            onSuccess={(action) => {
+              const seq = displayedMilestone?.sequence ?? 1;
+              const title = displayedMilestone?.title || 'bản vẽ phác thảo';
               setShowSubmitModal(false);
               refresh();
-              void chat.sendMessage(`🎨 Creator đã nộp bản phác thảo cho mốc: ${displayedMilestone?.title || 'bản vẽ phác thảo mới'}`, 'SystemEvent').catch(() => null);
+              const msg = action === 'resubmitted'
+                ? `🎨 Creator đã gửi lại bản phác thảo chỉnh sửa cho Mốc #${seq} (${title}). Khách hàng vui lòng kiểm tra & phản hồi (tự động duyệt sau 72h nếu chưa có phản hồi).`
+                : `🎨 Creator đã nộp bản phác thảo Mốc #${seq} (${title}). Khách hàng vui lòng kiểm tra & phản hồi (tự động duyệt sau 72h nếu chưa có phản hồi).`;
+              void chat.sendMessage(msg, 'SystemEvent').catch(() => null);
             }}
           />}
 
@@ -1948,10 +1984,25 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
             revisionFeedback={displayedMilestone?.revisionFeedback}
             milestoneStatus={displayedMilestone?.status}
             onOpenSubmitModal={() => setShowSubmitModal(true)}
-            onSuccess={() => {
+            onSuccess={({ action, feedback }) => {
+              const seq = displayedMilestone?.sequence ?? 1;
+              const title = displayedMilestone?.title || `Mốc #${seq}`;
+              const nextMilestone = sortedMilestones.find((m) => m.sequence === seq + 1);
               setShowApprovalModal(false);
               refresh();
-              void chat.sendMessage('🔄 Tiến độ mốc hợp đồng vừa meow cập nhật.', 'SystemEvent').catch(() => null);
+              let msg: string;
+              if (action === 'revision_requested') {
+                const cleanNote = feedback?.trim();
+                const preview = cleanNote ? (cleanNote.length > 160 ? `${cleanNote.slice(0, 157)}...` : cleanNote) : '';
+                msg = `✏️ Khách hàng đã yêu cầu chỉnh sửa Mốc #${seq} (${title})${preview ? `: "${preview}"` : '.'}`;
+              } else if (!nextMilestone) {
+                msg = `✅ Khách hàng đã duyệt Mốc #${seq} (${title}) — toàn bộ các mốc đã hoàn tất! Creator có thể gửi file hoàn chỉnh (HD) ngay.`;
+              } else if (commission?.isStagedEscrow) {
+                msg = `✅ Khách hàng đã duyệt Mốc #${seq} (${title}) và giải ngân cho Creator. Sang Mốc #${nextMilestone.sequence} (${nextMilestone.title}) — khách hàng vui lòng nạp ký quỹ Mốc #${nextMilestone.sequence} để Creator tiếp tục.`;
+              } else {
+                msg = `✅ Khách hàng đã duyệt Mốc #${seq} (${title}) và giải ngân cho Creator. Creator có thể tiếp tục thực hiện Mốc #${nextMilestone.sequence} (${nextMilestone.title}).`;
+              }
+              void chat.sendMessage(msg, 'SystemEvent').catch(() => null);
             }}
           />
 
@@ -1963,10 +2014,18 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
             commissionStatus={commissionStatus}
             commission={commission}
             onOpenReviewModal={() => setShowReviewModal(true)}
-            onSuccess={() => {
-              setShowDeliveryModal(false);
+            onSuccess={({ action, summary }) => {
+              if (action !== 'deleted') setShowDeliveryModal(false);
               refresh();
-              void chat.sendMessage('📦 Trạng thái bàn giao File gốc HD vừa được cập nhật!', 'SystemEvent').catch(() => null);
+              const msg = action === 'completed'
+                ? '🎉 Khách hàng đã xác nhận nghiệm thu file hoàn chỉnh — đơn hàng đã hoàn tất và chứng thư bản quyền đã được cấp!'
+                : action === 'deleted'
+                ? `🗑️ Creator đã gỡ tệp "${summary || ''}" khỏi Kho Bàn giao. Khách hàng vui lòng kiểm tra lại danh sách tệp mới nhất trước khi xác nhận.`
+                : `📦 Creator đã cập nhật Kho Bàn giao${summary ? ` (${summary})` : ''}. Khách hàng vui lòng tải về và mở kiểm tra kỹ từng tệp trước khi xác nhận hoàn tất.`;
+              void chat.sendMessage(msg, 'SystemEvent').catch(() => null);
+              if (action === 'completed' && !isCreator && !commission?.review) {
+                setShowReviewModal(true);
+              }
             }}
           />
 
@@ -1988,9 +2047,16 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
             commissionId={room.commissionId}
             commission={commission}
             currentUserId={userId}
-            onSuccess={() => {
+            onSuccess={(action) => {
               setShowCancelModal(false);
               refresh();
+              const msgMap = {
+                cancelled_immediately: '🚫 Đơn hàng đã được hủy theo chính sách và hoàn trả phần ký quỹ Escrow còn lại.',
+                cancel_requested: '⏳ Đã gửi yêu cầu hủy đơn. Đối tác có 48 giờ để đồng ý hoặc từ chối.',
+                cancel_approved: '✅ Yêu cầu hủy đơn đã được chấp thuận — đơn hàng đã hủy và hoàn trả phần Escrow còn lại.',
+                cancel_rejected: '↩️ Yêu cầu hủy đơn đã bị từ chối — đơn hàng tiếp tục được thực hiện.',
+              } as const;
+              void chat.sendMessage(msgMap[action], 'SystemEvent').catch(() => null);
             }}
           />
 
@@ -2027,13 +2093,6 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
             />
           )}
 
-
-
-          <DigitalCertificateModal
-            isOpen={showCertificateModal}
-            onClose={() => setShowCertificateModal(false)}
-            commission={commission}
-          />
         </>
       )}
     </div>

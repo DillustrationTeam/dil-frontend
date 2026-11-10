@@ -68,18 +68,43 @@ export const commissionService = {
   approveMilestone: async (id: string, milestoneId: string) => apiClient.patch(`/commissions/${id}/milestones/${milestoneId}/approve`),
   requestRevision: async (id: string, milestoneId: string, feedbackComment: string) =>
     apiClient.post(`/commissions/${id}/milestones/${milestoneId}/request-revision`, { feedbackComment }),
-  deliverFinal: async (id: string, file: File) => {
+  deliverFinal: async (id: string, files: File | File[]) => {
+    const list = Array.isArray(files) ? files : [files];
     const body = new FormData();
-    body.append('file', file);
-    return apiClient.post(`/commissions/${id}/deliver`, body);
+    for (const file of list) {
+      body.append('files', file);
+    }
+    const res = await apiClient.post<ApiResponse<Commission>>(`/commissions/${id}/deliver`, body);
+    return res.data.data;
   },
-  complete: async (id: string) => apiClient.patch(`/commissions/${id}/complete`),
+  getDeliverables: async (id: string) => {
+    const res = await apiClient.get<ApiResponse<{
+      version: string;
+      totalBytes: number;
+      files: Array<{ id: string; name: string; sizeBytes: number; sha256: string; uploadedAt: string }>;
+    }>>(`/commissions/${id}/deliverables`);
+    return res.data.data;
+  },
+  deleteDeliverable: async (id: string, fileId: string) => {
+    const res = await apiClient.delete<ApiResponse<{
+      version: string;
+      totalBytes: number;
+      files: Array<{ id: string; name: string; sizeBytes: number; sha256: string; uploadedAt: string }>;
+    }>>(`/commissions/${id}/deliverables/${encodeURIComponent(fileId)}`);
+    return res.data.data;
+  },
+  complete: async (id: string, expectedManifestVersion?: string) =>
+    apiClient.patch(`/commissions/${id}/complete`, undefined, {
+      params: expectedManifestVersion ? { expectedManifestVersion } : undefined,
+    }),
   getWipPreviewUrl: async (id: string, milestoneId: string) => {
     const res = await apiClient.get<ApiResponse<{ previewUrl: string }>>(`/commissions/${id}/milestones/${milestoneId}/preview`);
     return res.data.data?.previewUrl as string;
   },
-  getFinalDownloadUrl: async (id: string) => {
-    const res = await apiClient.get<ApiResponse<{ downloadUrl: string; expiresAt: string }>>(`/commissions/${id}/final/download`);
+  getFinalDownloadUrl: async (id: string, fileId?: string) => {
+    const res = await apiClient.get<ApiResponse<{ downloadUrl: string; expiresAt: string }>>(`/commissions/${id}/final/download`, {
+      params: fileId ? { fileId } : undefined,
+    });
     return res.data.data as { downloadUrl: string; expiresAt: string };
   },
   cancelWithPolicy: async (id: string, payload: { cancellationReason: string; details?: string }) => {

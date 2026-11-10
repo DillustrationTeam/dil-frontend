@@ -26,13 +26,15 @@ import { useEffect, useState } from 'react';
 import { Package, Sparkles, ChevronLeft, ChevronRight, X, Clock, Star, ArrowUpDown } from 'lucide-react';
 import CreateCommissionModal from '@/components/modals/CreateCommissionModal';
 import { useAuthStore } from '@/store/use-auth-store';
-import { creatorRateCardService, type RateCardPackage } from '@/features/creator-studio/services/creator-rate-card.service';
-import type { ArtworkDto, CreatorProfileDto } from '@/features/creator-studio/types/creator-profile.types';
+import { creatorRateCardService, getPackageSlotInfo, type RateCardPackage } from '@/features/creator-studio/services/creator-rate-card.service';
+import { creatorProfileService } from '@/features/creator-studio/services/creator-profile.service';
+import { CreatorTermsOverview } from '@/components/terms/CreatorTermsOverview';
+import type { ArtworkDto, CreatorProfileDto, CreatorTermsDto } from '@/features/creator-studio/types/creator-profile.types';
 import { marketplaceService, type CreatorReviewDto } from '@/features/marketplace/services/marketplace.service';
 import { commissionService } from '@/services/commission.service';
 import { ProfileLayout, ProfileTabs } from './profile-layout';
 
-type Tab = 'portfolio' | 'rates' | 'reviews';
+type Tab = 'portfolio' | 'rates' | 'reviews' | 'terms';
 
 export function CreatorProfileScreen({ id }: { id: string }) {
 
@@ -42,6 +44,7 @@ export function CreatorProfileScreen({ id }: { id: string }) {
   const [artworks, setArtworks] = useState<ArtworkDto[]>([]);
   const [rates, setRates] = useState<RateCardPackage[]>([]);
   const [reviews, setReviews] = useState<CreatorReviewDto[]>([]);
+  const [terms, setTerms] = useState<CreatorTermsDto | null>(null);
   const [following, setFollowing] = useState(false);
   const [busy, setBusy] = useState(false);
   const [loadedId, setLoadedId] = useState<string | null>(null);
@@ -116,12 +119,14 @@ export function CreatorProfileScreen({ id }: { id: string }) {
       marketplaceService.getArtworks(),
       creatorRateCardService.get(id),
       marketplaceService.getCreatorReviews(id),
-    ]).then(([nextProfile, allArtworks, nextRates, nextReviews]) => {
+      creatorProfileService.getTerms(id).catch(() => null),
+    ]).then(([nextProfile, allArtworks, nextRates, nextReviews, nextTerms]) => {
       if (!active) return;
       setProfile(nextProfile);
       setArtworks(allArtworks.filter((artwork) => artwork.creatorProfileId === id));
       setRates(nextRates);
       setReviews(nextReviews);
+      setTerms(nextTerms);
     }).catch(() => { if (active) setProfile(null); })
       .finally(() => { if (active) setLoadedId(id); });
     return () => { active = false; };
@@ -173,13 +178,16 @@ export function CreatorProfileScreen({ id }: { id: string }) {
         {tab === 'portfolio' && (artworks.length ? <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">{artworks.map((artwork) => <Link key={artwork.id} href={`/artworks/${artwork.id}`} className="group overflow-hidden rounded-xl border border-white/10 bg-white/[.03]"><div className="relative aspect-[4/5]"><Image src={artwork.thumbnailUrl || artwork.imageUrl} alt={artwork.title} fill unoptimized className="object-cover transition group-hover:scale-[1.02]" /></div><p className="truncate p-3 text-sm text-white">{artwork.title}</p></Link>)}</div> : <EmptyState>Chưa có tác phẩm được đăng.</EmptyState>)}
         {tab === 'rates' && (
           rates.length ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+            <div className="space-y-4">
               {rates.map((rate) => {
                 const orderCount = rate.orderCount ?? 0;
                 const sampleList = rate.sampleUrls ?? [];
+                const hasSamples = sampleList.length > 0;
                 const currentIndex = activeSampleIndexes[rate.id] ?? 0;
-                const safeIndex = sampleList.length > 0 ? currentIndex % sampleList.length : 0;
-                const currentImage = sampleList[safeIndex];
+                const safeIndex = hasSamples ? currentIndex % sampleList.length : 0;
+                const currentImage = hasSamples ? sampleList[safeIndex] : null;
+                const slot = getPackageSlotInfo(rate);
+                const milestones = [...(rate.milestones ?? [])].sort((a, b) => a.sequence - b.sequence);
 
                 const handlePrevSample = (e: React.MouseEvent) => {
                   e.stopPropagation();
@@ -200,121 +208,150 @@ export function CreatorProfileScreen({ id }: { id: string }) {
                 return (
                   <article
                     key={rate.id}
-                    className="flex flex-col rounded-2xl border border-white/10 bg-[#141724]/85 backdrop-blur-md overflow-hidden hover:border-[#A7ACD9]/50 hover:shadow-xl transition group"
+                    className="group overflow-hidden rounded-2xl border border-white/10 bg-[#141724]/90 transition hover:border-[#A7ACD9]/45"
                   >
-                    {/* Top Media / Sample Cover with Arrow Controls */}
-                    <div className="relative aspect-[16/10] w-full bg-[#10121d] overflow-hidden select-none">
-                      {currentImage ? (
-                        <Image
-                          src={currentImage}
-                          alt={`${rate.name} - Sample ${safeIndex + 1}`}
-                          fill
-                          unoptimized
-                          className="object-cover group-hover:scale-105 transition duration-300 cursor-pointer"
-                          onClick={() => setLightboxData({ urls: sampleList, index: safeIndex })}
-                        />
-                      ) : (
-                        <div className="w-full h-full flex flex-col items-center justify-center p-4 bg-gradient-to-br from-[#1b1f33] to-[#121422] text-slate-500">
-                          <Package className="h-8 w-8 text-[#A7ACD9]/30 mb-1" />
-                          <span className="text-[11px] text-slate-400">Chưa gắn ảnh mẫu</span>
+                    <div className={hasSamples ? 'grid grid-cols-1 md:grid-cols-[220px_minmax(0,1fr)]' : 'block'}>
+                      {hasSamples && currentImage && (
+                        <div className="relative aspect-[16/10] md:aspect-auto md:min-h-[190px] w-full bg-[#10121d] overflow-hidden select-none border-b md:border-b-0 md:border-r border-white/10">
+                          <Image
+                            src={currentImage}
+                            alt={`${rate.name} - Mẫu ${safeIndex + 1}`}
+                            fill
+                            unoptimized
+                            className="object-cover transition duration-300 group-hover:scale-[1.03] cursor-pointer"
+                            onClick={() => setLightboxData({ urls: sampleList, index: safeIndex })}
+                          />
+                          {sampleList.length > 1 && (
+                            <>
+                              <button
+                                type="button"
+                                onClick={handlePrevSample}
+                                className="absolute left-2 top-1/2 -translate-y-1/2 h-7 w-7 rounded-full bg-black/70 hover:bg-black/90 text-white flex items-center justify-center border border-white/15 opacity-80 group-hover:opacity-100 transition z-10"
+                                title="Xem ảnh mẫu trước"
+                              >
+                                <ChevronLeft className="h-4 w-4" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={handleNextSample}
+                                className="absolute right-2 top-1/2 -translate-y-1/2 h-7 w-7 rounded-full bg-black/70 hover:bg-black/90 text-white flex items-center justify-center border border-white/15 opacity-80 group-hover:opacity-100 transition z-10"
+                                title="Xem ảnh mẫu tiếp theo"
+                              >
+                                <ChevronRight className="h-4 w-4" />
+                              </button>
+                              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 rounded-full bg-black/75 px-2.5 py-0.5 text-[10px] font-medium tabular-nums text-white/90 border border-white/10 pointer-events-none z-10">
+                                {safeIndex + 1}/{sampleList.length}
+                              </div>
+                            </>
+                          )}
                         </div>
                       )}
 
-                      {/* Order Count Badge Overlay */}
-                      <div className="absolute top-3 right-3 flex items-center gap-1.5 rounded-full bg-black/75 backdrop-blur-md px-3 py-1 text-[11px] font-semibold border border-white/10 text-white shadow pointer-events-none z-10">
-                        {orderCount > 0 ? (
-                          <>
-                            <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-                            <span className="font-mono text-emerald-300 font-bold">{orderCount}</span> đơn đã đặt
-                          </>
-                        ) : (
-                          <span className="text-slate-300 font-medium">Gói mới</span>
-                        )}
-                      </div>
+                      <div className="flex flex-col justify-between p-5 sm:p-6 gap-4">
+                        <div className="space-y-3">
+                          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                            <div className="min-w-0 space-y-1.5">
+                              <div className="flex flex-wrap items-center gap-2">
+                                <h3 className="font-h1 text-base sm:text-lg font-bold text-white leading-snug">
+                                  {rate.name}
+                                </h3>
+                                <span
+                                  className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-medium ${
+                                    !slot.isLimited
+                                      ? 'border-sky-400/25 bg-sky-500/10 text-sky-200'
+                                      : slot.isFull
+                                        ? 'border-rose-400/30 bg-rose-500/10 text-rose-200'
+                                        : 'border-emerald-400/25 bg-emerald-500/10 text-emerald-200'
+                                  }`}
+                                >
+                                  {slot.label}
+                                </span>
+                                {orderCount > 0 && (
+                                  <span className="text-[11px] font-medium tabular-nums text-slate-400">
+                                    • Đã có {orderCount} lượt đặt vẽ gói này
+                                  </span>
+                                )}
+                              </div>
 
-                      {/* Arrow Navigation on Card Cover */}
-                      {sampleList.length > 1 && (
-                        <>
-                          <button
-                            type="button"
-                            onClick={handlePrevSample}
-                            className="absolute left-2.5 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-black/60 hover:bg-black/90 text-white flex items-center justify-center backdrop-blur-sm border border-white/10 opacity-75 group-hover:opacity-100 transition shadow hover:scale-110 z-10"
-                            title="Xem ảnh mẫu trước"
-                          >
-                            <ChevronLeft className="h-4 w-4" />
-                          </button>
+                              {rate.description ? (
+                                <p className="max-w-[68ch] text-xs sm:text-[13px] text-[#C7C5CF] leading-relaxed whitespace-pre-line">
+                                  {rate.description}
+                                </p>
+                              ) : (
+                                <p className="text-xs text-slate-400 italic">Không có mô tả chi tiết.</p>
+                              )}
+                            </div>
 
-                          <button
-                            type="button"
-                            onClick={handleNextSample}
-                            className="absolute right-2.5 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-black/60 hover:bg-black/90 text-white flex items-center justify-center backdrop-blur-sm border border-white/10 opacity-75 group-hover:opacity-100 transition shadow hover:scale-110 z-10"
-                            title="Xem ảnh mẫu tiếp theo"
-                          >
-                            <ChevronRight className="h-4 w-4" />
-                          </button>
-
-                          {/* Image Counter Indicator */}
-                          <div className="absolute bottom-2.5 left-1/2 -translate-x-1/2 flex items-center gap-1.5 rounded-full bg-black/75 backdrop-blur-md px-2.5 py-0.5 text-[10px] font-mono text-white/90 border border-white/10 shadow pointer-events-none z-10">
-                            <span>
-                              {safeIndex + 1} / {sampleList.length}
-                            </span>
+                            <div className="shrink-0 sm:text-right flex sm:flex-col items-baseline sm:items-end justify-between gap-1">
+                              <span className="font-h1 text-xl font-bold tabular-nums text-emerald-300">
+                                {new Intl.NumberFormat('vi-VN').format(rate.price)} ₫
+                              </span>
+                              <span className="text-[11px] tabular-nums text-slate-400">
+                                Sửa thêm: {new Intl.NumberFormat('vi-VN').format(rate.extraRevisionPrice ?? 0)} ₫/lần
+                              </span>
+                            </div>
                           </div>
-                        </>
-                      )}
-                    </div>
 
-                    {/* Content Body */}
-                    <div className="flex-1 p-4 sm:p-5 flex flex-col justify-between space-y-4">
-                      <div className="space-y-2">
-                        {/* Title & Price */}
-                        <div className="space-y-1">
-                          <h3 className="font-bold text-base text-white group-hover:text-[#A7ACD9] transition line-clamp-1">
-                            {rate.name}
-                          </h3>
-                          <div className="flex items-baseline gap-1.5">
-                            <span className="text-lg font-bold font-mono text-emerald-400">
-                              {new Intl.NumberFormat('vi-VN').format(rate.price)} ₫
-                            </span>
-                          </div>
+                          {milestones.length > 0 && (
+                            <div className="pt-3 border-t border-white/10">
+                              <div className={`grid grid-cols-1 divide-y divide-white/10 sm:divide-y-0 sm:divide-x ${
+                                milestones.length === 2
+                                  ? 'sm:grid-cols-2'
+                                  : milestones.length >= 3
+                                    ? 'sm:grid-cols-3'
+                                    : ''
+                              }`}>
+                                {milestones.map((m) => (
+                                  <div
+                                    key={m.sequence}
+                                    className="flex flex-col justify-between gap-1.5 py-2 first:pt-0 last:pb-0 sm:py-0 sm:px-3.5 sm:first:pl-0 sm:last:pr-0"
+                                  >
+                                    <div className="text-xs leading-snug">
+                                      <span className="font-semibold text-[#C5C9F8] tabular-nums">
+                                        Mốc {m.sequence}
+                                      </span>
+                                      <span className="text-slate-500"> · </span>
+                                      <span className="font-medium text-white">{m.title}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-[11px] tabular-nums text-slate-300">
+                                      <span className="font-semibold text-slate-200">
+                                        {new Intl.NumberFormat('vi-VN').format(m.price)} ₫
+                                      </span>
+                                      <span className="text-slate-500">·</span>
+                                      <span className="text-slate-400">
+                                        {m.maxRevisions ?? rate.maxRevisions ?? 3} lần sửa
+                                      </span>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
                         </div>
 
-                        {/* Description */}
-                        {rate.description ? (
-                          <p className="text-xs text-[#C7C5CF] line-clamp-2 leading-relaxed">
-                            {rate.description}
-                          </p>
-                        ) : (
-                          <p className="text-xs text-slate-500 italic">Không có mô tả chi tiết.</p>
-                        )}
-                      </div>
-
-                      {/* Footer Specs & Action CTA */}
-                      <div className="space-y-3 pt-3 border-t border-white/5">
-                        <div className="flex items-center justify-between text-[11px] text-slate-400">
-                          <span>{rate.milestones?.length || 1} cột mốc thanh toán</span>
-                          <span>{rate.maxRevisions ?? 3} lần sửa free</span>
+                        <div className="flex flex-wrap items-center justify-end gap-3 pt-2 border-t border-white/5">
+                          {isOwnProfile ? (
+                            <Link
+                              href="/creator/services"
+                              className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-white/15 bg-white/5 px-5 py-2 text-xs font-semibold text-slate-200 hover:text-white hover:bg-white/10 transition"
+                            >
+                              Chỉnh sửa gói
+                            </Link>
+                          ) : (
+                            <button
+                              type="button"
+                              disabled={slot.isFull}
+                              onClick={() => {
+                                setSelectedCommissionPackageId(rate.id);
+                                setShowCommissionModal(true);
+                              }}
+                              className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#A7ACD9] px-5 py-2.5 text-xs font-bold text-[#1F2335] hover:bg-[#b8bde4] transition disabled:opacity-45 disabled:cursor-not-allowed"
+                            >
+                              <Sparkles className="h-3.5 w-3.5" />
+                              {slot.isFull ? 'Gói đã hết slot' : 'Đặt vẽ gói này'}
+                            </button>
+                          )}
                         </div>
-
-                        {isOwnProfile ? (
-                          <Link
-                            href="/creator/services"
-                            className="w-full flex items-center justify-center gap-1.5 rounded-xl border border-white/10 bg-white/5 py-2.5 text-xs font-semibold text-slate-300 hover:text-white hover:bg-white/10 transition"
-                          >
-                            Chỉnh sửa gói
-                          </Link>
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setSelectedCommissionPackageId(rate.id);
-                              setShowCommissionModal(true);
-                            }}
-                            className="w-full flex items-center justify-center gap-1.5 rounded-xl bg-[#A7ACD9] py-2.5 text-xs font-bold text-[#1F2335] shadow hover:bg-[#b8bde4] hover:shadow-lg transition"
-                          >
-                            <Sparkles className="h-3.5 w-3.5" />
-                            Đặt vẽ gói này
-                          </button>
-                        )}
                       </div>
                     </div>
                   </article>
@@ -324,6 +361,18 @@ export function CreatorProfileScreen({ id }: { id: string }) {
           ) : (
             <EmptyState>Creator chưa đăng gói commission.</EmptyState>
           )
+        )}
+        {tab === 'terms' && (
+          <div className="rounded-2xl border border-white/10 bg-[#141724]/90 p-5 sm:p-6 space-y-4">
+            <CreatorTermsOverview terms={terms} creatorName={profile.displayName} />
+            {isOwnProfile && (
+              <div className="flex justify-end border-t border-white/10 pt-3">
+                <Link href="/creator/terms" className="inline-flex items-center rounded-xl border border-white/15 bg-white/5 px-4 py-2 text-xs font-semibold text-white hover:bg-white/10 transition">
+                  Chỉnh sửa điều khoản &amp; bản quyền
+                </Link>
+              </div>
+            )}
+          </div>
         )}
         {tab === 'reviews' && (() => {
           if (!reviews.length) return <EmptyState>Chưa có đánh giá nào cho Creator này.</EmptyState>;
@@ -826,6 +875,7 @@ export function CreatorProfileScreen({ id }: { id: string }) {
           creatorId={profile.id}
           creatorName={profile.displayName}
           initialPackageId={selectedCommissionPackageId || undefined}
+          initialTerms={terms}
           onClose={() => {
             setShowCommissionModal(false);
             setSelectedCommissionPackageId(null);

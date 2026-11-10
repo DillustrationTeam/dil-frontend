@@ -7,24 +7,23 @@ import {
   CheckCircle2,
   Copy,
   Check,
-  Download,
 } from 'lucide-react';
 import type { Commission } from '@/types/commission.types';
-import { commissionService } from '@/services/commission.service';
 
 interface DigitalCertificateModalProps {
   isOpen: boolean;
   onClose: () => void;
   commission: Commission | null;
+  masterSha256?: string;
 }
 
 export default function DigitalCertificateModal({
   isOpen,
   onClose,
   commission,
+  masterSha256,
 }: DigitalCertificateModalProps) {
   const [copiedHash, setCopiedHash] = useState(false);
-  const [downloading, setDownloading] = useState<string | null>(null);
 
   if (!isOpen || !commission) return null;
 
@@ -33,12 +32,10 @@ export default function DigitalCertificateModal({
   const creatorDisplay = commission.creatorName || 'Creator';
   const clientDisplay = commission.clientName || 'Khách hàng';
   const isCommercial = commission.licenseType === 'Commercial';
+  const termsSnap = commission.creatorTermsSnapshot;
+  const extTerms = termsSnap?.extended;
 
-  // Derived hash code
-  const pseudoHash = `b4c9e8f17a932d04a6e872c91b5820468032fec68a91275bb20d6f481e5927c3`
-    .split('')
-    .map((c, i) => commission.id.charCodeAt(i % commission.id.length).toString(16)[0] || c)
-    .join('');
+  const realHash = masterSha256 || 'Chưa có mã băm phiên bản bàn giao';
 
   // Latest approved / final artwork image
   const lastMilestoneWithWip = commission.milestones
@@ -51,27 +48,10 @@ export default function DigitalCertificateModal({
     'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=900&q=80';
 
   const handleCopyHash = () => {
-    navigator.clipboard.writeText(pseudoHash);
+    if (!masterSha256) return;
+    navigator.clipboard.writeText(masterSha256);
     setCopiedHash(true);
     setTimeout(() => setCopiedHash(false), 2000);
-  };
-
-  const handleDownloadMaster = async (type: string) => {
-    try {
-      setDownloading(type);
-      const { downloadUrl } = await commissionService.getFinalDownloadUrl(commission.id);
-      const link = document.createElement('a');
-      link.href = downloadUrl;
-      link.target = '_blank';
-      link.download = `${commission.title || 'Artwork'}_Master.${type}`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    } catch {
-      alert('Đang tạo liên kết tải về an toàn, vui lòng thử lại.');
-    } finally {
-      setDownloading(null);
-    }
   };
 
   return (
@@ -219,16 +199,22 @@ export default function DigitalCertificateModal({
                   <ul className="space-y-1.5 text-slate-300 text-xs list-disc list-inside">
                     {isCommercial ? (
                       <>
-                        <li>Toàn quyền sử dụng làm hình đại diện, video phát trực tiếp (Live Stream), bìa sản phẩm âm nhạc.</li>
-                        <li>Toàn quyền in ấn ấn phẩm lưu niệm (Merchandise), áo thun, poster, photocard không giới hạn số lượng.</li>
+                        <li>{extTerms?.commercialScope || 'Toàn quyền sử dụng cho mục đích thương mại: livestream, ấn phẩm truyền thông, hoặc merchandise.'}</li>
                         <li>Thời hạn bảo hộ: <strong>Vĩnh viễn (Perpetual)</strong> • Lãnh thổ: <strong>Toàn cầu (Worldwide)</strong>.</li>
                         <li>Người mua không được mạo danh tác giả gốc hoặc đăng ký bảo hộ độc quyền nhãn hiệu trái phép.</li>
                       </>
                     ) : (
                       <>
                         <li>Toàn quyền sử dụng làm hình nền, avatar cá nhân trên mạng xã hội phi thương mại.</li>
-                        <li>In ấn lưu niệm cá nhân phi lợi nhuận (không bán thương mại cho bên thứ ba).</li>
+                        <li>In ấn lưu niệm cá nhân phi lợi nhuận ({extTerms?.prohibitResale === false ? 'theo thỏa thuận với tác giả' : 'không bán thương mại hoặc chuyển nhượng cho bên thứ ba'}).</li>
                         <li>Thời hạn: <strong>Vĩnh viễn (Perpetual)</strong> • Lãnh thổ: <strong>Toàn cầu (Worldwide)</strong>.</li>
+                      </>
+                    )}
+                    {extTerms && (
+                      <>
+                        <li>Ghi nguồn tác giả (Credit): <strong>{extTerms.requireCredit ? 'Bắt buộc ghi nguồn Creator' : 'Không bắt buộc'}</strong> • Đăng Portfolio: <strong>{extTerms.allowPortfolioDisplay ? 'Creator được phép đăng mẫu' : 'Giữ kín riêng tư'}</strong>.</li>
+                        {extTerms.prohibitAiTraining && <li><strong>Cấm sử dụng tác phẩm để huấn luyện AI (AI Training) hoặc phát hành NFT.</strong></li>}
+                        {extTerms.usageRestrictions && <li>Ghi ch? b? sung: {extTerms.usageRestrictions}</li>}
                       </>
                     )}
                   </ul>
@@ -250,7 +236,7 @@ export default function DigitalCertificateModal({
                     </button>
                   </div>
                   <div className="font-mono text-[11px] text-brand-periwinkle bg-black/40 p-2.5 rounded border border-white/5 break-all select-all">
-                    {pseudoHash}
+                    {realHash}
                   </div>
                   <p className="text-[10px] text-slate-400">
                     * Mã băm mật mã độc bản này chứng minh tệp tin tải về là tệp gốc chính xác do tác giả bàn giao, chống mọi hành vi sửa đổi hoặc tráo file giả mạo.
@@ -288,85 +274,7 @@ export default function DigitalCertificateModal({
 
           </div>
 
-          {/* DELIVERABLES VAULT (KHO TỆP BÀN GIAO GỐC ĐỂ KHÁCH TẢI VỀ) */}
-          <div className="rounded-2xl border border-white/10 bg-[#131826] p-6 sm:p-8 space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-white/5 pb-4 gap-2">
-              <div>
-                <h3 className="text-base font-bold font-h1 text-white">Kho Tệp Bàn giao Chính thức (Deliverables Vault)</h3>
-                <p className="text-xs text-slate-400 mt-0.5">Tất cả tệp gốc độ phân giải cao đã được mở khóa an toàn sau khi nghiệm thu.</p>
-              </div>
-              <span className="text-xs font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-lg self-start sm:self-auto">
-                3 Tệp tin • Mở khóa toàn bộ
-              </span>
-            </div>
 
-            <div className="grid gap-4 sm:grid-cols-3">
-              {/* File 1: Master PSD / ZIP */}
-              <div className="rounded-xl border border-white/10 bg-[#181E2E] p-4 flex flex-col justify-between space-y-3 hover:border-brand-periwinkle/50 transition">
-                <div>
-                  <span className="text-[10px] font-mono font-bold text-sky-400 bg-sky-400/10 px-2 py-0.5 rounded">
-                    PSD / ZIP MASTER
-                  </span>
-                  <h4 className="font-bold text-xs text-white mt-2 truncate">
-                    {commission.title.replace(/\s+/g, '_')}_Master.zip
-                  </h4>
-                  <p className="text-[11px] text-slate-400 mt-1">File gốc phân lớp hoàn chỉnh, 4K 300DPI, màu CMYK/RGB.</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => handleDownloadMaster('zip')}
-                  disabled={downloading === 'zip'}
-                  className="w-full py-2 rounded-lg bg-brand-periwinkle text-brand-navy text-xs font-bold hover:brightness-110 transition flex items-center justify-center gap-1.5 shadow"
-                >
-                  <Download size={13} />
-                  <span>{downloading === 'zip' ? 'Đang tải...' : 'Tải file Master (.ZIP)'}</span>
-                </button>
-              </div>
-
-              {/* File 2: Transparent PNG */}
-              <div className="rounded-xl border border-white/10 bg-[#181E2E] p-4 flex flex-col justify-between space-y-3 hover:border-brand-periwinkle/50 transition">
-                <div>
-                  <span className="text-[10px] font-mono font-bold text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded">
-                    PNG TRANSPARENT
-                  </span>
-                  <h4 className="font-bold text-xs text-white mt-2 truncate">
-                    {commission.title.replace(/\s+/g, '_')}_Full.png
-                  </h4>
-                  <p className="text-[11px] text-slate-400 mt-1">Tách nền trong suốt 4096×5464px phục vụ stream &amp; video.</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => handleDownloadMaster('png')}
-                  disabled={downloading === 'png'}
-                  className="w-full py-2 rounded-lg bg-white/10 border border-white/15 text-white text-xs font-bold hover:bg-white/20 transition flex items-center justify-center gap-1.5"
-                >
-                  <Download size={13} />
-                  <span>{downloading === 'png' ? 'Đang tải...' : 'Tải PNG 4K Không Nền'}</span>
-                </button>
-              </div>
-
-              {/* File 3: PDF Certificate */}
-              <div className="rounded-xl border border-white/10 bg-[#181E2E] p-4 flex flex-col justify-between space-y-3 hover:border-brand-periwinkle/50 transition">
-                <div>
-                  <span className="text-[10px] font-mono font-bold text-brand-periwinkle bg-brand-periwinkle/10 px-2 py-0.5 rounded">
-                    PDF CERTIFICATE
-                  </span>
-                  <h4 className="font-bold text-xs text-white mt-2 truncate">
-                    Certificate_{certCode}.pdf
-                  </h4>
-                  <p className="text-[11px] text-slate-400 mt-1">Bản in chứng nhận bản quyền chuẩn quốc tế có mã QR.</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => window.print()}
-                  className="w-full py-2 rounded-lg bg-white/10 border border-white/15 text-white text-xs font-bold hover:bg-white/20 transition flex items-center justify-center gap-1.5"
-                >
-                  <Printer size={13} />
-                  <span>Xuất PDF Chứng nhận</span>
-                </button>
-              </div>
-            </div>
-          </div>
 
         </div>
 

@@ -54,16 +54,38 @@ export interface CreateArtworkRequest {
   tags?: string[];
 }
 
+export interface CreatorCustomClauseDto {
+  title: string;
+  content: string;
+}
+
+export interface CreatorExtendedTermsDto {
+  version: number;
+  willDraw?: string | null;
+  wontDraw?: string | null;
+  commercialScope?: string | null;
+  usageRestrictions?: string | null;
+  deliveryProcess?: string | null;
+  allowPortfolioDisplay: boolean;
+  requireCredit: boolean;
+  prohibitAiTraining: boolean;
+  prohibitResale: boolean;
+  customClauses?: CreatorCustomClauseDto[] | null;
+}
+
 export interface CreatorTermsDto {
   commercialLicenseMultiplier: number;
   revisionPolicy?: string | null;
   cancellationPolicy?: string | null;
+  extended?: CreatorExtendedTermsDto | null;
+  updatedAt?: string | null;
 }
 
 export interface UpdateCreatorTermsRequest {
   commercialLicenseMultiplier: number;
   revisionPolicy?: string | null;
   cancellationPolicy?: string | null;
+  extended?: CreatorExtendedTermsDto | null;
 }
 
 export interface AutoReplySettingDto {

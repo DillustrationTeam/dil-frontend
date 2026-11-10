@@ -27,6 +27,7 @@ import { extractErrorMessage } from '@/lib/api-client';
 import {
   creatorRateCardService,
   RateCardPackage,
+  getPackageSlotInfo,
 } from '@/features/creator-studio/services/creator-rate-card.service';
 
 const rateCardSchema = z
@@ -38,6 +39,7 @@ const rateCardSchema = z
       price: z.number(),
       maxRevisions: z.number().int().min(0).max(20).optional(),
       extraRevisionPrice: z.number().int().min(0).max(100_000_000).optional(),
+      maxSlots: z.number().int().min(0).max(100).nullable().optional(),
       sampleUrls: z.array(z.string().min(1)).max(10).optional(),
       milestones: z
         .array(
@@ -64,7 +66,9 @@ const labelBase = 'block text-[11px] font-medium text-slate-300 mb-1';
 export function CreatorRateCardManager() {
   const [tab, setTab] = useState<'packages' | 'addons'>('packages');
   const [packages, setPackages] = useState<RateCardPackage[]>([]);
-  const [slots, setSlots] = useState<number>(3);
+  const [slotLimitEnabled, setSlotLimitEnabled] = useState(false);
+  const [togglingSlotLimit, setTogglingSlotLimit] = useState(false);
+  const savedSlotLimitsRef = useRef<Record<string, number | null>>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [hasProfile, setHasProfile] = useState(false);
@@ -181,9 +185,9 @@ export function CreatorRateCardManager() {
       try {
         const profile = await creatorProfileService.getMyProfile();
         setHasProfile(true);
-        setSlots(profile.availableSlots ?? 3);
         const cardPackages = await creatorRateCardService.get(profile.id);
         setPackages(cardPackages);
+        setSlotLimitEnabled(cardPackages.some((pkg) => pkg.maxSlots !== null && pkg.maxSlots !== undefined));
       } catch (cause) {
         if (axios.isAxiosError(cause) && cause.response?.status === 400) {
           setError('Tài khoản này chưa có hồ sơ Creator. Hãy tạo hồ sơ trước khi lưu bảng giá.');
@@ -199,20 +203,58 @@ export function CreatorRateCardManager() {
     void loadData();
   }, []);
 
-  const updateSlots = async (nextSlots: number) => {
+  const toggleSlotLimit = async () => {
+    const nextEnabled = !slotLimitEnabled;
+    if (!nextEnabled) {
+      const snapshot: Record<string, number | null> = {};
+      for (const pkg of packages) snapshot[pkg.id] = pkg.maxSlots ?? null;
+      savedSlotLimitsRef.current = snapshot;
+    }
+
+    const updatedPackages = packages.map((pkg) => {
+      const price = (pkg.milestones ?? []).reduce((sum, stage) => sum + stage.price, 0);
+      if (!nextEnabled) {
+        return { ...pkg, price, maxSlots: null };
+      }
+      const restored = savedSlotLimitsRef.current[pkg.id];
+      const nextMaxSlots = restored !== undefined && restored !== null ? restored : (pkg.maxSlots ?? 3);
+      return { ...pkg, price, maxSlots: nextMaxSlots };
+    });
+
+    setSlotLimitEnabled(nextEnabled);
+    setPackages(updatedPackages);
+
+    if (!hasProfile || updatedPackages.length === 0) {
+      toast.success(nextEnabled ? 'Đã bật giới hạn số slot nhận đơn.' : 'Đã tắt giới hạn số slot nhận đơn.');
+      return;
+    }
+
+    const validation = rateCardSchema.safeParse(updatedPackages);
+    if (!validation.success) {
+      toast.success(nextEnabled ? 'Đã bật giới hạn slot — bấm Lưu bảng giá sau khi hoàn tất chỉnh sửa.' : 'Đã tắt giới hạn slot — bấm Lưu bảng giá để áp dụng.');
+      return;
+    }
+
+    setTogglingSlotLimit(true);
     try {
-      await creatorProfileService.updateMyProfile({ availableSlots: nextSlots });
-      setSlots(nextSlots);
-      toast.success('Đã cập nhật số slot nhận đơn.');
+      const saved = await creatorRateCardService.save(updatedPackages);
+      setPackages(saved);
+      toast.success(nextEnabled ? 'Đã bật giới hạn số slot nhận đơn.' : 'Đã chuyển toàn bộ gói sang Không giới hạn slot.');
     } catch {
-      toast.error('Không thể cập nhật số slot.');
+      toast.error('Không thể lưu trạng thái giới hạn slot. Vui lòng thử bấm Lưu bảng giá.');
+    } finally {
+      setTogglingSlotLimit(false);
     }
   };
 
   const updatePackage = (id: string, patch: Partial<RateCardPackage>) => {
-    setPackages((current) =>
-      current.map((item) => (item.id === id ? { ...item, ...patch } : item))
-    );
+    setPackages((current) => {
+      const next = current.map((item) => (item.id === id ? { ...item, ...patch } : item));
+      if (patch.maxSlots !== undefined) {
+        setSlotLimitEnabled(next.some((item) => item.maxSlots !== null && item.maxSlots !== undefined));
+      }
+      return next;
+    });
   };
 
   const updateMilestone = (
@@ -354,24 +396,30 @@ export function CreatorRateCardManager() {
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-[#141724] px-3.5 py-2 text-xs">
-            <span className="text-slate-400">Slot nhận đơn:</span>
-            <button
-              type="button"
-              onClick={() => updateSlots(Math.max(0, slots - 1))}
-              className="h-6 w-6 rounded-lg bg-white/5 font-bold text-white hover:bg-white/10 flex items-center justify-center transition"
+          <button
+            type="button"
+            role="switch"
+            aria-checked={slotLimitEnabled}
+            disabled={togglingSlotLimit}
+            onClick={toggleSlotLimit}
+            className="flex items-center gap-3 rounded-xl border border-white/10 bg-[#141724] px-3.5 py-2 text-xs hover:border-[#A7ACD9]/40 transition disabled:opacity-50"
+          >
+            <span className="text-slate-300 font-medium">Giới hạn số slot nhận đơn</span>
+            <span
+              className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors ${
+                slotLimitEnabled ? 'bg-[#A7ACD9]' : 'bg-white/15'
+              }`}
             >
-              −
-            </button>
-            <span className="min-w-[20px] text-center font-bold text-white">{slots}</span>
-            <button
-              type="button"
-              onClick={() => updateSlots(slots + 1)}
-              className="h-6 w-6 rounded-lg bg-white/5 font-bold text-white hover:bg-white/10 flex items-center justify-center transition"
-            >
-              +
-            </button>
-          </div>
+              <span
+                className={`inline-block h-3.5 w-3.5 transform rounded-full bg-[#111420] transition-transform ${
+                  slotLimitEnabled ? 'translate-x-4.5' : 'translate-x-1'
+                }`}
+              />
+            </span>
+            <span className={`text-[11px] font-semibold ${slotLimitEnabled ? 'text-[#C5C9F8]' : 'text-sky-300'}`}>
+              {slotLimitEnabled ? 'Đang bật' : 'Không giới hạn'}
+            </span>
+          </button>
         </div>
       </div>
 
@@ -436,6 +484,7 @@ export function CreatorRateCardManager() {
             {packages.map((item, index) => {
               const packageTotal = (item.milestones ?? []).reduce((sum, m) => sum + m.price, 0);
               const isCollapsed = Boolean(collapsedIds[item.id]);
+              const slotInfo = getPackageSlotInfo(item);
               return (
                 <div
                   key={item.id}
@@ -457,6 +506,15 @@ export function CreatorRateCardManager() {
                         </h2>
                         <span className="rounded-lg bg-white/5 border border-white/10 px-2.5 py-0.5 text-xs font-mono font-bold text-[#A7ACD9] shrink-0">
                           {money(packageTotal)}
+                        </span>
+                        <span className={`rounded-lg border px-2 py-0.5 text-[10px] font-semibold shrink-0 ${
+                          !slotInfo.isLimited
+                            ? 'border-sky-400/25 bg-sky-500/10 text-sky-300'
+                            : slotInfo.isFull
+                              ? 'border-rose-400/30 bg-rose-500/10 text-rose-300'
+                              : 'border-emerald-400/25 bg-emerald-500/10 text-emerald-300'
+                        }`}>
+                          {slotInfo.isLimited ? slotInfo.label : '∞ Không giới hạn'}
                         </span>
                         {isCollapsed && (
                           <span className="text-[11px] text-slate-400">
@@ -557,6 +615,68 @@ export function CreatorRateCardManager() {
                           đ/lần
                         </span>
                       </div>
+                    </div>
+
+                    <div className="sm:col-span-2 rounded-xl border border-white/10 bg-black/25 p-3.5 space-y-2.5">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <span className="text-[11px] font-semibold text-slate-300">
+                          Tùy biến Slot nhận đơn cho riêng gói này
+                        </span>
+                        <div className="inline-flex rounded-lg border border-white/10 bg-black/40 p-0.5 text-[11px]">
+                          <button
+                            type="button"
+                            onClick={() => updatePackage(item.id, { maxSlots: null })}
+                            className={`rounded-md px-2.5 py-1 font-semibold transition ${
+                              !slotInfo.isLimited
+                                ? 'bg-[#A7ACD9] text-[#1F2335]'
+                                : 'text-slate-400 hover:text-white'
+                            }`}
+                          >
+                            Không giới hạn slot
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => updatePackage(item.id, { maxSlots: slotInfo.maxSlots ?? 3 })}
+                            className={`rounded-md px-2.5 py-1 font-semibold transition ${
+                              slotInfo.isLimited
+                                ? 'bg-[#A7ACD9] text-[#1F2335]'
+                                : 'text-slate-400 hover:text-white'
+                            }`}
+                          >
+                            Giới hạn theo gói
+                          </button>
+                        </div>
+                      </div>
+
+                      {slotInfo.isLimited ? (
+                        <div className="flex flex-wrap items-center gap-3">
+                          <div className="flex items-center gap-2">
+                            <label className="text-[11px] text-slate-400" htmlFor={`pkg-slots-${item.id}`}>
+                              Số đơn tối đa đang mở:
+                            </label>
+                            <input
+                              id={`pkg-slots-${item.id}`}
+                              type="number"
+                              min={0}
+                              max={100}
+                              className="w-20 rounded-lg border border-white/15 bg-black/50 px-2.5 py-1.5 text-xs text-white focus:border-[#A7ACD9] focus:outline-none"
+                              value={slotInfo.maxSlots ?? 0}
+                              onChange={(e) =>
+                                updatePackage(item.id, {
+                                  maxSlots: Math.min(100, Math.max(0, Math.trunc(Number(e.target.value) || 0))),
+                                })
+                              }
+                            />
+                          </div>
+                          <span className={`text-[11px] font-medium ${slotInfo.isFull ? 'text-rose-300' : 'text-emerald-300'}`}>
+                            Đang thực hiện: {slotInfo.activeCount} đơn • {slotInfo.label} (tự hoàn lại khi xong hoặc hủy đơn)
+                          </span>
+                        </div>
+                      ) : (
+                        <p className="text-[11px] text-slate-400">
+                          Gói này không giới hạn số lượng đơn đồng thời (chỉ tắt khi bạn tắt nhận đơn toàn studio).
+                        </p>
+                      )}
                     </div>
                   </div>
 
