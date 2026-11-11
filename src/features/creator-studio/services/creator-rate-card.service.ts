@@ -12,7 +12,24 @@ export type RateCardPackage = {
   extraRevisionPrice?: number;
   sampleUrls?: string[];
   orderCount?: number;
+  maxSlots?: number | null;
+  activeOrderCount?: number;
+  remainingSlots?: number | null;
 };
+
+export function getPackageSlotInfo(pkg: Pick<RateCardPackage, 'maxSlots' | 'activeOrderCount' | 'remainingSlots'>) {
+  const isLimited = pkg.maxSlots !== null && pkg.maxSlots !== undefined;
+  const maxSlots = isLimited ? Math.max(0, pkg.maxSlots as number) : null;
+  const activeCount = pkg.activeOrderCount ?? 0;
+  const remaining = maxSlots !== null ? Math.max(0, pkg.remainingSlots ?? maxSlots - activeCount) : null;
+  const isFull = remaining !== null && remaining <= 0;
+  const label = !isLimited
+    ? 'Không giới hạn slot'
+    : isFull
+      ? `Hết slot (${activeCount}/${maxSlots})`
+      : `Còn ${remaining}/${maxSlots} slot`;
+  return { isLimited, maxSlots, activeCount, remaining, isFull, label };
+}
 
 export const creatorRateCardService = {
   async get(creatorId: string): Promise<RateCardPackage[]> {
@@ -20,6 +37,7 @@ export const creatorRateCardService = {
     if (response.data.error) throw new Error(response.data.error.details?.join(', ') || 'Không thể tải bảng giá.');
     return (response.data.data ?? []).map((pkg) => ({
       ...pkg,
+      maxSlots: pkg.maxSlots ?? null,
       sampleUrls: Array.isArray(pkg.sampleUrls) ? pkg.sampleUrls : [],
       milestones: Array.isArray(pkg.milestones) && pkg.milestones.length > 0
         ? pkg.milestones

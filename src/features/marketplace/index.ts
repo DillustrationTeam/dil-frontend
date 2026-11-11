@@ -3,3 +3,8 @@ export { ArtworkDetail, ArtworkDetailModal } from './components/artwork-detail';
 export { CreatorProfileScreen as CreatorProfile } from './components/creator-profile-screen';
 export { Collections } from './components/collections';
 export { ClientProfile } from './components/client-profile-screen';
+export { SectionEventSpotlight } from './components/section-event-spotlight';
+export { SectionTrendingLeaderboard } from './components/section-trending-leaderboard';
+export { SectionFeaturedCreators } from './components/section-featured-creators';
+export { SectionRecommendedByLikes } from './components/section-recommended-by-likes';
+export { SectionExploreByStyle } from './components/section-explore-by-style';

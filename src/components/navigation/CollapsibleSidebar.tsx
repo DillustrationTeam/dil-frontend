@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React from 'react';
 import Link from 'next/link';
@@ -12,7 +12,6 @@ import {
   ChevronRight,
   Clock,
   CheckCircle,
-  Crown,
   ListChecks,
   MessageSquare,
   Ticket,
@@ -56,10 +55,10 @@ const CLIENT_NAV_SECTIONS: SidebarSection[] = [
     items: [
       { label: 'Tác phẩm đã sở hữu', href: '/client/owned-artworks', icon: Sparkles },
       { label: 'My Commissions', href: '/client/commissions', icon: FolderKanban },
-      { label: 'Bộ sưu tập tranh đấu giá', href: '/collections', icon: Crown },
       { label: 'My Vouchers', href: '/vouchers', icon: Ticket },
       { label: 'My Auctions', href: '/my-auctions', icon: Gavel },
       { label: 'Workroom Chat', href: '/workroom', icon: MessageSquare },
+      { label: 'Forensic Watermark', href: '/forensic', icon: ShieldCheck },
     ],
   },
   {
@@ -113,6 +112,7 @@ const CREATOR_NAV_SECTIONS: SidebarSection[] = [
       { label: 'Event Jury', href: '/creator/events/jury', icon: Gavel },
       { label: 'My Vouchers', href: '/creator/vouchers', icon: Ticket },
       { label: 'Terms & Licensing', href: '/creator/terms', icon: ShieldCheck },
+      { label: 'Forensic Watermark', href: '/forensic', icon: ShieldCheck },
       { label: 'AI Auto-reply', href: '/creator/ai-rules', icon: Bot },
       { label: 'Asset & Presets', href: '/creator/assets', icon: Palette },
     ],

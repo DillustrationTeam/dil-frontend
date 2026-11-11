@@ -1,10 +1,10 @@
-'use client';
+﻿'use client';
 
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
-  BarChart3, Bug,
+  BarChart3,
   Users,
   UserCheck,
   ShieldAlert,
@@ -27,13 +27,6 @@ export const DEFAULT_ADMIN_NAV_SECTIONS: AdminNavSection[] = [
   {
     title: 'Platform Overview',
     items: [
-      {
-        id: 'bug-reports',
-        label: 'Báo cáo sự cố',
-        href: '/admin/bugs',
-        icon: <Bug className="w-4 h-4 shrink-0 text-rose-400" />,
-        materialIcon: 'bug_report',
-      },
       {
         id: 'system-overview',
         label: 'System Overview KPIs',
@@ -131,6 +124,13 @@ export const DEFAULT_ADMIN_NAV_SECTIONS: AdminNavSection[] = [
         href: '/admin/disputes',
         icon: <Gavel className="w-4 h-4 shrink-0" />,
         materialIcon: 'gavel',
+      },
+      {
+        id: 'forensic-watermark',
+        label: 'Forensic Watermark',
+        href: '/admin/forensic',
+        icon: <Shield className="w-4 h-4 shrink-0" />,
+        materialIcon: 'verified_user',
       },
     ],
   },

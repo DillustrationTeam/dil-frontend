@@ -57,10 +57,12 @@ export interface CreatorServiceDto {
 export interface CreatorReviewDto {
   id: string;
   reviewerUserId: string;
+  reviewerName?: string | null;
   rating: number;
   comment?: string | null;
   reviewerReply?: string | null;
   commissionId?: string | null;
+  commissionTitle?: string | null;
   createdAt: string;
 }
 
