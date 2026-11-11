@@ -655,7 +655,7 @@ export function EventHeadJuryScreen({ eventId }: EventHeadJuryScreenProps) {
   const isJudgingPhase = event?.status === 'Judging';
 
   return (
-    <div className="min-h-screen text-[#e4e1e5] space-y-6 pb-16">
+    <div className="mx-auto w-full max-w-7xl px-4 pb-20 pt-6 sm:px-6 lg:pt-8 min-h-screen text-[#e4e1e5] space-y-6">
       {/* Lightbox Modal */}
       {activeSubmission && (
         <JuryArtworkLightbox

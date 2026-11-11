@@ -440,7 +440,7 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
   const eventTitle = event.title;
 
   return (
-    <div className="min-h-screen text-[#e4e1e5] relative pb-16">
+    <div className="mx-auto w-full max-w-7xl px-4 pb-20 pt-6 sm:px-6 lg:pt-8 min-h-screen text-[#e4e1e5] relative">
       {/* Lightbox Modal */}
       {activeSubmission && (
         <JuryArtworkLightbox
