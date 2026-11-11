@@ -174,7 +174,16 @@ export interface EventRequestPayload {
   eventCriteria?: Array<Partial<JuryCriterion>>;
 }
 
+export type SubmissionDisputeCategory =
+  | 'AiArt'
+  | 'Copyright'
+  | 'VoteFraud'
+  | 'RuleViolation'
+  | 'ScoreAppeal'
+  | 'Other';
+
 export interface CreateSubmissionDisputeRequest {
+  category?: SubmissionDisputeCategory | string;
   reason: string;
   description?: string;
   evidenceUrls?: string[];

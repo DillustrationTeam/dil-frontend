@@ -12,6 +12,23 @@ import {
 } from 'lucide-react';
 import type { SubmissionDisputeDto } from '@/features/admin/types/dispute-arbitration.types';
 
+export function formatDisputeCategory(category?: string | null): string {
+  switch (category) {
+    case 'AiArt':
+      return 'AI Art';
+    case 'Copyright':
+      return 'Copyright';
+    case 'VoteFraud':
+      return 'Vote Fraud';
+    case 'RuleViolation':
+      return 'Rule Violation';
+    case 'ScoreAppeal':
+      return 'Score Appeal';
+    default:
+      return 'Other';
+  }
+}
+
 export function formatDisputeCode(id: string): string {
   if (!id) return 'DSP-000';
   if (id.startsWith('dsp-')) return id.toUpperCase();
@@ -171,15 +188,20 @@ export function DisputeQueueTable({
                       </div>
                     </td>
 
-                    {/* 4. Priority */}
+                    {/* 4. Priority & Category */}
                     <td className="py-3.5 px-4">
-                      <span
-                        className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold border ${getPriorityBadge(
-                          item.priority
-                        )}`}
-                      >
-                        {item.priority}
-                      </span>
+                      <div className="flex flex-col items-start gap-1">
+                        <span
+                          className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold border ${getPriorityBadge(
+                            item.priority
+                          )}`}
+                        >
+                          {item.priority}
+                        </span>
+                        <span className="text-[10px] text-[#A7ACD9] font-medium">
+                          {formatDisputeCategory(item.category)}
+                        </span>
+                      </div>
                     </td>
 
                     {/* 5. Status */}

@@ -13,7 +13,7 @@ import {
   FileText,
 } from 'lucide-react';
 import type { SubmissionDisputeDto } from '@/features/admin/types/dispute-arbitration.types';
-import { formatDisputeCode } from './dispute-queue-table';
+import { formatDisputeCategory, formatDisputeCode } from './dispute-queue-table';
 import { createPortal } from 'react-dom';
 
 interface DisputeInspectionPanelProps {
@@ -103,19 +103,26 @@ export function DisputeInspectionPanel({
       <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
         {/* Left Column: Artwork Preview & Dispute Details */}
         <div className="md:col-span-6 glass-container bg-[#161926]/85 backdrop-blur-[32px] border border-white/10 rounded-[28px] p-6 space-y-5">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-2 flex-wrap">
             <span className="text-[10px] font-mono text-[#8A8FA9] uppercase font-bold tracking-wider block">
               Contest Artwork Evidence
             </span>
-            <span
-              className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
-                dispute.priority === 'High'
-                  ? 'bg-red-500/20 text-red-300 border-red-500/30'
-                  : 'bg-amber-500/20 text-amber-300 border-amber-500/30'
-              }`}
-            >
-              {dispute.priority} Priority Claim
-            </span>
+            <div className="flex items-center gap-1.5">
+              {dispute.category && (
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold border border-brand-periwinkle/30 bg-brand-periwinkle/15 text-brand-periwinkle">
+                  {formatDisputeCategory(dispute.category)}
+                </span>
+              )}
+              <span
+                className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
+                  dispute.priority === 'High'
+                    ? 'bg-red-500/20 text-red-300 border-red-500/30'
+                    : 'bg-amber-500/20 text-amber-300 border-amber-500/30'
+                }`}
+              >
+                {dispute.priority} Priority Claim
+              </span>
+            </div>
           </div>
 
           {/* Artwork Image Container */}

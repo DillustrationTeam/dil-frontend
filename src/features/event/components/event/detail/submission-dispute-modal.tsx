@@ -4,7 +4,44 @@ import React, { useState } from 'react';
 import { X, AlertTriangle, ShieldAlert, Loader2, Link as LinkIcon, Plus, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { eventSubmissionService } from '@/features/event/services/event-submission.service';
-import type { EventSubmissionDto } from '@/features/event/types/event.types';
+import type { EventSubmissionDto, SubmissionDisputeCategory } from '@/features/event/types/event.types';
+
+const DISPUTE_CATEGORY_OPTIONS: Array<{
+  value: SubmissionDisputeCategory;
+  label: string;
+  hint: string;
+}> = [
+  {
+    value: 'AiArt',
+    label: 'AI-Generated Art',
+    hint: 'Suspected undisclosed AI usage',
+  },
+  {
+    value: 'Copyright',
+    label: 'Copyright / Plagiarism',
+    hint: 'Traced, stolen, or unauthorized artwork',
+  },
+  {
+    value: 'VoteFraud',
+    label: 'Vote Manipulation',
+    hint: 'Suspicious voting / bot activity',
+  },
+  {
+    value: 'RuleViolation',
+    label: 'Contest Rule Violation',
+    hint: 'Off-theme, NSFW, or format breach',
+  },
+  {
+    value: 'ScoreAppeal',
+    label: 'Judging / Score Concern',
+    hint: 'Scoring discrepancy or fairness issue',
+  },
+  {
+    value: 'Other',
+    label: 'Other Issue',
+    hint: 'Any other dispute not listed above',
+  },
+];
 
 interface SubmissionDisputeModalProps {
   submission: EventSubmissionDto;
@@ -19,7 +56,7 @@ export function SubmissionDisputeModal({
 }: SubmissionDisputeModalProps) {
   const [reason, setReason] = useState('');
   const [description, setDescription] = useState('');
-  const [priority, setPriority] = useState<'Low' | 'Medium' | 'High'>('Medium');
+  const [category, setCategory] = useState<SubmissionDisputeCategory>('Copyright');
   const [evidenceInputs, setEvidenceInputs] = useState<string[]>(['']);
   const [submitting, setSubmitting] = useState(false);
 
@@ -51,10 +88,10 @@ export function SubmissionDisputeModal({
     setSubmitting(true);
     try {
       await eventSubmissionService.createDispute(submission.id, {
+        category,
         reason: reason.trim(),
         description: description.trim() || undefined,
         evidenceUrls: validUrls.length > 0 ? validUrls : undefined,
-        priority,
       });
 
       toast.success('Dispute reported successfully. The contest moderators and jury will review this submission.');
@@ -145,26 +182,39 @@ export function SubmissionDisputeModal({
             />
           </div>
 
-          {/* Priority */}
+          {/* Dispute Content Category (server derives priority automatically) */}
           <div>
-            <label className="mb-1.5 block text-xs font-semibold text-white">Priority</label>
-            <div className="flex items-center gap-2">
-              {(['Low', 'Medium', 'High'] as const).map((p) => (
-                <button
-                  type="button"
-                  key={p}
-                  onClick={() => setPriority(p)}
-                  className={`rounded-xl px-3 py-1.5 text-xs font-semibold border transition cursor-pointer ${
-                    priority === p
-                      ? p === 'High'
-                        ? 'border-rose-500/50 bg-rose-500/20 text-rose-300'
-                        : 'border-brand-periwinkle bg-brand-periwinkle/20 text-brand-periwinkle'
-                      : 'border-white/10 bg-white/5 text-[#8A8FA9] hover:bg-white/10 hover:text-white'
-                  }`}
-                >
-                  {p}
-                </button>
-              ))}
+            <div className="flex items-center justify-between gap-2 mb-1.5">
+              <label className="block text-xs font-semibold text-white">
+                Dispute Category <span className="text-rose-400">*</span>
+              </label>
+              <span className="text-[10px] text-[#8A8FA9]">
+                Priority is auto-assigned by category
+              </span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {DISPUTE_CATEGORY_OPTIONS.map((opt) => {
+                const active = category === opt.value;
+                return (
+                  <button
+                    type="button"
+                    key={opt.value}
+                    onClick={() => setCategory(opt.value)}
+                    className={`rounded-xl px-3 py-2 text-left border transition cursor-pointer ${
+                      active
+                        ? 'border-brand-periwinkle bg-brand-periwinkle/20 text-white'
+                        : 'border-white/10 bg-white/5 text-[#8A8FA9] hover:bg-white/10 hover:text-white'
+                    }`}
+                  >
+                    <span className={`block text-xs font-semibold ${active ? 'text-brand-periwinkle' : 'text-white'}`}>
+                      {opt.label}
+                    </span>
+                    <span className="block text-[10px] text-[#8A8FA9] mt-0.5 line-clamp-1">
+                      {opt.hint}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           </div>
 

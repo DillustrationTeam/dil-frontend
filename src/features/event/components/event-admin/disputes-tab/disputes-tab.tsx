@@ -93,7 +93,7 @@ export function DisputesTab() {
           eventId: isGuid && targetEventId !== 'all' ? resolvedGuid : undefined,
           status: statusFilter !== 'All' ? statusFilter : undefined,
           page: 1,
-          pageSize: 50,
+          pageSize: 100,
         });
 
         if (res.items) {
@@ -118,6 +118,21 @@ export function DisputesTab() {
     })();
   }, [selectedEventId, statusFilter, loadDisputes]);
 
+  // Reload queue when admin returns to this browser tab/window
+  useEffect(() => {
+    const handleRefreshOnFocus = () => {
+      if (document.visibilityState === 'visible') {
+        void loadDisputes(selectedEventId);
+      }
+    };
+    window.addEventListener('focus', handleRefreshOnFocus);
+    document.addEventListener('visibilitychange', handleRefreshOnFocus);
+    return () => {
+      window.removeEventListener('focus', handleRefreshOnFocus);
+      document.removeEventListener('visibilitychange', handleRefreshOnFocus);
+    };
+  }, [selectedEventId, loadDisputes]);
+
   // 1. Contest-scoped disputes (for KPI stats & filtering)
   const contestDisputes = useMemo(() => {
     if (!selectedEventId || selectedEventId === 'all') {
@@ -140,8 +155,9 @@ export function DisputesTab() {
         const matchTitle = (item.submissionTitle || '').toLowerCase().includes(q);
         const matchEvent = (item.eventTitle || '').toLowerCase().includes(q);
         const matchReason = (item.reason || '').toLowerCase().includes(q);
+        const matchCategory = (item.category || '').toLowerCase().includes(q);
         const matchReporter = (item.raisedByName || '').toLowerCase().includes(q);
-        return matchCode || matchTitle || matchEvent || matchReason || matchReporter;
+        return matchCode || matchTitle || matchEvent || matchReason || matchCategory || matchReporter;
       }
       return true;
     });
