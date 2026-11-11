@@ -153,7 +153,7 @@ export function DisputeQueueTable({
                             {item.submissionTitle || 'Untitled Artwork'}
                           </p>
                           <span className="text-[10px] text-brand-periwinkle font-mono block mt-0.5">
-                            SUB-{item.submissionId.slice(0, 8)}
+                            {item.submissionId ? `SUB-${item.submissionId.slice(0, 8)}` : 'Withdrawn entry'}
                           </span>
                         </div>
                       </div>

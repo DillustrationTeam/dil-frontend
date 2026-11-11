@@ -148,7 +148,7 @@ export interface SubmissionDisputeDto {
   id: string;
   eventId: string;
   eventTitle?: string | null;
-  submissionId: string;
+  submissionId?: string | null;
   submissionTitle?: string | null;
   artworkImageUrl?: string | null;
   raisedById: string;

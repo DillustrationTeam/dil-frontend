@@ -213,11 +213,7 @@ function EventSubmissionModalInner({
         finalArtworkId = selectedArtwork.id;
         finalImageUrl = selectedArtwork.imageUrl;
       } else if (localFile) {
-        try {
-          finalImageUrl = await creatorProfileService.uploadArtworkImage(localFile);
-        } catch {
-          finalImageUrl = localPreviewUrl || 'https://images.unsplash.com/photo-1578632767115-351597cf2477?q=80&w=1200';
-        }
+        finalImageUrl = await creatorProfileService.uploadArtworkImage(localFile);
       } else if (isEditing && existingSubmission) {
         finalArtworkId = existingSubmission.artworkId;
         finalImageUrl = existingSubmission.artworkImageUrl || '';

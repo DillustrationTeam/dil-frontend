@@ -43,6 +43,7 @@ import {
 import { ArtworkActions } from './artwork-actions';
 import { ProtectedArtworkLightbox, ProtectedArtworkViewer } from './protected-artwork-viewer';
 import { useArtworkComments } from './use-artwork-comments';
+import { useAuthStore } from '@/store/use-auth-store';
 
 const DEFAULT_THUMB =
   'https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?auto=format&fit=crop&w=400&q=80';
@@ -91,6 +92,7 @@ function ArtworkDetailContent({
   mode: 'page' | 'modal';
   onClose?: () => void;
 }) {
+  const currentUserId = useAuthStore((state) => state.user?.id);
   const [activeId, setActiveId] = useState(id);
   const [artwork, setArtwork] = useState<MarketplaceArtwork | null>(null);
   const [creatorProfile, setCreatorProfile] = useState<CreatorProfileDto | null>(null);
@@ -115,7 +117,6 @@ function ArtworkDetailContent({
       .then(async (detail) => {
         if (!active) return;
         const art = detail.artwork;
-        setArtwork(art);
 
         const creatorId = art.creatorProfileId;
         const [profileRes, ratesRes, reviewsRes, allArtworksRes, provRes] = await Promise.all([
@@ -126,6 +127,7 @@ function ArtworkDetailContent({
           auctionService.getProvenance(activeId).catch(() => null),
         ]);
         if (!active) return;
+        setArtwork(art);
         setCreatorProfile(profileRes);
         setRates(ratesRes);
         setReviews(reviewsRes);
@@ -177,8 +179,11 @@ function ArtworkDetailContent({
   const pkgRevisions =
     matchedPkg?.milestones?.[0]?.maxRevisions ?? matchedPkg?.maxRevisions ?? 3;
   const isExclusive = Boolean(provenance?.isCurrentOwnerCollector);
+  const isOwnArtwork = Boolean(
+    currentUserId && creatorProfile?.userId && currentUserId === creatorProfile.userId
+  );
   const canCommission =
-    creatorProfile?.isAcceptingOrders !== false && !(pkgSlot?.isFull ?? false);
+    !isOwnArtwork && creatorProfile?.isAcceptingOrders !== false && !(pkgSlot?.isFull ?? false);
 
   const handleShare = async () => {
     const shareUrl =
@@ -504,72 +509,84 @@ function ArtworkDetailContent({
         )}
 
         {/* 3. Gói đặt vẽ áp dụng */}
-        <div className="py-4">
-          {matchedPkg ? (
-            <div className="space-y-3 rounded-[14px] border border-[#b3b7ee]/25 bg-[#1e2230] p-4">
-              <div className="flex items-start justify-between gap-2.5">
-                <div className="flex min-w-0 items-center gap-2">
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#b3b7ee]/15 text-[#b3b7ee]">
-                    <Layers className="h-3.5 w-3.5" />
-                  </span>
-                  <span className="text-[13.5px] font-semibold leading-snug text-white">
-                    {matchedPkg.name}
+        {(matchedPkg || !isOwnArtwork) && (
+          <div className="py-4">
+            {matchedPkg ? (
+              <div className="space-y-3 rounded-[14px] border border-[#b3b7ee]/25 bg-[#1e2230] p-4">
+                <div className="flex items-start justify-between gap-2.5">
+                  <div className="flex min-w-0 items-center gap-2">
+                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#b3b7ee]/15 text-[#b3b7ee]">
+                      <Layers className="h-3.5 w-3.5" />
+                    </span>
+                    <span className="text-[13.5px] font-semibold leading-snug text-white">
+                      {matchedPkg.name}
+                    </span>
+                  </div>
+                  <span className="shrink-0 text-sm font-bold tabular-nums text-[#b3b7ee]">
+                    Từ {formatVnd(matchedPkg.price)}
                   </span>
                 </div>
-                <span className="shrink-0 text-sm font-bold tabular-nums text-[#b3b7ee]">
-                  Từ {formatVnd(matchedPkg.price)}
-                </span>
-              </div>
 
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 border-t border-white/[0.07] pt-2.5 text-xs tabular-nums text-[#d1d5db]">
-                <span className="inline-flex items-center gap-1.5" title="Số giai đoạn bàn giao & giải ngân">
-                  <Layers className="h-3.5 w-3.5 text-[#9ca3af]" />
-                  <span>{matchedPkg.milestones?.length || 1} cột mốc</span>
-                </span>
-                <span className="inline-flex items-center gap-1.5" title="Số lần chỉnh sửa miễn phí mỗi mốc">
-                  <RotateCcw className="h-3.5 w-3.5 text-[#9ca3af]" />
-                  <span>{pkgRevisions} lần sửa</span>
-                </span>
-                <span className="inline-flex items-center gap-1.5" title="Định dạng tệp bàn giao theo thỏa thuận">
-                  <ImageIcon className="h-3.5 w-3.5 text-[#9ca3af]" />
-                  <span>File theo yêu cầu</span>
-                </span>
-              </div>
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 border-t border-white/[0.07] pt-2.5 text-xs tabular-nums text-[#d1d5db]">
+                  <span className="inline-flex items-center gap-1.5" title="Số giai đoạn bàn giao & giải ngân">
+                    <Layers className="h-3.5 w-3.5 text-[#9ca3af]" />
+                    <span>{matchedPkg.milestones?.length || 1} cột mốc</span>
+                  </span>
+                  <span className="inline-flex items-center gap-1.5" title="Số lần chỉnh sửa miễn phí mỗi mốc">
+                    <RotateCcw className="h-3.5 w-3.5 text-[#9ca3af]" />
+                    <span>{pkgRevisions} lần sửa</span>
+                  </span>
+                  <span className="inline-flex items-center gap-1.5" title="Định dạng tệp bàn giao theo thỏa thuận">
+                    <ImageIcon className="h-3.5 w-3.5 text-[#9ca3af]" />
+                    <span>File theo yêu cầu</span>
+                  </span>
+                </div>
 
+                {isOwnArtwork ? (
+                  <Link
+                    href="/creator/services"
+                    onClick={onClose}
+                    className="inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-[10px] border border-white/15 bg-white/5 px-3 text-[13px] font-semibold text-white transition hover:bg-white/10"
+                  >
+                    <span>Chỉnh sửa gói</span>
+                  </Link>
+                ) : (
+                  <button
+                    type="button"
+                    disabled={!canCommission}
+                    onClick={() => setIsCommissionOpen(true)}
+                    className="inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-[10px] bg-[#b3b7ee] px-3 text-[13px] font-semibold tabular-nums text-[#161923] transition hover:bg-[#c5c8f5] disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <span>
+                      {creatorProfile?.isAcceptingOrders === false
+                        ? 'Creator đang tạm ngưng nhận đơn'
+                        : pkgSlot?.isFull
+                          ? 'Gói này đã hết slot'
+                          : pkgSlot?.isLimited
+                            ? `Đặt vẽ gói này (${pkgSlot.remaining}/${pkgSlot.maxSlots} slot)`
+                            : 'Đặt vẽ gói này (∞ Không giới hạn)'}
+                    </span>
+                    {canCommission && <ArrowRight className="h-3.5 w-3.5" />}
+                  </button>
+                )}
+              </div>
+            ) : (
               <button
                 type="button"
-                disabled={!canCommission}
+                disabled={creatorProfile?.isAcceptingOrders === false}
                 onClick={() => setIsCommissionOpen(true)}
-                className="inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-[10px] bg-[#b3b7ee] px-3 text-[13px] font-semibold tabular-nums text-[#161923] transition hover:bg-[#c5c8f5] disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-[10px] bg-[#b3b7ee] px-4 text-[13px] font-semibold text-[#161923] transition hover:bg-[#c5c8f5] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <span>
                   {creatorProfile?.isAcceptingOrders === false
                     ? 'Creator đang tạm ngưng nhận đơn'
-                    : pkgSlot?.isFull
-                      ? 'Gói này đã hết slot'
-                      : pkgSlot?.isLimited
-                        ? `Đặt vẽ gói này (${pkgSlot.remaining}/${pkgSlot.maxSlots} slot)`
-                        : 'Đặt vẽ gói này (∞ Không giới hạn)'}
+                    : 'Đặt vẽ với họa sĩ này'}
                 </span>
-                {canCommission && <ArrowRight className="h-3.5 w-3.5" />}
+                {creatorProfile?.isAcceptingOrders !== false && <ArrowRight className="h-3.5 w-3.5" />}
               </button>
-            </div>
-          ) : (
-            <button
-              type="button"
-              disabled={creatorProfile?.isAcceptingOrders === false}
-              onClick={() => setIsCommissionOpen(true)}
-              className="inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-[10px] bg-[#b3b7ee] px-4 text-[13px] font-semibold text-[#161923] transition hover:bg-[#c5c8f5] disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              <span>
-                {creatorProfile?.isAcceptingOrders === false
-                  ? 'Creator đang tạm ngưng nhận đơn'
-                  : 'Đặt vẽ với họa sĩ này'}
-              </span>
-              {creatorProfile?.isAcceptingOrders !== false && <ArrowRight className="h-3.5 w-3.5" />}
-            </button>
-          )}
-        </div>
+            )}
+          </div>
+        )}
 
         {/* 4. Làm rõ bản quyền */}
         <div className="flex flex-wrap items-center justify-between gap-2 py-3.5 text-xs">
@@ -643,7 +660,7 @@ function ArtworkDetailContent({
         )}
       </aside>
 
-      {isCommissionOpen && (
+      {!isOwnArtwork && isCommissionOpen && (
         <CreateCommissionModal
           creatorId={artwork.creatorProfileId}
           creatorName={creatorDisplay}
