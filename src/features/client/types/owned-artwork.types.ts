@@ -14,7 +14,6 @@ export interface OwnedArtworkDto {
   acquiredAt: string;
   price?: number | null;
   certificateNumber?: string | null;
-  hasMasterFile: boolean;
   downloadUrl?: string | null;
   exclusiveBadge?: string | null;
 }

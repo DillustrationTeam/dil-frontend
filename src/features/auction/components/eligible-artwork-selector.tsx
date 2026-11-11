@@ -7,7 +7,7 @@ import type { EligibleArtworkDto } from '../types/auction.types';
 
 export interface EligibleArtworkSelectorProps {
   selectedArtworkId: string;
-  onSelect: (artworkId: string) => void;
+  onSelect: (artworkId: string, artwork?: EligibleArtworkDto) => void;
   reloadTrigger?: number;
 }
 
@@ -104,7 +104,7 @@ export function EligibleArtworkSelector({ selectedArtworkId, onSelect, reloadTri
                   {selectedArtwork.thumbnailUrl || selectedArtwork.imageUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
-                      src={selectedArtwork.thumbnailUrl || selectedArtwork.imageUrl}
+                      src={selectedArtwork.thumbnailUrl || selectedArtwork.imageUrl || '/weblogo.png'}
                       alt={selectedArtwork.title}
                       className="size-full object-cover"
                     />
@@ -140,13 +140,13 @@ export function EligibleArtworkSelector({ selectedArtworkId, onSelect, reloadTri
                     aria-selected={isSelected}
                     tabIndex={0}
                     onClick={() => {
-                      onSelect(item.artworkId);
+                      onSelect(item.artworkId, item);
                       setIsOpen(false);
                     }}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault();
-                        onSelect(item.artworkId);
+                        onSelect(item.artworkId, item);
                         setIsOpen(false);
                       }
                     }}

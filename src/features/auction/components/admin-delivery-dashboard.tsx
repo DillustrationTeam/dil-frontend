@@ -68,6 +68,18 @@ const statusBadgeConfig: Record<
     text: 'text-rose-300',
     border: 'border-rose-500/30',
   },
+  Resolved: {
+    label: 'Khiếu nại đã đóng',
+    bg: 'bg-amber-500/10',
+    text: 'text-amber-300',
+    border: 'border-amber-500/30',
+  },
+  DigitalAccepted: {
+    label: 'Đã nhận bản điện tử',
+    bg: 'bg-emerald-500/10',
+    text: 'text-emerald-300',
+    border: 'border-emerald-500/30',
+  },
   Active: {
     label: 'Đang đấu giá',
     bg: 'bg-purple-500/10',
@@ -87,6 +99,11 @@ export function AdminDeliveryDashboard() {
 
   // Proof Modal
   const [previewImage, setPreviewImage] = useState<{ url: string; title: string } | null>(null);
+
+  // Modal phân xử khiếu nại
+  const [resolveTarget, setResolveTarget] = useState<PhysicalDeliveryListItemDto | null>(null);
+  const [resolveNote, setResolveNote] = useState('');
+  const [resolving, setResolving] = useState(false);
 
   const fetchDeliveries = useCallback(async () => {
     setLoading(true);
@@ -130,6 +147,21 @@ export function AdminDeliveryDashboard() {
       ignore = true;
     };
   }, [statusFilter]);
+
+  async function handleResolve(decision: 'release' | 'refund' | 'close') {
+    if (!resolveTarget) return;
+    setResolving(true);
+    try {
+      await auctionService.resolveDeliveryDispute(resolveTarget.auctionId, decision, resolveNote.trim() || null);
+      setResolveTarget(null);
+      setResolveNote('');
+      await fetchDeliveries();
+    } catch (err) {
+      setError(auctionError(err) || 'Không phân xử được khiếu nại.');
+    } finally {
+      setResolving(false);
+    }
+  }
 
   // KPIs
   const totalCount = items.length;
@@ -291,6 +323,10 @@ export function AdminDeliveryDashboard() {
               {filteredItems.map((item) => {
                 const delivery = item.delivery;
                 const statusKey = delivery?.status ?? item.auctionStatus;
+                const paidEarly =
+                  item.auctionStatus === 'Completed' &&
+                  delivery?.status !== 'Delivered' &&
+                  delivery?.status !== 'Cancelled';
                 const badge = statusBadgeConfig[statusKey] ?? {
                   label: statusKey,
                   bg: 'bg-white/10',
@@ -374,6 +410,7 @@ export function AdminDeliveryDashboard() {
                       >
                         <Truck size={10} />
                         {badge.label}
+                        {paidEarly && <span className="text-[10px] font-normal text-amber-300"> · đã giải ngân trước</span>}
                       </span>
                       <div className="flex items-center gap-1 text-[11px] text-outline">
                         <ShieldCheck size={12} className="text-emerald-400" />
@@ -421,13 +458,27 @@ export function AdminDeliveryDashboard() {
 
                     {/* Thao tác */}
                     <td className="px-4 py-3.5 text-right">
-                      <Link
-                        href={`/auctions/${item.auctionId}`}
-                        className="inline-flex items-center gap-1 rounded-xl bg-white/10 px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-amber-400 hover:text-brand-navy transition"
-                      >
-                        Chi tiết
-                        <ArrowUpRight size={13} />
-                      </Link>
+                      <div className="flex items-center justify-end gap-2">
+                        {(item.delivery?.status === 'Disputed' || item.auctionStatus === 'Disputed') && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setResolveTarget(item);
+                              setResolveNote(item.delivery?.disputeReason ?? '');
+                            }}
+                            className="inline-flex items-center gap-1 rounded-xl border border-rose-400/40 bg-rose-500/15 px-3 py-1.5 text-[11px] font-bold text-rose-200 hover:bg-rose-500/25 transition"
+                          >
+                            Phân xử
+                          </button>
+                        )}
+                        <Link
+                          href={`/auctions/${item.auctionId}`}
+                          className="inline-flex items-center gap-1 rounded-xl bg-white/10 px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-amber-400 hover:text-brand-navy transition"
+                        >
+                          Chi tiết
+                          <ArrowUpRight size={13} />
+                        </Link>
+                      </div>
                     </td>
                   </tr>
                 );
@@ -437,10 +488,18 @@ export function AdminDeliveryDashboard() {
         </div>
       )}
 
-      {/* Modal xem phóng to ảnh biên lai / bưu kiện */}
+      {/* Modal xem phóng to ảnh biên lai / bưu kiện.
+          z-[80] để luôn nổi trên modal phân xử (z-50): nếu cùng z-50 thì modal
+          phân xử render sau sẽ đè lên, bấm ảnh bằng chứng không thấy gì. */}
       {previewImage && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
-          <div className="relative max-w-2xl w-full rounded-2xl border border-white/20 bg-brand-navy p-5 space-y-3">
+        <div
+          className="fixed inset-0 z-[80] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
+          onClick={() => setPreviewImage(null)}
+        >
+          <div
+            className="relative max-w-2xl w-full rounded-2xl border border-white/20 bg-brand-navy p-5 space-y-3"
+            onClick={(event) => event.stopPropagation()}
+          >
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
               <h4 className="font-semibold text-white text-sm truncate">{previewImage.title}</h4>
               <button
@@ -471,6 +530,109 @@ export function AdminDeliveryDashboard() {
               >
                 Mở ảnh gốc trong tab mới <ExternalLink size={12} />
               </a>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal phân xử khiếu nại giao nhận */}
+      {resolveTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 backdrop-blur-md">
+          <div className="w-full max-w-lg rounded-3xl border border-rose-400/40 bg-[#1F2335] p-6 shadow-2xl">
+            <h3 className="font-h1 text-base font-bold text-rose-200">Phân xử khiếu nại giao nhận</h3>
+            <p className="mt-1 text-xs text-on-surface-variant">
+              Phiên <strong className="text-white">{resolveTarget.artworkTitle}</strong> — ký quỹ
+              <strong className="text-white"> {formatVnd(resolveTarget.finalPrice ?? resolveTarget.currentPrice)}</strong> đang bị đóng băng.
+            </p>
+
+            {resolveTarget.delivery?.disputeReason && (
+              <p className="mt-3 rounded-xl border border-white/10 bg-black/25 p-3 text-xs text-on-surface-variant">
+                Lý do người mua nêu: <span className="text-white">{resolveTarget.delivery.disputeReason}</span>
+              </p>
+            )}
+
+            {/* Ký quỹ đã giải ngân: không còn quỹ để hoàn, chỉ đóng được hồ sơ.
+                Nói rõ trước khi Admin bấm, để không tưởng hệ thống lỗi. */}
+            {resolveTarget.escrowStatus === 'Released' && (
+              <p className="mt-3 rounded-xl border border-amber-400/40 bg-amber-400/10 p-3 text-xs text-amber-200">
+                <strong>Ký quỹ đã giải ngân cho người bán.</strong> Sàn không thu hồi được khoản tiền này nữa,
+                nên chỉ có thể <strong>đóng hồ sơ</strong>. Cả người mua và người bán sẽ nhận thông báo, người mua
+                được mở quyền đánh giá người bán.
+              </p>
+            )}
+
+            {resolveTarget.delivery?.disputeEvidenceUrl && (
+              <div className="mt-3 rounded-xl border border-rose-400/30 bg-rose-500/10 p-3">
+                <p className="text-[11px] font-semibold text-rose-200">Ảnh bằng chứng người mua tải lên:</p>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {resolveTarget.delivery.disputeEvidenceUrl
+                    .split(',')
+                    .map((url) => url.trim())
+                    .filter(Boolean)
+                    .map((url, idx) => (
+                      <button
+                        key={url}
+                        type="button"
+                        onClick={() => setPreviewImage({ url, title: `Bằng chứng khiếu nại #${idx + 1}` })}
+                        className="relative h-20 w-20 cursor-zoom-in overflow-hidden rounded-lg border border-white/20 transition hover:border-rose-300 hover:ring-2 hover:ring-rose-400/40"
+                      >
+                        <Image src={url} alt={`Bằng chứng ${idx + 1}`} fill unoptimized className="object-cover" />
+                      </button>
+                    ))}
+                </div>
+              </div>
+            )}
+
+            <label className="mt-4 block text-[11px] font-semibold text-on-surface-variant">
+              Ghi chú phân xử (lưu vào nhật ký)
+            </label>
+            <textarea
+              value={resolveNote}
+              onChange={(e) => setResolveNote(e.target.value)}
+              rows={3}
+              placeholder="Ví dụ: Ảnh biên lai cho thấy tranh nguyên vẹn, bác khiếu nại."
+              className="mt-1 w-full rounded-xl border border-white/10 bg-white/5 p-3 text-xs text-white placeholder-white/30 focus:border-rose-400 focus:outline-none"
+            />
+
+            <div className="mt-5 flex flex-wrap items-center justify-end gap-2 border-t border-white/10 pt-4">
+              <button
+                type="button"
+                onClick={() => {
+                  setResolveTarget(null);
+                  setResolveNote('');
+                }}
+                disabled={resolving}
+                className="rounded-xl px-4 py-2 text-xs font-semibold text-outline hover:text-white transition disabled:opacity-50"
+              >
+                Đóng
+              </button>
+              <button
+                type="button"
+                onClick={() => handleResolve('release')}
+                disabled={resolving}
+                className="rounded-xl border border-emerald-400/40 bg-emerald-500/15 px-4 py-2 text-xs font-bold text-emerald-200 hover:bg-emerald-500/25 transition disabled:opacity-50"
+              >
+                Bác khiếu nại — giải ngân cho người bán
+              </button>
+              {resolveTarget.escrowStatus === 'Released' ? (
+                <button
+                  type="button"
+                  onClick={() => handleResolve('close')}
+                  disabled={resolving}
+                  className="rounded-xl bg-rose-500 px-4 py-2 text-xs font-bold text-white hover:bg-rose-400 transition disabled:opacity-50"
+                >
+                  Đóng khiếu nại — không hoàn được tiền
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => handleResolve('refund')}
+                  disabled={resolving}
+                  className="rounded-xl bg-rose-500 px-4 py-2 text-xs font-bold text-white hover:bg-rose-400 transition disabled:opacity-50"
+                >
+                  Chấp nhận — hoàn tiền cho người mua
+                </button>
+              )}
             </div>
           </div>
         </div>

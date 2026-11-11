@@ -324,7 +324,7 @@ export default function AdminAuctionsPage() {
                           <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-xl border border-white/10 bg-black/40">
                             {auction.artwork?.thumbnailUrl || auction.artwork?.imageUrl ? (
                               <img
-                                src={auction.artwork.thumbnailUrl || auction.artwork.imageUrl || ''}
+                                src={auction.artwork.thumbnailUrl || auction.artwork.imageUrl || '/weblogo.png'}
                                 alt={auction.artwork?.artworkTitle || 'Artwork'}
                                 className="h-full w-full object-cover"
                               />
@@ -358,7 +358,7 @@ export default function AdminAuctionsPage() {
                       {/* Current Price */}
                       <td className="px-5 py-4 whitespace-nowrap">
                         <span className="font-mono text-sm font-bold text-[#A7ACD9]">
-                          {money(auction.currentPrice)}
+                          {auction.finalPrice ? `${money(auction.finalPrice)} (giá chốt)` : money(auction.currentPrice)}
                         </span>
                       </td>
 
@@ -462,7 +462,7 @@ export default function AdminAuctionsPage() {
               <div className="flex justify-between">
                 <span className="text-[#919099]">Giá hiện tại:</span>
                 <span className="font-mono font-bold text-[#A7ACD9]">
-                  {money(actionAuction.currentPrice)}
+                  {actionAuction.finalPrice ? `${money(actionAuction.finalPrice)} (giá chốt)` : money(actionAuction.currentPrice)}
                 </span>
               </div>
               <div className="flex justify-between">

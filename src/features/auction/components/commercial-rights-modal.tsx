@@ -39,7 +39,7 @@ export function CommercialRightsModal({
       return {
         auctionId: 'DRAFT',
         artworkId: 'DRAFT',
-        artworkTitle: artworkTitle || 'Tác phẩm đang mở phiên đấu giá',
+        artworkTitle: artworkTitle || 'Bức tranh đang mở phiên đấu giá',
         artworkImageUrl: null,
         certificateNumber: 'DIL-DEED-DRAFT-STANDARD',
         verificationCode: 'VERIFY-DRAFT-SPEC',
@@ -50,7 +50,7 @@ export function CommercialRightsModal({
         ownerName: 'Người thắng cuộc đấu giá (Collector / Winner)',
         finalPrice: 0,
         settledAt: new Date().toISOString(),
-        scopeOfRights: '1-of-1 Exclusive Commercial Exploitation & Derivative Rights',
+        scopeOfRights: 'Exclusive Commercial Exploitation & Derivative Rights',
         commercialExploitationAllowed: true,
         vtuberAndGameDevAllowed: true,
         resellAllowed: true,
@@ -134,7 +134,7 @@ export function CommercialRightsModal({
                 <span className="text-[10px] text-outline font-mono">ID: {deed.ownerId}</span>
               </div>
               <div className="sm:col-span-2 pt-2 border-t border-white/5 flex flex-wrap justify-between items-center text-xs">
-                <span>Tác phẩm: <strong className="text-white">{deed.artworkTitle}</strong></span>
+                <span>Tranh: <strong className="text-white">{deed.artworkTitle}</strong></span>
                 <span className="text-amber-400 font-mono font-bold">
                   {deed.finalPrice > 0 ? `Giá chốt: ${formatVnd(deed.finalPrice)}` : 'Giá chốt: Xác định khi phiên kết thúc'}
                 </span>
@@ -151,9 +151,10 @@ export function CommercialRightsModal({
                 <div className="flex items-start gap-2.5">
                   <CheckCircle2 size={16} className="text-emerald-400 shrink-0 mt-0.5" />
                   <div>
-                    <strong className="text-white">Quyền khai thác thương mại 100%:</strong>
+                    <strong className="text-white">Quyền sở hữu bức tranh (quyền tài sản 100%):</strong>
                     <p className="text-outline mt-0.5">
-                      Bên nhận chuyển giao được toàn quyền sử dụng hình ảnh, thiết kế nhân vật trong các sản phẩm thương mại sinh lời không giới hạn doanh thu.
+                      Bên nhận chuyển giao trở thành chủ sở hữu duy nhất của bức tranh: toàn quyền đối với bản số độc bản,
+                      và đối với bản tranh gốc vật lý nếu phiên đấu giá có kèm bản vật lý.
                     </p>
                   </div>
                 </div>
@@ -161,9 +162,10 @@ export function CommercialRightsModal({
                 <div className="flex items-start gap-2.5">
                   <CheckCircle2 size={16} className="text-emerald-400 shrink-0 mt-0.5" />
                   <div>
-                    <strong className="text-white">Dự án Game &amp; Nhân vật ảo VTuber:</strong>
+                    <strong className="text-white">Quyền khai thác thương mại hình ảnh bức tranh:</strong>
                     <p className="text-outline mt-0.5">
-                      Toàn quyền rigging mô hình Live2D, dựng model 3D, làm nhân vật chính/phụ trong game indie hoặc game studio thương mại.
+                      Được toàn quyền sử dụng hình ảnh bức tranh cho mục đích sinh lời: in ấn tranh để bán, đưa vào ấn phẩm
+                      quảng cáo, bao bì, nội dung truyền thông — không giới hạn doanh thu và không phải trả thêm phí tác quyền định kỳ.
                     </p>
                   </div>
                 </div>
@@ -171,9 +173,10 @@ export function CommercialRightsModal({
                 <div className="flex items-start gap-2.5">
                   <CheckCircle2 size={16} className="text-emerald-400 shrink-0 mt-0.5" />
                   <div>
-                    <strong className="text-white">Sản xuất Merchandise &amp; Ấn phẩm:</strong>
+                    <strong className="text-white">Quyền trưng bày &amp; cho mượn tranh:</strong>
                     <p className="text-outline mt-0.5">
-                      Được quyền in ấn móc khóa, áo thun, figure, artbook thương mại không cần trả thêm phí tác quyền định kỳ.
+                      Được trưng bày bức tranh tại không gian riêng, phòng tranh hoặc triển lãm, và được cho mượn tranh để
+                      giới thiệu với công chúng, miễn ghi rõ tên hoạ sĩ sáng tác.
                     </p>
                   </div>
                 </div>
@@ -181,9 +184,10 @@ export function CommercialRightsModal({
                 <div className="flex items-start gap-2.5">
                   <CheckCircle2 size={16} className="text-emerald-400 shrink-0 mt-0.5" />
                   <div>
-                    <strong className="text-white">Quyền niêm yết bán lại (Secondary Market / Resell):</strong>
+                    <strong className="text-white">Quyền niêm yết bán lại bức tranh (Secondary Market / Resell):</strong>
                     <p className="text-outline mt-0.5">
-                      Được công nhận là chủ sở hữu tài sản hợp pháp, có quyền mở phiên đấu giá thứ cấp trên sàn Dillustration khi tác phẩm tăng giá.
+                      Được công nhận là chủ sở hữu hợp pháp của bức tranh, có quyền mở phiên đấu giá thứ cấp trên sàn
+                      Dillustration khi tranh tăng giá.
                     </p>
                   </div>
                 </div>
@@ -191,9 +195,9 @@ export function CommercialRightsModal({
                 <div className="flex items-start gap-2.5">
                   <CheckCircle2 size={16} className="text-emerald-400 shrink-0 mt-0.5" />
                   <div>
-                    <strong className="text-white">Cam kết độc bản (1-of-1 Exclusivity):</strong>
+                    <strong className="text-white">Cam kết độc bản (Exclusivity):</strong>
                     <p className="text-outline mt-0.5">
-                      Họa sĩ cam kết không sao chép hoặc chuyển giao thiết kế này cho bất kỳ bên thứ ba nào khác.
+                      Hoạ sĩ cam kết không vẽ lại, sao chép hoặc chuyển giao bức tranh này cho bất kỳ bên thứ ba nào khác.
                     </p>
                   </div>
                 </div>
@@ -203,10 +207,10 @@ export function CommercialRightsModal({
                   <div>
                     <strong className="text-amber-300">Quyền nhân thân &amp; Quyền tác giả gốc bất khả xâm phạm (Moral Rights Retained):</strong>
                     <p className="text-white/90 mt-1 leading-relaxed">
-                      Quyền tác giả và quyền đứng tên tác giả <strong className="text-white underline">vĩnh viễn và tuyệt đối thuộc về Họa sĩ sáng tác gốc ({deed.creatorName})</strong> theo Luật Sở hữu trí tuệ. Họa sĩ được bảo lưu quyền lưu giữ tác phẩm trong hồ sơ năng lực (Portfolio) cá nhân với tư cách là tác giả sáng tạo.
+                      Quyền tác giả và quyền đứng tên tác giả <strong className="text-white underline">vĩnh viễn và tuyệt đối thuộc về Hoạ sĩ sáng tác gốc ({deed.creatorName})</strong> theo Luật Sở hữu trí tuệ. Hoạ sĩ được bảo lưu quyền lưu giữ hình ảnh bức tranh trong hồ sơ năng lực (Portfolio) cá nhân với tư cách là tác giả sáng tạo.
                     </p>
                     <p className="text-outline mt-1 leading-relaxed">
-                      Bên nhận chuyển giao nắm giữ 100% quyền tài sản và toàn quyền khai thác thương mại, nhưng <strong className="text-amber-200">tuyệt đối không được mạo danh mình là tác giả sáng tạo</strong> của tác phẩm. Danh tính của tác giả gốc luôn được ghi nhận vĩnh viễn trên Giấy chứng nhận số (Certificate) và Chuỗi lai lịch (Provenance).
+                      Bên nhận chuyển giao nắm giữ 100% quyền tài sản đối với bức tranh, nhưng <strong className="text-amber-200">tuyệt đối không được mạo danh mình là tác giả sáng tạo</strong> của bức tranh. Danh tính của tác giả gốc luôn được ghi nhận vĩnh viễn trên Giấy chứng nhận số (Certificate) và Chuỗi lai lịch (Provenance).
                     </p>
                   </div>
                 </div>

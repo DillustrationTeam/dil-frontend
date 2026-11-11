@@ -91,7 +91,7 @@ export function MyCollectionScreen() {
     return (
       <div className="py-20 text-center text-xs text-outline">
         <RefreshCw size={20} className="mx-auto mb-2 animate-spin text-brand-periwinkle" />
-        Đang mở kho lưu trữ tác phẩm 1-of-1...
+        Đang mở kho lưu trữ tác phẩm...
       </div>
     );
   }
@@ -117,7 +117,7 @@ export function MyCollectionScreen() {
               Bộ sưu tập tranh đấu giá ({items.length})
             </h1>
             <p className="mt-1 text-xs text-outline max-w-xl">
-              Nơi lưu trữ các tác phẩm bạn đã đấu giá thành công và sở hữu độc quyền 1-of-1 trên sàn Dillustration, bao gồm chứng chỉ số, quyền thương mại và quyền niêm yết bán lại.
+              Nơi lưu trữ các tác phẩm bạn đã đấu giá thành công và sở hữu độc quyền trên sàn Dillustration, bao gồm chứng chỉ số, quyền thương mại và quyền niêm yết bán lại.
             </p>
           </div>
 
@@ -135,7 +135,7 @@ export function MyCollectionScreen() {
           <Sparkles size={36} className="mx-auto mb-3 text-amber-300/60" />
           <h3 className="font-h1 text-base font-bold text-white">Bạn chưa sở hữu tác phẩm độc bản nào</h3>
           <p className="mt-1 text-xs text-outline max-w-md mx-auto">
-            Hãy tham gia các phiên đấu giá trên Dillustration để trở thành chủ sở hữu độc quyền 1-of-1 và nhận quyền khai thác thương mại đầy đủ.
+            Hãy tham gia các phiên đấu giá trên Dillustration để trở thành chủ sở hữu độc quyền và nhận quyền khai thác thương mại đầy đủ.
           </p>
           <Link
             href="/auctions"
@@ -155,23 +155,17 @@ export function MyCollectionScreen() {
                 {/* Ảnh tranh */}
                 <div className="relative aspect-[4/5] w-full overflow-hidden bg-black/40">
                   <Image
-                    src={item.thumbnailUrl || item.imageUrl}
+                    src={item.thumbnailUrl || item.imageUrl || '/weblogo.png'}
                     alt={item.title}
                     fill
                     unoptimized
                     className="object-cover transition duration-300 group-hover:scale-105"
                   />
-                  {/* Badge Exclusive 1-of-1 Owner */}
+                  {/* Badge Exclusive Owner */}
                   <div className="absolute top-3 left-3 inline-flex items-center gap-1.5 rounded-full border border-amber-400/60 bg-black/75 px-3 py-1 text-[11px] font-bold text-amber-300 shadow backdrop-blur-md">
                     <Crown size={13} className="text-amber-400" />
-                    Exclusive 1-of-1 Owner
+                    Exclusive Owner
                   </div>
-
-                  {item.hasMasterFile && (
-                    <div className="absolute bottom-3 left-3 inline-flex items-center gap-1 rounded-full bg-emerald-500/80 px-2.5 py-0.5 text-[10px] font-semibold text-white backdrop-blur-md">
-                      <Download size={11} /> Có Master Pack (.zip)
-                    </div>
-                  )}
                 </div>
 
                 {/* Thông tin chi tiết */}
@@ -274,7 +268,7 @@ export function MyCollectionScreen() {
         />
       )}
 
-      {/* Modal Tải bàn giao: Cả Tranh gốc HD + Master Pack .zip */}
+      {/* Modal Tải bàn giao tranh gốc HD */}
       {downloadDeliverable && (
         <DeliverablesDownloadModal
           deliverable={downloadDeliverable}
