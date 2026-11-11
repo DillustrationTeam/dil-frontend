@@ -185,22 +185,24 @@ export function PermissionsTable({ members, onUpdateRole, onRemoveMember, isJudg
                   </td>
                   <td className="py-3.5 px-3 text-right">
                     <div className="flex items-center justify-end gap-2">
-                      <button
-                        type="button"
-                        onClick={() => handleOpenEdit(member)}
-                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-xs text-white transition-all cursor-pointer"
-                      >
-                        <Edit2 className="w-3 h-3 text-brand-periwinkle" />
-                        <span>Edit Role</span>
-                      </button>
+                      {member.status === 'Confirmed' && (
+                        <button
+                          type="button"
+                          onClick={() => handleOpenEdit(member)}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-xs text-white transition-all cursor-pointer"
+                        >
+                          <Edit2 className="w-3 h-3 text-brand-periwinkle" />
+                          <span>Edit Role</span>
+                        </button>
+                      )}
                       <button
                         type="button"
                         onClick={() => handleOpenRemove(member)}
                         className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 text-xs text-red-400 transition-all cursor-pointer"
-                        title="Remove Member"
+                        title={member.status === 'Pending' ? 'Cancel Invitation' : 'Remove Member'}
                       >
                         <UserX className="w-3 h-3 text-red-400" />
-                        <span>Remove</span>
+                        <span>{member.status === 'Pending' ? 'Cancel Invite' : 'Remove'}</span>
                       </button>
                     </div>
                   </td>
@@ -239,18 +241,6 @@ export function PermissionsTable({ members, onUpdateRole, onRemoveMember, isJudg
                 <label className="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-2">
                   Select Role
                 </label>
-                <select
-                  value={editRole}
-                  onChange={(e) => setEditRole(e.target.value as 'Head Jury' | 'Jury')}
-                  className="w-full rounded-xl border border-white/10 bg-[#090b12]/90 text-white px-3.5 py-2.5 text-sm focus:outline-none focus:border-brand-periwinkle focus:ring-1 focus:ring-brand-periwinkle/30 transition-all cursor-pointer mb-3"
-                >
-                  <option value="Jury" className="bg-[#1f2335]">
-                    Jury Member
-                  </option>
-                  <option value="Head Jury" className="bg-[#1f2335]">
-                    Head Jury
-                  </option>
-                </select>
 
                 <div className="grid grid-cols-2 gap-3">
                   <button
@@ -305,9 +295,20 @@ export function PermissionsTable({ members, onUpdateRole, onRemoveMember, isJudg
       {mounted && memberToRemove && createPortal(
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 overflow-y-auto">
           <div className="w-full max-w-md rounded-2xl border border-red-500/30 bg-[#161926] p-6 shadow-2xl relative animate-in fade-in zoom-in-95 duration-200 text-left m-auto">
-            <h3 className="text-lg font-bold text-white font-h1">Remove Jury Member</h3>
+            <h3 className="text-lg font-bold text-white font-h1">
+              {memberToRemove.status === 'Pending' ? 'Cancel Jury Invitation' : 'Remove Jury Member'}
+            </h3>
             <p className="text-xs text-slate-300 mt-2 leading-relaxed">
-              Are you sure you want to remove <span className="font-bold text-white">{memberToRemove.name}</span> from the Jury Panel? They will no longer have access to evaluation tasks for this event.
+              {memberToRemove.status === 'Pending' ? (
+                <>
+                  Are you sure you want to cancel the pending jury invitation sent to{' '}
+                  <span className="font-bold text-white">{memberToRemove.name}</span>?
+                </>
+              ) : (
+                <>
+                  Are you sure you want to remove <span className="font-bold text-white">{memberToRemove.name}</span> from the Jury Panel? They will no longer have access to evaluation tasks for this event.
+                </>
+              )}
             </p>
 
             <div className="mt-6 flex justify-end gap-3">
@@ -316,14 +317,14 @@ export function PermissionsTable({ members, onUpdateRole, onRemoveMember, isJudg
                 onClick={() => setMemberToRemove(null)}
                 className="px-4 py-2 rounded-xl border border-white/10 text-xs font-semibold text-slate-300 hover:bg-white/5 transition-all cursor-pointer"
               >
-                Cancel
+                Keep
               </button>
               <button
                 type="button"
                 onClick={handleConfirmRemove}
                 className="px-4 py-2 rounded-xl bg-red-500 hover:bg-red-600 text-white text-xs font-bold transition-all shadow-[0_0_15px_rgba(239,68,68,0.3)] cursor-pointer"
               >
-                Remove Member
+                {memberToRemove.status === 'Pending' ? 'Cancel Invitation' : 'Remove Member'}
               </button>
             </div>
           </div>

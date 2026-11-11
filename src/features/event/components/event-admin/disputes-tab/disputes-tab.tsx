@@ -98,6 +98,7 @@ export function DisputesTab() {
 
         if (res.items) {
           setDisputes(res.items);
+          window.dispatchEvent(new CustomEvent('dil:disputes-updated'));
         }
       } catch (err: unknown) {
         console.error('Failed to load disputes from backend:', err);
@@ -223,7 +224,7 @@ export function DisputesTab() {
   // KPI Statistics - Strictly derived from contestDisputes to ensure 100% sync with table!
   const openCount = contestDisputes.filter((d) => d.status === 'Pending' || d.status === 'UnderReview').length;
   const highPriorityCount = contestDisputes.filter((d) => d.priority === 'High').length;
-  const resolvedCount = contestDisputes.filter((d) => d.status === 'Resolved').length;
+  const resolvedCount = contestDisputes.filter((d) => d.status === 'Resolved' || d.status === 'Rejected').length;
   const overdueCount = 0;
 
   return (

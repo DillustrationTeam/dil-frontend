@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef, useState, useSyncExternalStore } from 'react';
+import React, { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
@@ -11,9 +11,12 @@ import {
   Search,
   Layers,
   AlertTriangle,
+  BellRing,
+  ArrowRight,
 } from 'lucide-react';
 import type { EventListItemDto, EventFilters, EventSortOption, EventStatsDto } from '../../types/event.types';
 import { eventService } from '../../services/event.service';
+import { adminDisputeService } from '@/features/admin/services/dispute.service';
 import { EventCard } from '../event/event-card';
 
 import { PermissionsTab } from './permissions-tab/permissions-tab';
@@ -32,6 +35,46 @@ export function EventAdminScreen() {
   const [activeTab, setActiveTab] = useState<AdminEventsTab>('create');
   const [events, setEvents] = useState<EventListItemDto[]>([]);
   const [loading, setLoading] = useState(false);
+  const [openDisputesCount, setOpenDisputesCount] = useState(0);
+
+  useEffect(() => {
+    const tabParam = new URLSearchParams(window.location.search).get('tab');
+    if (tabParam === 'create' || tabParam === 'permissions' || tabParam === 'disputes' || tabParam === 'publish') {
+      setActiveTab(tabParam);
+    }
+  }, []);
+
+  const refreshOpenDisputesCount = useCallback(async () => {
+    try {
+      const res = await adminDisputeService.getSubmissionDisputeQueue({ page: 1, pageSize: 100 });
+      const count = (res.items || []).filter(
+        (d) => d.status === 'Pending' || d.status === 'UnderReview'
+      ).length;
+      setOpenDisputesCount(count);
+    } catch {
+      // Ignore if endpoint is temporarily unavailable
+    }
+  }, []);
+
+  useEffect(() => {
+    void refreshOpenDisputesCount();
+    const handleRefresh = () => {
+      if (document.visibilityState === 'visible') {
+        void refreshOpenDisputesCount();
+      }
+    };
+    const handleDisputesUpdated = () => {
+      void refreshOpenDisputesCount();
+    };
+    window.addEventListener('focus', handleRefresh);
+    document.addEventListener('visibilitychange', handleRefresh);
+    window.addEventListener('dil:disputes-updated', handleDisputesUpdated);
+    return () => {
+      window.removeEventListener('focus', handleRefresh);
+      document.removeEventListener('visibilitychange', handleRefresh);
+      window.removeEventListener('dil:disputes-updated', handleDisputesUpdated);
+    };
+  }, [refreshOpenDisputesCount]);
 
   // Delete Event Modal state
   const [eventToDelete, setEventToDelete] = useState<EventListItemDto | null>(null);
@@ -198,13 +241,25 @@ export function EventAdminScreen() {
         </button>
         <button
           onClick={() => setActiveTab('disputes')}
-          className={`px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
+          className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
             activeTab === 'disputes'
               ? 'bg-brand-periwinkle text-brand-navy shadow-[inset_0_1px_0_rgba(255,255,255,0.5),0_0_20px_rgba(167,172,217,0.25)]'
               : 'text-[#aaa8b3] hover:text-white hover:bg-white/5'
           }`}
         >
-          Dispute Resolution
+          <span>Dispute Resolution</span>
+          {openDisputesCount > 0 && (
+            <span
+              className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-extrabold leading-none ${
+                activeTab === 'disputes'
+                  ? 'bg-brand-navy/20 text-brand-navy border border-brand-navy/30'
+                  : 'bg-amber-500/20 text-amber-300 border border-amber-400/40 animate-pulse'
+              }`}
+              title={`${openDisputesCount} open submission dispute(s) awaiting review`}
+            >
+              {openDisputesCount}
+            </span>
+          )}
         </button>
         <button
           onClick={() => setActiveTab('publish')}
@@ -217,6 +272,33 @@ export function EventAdminScreen() {
           Publish Results
         </button>
       </nav>
+
+      {/* Pending Disputes Signal Banner (visible on other tabs so admins never miss new disputes) */}
+      {openDisputesCount > 0 && activeTab !== 'disputes' && (
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-amber-400/30 bg-amber-500/10 px-4 py-3 text-xs text-amber-200">
+          <div className="flex items-center gap-2.5">
+            <span className="flex h-7 w-7 items-center justify-center rounded-xl bg-amber-500/20 text-amber-300 shrink-0">
+              <BellRing className="w-4 h-4" />
+            </span>
+            <div>
+              <p className="font-bold text-amber-100">
+                {openDisputesCount} pending submission dispute{openDisputesCount > 1 ? 's' : ''} require admin moderation
+              </p>
+              <p className="text-[11px] text-amber-200/80">
+                New or unresolved client reports have been queued in the Dispute Resolution tab.
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setActiveTab('disputes')}
+            className="inline-flex items-center gap-1.5 rounded-xl bg-amber-400 px-3.5 py-2 text-xs font-bold text-slate-950 transition hover:bg-amber-300 cursor-pointer shrink-0"
+          >
+            <span>Open Dispute Queue</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
 
       {/* 3. Active Tab Content */}
       <div ref={contestGridRef}>

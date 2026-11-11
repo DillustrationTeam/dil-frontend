@@ -1,11 +1,13 @@
-import { apiClient } from '@/lib/api-client';
+import { apiClient, extractErrorMessage } from '@/lib/api-client';
 import type { ApiResponse } from '@/types/api.types';
+import type { EventInvitationDto } from '@/features/notification/types/notification.types';
 import type {
   JuryCriterion,
   JurySubmissionItem,
   JuryEvaluationDraft,
   JuryStats,
   JuryMemberInfo,
+  InvitationCandidateItem,
   SubmitScoreRequest,
   SubmissionScoreResponse,
   HeadJuryWorkspaceData,
@@ -344,56 +346,113 @@ export const juryService = {
   /**
    * Send invitation to jury member by email
    */
-  sendInvitation: async (eventId: string, email: string): Promise<unknown> => {
-    const response = await apiClient.post<ApiResponse<unknown>>('/invitations', {
-      eventId,
-      email,
-    });
-    return response.data?.data;
+  sendInvitation: async (eventId: string, email: string, isHeadJury = false): Promise<unknown> => {
+    try {
+      const response = await apiClient.post<ApiResponse<unknown>>('/invitations', {
+        eventId,
+        email,
+        isHeadJury,
+      });
+      return response.data?.data;
+    } catch (err) {
+      throw new Error(extractErrorMessage(err, 'Không thể gửi lời mời giám khảo.'));
+    }
+  },
+
+  /**
+   * Fetch directory of candidate users for jury invitation picker
+   */
+  getInvitationCandidates: async (
+    eventId: string,
+    params?: {
+      search?: string;
+      roleFilter?: 'All' | 'Creator' | 'Eligible' | 'Client';
+      page?: number;
+      pageSize?: number;
+    }
+  ): Promise<{ items: InvitationCandidateItem[]; totalCount: number }> => {
+    try {
+      const response = await apiClient.get<ApiResponse<InvitationCandidateItem[]>>('/invitations/candidates', {
+        params: {
+          eventId,
+          search: params?.search?.trim() || undefined,
+          roleFilter: params?.roleFilter || 'All',
+          page: params?.page ?? 1,
+          pageSize: params?.pageSize ?? 20,
+        },
+      });
+      const rawMeta = (response.data?.meta || {}) as Record<string, unknown>;
+      const items = Array.isArray(response.data?.data) ? response.data.data : [];
+      return {
+        items,
+        totalCount: Number(rawMeta.totalCount ?? items.length),
+      };
+    } catch (err) {
+      throw new Error(extractErrorMessage(err, 'Không thể tải danh sách người dùng ứng viên.'));
+    }
   },
 
   /**
    * Remove a jury member from an event
    */
   removeJury: async (juryId: string): Promise<void> => {
-    await apiClient.delete(`/juries/${juryId}`);
+    try {
+      await apiClient.delete(`/juries/${juryId}`);
+    } catch (err) {
+      throw new Error(extractErrorMessage(err, 'Không thể xóa thành viên ban giám khảo.'));
+    }
   },
 
   /**
    * Cancel a pending invitation
    */
   cancelInvitation: async (invitationId: string): Promise<void> => {
-    await apiClient.put(`/invitations/${invitationId}/cancel`);
+    try {
+      await apiClient.put(`/invitations/${invitationId}/cancel`);
+    } catch (err) {
+      throw new Error(extractErrorMessage(err, 'Không thể hủy lời mời giám khảo.'));
+    }
   },
 
   /**
    * Accept an invitation (For invited Creator)
    */
   acceptInvitation: async (invitationId: string): Promise<unknown> => {
-    const response = await apiClient.put<ApiResponse<unknown>>(`/invitations/${invitationId}/accept`);
-    return response.data?.data;
+    try {
+      const response = await apiClient.put<ApiResponse<unknown>>(`/invitations/${invitationId}/accept`);
+      return response.data?.data;
+    } catch (err) {
+      throw new Error(extractErrorMessage(err, 'Không thể chấp nhận lời mời giám khảo.'));
+    }
   },
 
   /**
    * Decline an invitation (For invited Creator)
    */
   declineInvitation: async (invitationId: string): Promise<unknown> => {
-    const response = await apiClient.put<ApiResponse<unknown>>(`/invitations/${invitationId}/decline`);
-    return response.data?.data;
+    try {
+      const response = await apiClient.put<ApiResponse<unknown>>(`/invitations/${invitationId}/decline`);
+      return response.data?.data;
+    } catch (err) {
+      throw new Error(extractErrorMessage(err, 'Không thể từ chối lời mời giám khảo.'));
+    }
   },
 
   /**
    * Fetch invitations for an event
    */
-  getInvitations: async (eventId: string): Promise<unknown[]> => {
+  getInvitations: async (eventId: string, status?: string): Promise<EventInvitationDto[]> => {
     try {
-      const response = await apiClient.get<ApiResponse<unknown>>('/invitations', {
-        params: { eventId, pageSize: 50 },
-      });
+      const response = await apiClient.get<ApiResponse<EventInvitationDto[] | { items: EventInvitationDto[] }>>(
+        '/invitations',
+        {
+          params: { eventId, status: status || undefined, pageSize: 50 },
+        }
+      );
       const data = response.data?.data;
       if (Array.isArray(data)) return data;
-      if (data && typeof data === 'object' && 'items' in data && Array.isArray((data as { items: unknown[] }).items)) {
-        return (data as { items: unknown[] }).items;
+      if (data && typeof data === 'object' && 'items' in data && Array.isArray(data.items)) {
+        return data.items;
       }
     } catch {
       // Fallback empty
@@ -410,8 +469,8 @@ export const juryService = {
         eventId,
         isHeadJury: role === 'Head Jury',
       });
-    } catch {
-      // Endpoint fallback
+    } catch (err) {
+      throw new Error(extractErrorMessage(err, 'Không thể cập nhật vai trò giám khảo.'));
     }
   },
 

@@ -65,6 +65,7 @@ export const notificationTypeLabels: Record<string, string> = {
   ArtTradeCompleted: 'Giao dịch trao đổi hoàn tất',
   TradeDisputeCreated: 'Khiếu nại trao đổi tác phẩm',
   TradeDisputeResolved: 'Phân xử khiếu nại trao đổi',
+  SubmissionDisputeCreated: 'Khiếu nại bài dự thi mới',
 };
 
 /** Danh sách loại hợp lệ, dùng cho bộ lọc và kiểm tra dữ liệu. */

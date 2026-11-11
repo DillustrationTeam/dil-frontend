@@ -82,10 +82,26 @@ export interface JuryMemberInfo {
   userId?: string;
   creatorName?: string;
   creatorDisplayName?: string;
-  creatorEmail?: string;
+  creatorEmail?: string | null;
   creatorAvatarUrl?: string;
   isHeadJury: boolean;
   role: string;
+}
+
+export interface InvitationCandidateItem {
+  userId: string;
+  creatorId?: string | null;
+  displayName: string;
+  fullName?: string | null;
+  userName?: string | null;
+  email?: string | null;
+  avatarUrl?: string | null;
+  roles: string[];
+  hasCreatorProfile: boolean;
+  isAlreadyJury: boolean;
+  hasPendingInvitation: boolean;
+  canInvite: boolean;
+  ineligibleReason?: string | null;
 }
 
 export interface JuryProgressItem {
