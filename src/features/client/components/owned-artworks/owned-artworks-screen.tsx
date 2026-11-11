@@ -36,6 +36,11 @@ import { auctionService, auctionError } from '@/features/auction/services/auctio
 import type { AuctionCertificateDto } from '@/features/auction/types/auction.types';
 import { AuctionCertificateCard } from '@/features/auction/components/auction-certificate-card';
 
+
+/// Ảnh dự phòng khi API trả về chuỗi rỗng ở thumbnailUrl/imageUrl.
+/// Next Image ném lỗi console nếu src là "" nên phải chốt về một ảnh có thật.
+const FALLBACK_IMAGE = '/weblogo.png';
+
 function formatVnd(value?: number | null) {
   if (value === null || value === undefined) return null;
   return new Intl.NumberFormat('vi-VN', {
@@ -164,7 +169,7 @@ export function OwnedArtworksScreen() {
         return (
           <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/60 bg-amber-500/20 px-3 py-1 text-[11px] font-bold text-amber-300 backdrop-blur-md shadow-[0_0_12px_rgba(245,158,11,0.2)]">
             <Crown size={12} className="text-amber-400" />
-            {lang === 'VIE' ? 'Đấu giá 1-of-1' : 'Auction Exclusive'}
+            {lang === 'VIE' ? 'Đấu giá' : 'Auction Exclusive'}
           </span>
         );
       case 'Commission':
@@ -204,8 +209,8 @@ export function OwnedArtworksScreen() {
             </h1>
             <p className="mt-2 text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed">
               {lang === 'VIE'
-                ? 'Tổng hợp tất cả tác phẩm số bạn đã sở hữu hợp pháp từ các phiên đấu giá độc bản 1-of-1, đơn đặt vẽ (Commission) hoàn tất, và các đợt trao đổi nghệ thuật (Art Trade).'
-                : 'All digital artworks you legally own across settled 1-of-1 auctions, completed commissions, and finalized art trades.'}
+                ? 'Tổng hợp tất cả tác phẩm số bạn đã sở hữu hợp pháp từ các phiên đấu giá độc bản, đơn đặt vẽ (Commission) hoàn tất, và các đợt trao đổi nghệ thuật (Art Trade).'
+                : 'All digital artworks you legally own across settled auctions, completed commissions, and finalized art trades.'}
             </p>
           </div>
 
@@ -379,7 +384,7 @@ export function OwnedArtworksScreen() {
                 ? 'Không có kết quả phù hợp với bộ lọc hiện tại. Thử xóa tìm kiếm hoặc đổi tiêu chí lọc.'
                 : 'No results match your current filter. Try adjusting your search query.'
               : lang === 'VIE'
-                ? 'Khi bạn thắng đấu giá 1-of-1, hoàn tất đơn đặt vẽ Commission, hoặc hoàn thành trao đổi Art Trade, tác phẩm sẽ tự động lưu trữ tại đây.'
+                ? 'Khi bạn thắng đấu giá, hoàn tất đơn đặt vẽ Commission, hoặc hoàn thành trao đổi Art Trade, tác phẩm sẽ tự động lưu trữ tại đây.'
                 : 'Artworks you acquire via auctions, completed commissions, or art trades will appear here.'}
           </p>
 
@@ -424,7 +429,7 @@ export function OwnedArtworksScreen() {
                   onClick={() => setLightboxArtwork(item)}
                 >
                   <Image
-                    src={item.thumbnailUrl || item.imageUrl}
+                    src={item.thumbnailUrl || item.imageUrl || FALLBACK_IMAGE}
                     alt={item.title}
                     fill
                     unoptimized
@@ -448,14 +453,6 @@ export function OwnedArtworksScreen() {
                   >
                     <Maximize2 size={13} />
                   </button>
-
-                  {/* Master file indicator (Bottom-left) */}
-                  {item.hasMasterFile && (
-                    <div className="absolute bottom-3 left-3 z-10 inline-flex items-center gap-1 rounded-full bg-emerald-500/80 px-2.5 py-1 text-[10px] font-semibold text-white backdrop-blur-md shadow">
-                      <Download size={11} />
-                      {lang === 'VIE' ? 'File Master / Gốc' : 'Master File'}
-                    </div>
-                  )}
 
                   {/* Certificate Number Pill (Bottom-right if present) */}
                   {item.certificateNumber && (
@@ -533,10 +530,10 @@ export function OwnedArtworksScreen() {
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 py-2 text-xs font-semibold text-emerald-300 hover:bg-emerald-500/20 transition"
-                      title={lang === 'VIE' ? 'Tải tác phẩm gốc' : 'Download Master Deliverable'}
+                      title={lang === 'VIE' ? 'Tải tác phẩm gốc' : 'Download original artwork'}
                     >
                       <Download size={13} />
-                      {lang === 'VIE' ? 'Tải tác phẩm' : 'Download'}
+                      {lang === 'VIE' ? 'Tải tranh gốc' : 'Download'}
                     </a>
                   )}
 
@@ -546,7 +543,7 @@ export function OwnedArtworksScreen() {
                       onClick={() => handleOpenCertificate(item)}
                       disabled={loadingCertId === item.id}
                       className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-amber-400/40 bg-amber-400/10 py-2 text-xs font-semibold text-amber-300 hover:bg-amber-400/20 transition disabled:opacity-50"
-                      title={lang === 'VIE' ? 'Chứng chỉ 1-of-1' : '1-of-1 Certificate'}
+                      title={lang === 'VIE' ? 'Chứng chỉ' : 'Certificate'}
                     >
                       {loadingCertId === item.id ? (
                         <RefreshCw size={13} className="animate-spin" />
@@ -632,7 +629,7 @@ export function OwnedArtworksScreen() {
             {/* Lightbox Image Body */}
             <div className="relative flex-1 min-h-[50vh] sm:min-h-[65vh] w-full bg-black/60 flex items-center justify-center p-4">
               <Image
-                src={lightboxArtwork.imageUrl || lightboxArtwork.thumbnailUrl}
+                src={lightboxArtwork.imageUrl || lightboxArtwork.thumbnailUrl || FALLBACK_IMAGE}
                 alt={lightboxArtwork.title}
                 fill
                 unoptimized

@@ -66,6 +66,12 @@ const statusBadgeConfig: Record<
     text: 'text-rose-300',
     border: 'border-rose-500/30',
   },
+  DigitalAccepted: {
+    label: 'Đã nhận bản điện tử',
+    bg: 'bg-emerald-500/10',
+    text: 'text-emerald-300',
+    border: 'border-emerald-500/30',
+  },
   Active: {
     label: 'Đang đấu giá (Có bản vật lý)',
     bg: 'bg-purple-500/10',
@@ -285,7 +291,13 @@ export function PhysicalDeliveryManager() {
             const isSeller = currentUserId === item.sellerId;
             const isWinner = Boolean(currentUserId && item.winnerId && currentUserId === item.winnerId);
             const delivery = item.delivery;
+            // Người mua nhận bản điện tử (tiền đã giải ngân) nhưng vẫn có thể yêu cầu giao tranh:
+            // trạng thái hiển thị theo bưu phẩm, chỉ thêm ghi chú "đã giải ngân trước".
             const statusKey = delivery?.status ?? item.auctionStatus;
+            const paidEarly =
+              item.auctionStatus === 'Completed' &&
+              delivery?.status !== 'Delivered' &&
+              delivery?.status !== 'Cancelled';
             const badge = statusBadgeConfig[statusKey] ?? {
               label: statusKey,
               bg: 'bg-white/10',
@@ -306,6 +318,7 @@ export function PhysicalDeliveryManager() {
                     >
                       <Truck size={12} />
                       {badge.label}
+                      {paidEarly && <span className="text-[10px] font-normal text-amber-300"> · đã giải ngân trước</span>}
                     </span>
 
                     <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-white/10 text-on-surface-variant">
@@ -381,7 +394,7 @@ export function PhysicalDeliveryManager() {
                 {/* Footer action button */}
                 <div className="mt-4 pt-3 border-t border-white/10 flex items-center justify-between">
                   <span className="text-[11px] text-outline">
-                    {item.auctionStatus === 'Active' ? 'Phiên đang nhận giá' : 'Đang xử lý giao nhận'}
+                    {item.auctionStatus === 'Active' ? 'Phiên đang nhận giá' : item.auctionStatus === 'Completed' ? 'Giao dịch đã hoàn tất' : item.auctionStatus === 'Disputed' ? 'Đang khiếu nại' : 'Đang xử lý giao nhận'}
                   </span>
 
                   <Link

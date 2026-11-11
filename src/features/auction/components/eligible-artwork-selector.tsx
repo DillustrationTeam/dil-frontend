@@ -104,7 +104,7 @@ export function EligibleArtworkSelector({ selectedArtworkId, onSelect, reloadTri
                   {selectedArtwork.thumbnailUrl || selectedArtwork.imageUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
-                      src={selectedArtwork.thumbnailUrl || selectedArtwork.imageUrl}
+                      src={selectedArtwork.thumbnailUrl || selectedArtwork.imageUrl || '/weblogo.png'}
                       alt={selectedArtwork.title}
                       className="size-full object-cover"
                     />
