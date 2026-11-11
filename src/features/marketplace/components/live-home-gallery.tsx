@@ -140,7 +140,14 @@ export function LiveHomeGallery() {
                     <Image src={artwork.thumbnailUrl || artwork.imageUrl} alt={artwork.title} fill unoptimized className="object-contain transition-transform group-hover:scale-[1.03]" />
                   </div>
                   <div className="p-4">
-                    <h3 className="font-semibold text-white">{artwork.title}</h3>
+                    <div className="flex items-start justify-between gap-2">
+                      <h3 className="font-semibold text-white truncate">{artwork.title}</h3>
+                      {(artwork.categoryName || artwork.style) && (
+                        <span className="shrink-0 rounded-full bg-[#A7ACD9]/15 border border-[#A7ACD9]/25 px-2 py-0.5 text-[10px] font-semibold text-[#C5C9F8]">
+                          {artwork.categoryName || artwork.style}
+                        </span>
+                      )}
+                    </div>
                     <p className="mt-1 text-xs text-[#919099]">{creatorName(artwork)} · {artwork.viewCount ?? 0} lượt xem</p>
                   </div>
                 </Link>

@@ -73,7 +73,7 @@ export const creatorProfileService = {
 
   async updateArtwork(
     id: string,
-    data: Pick<CreateArtworkRequest, 'title'> & Partial<Pick<CreateArtworkRequest, 'description' | 'tags' | 'imageUrl' | 'thumbnailUrl'>>
+    data: Pick<CreateArtworkRequest, 'title'> & Partial<Pick<CreateArtworkRequest, 'description' | 'tags' | 'imageUrl' | 'thumbnailUrl' | 'categoryId'>>
   ): Promise<ArtworkDto> {
     const response = await apiClient.put<ApiResponse<ArtworkDto>>(`/artworks/${id}`, data);
     if (response.data.error || !response.data.data) {

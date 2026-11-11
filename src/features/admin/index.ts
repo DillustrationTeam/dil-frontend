@@ -13,6 +13,7 @@ export * from './services/creator.service';
 export * from './services/user.service';
 export * from './services/platform-fee.service';
 export * from './services/moderation.service';
+export * from './services/categories.service';
 export * from './services/dispute.service';
 export * from './services/trade-operations.service';
 export * from './reducers/dashboard.reducer';

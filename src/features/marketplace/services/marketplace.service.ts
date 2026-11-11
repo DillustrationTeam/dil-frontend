@@ -8,6 +8,8 @@ export interface MarketplaceArtwork extends ArtworkDto {
   creatorRating?: number;
   availableSlots?: number;
   style?: string | null;
+  categoryId?: string | null;
+  categoryName?: string | null;
   licenseType?: string;
   startingPrice?: number | null;
   likeCount?: number;
@@ -75,6 +77,8 @@ export interface RelatedCreatorDto {
   ratingCount: number;
   followerCount: number;
   availableSlots: number;
+  bannerUrl?: string | null;
+  categories?: { id: string; name: string; slug: string }[];
 }
 
 export interface CollectionDto {
@@ -191,8 +195,14 @@ export const marketplaceService = {
     return getData(response);
   },
 
-  async getCreators(): Promise<RelatedCreatorDto[]> {
-    const response = await apiClient.get<ApiResponse<RelatedCreatorDto[]>>('/marketplace/creators');
+  async getCreators(filters?: { categoryId?: string; search?: string; onlyOpenSlots?: boolean }): Promise<RelatedCreatorDto[]> {
+    const response = await apiClient.get<ApiResponse<RelatedCreatorDto[]>>('/marketplace/creators', {
+      params: {
+        categoryId: filters?.categoryId || undefined,
+        search: filters?.search?.trim() || undefined,
+        onlyOpenSlots: filters?.onlyOpenSlots ? true : undefined,
+      },
+    });
     return getData(response);
   },
 

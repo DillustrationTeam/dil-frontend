@@ -9,10 +9,14 @@ import { authService } from '@/services/auth.service';
 import { useLanguage } from '@/context/language-context';
 import { useAuthStore } from '@/store/use-auth-store';
 import { NotificationBell } from '@/features/notification';
+import {
+  categoriesService,
+  type SearchSuggestionsDto,
+} from '@/features/marketplace/services/categories.service';
 
 const navLinks = [
   { href: '/', label: 'Marketplace', match: ['/'], exact: true, requiresAuth: false },
-  { href: '/#artists', label: 'Artists', match: [] as string[], exact: false, requiresAuth: false },
+  { href: '/creators', label: 'Artists', match: ['/creators'], exact: false, requiresAuth: false },
   { href: '/#bento', label: 'Collections', match: [] as string[], exact: false, requiresAuth: false },
   // Đấu giá và Phòng làm việc chỉ hiện khi đã đăng nhập.
   { href: '/auctions', label: 'Đấu giá', match: ['/auctions'], exact: false, requiresAuth: true },
@@ -36,6 +40,7 @@ export function SiteHeader() {
 
   const [searchOpen, setSearchOpen] = useState(false);
   const [keyword, setKeyword] = useState('');
+  const [suggestions, setSuggestions] = useState<SearchSuggestionsDto>({ categories: [], tags: [] });
   const [menuOpen, setMenuOpen] = useState(false);
 
   // Đổi trang thì đóng hết lớp phủ: điều chỉnh state ngay trong render khi `pathname`
@@ -76,6 +81,24 @@ export function SiteHeader() {
   useEffect(() => {
     if (searchOpen) searchInputRef.current?.focus();
   }, [searchOpen]);
+
+  // Gợi ý Danh mục lớn và Tag con theo từ khóa đang gõ.
+  useEffect(() => {
+    if (!searchOpen) return;
+    let active = true;
+    const timer = window.setTimeout(() => {
+      categoriesService
+        .getSearchSuggestions(keyword)
+        .then((res) => {
+          if (active) setSuggestions(res);
+        })
+        .catch(() => undefined);
+    }, 180);
+    return () => {
+      active = false;
+      window.clearTimeout(timer);
+    };
+  }, [keyword, searchOpen]);
 
   async function handleLogout() {
     setMenuOpen(false);
@@ -185,17 +208,52 @@ export function SiteHeader() {
                   </div>
                 </form>
 
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {['Tranh kỹ thuật số', 'Concept art', 'Phong cảnh'].map((suggestion) => (
-                    <button
-                      key={suggestion}
-                      type="button"
-                      onClick={() => setKeyword(suggestion)}
-                      className="rounded-full border border-white/10 px-3 py-1 text-[11px] text-[#c7c5cf] transition hover:border-[#c2c7f6]/40 hover:text-[#c2c7f6]"
-                    >
-                      {suggestion}
-                    </button>
-                  ))}
+                <div className="mt-3 space-y-2.5">
+                  {suggestions.categories.length > 0 && (
+                    <div>
+                      <p className="mb-1.5 text-[10px] font-bold uppercase tracking-wider text-[#A7ACD9]">
+                        Danh mục lớn
+                      </p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {suggestions.categories.map((cat) => (
+                          <button
+                            key={cat.id}
+                            type="button"
+                            onClick={() => {
+                              setSearchOpen(false);
+                              router.push(`/explore?category=${encodeURIComponent(cat.slug)}`);
+                            }}
+                            className="rounded-full border border-[#A7ACD9]/35 bg-[#A7ACD9]/15 px-3 py-1 text-[11px] font-semibold text-[#e4e1e5] transition hover:bg-[#A7ACD9]/25"
+                          >
+                            {cat.name}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {suggestions.tags.length > 0 && (
+                    <div>
+                      <p className="mb-1.5 text-[10px] font-bold uppercase tracking-wider text-[#919099]">
+                        Tag phổ biến
+                      </p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {suggestions.tags.map((tag) => (
+                          <button
+                            key={tag.id}
+                            type="button"
+                            onClick={() => {
+                              setSearchOpen(false);
+                              router.push(`/explore?tag=${encodeURIComponent(tag.name)}`);
+                            }}
+                            className="rounded-full border border-white/10 px-2.5 py-1 text-[11px] text-[#c7c5cf] transition hover:border-[#c2c7f6]/40 hover:text-[#c2c7f6]"
+                          >
+                            #{tag.name}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
