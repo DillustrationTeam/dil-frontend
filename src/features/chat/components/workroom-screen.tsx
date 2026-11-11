@@ -20,6 +20,7 @@ import {
   Lock,
   Maximize2,
   Paperclip,
+  Pencil,
   RefreshCw,
   Send,
   Scale,
@@ -48,6 +49,19 @@ import FinalDeliveryModal from '@/components/modals/FinalDeliveryModal';
 import CreatorReplyModal from '@/components/modals/CreatorReplyModal';
 import DisputeDetailsModal from '@/components/modals/DisputeDetailsModal';
 import ReviewRatingModal from '@/components/modals/ReviewRatingModal';
+import { ProtectedArtworkViewer } from '@/features/marketplace/components/protected-artwork-viewer';
+
+function parseReviewComment(raw?: string | null) {
+  if (!raw) return { userComment: '', tags: [] as string[] };
+  const match = raw.match(/\[(?:Điểm|Đặc điểm) nổi bật:\s*([^\]]+)\]/i);
+  if (!match) {
+    return { userComment: raw.trim(), tags: [] as string[] };
+  }
+  const tags = match[1].split(',').map((t) => t.trim()).filter(Boolean);
+  const userComment = raw.replace(match[0], '').trim();
+  return { userComment, tags };
+}
+
 import CancelRefundModal from '@/components/modals/CancelRefundModal';
 import RaiseDisputeModal from '@/components/modals/RaiseDisputeModal';
 import WorkroomTermsModal from '@/components/modals/WorkroomTermsModal';
@@ -113,6 +127,51 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
   const [showDisputeDetailsModal, setShowDisputeDetailsModal] = useState(false);
   const [acceptingTerms, setAcceptingTerms] = useState(false);
   const [termsError, setTermsError] = useState<string | null>(null);
+
+  // States & handlers cho tính năng đổi tên dự án (Workroom title)
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [editTitleInput, setEditTitleInput] = useState('');
+  const [isSavingTitle, setIsSavingTitle] = useState(false);
+  const [titleError, setTitleError] = useState<string | null>(null);
+
+  const handleStartEditTitle = useCallback(() => {
+    setEditTitleInput(room?.chatRoomTitle || commission?.title || '');
+    setTitleError(null);
+    setIsEditingTitle(true);
+  }, [room, commission]);
+
+  const handleCancelEditTitle = useCallback(() => {
+    setIsEditingTitle(false);
+    setTitleError(null);
+  }, []);
+
+  const handleSaveTitle = useCallback(async () => {
+    const trimmed = editTitleInput.trim();
+    if (!trimmed) {
+      setTitleError('Tên dự án không được để trống.');
+      return;
+    }
+    if (trimmed.length > 200) {
+      setTitleError('Tên dự án tối đa 200 ký tự.');
+      return;
+    }
+    if (!room?.commissionId) return;
+
+    try {
+      setIsSavingTitle(true);
+      setTitleError(null);
+      await commissionService.rename(room.commissionId, trimmed);
+
+      // Cập nhật state phòng và đơn hàng ngay lập tức
+      setRoom((prev) => (prev ? { ...prev, chatRoomTitle: trimmed } : prev));
+      setCommission((prev) => (prev ? { ...prev, title: trimmed } : prev));
+      setIsEditingTitle(false);
+    } catch (err: unknown) {
+      setTitleError(extractErrorMessage(err) || 'Không thể đổi tên dự án.');
+    } finally {
+      setIsSavingTitle(false);
+    }
+  }, [editTitleInput, room]);
 
   // Auto-detect clipping: Tự động nhận diện khoảng trống lề ngoài để thu gọn tab nếu bị khuất
   const binderRef = useRef<HTMLDivElement>(null);
@@ -546,8 +605,34 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
     }
   }
 
+  function formatEscrowDepositNotice(stage: number, isStaged: boolean, milestoneTitle?: string, amount?: number) {
+    const amountText = amount && amount > 0 ? ` (${amount.toLocaleString('vi-VN')}đ)` : '';
+    if (isStaged) {
+      return `🛡️ Khách hàng đã nạp ký quỹ Escrow cho Mốc #${stage}${milestoneTitle ? ` (${milestoneTitle})` : ''}${amountText}. Creator có thể bắt đầu vẽ Mốc #${stage}!`;
+    }
+    return `🛡️ Khách hàng đã nạp đủ 100% ký quỹ Escrow${amountText} cho toàn bộ đơn hàng. Creator có thể bắt đầu vẽ từ Mốc #1!`;
+  }
+
+  const checkoutNoticeSentRef = useRef(false);
+  useEffect(() => {
+    if (chat.status !== 'connected' || !commission || checkoutNoticeSentRef.current) return;
+    const params = new URLSearchParams(window.location.search);
+    const stageParam = params.get('depositedStage');
+    if (!stageParam) return;
+    checkoutNoticeSentRef.current = true;
+    const stage = Number(stageParam) || commission.currentStage || 1;
+    const isStaged = params.get('staged') === '1';
+    const amount = Number(params.get('depositAmount')) || 0;
+    const milestoneTitle = sortedMilestones.find((m) => m.sequence === stage)?.title;
+    void chat.sendMessage(formatEscrowDepositNotice(stage, isStaged, milestoneTitle, amount), 'SystemEvent').catch(() => null);
+    window.history.replaceState(null, '', window.location.pathname);
+  }, [chat, commission, sortedMilestones]);
+
   async function handleDepositEscrow() {
     if (!room?.commissionId || depositingEscrow) return;
+    const plannedAmount = (commission?.nextEscrowDepositAmount ?? 0) > 0
+      ? (commission?.nextEscrowDepositAmount ?? 0)
+      : (commission?.finalPrice ?? 0);
     setDepositingEscrow(true);
     setError(null);
     try {
@@ -556,7 +641,10 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
         setCommission(current => current ? { ...current, ...updated } : updated);
       }
       refresh();
-      void chat.sendMessage('🛡️ Khách hàng đã nạp tiền ký quỹ Escrow thành công. Creator có thể bắt đầu vẽ!').catch(() => null);
+      const stage = updated?.currentStage ?? commission?.currentStage ?? 1;
+      const isStaged = updated?.isStagedEscrow ?? commission?.isStagedEscrow ?? false;
+      const milestoneTitle = (updated?.milestones ?? sortedMilestones).find((m) => m.sequence === stage)?.title;
+      void chat.sendMessage(formatEscrowDepositNotice(stage, isStaged, milestoneTitle, plannedAmount), 'SystemEvent').catch(() => null);
     } catch (err: unknown) {
       setError(extractErrorMessage(err, 'Không thể nạp tiền ký quỹ Escrow.'));
     } finally {
@@ -835,7 +923,63 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                         <span className="rounded bg-brand-periwinkle/15 border border-brand-periwinkle/30 px-2 py-0.5 text-[10px] font-mono font-bold text-brand-periwinkle [clip-path:polygon(4px_0,100%_0,100%_calc(100%-4px),calc(100%-4px)_100%,0_100%,0_4px)]">
                           COMMISSION #CMD-{roomId.slice(0, 8).toUpperCase()}
                         </span>
-                        <h1 className="font-h1 font-bold text-sm text-on-surface line-clamp-1">{room.chatRoomTitle || 'Phòng trao đổi dự án'}</h1>
+                        {isEditingTitle ? (
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <input
+                              type="text"
+                              value={editTitleInput}
+                              onChange={(e) => {
+                                setEditTitleInput(e.target.value);
+                                if (titleError) setTitleError(null);
+                              }}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') void handleSaveTitle();
+                                if (e.key === 'Escape') handleCancelEditTitle();
+                              }}
+                              maxLength={200}
+                              disabled={isSavingTitle}
+                              autoFocus
+                              placeholder="Nhập tên dự án mới..."
+                              className="bg-black/80 border border-brand-periwinkle/80 rounded px-2.5 py-0.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand-periwinkle min-w-[200px] max-w-[340px]"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => void handleSaveTitle()}
+                              disabled={isSavingTitle || !editTitleInput.trim()}
+                              className="px-2 py-1 rounded bg-brand-periwinkle text-brand-navy hover:bg-[#c5c9f8] transition disabled:opacity-50 text-xs font-bold inline-flex items-center gap-1 shadow"
+                              title="Lưu tên mới (Enter)"
+                            >
+                              {isSavingTitle ? <RefreshCw size={12} className="animate-spin" /> : <Check size={12} />}
+                              <span>Lưu</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={handleCancelEditTitle}
+                              disabled={isSavingTitle}
+                              className="px-2 py-1 rounded text-outline hover:text-white hover:bg-white/10 transition text-xs inline-flex items-center gap-1"
+                              title="Hủy (Esc)"
+                            >
+                              <X size={12} />
+                              <span>Hủy</span>
+                            </button>
+                            {titleError && (
+                              <span className="text-[10px] text-red-400 font-normal">{titleError}</span>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-2">
+                            <h1 className="font-h1 font-bold text-sm text-on-surface line-clamp-1">{room.chatRoomTitle || 'Phòng trao đổi dự án'}</h1>
+                            <button
+                              type="button"
+                              onClick={handleStartEditTitle}
+                              className="inline-flex items-center gap-1 px-1.5 py-0.5 text-[11px] font-medium text-brand-periwinkle bg-brand-periwinkle/10 hover:bg-brand-periwinkle/20 border border-brand-periwinkle/30 rounded transition"
+                              title="Đổi tên dự án"
+                            >
+                              <Pencil size={11} />
+                              <span>Đổi tên</span>
+                            </button>
+                          </div>
+                        )}
                       </div>
                       <p className="text-[11px] text-on-surface-variant mt-0.5">
                         Thành viên: {room.members.map((m) => m.fullName || 'Người dùng').join(', ')}
@@ -989,6 +1133,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                       Các bản phác thảo (WIP) được xem thử trực quan ở khung bên phải. Tiền được bảo vệ an toàn trong Escrow và chỉ giải ngân khi bạn đồng ý duyệt từng mốc.
                     </p>
                   </div>
+
                 </div>
 
                 {/* DANH SÁCH TIN NHẮN REAL-TIME */}
@@ -1318,7 +1463,8 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                           <div className="flex items-center gap-2">
                             <button
                               type="button"
-                              disabled={!displayedMilestone}
+                              disabled={!displayedMilestone || commission?.escrowStatus === 'Pending'}
+                              title={commission?.escrowStatus === 'Pending' ? 'Chờ khách hàng nạp ký quỹ Escrow cho mốc này' : undefined}
                               onClick={() => setShowSubmitModal(true)}
                               className="commission-primary inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold shadow transition disabled:cursor-not-allowed disabled:opacity-40 [clip-path:polygon(0_0,calc(100%-6px)_0,100%_6px,100%_100%,6px_100%,0_calc(100%-6px))]"
                             >
@@ -1421,7 +1567,11 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                             <ShieldCheck size={18} />
                           </div>
                           <div>
-                            <p className="font-h1 font-bold text-amber-300 text-xs">Nạp tiền Escrow bảo đảm đơn hàng ({(commission.finalPrice ?? 0).toLocaleString('vi-VN')}đ)</p>
+                            <p className="font-h1 font-bold text-amber-300 text-xs">
+                              {commission.isStagedEscrow
+                                ? `Nạp tiền Escrow Mốc #${commission.currentStage ?? 1} (${((commission.nextEscrowDepositAmount ?? 0) > 0 ? (commission.nextEscrowDepositAmount ?? 0) : (commission.finalPrice ?? 0)).toLocaleString('vi-VN')}đ)`
+                                : `Nạp tiền Escrow bảo đảm đơn hàng (${(commission.finalPrice ?? 0).toLocaleString('vi-VN')}đ)`}
+                            </p>
                             <p className="mt-0.5 text-[11px] text-amber-200/80">
                               Khoản tiền sẽ được giữ an toàn bởi hệ thống và chỉ giải ngân cho họa sĩ sau khi bạn nghiệm thu từng mốc.
                             </p>
@@ -1444,21 +1594,24 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                         <div className="w-full h-full flex flex-col items-center justify-center relative space-y-3">
                           <div
                             onClick={() => setShowApprovalModal(true)}
-                            className="group relative cursor-pointer flex items-center justify-center max-h-[380px] w-full overflow-hidden border border-white/10 bg-black/60 p-2 transition duration-300 [clip-path:polygon(10px_0,calc(100%-10px)_0,100%_10px,100%_calc(100%-10px),calc(100%-10px)_100%,10px_100%,0_calc(100%-10px),0_10px)]"
+                            className="group relative cursor-pointer flex items-center justify-center max-h-[380px] w-full overflow-hidden rounded-xl border border-white/10 bg-[#141620] p-2 transition duration-300"
                           >
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img
-                              src={currentWipPreviewUrl}
+                            <ProtectedArtworkViewer
+                              artworkId={displayedMilestone?.id || commission?.id || roomId}
+                              fallbackImageUrl={currentWipPreviewUrl}
                               alt={displayedMilestone?.title || 'Bản vẽ phác thảo'}
-                              style={{ transform: `scale(${zoomScale})` }}
-                              className="max-h-[360px] w-full object-contain transition duration-300 group-hover:scale-[1.02]"
+                              fitMode="contain"
+                              skipViewSession
+                              showWatermarkBadge={false}
+                              onOpenLightbox={() => setShowApprovalModal(true)}
+                              className="h-[340px] w-full rounded-lg bg-[#141620]"
                             />
 
-                            <div className="absolute top-3 left-3 flex items-center gap-1.5 border border-emerald-400/40 bg-black/80 px-2.5 py-1 text-[10px] font-bold text-emerald-300 backdrop-blur-md [clip-path:polygon(4px_0,100%_0,100%_calc(100%-4px),calc(100%-4px)_100%,0_100%,0_4px)]">
+                            <div className="pointer-events-none absolute top-3 left-3 z-10 flex items-center gap-1.5 rounded-md border border-emerald-400/40 bg-black/80 px-2.5 py-1 text-[10px] font-bold text-emerald-300">
                               <ShieldCheck size={12} className="text-emerald-400" /> Bản phác thảo xem thử
                             </div>
 
-                            <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 backdrop-blur-[2px] transition duration-200 group-hover:opacity-100">
+                            <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center bg-black/55 opacity-0 transition duration-200 group-hover:opacity-100">
                               <span className="commission-primary inline-flex items-center gap-2 px-4 py-2 text-xs font-bold shadow-lg [clip-path:polygon(0_0,calc(100%-8px)_0,100%_8px,100%_100%,8px_100%,0_calc(100%-8px))]">
                                 <Maximize2 size={16} /> Xem chi tiết &amp; Phản hồi Mốc #{displayedMilestone?.sequence}
                               </span>
@@ -1497,11 +1650,12 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                           {isCreator && (
                             <button
                               type="button"
-                            disabled={!displayedMilestone}
+                            disabled={!displayedMilestone || commission?.escrowStatus === 'Pending'}
+                              title={commission?.escrowStatus === 'Pending' ? 'Chờ khách hàng nạp ký quỹ Escrow cho mốc này' : undefined}
                               onClick={() => setShowSubmitModal(true)}
                             className="commission-primary inline-flex items-center gap-2 px-4 py-2 text-xs font-bold shadow-md transition disabled:cursor-not-allowed disabled:opacity-40 [clip-path:polygon(0_0,calc(100%-6px)_0,100%_6px,100%_100%,6px_100%,0_calc(100%-6px))]"
                             >
-                              <UploadCloud size={15} /> Tải phác thảo Mốc #{displayedMilestone?.sequence ?? 1}
+                              <UploadCloud size={15} /> {commission?.escrowStatus === 'Pending' ? `Chờ ký quỹ Mốc #${displayedMilestone?.sequence ?? 1}` : `Tải phác thảo Mốc #${displayedMilestone?.sequence ?? 1}`}
                             </button>
                           )}
                         </div>
@@ -1531,8 +1685,20 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                             <div className="flex items-center gap-3">
                               <FileArchive size={24} className="text-emerald-400" />
                               <div>
-                                <p className="text-xs font-bold text-emerald-300">File gốc HD đã được bàn giao!</p>
-                                <p className="text-[10px] text-emerald-200/80">Bấm để nghiệm thu &amp; tải tệp về thiết bị.</p>
+                                <p className="text-xs font-bold text-emerald-300">
+                                  {commissionStatus === 'Completed'
+                                    ? 'Sản phẩm gốc HD đã nghiệm thu!'
+                                    : isCreator
+                                      ? 'Đã tải tệp lên Kho Bàn giao (chờ khách nghiệm thu)'
+                                      : 'File gốc HD đã được bàn giao!'}
+                                </p>
+                                <p className="text-[10px] text-emerald-200/80">
+                                  {commissionStatus === 'Completed'
+                                    ? 'Bấm để mở lại Kho Tệp Gốc & Chứng thư.'
+                                    : isCreator
+                                      ? 'Bấm để xem, thêm hoặc gỡ tệp trước khi khách hàng xác nhận hoàn tất.'
+                                      : 'Bấm để tải kiểm tra kỹ từng tệp & xác nhận hoàn tất đơn hàng.'}
+                                </p>
                               </div>
                             </div>
                             <Download size={16} className="text-emerald-300" />
@@ -1552,37 +1718,67 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                           </div>
                         )}
 
-                        {/* ĐÁNH GIÁ CỦA KHÁCH & PHẢN HỒI CỦA CREATOR TRONG WORKROOM */}
-                        {commission?.review && (
-                          <div className="mt-3 border border-white/10 bg-white/[0.03] p-3.5 rounded-xl space-y-2.5 text-xs text-slate-300">
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-1.5">
-                                <span className="text-amber-400 font-bold">★ {commission.review.rating}/5</span>
-                                <span className="font-semibold text-white">Đánh giá của khách hàng</span>
-                              </div>
-                              {commission.review.createdAt && (
-                                <span className="text-[10px] text-slate-500">{new Date(commission.review.createdAt).toLocaleDateString('vi-VN')}</span>
-                              )}
-                            </div>
-                            {commission.review.comment && (
-                              <p className="text-white/90 italic bg-black/20 p-2.5 rounded-lg border border-white/5">&ldquo;{commission.review.comment}&rdquo;</p>
-                            )}
-                            {commission.review.reviewerReply ? (
-                              <div className="border-l-2 border-[#A7ACD9] pl-3 py-1 space-y-0.5">
-                                <p className="text-[11px] font-semibold text-[#A7ACD9]">Phản hồi từ Creator:</p>
-                                <p className="text-white/90">{commission.review.reviewerReply}</p>
-                              </div>
-                            ) : isCreator ? (
-                              <button
-                                type="button"
-                                onClick={() => setShowReplyModal(true)}
-                                className="w-full py-1.5 px-3 rounded-lg bg-[#A7ACD9]/20 hover:bg-[#A7ACD9]/30 border border-[#A7ACD9]/40 text-[#C5C9F8] font-semibold text-xs transition"
-                              >
-                                💬 Trả lời đánh giá này
-                              </button>
-                            ) : null}
-                          </div>
+                        {commissionStatus === 'Completed' && (
+                          <p className="text-[11px] text-emerald-300/85">
+                            Chứng thư Bản quyền Số đã được gửi qua Gmail và đính kèm ngay trong Kho Tệp Bàn giao ở trên.
+                          </p>
                         )}
+                        
+                        {commission?.review && (() => {
+                          const { userComment, tags } = parseReviewComment(commission.review.comment);
+                          return (
+                            <div className="mt-3 border border-white/10 bg-[#111420]/80 p-4 rounded-2xl space-y-3 text-xs text-slate-300 shadow-lg">
+                              <div className="flex items-center justify-between pb-2.5 border-b border-white/10">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-amber-400 font-bold text-sm">★ {commission.review.rating}/5</span>
+                                  <span className="font-semibold text-white">Đánh giá từ khách hàng</span>
+                                </div>
+                                {commission.review.createdAt && (
+                                  <span className="text-[11px] text-slate-400 font-medium">
+                                    {new Date(commission.review.createdAt).toLocaleDateString('vi-VN')}
+                                  </span>
+                                )}
+                              </div>
+
+                              {/* Highlight Tags Badges */}
+                              {tags.length > 0 && (
+                                <div className="flex flex-wrap gap-1.5">
+                                  {tags.map((tag, idx) => (
+                                    <span
+                                      key={idx}
+                                      className="inline-flex items-center px-2.5 py-1 rounded-lg bg-[#A7ACD9]/15 border border-[#A7ACD9]/30 text-[11px] font-medium text-[#C5C9F8]"
+                                    >
+                                      {tag}
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
+
+                              {/* Clean User Comment */}
+                              {userComment && (
+                                <p className="text-white/95 text-xs leading-relaxed bg-black/40 p-3 rounded-xl border border-white/5">
+                                  &ldquo;{userComment}&rdquo;
+                                </p>
+                              )}
+
+                              {/* Creator Response */}
+                              {commission.review.reviewerReply ? (
+                                <div className="border-l-2 border-[#A7ACD9] pl-3 py-1 space-y-1 bg-white/[0.02] rounded-r-xl">
+                                  <p className="text-[11px] font-semibold text-[#A7ACD9]">Phản hồi từ Creator:</p>
+                                  <p className="text-white/90 text-xs leading-relaxed">{commission.review.reviewerReply}</p>
+                                </div>
+                              ) : isCreator ? (
+                                <button
+                                  type="button"
+                                  onClick={() => setShowReplyModal(true)}
+                                  className="w-full py-2 px-3 rounded-xl bg-[#A7ACD9]/20 hover:bg-[#A7ACD9]/30 border border-[#A7ACD9]/40 text-[#C5C9F8] font-semibold text-xs transition active:scale-98"
+                                >
+                                  💬 Trả lời đánh giá này
+                                </button>
+                              ) : null}
+                            </div>
+                          );
+                        })()}
                       </div>
                     </div>
                   </>
@@ -1620,9 +1816,10 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                               {commission?.escrowStatus === 'Released'
                                 ? 'Đã giải ngân (Hoàn tất)'
                                 : commission?.escrowStatus === 'PartialReleased'
-                                  ? 'Đã nạp (Đang giải ngân)'
+
+                                    ? (commission.isStagedEscrow ? `Đang giữ ${(commission.escrowHeldAmount ?? 0).toLocaleString('vi-VN')}đ (Đã trả ${(commission.disbursedAmount ?? 0).toLocaleString('vi-VN')}đ)` : 'Đã nạp (Đang giải ngân)')
                                   : commission?.escrowStatus === 'Deposited'
-                                    ? 'Đã nạp Escrow'
+                                    ? (commission.isStagedEscrow ? `Đã nạp Mốc #${commission.currentStage ?? 1} (${(commission.escrowHeldAmount ?? 0).toLocaleString('vi-VN')}đ)` : 'Đã nạp Escrow')
                                     : commission?.escrowStatus === 'Refunded'
                                       ? 'Đã hoàn tiền'
                                       : 'Chờ nạp Escrow'}
@@ -1761,10 +1958,16 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
             commissionId={room.commissionId}
             milestoneId={displayedMilestone.id}
             milestoneTitle={displayedMilestone.title}
-            onSuccess={() => {
+            isRevision={displayedMilestone.status === 'RevisionRequested'}
+            onSuccess={(action) => {
+              const seq = displayedMilestone?.sequence ?? 1;
+              const title = displayedMilestone?.title || 'bản vẽ phác thảo';
               setShowSubmitModal(false);
               refresh();
-              void chat.sendMessage(`🎨 Creator đã nộp bản phác thảo cho mốc: ${displayedMilestone?.title || 'bản vẽ phác thảo mới'}`, 'SystemEvent').catch(() => null);
+              const msg = action === 'resubmitted'
+                ? `🎨 Creator đã gửi lại bản phác thảo chỉnh sửa cho Mốc #${seq} (${title}). Khách hàng vui lòng kiểm tra & phản hồi (tự động duyệt sau 72h nếu chưa có phản hồi).`
+                : `🎨 Creator đã nộp bản phác thảo Mốc #${seq} (${title}). Khách hàng vui lòng kiểm tra & phản hồi (tự động duyệt sau 72h nếu chưa có phản hồi).`;
+              void chat.sendMessage(msg, 'SystemEvent').catch(() => null);
             }}
           />}
 
@@ -1781,10 +1984,25 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
             revisionFeedback={displayedMilestone?.revisionFeedback}
             milestoneStatus={displayedMilestone?.status}
             onOpenSubmitModal={() => setShowSubmitModal(true)}
-            onSuccess={() => {
+            onSuccess={({ action, feedback }) => {
+              const seq = displayedMilestone?.sequence ?? 1;
+              const title = displayedMilestone?.title || `Mốc #${seq}`;
+              const nextMilestone = sortedMilestones.find((m) => m.sequence === seq + 1);
               setShowApprovalModal(false);
               refresh();
-              void chat.sendMessage('🔄 Tiến độ mốc hợp đồng vừa meow cập nhật.', 'SystemEvent').catch(() => null);
+              let msg: string;
+              if (action === 'revision_requested') {
+                const cleanNote = feedback?.trim();
+                const preview = cleanNote ? (cleanNote.length > 160 ? `${cleanNote.slice(0, 157)}...` : cleanNote) : '';
+                msg = `✏️ Khách hàng đã yêu cầu chỉnh sửa Mốc #${seq} (${title})${preview ? `: "${preview}"` : '.'}`;
+              } else if (!nextMilestone) {
+                msg = `✅ Khách hàng đã duyệt Mốc #${seq} (${title}) — toàn bộ các mốc đã hoàn tất! Creator có thể gửi file hoàn chỉnh (HD) ngay.`;
+              } else if (commission?.isStagedEscrow) {
+                msg = `✅ Khách hàng đã duyệt Mốc #${seq} (${title}) và giải ngân cho Creator. Sang Mốc #${nextMilestone.sequence} (${nextMilestone.title}) — khách hàng vui lòng nạp ký quỹ Mốc #${nextMilestone.sequence} để Creator tiếp tục.`;
+              } else {
+                msg = `✅ Khách hàng đã duyệt Mốc #${seq} (${title}) và giải ngân cho Creator. Creator có thể tiếp tục thực hiện Mốc #${nextMilestone.sequence} (${nextMilestone.title}).`;
+              }
+              void chat.sendMessage(msg, 'SystemEvent').catch(() => null);
             }}
           />
 
@@ -1794,11 +2012,20 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
             commissionId={room.commissionId}
             isCreator={isCreator}
             commissionStatus={commissionStatus}
+            commission={commission}
             onOpenReviewModal={() => setShowReviewModal(true)}
-            onSuccess={() => {
-              setShowDeliveryModal(false);
+            onSuccess={({ action, summary }) => {
+              if (action !== 'deleted') setShowDeliveryModal(false);
               refresh();
-              void chat.sendMessage('📦 Trạng thái bàn giao File gốc HD vừa được cập nhật!', 'SystemEvent').catch(() => null);
+              const msg = action === 'completed'
+                ? '🎉 Khách hàng đã xác nhận nghiệm thu file hoàn chỉnh — đơn hàng đã hoàn tất và chứng thư bản quyền đã được cấp!'
+                : action === 'deleted'
+                ? `🗑️ Creator đã gỡ tệp "${summary || ''}" khỏi Kho Bàn giao. Khách hàng vui lòng kiểm tra lại danh sách tệp mới nhất trước khi xác nhận.`
+                : `📦 Creator đã cập nhật Kho Bàn giao${summary ? ` (${summary})` : ''}. Khách hàng vui lòng tải về và mở kiểm tra kỹ từng tệp trước khi xác nhận hoàn tất.`;
+              void chat.sendMessage(msg, 'SystemEvent').catch(() => null);
+              if (action === 'completed' && !isCreator && !commission?.review) {
+                setShowReviewModal(true);
+              }
             }}
           />
 
@@ -1806,7 +2033,8 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
             isOpen={showReviewModal}
             onClose={() => setShowReviewModal(false)}
             commissionId={room.commissionId}
-            creatorName="Linh Nguyen"
+            creatorName={partnerDisplayName || commission?.creatorName || 'Creator'}
+            existingReview={commission?.review}
             onReviewSubmitted={() => {
               setShowReviewModal(false);
               refresh();
@@ -1819,9 +2047,16 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
             commissionId={room.commissionId}
             commission={commission}
             currentUserId={userId}
-            onSuccess={() => {
+            onSuccess={(action) => {
               setShowCancelModal(false);
               refresh();
+              const msgMap = {
+                cancelled_immediately: '🚫 Đơn hàng đã được hủy theo chính sách và hoàn trả phần ký quỹ Escrow còn lại.',
+                cancel_requested: '⏳ Đã gửi yêu cầu hủy đơn. Đối tác có 48 giờ để đồng ý hoặc từ chối.',
+                cancel_approved: '✅ Yêu cầu hủy đơn đã được chấp thuận — đơn hàng đã hủy và hoàn trả phần Escrow còn lại.',
+                cancel_rejected: '↩️ Yêu cầu hủy đơn đã bị từ chối — đơn hàng tiếp tục được thực hiện.',
+              } as const;
+              void chat.sendMessage(msgMap[action], 'SystemEvent').catch(() => null);
             }}
           />
 
@@ -1837,14 +2072,13 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
           />
 
           {commission && (currentMemberRole === 'client' || currentMemberRole === 'creator') && (
-            <section className="mt-4 space-y-3 rounded-2xl border border-white/10 bg-white/[.03] p-4">
-              {(commission.dispute || commission.status === 'Cancelled' || commission.status === 'Disputed') && (
+            (commission.dispute || commission.status === 'Cancelled' || commission.status === 'Disputed') ? (
+              <section className="mt-4 space-y-3 rounded-2xl border border-white/10 bg-white/[.03] p-4">
                 <button type="button" onClick={() => setShowDisputeDetailsModal(true)} className="rounded-xl border border-[#A7ACD9]/40 px-4 py-2 text-sm text-[#C5C9F8] hover:bg-white/10 transition">
                   Xem hồ sơ &amp; kết quả tranh chấp
                 </button>
-              )}
-              {commission.review && <div className="space-y-2 text-sm text-slate-300"><p className="font-semibold text-white">Đánh giá của khách: {commission.review.rating}/5</p>{commission.review.comment && <p>{commission.review.comment}</p>}{commission.review.reviewerReply ? <p className="border-l-2 border-[#A7ACD9] pl-3">Phản hồi của Creator: {commission.review.reviewerReply}</p> : currentMemberRole === 'creator' && commission.status === 'Completed' ? <button type="button" onClick={() => setShowReplyModal(true)} className="rounded-xl border border-white/15 px-4 py-2">Trả lời đánh giá</button> : null}</div>}
-            </section>
+              </section>
+            ) : null
           )}
           {showDisputeDetailsModal && <DisputeDetailsModal key={room.commissionId} isOpen commissionId={room.commissionId} initialDispute={commission?.dispute} onClose={() => setShowDisputeDetailsModal(false)} />}
           {showReplyModal && <CreatorReplyModal isOpen commissionId={room.commissionId} reviewComment={commission?.review?.comment} reviewRating={commission?.review?.rating} onClose={() => setShowReplyModal(false)} onSuccess={() => { setShowReplyModal(false); refresh(); }} />}
@@ -1858,6 +2092,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
               onConfirm={handleAcceptWorkroomTerms}
             />
           )}
+
         </>
       )}
     </div>

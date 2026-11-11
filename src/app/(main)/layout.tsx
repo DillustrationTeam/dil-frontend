@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState } from 'react';
 import Link from 'next/link';
@@ -33,6 +33,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         <Link href="/client/commissions" className="shrink-0 rounded-lg bg-white/5 px-3 py-2">My commissions</Link>
         {isCreator && <Link href="/creator/commissions" className="shrink-0 rounded-lg bg-white/5 px-3 py-2">Creator studio</Link>}
         <Link href="/wallet" className="shrink-0 rounded-lg bg-white/5 px-3 py-2">Wallet</Link>
+        <Link href="/forensic" className="shrink-0 rounded-lg bg-white/5 px-3 py-2">Thuỷ vân</Link>
       </nav>}
 
       {/* Main Body with Sidebar + Content */}

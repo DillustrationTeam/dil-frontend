@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React from 'react';
 import Link from 'next/link';
@@ -10,6 +10,7 @@ const QUICK_SCREENS = [
   { label: 'Creator Apps', href: '/admin/creator-verifications' },
   { label: 'Arbitration', href: '/admin/disputes' },
   { label: 'Fee Policy', href: '/admin/fee-policy' },
+  { label: 'Forensic Watermark', href: '/admin/forensic' },
   { label: 'Admin KPIs', href: '/admin' },
 ];
 

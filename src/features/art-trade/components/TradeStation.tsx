@@ -21,6 +21,8 @@ import {
   Gavel,
   ShieldAlert,
   MessageSquare,
+  RefreshCw,
+  Trash2,
 } from 'lucide-react';
 import { ArtTradeDto, TradeStatus } from '@/types/art-trade.types';
 import { artTradeService } from '@/services/art-trade.service';
@@ -51,6 +53,7 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
   const [trade, setTrade] = useState<ArtTradeDto | null>(initialData ?? null);
   const [loading, setLoading] = useState<boolean>(!initialData && !!tradeId && isValidGuid(tradeId));
   const [uploadingSide, setUploadingSide] = useState<'initiator' | 'receiver' | null>(null);
+  const [removingSide, setRemovingSide] = useState<'initiator' | 'receiver' | null>(null);
   const [confirming, setConfirming] = useState<boolean>(false);
   const [respondingProposal, setRespondingProposal] = useState<boolean>(false);
   const [sideBNote, setSideBNote] = useState<string>('');
@@ -274,7 +277,7 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
     }
   };
 
-  // Handle artwork submission upload
+  // Handle artwork submission upload / replacement
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>, side: 'initiator' | 'receiver') => {
     const file = event.target.files?.[0];
     if (!file || !trade?.id) return;
@@ -289,6 +292,35 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
       toast.error(isVie ? 'Tải tranh lên thất bại. Vui lòng kiểm tra định dạng file (PNG, JPG, PSD, CLIP).' : 'Failed to upload artwork. Please verify format (PNG, JPG, PSD, CLIP).');
     } finally {
       setUploadingSide(null);
+      event.target.value = '';
+    }
+  };
+
+  // Handle removing submitted artwork to replace with another
+  const handleRemoveArtwork = async (side: 'initiator' | 'receiver') => {
+    if (!trade?.id) return;
+    const confirmed = window.confirm(
+      isVie
+        ? 'Bạn có chắc chắn muốn gỡ bỏ tác phẩm này để thay thế bằng tranh khác?'
+        : 'Are you sure you want to remove this artwork to replace it with a different one?'
+    );
+    if (!confirmed) return;
+
+    try {
+      setRemovingSide(side);
+      const updated = await artTradeService.removeArtwork(trade.id);
+      setTrade(updated);
+      toast.success(
+        isVie
+          ? 'Đã gỡ tranh thành công. Bạn có thể tải lên tác phẩm mới!'
+          : 'Artwork removed successfully. You can now upload a new artwork!'
+      );
+    } catch (err: unknown) {
+      console.error(err);
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      toast.error(msg || (isVie ? 'Gỡ tranh thất bại.' : 'Failed to remove artwork.'));
+    } finally {
+      setRemovingSide(null);
     }
   };
 
@@ -316,9 +348,27 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
     }
   };
 
-  // Handle confirmation
+  // Handle satisfaction confirmation (Only the logged-in participant can confirm their own side)
   const handleConfirmSatisfaction = async (side: 'initiator' | 'receiver') => {
     if (!trade?.id) return;
+
+    if (side === 'initiator' && !isCurrentUserInitiator) {
+      toast.error(isVie ? 'Bạn không thể xác nhận thay cho đối tác.' : 'You cannot confirm on behalf of your partner.');
+      return;
+    }
+    if (side === 'receiver' && !isCurrentUserReceiver) {
+      toast.error(isVie ? 'Bạn không thể xác nhận thay cho đối tác.' : 'You cannot confirm on behalf of your partner.');
+      return;
+    }
+
+    if (side === 'initiator' && (!trade.receiverSubmittedAt || !trade.receiverPreviewUrl)) {
+      toast.error(isVie ? 'Đối tác chưa nộp tác phẩm, bạn chưa thể xác nhận hài lòng.' : 'Partner has not submitted artwork yet.');
+      return;
+    }
+    if (side === 'receiver' && (!trade.initiatorSubmittedAt || !trade.initiatorPreviewUrl)) {
+      toast.error(isVie ? 'Đối tác chưa nộp tác phẩm, bạn chưa thể xác nhận hài lòng.' : 'Partner has not submitted artwork yet.');
+      return;
+    }
 
     try {
       setConfirming(true);
@@ -1212,6 +1262,17 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
               )}
             </div>
 
+            {/* Hidden File Input for Side A (Mounted whenever isCurrentUserInitiator) */}
+            {isCurrentUserInitiator && (
+              <input
+                type="file"
+                ref={initiatorFileInputRef}
+                accept=".png,.jpg,.jpeg,.psd,.clip"
+                className="hidden"
+                onChange={(e) => handleFileUpload(e, 'initiator')}
+              />
+            )}
+
             {/* Round-cornered Square Container */}
             <div className="relative aspect-square w-full rounded-2xl md:rounded-3xl border-2 border-white/10 bg-[#161722] overflow-hidden group shadow-2xl flex flex-col items-center justify-center">
               {trade.initiatorPreviewUrl ? (
@@ -1248,6 +1309,41 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
                       </div>
                     </>
                   )}
+
+                  {/* Replace / Remove Artwork Overlay Controls for Current User */}
+                  {isCurrentUserInitiator && !isWatermarkRemoved && trade.status !== 'Cancelled' && trade.status !== 'Rejected' && !isDisputed && (
+                    <div className="absolute bottom-3 left-3 right-3 flex items-center justify-center gap-2 z-20">
+                      <button
+                        type="button"
+                        onClick={() => initiatorFileInputRef.current?.click()}
+                        disabled={uploadingSide === 'initiator' || removingSide === 'initiator'}
+                        className="px-3 py-1.5 rounded-xl bg-black/80 hover:bg-black/95 backdrop-blur-md border border-white/20 text-xs font-semibold text-white flex items-center gap-1.5 shadow-lg transition hover:scale-105 cursor-pointer disabled:opacity-50"
+                        title={isVie ? 'Thay thế bằng file tranh khác' : 'Replace with another artwork file'}
+                      >
+                        {uploadingSide === 'initiator' ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        ) : (
+                          <RefreshCw className="w-3.5 h-3.5 text-indigo-400" />
+                        )}
+                        <span>{isVie ? 'Thay đổi tranh' : 'Replace Art'}</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveArtwork('initiator')}
+                        disabled={uploadingSide === 'initiator' || removingSide === 'initiator'}
+                        className="px-3 py-1.5 rounded-xl bg-red-950/80 hover:bg-red-900/90 backdrop-blur-md border border-red-500/30 text-xs font-semibold text-red-200 flex items-center gap-1.5 shadow-lg transition hover:scale-105 cursor-pointer disabled:opacity-50"
+                        title={isVie ? 'Gỡ bỏ tranh đã nộp' : 'Remove submitted artwork'}
+                      >
+                        {removingSide === 'initiator' ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        ) : (
+                          <Trash2 className="w-3.5 h-3.5 text-red-400" />
+                        )}
+                        <span>{isVie ? 'Gỡ tranh' : 'Remove'}</span>
+                      </button>
+                    </div>
+                  )}
                 </>
               ) : (
                 /* Empty / Upload State for Side A */
@@ -1264,13 +1360,6 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
 
                   {isCurrentUserInitiator && (
                     <>
-                      <input
-                        type="file"
-                        ref={initiatorFileInputRef}
-                        accept=".png,.jpg,.jpeg,.psd,.clip"
-                        className="hidden"
-                        onChange={(e) => handleFileUpload(e, 'initiator')}
-                      />
                       <button
                         type="button"
                         onClick={() => initiatorFileInputRef.current?.click()}
@@ -1314,6 +1403,17 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
               )}
             </div>
 
+            {/* Hidden File Input for Side B (Mounted whenever isCurrentUserReceiver) */}
+            {isCurrentUserReceiver && (
+              <input
+                type="file"
+                ref={receiverFileInputRef}
+                accept=".png,.jpg,.jpeg,.psd,.clip"
+                className="hidden"
+                onChange={(e) => handleFileUpload(e, 'receiver')}
+              />
+            )}
+
             {/* Round-cornered Square Container */}
             <div className="relative aspect-square w-full rounded-2xl md:rounded-3xl border-2 border-white/10 bg-[#161722] overflow-hidden group shadow-2xl flex flex-col items-center justify-center">
               {trade.receiverPreviewUrl ? (
@@ -1350,6 +1450,41 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
                       </div>
                     </>
                   )}
+
+                  {/* Replace / Remove Artwork Overlay Controls for Current User */}
+                  {isCurrentUserReceiver && !isWatermarkRemoved && trade.status !== 'Cancelled' && trade.status !== 'Rejected' && !isDisputed && (
+                    <div className="absolute bottom-3 left-3 right-3 flex items-center justify-center gap-2 z-20">
+                      <button
+                        type="button"
+                        onClick={() => receiverFileInputRef.current?.click()}
+                        disabled={uploadingSide === 'receiver' || removingSide === 'receiver'}
+                        className="px-3 py-1.5 rounded-xl bg-black/80 hover:bg-black/95 backdrop-blur-md border border-white/20 text-xs font-semibold text-white flex items-center gap-1.5 shadow-lg transition hover:scale-105 cursor-pointer disabled:opacity-50"
+                        title={isVie ? 'Thay thế bằng file tranh khác' : 'Replace with another artwork file'}
+                      >
+                        {uploadingSide === 'receiver' ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        ) : (
+                          <RefreshCw className="w-3.5 h-3.5 text-purple-400" />
+                        )}
+                        <span>{isVie ? 'Thay đổi tranh' : 'Replace Art'}</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveArtwork('receiver')}
+                        disabled={uploadingSide === 'receiver' || removingSide === 'receiver'}
+                        className="px-3 py-1.5 rounded-xl bg-red-950/80 hover:bg-red-900/90 backdrop-blur-md border border-red-500/30 text-xs font-semibold text-red-200 flex items-center gap-1.5 shadow-lg transition hover:scale-105 cursor-pointer disabled:opacity-50"
+                        title={isVie ? 'Gỡ bỏ tranh đã nộp' : 'Remove submitted artwork'}
+                      >
+                        {removingSide === 'receiver' ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        ) : (
+                          <Trash2 className="w-3.5 h-3.5 text-red-400" />
+                        )}
+                        <span>{isVie ? 'Gỡ tranh' : 'Remove'}</span>
+                      </button>
+                    </div>
+                  )}
                 </>
               ) : (
                 /* Empty / Upload State for Side B */
@@ -1366,13 +1501,6 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
 
                   {isCurrentUserReceiver && (
                     <>
-                      <input
-                        type="file"
-                        ref={receiverFileInputRef}
-                        accept=".png,.jpg,.jpeg,.psd,.clip"
-                        className="hidden"
-                        onChange={(e) => handleFileUpload(e, 'receiver')}
-                      />
                       <button
                         type="button"
                         onClick={() => receiverFileInputRef.current?.click()}
@@ -1402,9 +1530,9 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
           </div>
         </div>
 
-        {/* TWO PARTS FOR CONFIRMATION BUTTONS FOR BOTH PARTIES — Both can confirm satisfaction at the same time */}
+        {/* TWO PARTS FOR CONFIRMATION BUTTONS FOR BOTH PARTIES — Each party only confirms their own satisfaction */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-white/10">
-          {/* Confirmation Part A (For Participant 1) */}
+          {/* Confirmation Part A (For Participant 1: Initiator confirms partner's work) */}
           <div className="glass-panel p-5 rounded-2xl border border-white/5 bg-white/[0.02] flex flex-col justify-between">
             <div className="flex items-center justify-between mb-3">
               <span className="text-xs font-semibold text-indigo-300">
@@ -1424,23 +1552,39 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
                 <CheckCircle2 className="w-4 h-4 text-emerald-400" />
                 <span>Confirmed Satisfaction</span>
               </div>
-            ) : (
-              <button
-                type="button"
-                onClick={() => handleConfirmSatisfaction('initiator')}
-                disabled={confirming || isDisputed}
-                className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold tracking-wide uppercase shadow-lg shadow-emerald-900/30 transition flex items-center justify-center gap-2 disabled:opacity-40 disabled:pointer-events-none cursor-pointer"
-              >
-                {confirming ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" /> Processing...
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle2 className="w-4 h-4" /> Confirm Satisfaction
-                  </>
+            ) : isCurrentUserInitiator ? (
+              <>
+                <button
+                  type="button"
+                  onClick={() => handleConfirmSatisfaction('initiator')}
+                  disabled={confirming || isDisputed || !trade.receiverSubmittedAt}
+                  className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold tracking-wide uppercase shadow-lg shadow-emerald-900/30 transition flex items-center justify-center gap-2 disabled:opacity-40 disabled:pointer-events-none cursor-pointer"
+                >
+                  {confirming ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" /> Processing...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 className="w-4 h-4" /> Confirm Satisfaction
+                    </>
+                  )}
+                </button>
+                {!trade.receiverSubmittedAt && (
+                  <p className="text-[11px] text-amber-400/80 mt-2 text-center">
+                    {isVie ? 'Chờ đối tác nộp tác phẩm để xem trước và xác nhận' : 'Waiting for partner to submit artwork before confirming'}
+                  </p>
                 )}
-              </button>
+              </>
+            ) : (
+              <div className="w-full py-3 px-4 rounded-xl bg-white/[0.03] border border-white/10 text-gray-400 text-xs font-medium flex items-center justify-center gap-2">
+                <Clock className="w-4 h-4 text-gray-500" />
+                <span>
+                  {isVie
+                    ? `Đang chờ ${trade.initiator.fullName} xác nhận`
+                    : `Waiting for ${trade.initiator.fullName} to confirm`}
+                </span>
+              </div>
             )}
             {isDisputed && !trade.isInitiatorConfirmed && (
               <p className="text-[11px] text-red-400 mt-2 text-center">
@@ -1449,7 +1593,7 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
             )}
           </div>
 
-          {/* Confirmation Part B (For Participant 2) */}
+          {/* Confirmation Part B (For Participant 2: Receiver confirms partner's work) */}
           <div className="glass-panel p-5 rounded-2xl border border-white/5 bg-white/[0.02] flex flex-col justify-between">
             <div className="flex items-center justify-between mb-3">
               <span className="text-xs font-semibold text-purple-300">
@@ -1469,23 +1613,39 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
                 <CheckCircle2 className="w-4 h-4 text-emerald-400" />
                 <span>Confirmed Satisfaction</span>
               </div>
-            ) : (
-              <button
-                type="button"
-                onClick={() => handleConfirmSatisfaction('receiver')}
-                disabled={confirming || isDisputed}
-                className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold tracking-wide uppercase shadow-lg shadow-emerald-900/30 transition flex items-center justify-center gap-2 disabled:opacity-40 disabled:pointer-events-none cursor-pointer"
-              >
-                {confirming ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" /> Processing...
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle2 className="w-4 h-4" /> Confirm Satisfaction
-                  </>
+            ) : isCurrentUserReceiver ? (
+              <>
+                <button
+                  type="button"
+                  onClick={() => handleConfirmSatisfaction('receiver')}
+                  disabled={confirming || isDisputed || !trade.initiatorSubmittedAt}
+                  className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold tracking-wide uppercase shadow-lg shadow-emerald-900/30 transition flex items-center justify-center gap-2 disabled:opacity-40 disabled:pointer-events-none cursor-pointer"
+                >
+                  {confirming ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" /> Processing...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 className="w-4 h-4" /> Confirm Satisfaction
+                    </>
+                  )}
+                </button>
+                {!trade.initiatorSubmittedAt && (
+                  <p className="text-[11px] text-amber-400/80 mt-2 text-center">
+                    {isVie ? 'Chờ đối tác nộp tác phẩm để xem trước và xác nhận' : 'Waiting for partner to submit artwork before confirming'}
+                  </p>
                 )}
-              </button>
+              </>
+            ) : (
+              <div className="w-full py-3 px-4 rounded-xl bg-white/[0.03] border border-white/10 text-gray-400 text-xs font-medium flex items-center justify-center gap-2">
+                <Clock className="w-4 h-4 text-gray-500" />
+                <span>
+                  {isVie
+                    ? `Đang chờ ${trade.receiver.fullName} xác nhận`
+                    : `Waiting for ${trade.receiver.fullName} to confirm`}
+                </span>
+              </div>
             )}
             {isDisputed && !trade.isReceiverConfirmed && (
               <p className="text-[11px] text-red-400 mt-2 text-center">
