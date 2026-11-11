@@ -75,6 +75,12 @@ export const artTradeService = {
     return res.data.data;
   },
 
+  removeArtwork: async (id: string): Promise<ArtTradeDto> => {
+    const res = await apiClient.delete<ApiResponse<ArtTradeDto>>(`/art-trades/${id}/artwork`);
+    if (!res.data.data) throw new Error('Failed to remove artwork');
+    return res.data.data;
+  },
+
   confirm: async (id: string, side?: 'initiator' | 'receiver'): Promise<ArtTradeDto> => {
     const res = await apiClient.post<ApiResponse<ArtTradeDto>>(`/art-trades/${id}/confirm`, null, {
       params: side ? { side } : undefined,
