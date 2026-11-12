@@ -2,6 +2,8 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
+import { engToVieMap, engToVieRegex } from './translations/eng-to-vie';
+import { extraVieToEngMap, extraVieToEngRegex } from './translations/vie-to-eng';
 
 export type Language = 'VIE' | 'ENG';
 
@@ -71,6 +73,53 @@ const dictionary: Record<string, { VIE: string; ENG: string }> = {
   'Art Trade': { VIE: 'Trao đổi tranh', ENG: 'Art Trade' },
   'Sign in to Trade': { VIE: 'Đăng nhập để trao đổi', ENG: 'Sign in to Trade' },
   'Create Art Trade': { VIE: 'Tạo lời mời trao đổi', ENG: 'Create Art Trade' },
+  'Guide': { VIE: 'Hướng dẫn', ENG: 'Guide' },
+  'Admin Center': { VIE: 'Quản trị', ENG: 'Admin Center' },
+  'Studio': { VIE: 'Studio', ENG: 'Studio' },
+  'My Studio': { VIE: 'Studio của tôi', ENG: 'My Studio' },
+  'Hồ sơ của tôi': { VIE: 'Hồ sơ của tôi', ENG: 'My Profile' },
+  'Trở thành Creator': { VIE: 'Trở thành Creator', ENG: 'Become a Creator' },
+  'Duyệt đơn Creator': { VIE: 'Duyệt đơn Creator', ENG: 'Review Creator Apps' },
+  'Tìm kiếm...': { VIE: 'Tìm kiếm...', ENG: 'Search...' },
+  'Tìm tác phẩm hoặc tác giả': { VIE: 'Tìm tác phẩm hoặc tác giả', ENG: 'Search artworks or artists' },
+  'Tìm tên tranh hoặc tác giả…': { VIE: 'Tìm tên tranh hoặc tác giả…', ENG: 'Search artwork title or artist…' },
+  'Tìm kiếm': { VIE: 'Tìm kiếm', ENG: 'Search' },
+  'Mở tìm kiếm': { VIE: 'Mở tìm kiếm', ENG: 'Open search' },
+  'Đóng tìm kiếm': { VIE: 'Đóng tìm kiếm', ENG: 'Close search' },
+  'Signed out successfully.': { VIE: 'Đã đăng xuất thành công.', ENG: 'Signed out successfully.' },
+  'Search artworks, creators...': { VIE: 'Tìm tác phẩm, họa sĩ...', ENG: 'Search artworks, creators...' },
+  'Toggle navigation menu': { VIE: 'Đóng/mở menu điều hướng', ENG: 'Toggle navigation menu' },
+  'Guest': { VIE: 'Khách', ENG: 'Guest' },
+  'No email': { VIE: 'Chưa có email', ENG: 'No email' },
+  'My Auctions': { VIE: 'Đấu giá của tôi', ENG: 'My Auctions' },
+  'Forensic Watermark': { VIE: 'Thủy vân số', ENG: 'Forensic Watermark' },
+  'Event Jury': { VIE: 'Giám khảo sự kiện', ENG: 'Event Jury' },
+  'Cài đặt & Tài khoản': { VIE: 'Cài đặt & Tài khoản', ENG: 'Account & Settings' },
+  'Cài đặt hồ sơ': { VIE: 'Cài đặt hồ sơ', ENG: 'Profile Settings' },
+  'Cài đặt': { VIE: 'Cài đặt', ENG: 'Settings' },
+  'Wallet escrow': { VIE: 'Ví ký quỹ Escrow', ENG: 'Wallet escrow' },
+  'Released per milestone': { VIE: 'Giải ngân theo từng mốc', ENG: 'Released per milestone' },
+  'Expand Sidebar': { VIE: 'Mở rộng thanh bên', ENG: 'Expand Sidebar' },
+  'Collapse Sidebar': { VIE: 'Thu gọn thanh bên', ENG: 'Collapse Sidebar' },
+  'Platform Control': { VIE: 'Điều hành nền tảng', ENG: 'Platform Control' },
+  'Platform Overview': { VIE: 'Tổng quan nền tảng', ENG: 'Platform Overview' },
+  'System Overview KPIs': { VIE: 'Chỉ số tổng quan hệ thống', ENG: 'System Overview KPIs' },
+  'Platform Fee Config': { VIE: 'Cấu hình phí nền tảng', ENG: 'Platform Fee Config' },
+  'Financial Management': { VIE: 'Quản lý tài chính', ENG: 'Financial Management' },
+  'Payout Approvals': { VIE: 'Duyệt rút tiền', ENG: 'Payout Approvals' },
+  'User Management': { VIE: 'Quản lý người dùng', ENG: 'User Management' },
+  'User Accounts': { VIE: 'Tài khoản người dùng', ENG: 'User Accounts' },
+  'Creator Verifications': { VIE: 'Duyệt hồ sơ Creator', ENG: 'Creator Verifications' },
+  'Event & Market': { VIE: 'Sự kiện & Thị trường', ENG: 'Event & Market' },
+  'Event Operations': { VIE: 'Vận hành sự kiện', ENG: 'Event Operations' },
+  'Auction Operations': { VIE: 'Vận hành đấu giá', ENG: 'Auction Operations' },
+  'Shipping & Escrow': { VIE: 'Giao nhận & Ký quỹ', ENG: 'Shipping & Escrow' },
+  'Trust & Safety': { VIE: 'An toàn & Tin cậy', ENG: 'Trust & Safety' },
+  'Content & AI Moderation': { VIE: 'Kiểm duyệt nội dung & AI', ENG: 'Content & AI Moderation' },
+  'Dispute Arbitration': { VIE: 'Phân xử tranh chấp', ENG: 'Dispute Arbitration' },
+  'Bug Reports': { VIE: 'Báo cáo sự cố', ENG: 'Bug Reports' },
+  'Return to Marketplace': { VIE: 'Quay lại Chợ nghệ thuật', ENG: 'Return to Marketplace' },
+  'Exit Console': { VIE: 'Thoát trang quản trị', ENG: 'Exit Console' },
 };
 
 // Global DOM Auto-Translation Map for Client-side text node replacement
@@ -972,10 +1021,20 @@ const translationMap: Record<string, string> = {
   'Chưa thích tranh nào.': 'No favorited artworks yet.',
 };
 
-// Case-insensitive lookup dictionary built automatically
+const mergedTranslationMap: Record<string, string> = {
+  ...translationMap,
+  ...extraVieToEngMap,
+};
+
+// Case-insensitive lookup dictionaries built automatically
 const lowerTranslationMap: Record<string, string> = {};
-Object.entries(translationMap).forEach(([k, v]) => {
+Object.entries(mergedTranslationMap).forEach(([k, v]) => {
   lowerTranslationMap[k.toLowerCase().trim()] = v;
+});
+
+const lowerEngToVieMap: Record<string, string> = {};
+Object.entries(engToVieMap).forEach(([k, v]) => {
+  lowerEngToVieMap[k.toLowerCase().trim()] = v;
 });
 
 // Dynamic Regex Replacements for strings with numbers or dynamic parts
@@ -1033,8 +1092,8 @@ function translateString(text: string): string {
   if (!trimmed) return text;
 
   // Direct match
-  if (translationMap[trimmed]) {
-    return text.replace(trimmed, translationMap[trimmed]);
+  if (mergedTranslationMap[trimmed]) {
+    return text.replace(trimmed, mergedTranslationMap[trimmed]);
   }
 
   // Case-insensitive match
@@ -1044,7 +1103,30 @@ function translateString(text: string): string {
   }
 
   // Dynamic regex match
-  for (const { pattern, replacement } of regexReplacements) {
+  for (const { pattern, replacement } of [...regexReplacements, ...extraVieToEngRegex]) {
+    if (pattern.test(trimmed)) {
+      return text.replace(trimmed, trimmed.replace(pattern, replacement));
+    }
+  }
+
+  return text;
+}
+
+function translateToVie(text: string): string {
+  if (!text) return text;
+  const trimmed = text.trim();
+  if (!trimmed) return text;
+
+  if (engToVieMap[trimmed]) {
+    return text.replace(trimmed, engToVieMap[trimmed]);
+  }
+
+  const lower = trimmed.toLowerCase();
+  if (lowerEngToVieMap[lower]) {
+    return text.replace(trimmed, lowerEngToVieMap[lower]);
+  }
+
+  for (const { pattern, replacement } of engToVieRegex) {
     if (pattern.test(trimmed)) {
       return text.replace(trimmed, trimmed.replace(pattern, replacement));
     }
@@ -1069,36 +1151,63 @@ const LanguageContext = createContext<LanguageContextType>({
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const [lang, setLangState] = useState<Language>('VIE');
+  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
     void Promise.resolve().then(() => {
       const saved = localStorage.getItem('app-lang') as Language | null;
-      if (saved) {
+      if (saved === 'VIE' || saved === 'ENG') {
         setLangState(saved);
         document.documentElement.lang = saved === 'VIE' ? 'vi' : 'en';
       }
+      const switched = sessionStorage.getItem('app-lang-toast') as Language | null;
+      if (switched) {
+        sessionStorage.removeItem('app-lang-toast');
+        toast.success(switched === 'VIE' ? 'Đã chuyển sang Tiếng Việt' : 'Switched to English');
+      }
     });
+    // Wait until initial React SSR hydration commits before mutating DOM text nodes.
+    const rafId = window.requestAnimationFrame(() => {
+      setHydrated(true);
+    });
+    return () => window.cancelAnimationFrame(rafId);
   }, []);
 
-  // DOM Auto-Translator effect whenever language changes
+  // Bidirectional DOM Auto-Translator effect whenever language is active (post-hydration)
   useEffect(() => {
-    if (lang !== 'ENG') return;
+    if (!hydrated) return;
+    const transform = lang === 'ENG' ? translateString : translateToVie;
+    const SKIP_TAGS = new Set(['SCRIPT', 'STYLE', 'NOSCRIPT', 'CODE', 'PRE']);
+
+    function shouldSkipElement(el: HTMLElement | null): boolean {
+      let cur: HTMLElement | null = el;
+      while (cur && cur !== document.body) {
+        if (SKIP_TAGS.has(cur.tagName) || cur.getAttribute('data-no-translate') === 'true') {
+          return true;
+        }
+        cur = cur.parentElement;
+      }
+      return false;
+    }
 
     function translateNode(node: Node) {
       if (node.nodeType === Node.TEXT_NODE) {
+        const parent = node.parentElement;
+        if (parent && (parent.tagName === 'TEXTAREA' || shouldSkipElement(parent))) return;
         const val = node.nodeValue;
         if (val) {
-          const translated = translateString(val);
+          const translated = transform(val);
           if (translated !== val) {
             node.nodeValue = translated;
           }
         }
       } else if (node.nodeType === Node.ELEMENT_NODE) {
         const el = node as HTMLElement;
+        if (shouldSkipElement(el)) return;
         for (const attribute of ['placeholder', 'title', 'aria-label', 'alt']) {
           const value = el.getAttribute(attribute);
           if (value) {
-            const translated = translateString(value);
+            const translated = transform(value);
             if (translated !== value) el.setAttribute(attribute, translated);
           }
         }
@@ -1137,13 +1246,15 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     return () => {
       observer.disconnect();
     };
-  }, [lang]);
+  }, [lang, hydrated]);
 
   const setLang = (newLang: Language) => {
+    if (newLang === lang) return;
     setLangState(newLang);
     localStorage.setItem('app-lang', newLang);
     document.documentElement.lang = newLang === 'VIE' ? 'vi' : 'en';
     if (typeof window !== 'undefined') {
+      sessionStorage.setItem('app-lang-toast', newLang);
       window.location.reload();
     }
   };
@@ -1151,17 +1262,13 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const toggleLang = () => {
     const nextLang = lang === 'VIE' ? 'ENG' : 'VIE';
     setLang(nextLang);
-    toast.success(nextLang === 'VIE' ? 'Đã chuyển sang Tiếng Việt' : 'Switched to English');
   };
 
   const t = (text: string): string => {
     if (!text) return text;
     const entry = dictionary[text];
     if (entry) return entry[lang];
-    if (lang === 'ENG') {
-      return translateString(text);
-    }
-    return text;
+    return lang === 'ENG' ? translateString(text) : translateToVie(text);
   };
 
   return (
