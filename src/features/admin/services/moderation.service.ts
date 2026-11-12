@@ -140,4 +140,27 @@ export const adminModerationService = {
 
     return response.data.data;
   },
+
+  /**
+   * Chỉnh sửa Danh mục lớn và Tag con của tác phẩm trước/sau khi duyệt
+   */
+  async updateArtworkMetadata(
+    artworkId: string,
+    payload: { categoryId?: string | null; tags?: string[] }
+  ): Promise<ArtworkInspectionDetailDto> {
+    const response = await apiClient.put<ApiResponse<ArtworkInspectionDetailDto>>(
+      `/admin/moderation/${artworkId}/metadata`,
+      payload
+    );
+
+    if (response.data.error || !response.data.data) {
+      throw new Error(
+        response.data.error?.details?.join(', ') ||
+          response.data.error?.title ||
+          'Không thể cập nhật phân loại danh mục & tag.'
+      );
+    }
+
+    return response.data.data;
+  },
 };

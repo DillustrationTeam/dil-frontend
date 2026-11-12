@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { CreatorAddonManager } from './creator-addon-manager';
 import { creatorProfileService } from '@/features/creator-studio/services/creator-profile.service';
+import { categoriesService, type CategoryDto } from '@/features/marketplace/services/categories.service';
 import type { ArtworkDto } from '@/features/creator-studio/types/creator-profile.types';
 import { extractErrorMessage } from '@/lib/api-client';
 import {
@@ -40,6 +41,8 @@ const rateCardSchema = z
       maxRevisions: z.number().int().min(0).max(20).optional(),
       extraRevisionPrice: z.number().int().min(0).max(100_000_000).optional(),
       maxSlots: z.number().int().min(0).max(100).nullable().optional(),
+      categoryId: z.string().nullable().optional(),
+      categoryName: z.string().nullable().optional(),
       sampleUrls: z.array(z.string().min(1)).max(10).optional(),
       milestones: z
         .array(
@@ -66,6 +69,7 @@ const labelBase = 'block text-[11px] font-medium text-slate-300 mb-1';
 export function CreatorRateCardManager() {
   const [tab, setTab] = useState<'packages' | 'addons'>('packages');
   const [packages, setPackages] = useState<RateCardPackage[]>([]);
+  const [categories, setCategories] = useState<CategoryDto[]>([]);
   const [slotLimitEnabled, setSlotLimitEnabled] = useState(false);
   const [togglingSlotLimit, setTogglingSlotLimit] = useState(false);
   const savedSlotLimitsRef = useRef<Record<string, number | null>>({});
@@ -201,6 +205,7 @@ export function CreatorRateCardManager() {
     };
 
     void loadData();
+    categoriesService.getCategories().then(setCategories).catch(() => undefined);
   }, []);
 
   const toggleSlotLimit = async () => {
@@ -504,6 +509,11 @@ export function CreatorRateCardManager() {
                         <h2 className="font-semibold text-sm text-white group-hover:text-[#A7ACD9] transition truncate">
                           {item.name || `Gói dịch vụ ${index + 1}`}
                         </h2>
+                        {(item.categoryName || categories.find((c) => c.id === item.categoryId)?.name) && (
+                          <span className="rounded-lg bg-[#A7ACD9]/15 border border-[#A7ACD9]/30 px-2 py-0.5 text-[10px] font-semibold text-[#C5C9F8] shrink-0">
+                            {item.categoryName || categories.find((c) => c.id === item.categoryId)?.name}
+                          </span>
+                        )}
                         <span className="rounded-lg bg-white/5 border border-white/10 px-2.5 py-0.5 text-xs font-mono font-bold text-[#A7ACD9] shrink-0">
                           {money(packageTotal)}
                         </span>
@@ -565,6 +575,32 @@ export function CreatorRateCardManager() {
                         onChange={(e) => updatePackage(item.id, { description: e.target.value })}
                         placeholder="Ví dụ: 1 nhân vật, PNG 300DPI, dùng cá nhân"
                       />
+                    </div>
+
+                    <div className="sm:col-span-2">
+                      <label className={labelBase} htmlFor={`pkg-cat-${item.id}`}>
+                        Danh mục lớn chuyên môn của gói (Category)
+                      </label>
+                      <select
+                        id={`pkg-cat-${item.id}`}
+                        className={inputBase}
+                        value={item.categoryId ?? ''}
+                        onChange={(e) => {
+                          const nextId = e.target.value || null;
+                          const matched = categories.find((c) => c.id === nextId);
+                          updatePackage(item.id, {
+                            categoryId: nextId,
+                            categoryName: matched?.name ?? null,
+                          });
+                        }}
+                      >
+                        <option value="">-- Không gắn danh mục cụ thể --</option>
+                        {categories.map((cat) => (
+                          <option key={cat.id} value={cat.id}>
+                            {cat.name}
+                          </option>
+                        ))}
+                      </select>
                     </div>
 
                     <div>

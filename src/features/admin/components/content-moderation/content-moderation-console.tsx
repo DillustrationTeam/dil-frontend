@@ -25,6 +25,7 @@ export function ContentModerationConsole() {
     setSearchFilter,
     setPage,
     executeDecision,
+    updateArtworkMetadata,
   } = useModeration();
 
   return (
@@ -57,6 +58,7 @@ export function ContentModerationConsole() {
         isLoading={isInspectionLoading}
         isSubmitting={isDecisionSubmitting}
         onExecuteDecision={executeDecision}
+        onUpdateMetadata={updateArtworkMetadata}
         onClose={selectedArtwork ? clearSelectedArtwork : undefined}
       />
     </div>

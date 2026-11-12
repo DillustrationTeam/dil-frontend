@@ -167,9 +167,9 @@ export function ArtworkPreviewCard({ artwork }: ArtworkPreviewCardProps) {
                 : 'Recent'}
             </span>
           </span>
-          {artwork.style && (
-            <span className="font-mono text-[#C5C9F8] block mt-0.5">
-              {artwork.style}
+          {(artwork.categoryName || artwork.style) && (
+            <span className="inline-block mt-1 px-2 py-0.5 rounded-full bg-[#A7ACD9]/15 border border-[#A7ACD9]/30 font-semibold text-[#C5C9F8] text-[10px]">
+              {artwork.categoryName || artwork.style}
             </span>
           )}
         </div>

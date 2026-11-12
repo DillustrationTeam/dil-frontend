@@ -28,6 +28,8 @@ export interface ModerationQueueItemDto {
   imageUrl: string;
   thumbnailUrl?: string | null;
   style?: string | null;
+  categoryId?: string | null;
+  categoryName?: string | null;
   /** Tỷ lệ an toàn được AI phát hiện (0.0 - 1.0, e.g. 0.984 = 98.4% SAFE) */
   safeScore?: number | null;
   /** Lý do đưa vào hàng đợi kiểm duyệt (e.g. "AI NSFW Threshold Borderline", "User Reported") */
@@ -46,6 +48,8 @@ export interface ArtworkInspectionDetailDto {
   thumbnailUrl?: string | null;
   watermarkedUrl?: string | null;
   style?: string | null;
+  categoryId?: string | null;
+  categoryName?: string | null;
   likeCount: number;
   resolution?: string | null;
   fileSizeBytes?: number | null;

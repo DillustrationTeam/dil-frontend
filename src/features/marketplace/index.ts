@@ -8,3 +8,4 @@ export { SectionTrendingLeaderboard } from './components/section-trending-leader
 export { SectionFeaturedCreators } from './components/section-featured-creators';
 export { SectionRecommendedByLikes } from './components/section-recommended-by-likes';
 export { SectionExploreByStyle } from './components/section-explore-by-style';
+export { CreatorsDirectory } from './components/creators-directory';

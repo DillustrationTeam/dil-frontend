@@ -18,6 +18,6 @@ export function ArtworkMetadataAssistant({ file, onApply }: { file: File | null;
     }}>{busy ? 'AI đang đọc ảnh…' : '✨ Gợi ý tag & mô tả bằng AI'}</button>
     <p className="text-xs text-slate-400">Gửi ảnh đã chọn cho Gemini để gợi ý. Bạn xem và xác nhận trước khi áp dụng.</p>
     {error && <p role="alert" className="text-sm text-red-300">{error}</p>}
-    {suggestion?.file === file && suggestion && <div className="space-y-2 text-sm text-slate-300"><p className="font-semibold text-white">{suggestion.value.title}</p><p>{suggestion.value.description}</p><p>{suggestion.value.tags.map(t => `#${t}`).join(' · ')}</p><p className="text-xs">Phong cách: {suggestion.value.style}</p><button type="button" className="rounded-xl border border-[#A7ACD9]/50 px-4 py-2 text-[#A7ACD9]" onClick={() => { onApply(suggestion.value); setSuggestion(null); }}>Áp dụng vào biểu mẫu</button></div>}
+    {suggestion?.file === file && suggestion && <div className="space-y-2 text-sm text-slate-300"><p className="font-semibold text-white">{suggestion.value.title}</p><p>{suggestion.value.description}</p><p>{suggestion.value.tags.map(t => `#${t}`).join(' · ')}</p><p className="text-xs text-[#C5C9F8]">Danh mục đề xuất: <strong>{suggestion.value.categoryName || suggestion.value.style}</strong></p><button type="button" className="rounded-xl border border-[#A7ACD9]/50 px-4 py-2 text-[#A7ACD9]" onClick={() => { onApply(suggestion.value); setSuggestion(null); }}>Áp dụng vào biểu mẫu</button></div>}
   </section>;
 }

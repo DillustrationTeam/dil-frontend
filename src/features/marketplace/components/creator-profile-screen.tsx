@@ -255,6 +255,11 @@ export function CreatorProfileScreen({ id }: { id: string }) {
                                 <h3 className="font-h1 text-base sm:text-lg font-bold text-white leading-snug">
                                   {rate.name}
                                 </h3>
+                                {rate.categoryName && (
+                                  <span className="inline-flex items-center rounded-full border border-[#A7ACD9]/35 bg-[#A7ACD9]/15 px-2.5 py-0.5 text-[11px] font-semibold text-[#C5C9F8]">
+                                    {rate.categoryName}
+                                  </span>
+                                )}
                                 <span
                                   className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-medium ${
                                     !slot.isLimited

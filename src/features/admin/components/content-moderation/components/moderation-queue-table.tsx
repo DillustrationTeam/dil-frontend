@@ -208,9 +208,16 @@ export function ModerationQueueTable({
                       <span className="font-bold block text-white line-clamp-1">
                         {item.title}
                       </span>
-                      <span className="text-[10px] text-[#8A8FA9] block">
-                        By @{item.creatorUsername || item.creatorName}
-                      </span>
+                      <div className="flex flex-wrap items-center gap-1.5 mt-0.5">
+                        <span className="text-[10px] text-[#8A8FA9]">
+                          By @{item.creatorUsername || item.creatorName}
+                        </span>
+                        {(item.categoryName || item.style) && (
+                          <span className="px-1.5 py-0.5 rounded-md bg-[#A7ACD9]/15 text-[#C5C9F8] border border-[#A7ACD9]/25 text-[9px] font-semibold">
+                            {item.categoryName || item.style}
+                          </span>
+                        )}
+                      </div>
                     </td>
 
                     {/* AI NSFW Scan Badge */}

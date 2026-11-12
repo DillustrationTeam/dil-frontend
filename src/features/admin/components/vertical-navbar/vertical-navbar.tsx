@@ -19,6 +19,7 @@ import {
   Banknote,
   ArrowLeftRight,
   Truck,
+  Tags,
 } from 'lucide-react';
 import { useAuthStore } from '@/store/use-auth-store';
 import { AdminNavItem, AdminNavSection, AdminVerticalNavbarProps } from './types';
@@ -41,6 +42,13 @@ export const DEFAULT_ADMIN_NAV_SECTIONS: AdminNavSection[] = [
         href: '/admin/fee-policy',
         icon: <SlidersHorizontal className="w-4 h-4 shrink-0" />,
         materialIcon: 'tune',
+      },
+      {
+        id: 'category-management',
+        label: 'Category & Tags',
+        href: '/admin/categories',
+        icon: <Tags className="w-4 h-4 shrink-0" />,
+        materialIcon: 'category',
       },
     ],
   },
