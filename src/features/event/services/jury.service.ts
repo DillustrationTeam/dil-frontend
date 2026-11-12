@@ -334,14 +334,6 @@ export const juryService = {
   },
 
   /**
-   * Approve final event results by Head Jury
-   */
-  approveFinalResults: async (eventId: string): Promise<{ success: boolean; message: string }> => {
-    await apiClient.post<ApiResponse<unknown>>(`/events/${eventId}/approve-results`);
-    return { success: true, message: 'Phê duyệt kết quả cuộc thi thành công!' };
-  },
-
-  /**
    * Send invitation to jury member by email
    */
   sendInvitation: async (eventId: string, email: string): Promise<unknown> => {

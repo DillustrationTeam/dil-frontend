@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuthStore } from '@/store/use-auth-store';
-import { PageHeader } from '@/components/page-header';
 import { ProfileSettingsForm } from '@/features/profile-settings/components/profile-settings-form';
 import { SecuritySettingsForm } from '@/features/profile-settings/components/security-settings-form';
 import { DangerZoneForm } from '@/features/profile-settings/components/danger-zone-form';
@@ -38,14 +37,14 @@ export default function SettingsPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#1F2335] px-6 py-12">
+    <main className="min-h-screen bg-[#1F2335] px-6 py-8">
       <div className="mx-auto max-w-5xl">
-        <div className="mb-2 flex items-center justify-between">
-          <PageHeader title="Cài đặt hồ sơ" />
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+          <h1 className="font-h1 text-2xl font-bold text-white">Cài đặt hồ sơ</h1>
           {user?.id && (
             <Link
               href="/profile"
-              className="mb-8 inline-flex items-center gap-1.5 rounded-full border border-white/10 px-3.5 py-1.5 text-xs font-medium text-[#C7C5CF] transition hover:border-[#A7ACD9] hover:text-white"
+              className="inline-flex items-center gap-1.5 rounded-full border border-white/10 px-3.5 py-1.5 text-xs font-medium text-[#C7C5CF] transition hover:border-[#A7ACD9] hover:text-white"
             >
               <span className="material-symbols-outlined text-sm">visibility</span>
               Xem hồ sơ công khai

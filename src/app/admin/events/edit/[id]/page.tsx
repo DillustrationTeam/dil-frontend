@@ -26,8 +26,8 @@ export default function AdminEditEventPage() {
         } else {
           toast.error('Event not found.');
         }
-      } catch {
-        toast.error('Failed to load event details.');
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : 'Failed to load event details.');
       } finally {
         setLoading(false);
       }
