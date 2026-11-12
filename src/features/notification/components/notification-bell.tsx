@@ -3,12 +3,13 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ArrowLeftRight, ArrowRight, Award, Bell, BriefcaseBusiness, Check, CheckCheck, CircleAlert, Clock, Gavel, Info, LockKeyhole, Megaphone, RefreshCw, Scale, ShieldAlert, Wallet, X } from 'lucide-react';
+import { ArrowLeftRight, ArrowRight, Award, Bell, BriefcaseBusiness, Bug, Check, CheckCheck, CircleAlert, Clock, Gavel, Info, LockKeyhole, Megaphone, RefreshCw, Scale, ShieldAlert, Wallet, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { getApiErrorMessage } from '@/lib/api-error';
 import { notificationService } from '../services/notification.service';
 import { useNotificationHub } from '../hooks/use-notification-hub';
-import { notificationTypeLabels, type NotificationDto } from '../types/notification.types';
+import { useLanguage } from '@/context/language-context';
+import { notificationTypeLabels, notificationTypeLabelsEn, type NotificationDto } from '../types/notification.types';
 
 function getIcon(type: string, size = 15) {
   switch (type) {
@@ -25,6 +26,8 @@ function getIcon(type: string, size = 15) {
       return <Wallet size={size} className="text-sky-400" />;
     case 'UserSanctionAlert':
       return <ShieldAlert size={size} className="text-red-400" />;
+    case 'BugReportReplied':
+      return <Bug size={size} className="text-brand-periwinkle" />;
     case 'PromotionAnnouncement':
       return <Megaphone size={size} className="text-brand-periwinkle" />;
     case 'CommissionStatusChanged':
@@ -82,19 +85,20 @@ function getRefLink({ refType, refId, notificationType, notificationTitle, body 
   if (key === 'invitation' && refId) return `/notifications?invitationId=${refId}`;
   if ((key === 'arttrade' || key === 'tradedispute') && refId) return `/art-trades/${refId}`;
   if (key === 'submissiondispute') return '/admin/events?tab=disputes';
+  if (key === 'bugreport') return '/notifications';
   return null;
 }
 
-function formatRelativeTime(iso: string) {
+function formatRelativeTime(iso: string, isEng: boolean) {
   const diffMs = Date.now() - new Date(iso).getTime();
   const mins = Math.floor(diffMs / 60000);
-  if (mins < 1) return 'Vừa xong';
-  if (mins < 60) return `${mins} phút trước`;
+  if (mins < 1) return isEng ? 'Just now' : 'Vừa xong';
+  if (mins < 60) return isEng ? `${mins}m ago` : `${mins} phút trước`;
   const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours} giờ trước`;
+  if (hours < 24) return isEng ? `${hours}h ago` : `${hours} giờ trước`;
   const days = Math.floor(hours / 24);
-  if (days < 30) return `${days} ngày trước`;
-  return new Date(iso).toLocaleDateString('vi-VN');
+  if (days < 30) return isEng ? `${days}d ago` : `${days} ngày trước`;
+  return new Date(iso).toLocaleDateString(isEng ? 'en-US' : 'vi-VN');
 }
 
 interface NotificationBellProps {
@@ -116,6 +120,9 @@ export function NotificationBell({
   previewLimit = 6,
   align = 'right',
 }: NotificationBellProps) {
+  const { lang } = useLanguage();
+  const isEng = lang === 'ENG';
+  const typeLabels = isEng ? notificationTypeLabelsEn : notificationTypeLabels;
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState<NotificationDto[]>([]);
@@ -134,7 +141,7 @@ export function NotificationBell({
     setReplyingInvId(item.refId);
     try {
       await notificationService.acceptInvitation(item.refId);
-      toast.success('Bạn đã chấp nhận lời mời tham gia sự kiện!');
+      toast.success(isEng ? 'Event jury invitation accepted!' : 'Bạn đã chấp nhận lời mời tham gia sự kiện!');
       setItems((prev) =>
         prev.map((n) =>
           n.notificationId === item.notificationId
@@ -147,7 +154,7 @@ export function NotificationBell({
         setUnreadCount((c) => Math.max(0, c - 1));
       }
     } catch (err: unknown) {
-      toast.error(getApiErrorMessage(err, 'Không thể chấp nhận lời mời.'));
+      toast.error(getApiErrorMessage(err, isEng ? 'Unable to accept invitation.' : 'Không thể chấp nhận lời mời.'));
     } finally {
       setReplyingInvId(null);
     }
@@ -159,7 +166,7 @@ export function NotificationBell({
     setReplyingInvId(item.refId);
     try {
       await notificationService.declineInvitation(item.refId);
-      toast.success('Đã từ chối lời mời tham gia sự kiện.');
+      toast.success(isEng ? 'Event invitation declined.' : 'Đã từ chối lời mời tham gia sự kiện.');
       setItems((prev) =>
         prev.map((n) =>
           n.notificationId === item.notificationId
@@ -172,7 +179,7 @@ export function NotificationBell({
         setUnreadCount((c) => Math.max(0, c - 1));
       }
     } catch (err: unknown) {
-      toast.error(getApiErrorMessage(err, 'Không thể từ chối lời mời.'));
+      toast.error(getApiErrorMessage(err, isEng ? 'Unable to decline invitation.' : 'Không thể từ chối lời mời.'));
     } finally {
       setReplyingInvId(null);
     }
@@ -279,7 +286,7 @@ export function NotificationBell({
       await notificationService.markAllRead();
       setItems((prev) => prev.map((n) => ({ ...n, isRead: true })));
       setUnreadCount(0);
-      toast.success('Đã đánh dấu tất cả là đã đọc.');
+      toast.success(isEng ? 'Marked all notifications as read.' : 'Đã đánh dấu tất cả là đã đọc.');
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Không đánh dấu được tất cả là đã đọc.';
       setError(msg);
@@ -298,7 +305,7 @@ export function NotificationBell({
         onClick={() => setOpen((prev) => !prev)}
         aria-haspopup="dialog"
         aria-expanded={open}
-        aria-label={unreadCount > 0 ? `Thông báo, ${unreadCount} chưa đọc` : 'Thông báo'}
+        aria-label={unreadCount > 0 ? (isEng ? `Notifications, ${unreadCount} unread` : `Thông báo, ${unreadCount} chưa đọc`) : (isEng ? 'Notifications' : 'Thông báo')}
         className={
           triggerClassName ??
           'relative rounded-full p-2 text-brand-periwinkle transition-all hover:bg-brand-periwinkle/10 active:scale-95'
@@ -320,14 +327,14 @@ export function NotificationBell({
       {open && (
         <div
           role="dialog"
-          aria-label="Danh sách thông báo"
+          aria-label={isEng ? 'Notification list' : 'Danh sách thông báo'}
           className={`absolute z-50 mt-2 w-[22rem] max-w-[calc(100vw-2rem)] overflow-hidden rounded-3xl border border-white/10 bg-[#1F2335] shadow-2xl ${
             align === 'right' ? 'right-0' : 'left-0'
           }`}
         >
           {/* Tiêu đề + hành động nhanh */}
           <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
-            <h2 className="font-h1 text-sm font-bold text-on-surface">Thông báo</h2>
+            <h2 className="font-h1 text-sm font-bold text-on-surface">{isEng ? 'Notifications' : 'Thông báo'}</h2>
             {unreadCount > 0 && (
               <button
                 type="button"
@@ -336,7 +343,7 @@ export function NotificationBell({
                 className="inline-flex items-center gap-1 text-[11px] font-semibold text-brand-periwinkle hover:underline disabled:opacity-50"
               >
                 {markingAll ? <RefreshCw size={12} className="animate-spin" /> : <CheckCheck size={12} />}
-                Đánh dấu tất cả đã đọc
+                {isEng ? 'Mark all as read' : 'Đánh dấu tất cả đã đọc'}
               </button>
             )}
           </div>
@@ -345,7 +352,7 @@ export function NotificationBell({
           <div className="max-h-[22rem] overflow-y-auto">
             {!userId ? (
               <div className="px-4 py-8 text-center text-xs text-outline">
-                Vui lòng đăng nhập để xem thông báo.
+                {isEng ? 'Please sign in to view notifications.' : 'Vui lòng đăng nhập để xem thông báo.'}
               </div>
             ) : loading ? (
               <div className="space-y-2 p-3">
@@ -361,7 +368,7 @@ export function NotificationBell({
             ) : items.length === 0 ? (
               <div className="px-4 py-10 text-center">
                 <Bell size={28} className="mx-auto mb-2 text-outline" />
-                <p className="text-xs text-on-surface-variant">Bạn chưa có thông báo nào.</p>
+                <p className="text-xs text-on-surface-variant">{isEng ? 'You have no notifications yet.' : 'Bạn chưa có thông báo nào.'}</p>
               </div>
             ) : (
               <ul className="divide-y divide-white/5">
@@ -412,7 +419,7 @@ export function NotificationBell({
                                 ) : (
                                   <Check size={11} />
                                 )}
-                                Chấp nhận
+                                {isEng ? 'Accept' : 'Chấp nhận'}
                               </button>
                               <button
                                 type="button"
@@ -421,28 +428,28 @@ export function NotificationBell({
                                 className="inline-flex items-center gap-1 rounded-lg border border-rose-500/30 bg-rose-500/10 px-2 py-1 text-[11px] text-rose-300 transition hover:bg-rose-500/20 active:scale-95 disabled:opacity-50"
                               >
                                 <X size={11} />
-                                Từ chối
+                                {isEng ? 'Decline' : 'Từ chối'}
                               </button>
                             </div>
                           )}
 
                           {isInv && item.notificationType === 'InvitationAccepted' && (
                             <span className="mt-1.5 inline-flex items-center gap-1 font-semibold text-[10px] text-emerald-400">
-                              <Check size={11} /> Đã chấp nhận lời mời
+                              <Check size={11} /> {isEng ? 'Invitation accepted' : 'Đã chấp nhận lời mời'}
                             </span>
                           )}
 
                           {isInv && item.notificationType === 'InvitationDeclined' && (
                             <span className="mt-1.5 inline-flex items-center gap-1 font-semibold text-[10px] text-rose-400">
-                              <X size={11} /> Đã từ chối lời mời
+                              <X size={11} /> {isEng ? 'Invitation declined' : 'Đã từ chối lời mời'}
                             </span>
                           )}
 
                           <span className="mt-1.5 flex items-center gap-2 text-[10px] text-outline">
                             <span className="rounded-full border border-white/10 px-1.5 py-px">
-                              {notificationTypeLabels[item.notificationType] ?? item.notificationType}
+                              {typeLabels[item.notificationType] ?? item.notificationType}
                             </span>
-                            <span>{formatRelativeTime(item.createdAt)}</span>
+                            <span>{formatRelativeTime(item.createdAt, isEng)}</span>
                           </span>
                         </span>
                       </div>
@@ -459,7 +466,7 @@ export function NotificationBell({
             onClick={() => setOpen(false)}
             className="flex items-center justify-center gap-1.5 border-t border-white/10 px-4 py-3 text-xs font-semibold text-brand-periwinkle transition hover:bg-brand-periwinkle/10"
           >
-            Xem tất cả thông báo <ArrowRight size={14} />
+            {isEng ? 'View all notifications' : 'Xem tất cả thông báo'} <ArrowRight size={14} />
           </Link>
         </div>
       )}

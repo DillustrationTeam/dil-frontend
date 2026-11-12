@@ -439,10 +439,18 @@ function ArtworkDetailContent({
           </h1>
 
           <div className="mt-2 flex flex-wrap items-center gap-3 text-xs tabular-nums text-[#8b93a7]">
-            <span className="inline-flex items-center gap-1.5 font-medium text-[#b3b7ee]">
+            <Link
+              href={
+                artwork.categoryName || artwork.style
+                  ? `/explore?category=${encodeURIComponent(artwork.categoryName || artwork.style || '')}`
+                  : '/explore'
+              }
+              onClick={onClose}
+              className="inline-flex items-center gap-1.5 rounded-full border border-[#b3b7ee]/30 bg-[#b3b7ee]/15 px-2.5 py-1 font-semibold text-[#d9dcff] transition hover:bg-[#b3b7ee]/25"
+            >
               <Palette className="h-3.5 w-3.5" />
-              <span>{artwork.style || artwork.tags?.[0] || 'Digital art'}</span>
-            </span>
+              <span>{artwork.categoryName || artwork.style || 'Digital art'}</span>
+            </Link>
             <span className="inline-flex items-center gap-1.5">
               <Calendar className="h-3.5 w-3.5" />
               <span>{new Date(artwork.createdAt).toLocaleDateString('vi-VN')}</span>
@@ -498,7 +506,7 @@ function ArtworkDetailContent({
                 {artwork.tags.map((tag) => (
                   <Link
                     key={tag}
-                    href={`/explore?style=${encodeURIComponent(tag)}`}
+                    href={`/explore?tag=${encodeURIComponent(tag)}`}
                     onClick={onClose}
                     className="rounded-lg bg-[#1e2230] px-2.5 py-1 text-xs text-[#9ca3af] transition hover:bg-[#262b3d] hover:text-white"
                   >

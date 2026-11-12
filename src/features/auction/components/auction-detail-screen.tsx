@@ -3,21 +3,27 @@
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
+  AlertTriangle,
   ArrowLeft,
+  Award,
   CheckCircle2,
   CalendarDays,
   CircleAlert,
   Clock,
   Download,
+  ExternalLink,
+  FileCheck2,
   Gavel,
   Heart,
   FileType2,
   LoaderCircle,
   PackageCheck,
   RefreshCw,
+  ShieldCheck,
   User,
   Users,
   Wallet,
+  X,
   Zap,
 } from 'lucide-react';
 import {
@@ -26,14 +32,19 @@ import {
   auctionService,
   useAuctionClock,
   useAuctionHub,
+  type AuctionCertificateDto,
   type AuctionDetailDto,
   type BidDto,
   type AuctionParticipantDto,
   type WalletOverviewDto,
 } from '@/features/auction';
 import { SellerTransparencyCard } from './seller-transparency-card';
+import { AuctionCertificateCard } from './auction-certificate-card';
+import { CommercialRightsModal } from './commercial-rights-modal';
+import { DeliverablesDownloadModal } from './deliverables-download-modal';
+import { PhysicalDeliveryCard } from './physical-delivery-card';
 import { PageLoader } from '@/features/navigation';
-import { auctionStatusLabels } from '../types/auction.types';
+import { auctionStatusLabels, type DeliverableDownloadDto } from '../types/auction.types';
 
 function formatVnd(value: number) {
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 }).format(value);
@@ -97,6 +108,21 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
   const [watching, setWatching] = useState<boolean>(false);
   const [buyingNow, setBuyingNow] = useState<boolean>(false);
   const [downloading, setDownloading] = useState<boolean>(false);
+  const [certificate, setCertificate] = useState<AuctionCertificateDto | null>(null);
+  const [loadingCert, setLoadingCert] = useState<boolean>(false);
+  const [showCertModal, setShowCertModal] = useState<boolean>(false);
+  const [showCommercialDeed, setShowCommercialDeed] = useState<boolean>(false);
+  const [showRulesModal, setShowRulesModal] = useState<boolean>(false);
+  const [downloadDeliverable, setDownloadDeliverable] = useState<DeliverableDownloadDto | null>(null);
+  // Hộp thoại cảnh báo khi người thắng đã chọn nhận tranh vật lý nhưng muốn tải bản điện tử ngay
+  const [showDigitalNowWarning, setShowDigitalNowWarning] = useState<boolean>(false);
+  const [acceptingDigital, setAcceptingDigital] = useState<boolean>(false);
+  const [deliverableInfo, setDeliverableInfo] = useState<{
+    fileName: string;
+    mimeType?: string | null;
+    certNumber?: string | null;
+    licenseType?: string | null;
+  } | null>(null);
 
   // FE-01 Đồng hồ đếm ngược với serverTime
   const clock = useAuctionClock({
@@ -353,12 +379,27 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
     }
   }
 
-  async function handleDownloadOriginal() {
+  /** Có đang chờ giao tranh vật lý (chưa xác nhận đã nhận) hay không. */
+  const isAwaitingPhysicalDelivery =
+    Boolean(auction?.hasPhysicalCopy) &&
+    auction?.auctionStatus !== 'Completed' &&
+    (['AwaitingPhysical', 'InTransit'].includes(auction?.auctionStatus ?? '') ||
+      (Boolean(auction?.delivery) &&
+        !['Delivered', 'Cancelled'].includes(auction?.delivery?.status ?? '')));
+
+  /** Tải thật sự — dùng sau khi đã qua bước xác nhận chính sách. */
+  async function performDownloadOriginal() {
     setDownloading(true);
     try {
       const res = await auctionService.download(auctionId);
-      if (res.downloadUrl) {
-        window.open(res.downloadUrl, '_blank');
+      if (res) {
+        setDeliverableInfo({
+          fileName: res.fileName,
+          mimeType: res.mimeType,
+          certNumber: res.certificateNumber,
+          licenseType: res.licenseType,
+        });
+        setDownloadDeliverable(res);
       } else {
         setError('Liên kết tải về chưa sẵn sàng. Vui lòng thử lại sau vài giây.');
       }
@@ -366,6 +407,52 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
       setError(`Không thể tải tệp gốc: ${auctionError(err)}. Nếu bạn vừa thắng phiên, vui lòng đợi 1–2 phút để hệ thống hoàn tất giải ngân hợp đồng.`);
     } finally {
       setDownloading(false);
+    }
+  }
+
+  /**
+   * Người thắng đã chọn nhận tranh vật lý mà vẫn muốn lấy bản điện tử ngay:
+   * bắt buộc đi qua hộp thoại cảnh báo trước, vì thao tác này giải ngân ký quỹ
+   * cho người bán và mất quyền khiếu nại bưu phẩm.
+   * Tranh vật lý đã giao xong thì tải bình thường, không cần hỏi.
+   */
+  async function handleDownloadOriginal() {
+    if (isAwaitingPhysicalDelivery) {
+      setShowDigitalNowWarning(true);
+      return;
+    }
+    await performDownloadOriginal();
+  }
+
+  async function handleConfirmDigitalNow() {
+    setAcceptingDigital(true);
+    setError(null);
+    try {
+      await auctionService.acceptDigitalDelivery(auctionId);
+      setShowDigitalNowWarning(false);
+      await loadDetail();
+      await performDownloadOriginal();
+    } catch (err: unknown) {
+      setError(`Không thể chuyển sang nhận tranh điện tử: ${auctionError(err)}`);
+      setShowDigitalNowWarning(false);
+    } finally {
+      setAcceptingDigital(false);
+    }
+  }
+
+  async function handleViewCertificate() {
+    if (!isWinner && !isSeller) {
+      return;
+    }
+    setLoadingCert(true);
+    try {
+      const cert = await auctionService.getCertificate(auctionId);
+      setCertificate(cert);
+      setShowCertModal(true);
+    } catch (err: unknown) {
+      setError(`Không thể tải chứng nhận số: ${auctionError(err)}`);
+    } finally {
+      setLoadingCert(false);
     }
   }
 
@@ -392,9 +479,16 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
 
   const isLive = auction.auctionStatus === 'Active';
   const isScheduled = auction.auctionStatus === 'Scheduled';
-  const isFinished = ['Settled', 'Ended', 'Cancelled', 'Expired'].includes(auction.auctionStatus);
+  const isFinished = ['Settled', 'Ended', 'Cancelled', 'Expired', 'AwaitingPhysical', 'InTransit', 'Completed', 'Disputed'].includes(auction.auctionStatus);
   const isEnded = clock.isEnded || isFinished;
   const isWinner = userId && auction.winnerId === userId;
+  // Winner chỉ thấy khối "chúc mừng + tải tranh + chứng nhận" SAU KHI đã chọn hình thức nhận hàng.
+  // Phiên có bản vật lý: phải chọn nhận tranh thật (đã tạo delivery) hoặc từ chối để nhận file số
+  // (requiresPhysicalDelivery = false). Phiên không có bản vật lý thì không có gì phải chọn.
+  const hasCompletedDeliveryChoice =
+    !auction.hasPhysicalCopy ||
+    Boolean(auction.delivery) ||
+    auction.requiresPhysicalDelivery === false;
   const isSeller = userId && auction.seller?.userId === userId;
   const statusLabel = auctionStatusLabels[auction.auctionStatus] || auction.auctionStatus;
   const bidAmountNum = Number(bidAmount) || 0;
@@ -490,7 +584,7 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
               {auction.artwork?.imageUrl || auction.artwork?.thumbnailUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
-                  src={auction.artwork.imageUrl || auction.artwork.thumbnailUrl || ''}
+                  src={auction.artwork.imageUrl || auction.artwork.thumbnailUrl || '/weblogo.png'}
                   alt={auction.artwork.artworkTitle || 'Tác phẩm'}
                   className="size-full object-contain"
                 />
@@ -514,7 +608,7 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
               <p className="flex items-center gap-2"><User size={14} className="shrink-0 text-brand-periwinkle" /><span className="text-outline">Tác giả:</span> <strong className="truncate">{auction.seller?.fullName || 'Nghệ sĩ ẩn danh'}</strong></p>
               <p className="flex items-center gap-2"><CalendarDays size={14} className="shrink-0 text-brand-periwinkle" /><span className="text-outline">Ngày tạo:</span> <strong>{auction.artwork?.createdAt ? new Date(auction.artwork.createdAt).toLocaleDateString('vi-VN') : 'Chưa cập nhật'}</strong></p>
               <p className="flex items-center gap-2"><FileType2 size={14} className="shrink-0 text-brand-periwinkle" /><span className="text-outline">Định dạng:</span> <strong>{[auction.artwork?.fileFormat, auction.artwork?.resolution, formatFileSize(auction.artwork?.fileSizeBytes)].filter(Boolean).join(' · ') || 'Chưa cập nhật'}</strong></p>
-              <p className="flex items-center gap-2"><PackageCheck size={14} className="shrink-0 text-brand-periwinkle" /><span className="text-outline">Deliverable:</span> <strong>{auction.artwork?.deliverableCount ?? 0} tệp bàn giao</strong></p>
+              <p className="flex items-center gap-2"><PackageCheck size={14} className="shrink-0 text-brand-periwinkle" /><span className="text-outline">Tệp bàn giao:</span> <strong>{`${auction.artwork?.deliverableCount ?? 0} tệp tranh gốc`}</strong></p>
             </div>
           </div>
 
@@ -563,7 +657,17 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
                 </span>
                 <h2 className={`text-xs font-bold uppercase tracking-wide ${isFinished ? 'text-slate-400' : isUrgent ? 'text-rose-400' : 'text-on-surface'}`}>
                   {isFinished
-                    ? (auction?.auctionStatus === 'Settled' ? 'Phiên đã chốt' : auction?.auctionStatus === 'Cancelled' ? 'Phiên đã hủy' : 'Phiên đã kết thúc')
+                    ? (auction?.auctionStatus === 'Settled'
+                        ? 'Phiên đã chốt'
+                        : auction?.auctionStatus === 'AwaitingPhysical'
+                          ? 'Chờ xác nhận tranh vật lý'
+                          : auction?.auctionStatus === 'InTransit'
+                            ? 'Đang giao tranh vật lý'
+                            : auction?.auctionStatus === 'Completed'
+                              ? 'Giao dịch hoàn tất'
+                              : auction?.auctionStatus === 'Cancelled'
+                                ? 'Phiên đã hủy'
+                                : 'Phiên đã kết thúc')
                     : isEnded
                       ? (isScheduled ? 'Đang mở...' : 'Phiên đã kết thúc')
                       : isUrgent
@@ -612,6 +716,11 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
                   {formatVnd(auction.currentPrice)}
                 </p>
                 <p className="mt-2 text-xs text-outline">Khởi điểm: {formatVnd(auction.startPrice)}</p>
+                {auction.finalPrice ? (
+                  <p className="mt-1 text-xs font-semibold text-emerald-300">
+                    Giá chốt: {formatVnd(auction.finalPrice)}
+                  </p>
+                ) : null}
               </div>
 
               {/* FE-03 Balance Overview */}
@@ -632,18 +741,89 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
             </div>
 
             {/* Winner Badge & Download */}
-            {isWinner && (
-              <div className="mb-6 rounded-2xl border border-emerald-400/30 bg-emerald-500/10 p-4 text-xs text-emerald-200">
-                <p className="font-bold">Chúc mừng! Bạn đã thắng phiên đấu giá này.</p>
-                <p className="mt-1">Bạn có quyền sở hữu tác phẩm và tải tệp gốc chất lượng cao.</p>
-                <button
-                  type="button"
-                  disabled={downloading}
-                  onClick={handleDownloadOriginal}
-                  className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-emerald-400 px-4 py-2 font-h1 font-bold text-brand-navy shadow hover:brightness-110"
-                >
-                  <Download size={14} /> {downloading ? 'Đang tạo liên kết...' : 'Tải xuống tệp tranh gốc'}
-                </button>
+            {isWinner && hasCompletedDeliveryChoice && (
+              <div className="mb-6 rounded-2xl border border-emerald-400/30 bg-emerald-500/10 p-5 text-xs text-emerald-200">
+                <div className="flex items-center gap-2 text-sm font-bold text-emerald-300">
+                  <Award size={18} />
+                  <span>Chúc mừng! Bạn đã thắng phiên đấu giá này.</span>
+                </div>
+                <p className="mt-1 text-emerald-200/80">
+                  Bạn nắm giữ quyền sở hữu độc bản và toàn quyền khai thác thương mại đối với bức tranh này.
+                </p>
+
+                {deliverableInfo && (
+                  <div className="mt-3 rounded-xl border border-emerald-400/20 bg-black/20 p-3 space-y-1 text-[11px] text-emerald-100 font-mono">
+                    <p>• Tệp bàn giao: <span className="font-bold text-white">{deliverableInfo.fileName}</span> {deliverableInfo.mimeType ? `(${deliverableInfo.mimeType})` : ''}</p>
+                    {deliverableInfo.certNumber && <p>• Mã chứng nhận: <span className="text-emerald-300">{deliverableInfo.certNumber}</span></p>}
+                    {deliverableInfo.licenseType && <p>• Giấy phép: <span className="text-white">{deliverableInfo.licenseType}</span></p>}
+                  </div>
+                )}
+
+                <div className="mt-4 flex flex-wrap gap-2.5">
+                  <button
+                    type="button"
+                    disabled={downloading}
+                    onClick={handleDownloadOriginal}
+                    className="inline-flex items-center gap-1.5 rounded-full bg-emerald-400 px-4 py-2 font-h1 font-bold text-brand-navy shadow hover:brightness-110 disabled:opacity-50"
+                  >
+                    <Download size={14} /> {downloading ? 'Đang tạo liên kết...' : 'Tải xuống tranh gốc'}
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={loadingCert}
+                    onClick={handleViewCertificate}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/50 bg-emerald-950/40 px-4 py-2 font-h1 font-bold text-emerald-200 shadow hover:bg-emerald-900/50 disabled:opacity-50"
+                  >
+                    <ShieldCheck size={14} /> {loadingCert ? 'Đang tải chứng nhận...' : 'Xem Chứng nhận sở hữu'}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setShowCommercialDeed(true)}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/40 bg-amber-400/10 px-4 py-2 font-h1 font-bold text-amber-300 shadow hover:bg-amber-400/20"
+                  >
+                    <FileCheck2 size={14} /> Giấy bàn giao quyền thương mại
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Trạng thái phiên chốt: Chỉ Seller mới có nút xem hợp đồng/chứng chỉ, người lạ chỉ thấy thông báo */}
+            {auction.auctionStatus === 'Settled' && !isWinner && (
+              <div className="mb-6 rounded-2xl border border-brand-periwinkle/20 bg-brand-periwinkle/5 p-4 text-xs text-on-surface-variant">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 font-semibold text-brand-periwinkle">
+                    <ShieldCheck size={16} />
+                    <span>Phiên đấu giá đã chốt quyền sở hữu độc bản</span>
+                  </div>
+                  {isSeller && (
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setShowCommercialDeed(true)}
+                        className="text-[11px] font-bold text-amber-300 hover:underline cursor-pointer"
+                      >
+                        Quyền thương mại
+                      </button>
+                      <button
+                        type="button"
+                        disabled={loadingCert}
+                        onClick={handleViewCertificate}
+                        className="inline-flex items-center gap-1 text-[11px] font-bold text-brand-periwinkle hover:underline disabled:opacity-50 cursor-pointer"
+                      >
+                        {loadingCert ? 'Đang tải...' : 'Xem chứng chỉ'} <ExternalLink size={12} />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Quản lý giao nhận tranh vật lý & Biên lai ký quỹ/bưu cục (UC35) */}
+            {auction.hasPhysicalCopy && (
+              <div className="mb-6">
+                <PhysicalDeliveryCard auction={auction} userId={userId} onReload={loadDetail} />
               </div>
             )}
 
@@ -657,6 +837,7 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
                     </label>
                     <span className="text-[11px] text-outline">Tối thiểu: {formatVnd(minimumNextBid)}</span>
                   </div>
+
 
                   <input
                     id="bid-amount"
@@ -822,6 +1003,22 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
                     )}
                   </div>
                 )}
+
+                {/* Dòng ghi chú nhỏ quy chế và điều lệ đấu giá */}
+                <div className="flex items-center justify-center gap-1.5 pt-1 text-center text-[11px] text-outline">
+                  <ShieldCheck size={13} className="text-brand-periwinkle shrink-0" />
+                  <span>
+                    Bằng việc đặt giá hoặc mua ngay tác phẩm này, bạn đồng ý với{' '}
+                    <button
+                      type="button"
+                      onClick={() => setShowRulesModal(true)}
+                      className="text-brand-periwinkle font-medium underline decoration-brand-periwinkle/40 underline-offset-2 hover:text-white transition cursor-pointer"
+                    >
+                      Quy chế sàn đấu giá &amp; Điều lệ bản quyền
+                    </button>
+                    .
+                  </span>
+                </div>
               </form>
             ) : isSeller ? (
               <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-center text-xs text-outline">
@@ -891,6 +1088,177 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
           </section>
         </div>
       </div>
+
+      {/* Modal Chứng nhận quyền sở hữu số VIP Card (chỉ Winner hoặc Seller) */}
+      {showCertModal && certificate && (isWinner || isSeller) && (
+        <AuctionCertificateCard
+          certificate={certificate}
+          onClose={() => setShowCertModal(false)}
+          onOpenCommercialRights={() => {
+            setShowCertModal(false);
+            setShowCommercialDeed(true);
+          }}
+        />
+      )}
+
+      {/* Modal Hợp đồng bàn giao quyền thương mại (chỉ Winner hoặc Seller) */}
+      {showCommercialDeed && (isWinner || isSeller) && (
+        <CommercialRightsModal
+          auctionId={auctionId}
+          onClose={() => setShowCommercialDeed(false)}
+        />
+      )}
+
+      {/* Cảnh báo: nhận tranh điện tử ngay khi đang chờ giao tranh vật lý */}
+      {showDigitalNowWarning && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 backdrop-blur-md">
+          <div className="w-full max-w-lg rounded-3xl border border-amber-400/40 bg-[#1F2335] p-6 shadow-2xl">
+            <div className="flex items-start gap-3">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-amber-400/30 bg-amber-400/15 text-amber-300">
+                <AlertTriangle size={22} />
+              </div>
+              <div>
+                <h3 className="font-h1 text-base font-bold text-amber-300">
+                  Nhận tranh điện tử ngay?
+                </h3>
+                <p className="mt-1 text-xs text-on-surface-variant">
+                  Bạn đang chờ bưu cục giao bản tranh vật lý. Nếu nhận bản điện tử ngay bây giờ:
+                </p>
+              </div>
+            </div>
+
+            <ul className="mt-4 space-y-2 rounded-2xl border border-white/10 bg-black/25 p-4 text-xs text-on-surface-variant">
+              <li className="flex gap-2">
+                <span className="text-amber-400">•</span>
+                <span>Tiền ký quỹ được <strong className="text-white">giải ngân ngay cho người bán</strong>, phiên đấu giá đóng lại.</span>
+              </li>
+              <li className="flex gap-2">
+                <span className="text-rose-400">•</span>
+                <span>
+                  Sàn <strong className="text-white">không còn giữ tiền</strong>, nên nếu bưu phẩm đến muộn, hư hỏng hoặc
+                  không đúng tranh, bạn <strong className="text-rose-300">không được hoàn tiền</strong> và không mở khiếu nại được nữa.
+                </span>
+              </li>
+              <li className="flex gap-2">
+                <span className="text-emerald-400">•</span>
+                <span>Đổi lại bạn nhận ngay bản tranh gốc độ phân giải cao và giấy chứng nhận sở hữu.</span>
+              </li>
+            </ul>
+
+            <p className="mt-3 text-[11px] text-outline">
+              Nếu muốn giữ quyền khiếu nại bưu phẩm, hãy bấm Huỷ và chờ xác nhận đã nhận tranh vật lý.
+            </p>
+
+            <div className="mt-5 flex flex-wrap items-center justify-end gap-3 border-t border-white/10 pt-4">
+              <button
+                type="button"
+                onClick={() => setShowDigitalNowWarning(false)}
+                disabled={acceptingDigital}
+                className="rounded-xl px-4 py-2 text-xs font-semibold text-outline hover:text-white transition disabled:opacity-50"
+              >
+                Huỷ, chờ nhận tranh vật lý
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmDigitalNow}
+                disabled={acceptingDigital}
+                className="inline-flex items-center gap-2 rounded-xl bg-amber-400 px-5 py-2 text-xs font-bold text-brand-navy shadow-md hover:brightness-110 transition disabled:opacity-50"
+              >
+                <Download size={14} /> {acceptingDigital ? 'Đang xử lý...' : 'Tôi đồng ý, nhận tranh điện tử ngay'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Tải bàn giao tranh gốc HD (cho Winner) */}
+      {downloadDeliverable && (
+        <DeliverablesDownloadModal
+          deliverable={downloadDeliverable}
+          onClose={() => setDownloadDeliverable(null)}
+        />
+      )}
+
+      {/* Modal Quy chế sàn đấu giá & Điều lệ bản quyền */}
+      {showRulesModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-in fade-in duration-200">
+          <div className="relative w-full max-w-lg rounded-3xl border border-white/15 bg-[#1F2335]/95 p-6 shadow-2xl backdrop-blur-2xl text-on-surface space-y-4">
+            <button
+              type="button"
+              onClick={() => setShowRulesModal(false)}
+              className="absolute right-5 top-5 rounded-full p-1.5 text-outline hover:bg-white/10 hover:text-white transition cursor-pointer"
+              aria-label="Đóng"
+            >
+              <X size={18} />
+            </button>
+
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-periwinkle/15 text-brand-periwinkle">
+                <ShieldCheck size={22} />
+              </div>
+              <div>
+                <h3 className="font-h1 text-base font-bold text-white">Quy chế sàn &amp; Điều lệ bản quyền</h3>
+                <p className="text-[11px] text-outline">Quy định giao dịch đấu giá minh bạch trên Dillustration</p>
+              </div>
+            </div>
+
+            <div className="space-y-3 pt-1 text-xs text-on-surface leading-relaxed">
+              <div className="flex items-start gap-2.5 rounded-xl border border-white/5 bg-black/20 p-3">
+                <CheckCircle2 size={16} className="text-emerald-400 shrink-0 mt-0.5" />
+                <div>
+                  <strong className="text-white">Ký quỹ tự động &amp; Hoàn cọc 100% (Escrow):</strong>
+                  <p className="text-outline mt-0.5">
+                    Khi bạn đặt giá, số tiền cọc tương ứng được tạm khóa trong ví. Nếu có người trả giá cao hơn, tiền cọc của bạn lập tức được tự động mở khóa hoàn trả 100% về ví ngay tức thì (không giam tiền).
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-2.5 rounded-xl border border-white/5 bg-black/20 p-3">
+                <CheckCircle2 size={16} className="text-emerald-400 shrink-0 mt-0.5" />
+                <div>
+                  <strong className="text-white">Quyền sở hữu &amp; khai thác thương mại 100% cho Người thắng:</strong>
+                  <p className="text-outline mt-0.5">
+                    Người thắng phiên nhận quyền tài sản độc quyền đối với bức tranh: toàn quyền khai thác hình ảnh tranh để sinh lời (in ấn tranh, trưng bày, quảng cáo), quyền niêm yết bán lại thứ cấp, tải tệp tranh gốc chất lượng cao và Giấy chứng nhận độc bản.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-2.5 rounded-xl border border-amber-400/30 bg-amber-400/10 p-3">
+                <ShieldCheck size={16} className="text-amber-400 shrink-0 mt-0.5" />
+                <div>
+                  <strong className="text-amber-300">Bảo hộ Quyền nhân thân cho Họa sĩ gốc:</strong>
+                  <p className="text-white/90 mt-0.5">
+                    Theo Luật Sở hữu trí tuệ, danh tính Họa sĩ sáng tác gốc là bất biến và vĩnh viễn không thay đổi qua mọi đời chủ sở hữu.
+                  </p>
+                  <p className="text-outline mt-0.5">
+                    Người thắng phiên sở hữu quyền thương mại nhưng <strong className="text-amber-200">tuyệt đối không được mạo danh mình là tác giả sáng tác ra tác phẩm</strong>.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-2.5 rounded-xl border border-white/5 bg-black/20 p-3">
+                <CheckCircle2 size={16} className="text-brand-periwinkle shrink-0 mt-0.5" />
+                <div>
+                  <strong className="text-white">Tính ràng buộc của lệnh đặt giá:</strong>
+                  <p className="text-outline mt-0.5">
+                    Lệnh đặt giá hoặc mua ngay một khi đã xác nhận thành công là cam kết thanh toán hợp lệ, không thể tự ý hủy ngang giữa chừng và chỉ được giải phóng khi có người trả giá cao hơn.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end pt-2 border-t border-white/10">
+              <button
+                type="button"
+                onClick={() => setShowRulesModal(false)}
+                className="rounded-full bg-brand-periwinkle px-5 py-2 text-xs font-bold text-brand-navy hover:brightness-110 transition cursor-pointer"
+              >
+                Đã hiểu &amp; Đóng
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

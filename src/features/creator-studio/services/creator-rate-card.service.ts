@@ -15,6 +15,8 @@ export type RateCardPackage = {
   maxSlots?: number | null;
   activeOrderCount?: number;
   remainingSlots?: number | null;
+  categoryId?: string | null;
+  categoryName?: string | null;
 };
 
 export function getPackageSlotInfo(pkg: Pick<RateCardPackage, 'maxSlots' | 'activeOrderCount' | 'remainingSlots'>) {

@@ -26,6 +26,7 @@ import {
   X,
 } from 'lucide-react';
 import { creatorProfileService } from '../services/creator-profile.service';
+import { categoriesService, type CategoryDto } from '@/features/marketplace/services/categories.service';
 import { commissionService } from '@/services/commission.service';
 import type { Commission, CommissionStatus } from '@/types/commission.types';
 import { CreatorAssetLibrary } from './creator-asset-library';
@@ -127,6 +128,8 @@ function Artworks() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [categories, setCategories] = useState<CategoryDto[]>([]);
+  const [categoryId, setCategoryId] = useState('');
   const [tag, setTag] = useState('');
   const [tags, setTags] = useState<string[]>([]);
   const [isAiGenerated, setIsAiGenerated] = useState(false);
@@ -145,6 +148,7 @@ function Artworks() {
   const [deleteBusy, setDeleteBusy] = useState(false);
   const [editTitle, setEditTitle] = useState('');
   const [editDescription, setEditDescription] = useState('');
+  const [editCategoryId, setEditCategoryId] = useState('');
   const [editTags, setEditTags] = useState('');
   const [loadingArtworks, setLoadingArtworks] = useState(true);
   const [scanNotices, setScanNotices] = useState<Record<string, string>>({});
@@ -160,6 +164,7 @@ function Artworks() {
     };
 
     void loadProfile();
+    categoriesService.getCategories().then(setCategories).catch(() => undefined);
   }, []);
 
   useEffect(() => {
@@ -192,7 +197,7 @@ function Artworks() {
   };
 
   const addTag = () => {
-    const value = tag.trim();
+    const value = tag.trim().replace(/^#+/, '');
     if (value.length > 50 || tags.length >= 10) {
       setError('Tối đa 10 tag, mỗi tag không quá 50 ký tự.');
       return;
@@ -212,6 +217,11 @@ function Artworks() {
       return;
     }
 
+    if (!categoryId) {
+      setError('Vui lòng chọn Danh mục lớn cho tác phẩm.');
+      return;
+    }
+
     setUploading(true);
     try {
       const imageUrl = await creatorProfileService.uploadArtworkImage(imageFile);
@@ -222,6 +232,7 @@ function Artworks() {
         thumbnailUrl: imageUrl,
         isAiGenerated,
         tags,
+        categoryId,
       });
       setError('');
       setSaved(true);
@@ -233,6 +244,7 @@ function Artworks() {
       setPreview(null);
       setTitle('');
       setDescription('');
+      setCategoryId('');
       setTags([]);
       toast.success(`Đã lưu ${uploaded.title}. Theo dõi kiểm tra AI trong portfolio bên dưới.`);
     } catch (err) {
@@ -249,6 +261,7 @@ function Artworks() {
     setEditingImagePreview(artwork.thumbnailUrl || artwork.imageUrl);
     setEditTitle(artwork.title);
     setEditDescription(artwork.description ?? '');
+    setEditCategoryId(artwork.categoryId ?? '');
     setEditTags(artwork.tags.join(', '));
   };
 
@@ -276,7 +289,8 @@ function Artworks() {
       await creatorProfileService.updateArtwork(editingArtwork.id, {
         title: editTitle,
         description: editDescription,
-        tags: editTags.split(',').map((value) => value.trim()).filter(Boolean),
+        tags: editTags.split(',').map((value) => value.trim().replace(/^#+/, '')).filter(Boolean),
+        categoryId: editCategoryId || undefined,
         ...(imageUrl ? { imageUrl, thumbnailUrl: imageUrl } : {}),
       });
       if (imageUrl) setScanNotices(current => ({ ...current, [editingArtwork.id]: imageUrl }));
@@ -331,7 +345,40 @@ function Artworks() {
               <input maxLength={200} required value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Ví dụ: Violet afternoon" className="mt-2 w-full rounded-2xl border border-white/10 bg-[#171a2a] px-4 py-3 text-white outline-none focus:border-[#A7ACD9]" />
             </label>
 
-            <ArtworkMetadataAssistant file={imageFile} onApply={value => { setTitle(value.title); setDescription(value.description); setTags(value.tags); }} />
+            <ArtworkMetadataAssistant
+              file={imageFile}
+              onApply={(value) => {
+                setTitle(value.title);
+                setDescription(value.description);
+                setTags(value.tags);
+                if (value.categoryId) {
+                  setCategoryId(value.categoryId);
+                } else {
+                  const targetName = (value.categoryName || value.style || '').trim().toLowerCase();
+                  const matched = categories.find(
+                    (c) => c.name.toLowerCase() === targetName || c.name.toLowerCase().includes(targetName)
+                  );
+                  if (matched) setCategoryId(matched.id);
+                }
+              }}
+            />
+
+            <label className="text-sm text-[#C7C5CF]">
+              Danh mục lớn <span className="text-rose-400">*</span>
+              <select
+                required
+                value={categoryId}
+                onChange={(event) => setCategoryId(event.target.value)}
+                className="mt-2 w-full rounded-2xl border border-white/10 bg-[#171a2a] px-4 py-3 text-white outline-none focus:border-[#A7ACD9]"
+              >
+                <option value="">-- Chọn danh mục chính của tác phẩm --</option>
+                {categories.map((cat) => (
+                  <option key={cat.id} value={cat.id}>
+                    {cat.name}
+                  </option>
+                ))}
+              </select>
+            </label>
 
             <label className="text-sm text-[#C7C5CF]">
               Mô tả
@@ -407,7 +454,15 @@ function Artworks() {
                 </div>
                 <div className="space-y-3 p-4">
                   <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0"><h3 className="truncate text-sm font-semibold text-white">{artwork.title}</h3><p className="mt-1 text-xs text-[#A7ACD9]">{artwork.moderationStatus} · {artwork.viewCount} lượt xem</p></div>
+                    <div className="min-w-0">
+                      <h3 className="truncate text-sm font-semibold text-white">{artwork.title}</h3>
+                      <p className="mt-1 text-xs text-[#A7ACD9]">{artwork.moderationStatus} · {artwork.viewCount} lượt xem</p>
+                      {(artwork.categoryName || artwork.style) && (
+                        <span className="mt-1.5 inline-block rounded-full bg-[#A7ACD9]/15 border border-[#A7ACD9]/30 px-2 py-0.5 text-[10px] font-semibold text-[#C5C9F8]">
+                          {artwork.categoryName || artwork.style}
+                        </span>
+                      )}
+                    </div>
                     <div className="flex shrink-0 gap-1">
                       <button type="button" onClick={() => openEdit(artwork)} title="Chỉnh sửa tác phẩm" aria-label={`Chỉnh sửa ${artwork.title}`} className="rounded-lg border border-white/10 p-2 text-[#C7C5CF] hover:bg-white/10 hover:text-white"><Pencil className="h-3.5 w-3.5" /></button>
                       <button type="button" onClick={() => setDeletingArtwork(artwork)} title="Xóa tác phẩm" aria-label={`Xóa ${artwork.title}`} className="rounded-lg border border-rose-300/20 p-2 text-rose-200 hover:bg-rose-300/10"><Trash2 className="h-3.5 w-3.5" /></button>
@@ -435,6 +490,21 @@ function Artworks() {
           <button type="button" onClick={() => editImageInputRef.current?.click()} className="relative flex h-44 w-full items-center justify-center overflow-hidden rounded-xl border border-dashed border-white/15 bg-black/20 text-xs text-white hover:border-[#A7ACD9]/60">{editingImagePreview ? <Image src={editingImagePreview} alt="Ảnh artwork mới" fill unoptimized className="object-contain" /> : <span>Chọn ảnh thay thế</span>}<span className="absolute bottom-2 right-2 rounded-lg bg-black/70 px-2 py-1">Thay ảnh</span></button>
           <input ref={editImageInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={chooseEditImage} className="hidden" />
           <label className="block text-sm text-[#C7C5CF]">Tiêu đề<input value={editTitle} onChange={(event) => setEditTitle(event.target.value)} maxLength={200} required className="mt-1.5 w-full rounded-xl border border-white/10 bg-[#171a2a] px-3 py-2.5 text-white outline-none focus:border-[#A7ACD9]" /></label>
+          <label className="block text-sm text-[#C7C5CF]">
+            Danh mục lớn
+            <select
+              value={editCategoryId}
+              onChange={(event) => setEditCategoryId(event.target.value)}
+              className="mt-1.5 w-full rounded-xl border border-white/10 bg-[#171a2a] px-3 py-2.5 text-white outline-none focus:border-[#A7ACD9]"
+            >
+              <option value="">-- Giữ nguyên hoặc chọn danh mục --</option>
+              {categories.map((cat) => (
+                <option key={cat.id} value={cat.id}>
+                  {cat.name}
+                </option>
+              ))}
+            </select>
+          </label>
           <label className="block text-sm text-[#C7C5CF]">Mô tả<textarea value={editDescription} onChange={(event) => setEditDescription(event.target.value)} className="mt-1.5 min-h-24 w-full rounded-xl border border-white/10 bg-[#171a2a] px-3 py-2.5 text-white outline-none focus:border-[#A7ACD9]" /></label>
           <label className="block text-sm text-[#C7C5CF]">Tags, phân cách bằng dấu phẩy<input value={editTags} onChange={(event) => setEditTags(event.target.value)} className="mt-1.5 w-full rounded-xl border border-white/10 bg-[#171a2a] px-3 py-2.5 text-white outline-none focus:border-[#A7ACD9]" /></label>
           <div className="flex justify-end gap-2"><button type="button" onClick={() => setEditingArtwork(null)} className="rounded-xl border border-white/10 px-4 py-2 text-sm text-white">Hủy</button><button type="submit" disabled={savingEdit} className="rounded-xl bg-[#A7ACD9] px-4 py-2 text-sm font-semibold text-[#1F2335] disabled:opacity-60">{savingEdit ? 'Đang lưu...' : 'Lưu thay đổi'}</button></div>

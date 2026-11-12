@@ -1,34 +1,64 @@
 'use client';
 
-import Image from 'next/image';
-import { useState, useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { ArrowRight, CheckCircle2, Eye, EyeOff, Lock, Mail, User } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { authService } from '@/services/auth.service';
+import { useLanguage } from '@/context/language-context';
 import { useAuthStore } from '@/store/use-auth-store';
 import { useGoogleAuth } from '@/features/auth/hooks/use-google-auth';
 import { AccountPasswordSetupForm } from '@/features/auth/components/account-password-setup-form';
+import {
+  AUTH_INPUT_CLASS,
+  AUTH_INPUT_WRAP_CLASS,
+  AUTH_LABEL_CLASS,
+  AUTH_PRIMARY_BTN_CLASS,
+  AuthShell,
+  GoogleAuthButton,
+} from '@/features/auth/components/auth-shell';
 
-const registerSchema = z.object({
-  fullName: z.string().min(2, 'Full name must be at least 2 characters'),
-  email: z.string().min(1, 'Email address is required').email('Invalid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
-  terms: z.literal(true, {
-    message: 'You must accept the community guidelines',
-  }),
-});
-
-type RegisterFormValues = z.infer<typeof registerSchema>;
+interface RegisterFormValues {
+  fullName: string;
+  email: string;
+  password: string;
+  terms: boolean;
+}
 
 type VerifyState = 'idle' | 'sending' | 'sent' | 'confirming' | 'verified';
 
 export default function RegisterPage() {
   const router = useRouter();
+  const { lang } = useLanguage();
+  const isEng = lang === 'ENG';
   const setAuth = useAuthStore((state) => state.setAuth);
+
+  const registerSchema = useMemo(
+    () =>
+      z.object({
+        fullName: z
+          .string()
+          .min(2, isEng ? 'Full name must be at least 2 characters' : 'Họ tên phải có ít nhất 2 ký tự'),
+        email: z
+          .string()
+          .min(1, isEng ? 'Email address is required' : 'Vui lòng nhập địa chỉ email')
+          .email(isEng ? 'Invalid email address' : 'Địa chỉ email không hợp lệ'),
+        password: z
+          .string()
+          .min(6, isEng ? 'Password must be at least 6 characters' : 'Mật khẩu phải có ít nhất 6 ký tự'),
+        terms: z.boolean().refine((val) => val === true, {
+          message: isEng
+            ? 'Please read and agree to the Platform Guidelines & Personal Data Protection Policy'
+            : 'Vui lòng đọc và đồng ý với Quy chế nền tảng & Chính sách bảo vệ dữ liệu cá nhân',
+        }),
+      }),
+    [isEng]
+  );
+
   const [googleRegistration, setGoogleRegistration] = useState<{
     ticket: string;
     email: string;
@@ -39,31 +69,28 @@ export default function RegisterPage() {
     email: string;
     fullName: string | null;
   } | null>(null);
+
   const googleLogin = useGoogleAuth(
     undefined,
     (registrationTicket, suggestedEmail, suggestedFullName) => {
-      setGoogleRegistration({ ticket: registrationTicket, email: suggestedEmail, fullName: suggestedFullName });
+      setGoogleRegistration({
+        ticket: registrationTicket,
+        email: suggestedEmail,
+        fullName: suggestedFullName,
+      });
     },
     (passwordSetupTicket, email, fullName) => {
       setPasswordSetup({ ticket: passwordSetupTicket, email, fullName });
     }
   );
-  const [isLoading, setIsLoading] = useState(false);
-  const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 });
 
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [verifyState, setVerifyState] = useState<VerifyState>('idle');
   const [verifiedEmail, setVerifiedEmail] = useState<string | null>(null);
   const [verificationCode, setVerificationCode] = useState('');
   const [verificationTicket, setVerificationTicket] = useState<string | null>(null);
   const [resendCooldown, setResendCooldown] = useState(0);
-
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      setCursorPos({ x: e.clientX, y: e.clientY });
-    };
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, []);
 
   useEffect(() => {
     if (resendCooldown <= 0) return;
@@ -78,9 +105,7 @@ export default function RegisterPage() {
     formState: { errors },
   } = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
-    defaultValues: {
-      terms: true,
-    },
+    defaultValues: { terms: false },
   });
 
   const emailValue = useWatch({ control, name: 'email' });
@@ -96,7 +121,9 @@ export default function RegisterPage() {
 
   const handleSendCode = async () => {
     if (!emailValue || errors.email) {
-      toast.error('Please enter a valid email address first.');
+      toast.error(
+        isEng ? 'Please enter a valid email address first.' : 'Vui lòng nhập email hợp lệ trước.'
+      );
       return;
     }
 
@@ -105,16 +132,26 @@ export default function RegisterPage() {
       await authService.sendVerificationCode(emailValue);
       setVerifyState('sent');
       setResendCooldown(60);
-      toast.success('Verification code sent, please check your inbox.');
+      toast.success(
+        isEng
+          ? 'Verification code sent, please check your inbox.'
+          : 'Đã gửi mã xác minh, vui lòng kiểm tra hộp thư.'
+      );
     } catch (err) {
       setVerifyState('idle');
-      toast.error(err instanceof Error ? err.message : 'Failed to send verification code.');
+      toast.error(
+        err instanceof Error
+          ? err.message
+          : isEng
+            ? 'Failed to send verification code.'
+            : 'Gửi mã xác minh thất bại.'
+      );
     }
   };
 
   const handleConfirmCode = async () => {
     if (!verificationCode.trim()) {
-      toast.error('Please enter the verification code.');
+      toast.error(isEng ? 'Please enter the verification code.' : 'Vui lòng nhập mã xác minh.');
       return;
     }
 
@@ -124,16 +161,26 @@ export default function RegisterPage() {
       setVerificationTicket(result.verificationTicket);
       setVerifiedEmail(emailValue);
       setVerifyState('verified');
-      toast.success('Email verified!');
+      toast.success(isEng ? 'Email verified!' : 'Xác thực email thành công!');
     } catch (err) {
       setVerifyState('sent');
-      toast.error(err instanceof Error ? err.message : 'Invalid or expired code.');
+      toast.error(
+        err instanceof Error
+          ? err.message
+          : isEng
+            ? 'Invalid or expired code.'
+            : 'Mã xác minh không đúng hoặc đã hết hạn.'
+      );
     }
   };
 
   const onSubmit = async (data: RegisterFormValues) => {
     if (verifyState !== 'verified' || !verificationTicket) {
-      toast.error('Please verify your email before registering.');
+      toast.error(
+        isEng
+          ? 'Please verify your email before registering.'
+          : 'Vui lòng xác thực email trước khi đăng ký.'
+      );
       return;
     }
 
@@ -146,204 +193,204 @@ export default function RegisterPage() {
         verificationTicket,
       });
       setAuth(authResponse);
-      toast.success(`Account created! Welcome to the collective, ${authResponse.user.fullName}!`);
+      toast.success(
+        isEng
+          ? `Account created! Welcome, ${authResponse.user.fullName}!`
+          : `Đã tạo tài khoản! Chào mừng ${authResponse.user.fullName}!`
+      );
       router.push('/');
     } catch (err: unknown) {
       const errorObj = err as { message?: string };
-      toast.error(errorObj.message || 'Registration failed. Email might already be registered.');
+      toast.error(
+        errorObj.message ||
+          (isEng
+            ? 'Registration failed. Email might already be registered.'
+            : 'Đăng ký thất bại. Email có thể đã được sử dụng.')
+      );
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center p-6 bg-[#1F2335] text-[#e4e1e5] font-body relative overflow-hidden">
-      {/* Custom Cursor Glow */}
-      <div
-        className="fixed w-64 h-64 bg-[#A7ACD9]/10 rounded-full blur-[80px] pointer-events-none -translate-x-1/2 -translate-y-1/2 z-[100] transition-opacity duration-300 hidden md:block"
-        style={{ left: `${cursorPos.x}px`, top: `${cursorPos.y}px` }}
-      />
-
-      {/* Atmospheric Background */}
-      <div className="fixed top-0 left-0 w-full h-full -z-10 pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-[#c2c7f6]/10 rounded-full blur-[120px] opacity-40 animate-pulse" />
-        <div className="absolute bottom-[-5%] right-[-5%] w-[40%] h-[40%] bg-[#A7ACD9]/5 rounded-full blur-[100px] opacity-30" />
-      </div>
-
-      {/* Main Registration Shell */}
-      <main className="w-full max-w-xl z-10">
-        {/* Brand Identity Floating Above */}
-        <div className="flex flex-col items-center mb-8">
-          <Link href="/" className="mb-2 group">
-            <Image
-              src="/studiologo.png"
-              alt="dillustration"
-              width={220}
-              height={112}
-              priority
-              style={{ width: 'auto' }}
-              className="h-24 md:h-28 w-auto object-contain drop-shadow-[0_0_20px_rgba(194,199,246,0.4)] group-hover:scale-105 transition-transform"
-            />
-          </Link>
-          <p className="text-xs text-[#c7c5cf] uppercase tracking-widest font-medium">
-            Digital Etherealism Collective
-          </p>
-        </div>
-
-        {/* Glassmorphic Container */}
-        <div className="glass-container rounded-3xl p-8 md:p-12 relative overflow-hidden">
-          {/* Decorative Subtle Pattern */}
-          <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
-            <span className="material-symbols-outlined text-9xl">grid_view</span>
-          </div>
-
-          <div className="relative z-10">
-            {passwordSetup ? (
-              <AccountPasswordSetupForm
-                introText={
-                  <>
-                    <p className="text-sm text-[#c7c5cf]">
-                      Welcome back{passwordSetup.fullName ? `, ${passwordSetup.fullName}` : ''}! Signed in as{' '}
-                      <span className="text-white font-medium">{passwordSetup.email}</span>.
-                    </p>
-                    <p className="text-sm text-[#c7c5cf] mt-2">
-                      This account doesn&apos;t have a username and password yet — set them now before
-                      continuing.
-                    </p>
-                  </>
-                }
-                submitLabel="Finish & Continue"
-                submittingLabel="Saving..."
-                onSubmit={(username, password) =>
-                  authService.completeAccountPasswordSetup({
-                    email: passwordSetup.email,
-                    setupTicket: passwordSetup.ticket,
-                    username,
-                    password,
-                  })
-                }
-                onSuccess={(authResponse) => {
-                  setAuth(authResponse);
-                  setPasswordSetup(null);
-                  toast.success(`Welcome back, ${authResponse.user.fullName}!`);
-                  router.push('/');
-                }}
-                onCancel={() => setPasswordSetup(null)}
-              />
-            ) : googleRegistration ? (
-              <AccountPasswordSetupForm
-                introText={
-                  <>
-                    <p className="text-sm text-[#c7c5cf]">
-                      Welcome{googleRegistration.fullName ? `, ${googleRegistration.fullName}` : ''}! Signed in
-                      with Google as{' '}
-                      <span className="text-white font-medium">{googleRegistration.email}</span>.
-                    </p>
-                    <p className="text-sm text-[#c7c5cf] mt-2">
-                      Google accounts don&apos;t come with a password here — choose a username and
-                      password to finish creating your account.
-                    </p>
-                  </>
-                }
-                submitLabel="Finish Creating Account"
-                submittingLabel="Creating Account..."
-                onSubmit={(username, password) =>
-                  authService.completeGoogleRegistration({
-                    registrationTicket: googleRegistration.ticket,
-                    username,
-                    password,
-                  })
-                }
-                onSuccess={(authResponse) => {
-                  setAuth(authResponse);
-                  setGoogleRegistration(null);
-                  toast.success(`Account created! Welcome to the collective, ${authResponse.user.fullName}!`);
-                  router.push('/');
-                }}
-                onCancel={() => setGoogleRegistration(null)}
-              />
-            ) : (
-              <>
-            <h1 className="font-h1 text-3xl font-bold mb-2 text-white">Create Account</h1>
-            <p className="text-sm text-[#c7c5cf] mb-8">
-              Join the curated gallery of ethereal digital artists.
+    <AuthShell>
+      {passwordSetup ? (
+        <AccountPasswordSetupForm
+          introText={
+            <>
+              <p className="text-sm text-[#C7C5CF]">
+                {isEng ? 'Welcome back' : 'Chào mừng trở lại'}
+                {passwordSetup.fullName ? `, ${passwordSetup.fullName}` : ''}!{' '}
+                {isEng ? 'Signed in as' : 'Đăng nhập với'}{' '}
+                <span className="font-medium text-white">{passwordSetup.email}</span>.
+              </p>
+              <p className="mt-2 text-sm text-[#C7C5CF]">
+                {isEng
+                  ? "This account doesn't have a username and password yet — set them now before continuing."
+                  : 'Tài khoản này chưa có tên đăng nhập và mật khẩu — hãy thiết lập ngay trước khi tiếp tục.'}
+              </p>
+            </>
+          }
+          submitLabel={isEng ? 'Finish & Continue' : 'Hoàn tất & Tiếp tục'}
+          submittingLabel={isEng ? 'Saving...' : 'Đang lưu...'}
+          onSubmit={(username, password) =>
+            authService.completeAccountPasswordSetup({
+              email: passwordSetup.email,
+              setupTicket: passwordSetup.ticket,
+              username,
+              password,
+            })
+          }
+          onSuccess={(authResponse) => {
+            setAuth(authResponse);
+            setPasswordSetup(null);
+            toast.success(
+              isEng
+                ? `Welcome back, ${authResponse.user.fullName}!`
+                : `Chào mừng trở lại, ${authResponse.user.fullName}!`
+            );
+            router.push('/');
+          }}
+          onCancel={() => setPasswordSetup(null)}
+        />
+      ) : googleRegistration ? (
+        <AccountPasswordSetupForm
+          introText={
+            <>
+              <p className="text-sm text-[#C7C5CF]">
+                {isEng ? 'Welcome' : 'Chào mừng'}
+                {googleRegistration.fullName ? `, ${googleRegistration.fullName}` : ''}!{' '}
+                {isEng ? 'Signed in with Google as' : 'Đăng nhập Google bằng'}{' '}
+                <span className="font-medium text-white">{googleRegistration.email}</span>.
+              </p>
+              <p className="mt-2 text-sm text-[#C7C5CF]">
+                {isEng
+                  ? "Google accounts don't come with a password here — choose a username and password to finish creating your account."
+                  : 'Tài khoản Google cần thiết lập tên đăng nhập và mật khẩu để hoàn tất tạo tài khoản.'}
+              </p>
+            </>
+          }
+          submitLabel={isEng ? 'Finish Creating Account' : 'Hoàn tất tạo tài khoản'}
+          submittingLabel={isEng ? 'Creating Account...' : 'Đang tạo tài khoản...'}
+          onSubmit={(username, password) =>
+            authService.completeGoogleRegistration({
+              registrationTicket: googleRegistration.ticket,
+              username,
+              password,
+            })
+          }
+          onSuccess={(authResponse) => {
+            setAuth(authResponse);
+            setGoogleRegistration(null);
+            toast.success(
+              isEng
+                ? `Account created! Welcome, ${authResponse.user.fullName}!`
+                : `Đã tạo tài khoản! Chào mừng ${authResponse.user.fullName}!`
+            );
+            router.push('/');
+          }}
+          onCancel={() => setGoogleRegistration(null)}
+        />
+      ) : (
+        <>
+          <header className="mb-7">
+            <h1 className="font-h1 text-2xl font-bold text-white sm:text-3xl">
+              {isEng ? 'Create Account' : 'Tạo tài khoản'}
+            </h1>
+            <p className="mt-1.5 text-sm text-[#C7C5CF]">
+              {isEng
+                ? 'Join DILLUSTRATION to commission artists, join auctions, and trade art.'
+                : 'Tham gia DILLUSTRATION để đặt vẽ tranh, đấu giá và giao lưu tác phẩm.'}
             </p>
+          </header>
 
-            <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
-              {/* Full Name */}
-              <div className="space-y-2">
-                <label className="text-xs uppercase tracking-widest text-[#919099] ml-1 font-medium block">
-                  Full Name
-                </label>
+          <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>
+            {/* Full Name */}
+            <div className="space-y-1.5">
+              <label className={AUTH_LABEL_CLASS} htmlFor="fullName">
+                {isEng ? 'Full Name' : 'Họ và tên'}
+              </label>
+              <div className={AUTH_INPUT_WRAP_CLASS}>
+                <User className="pointer-events-none ml-3.5 h-4 w-4 shrink-0 text-[#919099]" aria-hidden />
                 <input
                   {...register('fullName')}
-                  className="w-full bg-[#0e0e11]/50 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-[#A7ACD9] focus:ring-1 focus:ring-[#A7ACD9] transition-all text-sm"
-                  placeholder="Claude Monet"
+                  id="fullName"
+                  className={`${AUTH_INPUT_CLASS} px-3.5`}
+                  placeholder={isEng ? 'Enter your full name' : 'Nhập họ và tên của bạn'}
                   type="text"
+                  autoComplete="name"
                   disabled={isLoading}
                 />
-                {errors.fullName && (
-                  <p className="text-red-400 text-xs ml-1">{errors.fullName.message}</p>
-                )}
               </div>
+              {errors.fullName && <p className="text-xs text-red-400">{errors.fullName.message}</p>}
+            </div>
 
-              {/* Email Address */}
-              <div className="space-y-2">
-                <label className="text-xs uppercase tracking-widest text-[#919099] ml-1 font-medium block">
-                  Email Address
-                </label>
-                <div className="relative">
-                  <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-white/40 text-xl">
-                    alternate_email
-                  </span>
-                  <input
-                    {...emailRegistration}
-                    onChange={handleEmailChange}
-                    className="w-full bg-[#0e0e11]/50 border border-white/10 rounded-xl pl-12 pr-28 py-3 text-white placeholder-white/30 focus:outline-none focus:border-[#A7ACD9] focus:ring-1 focus:ring-[#A7ACD9] transition-all text-sm"
-                    placeholder="curator@ethereal.art"
-                    type="email"
-                    disabled={isLoading}
-                  />
-                  <button
-                    type="button"
-                    onClick={handleSendCode}
-                    disabled={
-                      isLoading ||
-                      verifyState === 'sending' ||
-                      verifyState === 'verified' ||
-                      !emailValue ||
-                      !!errors.email ||
-                      resendCooldown > 0
-                    }
-                    className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg bg-[#A7ACD9]/20 px-3 py-1.5 text-xs font-semibold text-[#A7ACD9] hover:bg-[#A7ACD9]/30 transition-colors disabled:cursor-not-allowed disabled:opacity-40 cursor-pointer"
-                  >
-                    {verifyState === 'verified'
+            {/* Email Address + OTP verification */}
+            <div className="space-y-2">
+              <label className={AUTH_LABEL_CLASS} htmlFor="email">
+                {isEng ? 'Email Address' : 'Địa chỉ Email'}
+              </label>
+              <div className={AUTH_INPUT_WRAP_CLASS}>
+                <Mail className="pointer-events-none ml-3.5 h-4 w-4 shrink-0 text-[#919099]" aria-hidden />
+                <input
+                  {...emailRegistration}
+                  id="email"
+                  onChange={handleEmailChange}
+                  className={`${AUTH_INPUT_CLASS} pl-3.5 pr-28`}
+                  placeholder="name@example.com"
+                  type="email"
+                  autoComplete="email"
+                  disabled={isLoading}
+                />
+                <button
+                  type="button"
+                  onClick={handleSendCode}
+                  disabled={
+                    isLoading ||
+                    verifyState === 'sending' ||
+                    verifyState === 'verified' ||
+                    !emailValue ||
+                    !!errors.email ||
+                    resendCooldown > 0
+                  }
+                  className="absolute right-2 cursor-pointer rounded-lg border border-[#A7ACD9]/30 bg-[#A7ACD9]/15 px-3 py-1.5 text-xs font-semibold text-[#c2c7f6] transition-colors hover:bg-[#A7ACD9]/25 disabled:cursor-not-allowed disabled:opacity-45"
+                >
+                  {verifyState === 'verified'
+                    ? isEng
                       ? 'Verified'
-                      : verifyState === 'sending'
+                      : 'Đã xác thực'
+                    : verifyState === 'sending'
+                      ? isEng
                         ? 'Sending...'
-                        : resendCooldown > 0
+                        : 'Đang gửi...'
+                      : resendCooldown > 0
+                        ? isEng
                           ? `Resend (${resendCooldown}s)`
-                          : verifyState === 'sent' || verifyState === 'confirming'
+                          : `Gửi lại (${resendCooldown}s)`
+                        : verifyState === 'sent' || verifyState === 'confirming'
+                          ? isEng
                             ? 'Resend code'
-                            : 'Send code'}
-                  </button>
-                </div>
-                {errors.email && (
-                  <p className="text-red-400 text-xs ml-1">{errors.email.message}</p>
-                )}
+                            : 'Gửi lại mã'
+                          : isEng
+                            ? 'Send code'
+                            : 'Gửi mã'}
+                </button>
+              </div>
+              {errors.email && <p className="text-xs text-red-400">{errors.email.message}</p>}
 
-                {verifyState === 'verified' ? (
-                  <p className="flex items-center gap-1 text-xs text-emerald-400 ml-1">
-                    <span className="material-symbols-outlined text-sm">check_circle</span>
-                    Email verified
-                  </p>
-                ) : (verifyState === 'sent' || verifyState === 'confirming') && (
+              {verifyState === 'verified' ? (
+                <p className="flex items-center gap-1.5 text-xs font-medium text-emerald-400">
+                  <CheckCircle2 className="h-3.5 w-3.5" aria-hidden />
+                  {isEng ? 'Email verified' : 'Email đã được xác thực'}
+                </p>
+              ) : (
+                (verifyState === 'sent' || verifyState === 'confirming') && (
                   <div className="flex gap-2">
                     <input
                       value={verificationCode}
                       onChange={(e) => setVerificationCode(e.target.value)}
-                      className="w-full bg-[#0e0e11]/50 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder-white/30 focus:outline-none focus:border-[#A7ACD9] focus:ring-1 focus:ring-[#A7ACD9] transition-all text-sm tracking-widest"
-                      placeholder="6-digit code"
+                      className="h-11 w-full rounded-xl border border-white/10 bg-[#141724]/90 px-4 text-sm tracking-widest text-[#E4E1E5] placeholder:text-[#919099] focus:border-[#A7ACD9] focus:outline-none focus:ring-1 focus:ring-[#A7ACD9]"
+                      placeholder={isEng ? '6-digit code' : 'Mã 6 chữ số'}
                       maxLength={6}
                       disabled={verifyState === 'confirming'}
                     />
@@ -351,123 +398,129 @@ export default function RegisterPage() {
                       type="button"
                       onClick={handleConfirmCode}
                       disabled={verifyState === 'confirming'}
-                      className="shrink-0 rounded-xl bg-[#A7ACD9] px-4 py-2.5 text-sm font-bold text-[#1F2335] disabled:opacity-60 cursor-pointer"
+                      className="h-11 shrink-0 cursor-pointer rounded-xl bg-[#A7ACD9] px-4 text-xs font-bold text-[#1F2335] transition-colors hover:bg-[#c2c7f6] disabled:opacity-60"
                     >
-                      {verifyState === 'confirming' ? 'Checking...' : 'Confirm'}
+                      {verifyState === 'confirming'
+                        ? isEng
+                          ? 'Checking...'
+                          : 'Đang kiểm tra...'
+                        : isEng
+                          ? 'Confirm'
+                          : 'Xác nhận'}
                     </button>
                   </div>
-                )}
-              </div>
-
-              {/* Password */}
-              <div className="space-y-2">
-                <label className="text-xs uppercase tracking-widest text-[#919099] ml-1 font-medium block">
-                  Password
-                </label>
-                <div className="relative">
-                  <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-white/40 text-xl">
-                    lock_open
-                  </span>
-                  <input
-                    {...register('password')}
-                    className="w-full bg-[#0e0e11]/50 border border-white/10 rounded-xl pl-12 pr-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-[#A7ACD9] focus:ring-1 focus:ring-[#A7ACD9] transition-all text-sm"
-                    placeholder="••••••••••••"
-                    type="password"
-                    disabled={isLoading}
-                  />
-                </div>
-                {errors.password && (
-                  <p className="text-red-400 text-xs ml-1">{errors.password.message}</p>
-                )}
-              </div>
-
-              {/* Terms Checkbox */}
-              <div className="flex items-start gap-3 pt-2">
-                <div className="mt-1">
-                  <input
-                    {...register('terms')}
-                    id="terms"
-                    type="checkbox"
-                    className="rounded border-white/10 bg-[#0e0e11] text-[#A7ACD9] focus:ring-[#A7ACD9] cursor-pointer"
-                  />
-                </div>
-                <label htmlFor="terms" className="text-xs text-[#c7c5cf] leading-relaxed cursor-pointer">
-                  I agree to the{' '}
-                  <span className="text-[#A7ACD9] underline hover:text-white">
-                    Digital Etherealism Guidelines
-                  </span>{' '}
-                  and community standards for artistic integrity.
-                </label>
-              </div>
-              {errors.terms && (
-                <p className="text-red-400 text-xs ml-1">{errors.terms.message}</p>
+                )
               )}
+            </div>
 
-              {/* Primary Action Button */}
-              <button
-                type="submit"
-                disabled={isLoading || verifyState !== 'verified'}
-                className="w-full py-4 bg-white text-[#1F2335] font-bold text-base rounded-xl transition-all duration-300 active:scale-95 primary-glow-hover mt-4 flex items-center justify-center gap-2 group cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <span>{isLoading ? 'Creating Account...' : 'Begin Journey'}</span>
-                <span className="material-symbols-outlined transition-transform duration-300 group-hover:translate-x-1">
-                  arrow_forward
-                </span>
-              </button>
-            </form>
-
-            {/* Social Proof / Footer */}
-            <div className="mt-10 pt-8 border-t border-white/10 flex flex-col items-center gap-6">
-              <p className="text-sm text-[#c7c5cf]">
-                Already part of the collective?{' '}
-                <Link href="/login" className="text-[#A7ACD9] hover:underline font-bold">
-                  Sign In
-                </Link>
-              </p>
-
-              <div className="flex items-center gap-4 w-full">
-                <div className="h-[1px] flex-grow bg-white/10" />
-                <span className="text-[10px] text-[#919099] uppercase tracking-widest">
-                  Or continue with
-                </span>
-                <div className="h-[1px] flex-grow bg-white/10" />
-              </div>
-
-              <div className="w-full">
+            {/* Password */}
+            <div className="space-y-1.5">
+              <label className={AUTH_LABEL_CLASS} htmlFor="password">
+                {isEng ? 'Password' : 'Mật khẩu'}
+              </label>
+              <div className={AUTH_INPUT_WRAP_CLASS}>
+                <Lock className="pointer-events-none ml-3.5 h-4 w-4 shrink-0 text-[#919099]" aria-hidden />
+                <input
+                  {...register('password')}
+                  id="password"
+                  className={`${AUTH_INPUT_CLASS} pl-3.5 pr-11`}
+                  placeholder="••••••••••••"
+                  type={showPassword ? 'text' : 'password'}
+                  autoComplete="new-password"
+                  disabled={isLoading}
+                />
                 <button
                   type="button"
-                  onClick={() => googleLogin()}
-                  className="flex items-center justify-center gap-3 py-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-xs font-semibold text-[#c7c5cf] hover:text-white cursor-pointer w-full"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  className="absolute right-3.5 cursor-pointer text-[#919099] transition-colors hover:text-white"
+                  aria-label={isEng ? 'Toggle password visibility' : 'Hiện/ẩn mật khẩu'}
                 >
-                  <svg className="w-4 h-4" viewBox="0 0 24 24">
-                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-                  </svg>
-                  <span>Google</span>
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" aria-hidden />
+                  ) : (
+                    <Eye className="h-4 w-4" aria-hidden />
+                  )}
                 </button>
               </div>
+              {errors.password && <p className="text-xs text-red-400">{errors.password.message}</p>}
             </div>
-              </>
-            )}
-          </div>
-        </div>
 
-        {/* System Status Bar */}
-        <div className="mt-8 flex justify-between items-center px-4 text-xs text-[#919099]">
-          <div className="flex items-center gap-3">
-            <span className="w-2 h-2 rounded-full bg-[#e3c786] shadow-[0_0_8px_#e3c786]" />
-            <span className="uppercase tracking-wider">Gallery Servers Online</span>
+            {/* PDPL & Platform Terms Checkbox */}
+            <div className="flex items-start gap-2.5 pt-0.5">
+              <input
+                {...register('terms')}
+                id="terms"
+                type="checkbox"
+                className="mt-0.5 h-4 w-4 cursor-pointer rounded border-white/15 bg-[#141724] text-[#A7ACD9] focus:ring-[#A7ACD9]"
+              />
+              <label htmlFor="terms" className="cursor-pointer text-xs leading-relaxed text-[#C7C5CF]">
+                {isEng ? (
+                  <>
+                    I agree to the{' '}
+                    <Link href="/guide" className="text-[#A7ACD9] underline hover:text-white">
+                      Platform Guidelines
+                    </Link>{' '}
+                    and the processing of account information under the{' '}
+                    <Link href="/privacy" className="text-[#A7ACD9] underline hover:text-white">
+                      Personal Data Protection Policy
+                    </Link>
+                    .
+                  </>
+                ) : (
+                  <>
+                    Tôi đồng ý với{' '}
+                    <Link href="/guide" className="text-[#A7ACD9] underline hover:text-white">
+                      Quy chế nền tảng
+                    </Link>{' '}
+                    và việc xử lý thông tin tài khoản theo{' '}
+                    <Link href="/privacy" className="text-[#A7ACD9] underline hover:text-white">
+                      Chính sách bảo vệ dữ liệu cá nhân
+                    </Link>
+                    .
+                  </>
+                )}
+              </label>
+            </div>
+            {errors.terms && <p className="text-xs text-red-400">{errors.terms.message}</p>}
+
+            <button
+              type="submit"
+              disabled={isLoading || verifyState !== 'verified'}
+              className={AUTH_PRIMARY_BTN_CLASS}
+            >
+              <span>
+                {isLoading
+                  ? isEng
+                    ? 'Creating Account...'
+                    : 'Đang tạo tài khoản...'
+                  : isEng
+                    ? 'Create Account'
+                    : 'Đăng ký tài khoản'}
+              </span>
+              <ArrowRight className="h-4 w-4" aria-hidden />
+            </button>
+          </form>
+
+          <div className="mt-7 space-y-5 border-t border-white/10 pt-6">
+            <div className="flex items-center gap-4">
+              <div className="h-px flex-1 bg-white/10" />
+              <span className="text-[10px] uppercase tracking-widest text-[#919099]">
+                {isEng ? 'Or continue with' : 'Hoặc tiếp tục với'}
+              </span>
+              <div className="h-px flex-1 bg-white/10" />
+            </div>
+
+            <GoogleAuthButton onClick={() => googleLogin()} />
+
+            <p className="text-center text-xs text-[#C7C5CF]">
+              {isEng ? 'Already have an account?' : 'Đã có tài khoản?'}{' '}
+              <Link href="/login" className="font-bold text-[#A7ACD9] transition-colors hover:text-white hover:underline">
+                {isEng ? 'Sign In' : 'Đăng nhập'}
+              </Link>
+            </p>
           </div>
-          <div className="flex gap-6">
-            <Link href="#" className="hover:text-[#A7ACD9]">
-              Privacy
-            </Link>
-            <span>v2.04</span>
-          </div>
-        </div>
-      </main>
-    </div>
+        </>
+      )}
+    </AuthShell>
   );
 }

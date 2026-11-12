@@ -74,7 +74,7 @@ export function ArtworkProvenanceCard({ artworkId }: { artworkId: string }) {
           Lịch sử sở hữu &amp; Lai lịch tác phẩm (Provenance)
         </h3>
         <span className="inline-flex items-center gap-1 rounded-full border border-amber-400/40 bg-amber-400/10 px-2.5 py-0.5 text-[10px] font-bold text-amber-300">
-          <Crown size={12} /> 1-of-1 Verified
+          <Crown size={12} /> Verified
         </span>
       </div>
 
@@ -101,7 +101,7 @@ export function ArtworkProvenanceCard({ artworkId }: { artworkId: string }) {
 
           {provenance.isCurrentOwnerCollector && (
             <span className="ml-auto inline-flex items-center gap-1 rounded-full bg-emerald-500/20 border border-emerald-400/30 px-2 py-0.5 text-[10px] font-bold text-emerald-300">
-              <ShieldCheck size={11} /> Exclusive 1-of-1 Owner
+              <ShieldCheck size={11} /> Exclusive Owner
             </span>
           )}
         </div>

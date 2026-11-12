@@ -195,6 +195,23 @@ export function useModeration() {
     [inspectArtwork, loadQueue]
   );
 
+  const updateArtworkMetadata = useCallback(
+    async (artworkId: string, payload: { categoryId?: string | null; tags?: string[] }) => {
+      try {
+        const updated = await adminModerationService.updateArtworkMetadata(artworkId, payload);
+        dispatch({ type: 'INSPECT_ARTWORK_SUCCESS', payload: updated });
+        toast.success('Đã cập nhật danh mục & tag cho tác phẩm.');
+        await loadQueue();
+        return true;
+      } catch (error) {
+        const errorMsg = getErrorMessage(error, 'Không thể cập nhật phân loại tác phẩm.');
+        toast.error(errorMsg);
+        return false;
+      }
+    },
+    [loadQueue]
+  );
+
   const clearFeedback = useCallback(() => {
     dispatch({ type: 'CLEAR_FEEDBACK' });
   }, []);
@@ -238,6 +255,7 @@ export function useModeration() {
     setPage,
     executeDecision,
     rescanArtwork,
+    updateArtworkMetadata,
     clearFeedback,
   };
 }

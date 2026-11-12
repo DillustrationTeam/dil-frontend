@@ -1,4 +1,8 @@
-@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Space+Grotesk:wght@300;400;500;700&display=swap');
+/* Font được self-host qua `next/font/google` trong layout.tsx (biến --font-heading /
+   --font-body-grotesk). KHÔNG dùng @import Google Fonts ở đây nữa:
+   - Import qua CSS không kèm subset `vietnamese` nên chữ có dấu rơi về font hệ thống,
+     ra đúng lỗi "字体" lệch nét (Sora không có subset tiếng Việt).
+   - Self-host cắt được request bên thứ ba, không FOUT, không phụ thuộc mạng. */
 @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
 @import "tailwindcss";
 
@@ -11,6 +15,10 @@
   --on-surface: #E4E1E5;
   --on-surface-variant: #C7C5CF;
   --outline: #919099;
+
+  /* Fallback tiếng Việt đầy đủ: nếu font web chưa tải xong, hệ điều hành vẫn có đủ glyph
+     có dấu nên không bị lệch nét giữa chữ thường và chữ có dấu. */
+  --font-stack-fallback: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
 @theme {
@@ -20,14 +28,27 @@
   --color-on-surface: #E4E1E5;
   --color-on-surface-variant: #C7C5CF;
   --color-outline: #919099;
-  --font-h1: 'Sora', 'Space Grotesk', sans-serif;
-  --font-body: 'Space Grotesk', sans-serif;
+  --font-h1: var(--font-heading), var(--font-stack-fallback);
+  --font-body: var(--font-body-grotesk), var(--font-stack-fallback);
+}
+
+/* Gi? n?n t?i v? ch? s?ng khi tr?nh duy?t autofill tr?n dark theme */
+html.dark input:-webkit-autofill,
+html.dark input:-webkit-autofill:hover,
+html.dark input:-webkit-autofill:focus,
+html.dark textarea:-webkit-autofill {
+  -webkit-text-fill-color: #e4e1e5 !important;
+  -webkit-box-shadow: 0 0 0 1000px #141724 inset !important;
+  box-shadow: 0 0 0 1000px #141724 inset !important;
+  caret-color: #e4e1e5;
+  color-scheme: dark;
+  transition: background-color 9999s ease-out 0s;
 }
 
 body {
   background: radial-gradient(circle at 50% 15%, #181b29 0%, #0d0e15 100%);
   color: #E4E1E5;
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--font-body-grotesk), var(--font-stack-fallback);
   overflow-x: hidden;
   min-height: 100vh;
 }
@@ -39,15 +60,15 @@ h4,
 h5,
 h6,
 .font-h1 {
-  font-family: 'Sora', 'Space Grotesk', sans-serif;
+  font-family: var(--font-heading), var(--font-stack-fallback);
 }
 
 .font-h1 {
-  font-family: 'Sora', 'Space Grotesk', sans-serif !important;
+  font-family: var(--font-heading), var(--font-stack-fallback) !important;
 }
 
 .font-body {
-  font-family: 'Space Grotesk', sans-serif !important;
+  font-family: var(--font-body-grotesk), var(--font-stack-fallback) !important;
 }
 
 .glass-container {
@@ -123,7 +144,7 @@ h6,
   opacity: 0.03;
   pointer-events: none;
   user-select: none;
-  font-family: 'Sora', 'Space Grotesk', sans-serif;
+  font-family: var(--font-heading), var(--font-stack-fallback);
   font-weight: 800;
 }
 

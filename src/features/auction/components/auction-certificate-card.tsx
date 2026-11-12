@@ -31,7 +31,7 @@ function DillustrationOfficialSeal() {
         <Sparkles size={14} className="text-amber-300 animate-pulse" />
         <span className="text-[7px] font-black tracking-widest uppercase">DILLUSTRATION</span>
         <span className="text-[6px] font-bold tracking-tighter text-amber-200">OFFICIAL SEAL</span>
-        <span className="text-[5.5px] font-mono text-amber-400/80">★ 1-OF-1 ★</span>
+        <span className="text-[5.5px] font-mono text-amber-400/80">★ EXCLUSIVE ★</span>
       </div>
     </div>
   );
@@ -94,11 +94,11 @@ export function AuctionCertificateCard({
       ctx.fillStyle = '#F59E0B';
       ctx.font = 'bold 15px "Space Grotesk", sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText('DILLUSTRATION OFFICIAL CERTIFIED VAULT • 1-OF-1 EXCLUSIVE', 600, 70);
+      ctx.fillText('DILLUSTRATION OFFICIAL CERTIFIED VAULT • EXCLUSIVE', 600, 70);
 
       ctx.fillStyle = '#FFFFFF';
       ctx.font = 'bold 32px "Sora", sans-serif';
-      ctx.fillText('CHỨNG NHẬN QUYỀN SỞ HỮU ĐỘC BẢN 1-OF-1', 600, 115);
+      ctx.fillText('CHỨNG NHẬN QUYỀN SỞ HỮU ĐỘC BẢN', 600, 115);
 
       ctx.fillStyle = '#A7ACD9';
       ctx.font = '14px monospace';
@@ -165,7 +165,7 @@ export function AuctionCertificateCard({
       ctx.textAlign = 'center';
       ctx.font = 'bold 10px sans-serif';
       ctx.fillText('DILLUSTRATION VERIFIED', 950, 275);
-      ctx.fillText('★ 1-OF-1 OFFICIAL ★', 950, 292);
+      ctx.fillText('★ OFFICIAL ★', 950, 292);
 
       // Mã xác thực
       ctx.fillStyle = '#9CA3AF';
@@ -180,7 +180,7 @@ export function AuctionCertificateCard({
       ctx.fillText('QUYỀN THƯƠNG MẠI TOÀN PHẦN (COMMERCIAL DEED)', 950, 420);
       ctx.fillStyle = '#9CA3AF';
       ctx.font = '10px sans-serif';
-      ctx.fillText('Toàn quyền làm Game, VTuber & Chuyển nhượng', 950, 440);
+      ctx.fillText('Quyền sở hữu & khai thác hình ảnh bức tranh', 950, 440);
 
       // Chữ ký số SHA-256 dưới đáy
       ctx.textAlign = 'left';
@@ -226,10 +226,10 @@ export function AuctionCertificateCard({
           <div>
             <div className="inline-flex items-center gap-2 rounded-full border border-amber-400/40 bg-amber-400/10 px-3.5 py-1 text-xs font-bold text-amber-300">
               <Sparkles size={14} className="text-amber-400" />
-              DILLUSTRATION VIP CERTIFIED • 1-OF-1 EXCLUSIVE
+              DILLUSTRATION VIP CERTIFIED • EXCLUSIVE
             </div>
             <h2 className="mt-2.5 font-h1 text-xl md:text-2xl font-bold tracking-tight text-white">
-              CHỨNG NHẬN QUYỀN SỞ HỮU ĐỘC BẢN 1-OF-1
+              CHỨNG NHẬN QUYỀN SỞ HỮU ĐỘC BẢN
             </h2>
             <p className="font-mono text-xs text-brand-periwinkle mt-0.5">
               Mã chứng chỉ: <span className="text-white font-bold">{certificate.certificateNumber}</span>
@@ -288,7 +288,7 @@ export function AuctionCertificateCard({
                 <span className="font-bold text-white">{certificate.licenseType}</span>
               </div>
               <p className="text-[11px] text-emerald-200/70 leading-relaxed">
-                Toàn quyền khai thác thương mại, làm dự án Game, thiết kế nhân vật VTuber, phát hành ấn phẩm và niêm yết bán lại trên thị trường thứ cấp.
+                Quyền sở hữu bức tranh, khai thác thương mại hình ảnh tranh, trưng bày - cho mượn tranh và niêm yết bán lại trên thị trường thứ cấp.
               </p>
             </div>
 

@@ -361,6 +361,11 @@ export default function CreateCommissionModal({ creatorId, creatorName, onClose,
                     <span className="flex flex-wrap items-center gap-2.5">
                       <input type="radio" name="rate-package" disabled={slot.isFull} checked={selectedPackageId === item.id && !slot.isFull} onChange={() => { setSelectedPackageId(item.id); if (packageError) setPackageError(null); }} />
                       <strong className="text-white">{item.name}</strong>
+                      {item.categoryName && (
+                        <span className="rounded-md border border-[#A7ACD9]/30 bg-[#A7ACD9]/15 px-2 py-0.5 text-[10px] font-semibold text-[#C5C9F8]">
+                          {item.categoryName}
+                        </span>
+                      )}
                       <span className={`rounded-md border px-2 py-0.5 text-[10px] font-semibold ${
                         !slot.isLimited
                           ? 'border-sky-400/25 bg-sky-500/10 text-sky-300'

@@ -145,7 +145,7 @@ export default function CollapsibleSidebar({
       <button
         onClick={onToggleCollapse}
         className="absolute -right-3.5 top-6 w-7 h-7 rounded-full bg-[#1b1b1e] border border-white/20 text-slate-300 hover:text-white hover:border-[#A7ACD9]/50 flex items-center justify-center shadow-lg transition-all z-40"
-        title={isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
+        title={isCollapsed ? t('Expand Sidebar') : t('Collapse Sidebar')}
       >
         {isCollapsed ? (
           <ChevronRight className="w-4 h-4" />
@@ -217,8 +217,8 @@ export default function CollapsibleSidebar({
           </div>
           {!isCollapsed && (
             <div className="overflow-hidden">
-              <p className="text-[11px] font-bold text-white truncate">Wallet escrow</p>
-              <p className="text-[10px] text-emerald-400 truncate">Released per milestone</p>
+              <p className="text-[11px] font-bold text-white truncate">{t('Wallet escrow')}</p>
+              <p className="text-[10px] text-emerald-400 truncate">{t('Released per milestone')}</p>
             </div>
           )}
         </div>

@@ -25,7 +25,7 @@ export default function CollectionsPage() {
           }`}
         >
           <Sparkles size={16} />
-          Tất cả tác phẩm sở hữu (Owned Artworks)
+          Tất cả tác phẩm sở hữu
         </button>
 
         <button
@@ -38,7 +38,7 @@ export default function CollectionsPage() {
           }`}
         >
           <Crown size={16} className={activeTab === 'exclusive' ? 'text-amber-400' : ''} />
-          Bộ sưu tập tranh đấu giá 1-of-1
+          Bộ sưu tập tranh đấu giá
         </button>
 
         <button

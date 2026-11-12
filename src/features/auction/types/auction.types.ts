@@ -8,6 +8,7 @@ export const auctionStatusLabels: Record<string, string> = {
   AwaitingPhysical: 'Chờ xác nhận tranh vật lý',
   InTransit: 'Đang giao tranh vật lý',
   Completed: 'Hoàn tất giao dịch',
+  Disputed: 'Đang khiếu nại (đóng băng ký quỹ)',
 };
 
 export interface AuctionArtworkDto {
@@ -21,7 +22,6 @@ export interface AuctionArtworkDto {
   fileSizeBytes?: number | null;
   fileFormat?: string | null;
   deliverableCount?: number;
-  hasMasterFilePack?: boolean;
 }
 
 export interface AuctionListItemDto {
@@ -35,6 +35,8 @@ export interface AuctionListItemDto {
   watchCount: number;
   hasPhysicalCopy?: boolean;
   physicalDescription?: string | null;
+  /** Giá chốt cuối cùng — null khi phiên chưa settle. */
+  finalPrice?: number | null;
 }
 
 export interface AuctionDetailDto extends AuctionListItemDto {
@@ -44,7 +46,6 @@ export interface AuctionDetailDto extends AuctionListItemDto {
     creatorProfileId?: string | null;
   } | null;
   startPrice: number;
-  reservePrice: number | null;
   bidStep: number;
   buyNowPrice: number | null;
   winnerId: string | null;
@@ -74,16 +75,40 @@ export interface AuctionDeliveryDto {
   shippingReceiptUrl?: string | null;
   packageImageUrl?: string | null;
   deliveryReceiptUrl?: string | null;
-  status: 'AwaitingShipment' | 'InTransit' | 'Delivered' | 'Disputed' | 'Cancelled' | string;
+  status: 'AwaitingShipment' | 'InTransit' | 'Delivered' | 'Disputed' | 'Cancelled' | 'Resolved' | string;
   shippedAt?: string | null;
   deliveredAt?: string | null;
   confirmedAt?: string | null;
   disputeReason?: string | null;
   disputeEvidenceUrl?: string | null;
+  /** Moc he thong tu dong xac nhan da nhan hang (shippedAt + 48h). */
+  autoConfirmAt?: string | null;
+  /** Khieu nai gui sau khi ky quy da giai ngan — khong con quy de dong bang/hoan. */
+  isPostPayoutDispute?: boolean;
+  /** Ket qua phan xu: release | refund | paid-out. Null khi chua xu ly. */
+  disputeResolution?: 'release' | 'refund' | 'paid-out' | string | null;
+  disputeResolvedAt?: string | null;
+  disputeResolvedNote?: string | null;
+  /** Nguoi mua duoc phep danh gia nguoi ban cho phien nay. */
+  canRateSeller?: boolean;
+  /** Nguoi mua da danh gia nguoi ban cho phien nay roi. */
+  hasRatedSeller?: boolean;
 }
 
-export interface PhysicalDeliveryListItemDto {
+/** Kết quả đánh giá người bán sau khi giao dịch đấu giá khép lại. */
+export interface SellerRatingResult {
+  reviewId: string;
   auctionId: string;
+  sellerId: string;
+  creatorProfileId: string;
+  rating: number;
+  comment?: string | null;
+  createdAt: string;
+  sellerRatingAverage: number;
+  sellerRatingCount: number;
+}
+
+export interface PhysicalDeliveryListItemDto {  auctionId: string;
   artworkId: string;
   artworkTitle: string;
   artworkImageUrl?: string | null;
@@ -101,6 +126,8 @@ export interface PhysicalDeliveryListItemDto {
   requiresPhysicalDelivery?: boolean | null;
   delivery?: AuctionDeliveryDto | null;
   escrowStatus: string;
+  /** Ho so nghe si cua nguoi ban — dung cho form danh gia sau khieu nai. */
+  sellerCreatorProfileId?: string | null;
 }
 
 export interface AuctionReceiptDto {
@@ -153,14 +180,10 @@ export interface BidDto {
 export interface AuctionRequest {
   artworkId: string;
   startPrice: number;
-  reservePrice?: number | null;
   bidStep: number;
   buyNowPrice?: number | null;
   startAt: string;
   endAt: string;
-  masterFileUrl?: string | null;
-  masterFileName?: string | null;
-  masterFileSizeBytes?: number | null;
   hasPhysicalCopy?: boolean;
   physicalDescription?: string | null;
 }
@@ -283,7 +306,6 @@ export interface DeliverableDownloadDto {
   artworkImageUrl?: string | null;
   artworkImageDownloadUrl?: string | null;
   artworkTitle?: string | null;
-  hasMasterPack?: boolean;
 }
 
 export interface AuctionCertificateDto {
@@ -316,7 +338,6 @@ export interface MyCollectionItemDto {
   auctionId: string | null;
   finalPrice: number | null;
   certificateNumber: string | null;
-  hasMasterFile: boolean;
   exclusiveBadge: string;
 }
 

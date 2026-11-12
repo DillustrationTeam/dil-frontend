@@ -25,7 +25,9 @@ export function SellerTransparencyCard({ seller }: SellerTransparencyProps) {
   const [expanded, setExpanded] = useState(false);
 
   useEffect(() => {
-    const targetId = seller?.creatorProfileId || seller?.userId;
+    // API thống kê tra theo CreatorProfiles.Id, không phải userId — thiếu hồ sơ thì
+    // không gọi để tránh lỗi 400/404 thừa trong console.
+    const targetId = seller?.creatorProfileId;
     if (!targetId) return;
 
     let isMounted = true;
@@ -65,9 +67,9 @@ export function SellerTransparencyCard({ seller }: SellerTransparencyProps) {
     );
   }
 
-  const profileHref = seller.creatorProfileId
-    ? `/creator/${seller.creatorProfileId}`
-    : `/creator/${seller.userId}`;
+  // Trang profile công khai là `/creators/{creatorProfileId}` và API tra cứu theo
+  // CreatorProfiles.Id — KHÔNG phải userId. Dùng userId sẽ ra 404/400.
+  const profileHref = seller.creatorProfileId ? `/creators/${seller.creatorProfileId}` : null;
 
   return (
     <div className="glass-container rounded-3xl border border-white/10 p-5 text-on-surface">
@@ -84,12 +86,21 @@ export function SellerTransparencyCard({ seller }: SellerTransparencyProps) {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Link
-            href={profileHref}
-            className="rounded-full border border-brand-periwinkle/30 bg-brand-periwinkle/10 px-3 py-2 text-xs font-semibold text-brand-periwinkle transition hover:bg-brand-periwinkle hover:text-brand-navy"
-          >
-            Xem profile
-          </Link>
+          {profileHref ? (
+            <Link
+              href={profileHref}
+              className="rounded-full border border-brand-periwinkle/30 bg-brand-periwinkle/10 px-3 py-2 text-xs font-semibold text-brand-periwinkle transition hover:bg-brand-periwinkle hover:text-brand-navy"
+            >
+              Xem profile
+            </Link>
+          ) : (
+            <span
+              title="Người bán chưa tạo hồ sơ Creator nên chưa có trang profile."
+              className="cursor-not-allowed rounded-full border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-outline"
+            >
+              Chưa có hồ sơ
+            </span>
+          )}
           <button
             type="button"
             onClick={() => setExpanded((value) => !value)}
