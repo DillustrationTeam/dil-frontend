@@ -65,6 +65,36 @@ export const notificationTypeLabels: Record<string, string> = {
   ArtTradeCompleted: 'Giao dịch trao đổi hoàn tất',
   TradeDisputeCreated: 'Khiếu nại trao đổi tác phẩm',
   TradeDisputeResolved: 'Phân xử khiếu nại trao đổi',
+  BugReportReplied: 'Phản hồi báo cáo sự cố',
+};
+
+export const notificationTypeLabelsEn: Record<string, string> = {
+  OutbidAlert: 'Outbid Alert',
+  AuctionEndingSoon: 'Auction Ending Soon',
+  AuctionWon: 'Auction Won',
+  DeadlineRiskWarning: 'Deadline Risk Warning',
+  PaymentSucceeded: 'Deposit Succeeded',
+  PayoutStatusChanged: 'Payout Status Updated',
+  UserSanctionAlert: 'Account Sanction',
+  PromotionAnnouncement: 'Promotion',
+  CommissionStatusChanged: 'Commission Status Updated',
+  EscrowStatusChanged: 'Escrow Status Updated',
+  DisputeStatusChanged: 'Dispute Status Updated',
+  CreatorApplicationStatusChanged: 'Creator Application',
+  InvitationReceived: 'Event Invitation',
+  InvitationAccepted: 'Event Invitation Accepted',
+  InvitationDeclined: 'Event Invitation Declined',
+  InvitationCanceled: 'Event Invitation Canceled',
+  InvitationExpired: 'Event Invitation Expired',
+  ArtTradeProposed: 'Art Trade Proposed',
+  ArtTradeAccepted: 'Art Trade Accepted',
+  ArtTradeDeclined: 'Art Trade Declined',
+  ArtTradeCancelled: 'Art Trade Cancelled',
+  ArtTradeArtworkSubmitted: 'Trade Partner Submitted Artwork',
+  ArtTradeCompleted: 'Art Trade Completed',
+  TradeDisputeCreated: 'Art Trade Dispute Filed',
+  TradeDisputeResolved: 'Art Trade Dispute Resolved',
+  BugReportReplied: 'Bug Report Reply',
 };
 
 /** Danh sách loại hợp lệ, dùng cho bộ lọc và kiểm tra dữ liệu. */
@@ -76,10 +106,10 @@ export const notificationTypes = Object.keys(notificationTypeLabels);
  * theo từng tab vẫn đúng (xem `GetMyNotificationsQuery`).
  */
 export const notificationCategories = [
-  { id: 'Finance', label: 'Tài chính' },
-  { id: 'Order', label: 'Đơn hàng' },
-  { id: 'System', label: 'Hệ thống' },
-  { id: 'Promotion', label: 'Khuyến mãi' },
+  { id: 'Finance', label: 'Tài chính', labelEn: 'Finance' },
+  { id: 'Order', label: 'Đơn hàng', labelEn: 'Orders' },
+  { id: 'System', label: 'Hệ thống', labelEn: 'System' },
+  { id: 'Promotion', label: 'Khuyến mãi', labelEn: 'Promotions' },
 ] as const;
 
 export type NotificationCategoryId = (typeof notificationCategories)[number]['id'];

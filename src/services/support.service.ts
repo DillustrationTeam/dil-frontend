@@ -22,6 +22,12 @@ export interface CreateBugReportPayload {
   email?: string;
 }
 
+export interface ReplyBugReportResult {
+  report: BugReportDto;
+  notifiedInApp: boolean;
+  emailedTo?: string | null;
+}
+
 export const supportService = {
   async createBugReport(payload: CreateBugReportPayload): Promise<BugReportDto> {
     const res = await apiClient.post<ApiResponse<BugReportDto>>('/support/bugs', payload);
@@ -38,6 +44,18 @@ export const supportService = {
     const res = await apiClient.patch<ApiResponse<BugReportDto>>(`/support/bugs/${id}/status`, {
       status,
       adminNote,
+    });
+    return res.data.data!;
+  },
+
+  async replyBugReport(
+    id: string,
+    replyMessage: string,
+    status: BugReportStatus = 2
+  ): Promise<ReplyBugReportResult> {
+    const res = await apiClient.post<ApiResponse<ReplyBugReportResult>>(`/support/bugs/${id}/reply`, {
+      replyMessage,
+      status,
     });
     return res.data.data!;
   },

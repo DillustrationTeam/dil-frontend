@@ -8,6 +8,7 @@ import {
   Award,
   Bell,
   BriefcaseBusiness,
+  Bug,
   Check,
   CheckCheck,
   CircleAlert,
@@ -28,7 +29,8 @@ import toast from 'react-hot-toast';
 import { getApiErrorMessage } from '@/lib/api-error';
 import { notificationService } from '../services/notification.service';
 import { useNotificationHub } from '../hooks/use-notification-hub';
-import { notificationCategories, notificationTypeLabels, type NotificationDto } from '../types/notification.types';
+import { useLanguage } from '@/context/language-context';
+import { notificationCategories, notificationTypeLabels, notificationTypeLabelsEn, type NotificationDto } from '../types/notification.types';
 import { InvitationDetailModal } from './invitation-detail-modal';
 
 function getIcon(type: string) {
@@ -47,6 +49,8 @@ function getIcon(type: string) {
       return <Wallet size={18} className="text-sky-400" />;
     case 'UserSanctionAlert':
       return <ShieldAlert size={18} className="text-red-400" />;
+    case 'BugReportReplied':
+      return <Bug size={18} className="text-brand-periwinkle" />;
     case 'PromotionAnnouncement':
       return <Megaphone size={18} className="text-brand-periwinkle" />;
     case 'CommissionStatusChanged':
@@ -110,6 +114,9 @@ function getRefLink({ refType, refId, notificationType, notificationTitle, body 
 }
 
 export function NotificationScreen({ userId }: { userId: string | null }) {
+  const { lang } = useLanguage();
+  const isEng = lang === 'ENG';
+  const typeLabels = isEng ? notificationTypeLabelsEn : notificationTypeLabels;
   const [notifications, setNotifications] = useState<NotificationDto[]>([]);
   const [unreadCount, setUnreadCount] = useState<number>(0);
   const [loading, setLoading] = useState(true);
@@ -249,15 +256,15 @@ export function NotificationScreen({ userId }: { userId: string | null }) {
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="font-h1 text-2xl font-bold">Trung tâm thông báo</h1>
+            <h1 className="font-h1 text-2xl font-bold">{isEng ? 'Notification Center' : 'Trung tâm thông báo'}</h1>
             {unreadCount > 0 && (
               <span className="rounded-full bg-brand-periwinkle px-2.5 py-0.5 font-mono text-xs font-bold text-brand-navy">
-                {unreadCount} mới
+                {unreadCount} {isEng ? 'new' : 'mới'}
               </span>
             )}
           </div>
           <p className="mt-1 text-sm text-on-surface-variant">
-            Cập nhật hoạt động đặt vẽ tranh, biến động số dư và diễn biến các phiên đấu giá.
+            {isEng ? 'Stay updated on commission progress, wallet activity, auctions, and support replies.' : 'Cập nhật hoạt động đặt vẽ tranh, biến động số dư và diễn biến các phiên đấu giá.'}
           </p>
         </div>
 
@@ -268,7 +275,7 @@ export function NotificationScreen({ userId }: { userId: string | null }) {
               onClick={handleMarkAllRead}
               className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/5 px-4 py-2 text-xs font-semibold text-brand-periwinkle hover:bg-white/10"
             >
-              <CheckCheck size={15} /> Đánh dấu đã đọc tất cả
+              <CheckCheck size={15} /> {isEng ? 'Mark all as read' : 'Đánh dấu đã đọc tất cả'}
             </button>
           )}
           <button
@@ -285,7 +292,7 @@ export function NotificationScreen({ userId }: { userId: string | null }) {
 
       {/* Tab phân loại (SCR-45): Tất cả + Tài chính / Đơn hàng / Hệ thống / Khuyến mãi */}
       <div className="glass-container mb-6 flex flex-wrap items-center gap-2 rounded-2xl border border-white/10 p-2 text-xs">
-        {[{ id: 'all', label: 'Tất cả' }, ...notificationCategories].map((tab) => (
+        {[{ id: 'all', label: 'Tất cả', labelEn: 'All' }, ...notificationCategories].map((tab) => (
           <button
             key={tab.id}
             type="button"
@@ -297,7 +304,7 @@ export function NotificationScreen({ userId }: { userId: string | null }) {
                 : 'text-on-surface-variant hover:bg-white/5 hover:text-on-surface'
             }`}
           >
-            {tab.label}
+            {isEng ? tab.labelEn : tab.label}
           </button>
         ))}
 
@@ -312,7 +319,7 @@ export function NotificationScreen({ userId }: { userId: string | null }) {
           }`}
         >
           <span className={`size-2 rounded-full ${unreadOnly ? 'bg-brand-periwinkle' : 'bg-outline'}`} />
-          Chỉ chưa đọc
+          {isEng ? 'Unread only' : 'Chỉ chưa đọc'}
         </button>
       </div>
 
@@ -332,8 +339,8 @@ export function NotificationScreen({ userId }: { userId: string | null }) {
       ) : (!Array.isArray(notifications) || notifications.length === 0) ? (
         <div className="glass-container rounded-3xl border border-white/10 p-16 text-center">
           <Bell size={40} className="mx-auto mb-3 text-outline" />
-          <h2 className="font-h1 text-base font-bold text-on-surface">Không có thông báo nào</h2>
-          <p className="mt-1 text-xs text-on-surface-variant">Bạn đã xem hết tất cả thông báo hiện có.</p>
+          <h2 className="font-h1 text-base font-bold text-on-surface">{isEng ? 'No notifications' : 'Không có thông báo nào'}</h2>
+          <p className="mt-1 text-xs text-on-surface-variant">{isEng ? 'You are all caught up!' : 'Bạn đã xem hết tất cả thông báo hiện có.'}</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -356,7 +363,7 @@ export function NotificationScreen({ userId }: { userId: string | null }) {
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <span className="font-semibold">{n.notificationTitle}</span>
                     <span className="flex items-center gap-1 font-mono text-[11px] text-outline">
-                      <Clock size={12} /> {new Date(n.createdAt).toLocaleString('vi-VN')}
+                      <Clock size={12} /> {new Date(n.createdAt).toLocaleString(isEng ? 'en-US' : 'vi-VN')}
                     </span>
                   </div>
 
@@ -468,7 +475,7 @@ export function NotificationScreen({ userId }: { userId: string | null }) {
 
                   <div className="mt-3 flex flex-wrap items-center justify-between gap-3 text-xs">
                     <span className="rounded-full border border-white/10 px-2.5 py-0.5 text-[10px] text-outline">
-                      {notificationTypeLabels[n.notificationType] || n.notificationType}
+                      {typeLabels[n.notificationType] || n.notificationType}
                     </span>
 
                     <div className="flex items-center gap-3">
@@ -486,7 +493,7 @@ export function NotificationScreen({ userId }: { userId: string | null }) {
                           onClick={() => handleMarkRead(n.notificationId)}
                           className="inline-flex items-center gap-1 text-[11px] text-outline hover:text-white"
                         >
-                          <Check size={13} /> Đã đọc
+                          <Check size={13} /> {isEng ? 'Mark read' : 'Đã đọc'}
                         </button>
                       )}
                     </div>
@@ -513,7 +520,7 @@ export function NotificationScreen({ userId }: { userId: string | null }) {
             }}
             className="rounded-full border border-white/15 px-6 py-2 text-xs font-semibold hover:bg-white/10 disabled:opacity-50"
           >
-            {loadingMore ? 'Đang tải...' : 'Xem các thông báo cũ hơn'}
+            {loadingMore ? (isEng ? 'Loading...' : 'Đang tải...') : (isEng ? 'Load older notifications' : 'Xem các thông báo cũ hơn')}
           </button>
         </div>
       )}
