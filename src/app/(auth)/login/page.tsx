@@ -1,30 +1,37 @@
 'use client';
 
-import Image from 'next/image';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { ArrowRight, Eye, EyeOff, KeyRound, Lock, Mail } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { authService } from '@/services/auth.service';
+import { useLanguage } from '@/context/language-context';
 import { useAuthStore } from '@/store/use-auth-store';
 import { useGoogleAuth } from '@/features/auth/hooks/use-google-auth';
 import { AccountPasswordSetupForm } from '@/features/auth/components/account-password-setup-form';
+import {
+  AUTH_INPUT_CLASS,
+  AUTH_INPUT_WRAP_CLASS,
+  AUTH_LABEL_CLASS,
+  AUTH_PRIMARY_BTN_CLASS,
+  AuthShell,
+  GoogleAuthButton,
+} from '@/features/auth/components/auth-shell';
 import {
   isGoogleRegistrationRequired,
   isPasswordSetupRequired,
   isTwoFactorRequired,
 } from '@/types/auth.types';
 
-const loginSchema = z.object({
-  emailOrUsername: z.string().min(1, 'Email or username is required'),
-  password: z.string().min(1, 'Password is required'),
-  remember: z.boolean().optional(),
-});
-
-type LoginFormValues = z.infer<typeof loginSchema>;
+interface LoginFormValues {
+  emailOrUsername: string;
+  password: string;
+  remember?: boolean;
+}
 
 const seedAccounts = [
   { label: 'Client', email: 'client.demo@dillustration.test', password: 'Demo@123456' },
@@ -34,7 +41,22 @@ const seedAccounts = [
 
 export default function LoginPage() {
   const router = useRouter();
+  const { lang } = useLanguage();
+  const isEng = lang === 'ENG';
   const setAuth = useAuthStore((state) => state.setAuth);
+
+  const loginSchema = useMemo(
+    () =>
+      z.object({
+        emailOrUsername: z
+          .string()
+          .min(1, isEng ? 'Email or username is required' : 'Vui lòng nhập email hoặc tên đăng nhập'),
+        password: z.string().min(1, isEng ? 'Password is required' : 'Vui lòng nhập mật khẩu'),
+        remember: z.boolean().optional(),
+      }),
+    [isEng]
+  );
+
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [twoFactorTicket, setTwoFactorTicket] = useState<string | null>(null);
@@ -51,13 +73,18 @@ export default function LoginPage() {
     email: string;
     fullName: string | null;
   } | null>(null);
+
   const googleLogin = useGoogleAuth(
     (email, ticket) => {
       setPendingEmail(email);
       setTwoFactorTicket(ticket);
     },
     (registrationTicket, suggestedEmail, suggestedFullName) => {
-      setGoogleRegistration({ ticket: registrationTicket, email: suggestedEmail, fullName: suggestedFullName });
+      setGoogleRegistration({
+        ticket: registrationTicket,
+        email: suggestedEmail,
+        fullName: suggestedFullName,
+      });
     },
     (passwordSetupTicket, email, fullName) => {
       setPasswordSetup({ ticket: passwordSetupTicket, email, fullName });
@@ -93,28 +120,36 @@ export default function LoginPage() {
       }
 
       if (isGoogleRegistrationRequired(result) || isPasswordSetupRequired(result)) {
-        // Endpoint /auth/login không bao giờ trả 2 case này (chỉ /auth/google) — giữ để type-narrow an toàn.
-        toast.error('Unexpected response from server. Please try again.');
+        toast.error(
+          isEng
+            ? 'Unexpected response from server. Please try again.'
+            : 'Phản hồi không hợp lệ từ máy chủ. Vui lòng thử lại.'
+        );
         return;
       }
 
       setAuth(result);
-      toast.success(`Welcome back, ${result.user.fullName}!`);
+      toast.success(
+        isEng ? `Welcome back, ${result.user.fullName}!` : `Chào mừng trở lại, ${result.user.fullName}!`
+      );
       router.push('/');
     } catch (err: unknown) {
       const errorObj = err as { message?: string };
-      toast.error(errorObj.message || 'Login failed. Please check your credentials.');
+      toast.error(
+        errorObj.message ||
+          (isEng
+            ? 'Login failed. Please check your credentials.'
+            : 'Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.')
+      );
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleVerifyTwoFactor = async () => {
-    if (!twoFactorTicket) {
-      return;
-    }
+    if (!twoFactorTicket) return;
     if (!twoFactorCode.trim()) {
-      toast.error('Please enter the verification code.');
+      toast.error(isEng ? 'Please enter the verification code.' : 'Vui lòng nhập mã xác minh.');
       return;
     }
 
@@ -127,18 +162,26 @@ export default function LoginPage() {
       });
 
       if (isPasswordSetupRequired(result)) {
-        setPasswordSetup({ ticket: result.passwordSetupTicket, email: result.email, fullName: result.fullName });
+        setPasswordSetup({
+          ticket: result.passwordSetupTicket,
+          email: result.email,
+          fullName: result.fullName,
+        });
         setTwoFactorTicket(null);
         setTwoFactorCode('');
         return;
       }
 
       setAuth(result);
-      toast.success(`Welcome back, ${result.user.fullName}!`);
+      toast.success(
+        isEng ? `Welcome back, ${result.user.fullName}!` : `Chào mừng trở lại, ${result.user.fullName}!`
+      );
       router.push('/');
     } catch (err: unknown) {
       const errorObj = err as { message?: string };
-      toast.error(errorObj.message || 'Invalid verification code.');
+      toast.error(
+        errorObj.message || (isEng ? 'Invalid verification code.' : 'Mã xác minh không hợp lệ.')
+      );
     } finally {
       setIsVerifying(false);
     }
@@ -151,116 +194,102 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="min-h-screen w-full flex items-center justify-center relative px-6 py-12 overflow-hidden bg-[#1F2335]">
-      {/* Ambient Decorative Elements */}
-      <div className="fixed top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-[#A7ACD9] floating-bg animate-pulse" />
-      <div
-        className="fixed bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-[#c2c7f6] floating-bg"
-        style={{ animationDelay: '2s' }}
-      />
-      <div className="absolute inset-0 flex items-center justify-center overflow-hidden pointer-events-none">
-        <div className="watermark text-[20rem] absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 rotate-12">
-          dill
-        </div>
-        <div className="watermark text-[20rem] absolute bottom-0 right-0 translate-x-1/3 translate-y-1/3 -rotate-12">
-          art
-        </div>
-      </div>
-
-      {/* Login Container */}
-      <div className="w-full max-w-lg z-10">
-        <div className="glass-container rounded-[32px] p-8 md:p-12 relative overflow-hidden">
-          {/* Logo Section */}
-          <header className="mb-10 text-center">
-            <div className="flex justify-center mb-6">
-              <Link href="/">
-                <Image
-                  src="/studiologo.png"
-                  alt="dillustration"
-                  width={220}
-                  height={112}
-                  priority
-                  style={{ width: 'auto' }}
-                  className="h-24 md:h-28 w-auto object-contain drop-shadow-[0_0_20px_rgba(194,199,246,0.4)] hover:scale-105 transition-transform"
-                />
-              </Link>
-            </div>
-            <p className="text-[#C7C5CF] text-base font-body">
-              Enter the digital gallery of etherealism.
+    <AuthShell>
+      {passwordSetup ? (
+        <AccountPasswordSetupForm
+          introText={
+            <>
+              <p className="text-sm text-[#C7C5CF]">
+                {isEng ? 'Welcome back' : 'Chào mừng trở lại'}
+                {passwordSetup.fullName ? `, ${passwordSetup.fullName}` : ''}!{' '}
+                {isEng ? 'Signed in as' : 'Đăng nhập với'}{' '}
+                <span className="font-medium text-white">{passwordSetup.email}</span>.
+              </p>
+              <p className="mt-2 text-sm text-[#C7C5CF]">
+                {isEng
+                  ? "This account doesn't have a username and password yet — set them now before continuing."
+                  : 'Tài khoản này chưa có tên đăng nhập và mật khẩu — hãy thiết lập ngay trước khi tiếp tục.'}
+              </p>
+            </>
+          }
+          submitLabel={isEng ? 'Finish & Continue' : 'Hoàn tất & Tiếp tục'}
+          submittingLabel={isEng ? 'Saving...' : 'Đang lưu...'}
+          onSubmit={(username, password) =>
+            authService.completeAccountPasswordSetup({
+              email: passwordSetup.email,
+              setupTicket: passwordSetup.ticket,
+              username,
+              password,
+            })
+          }
+          onSuccess={(authResponse) => {
+            setAuth(authResponse);
+            setPasswordSetup(null);
+            toast.success(
+              isEng
+                ? `Welcome back, ${authResponse.user.fullName}!`
+                : `Chào mừng trở lại, ${authResponse.user.fullName}!`
+            );
+            router.push('/');
+          }}
+          onCancel={() => setPasswordSetup(null)}
+        />
+      ) : googleRegistration ? (
+        <AccountPasswordSetupForm
+          introText={
+            <>
+              <p className="text-sm text-[#C7C5CF]">
+                {isEng ? 'Welcome' : 'Chào mừng'}
+                {googleRegistration.fullName ? `, ${googleRegistration.fullName}` : ''}!{' '}
+                {isEng ? 'Signed in with Google as' : 'Đăng nhập Google bằng'}{' '}
+                <span className="font-medium text-white">{googleRegistration.email}</span>.
+              </p>
+              <p className="mt-2 text-sm text-[#C7C5CF]">
+                {isEng
+                  ? "Google accounts don't come with a password here — choose a username and password to finish creating your account."
+                  : 'Tài khoản Google cần thiết lập tên đăng nhập và mật khẩu để hoàn tất tạo tài khoản.'}
+              </p>
+            </>
+          }
+          submitLabel={isEng ? 'Finish Creating Account' : 'Hoàn tất tạo tài khoản'}
+          submittingLabel={isEng ? 'Creating Account...' : 'Đang tạo tài khoản...'}
+          onSubmit={(username, password) =>
+            authService.completeGoogleRegistration({
+              registrationTicket: googleRegistration.ticket,
+              username,
+              password,
+            })
+          }
+          onSuccess={(authResponse) => {
+            setAuth(authResponse);
+            setGoogleRegistration(null);
+            toast.success(
+              isEng
+                ? `Account created! Welcome, ${authResponse.user.fullName}!`
+                : `Đã tạo tài khoản! Chào mừng ${authResponse.user.fullName}!`
+            );
+            router.push('/');
+          }}
+          onCancel={() => setGoogleRegistration(null)}
+        />
+      ) : !twoFactorTicket ? (
+        <>
+          <header className="mb-7">
+            <h1 className="font-h1 text-2xl font-bold text-white sm:text-3xl">
+              {isEng ? 'Sign In' : 'Đăng nhập'}
+            </h1>
+            <p className="mt-1.5 text-sm text-[#C7C5CF]">
+              {isEng
+                ? 'Welcome back to the DILLUSTRATION digital art gallery.'
+                : 'Chào mừng bạn quay lại phòng trưng bày và giao dịch tranh số.'}
             </p>
           </header>
 
-          {passwordSetup ? (
-            <AccountPasswordSetupForm
-              introText={
-                <>
-                  <p className="text-sm text-[#C7C5CF]">
-                    Welcome back{passwordSetup.fullName ? `, ${passwordSetup.fullName}` : ''}! Signed in as{' '}
-                    <span className="text-white font-medium">{passwordSetup.email}</span>.
-                  </p>
-                  <p className="text-sm text-[#C7C5CF] mt-2">
-                    This account doesn&apos;t have a username and password yet — set them now before
-                    continuing.
-                  </p>
-                </>
-              }
-              submitLabel="Finish & Continue"
-              submittingLabel="Saving..."
-              onSubmit={(username, password) =>
-                authService.completeAccountPasswordSetup({
-                  email: passwordSetup.email,
-                  setupTicket: passwordSetup.ticket,
-                  username,
-                  password,
-                })
-              }
-              onSuccess={(authResponse) => {
-                setAuth(authResponse);
-                setPasswordSetup(null);
-                toast.success(`Welcome back, ${authResponse.user.fullName}!`);
-                router.push('/');
-              }}
-              onCancel={() => setPasswordSetup(null)}
-            />
-          ) : googleRegistration ? (
-            <AccountPasswordSetupForm
-              introText={
-                <>
-                  <p className="text-sm text-[#C7C5CF]">
-                    Welcome{googleRegistration.fullName ? `, ${googleRegistration.fullName}` : ''}! Signed in
-                    with Google as{' '}
-                    <span className="text-white font-medium">{googleRegistration.email}</span>.
-                  </p>
-                  <p className="text-sm text-[#C7C5CF] mt-2">
-                    Google accounts don&apos;t come with a password here — choose a username and
-                    password to finish creating your account.
-                  </p>
-                </>
-              }
-              submitLabel="Finish Creating Account"
-              submittingLabel="Creating Account..."
-              onSubmit={(username, password) =>
-                authService.completeGoogleRegistration({
-                  registrationTicket: googleRegistration.ticket,
-                  username,
-                  password,
-                })
-              }
-              onSuccess={(authResponse) => {
-                setAuth(authResponse);
-                setGoogleRegistration(null);
-                toast.success(`Account created! Welcome, ${authResponse.user.fullName}!`);
-                router.push('/');
-              }}
-              onCancel={() => setGoogleRegistration(null)}
-            />
-          ) : !twoFactorTicket ? (
-            <>
           {/* Dev-only: điền nhanh tài khoản seed theo role */}
           {process.env.NODE_ENV !== 'production' && (
-            <div className="mb-8 space-y-2">
-              <p className="text-[10px] uppercase tracking-widest text-[#919099] text-center">
-                Dev quick login
+            <div className="mb-6 space-y-2 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3">
+              <p className="text-center text-[10px] font-semibold uppercase tracking-widest text-[#919099]">
+                {isEng ? 'Dev quick login' : 'Đăng nhập nhanh (Dev)'}
               </p>
               <div className="flex flex-wrap justify-center gap-2">
                 {seedAccounts.map((account) => (
@@ -268,7 +297,7 @@ export default function LoginPage() {
                     key={account.email}
                     type="button"
                     onClick={() => fillSeedAccount(account)}
-                    className="rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5 text-xs font-medium text-[#A7ACD9] hover:bg-white/10 transition-colors cursor-pointer"
+                    className="cursor-pointer rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5 text-xs font-medium text-[#A7ACD9] transition-colors hover:border-[#A7ACD9]/40 hover:bg-white/10 hover:text-white"
                   >
                     {account.label}
                   </button>
@@ -277,211 +306,164 @@ export default function LoginPage() {
             </div>
           )}
 
-          {/* Login Form */}
-          <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
-            {/* Email Input */}
-            <div className="space-y-2">
-              <label
-                className="text-xs text-[#C7C5CF] uppercase tracking-widest block ml-1 font-medium"
-                htmlFor="emailOrUsername"
-              >
-                Email or Username
+          <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>
+            {/* Email / Username */}
+            <div className="space-y-1.5">
+              <label className={AUTH_LABEL_CLASS} htmlFor="emailOrUsername">
+                {isEng ? 'Email or Username' : 'Email hoặc Tên đăng nhập'}
               </label>
-              <div className="relative group periwinkle-glow rounded-xl transition-all duration-300 border border-white/10 bg-white/5">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <span className="material-symbols-outlined text-[#919099] text-xl">
-                    alternate_email
-                  </span>
-                </div>
+              <div className={AUTH_INPUT_WRAP_CLASS}>
+                <Mail className="pointer-events-none ml-3.5 h-4 w-4 shrink-0 text-[#919099]" aria-hidden />
                 <input
                   {...register('emailOrUsername')}
-                  className="block w-full bg-transparent border-none py-4 pl-12 pr-4 text-[#E4E1E5] focus:outline-none placeholder-white/20 text-base"
+                  className={`${AUTH_INPUT_CLASS} px-3.5`}
                   id="emailOrUsername"
-                  placeholder="artist@dillustration.com or username"
+                  placeholder={isEng ? 'name@example.com or username' : 'name@example.com hoặc tên đăng nhập'}
                   type="text"
                   autoComplete="username"
                   disabled={isLoading}
                 />
               </div>
               {errors.emailOrUsername && (
-                <p className="text-red-400 text-xs ml-1">{errors.emailOrUsername.message}</p>
+                <p className="text-xs text-red-400">{errors.emailOrUsername.message}</p>
               )}
             </div>
 
-            {/* Password Input */}
-            <div className="space-y-2">
-              <div className="flex justify-between items-center px-1">
-                <label
-                  className="text-xs text-[#C7C5CF] uppercase tracking-widest block font-medium"
-                  htmlFor="password"
-                >
-                  Password
+            {/* Password */}
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <label className={AUTH_LABEL_CLASS} htmlFor="password">
+                  {isEng ? 'Password' : 'Mật khẩu'}
                 </label>
                 <Link
-                  className="text-xs text-[#A7ACD9] hover:text-white transition-colors duration-200"
+                  className="text-xs font-medium text-[#A7ACD9] transition-colors hover:text-white"
                   href="/forgot-password"
                 >
-                  Forgot Password?
+                  {isEng ? 'Forgot Password?' : 'Quên mật khẩu?'}
                 </Link>
               </div>
-              <div className="relative group periwinkle-glow rounded-xl transition-all duration-300 border border-white/10 bg-white/5">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <span className="material-symbols-outlined text-[#919099] text-xl">lock</span>
-                </div>
+              <div className={AUTH_INPUT_WRAP_CLASS}>
+                <Lock className="pointer-events-none ml-3.5 h-4 w-4 shrink-0 text-[#919099]" aria-hidden />
                 <input
                   {...register('password')}
-                  className="block w-full bg-transparent border-none py-4 pl-12 pr-12 text-[#E4E1E5] focus:outline-none placeholder-white/20 text-base"
+                  className={`${AUTH_INPUT_CLASS} pl-3.5 pr-11`}
                   id="password"
                   placeholder="••••••••••••"
                   type={showPassword ? 'text' : 'password'}
                   autoComplete="current-password"
                   disabled={isLoading}
                 />
-                <div className="absolute inset-y-0 right-0 pr-4 flex items-center">
-                  <button
-                    className="text-[#919099] hover:text-white transition-colors cursor-pointer"
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                  >
-                    <span className="material-symbols-outlined text-xl">
-                      {showPassword ? 'visibility_off' : 'visibility'}
-                    </span>
-                  </button>
-                </div>
+                <button
+                  className="absolute right-3.5 cursor-pointer text-[#919099] transition-colors hover:text-white"
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  aria-label={isEng ? 'Toggle password visibility' : 'Hiện/ẩn mật khẩu'}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" aria-hidden />
+                  ) : (
+                    <Eye className="h-4 w-4" aria-hidden />
+                  )}
+                </button>
               </div>
-              {errors.password && (
-                <p className="text-red-400 text-xs ml-1">{errors.password.message}</p>
-              )}
+              {errors.password && <p className="text-xs text-red-400">{errors.password.message}</p>}
             </div>
 
-            {/* Keep me signed in Checkbox */}
-            <div className="flex items-center space-x-2 px-1">
+            {/* Remember */}
+            <div className="flex items-center gap-2.5 pt-0.5">
               <input
                 {...register('remember')}
-                className="w-4 h-4 rounded border-white/10 bg-white/5 text-[#A7ACD9] focus:ring-[#A7ACD9] focus:ring-offset-0 cursor-pointer"
+                className="h-4 w-4 cursor-pointer rounded border-white/15 bg-[#141724] text-[#A7ACD9] focus:ring-[#A7ACD9]"
                 id="remember"
                 type="checkbox"
               />
-              <label
-                className="text-sm text-[#C7C5CF] cursor-pointer select-none"
-                htmlFor="remember"
-              >
-                Keep me signed in
+              <label className="cursor-pointer select-none text-xs text-[#C7C5CF]" htmlFor="remember">
+                {isEng ? 'Keep me signed in' : 'Ghi nhớ đăng nhập'}
               </label>
             </div>
 
-            {/* Submit Button */}
-            <button
-              className="w-full bg-white text-[#1F2335] font-semibold text-lg py-4 rounded-xl transition-all duration-300 active:scale-[0.98] primary-glow flex items-center justify-center space-x-3 group cursor-pointer disabled:opacity-50"
-              type="submit"
-              disabled={isLoading}
-            >
-              <span>{isLoading ? 'Authenticating...' : 'Enter Gallery'}</span>
-              <span className="material-symbols-outlined group-hover:translate-x-1 transition-transform">
-                arrow_forward
+            <button className={AUTH_PRIMARY_BTN_CLASS} type="submit" disabled={isLoading}>
+              <span>
+                {isLoading ? (isEng ? 'Signing in...' : 'Đang xác thực...') : isEng ? 'Sign In' : 'Đăng nhập'}
               </span>
+              <ArrowRight className="h-4 w-4" aria-hidden />
             </button>
           </form>
 
-          {/* Social Login Divider */}
-          <div className="relative my-10">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-white/10" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase tracking-widest">
-              <span className="bg-[#1F2335]/80 px-4 text-[#919099] backdrop-blur-sm">
-                Or Curate via
+          <div className="mt-7 space-y-5 border-t border-white/10 pt-6">
+            <div className="flex items-center gap-4">
+              <div className="h-px flex-1 bg-white/10" />
+              <span className="text-[10px] uppercase tracking-widest text-[#919099]">
+                {isEng ? 'Or continue with' : 'Hoặc tiếp tục với'}
               </span>
+              <div className="h-px flex-1 bg-white/10" />
             </div>
-          </div>
 
-          {/* Social Buttons */}
-          <div className="w-full">
-            <button
-              type="button"
-              onClick={() => googleLogin()}
-              className="flex items-center justify-center gap-3 py-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-xs font-semibold text-[#C7C5CF] hover:text-white cursor-pointer w-full"
-            >
-              <svg className="w-4 h-4" viewBox="0 0 24 24">
-                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-              </svg>
-              <span>Google</span>
-            </button>
-          </div>
+            <GoogleAuthButton onClick={() => googleLogin()} />
 
-          {/* Footer Link */}
-          <div className="mt-10 text-center">
-            <p className="text-sm text-[#C7C5CF]">
-              New to the collective?
-              <Link
-                className="text-white font-bold hover:text-[#A7ACD9] transition-colors ml-1"
-                href="/register"
-              >
-                Register Now
+            <p className="text-center text-xs text-[#C7C5CF]">
+              {isEng ? 'New to DILLUSTRATION?' : 'Chưa có tài khoản?'}{' '}
+              <Link className="font-bold text-[#A7ACD9] transition-colors hover:text-white hover:underline" href="/register">
+                {isEng ? 'Create an account' : 'Đăng ký ngay'}
               </Link>
             </p>
           </div>
-            </>
-          ) : (
-            <div className="space-y-6">
-              <p className="text-sm text-[#C7C5CF]">
-                Enter the 6-digit code from your authenticator app for{' '}
-                <span className="text-white font-medium">{pendingEmail}</span>.
-              </p>
-              <input
-                value={twoFactorCode}
-                onChange={(event) => setTwoFactorCode(event.target.value)}
-                maxLength={11}
-                className="block w-full rounded-xl border border-white/10 bg-white/5 px-4 py-4 text-center text-lg tracking-widest text-[#E4E1E5] placeholder-white/20 focus:border-[#A7ACD9] focus:outline-none"
-                placeholder="••••••"
-                disabled={isVerifying}
-              />
-              <p className="text-center text-xs text-[#919099]">
-                Or enter one of your recovery codes (format XXXXX-XXXXX).
-              </p>
-              <button
-                type="button"
-                onClick={handleVerifyTwoFactor}
-                disabled={isVerifying}
-                className="w-full bg-white text-[#1F2335] font-semibold text-lg py-4 rounded-xl transition-all duration-300 active:scale-[0.98] primary-glow disabled:opacity-50"
-              >
-                {isVerifying ? 'Verifying...' : 'Verify & Continue'}
-              </button>
-              <button
-                type="button"
-                onClick={handleCancelTwoFactor}
-                className="w-full text-center text-sm text-[#919099] hover:text-white transition-colors"
-              >
-                Back to login
-              </button>
-            </div>
-          )}
-        </div>
-
-        {/* Decorative Artwork Snippet */}
-        <div className="mt-8 flex justify-between items-center opacity-60 px-2">
-          <div className="flex items-center space-x-4">
-            <div className="w-10 h-10 rounded-full overflow-hidden border border-white/20 bg-[#A7ACD9] flex items-center justify-center text-[#1F2335] font-bold text-xs">
-              EV
+        </>
+      ) : (
+        <div className="space-y-5">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#A7ACD9]/30 bg-[#A7ACD9]/15 text-[#A7ACD9]">
+              <KeyRound className="h-5 w-5" aria-hidden />
             </div>
             <div>
-              <p className="text-[10px] uppercase text-[#919099] tracking-wider font-semibold">
-                Featured Curator
-              </p>
-              <p className="text-xs text-white font-medium">Ethereal_Visions</p>
+              <h2 className="font-h1 text-lg font-bold text-white">
+                {isEng ? 'Two-Factor Verification' : 'Xác thực hai lớp (2FA)'}
+              </h2>
+              <p className="text-xs text-[#919099]">{pendingEmail}</p>
             </div>
           </div>
-          <div className="flex items-center space-x-2">
-            <div className="w-2 h-2 rounded-full bg-[#A7ACD9] animate-ping" />
-            <p className="text-[10px] uppercase text-[#A7ACD9] tracking-wider font-semibold">
-              1.2k Artists Online
-            </p>
+
+          <p className="text-sm text-[#C7C5CF]">
+            {isEng
+              ? 'Enter the 6-digit code from your authenticator app or a recovery code (XXXXX-XXXXX).'
+              : 'Nhập mã 6 chữ số từ ứng dụng xác thực hoặc mã khôi phục (định dạng XXXXX-XXXXX).'}
+          </p>
+
+          <div className={AUTH_INPUT_WRAP_CLASS}>
+            <input
+              value={twoFactorCode}
+              onChange={(event) => setTwoFactorCode(event.target.value)}
+              maxLength={11}
+              className={`${AUTH_INPUT_CLASS} px-4 text-center text-lg tracking-widest`}
+              placeholder="••••••"
+              disabled={isVerifying}
+            />
           </div>
+
+          <button
+            type="button"
+            onClick={handleVerifyTwoFactor}
+            disabled={isVerifying}
+            className={AUTH_PRIMARY_BTN_CLASS}
+          >
+            {isVerifying
+              ? isEng
+                ? 'Verifying...'
+                : 'Đang xác minh...'
+              : isEng
+                ? 'Verify & Continue'
+                : 'Xác minh & Tiếp tục'}
+          </button>
+
+          <button
+            type="button"
+            onClick={handleCancelTwoFactor}
+            className="w-full cursor-pointer text-center text-xs font-medium text-[#919099] transition-colors hover:text-white"
+          >
+            {isEng ? 'Back to sign in' : 'Quay lại đăng nhập'}
+          </button>
         </div>
-      </div>
-    </main>
+      )}
+    </AuthShell>
   );
 }

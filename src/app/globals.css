@@ -32,6 +32,19 @@
   --font-body: var(--font-body-grotesk), var(--font-stack-fallback);
 }
 
+/* Gi? n?n t?i v? ch? s?ng khi tr?nh duy?t autofill tr?n dark theme */
+html.dark input:-webkit-autofill,
+html.dark input:-webkit-autofill:hover,
+html.dark input:-webkit-autofill:focus,
+html.dark textarea:-webkit-autofill {
+  -webkit-text-fill-color: #e4e1e5 !important;
+  -webkit-box-shadow: 0 0 0 1000px #141724 inset !important;
+  box-shadow: 0 0 0 1000px #141724 inset !important;
+  caret-color: #e4e1e5;
+  color-scheme: dark;
+  transition: background-color 9999s ease-out 0s;
+}
+
 body {
   background: radial-gradient(circle at 50% 15%, #181b29 0%, #0d0e15 100%);
   color: #E4E1E5;
