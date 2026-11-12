@@ -11,6 +11,7 @@ import {
   CheckCircle2,
   CircleAlert,
   Clock,
+  Columns2,
   Download,
   Eye,
   FileArchive,
@@ -19,9 +20,14 @@ import {
   Globe,
   Lock,
   Maximize2,
+  Minimize2,
+  PanelLeftClose,
+  PanelRightClose,
   Paperclip,
   Pencil,
+  Pin,
   RefreshCw,
+  RotateCcw,
   Send,
   Scale,
   ShieldAlert,
@@ -29,6 +35,8 @@ import {
   TrendingUp,
   UploadCloud,
   X,
+  ZoomIn,
+  ZoomOut,
 } from 'lucide-react';
 
 import { chatService } from '../services/chat.service';
@@ -36,6 +44,7 @@ import { WorkroomProgressPanel } from './workroom-progress-panel';
 import { useChatHub } from '../hooks/use-chat-hub';
 import { useAutoTranslate } from '../hooks/use-auto-translate';
 import { WorkroomAddons } from './workroom-addons';
+import { WorkroomStickyNotes } from './workroom-sticky-notes';
 import type { ChatMessageDto, ChatRoomDto } from '../types/chat.types';
 import { CreatorAssetPicker } from '@/features/creator-studio';
 import { PageLoader } from '@/features/navigation';
@@ -111,7 +120,9 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
 
   // States cho Atelier Binder UI Right Page View & Zoom & Milestone Switcher
   const [rightPageView, setRightPageView] = useState<'canvas' | 'brief' | 'milestones'>('canvas');
-  const [zoomScale] = useState<number>(1);
+  const [zoomScale, setZoomScale] = useState<number>(1);
+  const [collapsedPanel, setCollapsedPanel] = useState<'none' | 'left' | 'right'>('none');
+  const wipCanvasContainerRef = useRef<HTMLDivElement>(null);
   const [selectedMilestoneId, setSelectedMilestoneId] = useState<string | null>(null);
 
   // States cho các Modal Hợp đồng & Cột mốc
@@ -889,7 +900,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
             <div className="relative w-full bg-[#1F2335] border border-white/10 shadow-2xl flex flex-col lg:flex-row z-10 min-h-[720px] lg:h-[calc(100vh-8.5rem)] rounded-tl-3xl rounded-bl-3xl rounded-br-3xl [clip-path:polygon(0_0,calc(100%-24px)_0,100%_24px,100%_100%,0_100%)]">
 
               {/* GÁY SỔ LÒ XO KIM LOẠI Ở GIỮA */}
-              <div className="hidden lg:flex absolute left-1/2 top-0 bottom-0 -translate-x-1/2 w-8 z-30 flex-col justify-between py-6 pointer-events-none items-center">
+              <div className={`hidden lg:flex absolute left-1/2 top-0 bottom-0 -translate-x-1/2 w-8 z-30 flex-col justify-between py-6 pointer-events-none items-center transition-opacity duration-300 ease-in-out ${collapsedPanel === 'none' ? 'opacity-100' : 'opacity-0'}`}>
                 {Array.from({ length: 14 }).map((_, idx) => (
                   <div
                     key={idx}
@@ -901,7 +912,40 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
               {/* ========================================================================= */}
               {/* TRANG TRÁI (LEFT PAGE): LOGBOOK SKETCH & SIGNALR LIVE CHAT */}
               {/* ========================================================================= */}
-              <div className="flex-1 bg-[#1F1F22] border-b lg:border-b-0 lg:border-r border-white/10 p-4 lg:p-6 flex flex-col justify-between relative rounded-tl-3xl rounded-bl-3xl">
+              <div
+                className={`transition-[width,flex] duration-300 ease-in-out relative flex flex-col overflow-hidden rounded-tl-3xl rounded-bl-3xl ${
+                  collapsedPanel === 'left'
+                    ? 'w-full lg:w-14 shrink-0'
+                    : collapsedPanel === 'right'
+                      ? 'flex-1 w-full'
+                      : 'flex-1 w-full lg:w-1/2'
+                }`}
+              >
+                {collapsedPanel === 'left' ? (
+                  <button
+                    type="button"
+                    onClick={() => setCollapsedPanel('none')}
+                    title="Nhấn vào tờ ghim để khôi phục chia đôi hai trang (50/50)"
+                    className="w-full h-full py-3 lg:py-6 px-3 lg:px-1 bg-[#181A24] border-b lg:border-b-0 lg:border-r border-white/10 hover:border-white/20 transition-all duration-200 flex flex-row lg:flex-col items-center justify-between cursor-pointer group shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] select-none"
+                  >
+                    <div className="flex flex-row lg:flex-col items-center gap-1.5">
+                      <div className="size-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center shadow-md group-hover:scale-105 group-hover:bg-white/10 group-hover:border-white/20 transition-all">
+                        <Pin size={16} className="text-slate-300 group-hover:text-white transition-colors" />
+                      </div>
+                    </div>
+                    <div className="my-auto flex items-center justify-center lg:[writing-mode:vertical-rl] lg:rotate-180">
+                      <span className="text-xs font-bold tracking-widest text-slate-300 group-hover:text-white uppercase transition-colors whitespace-nowrap">
+                        TRAO ĐỔI &amp; CHAT
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1 text-[11px] font-semibold text-slate-400 group-hover:text-slate-200">
+                      <Columns2 size={14} className="group-hover:scale-110 transition-transform" />
+                      <span className="text-[10px] font-bold tracking-wider lg:hidden">MỞ LẠI (50/50)</span>
+                      <span className="hidden lg:block text-[9px] font-mono [writing-mode:vertical-rl] lg:rotate-180">50/50</span>
+                    </div>
+                  </button>
+                ) : (
+                  <div className="w-full h-full bg-[#1F1F22] border-b lg:border-b-0 lg:border-r border-white/10 p-4 lg:p-6 flex flex-col justify-between relative overflow-hidden">
 
                 {/* Nền Hoạ tiết Lưới Chấm Dot-Grid Paper Texture */}
                 <div
@@ -988,6 +1032,14 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                   </div>
 
                   <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setCollapsedPanel((prev) => (prev === 'left' ? 'none' : 'left'))}
+                      className="size-8 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white transition flex items-center justify-center shadow cursor-pointer"
+                      title="Thu gọn khung chat (Phóng to khung tranh)"
+                    >
+                      <PanelLeftClose size={15} />
+                    </button>
                     {/* Thẻ Trạng Thái Kênh Trực Tiếp (100% dữ liệu thực SignalR, không giả lập Online) */}
                     <div
                       title={
@@ -1395,12 +1447,69 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                   </form>
                   <p className="mt-1 text-right text-[10px] text-outline">Enter để gửi · Shift+Enter để xuống dòng</p>
                 </div>
+                  </div>
+                )}
               </div>
 
               {/* ========================================================================= */}
               {/* TRANG PHẢI (RIGHT PAGE): DYNAMIC TABBED VIEW (CANVAS / BRIEF / MILESTONES) */}
               {/* ========================================================================= */}
-              <div className="flex-1 bg-[#1F2335] p-4 lg:p-6 flex flex-col justify-between relative rounded-tr-3xl rounded-br-3xl">
+              <div
+                className={`transition-[width,flex] duration-300 ease-in-out relative flex flex-col overflow-hidden rounded-tr-3xl rounded-br-3xl ${
+                  collapsedPanel === 'right'
+                    ? 'w-full lg:w-14 shrink-0'
+                    : collapsedPanel === 'left'
+                      ? 'flex-1 w-full'
+                      : 'flex-1 w-full lg:w-1/2'
+                }`}
+              >
+                {collapsedPanel === 'right' ? (
+                  <button
+                    type="button"
+                    onClick={() => setCollapsedPanel('none')}
+                    title="Nhấn vào tờ ghim để khôi phục chia đôi hai trang (50/50)"
+                    className="w-full h-full py-3 lg:py-6 px-3 lg:px-1 bg-[#1A1D2B] border-t lg:border-t-0 lg:border-l border-white/10 hover:border-white/20 transition-all duration-200 flex flex-row lg:flex-col items-center justify-between cursor-pointer group shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] select-none"
+                  >
+                    <div className="flex flex-row lg:flex-col items-center gap-1.5">
+                      <div className="size-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center shadow-md group-hover:scale-105 group-hover:bg-white/10 group-hover:border-white/20 transition-all">
+                        <Pin size={16} className="text-slate-300 group-hover:text-white transition-colors" />
+                      </div>
+                    </div>
+                    <div className="my-auto flex items-center justify-center lg:[writing-mode:vertical-rl] lg:rotate-180">
+                      <span className="text-xs font-bold tracking-widest text-slate-300 group-hover:text-white uppercase transition-colors whitespace-nowrap">
+                        TRANH MINH HỌA &amp; MỐC
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1 text-[11px] font-semibold text-slate-400 group-hover:text-slate-200">
+                      <Columns2 size={14} className="group-hover:scale-110 transition-transform" />
+                      <span className="text-[10px] font-bold tracking-wider lg:hidden">MỞ LẠI (50/50)</span>
+                      <span className="hidden lg:block text-[9px] font-mono [writing-mode:vertical-rl] lg:rotate-180">50/50</span>
+                    </div>
+                  </button>
+                ) : (
+                  <div className="w-full h-full bg-[#1F2335] p-4 lg:p-6 flex flex-col justify-between relative overflow-hidden">
+                    <div className="absolute top-3.5 sm:top-4 lg:top-5 right-3.5 sm:right-[130px] z-40 flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => setCollapsedPanel((prev) => (prev === 'right' ? 'none' : 'right'))}
+                        className="size-8 sm:size-9 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white transition flex items-center justify-center shadow-md backdrop-blur-sm cursor-pointer"
+                        title="Thu gọn khung tranh (Mở rộng chat)"
+                      >
+                        <PanelRightClose size={16} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setCollapsedPanel((prev) => (prev === 'left' ? 'none' : 'left'))}
+                        className={`size-8 sm:size-9 rounded-lg border transition flex items-center justify-center shadow-md backdrop-blur-sm cursor-pointer ${
+                          collapsedPanel === 'left'
+                            ? 'bg-white/15 border-white/25 text-white'
+                            : 'bg-white/5 hover:bg-white/10 border-white/10 text-slate-300 hover:text-white'
+                        }`}
+                        title={collapsedPanel === 'left' ? 'Thu nhỏ về chia đôi (50/50)' : 'Phóng to khung tranh (Ẩn chat)'}
+                      >
+                        {collapsedPanel === 'left' ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+                      </button>
+                    </div>
 
                 {/* CỤM THẺ RUY-BĂNG THẢ RỦ TỪ TRÊN XUỐNG (BRIEF & TIẾN ĐỘ TABS) */}
                 <div className="hidden sm:flex absolute top-0 right-6 sm:right-8 items-start gap-2.5 z-40">
@@ -1589,13 +1698,28 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                       </div>
                     )}
 
-                    <div className="flex-1 flex flex-col justify-center items-center my-3 relative overflow-hidden border border-white/10 bg-[#1F1F22] p-4 min-h-[320px] [clip-path:polygon(14px_0,calc(100%-14px)_0,100%_14px,100%_calc(100%-14px),calc(100%-14px)_100%,14px_100%,0_calc(100%-14px),0_14px)]">
+                    <div
+                      ref={wipCanvasContainerRef}
+                      className="flex-1 flex flex-col justify-center items-center my-3 relative overflow-hidden border border-white/10 bg-[#1F1F22] p-4 min-h-[320px] [clip-path:polygon(14px_0,calc(100%-14px)_0,100%_14px,100%_calc(100%-14px),calc(100%-14px)_100%,14px_100%,0_calc(100%-14px),0_14px)]"
+                    >
+                      {/* Floating Cute Sticky Notes on Canvas WIP */}
+                      {commission && (
+                        <WorkroomStickyNotes
+                          commissionId={commission.id}
+                          displayedMilestone={displayedMilestone}
+                          isCreator={isCreator}
+                          containerRef={wipCanvasContainerRef}
+                          onOpenApprovalModal={() => setShowApprovalModal(true)}
+                        />
+                      )}
                       {currentWipPreviewUrl ? (
                         <div className="w-full h-full flex flex-col items-center justify-center relative space-y-3">
-                          <div
-                            onClick={() => setShowApprovalModal(true)}
-                            className="group relative cursor-pointer flex items-center justify-center max-h-[380px] w-full overflow-hidden rounded-xl border border-white/10 bg-[#141620] p-2 transition duration-300"
-                          >
+                          <div className="relative flex items-center justify-center max-h-[380px] w-full overflow-auto rounded-xl border border-white/10 bg-[#141620] p-2">
+                            <div
+                              onClick={() => setShowApprovalModal(true)}
+                              style={{ transform: `scale(${zoomScale})`, transformOrigin: 'center center' }}
+                              className="group relative cursor-pointer flex items-center justify-center w-full transition-transform duration-150"
+                            >
                             <ProtectedArtworkViewer
                               artworkId={displayedMilestone?.id || commission?.id || roomId}
                               fallbackImageUrl={currentWipPreviewUrl}
@@ -1615,6 +1739,45 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                               <span className="commission-primary inline-flex items-center gap-2 px-4 py-2 text-xs font-bold shadow-lg [clip-path:polygon(0_0,calc(100%-8px)_0,100%_8px,100%_100%,8px_100%,0_calc(100%-8px))]">
                                 <Maximize2 size={16} /> Xem chi tiết &amp; Phản hồi Mốc #{displayedMilestone?.sequence}
                               </span>
+                            </div>
+                          </div>
+
+                            {/* Zoom controls */}
+                            <div
+                              onClick={(e) => e.stopPropagation()}
+                              className="absolute bottom-3 left-3 z-30 flex items-center gap-1 rounded-lg border border-white/15 bg-black/80 p-1 backdrop-blur-md shadow-lg"
+                            >
+                              <button
+                                type="button"
+                                onClick={() => setZoomScale((prev) => Math.max(1, Math.round((prev - 0.25) * 100) / 100))}
+                                disabled={zoomScale <= 1}
+                                className="p-1 rounded text-slate-300 hover:text-white hover:bg-white/10 transition disabled:opacity-30"
+                                title="Thu nhỏ"
+                              >
+                                <ZoomOut size={14} />
+                              </button>
+                              <span className="px-1.5 text-[10px] font-mono font-bold text-slate-200 min-w-[38px] text-center">
+                                {Math.round(zoomScale * 100)}%
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => setZoomScale((prev) => Math.min(2.5, Math.round((prev + 0.25) * 100) / 100))}
+                                disabled={zoomScale >= 2.5}
+                                className="p-1 rounded text-slate-300 hover:text-white hover:bg-white/10 transition disabled:opacity-30"
+                                title="Phóng to tranh"
+                              >
+                                <ZoomIn size={14} />
+                              </button>
+                              {zoomScale > 1 && (
+                                <button
+                                  type="button"
+                                  onClick={() => setZoomScale(1)}
+                                  className="p-1 rounded text-slate-300 hover:text-white hover:bg-white/10 transition"
+                                  title="Đặt lại 100%"
+                                >
+                                  <RotateCcw size={14} />
+                                </button>
+                              )}
                             </div>
                           </div>
 
@@ -1945,10 +2108,11 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                   </div>
                 )}
 
+                  </div>
+                )}
               </div>
             </div>
           </div>
-
       {/* MODALS NGHIỆP VỤ HỢP ĐỒNG (CÁC MODAL HIỆN CÓ KHÔNG SỬA ĐỔI PROTOCOL) */}
       {room.commissionId && (
         <>
@@ -1982,6 +2146,8 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
             milestoneSequence={displayedMilestone?.sequence ?? 1}
             isCreator={isCreator}
             revisionFeedback={displayedMilestone?.revisionFeedback}
+            revisionFeedbackImageUrl={displayedMilestone?.revisionFeedbackImageUrl}
+            revisionAnnotationsJson={displayedMilestone?.revisionAnnotationsJson}
             milestoneStatus={displayedMilestone?.status}
             onOpenSubmitModal={() => setShowSubmitModal(true)}
             onSuccess={({ action, feedback }) => {
