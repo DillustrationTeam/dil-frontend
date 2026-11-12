@@ -156,6 +156,7 @@ export function DisputeQueueTable({
                               src={item.artworkImageUrl}
                               alt={item.submissionTitle || 'Artwork'}
                               fill
+                              unoptimized
                               sizes="44px"
                               className="object-cover"
                             />

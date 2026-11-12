@@ -19,10 +19,10 @@ const DRAFT_STORAGE_PREFIX = 'dil_jury_draft_';
 function generateShortCode(id: string, index: number, eventTitle?: string): string {
   const prefix = eventTitle
     ? eventTitle
-        .split(' ')
-        .map((w) => w[0]?.toUpperCase())
-        .join('')
-        .slice(0, 3) || 'AUR'
+      .split(' ')
+      .map((w) => w[0]?.toUpperCase())
+      .join('')
+      .slice(0, 3) || 'AUR'
     : 'AUR';
   const numPart = id ? parseInt(id.replace(/\D/g, '').slice(-4) || `${index + 1}`, 10) : index + 1;
   return `#${prefix}-${String(numPart).padStart(4, '0')}`;
@@ -102,9 +102,17 @@ export const juryService = {
       if (rawItems.length > 0) {
         return rawItems.map((sub, index) => {
           const draft = drafts[sub.id];
-          const hasScore = typeof sub.score === 'number' && sub.score > 0;
-          const isGraded = Boolean(draft?.isLocked || hasScore);
-          const gradedScore = draft?.totalScore ?? (hasScore ? Number(sub.score) : null);
+          const serverHasGraded =
+            typeof sub.currentJuryHasGraded === 'boolean'
+              ? sub.currentJuryHasGraded
+              : false;
+          const isGraded = Boolean(serverHasGraded || draft?.isLocked);
+          const gradedScore =
+            typeof sub.currentJuryScore === 'number'
+              ? Number(sub.currentJuryScore)
+              : draft?.totalScore ?? null;
+          const criteriaScores =
+            sub.currentJuryCriteriaScores ?? draft?.criteriaScores;
 
           // Artwork category classification
           const categories = ['Illustration', 'Concept Art', 'Digital Art', 'Mixed Media', 'Character Design'];
@@ -128,11 +136,11 @@ export const juryService = {
             isGraded,
             gradedScore,
             notes: draft?.notes || sub.adminNote || '',
-            criteriaScores: draft?.criteriaScores,
+            criteriaScores,
             noConflictOfInterest: draft?.noConflictOfInterest ?? true,
             nominateSpecialAward: draft?.nominateSpecialAward ?? false,
             specialAwardCategory: draft?.specialAwardCategory,
-            isLocked: Boolean(draft?.isLocked || hasScore),
+            isLocked: Boolean(serverHasGraded || draft?.isLocked),
           };
         });
       }
@@ -210,40 +218,44 @@ export const juryService = {
     submissionId: string,
     data: SubmitScoreRequest
   ): Promise<SubmissionScoreResponse> => {
-    const response = await apiClient.post<ApiResponse<SubmissionScoreResponse>>(
-      `/event-submissions/${submissionId}/score`,
-      data
-    );
+    try {
+      const response = await apiClient.post<ApiResponse<SubmissionScoreResponse>>(
+        `/event-submissions/${submissionId}/score`,
+        data
+      );
 
-    // Save draft locally as locked only after successful submission
-    const draft: JuryEvaluationDraft = {
-      submissionId,
-      totalScore: data.totalScore,
-      criteriaScores: data.criteriaScores.reduce((acc, c) => {
-        acc[c.criteriaId] = c.score;
-        return acc;
-      }, {} as Record<string, number>),
-      notes: data.notes || '',
-      noConflictOfInterest: data.noConflictOfInterest,
-      nominateSpecialAward: data.nominateSpecialAward,
-      specialAwardCategory: data.specialAwardCategory,
-      updatedAt: new Date().toISOString(),
-      isLocked: true,
-    };
-    juryService.saveDraft(eventId, submissionId, draft);
+      // Save draft locally as locked only after successful submission
+      const draft: JuryEvaluationDraft = {
+        submissionId,
+        totalScore: data.totalScore,
+        criteriaScores: data.criteriaScores.reduce((acc, c) => {
+          acc[c.criteriaId] = c.score;
+          return acc;
+        }, {} as Record<string, number>),
+        notes: data.notes || '',
+        noConflictOfInterest: data.noConflictOfInterest,
+        nominateSpecialAward: data.nominateSpecialAward,
+        specialAwardCategory: data.specialAwardCategory,
+        updatedAt: new Date().toISOString(),
+        isLocked: true,
+      };
+      juryService.saveDraft(eventId, submissionId, draft);
 
-    if (response.data?.data) {
-      return response.data.data;
+      if (response.data?.data) {
+        return response.data.data;
+      }
+
+      return {
+        submissionId,
+        score: data.totalScore,
+        totalAverageScore: data.totalScore,
+        notes: data.notes,
+        gradedAt: new Date().toISOString(),
+        isLocked: true,
+      };
+    } catch (err) {
+      throw new Error(extractErrorMessage(err, 'Không thể gửi điểm đánh giá. Vui lòng thử lại.'));
     }
-
-    return {
-      submissionId,
-      score: data.totalScore,
-      totalAverageScore: data.totalScore,
-      notes: data.notes,
-      gradedAt: new Date().toISOString(),
-      isLocked: true,
-    };
   },
 
   /**
@@ -301,11 +313,15 @@ export const juryService = {
     disputeId: string,
     payload: { resolution: 'Dismiss' | 'Disqualify' | 'RequestReEvaluation'; note?: string }
   ): Promise<{ message: string }> => {
-    const response = await apiClient.post<ApiResponse<{ message: string }>>(
-      `/jury/disputes/${disputeId}/resolve`,
-      payload
-    );
-    return response.data?.data ?? { message: 'Phân xử khiếu nại thành công.' };
+    try {
+      const response = await apiClient.post<ApiResponse<{ message: string }>>(
+        `/jury/disputes/${disputeId}/resolve`,
+        payload
+      );
+      return response.data?.data ?? { message: 'Phân xử khiếu nại thành công.' };
+    } catch (err) {
+      throw new Error(extractErrorMessage(err, 'Không thể xử lý khiếu nại.'));
+    }
   },
 
   /**
@@ -315,32 +331,46 @@ export const juryService = {
     _eventId: string,
     caseId: string,
     decision: string,
-    notes: string
+    notes: string,
+    submissionId?: string
   ): Promise<{ success: boolean; message: string }> => {
-    const resolutionMap: Record<string, 'Dismiss' | 'Disqualify' | 'RequestReEvaluation'> = {
+    const resolutionMap: Record<string, 'Dismiss' | 'Disqualify' | 'RequestReEvaluation' | 'Other'> = {
       'Dismiss': 'Dismiss',
       'Reject': 'Dismiss',
+      'Maintain Current Median Score': 'Dismiss',
       'Disqualify': 'Disqualify',
       'RequestReEvaluation': 'RequestReEvaluation',
       'Re-evaluation': 'RequestReEvaluation',
+      'Request Panel Re-evaluation': 'RequestReEvaluation',
+      'Cast Head Jury Tie-Breaker': 'Other',
+      'Other': 'Other',
     };
     const resolution = resolutionMap[decision] || 'RequestReEvaluation';
     const isGuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(caseId);
-    if (isGuid) {
-      await apiClient.post<ApiResponse<unknown>>(`/jury/disputes/${caseId}/resolve`, {
-        resolution,
-        note: notes,
-      });
+    const isPersistedDisputeId = isGuid && !/^0+$/.test(caseId.replace(/-/g, '')) && caseId !== submissionId;
+    if (isPersistedDisputeId) {
+      try {
+        await apiClient.post<ApiResponse<unknown>>(`/jury/disputes/${caseId}/resolve`, {
+          resolution,
+          note: notes,
+        });
+      } catch (err) {
+        throw new Error(extractErrorMessage(err, 'Không thể lưu quyết định trọng tài.'));
+      }
     }
     return { success: true, message: 'Xác nhận phân xử thành công.' };
   },
 
   /**
-   * Approve final event results by Head Jury
+   * Approve / sign-off final event results by Head Jury
    */
-  approveFinalResults: async (eventId: string): Promise<{ success: boolean; message: string }> => {
-    await apiClient.post<ApiResponse<unknown>>(`/events/${eventId}/approve-results`);
-    return { success: true, message: 'Phê duyệt kết quả cuộc thi thành công!' };
+  approveFinalResults: async (eventId: string): Promise<{ success: boolean; message: string; signedOffAt?: string }> => {
+    const res = await juryService.signOffHeadJury(eventId);
+    return {
+      success: res.success,
+      signedOffAt: res.signedOffAt,
+      message: 'Phê duyệt kết quả cuộc thi thành công!',
+    };
   },
 
   /**
@@ -478,11 +508,15 @@ export const juryService = {
    * Complete Head Jury sign-off for an event
    */
   signOffHeadJury: async (eventId: string): Promise<{ success: boolean; signedOffAt?: string }> => {
-    const response = await apiClient.post<ApiResponse<{ signedOffAt?: string }>>(`/events/${eventId}/head-jury/sign-off`);
-    return {
-      success: !response.data?.error,
-      signedOffAt: response.data?.data?.signedOffAt,
-    };
+    try {
+      const response = await apiClient.post<ApiResponse<{ signedOffAt?: string }>>(`/events/${eventId}/head-jury/sign-off`);
+      return {
+        success: !response.data?.error,
+        signedOffAt: response.data?.data?.signedOffAt,
+      };
+    } catch (err) {
+      throw new Error(extractErrorMessage(err, 'Không thể phê duyệt kết quả cuộc thi.'));
+    }
   },
 };
 

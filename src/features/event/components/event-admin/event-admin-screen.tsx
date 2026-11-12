@@ -35,6 +35,7 @@ export function EventAdminScreen() {
   const [activeTab, setActiveTab] = useState<AdminEventsTab>('create');
   const [events, setEvents] = useState<EventListItemDto[]>([]);
   const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [openDisputesCount, setOpenDisputesCount] = useState(0);
 
   useEffect(() => {
@@ -99,9 +100,11 @@ export function EventAdminScreen() {
 
   const refreshEvents = async () => {
     setLoading(true);
+    setLoadError(null);
     try {
       const filters: EventFilters = {
         status: status || undefined,
+        includeDrafts: true,
         sortBy,
         search: keyword.trim() || undefined,
         page,
@@ -117,8 +120,11 @@ export function EventAdminScreen() {
       if (statsData) {
         setStats(statsData);
       }
-    } catch {
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Không thể tải danh sách sự kiện.';
+      setLoadError(msg);
       setEvents([]);
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
@@ -128,9 +134,12 @@ export function EventAdminScreen() {
     let ignore = false;
 
     async function loadData() {
+      setLoading(true);
+      setLoadError(null);
       try {
         const filters: EventFilters = {
           status: status || undefined,
+          includeDrafts: true,
           sortBy,
           search: keyword.trim() || undefined,
           page,
@@ -148,9 +157,16 @@ export function EventAdminScreen() {
             setStats(statsData);
           }
         }
-      } catch {
+      } catch (err: unknown) {
         if (!ignore) {
+          const msg = err instanceof Error ? err.message : 'Không thể tải danh sách sự kiện.';
+          setLoadError(msg);
           setEvents([]);
+          toast.error(msg);
+        }
+      } finally {
+        if (!ignore) {
+          setLoading(false);
         }
       }
     }
@@ -328,6 +344,7 @@ export function EventAdminScreen() {
                   className="h-10 px-3.5 bg-[#090b12]/70 border border-white/10 rounded-xl text-xs text-white focus:outline-none focus:border-brand-periwinkle cursor-pointer"
                 >
                   <option value="" className="bg-[#1f2335]">All Statuses</option>
+                  <option value="Upcoming" className="bg-[#1f2335]">Waiting to Open</option>
                   <option value="Open" className="bg-[#1f2335]">Open</option>
                   <option value="Judging" className="bg-[#1f2335]">Judging</option>
                   <option value="Ended" className="bg-[#1f2335]">Ended</option>
@@ -362,7 +379,24 @@ export function EventAdminScreen() {
             </div>
 
             {/* Event Cards Grid */}
-            {events.length === 0 ? (
+            {loadError ? (
+              <div
+                role="alert"
+                className="rounded-2xl border border-red-500/35 bg-red-500/10 p-8 text-center"
+              >
+                <AlertTriangle className="mx-auto h-10 w-10 text-red-400 mb-3" />
+                <p className="text-base font-bold text-white">Không thể tải danh sách sự kiện</p>
+                <p className="mt-1 text-xs text-red-200 max-w-xl mx-auto">{loadError}</p>
+                <button
+                  type="button"
+                  onClick={() => void refreshEvents()}
+                  className="mt-4 inline-flex items-center gap-2 rounded-xl bg-red-500/25 border border-red-400/40 px-4 py-2 text-xs font-bold text-white hover:bg-red-500/35 transition cursor-pointer"
+                >
+                  <RefreshCw size={14} />
+                  <span>Thử tải lại</span>
+                </button>
+              </div>
+            ) : events.length === 0 ? (
               <div className="rounded-2xl border border-white/10 bg-[#161926]/50 p-12 text-center text-outline">
                 <Layers className="mx-auto h-12 w-12 text-brand-periwinkle/40 mb-3" />
                 <p className="text-base font-semibold text-white">No contests found</p>

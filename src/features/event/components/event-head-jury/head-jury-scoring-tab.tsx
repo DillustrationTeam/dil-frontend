@@ -15,6 +15,7 @@ import {
   Lock,
 } from 'lucide-react';
 import type { JuryCriterion, JurySubmissionItem } from '../../types/jury.types';
+import { getRubricMaxTotal } from '../../utils/jury-phase';
 import { EventSearchFilterBar } from '../event/event-search-filter-bar';
 
 interface HeadJuryScoringTabProps {
@@ -39,6 +40,8 @@ interface HeadJuryScoringTabProps {
   handleSubmitScore: (e: React.FormEvent) => void;
   setIsLightboxOpen: (open: boolean) => void;
   activeIndex: number;
+  isJudgingPhase?: boolean;
+  judgingLockMessage?: string;
 }
 
 export function HeadJuryScoringTab({
@@ -62,11 +65,16 @@ export function HeadJuryScoringTab({
   handleSubmitScore,
   setIsLightboxOpen,
   activeIndex,
+  isJudgingPhase = false,
+  judgingLockMessage,
 }: HeadJuryScoringTabProps) {
+  const isReadOnly = Boolean(activeSubmission?.isLocked) || !isJudgingPhase;
+  const maxTotalScore = getRubricMaxTotal(criteria);
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[320px_minmax(0,1fr)] gap-6 items-start">
       {/* Left Column: Queue List */}
-      <aside className="p-4 rounded-2xl bg-[#151926]/90 border border-white/10 backdrop-blur-xl lg:sticky lg:top-36 max-h-none lg:max-h-[calc(100vh-10rem)] flex flex-col">
+      <aside className="glass-container p-4 rounded-2xl lg:sticky lg:top-36 max-h-none lg:max-h-[calc(100vh-10rem)] flex flex-col">
         {/* Panel Head */}
         <div className="flex items-center justify-between gap-3 pb-3 border-b border-white/10 mb-3">
           <div>
@@ -107,17 +115,15 @@ export function HeadJuryScoringTab({
                   key={entry.id}
                   type="button"
                   onClick={() => setSelectedSubmissionId(entry.id)}
-                  className={`w-full text-left p-3 rounded-xl border transition-all cursor-pointer flex items-center justify-between gap-3 ${
-                    isActive
+                  className={`w-full text-left p-3 rounded-xl border transition-all cursor-pointer flex items-center justify-between gap-3 ${isActive
                       ? 'border-[#A7ACD9] bg-[#A7ACD9]/15 shadow-md shadow-[#A7ACD9]/5'
                       : 'border-white/10 bg-white/[0.02] hover:bg-white/[0.06] hover:border-white/20'
-                  }`}
+                    }`}
                 >
                   <div className="min-w-0 flex-1">
                     <strong
-                      className={`block text-xs sm:text-sm font-semibold truncate ${
-                        isActive ? 'text-white' : 'text-[#e4e1e5]'
-                      }`}
+                      className={`block text-xs sm:text-sm font-semibold truncate ${isActive ? 'text-white' : 'text-[#e4e1e5]'
+                        }`}
                     >
                       {entry.title}
                     </strong>
@@ -154,7 +160,7 @@ export function HeadJuryScoringTab({
       {activeSubmission ? (
         <form
           onSubmit={handleSubmitScore}
-          className="p-5 sm:p-6 rounded-2xl bg-[#151926]/90 border border-white/10 backdrop-blur-xl space-y-6"
+          className="glass-container p-5 sm:p-6 rounded-2xl space-y-6"
         >
           {activeSubmission.isLocked && (
             <div className="flex items-center gap-3 p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-200 text-xs">
@@ -167,6 +173,16 @@ export function HeadJuryScoringTab({
                   {activeSubmission.gradedScore ?? totalScore} pts
                 </span>
               </div>
+            </div>
+          )}
+
+          {!isJudgingPhase && !activeSubmission.isLocked && (
+            <div className="flex items-center gap-3 p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-200 text-xs">
+              <Lock className="w-4 h-4 text-amber-400 shrink-0" />
+              <span>
+                {judgingLockMessage ||
+                  'Grading controls are temporarily locked until the contest enters its active Judging phase.'}
+              </span>
             </div>
           )}
 
@@ -194,7 +210,7 @@ export function HeadJuryScoringTab({
                 <strong className="text-2xl sm:text-3xl font-sora font-extrabold text-[#A7ACD9] block">
                   {activeSubmission.isGraded || totalScore > 0 ? (
                     <>
-                      {totalScore} <span className="text-sm font-normal text-[#9695a1]">/ 100</span>
+                      {totalScore} <span className="text-sm font-normal text-[#9695a1]">/ {maxTotalScore}</span>
                     </>
                   ) : (
                     <span className="text-lg sm:text-xl font-medium text-[#9695a1]">Pending</span>
@@ -271,13 +287,12 @@ export function HeadJuryScoringTab({
                           min={0}
                           max={crit.maxScore}
                           value={currentScore}
-                          disabled={Boolean(activeSubmission.isLocked)}
+                          disabled={isReadOnly}
                           onChange={(e) => handleScoreChange(crit.id, parseFloat(e.target.value) || 0, crit.maxScore)}
-                          className={`w-16 px-2 py-1 bg-white/5 border rounded-lg text-right text-xs font-mono font-bold text-white focus:outline-none ${
-                            activeSubmission.isLocked
+                          className={`w-16 px-2 py-1 bg-white/5 border rounded-lg text-right text-xs font-mono font-bold text-white focus:outline-none ${isReadOnly
                               ? 'border-white/5 opacity-60 cursor-not-allowed text-[#9695a1]'
                               : 'border-white/10 focus:border-[#A7ACD9]'
-                          }`}
+                            }`}
                         />
                         <span className="text-xs text-[#9695a1] font-mono">/ {crit.maxScore}</span>
                       </div>
@@ -291,11 +306,10 @@ export function HeadJuryScoringTab({
                         max={crit.maxScore}
                         step={1}
                         value={currentScore}
-                        disabled={Boolean(activeSubmission.isLocked)}
+                        disabled={isReadOnly}
                         onChange={(e) => handleScoreChange(crit.id, parseFloat(e.target.value) || 0, crit.maxScore)}
-                        className={`w-full accent-[#A7ACD9] ${
-                          activeSubmission.isLocked ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'
-                        }`}
+                        className={`w-full accent-[#A7ACD9] ${isReadOnly ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'
+                          }`}
                       />
                     </div>
                   </div>
@@ -313,24 +327,23 @@ export function HeadJuryScoringTab({
             <textarea
               rows={3}
               value={notes}
-              disabled={Boolean(activeSubmission.isLocked)}
+              disabled={isReadOnly}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Provide structured notes on execution, technique, or potential concerns..."
-              className={`w-full p-3 text-xs bg-white/5 border rounded-xl text-white placeholder-[#9695a1] focus:outline-none leading-relaxed ${
-                activeSubmission.isLocked
+              className={`w-full p-3 text-xs bg-white/5 border rounded-xl text-white placeholder-[#9695a1] focus:outline-none leading-relaxed ${isReadOnly
                   ? 'border-white/5 opacity-60 cursor-not-allowed'
                   : 'border-white/10 focus:border-[#A7ACD9]'
-              }`}
+                }`}
             />
           </div>
 
           {/* Confirmations Checkbox */}
           <div className="space-y-3 pt-2">
-            <label className={`flex items-start gap-2.5 text-xs text-[#c7c5cf] ${activeSubmission.isLocked ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}>
+            <label className={`flex items-start gap-2.5 text-xs text-[#c7c5cf] ${isReadOnly ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}>
               <input
                 type="checkbox"
                 checked={noConflict}
-                disabled={Boolean(activeSubmission.isLocked)}
+                disabled={isReadOnly}
                 onChange={(e) => setNoConflict(e.target.checked)}
                 className="mt-0.5 rounded border-white/20 bg-white/5 text-[#A7ACD9] focus:ring-0 accent-[#A7ACD9] disabled:cursor-not-allowed"
               />
@@ -376,7 +389,7 @@ export function HeadJuryScoringTab({
               <button
                 type="button"
                 onClick={handleSaveDraft}
-                disabled={Boolean(activeSubmission.isLocked)}
+                disabled={isReadOnly}
                 className="px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-white transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 <Save className="w-4 h-4 text-[#A7ACD9]" />
@@ -385,12 +398,11 @@ export function HeadJuryScoringTab({
 
               <button
                 type="submit"
-                disabled={Boolean(activeSubmission.isLocked)}
-                className={`px-5 py-2.5 rounded-xl font-sora font-extrabold text-xs shadow-lg transition-all flex items-center gap-2 ${
-                  activeSubmission.isLocked
-                    ? 'bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 cursor-not-allowed opacity-90'
-                    : 'bg-gradient-to-r from-purple-600 via-indigo-600 to-[#7FD5E8] hover:brightness-110 text-white cursor-pointer hover:shadow-purple-500/20 disabled:opacity-60 disabled:cursor-not-allowed'
-                }`}
+                disabled={isReadOnly}
+                className={`px-5 py-2.5 rounded-xl font-sora text-xs shadow-lg transition-all flex items-center gap-2 ${activeSubmission.isLocked
+                    ? 'bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 font-extrabold cursor-not-allowed opacity-90'
+                    : 'commission-primary cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed'
+                  }`}
               >
                 {activeSubmission.isLocked ? <Lock className="w-4 h-4 text-emerald-400" /> : <Send className="w-4 h-4" />}
                 <span>{activeSubmission.isLocked ? 'Điểm đã khóa' : 'Submit Head Jury Evaluation'}</span>
@@ -399,7 +411,7 @@ export function HeadJuryScoringTab({
           </div>
         </form>
       ) : (
-        <div className="p-12 text-center rounded-2xl bg-[#151926]/90 border border-white/10 text-[#9695a1]">
+        <div className="glass-container p-12 text-center rounded-2xl text-[#9695a1]">
           Select a submission from the queue to start evaluation.
         </div>
       )}

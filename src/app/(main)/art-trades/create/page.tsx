@@ -206,26 +206,26 @@ function CreateArtTradeContent() {
   if (!isCreator && !isAdmin) {
     return (
       <div className="w-full max-w-2xl mx-auto px-4 py-16 text-center">
-        <div className="glass-container rounded-3xl p-8 md:p-12 border border-white/10 bg-[#14151e]/80 backdrop-blur-xl shadow-2xl">
-          <div className="w-16 h-16 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center mx-auto mb-5">
+        <div className="glass-container rounded-3xl p-8 md:p-12 shadow-2xl">
+          <div className="w-16 h-16 rounded-2xl bg-brand-periwinkle/10 border border-brand-periwinkle/25 text-brand-periwinkle flex items-center justify-center mx-auto mb-5">
             <Palette className="w-8 h-8" />
           </div>
-          <h2 className="text-xl md:text-2xl font-bold text-white mb-2">
+          <h2 className="text-xl md:text-2xl font-bold text-white mb-2 font-h1">
             Art Trading is Exclusive to Creators
           </h2>
-          <p className="text-sm text-gray-400 mb-6 max-w-md mx-auto">
+          <p className="text-sm text-[#919099] mb-6 max-w-md mx-auto">
             Only verified Creators are permitted to upload and exchange original artwork. Apply to become a Creator to unlock Art Trading!
           </p>
           <div className="flex items-center justify-center gap-4">
             <Link
               href="/become-creator"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-xs font-bold uppercase tracking-wider shadow-lg shadow-indigo-600/30 transition hover:scale-105"
+              className="commission-primary inline-flex items-center gap-2 px-6 py-3 rounded-xl text-xs uppercase tracking-wider shadow-lg transition hover:scale-105"
             >
               <Palette className="w-4 h-4" /> Become a Creator
             </Link>
             <Link
               href="/explore"
-              className="px-5 py-3 rounded-xl bg-white/5 border border-white/10 text-xs font-semibold text-gray-300 hover:text-white transition"
+              className="px-5 py-3 rounded-xl bg-white/5 border border-white/10 text-xs font-semibold text-[#C7C5CF] hover:text-white transition"
             >
               Explore Artworks
             </Link>
@@ -317,37 +317,37 @@ function CreateArtTradeContent() {
       <div className="flex items-center justify-between mb-6">
         <Link
           href="/art-trades"
-          className="inline-flex items-center gap-2 text-xs font-semibold text-gray-400 hover:text-white transition"
+          className="inline-flex items-center gap-2 text-xs font-semibold text-[#919099] hover:text-white transition"
         >
-          <ArrowLeftRight className="w-4 h-4 text-indigo-400" />
+          <ArrowLeftRight className="w-4 h-4 text-brand-periwinkle" />
           <span>Back to My Trades</span>
         </Link>
       </div>
 
       {/* Main Glass Form Card */}
-      <div className="glass-container rounded-3xl p-6 md:p-10 border border-white/10 bg-[#14151e]/80 backdrop-blur-xl shadow-2xl relative overflow-hidden">
+      <div className="glass-container rounded-3xl p-6 md:p-10 shadow-2xl relative overflow-hidden">
         {/* Glow ambient */}
-        <div className="absolute -top-32 -right-32 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-32 -left-32 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -top-32 -right-32 w-80 h-80 bg-brand-periwinkle/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-32 -left-32 w-80 h-80 bg-brand-periwinkle/5 rounded-full blur-3xl pointer-events-none" />
 
         {/* Header */}
         <div className="pb-8 mb-8 border-b border-white/10">
           <div className="flex items-center gap-2 mb-2">
-            <span className="text-xs uppercase tracking-wider text-indigo-400 font-semibold flex items-center gap-1.5">
+            <span className="text-xs uppercase tracking-wider text-brand-periwinkle font-semibold flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5" /> Creator Art Trade
             </span>
           </div>
           <h1 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight font-h1">
             Propose an Art Trade
           </h1>
-          <p className="text-sm text-gray-400 mt-1 max-w-2xl">
+          <p className="text-sm text-[#919099] mt-1 max-w-2xl">
             Propose an art exchange with a fellow Creator. Both original files are protected by watermark previews until both sides confirm mutual satisfaction.
           </p>
 
           {/* Slot Status Indicator */}
           <div className="mt-5 flex flex-wrap items-center gap-4 text-xs">
-            <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-white/5 border border-white/10 text-gray-300">
-              <Clock className="w-4 h-4 text-indigo-400" />
+            <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-white/5 border border-white/10 text-[#C7C5CF]">
+              <Clock className="w-4 h-4 text-brand-periwinkle" />
               <span>
                 Active Slots:{' '}
                 <strong className="text-white">
@@ -356,8 +356,8 @@ function CreateArtTradeContent() {
               </span>
             </div>
 
-            <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-indigo-950/40 border border-indigo-500/20 text-indigo-300">
-              <ShieldCheck className="w-4 h-4 text-indigo-400" />
+            <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-brand-periwinkle/10 border border-brand-periwinkle/25 text-brand-periwinkle">
+              <ShieldCheck className="w-4 h-4 text-brand-periwinkle" />
               <span>Zero-fee Escrow Protection</span>
             </div>
 
@@ -374,15 +374,15 @@ function CreateArtTradeContent() {
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Partner Creator Selection with Searchbar */}
           <div>
-            <label className="block text-xs font-bold text-gray-300 uppercase tracking-wider mb-2">
+            <label className="block text-xs font-bold text-[#C7C5CF] uppercase tracking-wider mb-2">
               Đối tác trao đổi (Partner Creator) <span className="text-rose-400">*</span>
             </label>
 
             {selectedCreator ? (
               /* Selected Creator Display Card */
-              <div className="relative rounded-2xl border border-indigo-500/40 bg-[#161926]/90 p-4 backdrop-blur-xl flex items-center justify-between gap-4 transition shadow-lg shadow-indigo-950/20">
+              <div className="relative rounded-2xl border border-brand-periwinkle/40 bg-[#161926]/90 p-4 backdrop-blur-xl flex items-center justify-between gap-4 transition shadow-lg">
                 <div className="flex items-center gap-3.5 min-w-0">
-                  <div className="relative w-12 h-12 rounded-full overflow-hidden bg-indigo-950/60 border border-indigo-400/40 flex items-center justify-center shrink-0">
+                  <div className="relative w-12 h-12 rounded-full overflow-hidden bg-brand-navy border border-brand-periwinkle/40 flex items-center justify-center shrink-0">
                     {selectedCreator.avatarUrl ? (
                       <img
                         src={selectedCreator.avatarUrl}
@@ -390,7 +390,7 @@ function CreateArtTradeContent() {
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      <span className="text-base font-bold text-indigo-300 uppercase">
+                      <span className="text-base font-bold text-brand-periwinkle uppercase">
                         {selectedCreator.displayName.slice(0, 2)}
                       </span>
                     )}
@@ -400,11 +400,11 @@ function CreateArtTradeContent() {
                       <h3 className="text-sm font-bold text-white truncate font-h1">
                         {selectedCreator.displayName}
                       </h3>
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-brand-periwinkle/15 text-brand-periwinkle border border-brand-periwinkle/30">
                         Creator
                       </span>
                     </div>
-                    <p className="text-xs text-gray-400 truncate mt-0.5">
+                    <p className="text-xs text-[#919099] truncate mt-0.5">
                       {selectedCreator.headline || selectedCreator.specialties || 'Họa sĩ minh họa'}
                     </p>
                     <div className="flex items-center gap-3 mt-1 text-[11px]">
@@ -424,7 +424,7 @@ function CreateArtTradeContent() {
                 <button
                   type="button"
                   onClick={handleClearSelectedCreator}
-                  className="shrink-0 px-3 py-1.5 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-xs font-medium text-gray-300 hover:text-white transition flex items-center gap-1.5 cursor-pointer"
+                  className="shrink-0 px-3 py-1.5 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-xs font-medium text-[#C7C5CF] hover:text-white transition flex items-center gap-1.5 cursor-pointer"
                 >
                   <X className="w-3.5 h-3.5" />
                   <span>Đổi nghệ sĩ</span>
@@ -434,7 +434,7 @@ function CreateArtTradeContent() {
               /* Search Bar with Dropdown Suggestions */
               <div ref={searchContainerRef} className="relative">
                 <div className="relative">
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#919099] pointer-events-none" />
                   <input
                     type="text"
                     value={creatorSearchQuery}
@@ -444,7 +444,7 @@ function CreateArtTradeContent() {
                       if (creatorResults.length === 0) fetchCreatorSuggestions(creatorSearchQuery);
                     }}
                     placeholder="Tìm theo Tên hiển thị (Display Name), phong cách, hoặc nhập tên nghệ sĩ..."
-                    className="w-full pl-11 pr-10 py-3 bg-[#181926] border border-white/10 rounded-2xl text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition"
+                    className="w-full pl-11 pr-10 py-3 bg-[#161926] border border-white/10 rounded-2xl text-sm text-white placeholder-[#919099] focus:outline-none focus:ring-1 focus:ring-brand-periwinkle focus:border-brand-periwinkle transition"
                   />
                   {creatorSearchQuery && (
                     <button
@@ -454,7 +454,7 @@ function CreateArtTradeContent() {
                         setReceiverDisplayName('');
                         fetchCreatorSuggestions('');
                       }}
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white cursor-pointer p-1"
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#919099] hover:text-white cursor-pointer p-1"
                     >
                       <X className="w-4 h-4" />
                     </button>
@@ -465,23 +465,23 @@ function CreateArtTradeContent() {
                 {showDropdown && (
                   <div className="absolute left-0 right-0 top-full mt-2 z-50 rounded-2xl border border-white/10 bg-[#161926] shadow-2xl backdrop-blur-2xl overflow-hidden max-h-80 overflow-y-auto divide-y divide-white/5">
                     {isSearchingCreators ? (
-                      <div className="p-4 text-center text-xs text-gray-400 flex items-center justify-center gap-2">
-                        <Loader2 className="w-4 h-4 animate-spin text-indigo-400" />
+                      <div className="p-4 text-center text-xs text-[#919099] flex items-center justify-center gap-2">
+                        <Loader2 className="w-4 h-4 animate-spin text-brand-periwinkle" />
                         <span>Đang tìm kiếm nghệ sĩ...</span>
                       </div>
                     ) : creatorResults.length > 0 ? (
                       <>
-                        <div className="px-4 py-2 text-[11px] font-semibold uppercase tracking-wider text-gray-400 bg-white/[0.02]">
+                        <div className="px-4 py-2 text-[11px] font-semibold uppercase tracking-wider text-[#919099] bg-white/[0.02]">
                           Gợi ý nghệ sĩ ({creatorResults.length})
                         </div>
                         {creatorResults.map((creator) => (
                           <div
                             key={creator.userId}
                             onClick={() => handleSelectCreator(creator)}
-                            className="px-4 py-3 hover:bg-indigo-600/10 cursor-pointer transition flex items-center justify-between gap-3 group"
+                            className="px-4 py-3 hover:bg-brand-periwinkle/10 cursor-pointer transition flex items-center justify-between gap-3 group"
                           >
                             <div className="flex items-center gap-3 min-w-0">
-                              <div className="w-10 h-10 rounded-full overflow-hidden bg-indigo-950/60 border border-white/10 flex items-center justify-center shrink-0">
+                              <div className="w-10 h-10 rounded-full overflow-hidden bg-brand-navy border border-white/10 flex items-center justify-center shrink-0">
                                 {creator.avatarUrl ? (
                                   <img
                                     src={creator.avatarUrl}
@@ -489,21 +489,21 @@ function CreateArtTradeContent() {
                                     className="w-full h-full object-cover"
                                   />
                                 ) : (
-                                  <span className="text-xs font-bold text-indigo-300 uppercase">
+                                  <span className="text-xs font-bold text-brand-periwinkle uppercase">
                                     {creator.displayName.slice(0, 2)}
                                   </span>
                                 )}
                               </div>
                               <div className="min-w-0">
                                 <div className="flex items-center gap-2">
-                                  <span className="text-xs font-bold text-white group-hover:text-indigo-300 transition truncate">
+                                  <span className="text-xs font-bold text-white group-hover:text-brand-periwinkle transition truncate">
                                     {creator.displayName}
                                   </span>
-                                  <span className="px-1.5 py-0.5 rounded text-[10px] bg-white/5 text-gray-400 border border-white/5">
+                                  <span className="px-1.5 py-0.5 rounded text-[10px] bg-white/5 text-[#919099] border border-white/5">
                                     Creator
                                   </span>
                                 </div>
-                                <p className="text-[11px] text-gray-400 truncate mt-0.5">
+                                <p className="text-[11px] text-[#919099] truncate mt-0.5">
                                   {creator.headline || creator.specialties || 'Chưa cập nhật giới thiệu'}
                                 </p>
                               </div>
@@ -524,9 +524,9 @@ function CreateArtTradeContent() {
                         ))}
                       </>
                     ) : (
-                      <div className="p-6 text-center text-xs text-gray-400">
-                        <p className="font-medium text-gray-300">Không tìm thấy nghệ sĩ phù hợp</p>
-                        <p className="text-[11px] text-gray-500 mt-1">
+                      <div className="p-6 text-center text-xs text-[#919099]">
+                        <p className="font-medium text-[#C7C5CF]">Không tìm thấy nghệ sĩ phù hợp</p>
+                        <p className="text-[11px] text-[#919099] mt-1">
                           Bạn có thể gửi đề nghị với tên &quot;{creatorSearchQuery}&quot; hoặc nhập mã Creator ID.
                         </p>
                       </div>
@@ -537,7 +537,7 @@ function CreateArtTradeContent() {
             )}
 
             {prefilledReceiverName && !selectedCreator && (
-              <p className="text-xs text-indigo-300 mt-1.5 flex items-center gap-1">
+              <p className="text-xs text-brand-periwinkle mt-1.5 flex items-center gap-1">
                 <Info className="w-3.5 h-3.5" /> Gửi đề nghị đến: <strong>{prefilledReceiverName}</strong>
               </p>
             )}
@@ -545,7 +545,7 @@ function CreateArtTradeContent() {
 
           {/* Trade Title */}
           <div>
-            <label className="block text-xs font-bold text-gray-300 uppercase tracking-wider mb-2">
+            <label className="block text-xs font-bold text-[#C7C5CF] uppercase tracking-wider mb-2">
               Trade Title <span className="text-rose-400">*</span>
             </label>
             <input
@@ -555,14 +555,14 @@ function CreateArtTradeContent() {
               placeholder="e.g. Fantasy OC Portrait Exchange"
               maxLength={120}
               required
-              className="w-full px-4 py-3 bg-[#181926] border border-white/10 rounded-2xl text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition"
+              className="w-full px-4 py-3 bg-[#161926] border border-white/10 rounded-2xl text-sm text-white placeholder-[#919099] focus:outline-none focus:ring-1 focus:ring-brand-periwinkle focus:border-brand-periwinkle transition"
             />
           </div>
 
           {/* Description */}
           <div>
-            <label className="block text-xs font-bold text-gray-300 uppercase tracking-wider mb-2">
-              General Overview / Guidelines <span className="text-gray-500">(Optional)</span>
+            <label className="block text-xs font-bold text-[#C7C5CF] uppercase tracking-wider mb-2">
+              General Overview / Guidelines <span className="text-[#919099]">(Optional)</span>
             </label>
             <textarea
               value={description}
@@ -570,15 +570,15 @@ function CreateArtTradeContent() {
               placeholder="Add any general notes, preferred canvas dimensions, art style or background rules..."
               rows={3}
               maxLength={1000}
-              className="w-full px-4 py-3 bg-[#181926] border border-white/10 rounded-2xl text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition resize-none"
+              className="w-full px-4 py-3 bg-[#161926] border border-white/10 rounded-2xl text-sm text-white placeholder-[#919099] focus:outline-none focus:ring-1 focus:ring-brand-periwinkle focus:border-brand-periwinkle transition resize-none"
             />
           </div>
 
           {/* Dual Notes Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
             {/* Side A Note: What I will draw */}
-            <div className="p-4 rounded-2xl bg-indigo-950/20 border border-indigo-500/20">
-              <label className="block text-xs font-bold text-indigo-300 uppercase tracking-wider mb-2">
+            <div className="p-4 rounded-2xl bg-brand-periwinkle/[0.06] border border-brand-periwinkle/20">
+              <label className="block text-xs font-bold text-brand-periwinkle uppercase tracking-wider mb-2">
                 What you will draw for your partner <span className="text-rose-400">*</span>
               </label>
               <textarea
@@ -587,22 +587,22 @@ function CreateArtTradeContent() {
                 placeholder="Describe what subject, character, or style you pledge to illustrate for your partner..."
                 rows={4}
                 required
-                className="w-full px-3.5 py-2.5 bg-[#141522] border border-white/10 rounded-xl text-xs text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 transition resize-none"
+                className="w-full px-3.5 py-2.5 bg-[#161926] border border-white/10 rounded-xl text-xs text-white placeholder-[#919099] focus:outline-none focus:ring-1 focus:ring-brand-periwinkle focus:border-brand-periwinkle transition resize-none"
               />
 
               {/* Multiple Reference Images for Side A */}
               <div className="mt-3">
                 <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-[10px] uppercase tracking-wider text-indigo-300 font-semibold">
+                  <span className="text-[10px] uppercase tracking-wider text-brand-periwinkle font-semibold">
                     Ảnh mẫu tham khảo (Reference Images)
                   </span>
-                  <span className="text-[10px] text-gray-500">
+                  <span className="text-[10px] text-[#919099]">
                     {initiatorImages.length} ảnh
                   </span>
                 </div>
                 <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
                   {initiatorImages.map((url, idx) => (
-                    <div key={idx} className="group relative aspect-square overflow-hidden rounded-xl border border-indigo-500/30 bg-black/40">
+                    <div key={idx} className="group relative aspect-square overflow-hidden rounded-xl border border-brand-periwinkle/30 bg-black/40">
                       <img src={url} alt="Ref" className="w-full h-full object-cover" />
                       <button
                         type="button"
@@ -613,9 +613,9 @@ function CreateArtTradeContent() {
                       </button>
                     </div>
                   ))}
-                  <label className="flex aspect-square cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed border-indigo-400/30 bg-indigo-950/20 text-indigo-300 hover:border-indigo-400 hover:text-white transition">
+                  <label className="flex aspect-square cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed border-brand-periwinkle/30 bg-brand-periwinkle/5 text-brand-periwinkle hover:border-brand-periwinkle hover:text-white transition">
                     {uploadingInitiatorImg ? (
-                      <Loader2 className="w-4 h-4 animate-spin text-indigo-400" />
+                      <Loader2 className="w-4 h-4 animate-spin text-brand-periwinkle" />
                     ) : (
                       <>
                         <Plus className="w-4 h-4 mb-0.5" />
@@ -636,8 +636,8 @@ function CreateArtTradeContent() {
             </div>
 
             {/* Side B Note: What I request */}
-            <div className="p-4 rounded-2xl bg-purple-950/20 border border-purple-500/20">
-              <label className="block text-xs font-bold text-purple-300 uppercase tracking-wider mb-2">
+            <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/15">
+              <label className="block text-xs font-bold text-[#C7C5CF] uppercase tracking-wider mb-2">
                 What you want your partner to draw <span className="text-rose-400">*</span>
               </label>
               <textarea
@@ -646,22 +646,22 @@ function CreateArtTradeContent() {
                 placeholder="Describe your character, references, pose preferences or mood you want them to draw..."
                 rows={4}
                 required
-                className="w-full px-3.5 py-2.5 bg-[#141522] border border-white/10 rounded-xl text-xs text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500 transition resize-none"
+                className="w-full px-3.5 py-2.5 bg-[#161926] border border-white/10 rounded-xl text-xs text-white placeholder-[#919099] focus:outline-none focus:ring-1 focus:ring-brand-periwinkle focus:border-brand-periwinkle transition resize-none"
               />
 
               {/* Multiple Reference Images for Side B */}
               <div className="mt-3">
                 <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-[10px] uppercase tracking-wider text-purple-300 font-semibold">
+                  <span className="text-[10px] uppercase tracking-wider text-[#C7C5CF] font-semibold">
                     Ảnh mẫu tham khảo (Reference Images)
                   </span>
-                  <span className="text-[10px] text-gray-500">
+                  <span className="text-[10px] text-[#919099]">
                     {receiverImages.length} ảnh
                   </span>
                 </div>
                 <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
                   {receiverImages.map((url, idx) => (
-                    <div key={idx} className="group relative aspect-square overflow-hidden rounded-xl border border-purple-500/30 bg-black/40">
+                    <div key={idx} className="group relative aspect-square overflow-hidden rounded-xl border border-white/20 bg-black/40">
                       <img src={url} alt="Ref" className="w-full h-full object-cover" />
                       <button
                         type="button"
@@ -672,9 +672,9 @@ function CreateArtTradeContent() {
                       </button>
                     </div>
                   ))}
-                  <label className="flex aspect-square cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed border-purple-400/30 bg-purple-950/20 text-purple-300 hover:border-purple-400 hover:text-white transition">
+                  <label className="flex aspect-square cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed border-white/25 bg-white/[0.03] text-[#C7C5CF] hover:border-brand-periwinkle hover:text-white transition">
                     {uploadingReceiverImg ? (
-                      <Loader2 className="w-4 h-4 animate-spin text-purple-400" />
+                      <Loader2 className="w-4 h-4 animate-spin text-brand-periwinkle" />
                     ) : (
                       <>
                         <Plus className="w-4 h-4 mb-0.5" />
@@ -697,7 +697,7 @@ function CreateArtTradeContent() {
 
           {/* Submission Deadline Selection */}
           <div className="pt-2">
-            <label className="block text-xs font-bold text-gray-300 uppercase tracking-wider mb-3">
+            <label className="block text-xs font-bold text-[#C7C5CF] uppercase tracking-wider mb-3">
               Proposed Submission Deadline <span className="text-rose-400">*</span>
             </label>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -708,23 +708,23 @@ function CreateArtTradeContent() {
                   onClick={() => setSubmissionDeadlineDays(opt.days)}
                   className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${
                     submissionDeadlineDays === opt.days
-                      ? 'bg-indigo-600/20 border-indigo-500 text-white shadow-lg shadow-indigo-500/10'
-                      : 'bg-[#181926] border-white/10 text-gray-400 hover:text-white hover:bg-white/5'
+                      ? 'bg-brand-periwinkle/15 border-brand-periwinkle text-white shadow-lg'
+                      : 'bg-[#161926] border-white/10 text-[#919099] hover:text-white hover:bg-white/5'
                   }`}
                 >
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-xs font-bold">{opt.label}</span>
                     <Calendar className="w-3.5 h-3.5 opacity-70" />
                   </div>
-                  <p className="text-[11px] text-gray-400">{opt.desc}</p>
+                  <p className="text-[11px] text-[#919099]">{opt.desc}</p>
                 </button>
               ))}
             </div>
           </div>
 
           {/* Safety Notice */}
-          <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 flex items-start gap-3 text-xs text-gray-400">
-            <ShieldCheck className="w-5 h-5 text-indigo-400 shrink-0 mt-0.5" />
+          <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 flex items-start gap-3 text-xs text-[#919099]">
+            <ShieldCheck className="w-5 h-5 text-brand-periwinkle shrink-0 mt-0.5" />
             <p>
               Once accepted, both Creators enter the Drawing Phase. After both upload their original art, watermarked previews will be available for mutual verification before non-watermarked original downloads are unlocked.
             </p>
@@ -734,7 +734,7 @@ function CreateArtTradeContent() {
           <div className="pt-4 flex items-center justify-end gap-4 border-t border-white/10">
             <Link
               href="/art-trades"
-              className="px-5 py-2.5 rounded-xl border border-white/10 text-xs font-semibold text-gray-400 hover:text-white hover:bg-white/5 transition"
+              className="px-5 py-2.5 rounded-xl border border-white/10 text-xs font-semibold text-[#919099] hover:text-white hover:bg-white/5 transition"
             >
               Cancel
             </Link>
@@ -742,7 +742,7 @@ function CreateArtTradeContent() {
             <button
               type="submit"
               disabled={submitting || (slotStatus ? slotStatus.availableSlots <= 0 || !slotStatus.canTrade : false)}
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-xs font-bold uppercase tracking-wider shadow-lg shadow-indigo-600/30 transition disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
+              className="commission-primary inline-flex items-center gap-2 px-6 py-3 rounded-xl text-xs uppercase tracking-wider shadow-lg transition disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
             >
               {submitting ? (
                 <>
@@ -765,8 +765,8 @@ export default function CreateArtTradePage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-[400px] flex flex-col items-center justify-center p-8 text-center text-gray-400">
-          <Loader2 className="w-8 h-8 animate-spin text-indigo-400 mb-3" />
+        <div className="min-h-[400px] flex flex-col items-center justify-center p-8 text-center text-[#919099]">
+          <Loader2 className="w-8 h-8 animate-spin text-brand-periwinkle mb-3" />
           <p className="text-xs font-medium">Loading trade creation workspace...</p>
         </div>
       }

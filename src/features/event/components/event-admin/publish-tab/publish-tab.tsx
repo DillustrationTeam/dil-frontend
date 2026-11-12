@@ -10,7 +10,7 @@ import { eventService } from '../../../services/event.service';
 import { eventSubmissionService } from '../../../services/event-submission.service';
 import { juryService } from '../../../services/jury.service';
 import { adminDisputeService } from '@/features/admin/services/dispute.service';
-import type { EventListItemDto, EventDetailDto } from '../../../types/event.types';
+import { normalizeEventStatus, type EventListItemDto, type EventDetailDto } from '../../../types/event.types';
 import type { JuryMemberInfo } from '../../../types/jury.types';
 import type { SubmissionDisputeDto } from '@/features/admin/types/dispute-arbitration.types';
 
@@ -54,8 +54,11 @@ export function PublishTab() {
             items[0];
           setSelectedEventId(preferred.id);
         }
-      } catch {
-        if (active) setEvents([]);
+      } catch (err: unknown) {
+        if (active) {
+          setEvents([]);
+          toast.error(err instanceof Error ? err.message : 'Không thể tải danh sách sự kiện.');
+        }
       }
     }
     void loadEvents();
@@ -86,8 +89,7 @@ export function PublishTab() {
 
       // Check if event is already ended or published
       const isAlreadyEnded =
-        detailData?.status === 'Ended' ||
-        String(detailData?.status) === '4' ||
+        normalizeEventStatus(detailData?.status) === 'Ended' ||
         String(detailData?.status).toLowerCase() === 'concluded';
       setIsContestResultsPublished(isAlreadyEnded);
       setIsAwardAllocationsConfirmed(isAlreadyEnded || Boolean(detailData?.isHeadJurySignedOff));
@@ -216,14 +218,12 @@ export function PublishTab() {
 
   // 4. Dynamically compute Audit Checklist from real event parameters
   const checklist = useMemo<PublishChecklistStatus>(() => {
-    const eventStatusStr = String(eventDetail?.status || '').toLowerCase();
+    const normalizedEventStatus = normalizeEventStatus(eventDetail?.status);
     const eventConcluded =
       isContestResultsPublished ||
-      eventStatusStr === 'ended' ||
-      eventStatusStr === 'judging' ||
-      eventStatusStr === '3' ||
-      eventStatusStr === '4' ||
-      (eventDetail != null && eventDetail.isOpenForSubmission === false && eventStatusStr !== 'draft');
+      normalizedEventStatus === 'Ended' ||
+      normalizedEventStatus === 'Judging' ||
+      (eventDetail != null && eventDetail.isOpenForSubmission === false && normalizedEventStatus !== 'Draft');
 
     const juryCount = juries.length;
     // Considered done if there are juries and scores exist, or if marked completed
@@ -303,7 +303,7 @@ export function PublishTab() {
       {/* Contest Selector Bar */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 rounded-2xl border border-white/10 bg-[#161926] p-4">
         <div className="flex items-center gap-3 w-full sm:w-auto">
-          <div className="flex size-10 items-center justify-center rounded-xl bg-purple-500/15 text-purple-300 shrink-0">
+          <div className="flex size-10 items-center justify-center rounded-xl bg-brand-periwinkle/15 text-brand-periwinkle shrink-0">
             <Trophy size={20} />
           </div>
           <div>

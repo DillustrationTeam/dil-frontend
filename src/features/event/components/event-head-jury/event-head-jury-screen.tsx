@@ -36,6 +36,7 @@ import type {
 } from '../../types/jury.types';
 import { eventService } from '../../services/event.service';
 import { juryService } from '../../services/jury.service';
+import { computeIsJudgingPhase, getJudgingLockMessage, getRubricMaxTotal } from '../../utils/jury-phase';
 import { JuryArtworkLightbox } from '../event-jury/jury-artwork-lightbox';
 import { HeadJuryScoringTab } from './head-jury-scoring-tab';
 import { HeadJuryProgressTab } from './head-jury-progress-tab';
@@ -50,6 +51,7 @@ interface EventHeadJuryScreenProps {
 type HeadJuryTab = 'score' | 'progress' | 'scores' | 'arbitration' | 'approve';
 
 export function EventHeadJuryScreen({ eventId }: EventHeadJuryScreenProps) {
+  const [nowMs, setNowMs] = useState(() => Date.now());
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<HeadJuryTab>('score');
   const [event, setEvent] = useState<EventDetailDto | null>(null);
@@ -106,7 +108,7 @@ export function EventHeadJuryScreen({ eventId }: EventHeadJuryScreenProps) {
     async function loadWorkspace() {
       setLoading(true);
       try {
-        const eventData = await eventService.detail(eventId).catch(() => null);
+        const eventData = await eventService.detail(eventId);
         const [criteriaData, headWorkspace, subItems, eventJuries, profileData] = await Promise.all([
           juryService.getEventCriteria(eventId).catch(() => []),
           juryService.getHeadJuryWorkspace(eventId).catch(() => null),
@@ -174,8 +176,8 @@ export function EventHeadJuryScreen({ eventId }: EventHeadJuryScreenProps) {
         if (subItems.length > 0) {
           setSelectedSubmissionId(subItems[0].id);
         }
-      } catch {
-        toast.error('Failed to load Head Jury Workspace data.');
+      } catch (err: unknown) {
+        toast.error(err instanceof Error ? err.message : 'Failed to load Head Jury Workspace data.');
       } finally {
         if (isMounted) setLoading(false);
       }
@@ -247,9 +249,23 @@ export function EventHeadJuryScreen({ eventId }: EventHeadJuryScreenProps) {
     }, 0);
   }, [scores, criteria]);
 
+  const maxTotalScore = useMemo(() => getRubricMaxTotal(criteria), [criteria]);
+
+  useEffect(() => {
+    const timer = setInterval(() => setNowMs(Date.now()), 15000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const isJudgingPhase = useMemo(() => computeIsJudgingPhase(event, nowMs), [event, nowMs]);
+  const judgingLockMessage = useMemo(() => getJudgingLockMessage(event, nowMs), [event, nowMs]);
+
   const handleScoreChange = (criteriaId: string, val: number, maxScore: number) => {
     if (activeSubmission?.isLocked) {
       toast.error('Điểm của bài dự thi này đã được khóa và không thể chỉnh sửa.');
+      return;
+    }
+    if (!isJudgingPhase) {
+      toast.error(judgingLockMessage);
       return;
     }
     const clamped = Math.max(0, Math.min(maxScore, val));
@@ -263,6 +279,10 @@ export function EventHeadJuryScreen({ eventId }: EventHeadJuryScreenProps) {
     if (!activeSubmission) return;
     if (activeSubmission.isLocked) {
       toast.error('Điểm của bài dự thi này đã được khóa và không thể chỉnh sửa.');
+      return;
+    }
+    if (!isJudgingPhase) {
+      toast.error(judgingLockMessage);
       return;
     }
     const draft: JuryEvaluationDraft = {
@@ -281,11 +301,11 @@ export function EventHeadJuryScreen({ eventId }: EventHeadJuryScreenProps) {
       prev.map((s) =>
         s.id === activeSubmission.id
           ? {
-              ...s,
-              gradedScore: totalScore,
-              notes,
-              criteriaScores: scores,
-            }
+            ...s,
+            gradedScore: totalScore,
+            notes,
+            criteriaScores: scores,
+          }
           : s
       )
     );
@@ -298,6 +318,11 @@ export function EventHeadJuryScreen({ eventId }: EventHeadJuryScreenProps) {
 
     if (activeSubmission.isLocked) {
       toast.error('Điểm của bài dự thi này đã được khóa và không thể chỉnh sửa.');
+      return;
+    }
+
+    if (!isJudgingPhase) {
+      toast.error(judgingLockMessage);
       return;
     }
 
@@ -324,18 +349,18 @@ export function EventHeadJuryScreen({ eventId }: EventHeadJuryScreenProps) {
         prev.map((s) =>
           s.id === activeSubmission.id
             ? {
-                ...s,
-                isGraded: true,
-                gradedScore: totalScore,
-                notes,
-                criteriaScores: scores,
-                isLocked: true,
-              }
+              ...s,
+              isGraded: true,
+              gradedScore: totalScore,
+              notes,
+              criteriaScores: scores,
+              isLocked: true,
+            }
             : s
         )
       );
 
-      toast.success(`Head Jury evaluation submitted: ${totalScore} pts!`);
+      toast.success(`Head Jury evaluation submitted: ${totalScore} / ${maxTotalScore} pts!`);
 
       const nextPending = submissions.find((s, idx) => idx > activeIndex && !s.isGraded);
       if (nextPending) {
@@ -430,7 +455,8 @@ export function EventHeadJuryScreen({ eventId }: EventHeadJuryScreenProps) {
           eventId,
           selectedArbitrationCase.id,
           arbitrationDecision,
-          arbitrationNotes
+          arbitrationNotes,
+          selectedArbitrationCase.submissionId
         );
       } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : 'Failed to save arbitration decision to backend.';
@@ -443,11 +469,11 @@ export function EventHeadJuryScreen({ eventId }: EventHeadJuryScreenProps) {
       caseList.map((item) =>
         item.id === selectedArbitrationCase.id
           ? {
-              ...item,
-              status: 'Resolved',
-              decision: arbitrationDecision,
-              notes: arbitrationNotes,
-            }
+            ...item,
+            status: 'Resolved',
+            decision: arbitrationDecision,
+            notes: arbitrationNotes,
+          }
           : item
       )
     );
@@ -468,10 +494,10 @@ export function EventHeadJuryScreen({ eventId }: EventHeadJuryScreenProps) {
       setEvent((prev) =>
         prev
           ? {
-              ...prev,
-              isHeadJurySignedOff: true,
-              headJurySignedOffAt: new Date().toISOString(),
-            }
+            ...prev,
+            isHeadJurySignedOff: true,
+            headJurySignedOffAt: new Date().toISOString(),
+          }
           : prev
       );
       toast.success(
@@ -608,7 +634,7 @@ export function EventHeadJuryScreen({ eventId }: EventHeadJuryScreenProps) {
         <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
           <Link
             href={`/creator/events/${eventId}/jury`}
-            className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 px-6 py-2.5 text-xs font-bold text-white hover:brightness-110 transition shadow-lg"
+            className="commission-primary inline-flex items-center gap-2 rounded-xl px-6 py-2.5 text-xs transition shadow-lg"
           >
             <Gavel size={16} />
             <span>Không gian chấm thi thông thường</span>
@@ -652,7 +678,6 @@ export function EventHeadJuryScreen({ eventId }: EventHeadJuryScreenProps) {
   const deadlineFormatted = event.judgingEndAt
     ? new Date(event.judgingEndAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
     : 'Chưa xác định';
-  const isJudgingPhase = event?.status === 'Judging';
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 pb-20 pt-6 sm:px-6 lg:pt-8 min-h-screen text-[#e4e1e5] space-y-6">
@@ -806,7 +831,7 @@ export function EventHeadJuryScreen({ eventId }: EventHeadJuryScreenProps) {
               <Lock className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
               <div>
                 <strong className="text-amber-300 font-semibold block sm:inline">Grading Temporarily Locked: </strong>
-                This contest has not reached the Judging phase yet (current status: <span className="font-semibold text-white">{statusLabel}</span>). Evaluation controls will activate once the contest officially enters the Judging round.
+                {judgingLockMessage} (current status: <span className="font-semibold text-white">{statusLabel}</span>).
               </div>
             </div>
           )}
@@ -824,55 +849,50 @@ export function EventHeadJuryScreen({ eventId }: EventHeadJuryScreenProps) {
           <button
             type="button"
             onClick={() => setActiveTab('score')}
-            className={`px-4 py-2 rounded-xl font-sora font-bold text-xs whitespace-nowrap transition-all cursor-pointer ${
-              activeTab === 'score'
+            className={`px-4 py-2 rounded-xl font-sora font-bold text-xs whitespace-nowrap transition-all cursor-pointer ${activeTab === 'score'
                 ? 'bg-[#A7ACD9] text-[#1F2335] shadow-lg shadow-[#A7ACD9]/20'
                 : 'text-[#9695a1] hover:text-white hover:bg-white/5'
-            }`}
+              }`}
           >
             Scoring
           </button>
           <button
             type="button"
             onClick={() => setActiveTab('progress')}
-            className={`px-4 py-2 rounded-xl font-sora font-bold text-xs whitespace-nowrap transition-all cursor-pointer ${
-              activeTab === 'progress'
+            className={`px-4 py-2 rounded-xl font-sora font-bold text-xs whitespace-nowrap transition-all cursor-pointer ${activeTab === 'progress'
                 ? 'bg-[#A7ACD9] text-[#1F2335] shadow-lg shadow-[#A7ACD9]/20'
                 : 'text-[#9695a1] hover:text-white hover:bg-white/5'
-            }`}
+              }`}
           >
             Overall Progress
           </button>
           <button
             type="button"
             onClick={() => setActiveTab('scores')}
-            className={`px-4 py-2 rounded-xl font-sora font-bold text-xs whitespace-nowrap transition-all cursor-pointer ${
-              activeTab === 'scores'
+            className={`px-4 py-2 rounded-xl font-sora font-bold text-xs whitespace-nowrap transition-all cursor-pointer ${activeTab === 'scores'
                 ? 'bg-[#A7ACD9] text-[#1F2335] shadow-lg shadow-[#A7ACD9]/20'
                 : 'text-[#9695a1] hover:text-white hover:bg-white/5'
-            }`}
+              }`}
           >
             Leaderboard & Scores
           </button>
           <button
             type="button"
             onClick={() => setActiveTab('arbitration')}
-            className={`px-4 py-2 rounded-xl font-sora font-bold text-xs whitespace-nowrap transition-all cursor-pointer ${
-              activeTab === 'arbitration'
+            className={`px-4 py-2 rounded-xl font-sora font-bold text-xs whitespace-nowrap transition-all cursor-pointer ${activeTab === 'arbitration'
                 ? 'bg-[#A7ACD9] text-[#1F2335] shadow-lg shadow-[#A7ACD9]/20'
                 : 'text-[#9695a1] hover:text-white hover:bg-white/5'
-            }`}
+              }`}
           >
             Arbitration Voting
           </button>
           <button
             type="button"
             onClick={() => setActiveTab('approve')}
-            className={`px-4 py-2 rounded-xl font-sora font-bold text-xs whitespace-nowrap transition-all cursor-pointer ${
-              activeTab === 'approve'
+            className={`px-4 py-2 rounded-xl font-sora font-bold text-xs whitespace-nowrap transition-all cursor-pointer ${activeTab === 'approve'
                 ? 'bg-[#A7ACD9] text-[#1F2335] shadow-lg shadow-[#A7ACD9]/20'
                 : 'text-[#9695a1] hover:text-white hover:bg-white/5'
-            }`}
+              }`}
           >
             Approve Results
           </button>
@@ -903,6 +923,8 @@ export function EventHeadJuryScreen({ eventId }: EventHeadJuryScreenProps) {
             handleSubmitScore={handleSubmitScore}
             setIsLightboxOpen={setIsLightboxOpen}
             activeIndex={activeIndex}
+            isJudgingPhase={isJudgingPhase}
+            judgingLockMessage={judgingLockMessage}
           />
         )}
 

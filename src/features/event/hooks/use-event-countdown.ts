@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import type { EventListItemDto } from '../types/event.types';
+import { normalizeEventStatus, type EventListItemDto } from '../types/event.types';
 
 type TickListener = (nowMs: number) => void;
 const listeners = new Set<TickListener>();
@@ -69,6 +69,37 @@ export function useEventCountdown(event?: EventListItemDto | null): EventCountdo
       };
     }
 
+    const normalizedStatus = normalizeEventStatus(event.status);
+    if (normalizedStatus === 'Draft') {
+      return {
+        phase: 'Upcoming',
+        phaseLabel: 'Draft — Not Published',
+        targetDate: null,
+        remainingMs: 0,
+        formatted: 'Draft',
+        days: 0,
+        hours: 0,
+        minutes: 0,
+        seconds: 0,
+        isEnded: false,
+      };
+    }
+
+    if (normalizedStatus === 'Ended') {
+      return {
+        phase: 'Ended',
+        phaseLabel: 'Contest Concluded',
+        targetDate: null,
+        remainingMs: 0,
+        formatted: 'Time Expired',
+        days: 0,
+        hours: 0,
+        minutes: 0,
+        seconds: 0,
+        isEnded: true,
+      };
+    }
+
     const subStart = new Date(event.submissionStartAt).getTime();
     const subEnd = new Date(event.submissionEndAt).getTime();
     const votingEnd = new Date(event.votingEndAt || event.judgingEndAt).getTime();
@@ -81,7 +112,7 @@ export function useEventCountdown(event?: EventListItemDto | null): EventCountdo
 
     if (!isNaN(subStart) && now < subStart) {
       phase = 'Upcoming';
-      phaseLabel = 'Submissions Open Soon';
+      phaseLabel = 'Waiting to Open in';
       targetTimeMs = subStart;
       targetDateStr = event.submissionStartAt;
     } else if (!isNaN(subEnd) && now < subEnd) {

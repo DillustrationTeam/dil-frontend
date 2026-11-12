@@ -31,7 +31,7 @@ import toast from 'react-hot-toast';
 import { useAuthStore } from '@/store/use-auth-store';
 import { creatorProfileService } from '@/features/creator-studio/services/creator-profile.service';
 import type { EventDetailDto } from '../../types/event.types';
-import { eventStatusBadgeStyles, eventStatusLabels } from '../../types/event.types';
+import { eventStatusBadgeStyles, eventStatusLabels, normalizeEventStatus } from '../../types/event.types';
 import type {
   JuryCriterion,
   JurySubmissionItem,
@@ -42,6 +42,7 @@ import type {
 import type { CreatorProfileDto } from '@/features/creator-studio/types/creator-profile.types';
 import { eventService } from '../../services/event.service';
 import { juryService } from '../../services/jury.service';
+import { computeIsJudgingPhase, getJudgingLockMessage, getRubricMaxTotal } from '../../utils/jury-phase';
 import { JuryArtworkLightbox } from './jury-artwork-lightbox';
 import { EventSearchFilterBar } from '../event/event-search-filter-bar';
 
@@ -63,7 +64,7 @@ function formatDisplayDate(dateStr?: string | null): string {
 }
 
 export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
-  const [now] = useState(() => Date.now());
+  const [nowMs, setNowMs] = useState(() => Date.now());
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [event, setEvent] = useState<EventDetailDto | null>(null);
@@ -85,39 +86,19 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
   const [isRulesModalOpen, setIsRulesModalOpen] = useState(false);
 
   // Status badge styling matching event-detail-screen
-  const statusStr =
-    typeof event?.status === 'number'
-      ? event.status === 2
-        ? 'Open'
-        : event.status === 3
-        ? 'Judging'
-        : event.status === 4
-        ? 'Ended'
-        : 'Draft'
-      : String(event?.status || 'Judging');
+  const statusStr = event?.status != null ? normalizeEventStatus(event.status) : 'Judging';
   const statusColor = eventStatusBadgeStyles[statusStr] || 'border-white/10 bg-white/5 text-[#9695a1]';
   const statusLabel = eventStatusLabels[statusStr] || statusStr;
 
+  useEffect(() => {
+    const timer = setInterval(() => setNowMs(Date.now()), 15000);
+    return () => clearInterval(timer);
+  }, []);
+
   // Check whether the contest is in the official Judging Phase
-  const isJudgingPhase = useMemo(() => {
-    if (!event) return false;
-    const statusVal = String(event.status).toLowerCase();
-    if (statusVal === 'judging' || statusVal === '3') return true;
-
-    // If event is in Draft or Ended, judging is strictly inactive
-    if (statusVal === 'draft' || statusVal === '1' || statusVal === 'ended' || statusVal === '4') {
-      return false;
-    }
-
-    // Check by judging stage dates if configured
-    if (event.judgingStartAt) {
-      const start = new Date(event.judgingStartAt).getTime();
-      const end = event.judgingEndAt ? new Date(event.judgingEndAt).getTime() : Infinity;
-      if (now >= start && now <= end) return true;
-    }
-
-    return false;
-  }, [event, now]);
+  const isJudgingPhase = useMemo(() => computeIsJudgingPhase(event, nowMs), [event, nowMs]);
+  const judgingLockMessage = useMemo(() => getJudgingLockMessage(event, nowMs), [event, nowMs]);
+  const maxTotalScore = useMemo(() => getRubricMaxTotal(criteria), [criteria]);
 
   const [juries, setJuries] = useState<JuryMemberInfo[]>([]);
   const [myCreatorProfile, setMyCreatorProfile] = useState<CreatorProfileDto | null>(null);
@@ -132,8 +113,8 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
     async function loadJuryWorkspace() {
       setLoading(true);
       try {
-        const [eventData, criteriaData, juriesData, profileData] = await Promise.all([
-          eventService.detail(eventId).catch(() => null),
+        const eventData = await eventService.detail(eventId);
+        const [criteriaData, juriesData, profileData] = await Promise.all([
           juryService.getEventCriteria(eventId).catch(() => []),
           juryService.getEventJuries(eventId).catch(() => []),
           effectiveUserId ? creatorProfileService.getMyProfile().catch(() => null) : Promise.resolve(null),
@@ -157,8 +138,8 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
           const firstPending = subItems.find((s) => !s.isGraded);
           setSelectedSubmissionId(firstPending ? firstPending.id : subItems[0].id);
         }
-      } catch {
-        toast.error('Failed to load Jury workspace data.');
+      } catch (err: unknown) {
+        toast.error(err instanceof Error ? err.message : 'Failed to load Jury workspace data.');
       } finally {
         if (isMounted) setLoading(false);
       }
@@ -251,6 +232,10 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
       toast.error('Điểm của bài dự thi này đã được khóa và không thể chỉnh sửa.');
       return;
     }
+    if (!isJudgingPhase) {
+      toast.error(judgingLockMessage);
+      return;
+    }
     const clamped = Math.max(0, Math.min(maxScore, val));
     setScores((prev) => ({
       ...prev,
@@ -265,7 +250,7 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
       return;
     }
     if (!isJudgingPhase) {
-      toast.error('Evaluation is locked until the contest reaches the Judging phase.');
+      toast.error(judgingLockMessage);
       return;
     }
 
@@ -286,13 +271,13 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
       prev.map((s) =>
         s.id === activeSubmission.id
           ? {
-              ...s,
-              gradedScore: totalScore,
-              notes,
-              criteriaScores: scores,
-              noConflictOfInterest: noConflict,
-              nominateSpecialAward: false,
-            }
+            ...s,
+            gradedScore: totalScore,
+            notes,
+            criteriaScores: scores,
+            noConflictOfInterest: noConflict,
+            nominateSpecialAward: false,
+          }
           : s
       )
     );
@@ -315,7 +300,7 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
     }
 
     if (!isJudgingPhase) {
-      toast.error('Evaluation is locked until the contest reaches the Judging phase.');
+      toast.error(judgingLockMessage);
       return;
     }
 
@@ -345,20 +330,20 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
         prev.map((s) =>
           s.id === activeSubmission.id
             ? {
-                ...s,
-                isGraded: true,
-                gradedScore: totalScore,
-                notes,
-                criteriaScores: scores,
-                noConflictOfInterest: noConflict,
-                nominateSpecialAward: false,
-                isLocked: true,
-              }
+              ...s,
+              isGraded: true,
+              gradedScore: totalScore,
+              notes,
+              criteriaScores: scores,
+              noConflictOfInterest: noConflict,
+              nominateSpecialAward: false,
+              isLocked: true,
+            }
             : s
         )
       );
 
-      toast.success(`Evaluation submitted successfully: ${totalScore} / 100 points!`);
+      toast.success(`Evaluation submitted successfully: ${totalScore} / ${maxTotalScore} points!`);
 
       const nextPending = submissions.find(
         (s) => s.id !== activeSubmission.id && !s.isGraded
@@ -399,7 +384,7 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
         <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
           <Link
             href={`/events/${eventId}`}
-            className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 px-6 py-2.5 text-xs font-bold text-white hover:brightness-110 transition shadow-lg"
+            className="commission-primary inline-flex items-center gap-2 rounded-xl px-6 py-2.5 text-xs transition shadow-lg"
           >
             <ChevronLeft size={16} />
             <span>Quay lại chi tiết sự kiện</span>
@@ -624,7 +609,7 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
           </article>
 
           <article className="relative overflow-hidden p-4 sm:p-5 rounded-2xl bg-white/[0.03] border border-white/10 backdrop-blur-xl">
-            <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#A7ACD9] via-indigo-400 to-transparent opacity-75" />
+            <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#A7ACD9] via-[#c2c7f6] to-transparent opacity-75" />
             <div className="flex items-center justify-between">
               <span className="text-[11px] uppercase tracking-wider text-[#9695a1] font-medium block">Progress</span>
               <span className="text-xs font-semibold text-[#A7ACD9]">{stats.progressPercent}%</span>
@@ -642,7 +627,7 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
         {/* Main 2-Column Split Workspace */}
         <div className="grid grid-cols-1 lg:grid-cols-[320px_minmax(0,1fr)] gap-6 items-start">
           {/* Left Column: Assigned Queue */}
-          <aside className="p-4 rounded-2xl bg-[#151926]/90 border border-white/10 backdrop-blur-xl lg:sticky lg:top-24 max-h-none lg:max-h-[calc(100vh-7rem)] flex flex-col">
+          <aside className="glass-container p-4 rounded-2xl lg:sticky lg:top-24 max-h-none lg:max-h-[calc(100vh-7rem)] flex flex-col">
             <div className="flex items-center justify-between gap-3 pb-3 border-b border-white/10 mb-3">
               <div>
                 <h2 className="font-sora font-semibold text-white text-base">Assigned Queue</h2>
@@ -678,11 +663,10 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
                       key={entry.id}
                       type="button"
                       onClick={() => setSelectedSubmissionId(entry.id)}
-                      className={`w-full text-left p-3 rounded-xl border transition-all cursor-pointer flex items-center justify-between gap-3 ${
-                        isActive
-                          ? 'border-[#A7ACD9] bg-[#A7ACD9]/15 shadow-md shadow-[#A7ACD9]/5'
-                          : 'border-white/10 bg-white/[0.02] hover:bg-white/[0.06] hover:border-white/20'
-                      }`}
+                      className={`w-full text-left p-3 rounded-xl border transition-all cursor-pointer flex items-center justify-between gap-3 ${isActive
+                        ? 'border-[#A7ACD9] bg-[#A7ACD9]/15 shadow-md shadow-[#A7ACD9]/5'
+                        : 'border-white/10 bg-white/[0.02] hover:bg-white/[0.06] hover:border-white/20'
+                        }`}
                     >
                       <div className="min-w-0 flex-1">
                         <strong className={`block text-xs sm:text-sm font-semibold truncate ${isActive ? 'text-white' : 'text-[#e4e1e5]'}`}>
@@ -719,7 +703,7 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
 
           {/* Right Column: Scoring Form */}
           {activeSubmission ? (
-            <form onSubmit={handleSubmitScore} className="p-5 sm:p-6 rounded-2xl bg-[#151926]/90 border border-white/10 backdrop-blur-xl space-y-6">
+            <form onSubmit={handleSubmitScore} className="glass-container p-5 sm:p-6 rounded-2xl space-y-6">
               {activeSubmission.isLocked && (
                 <div className="flex items-center gap-3 p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-200 text-xs">
                   <Lock className="w-4 h-4 text-emerald-400 shrink-0" />
@@ -737,9 +721,7 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
               {!isJudgingPhase && (
                 <div className="flex items-center gap-3 p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-200 text-xs">
                   <Lock className="w-4 h-4 text-amber-400 shrink-0" />
-                  <span>
-                    Grading controls are temporarily locked. Submissions can only be scored once the contest officially reaches the <strong>Judging</strong> phase.
-                  </span>
+                  <span>{judgingLockMessage}</span>
                 </div>
               )}
 
@@ -763,7 +745,7 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
                     <strong className="text-2xl sm:text-3xl font-sora font-extrabold text-[#A7ACD9] block">
                       {activeSubmission.isGraded || totalScore > 0 ? (
                         <>
-                          {totalScore} <span className="text-sm font-normal text-[#9695a1]">/ 100</span>
+                          {totalScore} <span className="text-sm font-normal text-[#9695a1]">/ {maxTotalScore}</span>
                         </>
                       ) : (
                         <span className="text-lg sm:text-xl font-medium text-[#9695a1]">Pending</span>
@@ -830,11 +812,10 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
                               value={currentScore}
                               disabled={Boolean(activeSubmission.isLocked) || !isJudgingPhase}
                               onChange={(e) => handleScoreChange(crit.id, parseFloat(e.target.value) || 0, crit.maxScore)}
-                              className={`w-16 px-2 py-1 bg-white/5 border rounded-lg text-right text-xs font-mono font-bold text-white focus:outline-none ${
-                                Boolean(activeSubmission.isLocked) || !isJudgingPhase
-                                  ? 'border-white/5 opacity-60 cursor-not-allowed text-[#9695a1]'
-                                  : 'border-white/10 focus:border-[#A7ACD9]'
-                              }`}
+                              className={`w-16 px-2 py-1 bg-white/5 border rounded-lg text-right text-xs font-mono font-bold text-white focus:outline-none ${Boolean(activeSubmission.isLocked) || !isJudgingPhase
+                                ? 'border-white/5 opacity-60 cursor-not-allowed text-[#9695a1]'
+                                : 'border-white/10 focus:border-[#A7ACD9]'
+                                }`}
                             />
                             <span className="text-xs text-[#9695a1] font-mono">/ {crit.maxScore}</span>
                           </div>
@@ -849,9 +830,8 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
                             value={currentScore}
                             disabled={Boolean(activeSubmission.isLocked) || !isJudgingPhase}
                             onChange={(e) => handleScoreChange(crit.id, parseFloat(e.target.value) || 0, crit.maxScore)}
-                            className={`w-full accent-[#A7ACD9] ${
-                              Boolean(activeSubmission.isLocked) || !isJudgingPhase ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'
-                            }`}
+                            className={`w-full accent-[#A7ACD9] ${Boolean(activeSubmission.isLocked) || !isJudgingPhase ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'
+                              }`}
                           />
                         </div>
                       </div>
@@ -871,11 +851,10 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
                   disabled={Boolean(activeSubmission.isLocked) || !isJudgingPhase}
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder="Provide structured notes on execution, technique, or composition..."
-                  className={`w-full p-3 text-xs bg-white/5 border rounded-xl text-white placeholder-[#9695a1] focus:outline-none leading-relaxed ${
-                    Boolean(activeSubmission.isLocked) || !isJudgingPhase
-                      ? 'border-white/5 opacity-60 cursor-not-allowed'
-                      : 'border-white/10 focus:border-[#A7ACD9]'
-                  }`}
+                  className={`w-full p-3 text-xs bg-white/5 border rounded-xl text-white placeholder-[#9695a1] focus:outline-none leading-relaxed ${Boolean(activeSubmission.isLocked) || !isJudgingPhase
+                    ? 'border-white/5 opacity-60 cursor-not-allowed'
+                    : 'border-white/10 focus:border-[#A7ACD9]'
+                    }`}
                 />
               </div>
 
@@ -933,11 +912,10 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
                   <button
                     type="submit"
                     disabled={submitting || Boolean(activeSubmission.isLocked) || !isJudgingPhase}
-                    className={`px-5 py-2.5 rounded-xl font-sora font-extrabold text-xs shadow-lg transition-all flex items-center gap-2 ${
-                      Boolean(activeSubmission.isLocked)
-                        ? 'bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 cursor-not-allowed opacity-90'
-                        : 'bg-gradient-to-r from-purple-600 via-indigo-600 to-[#7FD5E8] hover:brightness-110 text-white cursor-pointer hover:shadow-purple-500/20 disabled:opacity-60 disabled:cursor-not-allowed'
-                    }`}
+                    className={`px-5 py-2.5 rounded-xl font-sora text-xs shadow-lg transition-all flex items-center gap-2 ${Boolean(activeSubmission.isLocked)
+                      ? 'bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 font-extrabold cursor-not-allowed opacity-90'
+                      : 'commission-primary cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed'
+                      }`}
                   >
                     {activeSubmission.isLocked ? <Lock className="w-4 h-4 text-emerald-400" /> : <Send className="w-4 h-4" />}
                     <span>{activeSubmission.isLocked ? 'Điểm đã khóa' : 'Submit Evaluation Score'}</span>
@@ -946,7 +924,7 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
               </div>
             </form>
           ) : (
-            <div className="p-12 text-center rounded-2xl bg-[#151926]/90 border border-white/10 text-[#9695a1]">
+            <div className="glass-container p-12 text-center rounded-2xl text-[#9695a1]">
               Select a submission from the queue to start evaluation.
             </div>
           )}

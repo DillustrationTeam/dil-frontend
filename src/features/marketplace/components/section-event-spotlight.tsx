@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { apiClient } from '@/lib/api-client';
 import type { ApiResponse } from '@/types/api.types';
-import type { EventListItemDto } from '@/features/event/types/event.types';
+import { normalizeEventStatus, type EventListItemDto } from '@/features/event/types/event.types';
 import type { MarketplaceArtwork } from '../services/marketplace.service';
 
 interface SpotlightArtwork extends MarketplaceArtwork {
@@ -14,15 +14,21 @@ interface SpotlightArtwork extends MarketplaceArtwork {
 }
 
 function EventStatusPill({ status }: { status: string | number }) {
-  const s = String(status).toLowerCase();
-  if (s === 'open' || s === '2')
+  const s = normalizeEventStatus(status);
+  if (s === 'Upcoming')
+    return (
+      <span className="inline-flex items-center gap-1.5 rounded-full border border-sky-400/30 bg-sky-950/70 px-2.5 py-0.5 text-xs font-medium text-sky-300">
+        Chờ mở nộp bài
+      </span>
+    );
+  if (s === 'Open')
     return (
       <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/30 bg-emerald-950/70 px-2.5 py-0.5 text-xs font-medium text-emerald-300">
         <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" />
         Đang diễn ra
       </span>
     );
-  if (s === 'judging' || s === '3')
+  if (s === 'Judging')
     return (
       <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/30 bg-amber-950/70 px-2.5 py-0.5 text-xs font-medium text-amber-300">
         Chấm điểm

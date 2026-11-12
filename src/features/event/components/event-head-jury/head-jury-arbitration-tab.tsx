@@ -62,7 +62,7 @@ export function HeadJuryArbitrationTab({
 
         <div className="grid gap-6 lg:grid-cols-12 items-start">
           {/* Left: Arbitration Cases table + overall resolution progress */}
-          <div className="rounded-2xl border border-white/10 bg-[#151926]/90 backdrop-blur-xl p-4 lg:col-span-5 flex flex-col space-y-3">
+          <div className="glass-container rounded-2xl p-4 lg:col-span-5 flex flex-col space-y-3">
             {/* Searchbar & Status Filter for Arbitration Cases */}
             <EventSearchFilterBar
               variant="inline"
@@ -86,7 +86,7 @@ export function HeadJuryArbitrationTab({
 
             <div className="overflow-y-auto max-h-[380px] sm:max-h-[410px] pr-1 custom-scrollbar">
               <table className="w-full border-collapse text-left text-xs">
-                <thead className="sticky top-0 z-10 bg-[#151926] shadow-sm">
+                <thead className="sticky top-0 z-10 bg-[#161926] shadow-sm">
                   <tr className="border-b border-white/10 text-[#858694] uppercase font-semibold text-[10px]">
                     <th className="py-2.5 px-3">Entry</th>
                     <th className="py-2.5 px-3 text-right">Status</th>
@@ -172,7 +172,7 @@ export function HeadJuryArbitrationTab({
           </div>
 
           {/* Right: Detailed Master View & Arbitration Action Panel */}
-          <div className="rounded-2xl border border-white/10 bg-[#151926]/90 backdrop-blur-xl p-5 lg:col-span-7">
+          <div className="glass-container rounded-2xl p-5 lg:col-span-7">
             {!selectedArbitrationCase ? (
               <p className="py-16 text-center text-sm text-[#9695a1]">Select an entry to view arbitration details.</p>
             ) : (
@@ -264,13 +264,13 @@ export function HeadJuryArbitrationTab({
                       onClick={() => setArbitrationDecision('Cast Head Jury Tie-Breaker')}
                       className={`p-3.5 rounded-xl border text-left transition-all flex flex-col justify-between cursor-pointer ${
                         arbitrationDecision === 'Cast Head Jury Tie-Breaker'
-                          ? 'border-purple-400 bg-purple-500/20 text-white shadow-lg shadow-purple-500/10'
+                          ? 'border-brand-periwinkle bg-brand-periwinkle/20 text-white shadow-lg shadow-brand-periwinkle/10'
                           : 'border-white/10 bg-white/5 text-[#c7c5cf] hover:bg-white/10 hover:border-white/20'
                       }`}
                     >
                       <div className="space-y-1">
-                        <div className="flex items-center gap-1.5 font-sora text-xs font-bold text-purple-300">
-                          <Award className="w-4 h-4 text-purple-400 shrink-0" />
+                        <div className="flex items-center gap-1.5 font-sora text-xs font-bold text-brand-periwinkle">
+                          <Award className="w-4 h-4 text-brand-periwinkle shrink-0" />
                           <span>Tie-Breaker Vote</span>
                         </div>
                         <p className="text-[11px] text-[#9695a1] leading-normal">
@@ -279,7 +279,7 @@ export function HeadJuryArbitrationTab({
                       </div>
                       <span
                         className={`mt-2 text-[10px] font-bold ${
-                          arbitrationDecision === 'Cast Head Jury Tie-Breaker' ? 'text-purple-300' : 'text-[#858694]'
+                          arbitrationDecision === 'Cast Head Jury Tie-Breaker' ? 'text-brand-periwinkle' : 'text-[#858694]'
                         }`}
                       >
                         {arbitrationDecision === 'Cast Head Jury Tie-Breaker' ? '✓ Selected' : 'Click to select'}
@@ -332,13 +332,13 @@ export function HeadJuryArbitrationTab({
 
                 {/* Sub-Panel 3: Cast Head Jury Tie-Breaker */}
                 {arbitrationDecision === 'Cast Head Jury Tie-Breaker' && (
-                  <div className="p-4 rounded-xl border border-purple-400/30 bg-purple-500/10 space-y-4 text-xs">
+                  <div className="p-4 rounded-xl border border-brand-periwinkle/30 bg-brand-periwinkle/10 space-y-4 text-xs">
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2 font-sora font-bold text-purple-200">
-                        <Award className="w-4 h-4 text-purple-400" />
+                      <div className="flex items-center gap-2 font-sora font-bold text-[#E4E1E5]">
+                        <Award className="w-4 h-4 text-brand-periwinkle" />
                         <span>Interactive Head-to-Head Comparison</span>
                       </div>
-                      <span className="px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 text-[10px] font-bold">
+                      <span className="px-2 py-0.5 rounded bg-brand-periwinkle/20 text-brand-periwinkle text-[10px] font-bold">
                         Tied at 89.6 pts
                       </span>
                     </div>
@@ -387,10 +387,10 @@ export function HeadJuryArbitrationTab({
                           </tr>
                           <tr>
                             <td className="py-2 px-3 text-[#9695a1] font-medium">Technical Execution</td>
-                            <td className="py-2 px-3 text-center font-mono text-purple-300 border-l border-white/10">
+                            <td className="py-2 px-3 text-center font-mono text-brand-periwinkle border-l border-white/10">
                               27 / 30
                             </td>
-                            <td className="py-2 px-3 text-center font-mono text-purple-300 border-l border-white/10">
+                            <td className="py-2 px-3 text-center font-mono text-brand-periwinkle border-l border-white/10">
                               27 / 30
                             </td>
                           </tr>
@@ -400,7 +400,7 @@ export function HeadJuryArbitrationTab({
 
                     {/* Interactive Winner Selector Buttons */}
                     <div className="space-y-2 pt-1">
-                      <label className="text-xs font-semibold text-purple-200 block">
+                      <label className="text-xs font-semibold text-[#E4E1E5] block">
                         Declare Official Tie-Breaker Winner:
                       </label>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">

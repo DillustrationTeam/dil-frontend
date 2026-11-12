@@ -1,5 +1,76 @@
-import { apiClient } from '@/lib/api-client';
+import { apiClient, extractErrorMessage } from '@/lib/api-client';
 import type { ApiResponse } from '@/types/api.types';
+import { normalizeEventStatus } from '../types/event.types';
+
+export class EventServiceError extends Error {
+  status?: number;
+  isEndpointNotFound: boolean;
+  isResourceNotFound: boolean;
+
+  constructor(
+    message: string,
+    options?: {
+      status?: number;
+      isEndpointNotFound?: boolean;
+      isResourceNotFound?: boolean;
+    }
+  ) {
+    super(message);
+    this.name = 'EventServiceError';
+    this.status = options?.status;
+    this.isEndpointNotFound = Boolean(options?.isEndpointNotFound);
+    this.isResourceNotFound = Boolean(options?.isResourceNotFound);
+  }
+}
+
+function buildEventServiceError(err: unknown, fallbackMessage: string): EventServiceError {
+  if (err instanceof EventServiceError) {
+    return err;
+  }
+
+  const axiosLike = (err && typeof err === 'object'
+    ? (err as {
+      response?: { status?: number; data?: Record<string, unknown> };
+      config?: { method?: string; url?: string };
+    })
+    : undefined);
+
+  const status = axiosLike?.response?.status;
+  const rawData = axiosLike?.response?.data;
+  const hasStructuredApiBody = Boolean(
+    rawData &&
+    typeof rawData === 'object' &&
+    ('error' in rawData || 'errors' in rawData || 'message' in rawData || 'detail' in rawData)
+  );
+  const reqMethod = (axiosLike?.config?.method || 'GET').toUpperCase();
+  const reqPath = axiosLike?.config?.url || '';
+  const baseMessage = extractErrorMessage(err, fallbackMessage);
+
+  if (status === 404) {
+    if (hasStructuredApiBody) {
+      const withStatus = baseMessage.includes('404') ? baseMessage : `${baseMessage} (HTTP 404)`;
+      return new EventServiceError(withStatus, {
+        status: 404,
+        isResourceNotFound: true,
+      });
+    }
+
+    const endpointMessage = reqPath
+      ? `API endpoint không tồn tại hoặc sai đường dẫn (HTTP 404: ${reqMethod} ${reqPath}).`
+      : `API endpoint không tồn tại hoặc server sai cấu hình (HTTP 404).`;
+    return new EventServiceError(endpointMessage, {
+      status: 404,
+      isEndpointNotFound: true,
+    });
+  }
+
+  const formattedMessage =
+    status && !baseMessage.includes(String(status))
+      ? `${baseMessage} (HTTP ${status})`
+      : baseMessage;
+
+  return new EventServiceError(formattedMessage, { status });
+}
 import type {
   EventDetailDto,
   EventFilters,
@@ -49,8 +120,7 @@ export function sortEventItems(items: EventListItemDto[], sortBy?: EventSortOpti
 
 export function isEventInSubmissionStage(event?: EventListItemDto | null): boolean {
   if (!event) return false;
-  const statusStr = String(event.status).toLowerCase();
-  const isStatusOpen = statusStr === 'open' || statusStr === '2';
+  const isStatusOpen = normalizeEventStatus(event.status) === 'Open';
   if (!isStatusOpen) return false;
 
   if (event.submissionEndAt) {
@@ -60,6 +130,26 @@ export function isEventInSubmissionStage(event?: EventListItemDto | null): boole
     }
   }
   return true;
+}
+
+export function isEventEnded(event?: EventListItemDto | null): boolean {
+  if (!event) return true;
+  if (normalizeEventStatus(event.status) === 'Ended') return true;
+
+  const endDateStr = event.resultAnnouncementAt || event.votingEndAt || event.judgingEndAt;
+  if (endDateStr) {
+    const end = new Date(endDateStr).getTime();
+    if (!isNaN(end) && Date.now() >= end) {
+      return true;
+    }
+  }
+  return false;
+}
+
+export function isFeaturedCarouselEvent(event?: EventListItemDto | null): boolean {
+  if (!event || !event.isFeatured) return false;
+  if (normalizeEventStatus(event.status) === 'Draft') return false;
+  return !isEventEnded(event);
 }
 
 export function parsePrizeAmount(prize?: string | null): number {
@@ -92,7 +182,7 @@ export function parsePrizeAmount(prize?: string | null): number {
 
 export function calculateEventStats(events: EventListItemDto[]): EventStatsDto {
   const totalPrizePool = events.reduce((sum, e) => sum + parsePrizeAmount(e.prize), 0);
-  const openEventsCount = events.filter((e) => isEventInSubmissionStage(e) || String(e.status).toLowerCase() === 'open' || String(e.status) === '2').length;
+  const openEventsCount = events.filter((e) => isEventInSubmissionStage(e) || normalizeEventStatus(e.status) === 'Open').length;
   const totalSubmissionsCount = events.reduce((sum, e) => sum + (e.submissionCount || 0), 0);
 
   return {
@@ -119,6 +209,8 @@ export const eventService = {
           search: filters?.search || undefined,
           status: filters?.status || undefined,
           isFeatured: filters?.isFeatured !== undefined ? filters.isFeatured : undefined,
+          excludeEnded: filters?.excludeEnded ? true : undefined,
+          includeDrafts: filters?.includeDrafts ? true : undefined,
           sortBy: filters?.sortBy || 'latest',
           page,
           pageSize,
@@ -139,14 +231,8 @@ export const eventService = {
         totalCount,
         totalPages,
       };
-    } catch {
-      return {
-        items: [],
-        page,
-        pageSize,
-        totalCount: 0,
-        totalPages: 1,
-      };
+    } catch (err: unknown) {
+      throw buildEventServiceError(err, 'Không thể tải danh sách sự kiện từ máy chủ.');
     }
   },
 
@@ -154,11 +240,18 @@ export const eventService = {
    * Lấy chi tiết sự kiện
    */
   detail: async (id: string): Promise<EventDetailDto> => {
-    const response = await apiClient.get<ApiResponse<EventDetailDto>>(`/events/${id}`);
-    if (response.data.data) {
-      return response.data.data;
+    try {
+      const response = await apiClient.get<ApiResponse<EventDetailDto>>(`/events/${id}`);
+      if (response.data.data) {
+        return response.data.data;
+      }
+      throw new EventServiceError(
+        response.data.error?.detail || response.data.error?.title || 'Không tìm thấy thông tin sự kiện.',
+        { status: 404, isResourceNotFound: true }
+      );
+    } catch (err: unknown) {
+      throw buildEventServiceError(err, 'Không thể tải chi tiết sự kiện.');
     }
-    throw new Error(response.data.error?.detail || response.data.error?.title || 'Không tìm thấy thông tin sự kiện.');
   },
 
   /**
@@ -198,29 +291,45 @@ export const eventService = {
    * Create a new platform event
    */
   create: async (data: Record<string, unknown>): Promise<EventDetailDto> => {
-    const response = await apiClient.post<ApiResponse<EventDetailDto>>('/events', data);
-    if (response.data.data) {
-      return response.data.data;
+    try {
+      const response = await apiClient.post<ApiResponse<EventDetailDto>>('/events', data);
+      if (response.data.data) {
+        return response.data.data;
+      }
+      throw new EventServiceError(
+        response.data.error?.detail || response.data.error?.title || 'Không thể tạo sự kiện.'
+      );
+    } catch (err: unknown) {
+      throw buildEventServiceError(err, 'Không thể tạo sự kiện.');
     }
-    throw new Error(response.data.error?.detail || 'Failed to create event.');
   },
 
   /**
    * Update an existing platform event
    */
   update: async (id: string, data: Record<string, unknown>): Promise<EventDetailDto> => {
-    const response = await apiClient.put<ApiResponse<EventDetailDto>>(`/events/${id}`, data);
-    if (response.data.data) {
-      return response.data.data;
+    try {
+      const response = await apiClient.put<ApiResponse<EventDetailDto>>(`/events/${id}`, data);
+      if (response.data.data) {
+        return response.data.data;
+      }
+      throw new EventServiceError(
+        response.data.error?.detail || response.data.error?.title || 'Không thể cập nhật sự kiện.'
+      );
+    } catch (err: unknown) {
+      throw buildEventServiceError(err, 'Không thể cập nhật sự kiện.');
     }
-    throw new Error(response.data.error?.detail || 'Failed to update event.');
   },
 
   /**
    * Delete an existing platform event
    */
   delete: async (id: string): Promise<void> => {
-    await apiClient.delete(`/events/${id}`);
+    try {
+      await apiClient.delete(`/events/${id}`);
+    } catch (err: unknown) {
+      throw buildEventServiceError(err, 'Không thể xóa sự kiện.');
+    }
   },
 
   // Re-exports for backwards compatibility

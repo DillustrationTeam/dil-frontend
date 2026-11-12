@@ -14,9 +14,9 @@ import {
   Play,
   Calendar,
 } from 'lucide-react';
-import type { EventListItemDto } from '../../types/event.types';
+import { eventStatusBadgeStyles, eventStatusLabels, normalizeEventStatus, type EventListItemDto } from '../../types/event.types';
 import { useEventCountdown } from '../../hooks/use-event-countdown';
-import { isEventInSubmissionStage } from '../../services/event.service';
+import { isFeaturedCarouselEvent, sortEventItems } from '../../services/event.service';
 
 interface EventSpotlightHeroProps {
   events?: EventListItemDto[] | null;
@@ -29,11 +29,10 @@ export function EventSpotlightHero({
   event,
   maxItems = 5,
 }: EventSpotlightHeroProps) {
-  // Normalize items: ONLY show contests currently in the submission stage, up to maxItems (default 5)
+  // Normalize items: ONLY show top latest featured events that have not ended, up to maxItems (default 5)
   const items = React.useMemo(() => {
     const rawList = events && events.length > 0 ? events : event ? [event] : [];
-    const submissionOnly = rawList.filter(isEventInSubmissionStage);
-    return submissionOnly.slice(0, maxItems);
+    return sortEventItems(rawList.filter(isFeaturedCarouselEvent), 'latest').slice(0, maxItems);
   }, [events, event, maxItems]);
 
   const [rawActiveIndex, setRawActiveIndex] = useState(0);
@@ -301,19 +300,20 @@ function SlideItem({ event }: { event: EventListItemDto }) {
           <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-black/30" />
 
           {/* Top Banner Tag: Status */}
-          <div className="absolute top-4 left-4">
-            <span
-              className={`rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider backdrop-blur-md shadow-md ${
-                String(event.status).toLowerCase() === 'open'
-                  ? 'bg-emerald-500/20 border border-emerald-400/40 text-emerald-300'
-                  : String(event.status).toLowerCase() === 'judging'
-                  ? 'bg-amber-500/20 border border-amber-400/40 text-amber-300'
-                  : 'bg-slate-500/20 border border-slate-400/40 text-slate-300'
-              }`}
-            >
-              {event.status}
-            </span>
-          </div>
+          {(() => {
+            const normalized = normalizeEventStatus(event.status);
+            const badgeStyle = eventStatusBadgeStyles[normalized] || 'bg-slate-500/20 border-slate-400/40 text-slate-300';
+            const badgeLabel = eventStatusLabels[normalized] || normalized;
+            return (
+              <div className="absolute top-4 left-4">
+                <span
+                  className={`rounded-full border px-3 py-1 text-xs font-bold uppercase tracking-wider backdrop-blur-md shadow-md ${badgeStyle}`}
+                >
+                  {badgeLabel}
+                </span>
+              </div>
+            );
+          })()}
 
           <div className="absolute bottom-4 left-4 right-4">
             <p className="text-[11px] uppercase tracking-wider text-slate-300 font-bold">

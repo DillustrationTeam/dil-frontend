@@ -264,8 +264,9 @@ export function PermissionsTab() {
             return prev;
           });
         }
-      } catch (err) {
+      } catch (err: unknown) {
         console.error('Failed to load events in permissions tab:', err);
+        toast.error(err instanceof Error ? err.message : 'Không thể tải danh sách sự kiện.');
       }
     }
     void fetchEvents();

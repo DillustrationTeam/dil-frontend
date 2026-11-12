@@ -43,6 +43,7 @@ import {
 import { ArtworkActions } from './artwork-actions';
 import { ProtectedArtworkLightbox, ProtectedArtworkViewer } from './protected-artwork-viewer';
 import { useArtworkComments } from './use-artwork-comments';
+import { useLanguage } from '@/context/language-context';
 import { useAuthStore } from '@/store/use-auth-store';
 
 const DEFAULT_THUMB =
@@ -170,6 +171,7 @@ function ArtworkDetailContent({
     return [artwork, ...others].slice(0, 3);
   }, [artwork, artistArtworks]);
 
+  const { t } = useLanguage();
   const creatorDisplay =
     creatorProfile?.displayName || artwork?.creatorName || 'Nghệ sĩ Dillustration';
   const ratingAverage = creatorProfile?.ratingAverage ?? artwork?.creatorRating ?? 0;
@@ -523,22 +525,22 @@ function ArtworkDetailContent({
                     </span>
                   </div>
                   <span className="shrink-0 text-sm font-bold tabular-nums text-[#b3b7ee]">
-                    Từ {formatVnd(matchedPkg.price)}
+                    {t(`Từ ${formatVnd(matchedPkg.price)}`)}
                   </span>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 border-t border-white/[0.07] pt-2.5 text-xs tabular-nums text-[#d1d5db]">
-                  <span className="inline-flex items-center gap-1.5" title="Số giai đoạn bàn giao & giải ngân">
+                  <span className="inline-flex items-center gap-1.5" title={t('Số giai đoạn bàn giao & giải ngân')}>
                     <Layers className="h-3.5 w-3.5 text-[#9ca3af]" />
-                    <span>{matchedPkg.milestones?.length || 1} cột mốc</span>
+                    <span>{t(`${matchedPkg.milestones?.length || 1} cột mốc`)}</span>
                   </span>
-                  <span className="inline-flex items-center gap-1.5" title="Số lần chỉnh sửa miễn phí mỗi mốc">
+                  <span className="inline-flex items-center gap-1.5" title={t('Số lần chỉnh sửa miễn phí mỗi mốc')}>
                     <RotateCcw className="h-3.5 w-3.5 text-[#9ca3af]" />
-                    <span>{pkgRevisions} lần sửa</span>
+                    <span>{t(`${pkgRevisions} lần sửa`)}</span>
                   </span>
-                  <span className="inline-flex items-center gap-1.5" title="Định dạng tệp bàn giao theo thỏa thuận">
+                  <span className="inline-flex items-center gap-1.5" title={t('Định dạng tệp bàn giao theo thỏa thuận')}>
                     <ImageIcon className="h-3.5 w-3.5 text-[#9ca3af]" />
-                    <span>File theo yêu cầu</span>
+                    <span>{t('File theo yêu cầu')}</span>
                   </span>
                 </div>
 
@@ -548,7 +550,7 @@ function ArtworkDetailContent({
                     onClick={onClose}
                     className="inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-[10px] border border-white/15 bg-white/5 px-3 text-[13px] font-semibold text-white transition hover:bg-white/10"
                   >
-                    <span>Chỉnh sửa gói</span>
+                    <span>{t('Chỉnh sửa gói')}</span>
                   </Link>
                 ) : (
                   <button
@@ -559,12 +561,12 @@ function ArtworkDetailContent({
                   >
                     <span>
                       {creatorProfile?.isAcceptingOrders === false
-                        ? 'Creator đang tạm ngưng nhận đơn'
+                        ? t('Creator đang tạm ngưng nhận đơn')
                         : pkgSlot?.isFull
-                          ? 'Gói này đã hết slot'
+                          ? t('Gói này đã hết slot')
                           : pkgSlot?.isLimited
-                            ? `Đặt vẽ gói này (${pkgSlot.remaining}/${pkgSlot.maxSlots} slot)`
-                            : 'Đặt vẽ gói này (∞ Không giới hạn)'}
+                            ? t(`Đặt vẽ gói này (${pkgSlot.remaining}/${pkgSlot.maxSlots} slot)`)
+                            : t('Đặt vẽ gói này (∞ Không giới hạn)')}
                     </span>
                     {canCommission && <ArrowRight className="h-3.5 w-3.5" />}
                   </button>
@@ -579,8 +581,8 @@ function ArtworkDetailContent({
               >
                 <span>
                   {creatorProfile?.isAcceptingOrders === false
-                    ? 'Creator đang tạm ngưng nhận đơn'
-                    : 'Đặt vẽ với họa sĩ này'}
+                    ? t('Creator đang tạm ngưng nhận đơn')
+                    : t('Đặt vẽ với họa sĩ này')}
                 </span>
                 {creatorProfile?.isAcceptingOrders !== false && <ArrowRight className="h-3.5 w-3.5" />}
               </button>
@@ -594,19 +596,19 @@ function ArtworkDetailContent({
             <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-emerald-400" />
             {isExclusive && provenance ? (
               <span>
-                Sáng tác: <strong className="text-white">{provenance.creatorName}</strong>
+                {t('Sáng tác:')} <strong className="text-white">{provenance.creatorName}</strong>
                 <span className="mx-1 text-[#8b93a7]">→</span>
-                Sở hữu: <strong className="text-white">{provenance.currentOwnerName}</strong>
+                {t('Sở hữu:')} <strong className="text-white">{provenance.currentOwnerName}</strong>
               </span>
             ) : (
               <span>
-                Tác quyền: <strong className="text-white">Thuộc về {creatorDisplay}</strong>
+                {t('Tác quyền:')} <strong className="text-white">{t(`Thuộc về ${creatorDisplay}`)}</strong>
               </span>
             )}
           </div>
           {isSampleMatch && matchedPkg && (
             <span className="rounded-full border border-[#b3b7ee]/30 bg-[#b3b7ee]/10 px-2.5 py-1 text-[11px] font-medium text-[#b3b7ee]">
-              Tranh mẫu gói {matchedPkg.name}
+              {t(`Tranh mẫu gói ${matchedPkg.name}`)}
             </span>
           )}
         </div>

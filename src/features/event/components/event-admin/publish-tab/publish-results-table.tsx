@@ -33,7 +33,7 @@ export function PublishResultsTable({
   isLoading = false,
 }: PublishResultsTableProps) {
   return (
-    <div className="p-6 rounded-2xl bg-[#151926]/90 border border-white/10 backdrop-blur-xl space-y-5">
+    <div className="glass-container p-6 rounded-2xl space-y-5">
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
           <h2 className="text-xl font-bold font-sora text-white">Final Contest Results</h2>
@@ -183,7 +183,7 @@ export function PublishResultsTable({
           type="button"
           onClick={handleApproveAwardAllocations}
           disabled={isAwardAllocationsConfirmed || isContestResultsPublished || finalWinnersList.length === 0}
-          className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-[#7FD5E8] hover:brightness-110 text-white font-sora font-extrabold text-xs shadow-lg hover:shadow-purple-500/20 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+          className="commission-primary px-5 py-2.5 rounded-xl font-sora text-xs shadow-lg transition-all flex items-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
         >
           <CheckCircle2 className="w-4 h-4" />
           <span>

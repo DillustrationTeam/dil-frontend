@@ -36,7 +36,7 @@ export function PublishChecklistAside({
     (checklist.headJurySignOff || isAwardAllocationsConfirmed);
 
   return (
-    <aside className="p-6 rounded-2xl bg-[#151926]/90 border border-white/10 backdrop-blur-xl space-y-4 lg:sticky lg:top-24">
+    <aside className="glass-container p-6 rounded-2xl space-y-4 lg:sticky lg:top-24">
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-bold font-sora text-white">Release Audit Checklist</h2>
         <span className="text-xs text-[#9695a1] font-mono">
@@ -142,7 +142,7 @@ export function PublishChecklistAside({
         type="button"
         onClick={handlePublishResults}
         disabled={!canPublish}
-        className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-[#7FD5E8] text-white font-sora font-extrabold text-xs shadow-lg hover:brightness-110 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+        className="commission-primary w-full py-3 px-4 rounded-xl font-sora text-xs shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
       >
         <Megaphone className="w-4 h-4" />
         <span>

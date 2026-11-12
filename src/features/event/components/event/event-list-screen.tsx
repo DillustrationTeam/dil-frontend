@@ -13,7 +13,7 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import type { EventListItemDto, EventFilters, EventSortOption, EventStatsDto } from '../../types/event.types';
-import { eventService, isEventInSubmissionStage } from '../../services/event.service';
+import { eventService, isFeaturedCarouselEvent, sortEventItems } from '../../services/event.service';
 import { EventCard } from './event-card';
 import { EventSpotlightHero } from './event-spotlight-hero';
 import { EventSearchFilterBar } from './event-search-filter-bar';
@@ -82,23 +82,17 @@ export function EventListScreen({}: EventListScreenProps) {
 
   async function loadFeaturedEvents() {
     try {
-      // Only fetch featured contests that are Open for submission
-      const res = await eventService.list({ isFeatured: true, status: 'Open', pageSize: 5 });
-      let list = res.items.filter(isEventInSubmissionStage);
-
-      // If fewer than 5 featured submission contests returned, supplement with active open contests
-      if (list.length < 5) {
-        const fallbackRes = await eventService.list({ status: 'Open', pageSize: 5 });
-        const existingIds = new Set(list.map((e: EventListItemDto) => e.id));
-        const extras = fallbackRes.items
-          .filter(isEventInSubmissionStage)
-          .filter((e: EventListItemDto) => !existingIds.has(e.id));
-        list = [...list, ...extras].slice(0, 5);
-      }
-
-      setFeaturedEvents(list.slice(0, 5));
+      // Only fetch the top 5 latest featured contests that have not ended
+      const res = await eventService.list({
+        isFeatured: true,
+        excludeEnded: true,
+        sortBy: 'latest',
+        pageSize: 5,
+      });
+      const activeFeatured = sortEventItems(res.items.filter(isFeaturedCarouselEvent), 'latest').slice(0, 5);
+      setFeaturedEvents(activeFeatured);
     } catch {
-      // Keep existing or fallback
+      // Keep existing featured events on transient failure
     }
   }
 
@@ -142,16 +136,10 @@ export function EventListScreen({}: EventListScreenProps) {
     return () => clearTimeout(timer);
   }, [keyword]);
 
-  // Display up to 5 featured events in carousel - ONLY contests currently in the submission stage
+  // Display at most the top 5 latest featured events that have not ended
   const displayFeaturedEvents = useMemo(() => {
-    const validFeatured = featuredEvents.filter(isEventInSubmissionStage);
-    if (validFeatured.length > 0) return validFeatured.slice(0, 5);
-
-    const explicitFeatured = events.filter((e) => e.isFeatured && isEventInSubmissionStage(e));
-    if (explicitFeatured.length > 0) return explicitFeatured.slice(0, 5);
-
-    return events.filter(isEventInSubmissionStage).slice(0, 5);
-  }, [featuredEvents, events]);
+    return sortEventItems(featuredEvents.filter(isFeaturedCarouselEvent), 'latest').slice(0, 5);
+  }, [featuredEvents]);
 
   const handlePageChange = (newPage: number) => {
     setPage(newPage);
@@ -283,6 +271,20 @@ export function EventListScreen({}: EventListScreenProps) {
               <div className="h-10 w-full rounded-xl bg-white/10" />
             </div>
           ))}
+        </div>
+      ) : error && events.length === 0 ? (
+        <div className="my-12 rounded-3xl border border-red-500/30 bg-red-500/10 p-10 text-center">
+          <Trophy size={42} className="mx-auto text-red-400/80 mb-3" />
+          <h3 className="font-h1 text-xl font-bold text-white">Không thể tải danh sách cuộc thi</h3>
+          <p className="mt-1 text-sm text-red-200 max-w-lg mx-auto">{error}</p>
+          <button
+            type="button"
+            onClick={() => void loadEvents()}
+            className="mt-5 inline-flex items-center gap-2 rounded-2xl bg-red-500/25 border border-red-400/40 px-6 py-2.5 text-xs font-bold text-white cursor-pointer transition hover:bg-red-500/35"
+          >
+            <RefreshCw size={14} />
+            <span>Thử tải lại</span>
+          </button>
         </div>
       ) : events.length === 0 ? (
         <div className="my-16 rounded-3xl border border-dashed border-white/15 p-12 text-center">
@@ -424,7 +426,7 @@ export function EventListScreen({}: EventListScreenProps) {
 
             <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 space-y-2">
               <div className="flex items-center gap-2 font-bold text-white text-sm">
-                <span className="flex size-6 items-center justify-center rounded-lg bg-purple-400/20 text-purple-300 font-mono text-xs">4</span>
+                <span className="flex size-6 items-center justify-center rounded-lg bg-brand-periwinkle/20 text-brand-periwinkle font-mono text-xs">4</span>
                 Awards & Contracts
               </div>
               <p className="text-[#8A8FA9] leading-relaxed">

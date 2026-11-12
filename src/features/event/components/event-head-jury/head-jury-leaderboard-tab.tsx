@@ -9,7 +9,7 @@ interface HeadJuryLeaderboardTabProps {
 
 export function HeadJuryLeaderboardTab({ combinedScores }: HeadJuryLeaderboardTabProps) {
   return (
-    <section className="p-6 rounded-2xl bg-[#151926]/90 border border-white/10 backdrop-blur-xl space-y-4">
+    <section className="glass-container p-6 rounded-2xl space-y-4">
       <h2 className="text-xl font-bold font-sora text-white">Combined Leaderboard & Scores</h2>
       <div className="overflow-x-auto">
         <table className="w-full border-collapse text-left min-w-[650px] text-xs">

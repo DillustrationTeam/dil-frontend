@@ -179,7 +179,7 @@ export function EventStageProgress({ event }: EventStageProgressProps) {
           {/* Active Glowing Progress Fill */}
           <div
             style={{ width: `${(overallPercent / 100) * 75}%` }}
-            className="absolute top-4 left-[12.5%] -translate-y-1/2 h-1 bg-gradient-to-r from-brand-periwinkle via-purple-400 to-amber-400 rounded-full z-0 shadow-[0_0_12px_rgba(167,172,217,0.7)] transition-all duration-700"
+            className="absolute top-4 left-[12.5%] -translate-y-1/2 h-1 bg-gradient-to-r from-brand-periwinkle via-[#c2c7f6] to-amber-400 rounded-full z-0 shadow-[0_0_12px_rgba(167,172,217,0.7)] transition-all duration-700"
           />
 
           {/* 4 Equidistant Columns: Each Point and its Content are strictly centered together */}

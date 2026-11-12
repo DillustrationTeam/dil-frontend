@@ -12,7 +12,7 @@ import { eventVoteService } from '../../services/event-vote.service';
 import { juryService } from '../../services/jury.service';
 import { creatorProfileService } from '@/features/creator-studio/services/creator-profile.service';
 import { useEventCountdown } from '../../hooks/use-event-countdown';
-import { eventStatusBadgeStyles, eventStatusLabels } from '../../types/event.types';
+import { eventStatusBadgeStyles, eventStatusLabels, normalizeEventStatus } from '../../types/event.types';
 import { EventSubmissionModal } from './event-submission-modal';
 import { useAuthStore } from '@/store/use-auth-store';
 
@@ -45,6 +45,7 @@ export function EventDetailScreen({ id, userId, isAdmin }: EventDetailScreenProp
   const [leaderboard, setLeaderboard] = useState<EventLeaderboardItemDto[]>([]);
   const [activeTab, setActiveTab] = useState<TabType>('artworks');
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [votingId, setVotingId] = useState<string | null>(null);
 
   // Filter & Search states for Artworks tab
@@ -84,21 +85,25 @@ export function EventDetailScreen({ id, userId, isAdmin }: EventDetailScreenProp
   useEffect(() => {
     async function loadDetail() {
       setLoading(true);
+      setLoadError(null);
       try {
-        const [eventData, subData, leadData, juriesData, profileData] = await Promise.all([
-          eventService.detail(id).catch(() => null),
+        const eventData = await eventService.detail(id);
+        const [subData, leadData, juriesData, profileData] = await Promise.all([
           eventSubmissionService.getSubmissions(id).catch(() => ({ items: [], totalCount: 0 })),
           eventSubmissionService.getLeaderboard(id, wallSort).catch(() => []),
           juryService.getEventJuries(id).catch(() => []),
           effectiveUserId ? creatorProfileService.getMyProfile().catch(() => null) : Promise.resolve(null),
         ]);
-        if (eventData) setEvent(eventData);
+        setEvent(eventData);
         setSubmissions(subData.items || []);
         setLeaderboard(leadData || []);
         setJuries(juriesData || []);
         setMyCreatorProfile(profileData);
-      } catch {
-        toast.error('Failed to load contest details.');
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : 'Failed to load contest details.';
+        setEvent(null);
+        setLoadError(message);
+        toast.error(message);
       } finally {
         setLoading(false);
       }
@@ -249,8 +254,7 @@ export function EventDetailScreen({ id, userId, isAdmin }: EventDetailScreenProp
   // Wall of Fame only opens after official result announcement or event ended
   const isAnnounced = useMemo(() => {
     if (!event) return false;
-    const status = String(event.status).toLowerCase();
-    if (status === 'ended' || status === '4') return true;
+    if (normalizeEventStatus(event.status) === 'Ended') return true;
     return countdown.phase === 'Ended';
   }, [event, countdown.phase]);
 
@@ -264,9 +268,13 @@ export function EventDetailScreen({ id, userId, isAdmin }: EventDetailScreenProp
 
   if (!event) {
     return (
-      <div className="mx-auto max-w-4xl py-24 text-center">
-        <h2 className="font-h1 text-2xl font-bold text-white">Contest Not Found</h2>
-        <p className="mt-2 text-sm text-[#8A8FA9]">This event may have been removed or is no longer available.</p>
+      <div className="mx-auto max-w-4xl py-24 text-center px-4">
+        <h2 className="font-h1 text-2xl font-bold text-white">
+          {loadError ? 'Unable to Load Contest' : 'Contest Not Found'}
+        </h2>
+        <p className="mt-2 text-sm text-[#8A8FA9]">
+          {loadError || 'This event may have been removed or is no longer available.'}
+        </p>
         <Link
           href="/events"
           className="mt-6 inline-flex rounded-2xl bg-brand-periwinkle px-6 py-2.5 text-xs font-bold text-brand-navy cursor-pointer"
@@ -277,16 +285,7 @@ export function EventDetailScreen({ id, userId, isAdmin }: EventDetailScreenProp
     );
   }
 
-  const statusStr =
-    typeof event.status === 'number'
-      ? event.status === 2
-        ? 'Open'
-        : event.status === 3
-        ? 'Judging'
-        : event.status === 4
-        ? 'Ended'
-        : 'Draft'
-      : String(event.status);
+  const statusStr = normalizeEventStatus(event.status);
   const statusColor = eventStatusBadgeStyles[statusStr] || 'border-white/10 bg-white/5 text-outline';
   const statusLabel = eventStatusLabels[statusStr] || statusStr;
 
