@@ -11,7 +11,7 @@ interface SubmissionModalJuryNoticeProps {
 export function SubmissionModalJuryNotice({ onClose, eventTitle }: SubmissionModalJuryNoticeProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
-      <div className="relative w-full max-w-lg rounded-3xl border border-indigo-500/30 bg-[#161926] p-8 text-center shadow-2xl space-y-5">
+      <div className="relative w-full max-w-lg rounded-3xl border border-brand-periwinkle/30 bg-[#161926] p-8 text-center shadow-2xl space-y-5">
         <button
           type="button"
           onClick={onClose}
@@ -19,7 +19,7 @@ export function SubmissionModalJuryNotice({ onClose, eventTitle }: SubmissionMod
         >
           <X size={20} />
         </button>
-        <div className="flex size-14 items-center justify-center rounded-2xl bg-indigo-500/20 text-indigo-300 mx-auto">
+        <div className="flex size-14 items-center justify-center rounded-2xl bg-brand-periwinkle/20 text-brand-periwinkle mx-auto">
           <ShieldAlert size={28} />
         </div>
         <h3 className="font-h1 text-xl font-bold text-white">Submission Not Permitted</h3>

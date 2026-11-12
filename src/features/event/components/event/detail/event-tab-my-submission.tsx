@@ -76,11 +76,11 @@ export function EventTabMySubmission({
         </div>
       ) : isJuryMember ? (
         // Case: User is a Jury / Head Jury member for this event
-        <div className="rounded-3xl border border-indigo-500/30 bg-gradient-to-br from-indigo-500/15 via-[#161926] to-[#161926] p-10 sm:p-14 text-center max-w-2xl mx-auto shadow-2xl">
-          <div className="flex size-16 items-center justify-center rounded-2xl bg-indigo-500/20 text-indigo-300 mx-auto mb-4">
+        <div className="glass-container rounded-3xl border-brand-periwinkle/30 p-10 sm:p-14 text-center max-w-2xl mx-auto shadow-2xl">
+          <div className="flex size-16 items-center justify-center rounded-2xl bg-brand-periwinkle/20 text-brand-periwinkle mx-auto mb-4">
             <ShieldAlert size={32} />
           </div>
-          <div className="inline-flex items-center gap-1.5 rounded-full border border-indigo-400/40 bg-indigo-500/20 px-3.5 py-1 text-xs font-bold text-indigo-300 mb-3">
+          <div className="inline-flex items-center gap-1.5 rounded-full border border-brand-periwinkle/40 bg-brand-periwinkle/15 px-3.5 py-1 text-xs font-bold text-brand-periwinkle mb-3">
             <ShieldCheck size={13} />
             <span>Jury Member Restricted</span>
           </div>
@@ -93,7 +93,7 @@ export function EventTabMySubmission({
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link
               href={`/events/${eventId}/jury`}
-              className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-indigo-500 to-purple-500 px-7 py-3.5 text-xs font-bold text-white shadow-xl hover:brightness-110 active:scale-95 transition cursor-pointer"
+              className="commission-primary inline-flex items-center gap-2 rounded-2xl px-7 py-3.5 text-xs shadow-xl active:scale-95 transition cursor-pointer"
             >
               <ShieldCheck size={16} />
               <span>Open Jury Workspace</span>

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useRef, useSyncExternalStore } from 'react';
+import React, { useCallback, useEffect, useState, useRef, useSyncExternalStore } from 'react';
 import { createPortal } from 'react-dom';
 import { Search, ChevronDown, Check } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -238,6 +238,7 @@ export function PermissionsTab() {
   const [selectedEventId, setSelectedEventId] = useState<string>('');
   const [members, setMembers] = useState<JuryPermissionMember[]>([]);
   const [, setLoading] = useState(false);
+  const [candidateRefreshKey, setCandidateRefreshKey] = useState(0);
 
   // Real backend events
   const allEvents = events;
@@ -263,63 +264,70 @@ export function PermissionsTab() {
             return prev;
           });
         }
-      } catch (err) {
+      } catch (err: unknown) {
         console.error('Failed to load events in permissions tab:', err);
+        toast.error(err instanceof Error ? err.message : 'Không thể tải danh sách sự kiện.');
       }
     }
     void fetchEvents();
   }, []);
 
-  useEffect(() => {
-    async function loadEventJuries() {
-      if (!selectedEventId) {
-        setMembers([]);
-        return;
-      }
-      setLoading(true);
-      try {
-        const juries = await juryService.getEventJuries(selectedEventId);
-        if (juries && juries.length > 0) {
-          const mapped: JuryPermissionMember[] = juries.map((j) => ({
-            id: j.id,
-            name: j.creatorDisplayName || j.creatorName || 'Jury Member',
-            email: j.creatorEmail || 'jury@dillustration.vn',
-            role: j.isHeadJury ? 'Head Jury' : 'Jury',
-            status: 'Confirmed',
-          }));
-          setMembers(mapped);
-        } else {
-          setMembers([]);
-        }
-      } catch {
-        setMembers([]);
-      } finally {
-        setLoading(false);
-      }
+  const loadEventMembers = useCallback(async (eventId: string) => {
+    if (!eventId) {
+      setMembers([]);
+      return;
     }
-    void loadEventJuries();
-  }, [selectedEventId]);
+    setLoading(true);
+    try {
+      const [juries, pendingInvites] = await Promise.all([
+        juryService.getEventJuries(eventId),
+        juryService.getInvitations(eventId, 'Pending'),
+      ]);
 
-  const handleInviteSent = async (email: string) => {
+      const confirmedMembers: JuryPermissionMember[] = (juries || []).map((j) => ({
+        id: j.id,
+        name: j.creatorDisplayName || j.creatorName || 'Jury Member',
+        email: j.creatorEmail || '',
+        role: j.isHeadJury ? 'Head Jury' : 'Jury',
+        status: 'Confirmed',
+      }));
+
+      const pendingMembers: JuryPermissionMember[] = (pendingInvites || []).map((inv) => ({
+        id: inv.id,
+        name: inv.sentToCreatorName || inv.sentToCreatorEmail || 'Invited Creator',
+        email: inv.sentToCreatorEmail || '',
+        role: inv.isHeadJury ? 'Head Jury' : 'Jury',
+        status: 'Pending',
+      }));
+
+      setMembers([...confirmedMembers, ...pendingMembers]);
+    } catch {
+      setMembers([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadEventMembers(selectedEventId);
+  }, [selectedEventId, loadEventMembers]);
+
+  const handleInviteSent = async (email: string, isHeadJury = false): Promise<boolean> => {
     if (isJudgingPhaseActive) {
       toast.error('Cannot send jury invitation once the judging phase has started.');
-      return;
+      return false;
     }
 
     try {
-      await juryService.sendInvitation(selectedEventId, email);
+      await juryService.sendInvitation(selectedEventId, email, isHeadJury);
       toast.success(`Invitation sent to ${email} successfully!`);
-      const newMember: JuryPermissionMember = {
-        id: `invite-${Date.now()}`,
-        name: email.split('@')[0],
-        email,
-        role: 'Jury',
-        status: 'Pending',
-      };
-      setMembers((prev) => [newMember, ...prev]);
+      await loadEventMembers(selectedEventId);
+      setCandidateRefreshKey((k) => k + 1);
+      return true;
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Failed to send invitation.';
       toast.error(msg);
+      return false;
     }
   };
 
@@ -332,13 +340,11 @@ export function PermissionsTab() {
     try {
       await juryService.updateJuryRole(selectedEventId, memberId, newRole);
       toast.success(`Updated role for member to ${newRole}.`);
-    } catch {
-      toast.success(`Updated role to ${newRole}.`);
+      await loadEventMembers(selectedEventId);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to update jury role.';
+      toast.error(msg);
     }
-
-    setMembers((prev) =>
-      prev.map((m) => (m.id === memberId ? { ...m, role: newRole } : m))
-    );
   };
 
   const handleRemoveMember = async (memberId: string) => {
@@ -347,13 +353,22 @@ export function PermissionsTab() {
       return;
     }
 
+    const target = members.find((m) => m.id === memberId);
+
     try {
-      await juryService.removeJury(memberId);
-      toast.success('Jury member removed successfully.');
-    } catch {
-      toast.success('Jury member removed successfully.');
+      if (target?.status === 'Pending') {
+        await juryService.cancelInvitation(memberId);
+        toast.success('Pending jury invitation canceled.');
+      } else {
+        await juryService.removeJury(memberId);
+        toast.success('Jury member removed successfully.');
+      }
+      await loadEventMembers(selectedEventId);
+      setCandidateRefreshKey((k) => k + 1);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to remove jury member.';
+      toast.error(msg);
     }
-    setMembers((prev) => prev.filter((m) => m.id !== memberId));
   };
 
   const headJuryCount = members.filter((m) => m.role === 'Head Jury').length;
@@ -408,8 +423,11 @@ export function PermissionsTab() {
         </div>
         <div className="lg:col-span-4">
           <InviteJuryCard
+            eventId={selectedEventId}
             onInviteSent={handleInviteSent}
             isJudgingPhaseActive={isJudgingPhaseActive}
+            refreshKey={candidateRefreshKey}
+            hasHeadJury={headJuryCount > 0}
           />
         </div>
       </div>

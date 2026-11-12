@@ -65,6 +65,7 @@ export const notificationTypeLabels: Record<string, string> = {
   ArtTradeCompleted: 'Giao dịch trao đổi hoàn tất',
   TradeDisputeCreated: 'Khiếu nại trao đổi tác phẩm',
   TradeDisputeResolved: 'Phân xử khiếu nại trao đổi',
+  SubmissionDisputeCreated: 'Khiếu nại bài dự thi mới',
   BugReportReplied: 'Phản hồi báo cáo sự cố',
 };
 
@@ -94,6 +95,7 @@ export const notificationTypeLabelsEn: Record<string, string> = {
   ArtTradeCompleted: 'Art Trade Completed',
   TradeDisputeCreated: 'Art Trade Dispute Filed',
   TradeDisputeResolved: 'Art Trade Dispute Resolved',
+  SubmissionDisputeCreated: 'New Event Submission Dispute',
   BugReportReplied: 'Bug Report Reply',
 };
 

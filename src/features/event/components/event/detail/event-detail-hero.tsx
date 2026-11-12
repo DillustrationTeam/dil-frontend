@@ -172,7 +172,7 @@ export function EventDetailHero({
               </p>
             </div>
             <div className="col-span-2 sm:col-span-1">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-purple-300">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-brand-periwinkle">
                 {countdown.phaseLabel}
               </span>
               <p className="mt-1 font-mono text-base sm:text-lg font-bold text-white">{countdown.formatted}</p>

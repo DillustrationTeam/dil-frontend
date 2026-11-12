@@ -40,6 +40,8 @@ function getIcon(type: string, size = 15) {
       return <Scale size={size} className="text-rose-400" />;
     case 'TradeDisputeResolved':
       return <Scale size={size} className="text-emerald-400" />;
+    case 'SubmissionDisputeCreated':
+      return <Scale size={size} className="text-amber-400" />;
     case 'ArtTradeProposed':
     case 'ArtTradeAccepted':
     case 'ArtTradeArtworkSubmitted':
@@ -82,6 +84,7 @@ function getRefLink({ refType, refId, notificationType, notificationTitle, body 
   if (key === 'chatroom' && refId) return `/workroom/${refId}`;
   if (key === 'invitation' && refId) return `/notifications?invitationId=${refId}`;
   if ((key === 'arttrade' || key === 'tradedispute') && refId) return `/art-trades/${refId}`;
+  if (key === 'submissiondispute') return '/admin/events?tab=disputes';
   if (key === 'bugreport') return '/notifications';
   return null;
 }

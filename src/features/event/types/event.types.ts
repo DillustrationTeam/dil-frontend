@@ -1,20 +1,66 @@
 import type { JuryCriterion } from './jury.types';
 
-export type EventStatus = 'Draft' | 'Open' | 'Judging' | 'Ended';
+export type EventStatus = 'Draft' | 'Upcoming' | 'Open' | 'Judging' | 'Ended';
 
 export const eventStatusLabels: Record<string, string> = {
   Draft: 'Draft',
+  Upcoming: 'Waiting to Open',
   Open: 'Open for Submissions',
   Judging: 'Judging & Voting',
   Ended: 'Ended',
 };
 
 export const eventStatusBadgeStyles: Record<string, string> = {
+  Upcoming: 'border-sky-400/30 bg-sky-950/70 text-sky-300 shadow-[0_0_15px_rgba(56,189,248,0.15)]',
   Open: 'border-emerald-400/30 bg-emerald-950/70 text-emerald-300 shadow-[0_0_15px_rgba(52,211,153,0.15)]',
   Judging: 'border-amber-400/30 bg-amber-950/70 text-amber-300 shadow-[0_0_15px_rgba(251,191,36,0.15)]',
-  Ended: 'border-white/15 bg-white/5 text -on-surface-variant',
+  Ended: 'border-white/15 bg-white/5 text-on-surface-variant',
   Draft: 'border-white/10 bg-white/5 text-outline',
 };
+
+export function normalizeEventStatus(status?: EventStatus | string | number | null): EventStatus {
+  if (typeof status === 'number') {
+    if (status === 2) return 'Upcoming';
+    if (status === 3) return 'Open';
+    if (status === 4) return 'Judging';
+    if (status === 5) return 'Ended';
+    return 'Draft';
+  }
+  switch (String(status || '').trim().toLowerCase()) {
+    case 'upcoming':
+    case '2':
+      return 'Upcoming';
+    case 'open':
+    case '3':
+      return 'Open';
+    case 'judging':
+    case '4':
+      return 'Judging';
+    case 'ended':
+    case '5':
+      return 'Ended';
+    case 'draft':
+    case '1':
+    default:
+      return 'Draft';
+  }
+}
+
+export function toEventStatusEnumValue(status?: EventStatus | string | number | null): number {
+  switch (normalizeEventStatus(status)) {
+    case 'Upcoming':
+      return 2;
+    case 'Open':
+      return 3;
+    case 'Judging':
+      return 4;
+    case 'Ended':
+      return 5;
+    case 'Draft':
+    default:
+      return 1;
+  }
+}
 
 export interface EventListItemDto {
   id: string;
@@ -76,6 +122,9 @@ export interface EventSubmissionDto {
   adminNote?: string;
   submittedAt: string;
   hasVoted?: boolean;
+  currentJuryHasGraded?: boolean | null;
+  currentJuryScore?: number | null;
+  currentJuryCriteriaScores?: Record<string, number> | null;
 }
 
 export interface EventLeaderboardItemDto {
@@ -108,6 +157,8 @@ export interface EventFilters {
   search?: string;
   status?: string;
   isFeatured?: boolean;
+  excludeEnded?: boolean;
+  includeDrafts?: boolean;
   minSubmissions?: number;
   maxSubmissions?: number;
   sortBy?: EventSortOption | string;
@@ -174,7 +225,16 @@ export interface EventRequestPayload {
   eventCriteria?: Array<Partial<JuryCriterion>>;
 }
 
+export type SubmissionDisputeCategory =
+  | 'AiArt'
+  | 'Copyright'
+  | 'VoteFraud'
+  | 'RuleViolation'
+  | 'ScoreAppeal'
+  | 'Other';
+
 export interface CreateSubmissionDisputeRequest {
+  category?: SubmissionDisputeCategory | string;
   reason: string;
   description?: string;
   evidenceUrls?: string[];

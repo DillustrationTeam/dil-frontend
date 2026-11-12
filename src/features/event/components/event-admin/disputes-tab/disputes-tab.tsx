@@ -61,8 +61,8 @@ export function DisputesTab() {
   const isJudgingPhaseActive =
     selectedEvent && selectedEvent.id !== 'all'
       ? selectedEvent.status === 'Judging' ||
-        selectedEvent.status === 'Ended' ||
-        (selectedEvent.judgingStartAt ? new Date() >= new Date(selectedEvent.judgingStartAt) : false)
+      selectedEvent.status === 'Ended' ||
+      (selectedEvent.judgingStartAt ? new Date() >= new Date(selectedEvent.judgingStartAt) : false)
       : false;
 
   // 1. Fetch available events for contest selection
@@ -73,8 +73,9 @@ export function DisputesTab() {
         if (res.items && res.items.length > 0) {
           setEvents(res.items);
         }
-      } catch (err) {
+      } catch (err: unknown) {
         console.error('Failed to load events list:', err);
+        toast.error(err instanceof Error ? err.message : 'Không thể tải danh sách sự kiện.');
       }
     }
     void fetchEvents();
@@ -93,11 +94,12 @@ export function DisputesTab() {
           eventId: isGuid && targetEventId !== 'all' ? resolvedGuid : undefined,
           status: statusFilter !== 'All' ? statusFilter : undefined,
           page: 1,
-          pageSize: 50,
+          pageSize: 100,
         });
 
         if (res.items) {
           setDisputes(res.items);
+          window.dispatchEvent(new CustomEvent('dil:disputes-updated'));
         }
       } catch (err: unknown) {
         console.error('Failed to load disputes from backend:', err);
@@ -117,6 +119,21 @@ export function DisputesTab() {
       await loadDisputes(selectedEventId);
     })();
   }, [selectedEventId, statusFilter, loadDisputes]);
+
+  // Reload queue when admin returns to this browser tab/window
+  useEffect(() => {
+    const handleRefreshOnFocus = () => {
+      if (document.visibilityState === 'visible') {
+        void loadDisputes(selectedEventId);
+      }
+    };
+    window.addEventListener('focus', handleRefreshOnFocus);
+    document.addEventListener('visibilitychange', handleRefreshOnFocus);
+    return () => {
+      window.removeEventListener('focus', handleRefreshOnFocus);
+      document.removeEventListener('visibilitychange', handleRefreshOnFocus);
+    };
+  }, [selectedEventId, loadDisputes]);
 
   // 1. Contest-scoped disputes (for KPI stats & filtering)
   const contestDisputes = useMemo(() => {
@@ -140,8 +157,9 @@ export function DisputesTab() {
         const matchTitle = (item.submissionTitle || '').toLowerCase().includes(q);
         const matchEvent = (item.eventTitle || '').toLowerCase().includes(q);
         const matchReason = (item.reason || '').toLowerCase().includes(q);
+        const matchCategory = (item.category || '').toLowerCase().includes(q);
         const matchReporter = (item.raisedByName || '').toLowerCase().includes(q);
-        return matchCode || matchTitle || matchEvent || matchReason || matchReporter;
+        return matchCode || matchTitle || matchEvent || matchReason || matchCategory || matchReporter;
       }
       return true;
     });
@@ -207,7 +225,7 @@ export function DisputesTab() {
   // KPI Statistics - Strictly derived from contestDisputes to ensure 100% sync with table!
   const openCount = contestDisputes.filter((d) => d.status === 'Pending' || d.status === 'UnderReview').length;
   const highPriorityCount = contestDisputes.filter((d) => d.priority === 'High').length;
-  const resolvedCount = contestDisputes.filter((d) => d.status === 'Resolved').length;
+  const resolvedCount = contestDisputes.filter((d) => d.status === 'Resolved' || d.status === 'Rejected').length;
   const overdueCount = 0;
 
   return (
@@ -270,19 +288,18 @@ export function DisputesTab() {
         <div className="flex items-center gap-2">
           <span className="text-xs text-outline">Judging Phase Status:</span>
           <span
-            className={`px-3 py-1 rounded-full text-xs font-bold ${
-              selectedEventId === 'all'
+            className={`px-3 py-1 rounded-full text-xs font-bold ${selectedEventId === 'all'
                 ? 'bg-brand-periwinkle/20 text-brand-periwinkle border border-brand-periwinkle/30'
                 : isJudgingPhaseActive
-                ? 'bg-amber-500/20 text-amber-300 border border-amber-400/30'
-                : 'bg-emerald-500/20 text-emerald-300 border border-emerald-400/30'
-            }`}
+                  ? 'bg-amber-500/20 text-amber-300 border border-amber-400/30'
+                  : 'bg-emerald-500/20 text-emerald-300 border border-emerald-400/30'
+              }`}
           >
             {selectedEventId === 'all'
               ? '🌐 Global Queue Active'
               : isJudgingPhaseActive
-              ? '🔒 Judging Started (Locked)'
-              : '🔓 Open for Jury Assignments'}
+                ? '🔒 Judging Started (Locked)'
+                : '🔓 Open for Jury Assignments'}
           </span>
         </div>
       </div>

@@ -201,9 +201,31 @@ export function extractErrorMessage(error: unknown, fallbackMessage = 'Yêu cầ
   if (typeof error === 'string') return error;
 
   if (typeof error === 'object' && error !== null) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const res = (error as { response?: { data?: any; status?: number; statusText?: string } }).response;
-    if (res?.data) {
+    const axiosLike = error as {
+      response?: {
+        data?: {
+          errors?: unknown[] | Record<string, unknown>;
+          error?: {
+            detail?: unknown;
+            details?: unknown;
+            message?: unknown;
+            title?: unknown;
+          };
+          message?: unknown;
+          detail?: unknown;
+          title?: unknown;
+        };
+        status?: number;
+        statusText?: string;
+      };
+      config?: { method?: string; url?: string };
+      code?: string;
+      message?: string;
+    };
+    const res = axiosLike.response;
+    const reqMethod = (axiosLike.config?.method || 'GET').toUpperCase();
+    const reqEndpoint = axiosLike.config?.url ? `${reqMethod} ${axiosLike.config.url}` : '';
+    if (res?.data && typeof res.data === 'object') {
       const data = res.data;
 
       // Case 1: Custom Result wrapper `data.errors: string[]`
@@ -253,6 +275,10 @@ export function extractErrorMessage(error: unknown, fallbackMessage = 'Yêu cầ
       }
     }
 
+    if (!res && (axiosLike.code === 'ERR_NETWORK' || axiosLike.message === 'Network Error')) {
+      return `Không thể kết nối tới API server (${API_BASE_URL}). Vui lòng kiểm tra backend đã khởi động đúng cổng.`;
+    }
+
     if (res?.status === 401) {
       return 'Phiên đăng nhập đã hết hạn hoặc bạn chưa đăng nhập. Vui lòng đăng nhập lại.';
     }
@@ -260,14 +286,16 @@ export function extractErrorMessage(error: unknown, fallbackMessage = 'Yêu cầ
       return 'Tài khoản của bạn không có quyền thực hiện thao tác này.';
     }
     if (res?.status === 404) {
-      return 'Không tìm thấy dữ liệu yêu cầu (404).';
+      return reqEndpoint
+        ? `API endpoint hoặc tài nguyên không tồn tại (404: ${reqEndpoint}).`
+        : 'Không tìm thấy endpoint hoặc tài nguyên yêu cầu (404).';
     }
     if (res?.status === 500) {
       return 'Máy chủ xảy ra lỗi (500). Vui lòng thử lại sau.';
     }
 
     // Case 5: Error.message (nếu không phải dạng generic 'Request failed with status code...')
-    const msg = (error as { message?: string }).message;
+    const msg = axiosLike.message;
     if (msg && !msg.startsWith('Request failed with status code')) {
       return msg;
     }

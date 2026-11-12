@@ -1019,6 +1019,21 @@ const translationMap: Record<string, string> = {
   'Chưa có album công khai nào.': 'No public albums yet.',
   'tranh': 'artwork(s)',
   'Chưa thích tranh nào.': 'No favorited artworks yet.',
+
+  // Artwork Detail — Commission Package & Copyright Sidebar
+  'Chỉnh sửa gói': 'Edit Package',
+  'Số giai đoạn bàn giao & giải ngân': 'Delivery & escrow milestone stages',
+  'Số lần chỉnh sửa miễn phí mỗi mốc': 'Free revisions per milestone',
+  'Định dạng tệp bàn giao theo thỏa thuận': 'Agreed deliverable file format',
+  'File theo yêu cầu': 'Custom deliverable files',
+  'Creator đang tạm ngưng nhận đơn': 'Creator has paused new orders',
+  'Gói này đã hết slot': 'This package has no open slots',
+  'Đặt vẽ gói này (∞ Không giới hạn)': 'Commission this package (∞ Unlimited)',
+  'Đặt vẽ với họa sĩ này': 'Commission this artist',
+  'Tác quyền:': 'Copyright:',
+  'Sáng tác:': 'Created by:',
+  'Sở hữu:': 'Owned by:',
+  'Thẻ phân loại': 'Tags',
 };
 
 const mergedTranslationMap: Record<string, string> = {
@@ -1084,6 +1099,14 @@ const regexReplacements: Array<{ pattern: RegExp; replacement: string }> = [
   { pattern: /^(\d+)\s+giờ$/i, replacement: '$1 hours' },
   { pattern: /^(\d+)\s+phút$/i, replacement: '$1 minutes' },
   { pattern: /^(\d+)\s+giây$/i, replacement: '$1 seconds' },
+
+  // Artwork Detail dynamic package labels
+  { pattern: /^Từ (.+)$/i, replacement: 'From $1' },
+  { pattern: /^(\d+)\s+cột mốc$/i, replacement: '$1 milestones' },
+  { pattern: /^(\d+)\s+lần sửa$/i, replacement: '$1 revisions' },
+  { pattern: /^Đặt vẽ gói này \((\d+)\/(\d+) slot\)$/i, replacement: 'Commission this package ($1/$2 slots)' },
+  { pattern: /^Thuộc về (.+)$/i, replacement: 'Owned by $1' },
+  { pattern: /^Tranh mẫu gói (.+)$/i, replacement: 'Sample for $1' },
 ];
 
 function translateString(text: string): string {

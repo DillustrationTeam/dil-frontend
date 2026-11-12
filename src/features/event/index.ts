@@ -10,13 +10,13 @@ export {
   JuryArtworkLightbox,
   EventSearchFilterBar,
 } from './components';
-export { eventService, sortEventItems, isEventInSubmissionStage } from './services/event.service';
+export { eventService, EventServiceError, sortEventItems, isEventInSubmissionStage } from './services/event.service';
 export { eventSubmissionService } from './services/event-submission.service';
 export { eventVoteService } from './services/event-vote.service';
 export { eventCriteriaService } from './services/event-criteria.service';
 export { juryService } from './services/jury.service';
 export { useEventCountdown } from './hooks/use-event-countdown';
-export { eventStatusLabels, eventStatusBadgeStyles } from './types/event.types';
+export { eventStatusLabels, eventStatusBadgeStyles, normalizeEventStatus } from './types/event.types';
 export type {
   EventStatus,
   EventListItemDto,

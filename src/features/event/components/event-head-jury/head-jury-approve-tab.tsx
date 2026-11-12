@@ -22,7 +22,7 @@ export function HeadJuryApproveTab({
   return (
     <section className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.25fr)_minmax(320px,0.75fr)] gap-6 items-start">
       {/* Final Results Table */}
-      <div className="p-6 rounded-2xl bg-[#151926]/90 border border-white/10 backdrop-blur-xl space-y-5">
+      <div className="glass-container p-6 rounded-2xl space-y-5">
         <div className="flex items-center justify-between flex-wrap gap-2">
           <div>
             <h2 className="text-xl font-bold font-sora text-white">Final Contest Results</h2>
@@ -105,7 +105,7 @@ export function HeadJuryApproveTab({
             type="button"
             onClick={handleApproveAwardAllocations}
             disabled={isAwardAllocationsConfirmed}
-            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-[#7FD5E8] hover:brightness-110 text-white font-sora font-extrabold text-xs shadow-lg hover:shadow-purple-500/20 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+            className="commission-primary px-5 py-2.5 rounded-xl font-sora text-xs shadow-lg transition-all flex items-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
           >
             <CheckCircle2 className="w-4 h-4" />
             <span>{isAwardAllocationsConfirmed ? 'Award Allocations Confirmed' : 'Approve Results'}</span>
@@ -114,7 +114,7 @@ export function HeadJuryApproveTab({
       </div>
 
       {/* Checklist Sidebar */}
-      <aside className="p-6 rounded-2xl bg-[#151926]/90 border border-white/10 backdrop-blur-xl space-y-4 lg:sticky lg:top-36">
+      <aside className="glass-container p-6 rounded-2xl space-y-4 lg:sticky lg:top-36">
         <h2 className="text-xl font-bold font-sora text-white">Approval Checklist</h2>
 
         <div className="space-y-2.5 text-xs">
@@ -150,7 +150,7 @@ export function HeadJuryApproveTab({
           type="button"
           onClick={handleApproveContestResults}
           disabled={isContestResultsApproved}
-          className="w-full py-2.5 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-[#7FD5E8] text-white font-sora font-extrabold text-xs shadow-lg hover:brightness-110 transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+          className="commission-primary w-full py-2.5 rounded-xl font-sora text-xs shadow-lg transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {isContestResultsApproved ? 'Contest Results Approved' : 'Approve Contest Results'}
         </button>

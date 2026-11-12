@@ -16,7 +16,7 @@ import {
   Trash2,
   ListChecks,
 } from 'lucide-react';
-import type { EventStatus, EventListItemDto } from '../../../types/event.types';
+import { normalizeEventStatus, toEventStatusEnumValue, type EventStatus, type EventListItemDto } from '../../../types/event.types';
 import { eventService } from '../../../services/event.service';
 import { eventCriteriaService } from '../../../services/event-criteria.service';
 import { creatorProfileService } from '@/features/creator-studio/services/creator-profile.service';
@@ -36,6 +36,22 @@ function formatDateForInput(dateStr?: string | null): string {
   } catch {
     return dateStr;
   }
+}
+
+function getDefaultTimelineSchedule(baseTimeMs = Date.now()) {
+  const addMinutes = (minutesFromNow: number) =>
+    formatDateForInput(new Date(baseTimeMs + minutesFromNow * 60_000).toISOString());
+
+  // Offsets from current time: +3, +3, +1, +5, +1, +3, +1 minutes
+  return {
+    submissionStartAt: addMinutes(3),
+    submissionEndAt: addMinutes(6),
+    judgingStartAt: addMinutes(7),
+    judgingEndAt: addMinutes(12),
+    votingStartAt: addMinutes(13),
+    votingEndAt: addMinutes(16),
+    resultAnnouncementAt: addMinutes(17),
+  };
 }
 
 interface EventCreateFormProps {
@@ -69,14 +85,29 @@ export function EventCreateForm({
   );
   const bannerInputRef = useRef<HTMLInputElement>(null);
 
-  // Timeline dates
-  const [submissionStartAt, setSubmissionStartAt] = useState(() => formatDateForInput(selectedEvent?.submissionStartAt));
-  const [submissionEndAt, setSubmissionEndAt] = useState(() => formatDateForInput(selectedEvent?.submissionEndAt));
-  const [judgingStartAt, setJudgingStartAt] = useState(() => formatDateForInput(selectedEvent?.judgingStartAt));
-  const [judgingEndAt, setJudgingEndAt] = useState(() => formatDateForInput(selectedEvent?.judgingEndAt));
-  const [votingStartAt, setVotingStartAt] = useState(() => formatDateForInput(selectedEvent?.votingStartAt));
-  const [votingEndAt, setVotingEndAt] = useState(() => formatDateForInput(selectedEvent?.votingEndAt));
-  const [resultAnnouncementAt, setResultAnnouncementAt] = useState(() => formatDateForInput(selectedEvent?.resultAnnouncementAt));
+  // Timeline dates (default schedule for new event creation)
+  const [defaultSchedule] = useState(() => getDefaultTimelineSchedule());
+  const [submissionStartAt, setSubmissionStartAt] = useState(() =>
+    selectedEvent?.submissionStartAt ? formatDateForInput(selectedEvent.submissionStartAt) : defaultSchedule.submissionStartAt
+  );
+  const [submissionEndAt, setSubmissionEndAt] = useState(() =>
+    selectedEvent?.submissionEndAt ? formatDateForInput(selectedEvent.submissionEndAt) : defaultSchedule.submissionEndAt
+  );
+  const [judgingStartAt, setJudgingStartAt] = useState(() =>
+    selectedEvent?.judgingStartAt ? formatDateForInput(selectedEvent.judgingStartAt) : defaultSchedule.judgingStartAt
+  );
+  const [judgingEndAt, setJudgingEndAt] = useState(() =>
+    selectedEvent?.judgingEndAt ? formatDateForInput(selectedEvent.judgingEndAt) : defaultSchedule.judgingEndAt
+  );
+  const [votingStartAt, setVotingStartAt] = useState(() =>
+    selectedEvent?.votingStartAt ? formatDateForInput(selectedEvent.votingStartAt) : defaultSchedule.votingStartAt
+  );
+  const [votingEndAt, setVotingEndAt] = useState(() =>
+    selectedEvent?.votingEndAt ? formatDateForInput(selectedEvent.votingEndAt) : defaultSchedule.votingEndAt
+  );
+  const [resultAnnouncementAt, setResultAnnouncementAt] = useState(() =>
+    selectedEvent?.resultAnnouncementAt ? formatDateForInput(selectedEvent.resultAnnouncementAt) : defaultSchedule.resultAnnouncementAt
+  );
 
   // Scoring Criteria State
   const [criteriaList, setCriteriaList] = useState<Array<{
@@ -117,13 +148,13 @@ export function EventCreateForm({
     setStatus((selectedEvent?.status as EventStatus) || 'Draft');
     setIsFeatured(Boolean(selectedEvent?.isFeatured));
     setBannerPreviewUrl(selectedEvent?.bannerUrl || '');
-    setSubmissionStartAt(formatDateForInput(selectedEvent?.submissionStartAt));
-    setSubmissionEndAt(formatDateForInput(selectedEvent?.submissionEndAt));
-    setJudgingStartAt(formatDateForInput(selectedEvent?.judgingStartAt));
-    setJudgingEndAt(formatDateForInput(selectedEvent?.judgingEndAt));
-    setVotingStartAt(formatDateForInput(selectedEvent?.votingStartAt));
-    setVotingEndAt(formatDateForInput(selectedEvent?.votingEndAt));
-    setResultAnnouncementAt(formatDateForInput(selectedEvent?.resultAnnouncementAt));
+    setSubmissionStartAt(selectedEvent ? formatDateForInput(selectedEvent.submissionStartAt) : defaultSchedule.submissionStartAt);
+    setSubmissionEndAt(selectedEvent ? formatDateForInput(selectedEvent.submissionEndAt) : defaultSchedule.submissionEndAt);
+    setJudgingStartAt(selectedEvent ? formatDateForInput(selectedEvent.judgingStartAt) : defaultSchedule.judgingStartAt);
+    setJudgingEndAt(selectedEvent ? formatDateForInput(selectedEvent.judgingEndAt) : defaultSchedule.judgingEndAt);
+    setVotingStartAt(selectedEvent ? formatDateForInput(selectedEvent.votingStartAt) : defaultSchedule.votingStartAt);
+    setVotingEndAt(selectedEvent ? formatDateForInput(selectedEvent.votingEndAt) : defaultSchedule.votingEndAt);
+    setResultAnnouncementAt(selectedEvent ? formatDateForInput(selectedEvent.resultAnnouncementAt) : defaultSchedule.resultAnnouncementAt);
 
     const existing = selectedEvent?.criteria || selectedEvent?.eventCriteria;
     if (existing && existing.length > 0) {
@@ -194,17 +225,13 @@ export function EventCreateForm({
   // Criteria can only be edited before judging starts
   const isCriteriaLocked = useMemo(() => {
     if (!isEditing || !selectedEvent) return false;
-    const statusStr = String(status).toLowerCase();
-    const origStatusStr = String(selectedEvent.status).toLowerCase();
+    const normalizedStatus = normalizeEventStatus(status);
+    const normalizedOrigStatus = normalizeEventStatus(selectedEvent.status);
     const isJudgingOrLaterStatus =
-      statusStr === 'judging' ||
-      statusStr === '3' ||
-      statusStr === 'ended' ||
-      statusStr === '4' ||
-      origStatusStr === 'judging' ||
-      origStatusStr === '3' ||
-      origStatusStr === 'ended' ||
-      origStatusStr === '4';
+      normalizedStatus === 'Judging' ||
+      normalizedStatus === 'Ended' ||
+      normalizedOrigStatus === 'Judging' ||
+      normalizedOrigStatus === 'Ended';
 
     return Boolean(isJudgingStartPassed || isJudgingActive || isJudgingEndPassed || isJudgingOrLaterStatus);
   }, [isEditing, selectedEvent, status, isJudgingStartPassed, isJudgingActive, isJudgingEndPassed]);
@@ -408,25 +435,6 @@ export function EventCreateForm({
         }
       }
 
-      const mapStatusToEnum = (s: EventStatus | string | number): number => {
-        if (typeof s === 'number') return s;
-        switch (String(s).toLowerCase()) {
-          case 'open':
-          case '2':
-            return 2;
-          case 'judging':
-          case '3':
-            return 3;
-          case 'ended':
-          case '4':
-            return 4;
-          case 'draft':
-          case '1':
-          default:
-            return 1;
-        }
-      };
-
       const formatIsoUtc = (inputStr: string, origIsoStr?: string | null): string => {
         if (origIsoStr && !isFieldChanged(inputStr, origIsoStr)) {
           return origIsoStr;
@@ -435,6 +443,16 @@ export function EventCreateForm({
         return isNaN(d.getTime()) ? new Date().toISOString() : d.toISOString();
       };
 
+      const currentStatus = normalizeEventStatus(status);
+      const isCurrentDraft = currentStatus === 'Draft';
+      const subStartMs = new Date(submissionStartAt).getTime();
+      const publishedStatus = !isNaN(subStartMs) && subStartMs > Date.now() ? 2 : 3;
+      const resolvedStatus = isDraft
+        ? 1
+        : !isEditing || isCurrentDraft || currentStatus === 'Open' || currentStatus === 'Upcoming'
+          ? publishedStatus
+          : toEventStatusEnumValue(currentStatus);
+
       const payload = {
         title: title.trim(),
         description: description.trim(),
@@ -442,7 +460,7 @@ export function EventCreateForm({
         rules: rules.trim() || null,
         prize: prize.trim() || null,
         maxVote: Number(maxVote) > 0 ? Number(maxVote) : 1,
-        status: isDraft ? 1 : mapStatusToEnum(status),
+        status: resolvedStatus,
         isFeatured,
         submissionStartAt: formatIsoUtc(submissionStartAt, selectedEvent?.submissionStartAt),
         submissionEndAt: formatIsoUtc(submissionEndAt, selectedEvent?.submissionEndAt),
@@ -701,24 +719,8 @@ export function EventCreateForm({
         </div>
       </div>
 
-      {/* 3. Configuration & Status Settings */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-        <div>
-          <label className="block text-xs font-semibold uppercase tracking-wider text-[#A7ACD9] mb-1.5">
-            Event Status
-          </label>
-          <select
-            value={status}
-            onChange={(e) => setStatus(e.target.value as EventStatus)}
-            className="w-full rounded-xl border border-white/10 bg-[#090b12] px-4 py-2.5 text-sm text-white focus:border-brand-periwinkle focus:outline-none cursor-pointer"
-          >
-            <option value="Draft" className="bg-[#1f2335]">Draft</option>
-            <option value="Open" className="bg-[#1f2335]">Open for Submissions</option>
-            <option value="Judging" className="bg-[#1f2335]">Judging & Voting</option>
-            <option value="Ended" className="bg-[#1f2335]">Ended</option>
-          </select>
-        </div>
-
+      {/* 3. Configuration Settings */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 items-center">
         <div>
           <label className="block text-xs font-semibold uppercase tracking-wider text-[#A7ACD9] mb-1.5">
             Max Votes Per User
@@ -733,7 +735,7 @@ export function EventCreateForm({
           />
         </div>
 
-        <div className="md:col-span-2 pt-2">
+        <div className="pt-2 md:pt-5">
           <label className="flex items-center gap-2.5 cursor-pointer select-none">
             <input
               type="checkbox"
@@ -747,15 +749,12 @@ export function EventCreateForm({
         </div>
       </div>
 
-      {/* 4. Timeline Schedule with Backend Stage Constraints */}
+      {/* 4. Event Stages & Timeline Schedules */}
       <div className="space-y-4 pt-4 border-t border-white/10">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h3 className="text-xs font-bold text-brand-periwinkle uppercase tracking-wider flex items-center gap-1.5">
-            <Calendar size={15} /> Event Stages & Timeline Schedules (Backend Constraints)
+            <Calendar size={15} /> Event Stages & Timeline Schedules
           </h3>
-          <span className="text-[11px] text-[#8A8FA9]">
-            Sequential order: Submission → Judging → Voting → Result Announcement
-          </span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -1085,15 +1084,17 @@ export function EventCreateForm({
 
       {/* Footer Actions */}
       <div className="flex flex-wrap items-center justify-end gap-3 pt-4 border-t border-white/10">
-        <button
-          type="button"
-          onClick={handleSaveDraft}
-          disabled={submitting}
-          className="rounded-xl border border-white/10 px-5 py-2.5 text-xs font-semibold text-[#A7ACD9] hover:bg-white/5 hover:text-white transition cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
-        >
-          <Save size={14} className="text-brand-periwinkle" />
-          <span>Save Draft</span>
-        </button>
+        {(!isEditing || String(status).toLowerCase() === 'draft' || String(status) === '1') && (
+          <button
+            type="button"
+            onClick={handleSaveDraft}
+            disabled={submitting}
+            className="rounded-xl border border-white/10 px-5 py-2.5 text-xs font-semibold text-[#A7ACD9] hover:bg-white/5 hover:text-white transition cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
+          >
+            <Save size={14} className="text-brand-periwinkle" />
+            <span>Save Draft</span>
+          </button>
+        )}
 
         <button
           type="submit"
@@ -1105,7 +1106,9 @@ export function EventCreateForm({
             {submitting
               ? 'Saving...'
               : isEditing
-                ? 'Update Event'
+                ? String(status).toLowerCase() === 'draft' || String(status) === '1'
+                  ? 'Publish Event'
+                  : 'Update Event'
                 : 'Create Event'}
           </span>
         </button>

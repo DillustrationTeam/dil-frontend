@@ -161,8 +161,8 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
 
   if (loading) {
     return (
-      <div className="min-h-[500px] flex flex-col items-center justify-center p-8 text-center text-gray-400">
-        <Loader2 className="w-10 h-10 animate-spin text-indigo-400 mb-4" />
+      <div className="min-h-[500px] flex flex-col items-center justify-center p-8 text-center text-[#919099]">
+        <Loader2 className="w-10 h-10 animate-spin text-brand-periwinkle mb-4" />
         <p className="text-sm font-medium">{isVie ? 'Đang tải thông tin trao đổi...' : 'Loading trade information...'}</p>
       </div>
     );
@@ -173,7 +173,7 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
       <div className="p-8 text-center text-red-400 glass-container rounded-2xl max-w-xl mx-auto my-12">
         <AlertCircle className="w-12 h-12 mx-auto mb-3 opacity-80" />
         <h3 className="text-lg font-bold mb-1">{isVie ? 'Không tìm thấy trao đổi' : 'Trade Not Found'}</h3>
-        <p className="text-sm text-gray-400">
+        <p className="text-sm text-[#919099]">
           {isVie ? 'Không thể truy xuất thông tin phiên trao đổi tranh này.' : 'Could not retrieve information for this art trade session.'}
         </p>
         <Link
@@ -408,7 +408,7 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
     }
     if (s === 'BothSubmitted' || s === 3 || s === '3') {
       return (
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-500/15 text-indigo-300 border border-indigo-500/30">
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-brand-periwinkle/15 text-brand-periwinkle border border-brand-periwinkle/30">
           <Sparkles className="w-3.5 h-3.5" /> {isVie ? 'Đã nộp cả hai bên (Chờ duyệt)' : 'Both Submitted (Under Review)'}
         </span>
       );
@@ -429,13 +429,13 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
     }
     if (s === 'Cancelled' || s === 'Rejected' || s === 5 || s === '5' || s === 6 || s === '6') {
       return (
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-gray-500/15 text-gray-400 border border-gray-500/30">
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-white/5 text-[#919099] border border-white/10">
           <XCircle className="w-3.5 h-3.5" /> {isVie ? 'Đã kết thúc / Hủy' : 'Cancelled / Rejected'}
         </span>
       );
     }
     return (
-      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-gray-500/15 text-gray-300 border border-gray-500/30">
+      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-white/5 text-[#C7C5CF] border border-white/10">
         {status}
       </span>
     );
@@ -457,17 +457,17 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
         <div className="mb-6 flex items-center justify-between">
           <Link
             href="/art-trades"
-            className="inline-flex items-center gap-2 text-xs font-semibold text-gray-400 hover:text-white transition"
+            className="inline-flex items-center gap-2 text-xs font-semibold text-[#919099] hover:text-white transition"
           >
-            <ArrowLeft className="w-4 h-4 text-indigo-400" />
+            <ArrowLeft className="w-4 h-4 text-brand-periwinkle" />
             <span>{isVie ? 'Quay lại danh sách Trao đổi' : 'Back to My Trades'}</span>
           </Link>
         </div>
 
-        <div className="glass-container rounded-3xl p-6 md:p-10 border border-white/10 bg-[#14151e]/85 backdrop-blur-xl shadow-2xl relative overflow-hidden">
+        <div className="glass-container rounded-3xl p-6 md:p-10 shadow-2xl relative overflow-hidden">
           {/* Subtle Ambient Glow */}
           <div className="absolute -top-32 -left-32 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute -bottom-32 -right-32 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-32 -right-32 w-80 h-80 bg-brand-periwinkle/10 rounded-full blur-3xl pointer-events-none" />
 
           {/* Header */}
           <div className="pb-8 mb-8 border-b border-white/10">
@@ -475,7 +475,7 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
               <span className="text-xs uppercase tracking-wider text-amber-400 font-semibold flex items-center gap-1.5">
                 <Clock className="w-3.5 h-3.5" /> {isVie ? 'Đề nghị trao đổi tranh' : 'Art Trade Proposal'}
               </span>
-              <span className="text-gray-500">•</span>
+              <span className="text-[#919099]">•</span>
               {getStatusBadge(trade.status)}
             </div>
 
@@ -486,18 +486,18 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
             {/* Hướng dẫn & Mô tả chung - Giữ lại như yêu cầu */}
             {trade.description && (
               <div className="mt-4 p-4 rounded-2xl bg-white/[0.03] border border-white/5">
-                <span className="text-[11px] uppercase tracking-wider text-gray-400 font-semibold block mb-1">
+                <span className="text-[11px] uppercase tracking-wider text-[#919099] font-semibold block mb-1">
                   {isVie ? 'Hướng dẫn & Mô tả chung' : 'General Overview & Guidelines'}
                 </span>
-                <p className="text-xs text-gray-300 leading-relaxed whitespace-pre-wrap">
+                <p className="text-xs text-[#C7C5CF] leading-relaxed whitespace-pre-wrap">
                   {trade.description}
                 </p>
               </div>
             )}
 
             {trade.submissionDeadlineAt && (
-              <div className="mt-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-xs text-gray-300">
-                <Calendar className="w-3.5 h-3.5 text-indigo-400" />
+              <div className="mt-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-xs text-[#C7C5CF]">
+                <Calendar className="w-3.5 h-3.5 text-brand-periwinkle" />
                 <span>
                   {isVie ? 'Hạn hoàn thành tranh dự kiến:' : 'Proposed Deadline:'}{' '}
                   <strong className="text-white">{new Date(trade.submissionDeadlineAt).toLocaleDateString()}</strong>
@@ -510,22 +510,22 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
           <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] items-center gap-6 mb-8 p-6 rounded-2xl bg-white/[0.02] border border-white/5">
             {/* Initiator */}
             <div className="flex items-center gap-3.5">
-              <div className="w-14 h-14 rounded-full border-2 border-indigo-500/50 overflow-hidden bg-indigo-950/60 flex items-center justify-center shrink-0">
+              <div className="w-14 h-14 rounded-full border-2 border-brand-periwinkle/50 overflow-hidden bg-brand-navy flex items-center justify-center shrink-0">
                 {trade.initiator.avatarUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={trade.initiator.avatarUrl} alt={trade.initiator.fullName} className="w-full h-full object-cover" />
                 ) : (
-                  <span className="text-lg font-bold text-indigo-200">{trade.initiator.fullName.charAt(0).toUpperCase()}</span>
+                  <span className="text-lg font-bold text-brand-periwinkle">{trade.initiator.fullName.charAt(0).toUpperCase()}</span>
                 )}
               </div>
               <div className="min-w-0">
-                <span className="text-[10px] uppercase tracking-wider text-indigo-400 font-bold">
+                <span className="text-[10px] uppercase tracking-wider text-brand-periwinkle font-bold">
                   {isVie ? 'Người khởi tạo (Side A)' : 'Initiator (Side A)'}
                 </span>
                 <h4 className="text-sm font-bold text-white truncate flex items-center gap-1.5">
                   {trade.initiator.fullName}
                   {isCurrentUserInitiator && (
-                    <span className="text-[10px] px-1.5 py-0.2 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                    <span className="text-[10px] px-1.5 py-0.2 rounded bg-brand-periwinkle/20 text-brand-periwinkle border border-brand-periwinkle/30">
                       {isVie ? 'Bạn' : 'You'}
                     </span>
                   )}
@@ -543,24 +543,24 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
             {/* Receiver */}
             <div className="flex items-center gap-3.5 justify-start md:justify-end text-left md:text-right">
               <div className="min-w-0 order-2 md:order-1">
-                <span className="text-[10px] uppercase tracking-wider text-purple-400 font-bold">
+                <span className="text-[10px] uppercase tracking-wider text-[#C7C5CF] font-bold">
                   {isVie ? 'Người nhận (Side B)' : 'Receiver (Side B)'}
                 </span>
                 <h4 className="text-sm font-bold text-white truncate flex items-center justify-start md:justify-end gap-1.5">
                   {trade.receiver.fullName}
                   {isCurrentUserReceiver && (
-                    <span className="text-[10px] px-1.5 py-0.2 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                    <span className="text-[10px] px-1.5 py-0.2 rounded bg-brand-periwinkle/20 text-brand-periwinkle border border-brand-periwinkle/30">
                       {isVie ? 'Bạn' : 'You'}
                     </span>
                   )}
                 </h4>
               </div>
-              <div className="w-14 h-14 rounded-full border-2 border-purple-500/50 overflow-hidden bg-purple-950/60 flex items-center justify-center shrink-0 order-1 md:order-2">
+              <div className="w-14 h-14 rounded-full border-2 border-white/30 overflow-hidden bg-brand-navy flex items-center justify-center shrink-0 order-1 md:order-2">
                 {trade.receiver.avatarUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={trade.receiver.avatarUrl} alt={trade.receiver.fullName} className="w-full h-full object-cover" />
                 ) : (
-                  <span className="text-lg font-bold text-purple-200">{trade.receiver.fullName.charAt(0).toUpperCase()}</span>
+                  <span className="text-lg font-bold text-[#C7C5CF]">{trade.receiver.fullName.charAt(0).toUpperCase()}</span>
                 )}
               </div>
             </div>
@@ -569,19 +569,19 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
           {/* Proposal Pledges & Request Details */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             {/* Side A pledge */}
-            <div className="p-5 rounded-2xl bg-indigo-950/20 border border-indigo-500/20 flex flex-col justify-between">
+            <div className="p-5 rounded-2xl bg-brand-periwinkle/[0.06] border border-brand-periwinkle/20 flex flex-col justify-between">
               <div>
-                <span className="text-[11px] font-bold uppercase tracking-wider text-indigo-300 block mb-2">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-brand-periwinkle block mb-2">
                   {isVie ? `Cam kết vẽ từ ${trade.initiator.fullName} (Side A)` : `What ${trade.initiator.fullName} pledges to draw`}
                 </span>
-                <p className="text-xs text-gray-300 leading-relaxed whitespace-pre-wrap">
+                <p className="text-xs text-[#C7C5CF] leading-relaxed whitespace-pre-wrap">
                   {parsedInitiatorNote.text || (isVie ? 'Sáng tác tranh nguyên tác theo yêu cầu trao đổi.' : 'Pledged custom artwork.')}
                 </p>
 
                 {/* Side A Reference Images (Read-only Gallery) */}
                 {parsedInitiatorNote.images.length > 0 && (
-                  <div className="mt-4 pt-3 border-t border-indigo-500/10">
-                    <span className="text-[10px] uppercase tracking-wider text-indigo-400/80 font-semibold block mb-2">
+                  <div className="mt-4 pt-3 border-t border-brand-periwinkle/15">
+                    <span className="text-[10px] uppercase tracking-wider text-brand-periwinkle font-semibold block mb-2">
                       {isVie ? `Ảnh mẫu tham khảo (${parsedInitiatorNote.images.length})` : `Reference Images (${parsedInitiatorNote.images.length})`}
                     </span>
                     <div className="grid grid-cols-3 sm:grid-cols-4 gap-2.5">
@@ -589,7 +589,7 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
                         <div
                           key={i}
                           onClick={() => setPreviewModalUrl(imgUrl)}
-                          className="relative aspect-square rounded-xl overflow-hidden border border-indigo-500/20 bg-black/40 cursor-pointer hover:border-indigo-400 group transition"
+                          className="relative aspect-square rounded-xl overflow-hidden border border-brand-periwinkle/25 bg-black/40 cursor-pointer hover:border-brand-periwinkle group transition"
                         >
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img src={imgUrl} alt="Ref" className="w-full h-full object-cover group-hover:scale-105 transition" />
@@ -602,23 +602,23 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
             </div>
 
             {/* Side B request - READ ONLY (Partner's request sent to Side B) */}
-            <div className="p-5 rounded-2xl bg-purple-950/20 border border-purple-500/20 flex flex-col justify-between">
+            <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/15 flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-purple-300">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-[#C7C5CF]">
                     {isVie ? `Yêu cầu vẽ từ đối tác (${trade.initiator.fullName} gửi cho ${trade.receiver.fullName})` : `What ${trade.initiator.fullName} requested from ${trade.receiver.fullName}`}
                   </span>
                 </div>
 
                 <div>
-                  <p className="text-xs text-gray-300 leading-relaxed whitespace-pre-wrap">
+                  <p className="text-xs text-[#C7C5CF] leading-relaxed whitespace-pre-wrap">
                     {parsedReceiverNote.text || (isVie ? 'Chưa có mô tả yêu cầu cụ thể.' : 'Requested artwork details.')}
                   </p>
 
                   {/* Partner's Reference Images (Read-only Gallery) */}
                   {parsedReceiverNote.images.length > 0 && (
-                    <div className="mt-4 pt-3 border-t border-purple-500/10">
-                      <span className="text-[10px] uppercase tracking-wider text-purple-400/80 font-semibold block mb-2">
+                    <div className="mt-4 pt-3 border-t border-white/10">
+                      <span className="text-[10px] uppercase tracking-wider text-[#919099] font-semibold block mb-2">
                         {isVie ? `Ảnh mẫu tham khảo (${parsedReceiverNote.images.length})` : `Reference Images (${parsedReceiverNote.images.length})`}
                       </span>
                       <div className="grid grid-cols-3 sm:grid-cols-4 gap-2.5">
@@ -626,7 +626,7 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
                           <div
                             key={i}
                             onClick={() => setPreviewModalUrl(imgUrl)}
-                            className="relative aspect-square rounded-xl overflow-hidden border border-purple-500/20 bg-black/40 cursor-pointer hover:border-purple-400 group transition"
+                            className="relative aspect-square rounded-xl overflow-hidden border border-white/15 bg-black/40 cursor-pointer hover:border-brand-periwinkle group transition"
                           >
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img src={imgUrl} alt="Ref" className="w-full h-full object-cover group-hover:scale-105 transition" />
@@ -641,18 +641,18 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
           </div>
 
           {/* Creator's Own Request / Response Section (Mục riêng cho Creator thêm ảnh của riêng mình) */}
-          <div className="mb-8 p-6 rounded-2xl bg-[#171827] border border-purple-500/30 relative">
+          <div className="mb-8 p-6 rounded-2xl bg-[#161926]/80 border border-brand-periwinkle/25 relative">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-purple-400" />
-                <h3 className="text-xs md:text-sm font-bold text-white uppercase tracking-wider">
+                <Sparkles className="w-4 h-4 text-brand-periwinkle" />
+                <h3 className="text-xs md:text-sm font-bold text-white uppercase tracking-wider font-h1">
                   {isCurrentUserReceiver
                     ? (isVie ? 'Yêu cầu & Ảnh mẫu của riêng bạn (Creator)' : 'Your Request & Reference Images')
                     : (isVie ? `Yêu cầu & Ảnh mẫu từ Creator (${trade.receiver.fullName})` : `Creator's Request & References (${trade.receiver.fullName})`)}
                 </h3>
               </div>
               {isCurrentUserReceiver && (
-                <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30 font-medium">
+                <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-brand-periwinkle/15 text-brand-periwinkle border border-brand-periwinkle/30 font-medium">
                   {isVie ? 'Mục riêng của Creator' : 'Creator Section'}
                 </span>
               )}
@@ -662,7 +662,7 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
               /* Editable for Creator */
               <div className="space-y-4">
                 <div>
-                  <label className="block text-[11px] text-gray-300 font-semibold mb-1.5">
+                  <label className="block text-[11px] text-[#C7C5CF] font-semibold mb-1.5">
                     {isVie ? 'Mô tả / Yêu cầu vẽ bạn muốn đối tác thực hiện cho bạn (Tùy chọn):' : 'What you would like your partner to draw for you (Optional):'}
                   </label>
                   <textarea
@@ -670,17 +670,17 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
                     onChange={(e) => setSideBNote(e.target.value)}
                     placeholder={isVie ? 'Mô tả chi tiết nhân vật, trang phục, dáng vẽ, hoặc phong cách bạn muốn đối tác vẽ cho mình...' : 'Describe character, outfit, pose or style you want them to draw for you...'}
                     rows={3}
-                    className="w-full px-3.5 py-2.5 bg-[#10111a] border border-purple-500/30 rounded-xl text-xs text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500 transition resize-none"
+                    className="w-full px-3.5 py-2.5 bg-[#161926] border border-white/15 rounded-xl text-xs text-white placeholder-[#919099] focus:outline-none focus:ring-1 focus:ring-brand-periwinkle focus:border-brand-periwinkle transition resize-none"
                   />
                 </div>
 
                 {/* Creator Multiple Image Upload Grid */}
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <label className="text-[11px] uppercase tracking-wider text-purple-300 font-semibold">
+                    <label className="text-[11px] uppercase tracking-wider text-brand-periwinkle font-semibold">
                       {isVie ? 'Ảnh mẫu tham khảo của riêng bạn (Đính kèm nhiều ảnh)' : 'Your Reference Images (Attach multiple)'}
                     </label>
-                    <span className="text-[10px] text-gray-400">
+                    <span className="text-[10px] text-[#919099]">
                       {sideBImages.length} {isVie ? 'ảnh đã chọn' : 'selected'}
                     </span>
                   </div>
@@ -689,7 +689,7 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
                     {sideBImages.map((imgUrl, idx) => (
                       <div
                         key={idx}
-                        className="group relative aspect-square overflow-hidden rounded-xl border border-purple-500/40 bg-black/40"
+                        className="group relative aspect-square overflow-hidden rounded-xl border border-brand-periwinkle/35 bg-black/40"
                       >
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
@@ -709,9 +709,9 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
                       </div>
                     ))}
 
-                    <label className="flex aspect-square cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed border-purple-400/40 bg-purple-950/20 text-purple-300 hover:border-purple-400 hover:bg-purple-900/30 hover:text-white transition">
+                    <label className="flex aspect-square cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed border-brand-periwinkle/35 bg-brand-periwinkle/5 text-brand-periwinkle hover:border-brand-periwinkle hover:bg-brand-periwinkle/10 hover:text-white transition">
                       {isUploadingSideBAttachment ? (
-                        <Loader2 className="w-4 h-4 animate-spin text-purple-400" />
+                        <Loader2 className="w-4 h-4 animate-spin text-brand-periwinkle" />
                       ) : (
                         <>
                           <Plus className="w-4 h-4 mb-0.5" />
@@ -736,7 +736,7 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
                 {parsedReceiverResponse.text || parsedReceiverResponse.images.length > 0 ? (
                   <div>
                     {parsedReceiverResponse.text && (
-                      <p className="text-xs text-gray-300 leading-relaxed whitespace-pre-wrap mb-3">
+                      <p className="text-xs text-[#C7C5CF] leading-relaxed whitespace-pre-wrap mb-3">
                         {parsedReceiverResponse.text}
                       </p>
                     )}
@@ -746,7 +746,7 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
                           <div
                             key={idx}
                             onClick={() => setPreviewModalUrl(imgUrl)}
-                            className="relative aspect-square overflow-hidden rounded-xl border border-purple-500/30 bg-black/40 cursor-pointer hover:border-purple-400 group transition"
+                            className="relative aspect-square overflow-hidden rounded-xl border border-brand-periwinkle/30 bg-black/40 cursor-pointer hover:border-brand-periwinkle group transition"
                           >
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img src={imgUrl} alt="Creator Ref" className="w-full h-full object-cover group-hover:scale-105 transition" />
@@ -756,7 +756,7 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
                     )}
                   </div>
                 ) : (
-                  <p className="text-xs text-gray-400 italic">
+                  <p className="text-xs text-[#919099] italic">
                     {isVie
                       ? 'Họa sĩ chưa cập nhật ghi chú hoặc ảnh mẫu của riêng mình (sẽ được bổ sung khi họa sĩ xác nhận đề nghị).'
                       : 'The creator has not yet added their own notes or reference images.'}
@@ -774,7 +774,7 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
               <h3 className="text-base font-bold text-white mb-1.5">
                 {isVie ? 'Bạn đã chấp nhận đề nghị' : 'You accepted this proposal'}
               </h3>
-              <p className="text-xs text-gray-300 max-w-md mx-auto leading-relaxed">
+              <p className="text-xs text-[#C7C5CF] max-w-md mx-auto leading-relaxed">
                 {isVie
                   ? `Đang chờ ${trade.initiator.fullName} xác nhận lại. Trade Room chỉ mở khi cả hai bên cùng chấp nhận.`
                   : `Waiting for ${trade.initiator.fullName} to confirm. The Trade Room opens once both sides accept.`}
@@ -782,11 +782,11 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
             </div>
           ) : isReceiverRole ? (
             /* Receiver sees Accept / Decline buttons */
-            <div className="p-6 rounded-2xl bg-gradient-to-r from-indigo-950/40 via-purple-950/40 to-slate-900 border border-indigo-500/30 text-center">
-              <h3 className="text-base font-bold text-white mb-1.5">
+            <div className="p-6 rounded-2xl bg-brand-periwinkle/[0.08] border border-brand-periwinkle/25 text-center">
+              <h3 className="text-base font-bold text-white mb-1.5 font-h1">
                 {isVie ? `Bạn nhận được đề nghị trao đổi tranh từ ${trade.initiator.fullName}` : `You received this trade proposal from ${trade.initiator.fullName}`}
               </h3>
-              <p className="text-xs text-gray-300 max-w-lg mx-auto mb-5 leading-relaxed">
+              <p className="text-xs text-[#C7C5CF] max-w-lg mx-auto mb-5 leading-relaxed">
                 {isVie
                   ? 'Bạn có thể chỉnh sửa yêu cầu và ảnh mẫu mong muốn ở khung trên. Sau khi bạn chấp nhận, đối tác cần xác nhận lại; phòng vẽ tranh (Trade Room) chỉ mở khi cả hai bên cùng chấp nhận.'
                   : 'You can edit your drawing requests and attach reference images above. After you accept, your partner must confirm too; the Trade Room unlocks only when both sides accept.'}
@@ -797,7 +797,7 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
                   type="button"
                   onClick={() => handleRespondProposal(false)}
                   disabled={respondingProposal}
-                  className="px-5 py-2.5 rounded-xl border border-white/10 bg-white/5 hover:bg-rose-500/20 hover:text-rose-300 text-xs font-semibold text-gray-300 transition cursor-pointer disabled:opacity-50"
+                  className="px-5 py-2.5 rounded-xl border border-white/10 bg-white/5 hover:bg-rose-500/20 hover:text-rose-300 text-xs font-semibold text-[#C7C5CF] transition cursor-pointer disabled:opacity-50"
                 >
                   {isVie ? 'Từ chối' : 'Decline Proposal'}
                 </button>
@@ -806,7 +806,7 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
                   type="button"
                   onClick={() => handleRespondProposal(true)}
                   disabled={respondingProposal}
-                  className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-xs font-bold uppercase tracking-wider shadow-lg shadow-indigo-600/30 transition hover:scale-105 active:scale-95 cursor-pointer disabled:opacity-50"
+                  className="commission-primary inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs uppercase tracking-wider shadow-lg transition hover:scale-105 active:scale-95 cursor-pointer disabled:opacity-50"
                 >
                   {respondingProposal ? (
                     <>
@@ -827,7 +827,7 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
               <h3 className="text-base font-bold text-white mb-1.5">
                 {isVie ? `${trade.receiver.fullName} đã chấp nhận đề nghị` : `${trade.receiver.fullName} accepted your proposal`}
               </h3>
-              <p className="text-xs text-gray-300 max-w-md mx-auto mb-5 leading-relaxed">
+              <p className="text-xs text-[#C7C5CF] max-w-md mx-auto mb-5 leading-relaxed">
                 {isVie
                   ? 'Hãy xem lại yêu cầu & ảnh mẫu của đối tác ở trên. Khi bạn xác nhận, phòng vẽ tranh sẽ chính thức mở.'
                   : 'Review your partner’s request and references above. Once you confirm, the Trade Room opens.'}
@@ -837,7 +837,7 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
                   type="button"
                   onClick={handleCancelProposal}
                   disabled={respondingProposal}
-                  className="px-5 py-2.5 rounded-xl border border-white/10 bg-white/5 hover:bg-rose-500/20 hover:text-rose-300 text-xs font-semibold text-gray-300 transition cursor-pointer disabled:opacity-50"
+                  className="px-5 py-2.5 rounded-xl border border-white/10 bg-white/5 hover:bg-rose-500/20 hover:text-rose-300 text-xs font-semibold text-[#C7C5CF] transition cursor-pointer disabled:opacity-50"
                 >
                   {isVie ? 'Hủy đề nghị' : 'Cancel Proposal'}
                 </button>
@@ -845,7 +845,7 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
                   type="button"
                   onClick={handleConfirmProposal}
                   disabled={respondingProposal}
-                  className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-xs font-bold uppercase tracking-wider shadow-lg transition cursor-pointer disabled:opacity-50"
+                  className="commission-primary inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs uppercase tracking-wider shadow-lg transition cursor-pointer disabled:opacity-50"
                 >
                   {respondingProposal ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
                   {isVie ? 'Xác nhận & bắt đầu' : 'Confirm & Start'}
@@ -860,7 +860,7 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
               <h3 className="text-base font-bold text-white mb-1.5">
                 {isVie ? `Đang chờ ${trade.receiver.fullName} phản hồi` : `Waiting for ${trade.receiver.fullName} to accept`}
               </h3>
-              <p className="text-xs text-gray-300 max-w-md mx-auto mb-5 leading-relaxed">
+              <p className="text-xs text-[#C7C5CF] max-w-md mx-auto mb-5 leading-relaxed">
                 {isVie
                   ? 'Đề nghị của bạn đã được gửi thành công. Phòng vẽ tranh (Trade Room) sẽ mở ngay sau khi đối tác chấp nhận lời mời.'
                   : 'Your proposal was sent. The Trade Room will unlock as soon as your partner accepts.'}
@@ -870,7 +870,7 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
                 type="button"
                 onClick={handleCancelProposal}
                 disabled={respondingProposal}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white/5 hover:bg-rose-500/20 hover:text-rose-300 text-gray-400 text-xs font-semibold border border-white/10 transition cursor-pointer disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white/5 hover:bg-rose-500/20 hover:text-rose-300 text-[#919099] text-xs font-semibold border border-white/10 transition cursor-pointer disabled:opacity-50"
               >
                 <X className="w-3.5 h-3.5" />
                 <span>{isVie ? 'Hủy lời mời này' : 'Cancel Proposal'}</span>
@@ -880,8 +880,8 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
           )}
 
           {/* Safe Escrow Notice */}
-          <div className="mt-6 p-4 rounded-2xl bg-white/[0.02] border border-white/5 flex items-start gap-3 text-xs text-gray-400">
-            <ShieldCheck className="w-5 h-5 text-indigo-400 shrink-0 mt-0.5" />
+          <div className="mt-6 p-4 rounded-2xl bg-white/[0.02] border border-white/5 flex items-start gap-3 text-xs text-[#919099]">
+            <ShieldCheck className="w-5 h-5 text-brand-periwinkle shrink-0 mt-0.5" />
             <p>
               {isVie
                 ? 'Phòng nộp tranh gốc và cấp watermark xem trước chỉ mở sau khi lời mời được chấp nhận. Toàn bộ quá trình được bảo hộ bởi hệ thống Escrow không tính phí.'
@@ -896,7 +896,7 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
             onClick={() => setPreviewModalUrl(null)}
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 cursor-zoom-out"
           >
-            <div className="relative max-w-4xl max-h-[90vh] overflow-hidden rounded-2xl border border-white/10 bg-[#161722]" onClick={(e) => e.stopPropagation()}>
+            <div className="relative max-w-4xl max-h-[90vh] overflow-hidden rounded-2xl border border-white/10 bg-[#161926]" onClick={(e) => e.stopPropagation()}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={previewModalUrl} alt="Preview" className="max-w-full max-h-[85vh] object-contain" />
               <button
@@ -918,16 +918,16 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
   if (isCancelledOrRejected) {
     return (
       <div className="w-full max-w-2xl mx-auto px-4 py-12 text-center">
-        <div className="glass-container rounded-3xl p-8 md:p-12 border border-white/10 bg-[#14151e]/80 backdrop-blur-xl shadow-2xl">
+        <div className="glass-container rounded-3xl p-8 md:p-12 shadow-2xl">
           <div className="w-16 h-16 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center mx-auto mb-4">
             <XCircle className="w-8 h-8" />
           </div>
-          <h2 className="text-xl md:text-2xl font-bold text-white mb-2">
+          <h2 className="text-xl md:text-2xl font-bold text-white mb-2 font-h1">
             {trade.status === 'Rejected'
               ? (isVie ? 'Đề nghị trao đổi đã bị từ chối' : 'Trade Proposal Declined')
               : (isVie ? 'Cuộc trao đổi tranh đã bị hủy' : 'Art Trade Cancelled')}
           </h2>
-          <p className="text-xs text-gray-400 mb-6 max-w-md mx-auto">
+          <p className="text-xs text-[#919099] mb-6 max-w-md mx-auto">
             {trade.rejectionReason || trade.cancellationReason || (isVie ? 'Phiên trao đổi này đã kết thúc.' : 'This trade session has ended.')}
           </p>
           <Link
@@ -950,9 +950,9 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
       <div className="mb-6 flex items-center justify-between">
         <Link
           href="/art-trades"
-          className="inline-flex items-center gap-2 text-xs font-semibold text-gray-400 hover:text-white transition"
+          className="inline-flex items-center gap-2 text-xs font-semibold text-[#919099] hover:text-white transition"
         >
-          <ArrowLeft className="w-4 h-4 text-indigo-400" />
+          <ArrowLeft className="w-4 h-4 text-brand-periwinkle" />
           <span>{isVie ? 'Quay lại danh sách Trao đổi' : 'Back to My Trades'}</span>
         </Link>
       </div>
@@ -964,27 +964,27 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
 
       {/* Main Trade Room Container */}
       <div
-        className="glass-container rounded-3xl p-6 md:p-10 border border-white/10 bg-[#14151e]/80 backdrop-blur-xl shadow-2xl relative overflow-hidden"
+        className="glass-container rounded-3xl p-6 md:p-10 shadow-2xl relative overflow-hidden"
       >
         {/* Subtle Ambient Background Glows */}
-        <div className="absolute -top-32 -left-32 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-32 -right-32 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -top-32 -left-32 w-80 h-80 bg-brand-periwinkle/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-32 -right-32 w-80 h-80 bg-brand-periwinkle/5 rounded-full blur-3xl pointer-events-none" />
 
         {/* Top Header with Title and Status */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-4 pb-8 mb-8 border-b border-white/10">
           <div>
             <div className="flex items-center gap-2 mb-1.5">
-              <span className="text-xs uppercase tracking-wider text-indigo-400 font-semibold">
+              <span className="text-xs uppercase tracking-wider text-brand-periwinkle font-semibold">
                 {isVie ? 'Phòng trao đổi tranh' : 'Art Trade Station'}
               </span>
-              <span className="text-gray-500">•</span>
+              <span className="text-[#919099]">•</span>
               {getStatusBadge(trade.status)}
             </div>
             <h1 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight font-h1">
               {trade.title}
             </h1>
             {trade.description && (
-              <p className="text-sm text-gray-400 mt-1 max-w-2xl">{trade.description}</p>
+              <p className="text-sm text-[#919099] mt-1 max-w-2xl">{trade.description}</p>
             )}
           </div>
 
@@ -993,7 +993,7 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
             <div className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs border ${
               isWatermarkRemoved
                 ? 'bg-emerald-950/40 border-emerald-500/30 text-emerald-300'
-                : 'bg-indigo-950/40 border-indigo-500/20 text-indigo-300'
+                : 'bg-brand-periwinkle/10 border-brand-periwinkle/25 text-brand-periwinkle'
             }`}>
               {isWatermarkRemoved ? (
                 <>
@@ -1002,7 +1002,7 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
                 </>
               ) : (
                 <>
-                  <ShieldCheck className="w-4 h-4 text-indigo-400 shrink-0" />
+                  <ShieldCheck className="w-4 h-4 text-brand-periwinkle shrink-0" />
                   <span>{isVie ? 'Watermark xem trước & Ký quỹ an toàn' : 'Watermarked Preview & Dual Escrow Protection'}</span>
                 </>
               )}
@@ -1014,11 +1014,11 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
               onClick={() => setActiveTab('chat')}
               className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold border transition cursor-pointer ${
                 activeTab === 'chat'
-                  ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white border-transparent shadow-lg shadow-indigo-900/30'
-                  : 'bg-white/5 border-white/10 text-gray-300 hover:text-white hover:bg-white/10'
+                  ? 'commission-primary border-transparent shadow-lg'
+                  : 'bg-white/5 border-white/10 text-[#C7C5CF] hover:text-white hover:bg-white/10'
               }`}
             >
-              <MessageSquare className="w-4 h-4 text-purple-400" />
+              <MessageSquare className={`w-4 h-4 ${activeTab === 'chat' ? 'text-brand-navy' : 'text-brand-periwinkle'}`} />
               <span>{isVie ? 'Phòng trò chuyện' : 'Trade Chat'}</span>
             </button>
           </div>
@@ -1029,7 +1029,7 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
           {/* Participant A (Initiator) Avatar Circle */}
           <div className="flex flex-col items-center text-center">
             <div className="relative group mb-3">
-              <div className="w-24 h-24 md:w-28 md:h-28 rounded-full border-4 border-indigo-500/60 shadow-xl overflow-hidden ring-4 ring-indigo-500/20 bg-gradient-to-tr from-indigo-900 to-slate-800 flex items-center justify-center">
+              <div className="w-24 h-24 md:w-28 md:h-28 rounded-full border-4 border-brand-periwinkle/60 shadow-xl overflow-hidden ring-4 ring-brand-periwinkle/20 bg-brand-navy flex items-center justify-center">
                 {trade.initiator.avatarUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
@@ -1038,12 +1038,12 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <span className="text-2xl md:text-3xl font-bold text-indigo-200">
+                  <span className="text-2xl md:text-3xl font-bold text-brand-periwinkle">
                     {trade.initiator.fullName.charAt(0).toUpperCase()}
                   </span>
                 )}
               </div>
-              <div className="absolute -bottom-1 -right-1 bg-indigo-600 text-white rounded-full p-1.5 shadow-md">
+              <div className="absolute -bottom-1 -right-1 bg-brand-periwinkle text-brand-navy rounded-full p-1.5 shadow-md">
                 <Sparkles className="w-3.5 h-3.5" />
               </div>
             </div>
@@ -1052,21 +1052,21 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
               <h3 className="font-semibold text-white text-base md:text-lg flex items-center justify-center gap-1.5">
                 {trade.initiator.fullName}
                 {isCurrentUserInitiator && (
-                  <span className="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                  <span className="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded bg-brand-periwinkle/20 text-brand-periwinkle border border-brand-periwinkle/30">
                     {isVie ? 'Bạn' : 'You'}
                   </span>
                 )}
               </h3>
-              <p className="text-xs text-indigo-300 font-medium">Initiator (Side A)</p>
+              <p className="text-xs text-brand-periwinkle font-medium">Initiator (Side A)</p>
             </div>
           </div>
 
           {/* Center Trade Crest / Exchange Arrows */}
           <div className="flex flex-col items-center justify-center py-2 md:py-0">
-            <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-indigo-300 shadow-inner group hover:scale-105 transition">
-              <ArrowLeftRight className="w-6 h-6 text-indigo-400 animate-pulse" />
+            <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-brand-periwinkle shadow-inner group hover:scale-105 transition">
+              <ArrowLeftRight className="w-6 h-6 text-brand-periwinkle animate-pulse" />
             </div>
-            <span className="text-[11px] uppercase tracking-wider text-gray-500 font-semibold mt-2">
+            <span className="text-[11px] uppercase tracking-wider text-[#919099] font-semibold mt-2">
               Exchange
             </span>
           </div>
@@ -1074,7 +1074,7 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
           {/* Participant B (Receiver) Avatar Circle */}
           <div className="flex flex-col items-center text-center">
             <div className="relative group mb-3">
-              <div className="w-24 h-24 md:w-28 md:h-28 rounded-full border-4 border-purple-500/60 shadow-xl overflow-hidden ring-4 ring-purple-500/20 bg-gradient-to-tr from-purple-900 to-slate-800 flex items-center justify-center">
+              <div className="w-24 h-24 md:w-28 md:h-28 rounded-full border-4 border-white/30 shadow-xl overflow-hidden ring-4 ring-white/10 bg-brand-navy flex items-center justify-center">
                 {trade.receiver.avatarUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
@@ -1083,12 +1083,12 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <span className="text-2xl md:text-3xl font-bold text-purple-200">
+                  <span className="text-2xl md:text-3xl font-bold text-[#C7C5CF]">
                     {trade.receiver.fullName.charAt(0).toUpperCase()}
                   </span>
                 )}
               </div>
-              <div className="absolute -bottom-1 -right-1 bg-purple-600 text-white rounded-full p-1.5 shadow-md">
+              <div className="absolute -bottom-1 -right-1 bg-white/15 border border-white/25 text-white rounded-full p-1.5 shadow-md backdrop-blur-md">
                 <Sparkles className="w-3.5 h-3.5" />
               </div>
             </div>
@@ -1097,12 +1097,12 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
               <h3 className="font-semibold text-white text-base md:text-lg flex items-center justify-center gap-1.5">
                 {trade.receiver.fullName}
                 {isCurrentUserReceiver && (
-                  <span className="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                  <span className="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded bg-brand-periwinkle/20 text-brand-periwinkle border border-brand-periwinkle/30">
                     {isVie ? 'Bạn' : 'You'}
                   </span>
                 )}
               </h3>
-              <p className="text-xs text-purple-300 font-medium">Receiver (Side B)</p>
+              <p className="text-xs text-[#C7C5CF] font-medium">Receiver (Side B)</p>
             </div>
           </div>
         </div>
@@ -1120,8 +1120,8 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
               onClick={() => setActiveTab(key)}
               className={`flex-1 inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold uppercase tracking-wider transition cursor-pointer ${
                 activeTab === key
-                  ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-900/30'
-                  : 'text-gray-400 hover:text-white hover:bg-white/5'
+                  ? 'commission-primary shadow-lg'
+                  : 'text-[#919099] hover:text-white hover:bg-white/5'
               }`}
             >
               <Icon className="w-4 h-4" />
@@ -1140,18 +1140,18 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
           const hasResp = !!(parsedResp.text || parsedResp.images.length > 0);
           return (
             <div className="space-y-6">
-              {/* Line 1: Pledge (Side A) + Request (Side B), side by side with distinct colors */}
+              {/* Line 1: Pledge (Side A) + Request (Side B) */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="p-6 rounded-2xl bg-indigo-950/20 border border-indigo-500/20 min-h-[260px]">
-                  <span className="text-xs font-bold uppercase tracking-wider text-indigo-300 block mb-3">
+                <div className="p-6 rounded-2xl bg-brand-periwinkle/[0.06] border border-brand-periwinkle/20 min-h-[260px]">
+                  <span className="text-xs font-bold uppercase tracking-wider text-brand-periwinkle block mb-3">
                     {isVie ? `Cam kết vẽ từ ${trade.initiator.fullName} (Side A)` : `What ${trade.initiator.fullName} pledges to draw`}
                   </span>
-                  <p className="text-sm text-gray-200 leading-relaxed whitespace-pre-wrap">
+                  <p className="text-sm text-[#E4E1E5] leading-relaxed whitespace-pre-wrap">
                     {parsedInit.text || (isVie ? 'Sáng tác tranh nguyên tác theo yêu cầu.' : 'Custom artwork.')}
                   </p>
                   {parsedInit.images.length > 0 && (
-                    <div className="mt-5 pt-4 border-t border-indigo-500/10">
-                      <span className="text-[11px] uppercase tracking-wider text-indigo-400/80 font-semibold block mb-3">
+                    <div className="mt-5 pt-4 border-t border-brand-periwinkle/15">
+                      <span className="text-[11px] uppercase tracking-wider text-brand-periwinkle font-semibold block mb-3">
                         {isVie ? `Ảnh mẫu tham khảo (${parsedInit.images.length})` : `Reference Images (${parsedInit.images.length})`}
                       </span>
                     <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-3">
@@ -1159,7 +1159,7 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
                         <div
                           key={i}
                           onClick={() => setPreviewModalUrl(imgUrl)}
-                          className="relative aspect-square rounded-2xl overflow-hidden border border-indigo-500/20 bg-black/40 cursor-pointer hover:border-indigo-400 group transition"
+                          className="relative aspect-square rounded-2xl overflow-hidden border border-brand-periwinkle/25 bg-black/40 cursor-pointer hover:border-brand-periwinkle group transition"
                         >
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img src={imgUrl} alt="Ref" className="w-full h-full object-cover group-hover:scale-105 transition" />
@@ -1170,16 +1170,16 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
                   )}
                 </div>
 
-                <div className="p-6 rounded-2xl bg-purple-950/20 border border-purple-500/20 min-h-[260px]">
-                  <span className="text-xs font-bold uppercase tracking-wider text-purple-300 block mb-3">
+                <div className="p-6 rounded-2xl bg-white/[0.03] border border-white/15 min-h-[260px]">
+                  <span className="text-xs font-bold uppercase tracking-wider text-[#C7C5CF] block mb-3">
                     {isVie ? `Yêu cầu vẽ từ đối tác (${trade.initiator.fullName} gửi cho ${trade.receiver.fullName})` : `What ${trade.initiator.fullName} requested from ${trade.receiver.fullName}`}
                   </span>
-                  <p className="text-sm text-gray-200 leading-relaxed whitespace-pre-wrap">
+                  <p className="text-sm text-[#E4E1E5] leading-relaxed whitespace-pre-wrap">
                     {parsedRecv.text || (isVie ? 'Chưa có mô tả yêu cầu cụ thể.' : 'Requested artwork details.')}
                   </p>
                   {parsedRecv.images.length > 0 && (
-                    <div className="mt-5 pt-4 border-t border-purple-500/10">
-                      <span className="text-[11px] uppercase tracking-wider text-purple-400/80 font-semibold block mb-3">
+                    <div className="mt-5 pt-4 border-t border-white/10">
+                      <span className="text-[11px] uppercase tracking-wider text-[#919099] font-semibold block mb-3">
                         {isVie ? `Ảnh mẫu tham khảo (${parsedRecv.images.length})` : `Reference Images (${parsedRecv.images.length})`}
                       </span>
                     <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-3">
@@ -1187,7 +1187,7 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
                         <div
                           key={i}
                           onClick={() => setPreviewModalUrl(imgUrl)}
-                          className="relative aspect-square rounded-2xl overflow-hidden border border-purple-500/20 bg-black/40 cursor-pointer hover:border-purple-400 group transition"
+                          className="relative aspect-square rounded-2xl overflow-hidden border border-white/15 bg-black/40 cursor-pointer hover:border-brand-periwinkle group transition"
                         >
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img src={imgUrl} alt="Ref" className="w-full h-full object-cover group-hover:scale-105 transition" />
@@ -1207,7 +1207,7 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
                 {hasResp ? (
                   <>
                     {parsedResp.text && (
-                      <p className="text-sm text-gray-200 leading-relaxed whitespace-pre-wrap">{parsedResp.text}</p>
+                      <p className="text-sm text-[#E4E1E5] leading-relaxed whitespace-pre-wrap">{parsedResp.text}</p>
                     )}
                     {parsedResp.images.length > 0 && (
                       <div className="mt-5 pt-4 border-t border-amber-500/10">
@@ -1230,7 +1230,7 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
                     )}
                   </>
                 ) : (
-                  <p className="text-sm text-gray-400 italic">
+                  <p className="text-sm text-[#919099] italic">
                     {isVie ? 'Creator chưa thêm ghi chú hoặc ảnh mẫu riêng.' : 'The creator has not added their own notes or reference images.'}
                   </p>
                 )}
@@ -1249,7 +1249,7 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
           {/* Square A: Initiator's Submitted Artwork */}
           <div className="flex flex-col">
-            <div className="flex items-center justify-between text-xs font-semibold text-gray-400 mb-2 px-1">
+            <div className="flex items-center justify-between text-xs font-semibold text-[#919099] mb-2 px-1">
               <span>{trade.initiator.fullName}&apos;s Artwork</span>
               {trade.initiatorSubmittedAt ? (
                 <span className="text-emerald-400 flex items-center gap-1">
@@ -1274,7 +1274,7 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
             )}
 
             {/* Round-cornered Square Container */}
-            <div className="relative aspect-square w-full rounded-2xl md:rounded-3xl border-2 border-white/10 bg-[#161722] overflow-hidden group shadow-2xl flex flex-col items-center justify-center">
+            <div className="relative aspect-square w-full rounded-2xl md:rounded-3xl border-2 border-white/10 bg-[#161926] overflow-hidden group shadow-2xl flex flex-col items-center justify-center">
               {trade.initiatorPreviewUrl ? (
                 <>
                   {/* The Artwork Image */}
@@ -1304,7 +1304,7 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
 
                       {/* Watermark Badge Indicator */}
                       <div className="absolute top-3 right-3 bg-black/70 backdrop-blur-md px-2.5 py-1 rounded-lg border border-white/15 text-[11px] text-white/90 font-medium flex items-center gap-1.5 shadow-lg">
-                        <ShieldCheck className="w-3.5 h-3.5 text-indigo-400" />
+                        <ShieldCheck className="w-3.5 h-3.5 text-brand-periwinkle" />
                         <span>Watermark Protected</span>
                       </div>
                     </>
@@ -1323,7 +1323,7 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
                         {uploadingSide === 'initiator' ? (
                           <Loader2 className="w-3.5 h-3.5 animate-spin" />
                         ) : (
-                          <RefreshCw className="w-3.5 h-3.5 text-indigo-400" />
+                          <RefreshCw className="w-3.5 h-3.5 text-brand-periwinkle" />
                         )}
                         <span>{isVie ? 'Thay đổi tranh' : 'Replace Art'}</span>
                       </button>
@@ -1348,11 +1348,11 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
               ) : (
                 /* Empty / Upload State for Side A */
                 <div className="p-6 text-center flex flex-col items-center justify-center w-full h-full">
-                  <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-gray-500 mb-4">
+                  <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-[#919099] mb-4">
                     <ImageIcon className="w-8 h-8" />
                   </div>
                   <h4 className="text-sm font-semibold text-white mb-1">No Artwork Submitted Yet</h4>
-                  <p className="text-xs text-gray-400 max-w-xs mb-4">
+                  <p className="text-xs text-[#919099] max-w-xs mb-4">
                     {isCurrentUserInitiator
                       ? 'Upload your finished original file (PNG, JPG, PSD, CLIP). The system will automatically apply a watermark preview.'
                       : 'Waiting for partner to finish and upload artwork preview.'}
@@ -1364,7 +1364,7 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
                         type="button"
                         onClick={() => initiatorFileInputRef.current?.click()}
                         disabled={uploadingSide === 'initiator' || isDisputed}
-                        className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-lg shadow-indigo-600/30 transition disabled:opacity-50 cursor-pointer"
+                        className="commission-primary inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs shadow-lg transition disabled:opacity-50 cursor-pointer"
                       >
                         {uploadingSide === 'initiator' ? (
                           <>
@@ -1390,7 +1390,7 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
 
           {/* Square B: Receiver's Submitted Artwork */}
           <div className="flex flex-col">
-            <div className="flex items-center justify-between text-xs font-semibold text-gray-400 mb-2 px-1">
+            <div className="flex items-center justify-between text-xs font-semibold text-[#919099] mb-2 px-1">
               <span>{trade.receiver.fullName}&apos;s Artwork</span>
               {trade.receiverSubmittedAt ? (
                 <span className="text-emerald-400 flex items-center gap-1">
@@ -1415,7 +1415,7 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
             )}
 
             {/* Round-cornered Square Container */}
-            <div className="relative aspect-square w-full rounded-2xl md:rounded-3xl border-2 border-white/10 bg-[#161722] overflow-hidden group shadow-2xl flex flex-col items-center justify-center">
+            <div className="relative aspect-square w-full rounded-2xl md:rounded-3xl border-2 border-white/10 bg-[#161926] overflow-hidden group shadow-2xl flex flex-col items-center justify-center">
               {trade.receiverPreviewUrl ? (
                 <>
                   {/* The Artwork Image */}
@@ -1445,7 +1445,7 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
 
                       {/* Watermark Badge Indicator */}
                       <div className="absolute top-3 right-3 bg-black/70 backdrop-blur-md px-2.5 py-1 rounded-lg border border-white/15 text-[11px] text-white/90 font-medium flex items-center gap-1.5 shadow-lg">
-                        <ShieldCheck className="w-3.5 h-3.5 text-purple-400" />
+                        <ShieldCheck className="w-3.5 h-3.5 text-brand-periwinkle" />
                         <span>Watermark Protected</span>
                       </div>
                     </>
@@ -1464,7 +1464,7 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
                         {uploadingSide === 'receiver' ? (
                           <Loader2 className="w-3.5 h-3.5 animate-spin" />
                         ) : (
-                          <RefreshCw className="w-3.5 h-3.5 text-purple-400" />
+                          <RefreshCw className="w-3.5 h-3.5 text-brand-periwinkle" />
                         )}
                         <span>{isVie ? 'Thay đổi tranh' : 'Replace Art'}</span>
                       </button>
@@ -1489,11 +1489,11 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
               ) : (
                 /* Empty / Upload State for Side B */
                 <div className="p-6 text-center flex flex-col items-center justify-center w-full h-full">
-                  <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-gray-500 mb-4">
+                  <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-[#919099] mb-4">
                     <ImageIcon className="w-8 h-8" />
                   </div>
                   <h4 className="text-sm font-semibold text-white mb-1">No Artwork Submitted Yet</h4>
-                  <p className="text-xs text-gray-400 max-w-xs mb-4">
+                  <p className="text-xs text-[#919099] max-w-xs mb-4">
                     {isCurrentUserReceiver
                       ? 'Upload your finished original file (PNG, JPG, PSD, CLIP). The system will automatically apply a watermark preview.'
                       : 'Waiting for partner to finish and upload artwork preview.'}
@@ -1505,7 +1505,7 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
                         type="button"
                         onClick={() => receiverFileInputRef.current?.click()}
                         disabled={uploadingSide === 'receiver' || isDisputed}
-                        className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold shadow-lg shadow-purple-600/30 transition disabled:opacity-50 cursor-pointer"
+                        className="commission-primary inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs shadow-lg transition disabled:opacity-50 cursor-pointer"
                       >
                         {uploadingSide === 'receiver' ? (
                           <>
@@ -1535,7 +1535,7 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
           {/* Confirmation Part A (For Participant 1: Initiator confirms partner's work) */}
           <div className="glass-panel p-5 rounded-2xl border border-white/5 bg-white/[0.02] flex flex-col justify-between">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-semibold text-indigo-300">
+              <span className="text-xs font-semibold text-brand-periwinkle">
                 {trade.initiator.fullName}&apos;s Confirmation
               </span>
               {trade.isInitiatorConfirmed ? (
@@ -1543,7 +1543,7 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
                   <CheckCircle2 className="w-3.5 h-3.5" /> Confirmed
                 </span>
               ) : (
-                <span className="text-xs text-gray-400">Pending Confirmation</span>
+                <span className="text-xs text-[#919099]">Pending Confirmation</span>
               )}
             </div>
 
@@ -1577,8 +1577,8 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
                 )}
               </>
             ) : (
-              <div className="w-full py-3 px-4 rounded-xl bg-white/[0.03] border border-white/10 text-gray-400 text-xs font-medium flex items-center justify-center gap-2">
-                <Clock className="w-4 h-4 text-gray-500" />
+              <div className="w-full py-3 px-4 rounded-xl bg-white/[0.03] border border-white/10 text-[#919099] text-xs font-medium flex items-center justify-center gap-2">
+                <Clock className="w-4 h-4 text-[#919099]" />
                 <span>
                   {isVie
                     ? `Đang chờ ${trade.initiator.fullName} xác nhận`
@@ -1596,7 +1596,7 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
           {/* Confirmation Part B (For Participant 2: Receiver confirms partner's work) */}
           <div className="glass-panel p-5 rounded-2xl border border-white/5 bg-white/[0.02] flex flex-col justify-between">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-semibold text-purple-300">
+              <span className="text-xs font-semibold text-[#C7C5CF]">
                 {trade.receiver.fullName}&apos;s Confirmation
               </span>
               {trade.isReceiverConfirmed ? (
@@ -1604,7 +1604,7 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
                   <CheckCircle2 className="w-3.5 h-3.5" /> Confirmed
                 </span>
               ) : (
-                <span className="text-xs text-gray-400">Pending Confirmation</span>
+                <span className="text-xs text-[#919099]">Pending Confirmation</span>
               )}
             </div>
 
@@ -1638,8 +1638,8 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
                 )}
               </>
             ) : (
-              <div className="w-full py-3 px-4 rounded-xl bg-white/[0.03] border border-white/10 text-gray-400 text-xs font-medium flex items-center justify-center gap-2">
-                <Clock className="w-4 h-4 text-gray-500" />
+              <div className="w-full py-3 px-4 rounded-xl bg-white/[0.03] border border-white/10 text-[#919099] text-xs font-medium flex items-center justify-center gap-2">
+                <Clock className="w-4 h-4 text-[#919099]" />
                 <span>
                   {isVie
                     ? `Đang chờ ${trade.receiver.fullName} xác nhận`
@@ -1659,12 +1659,12 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
         {trade.status !== 'Completed' && (
           <div className="mt-8 pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="text-center sm:text-left">
-              <span className="text-xs font-bold text-gray-300 block">
+              <span className="text-xs font-bold text-[#C7C5CF] block">
                 {isDisputed
                   ? (isVie ? 'Giao dịch đang có khiếu nại tranh chấp' : 'Trade Under Active Dispute')
                   : (isVie ? 'Vấn đề phát sinh hoặc hủy giao dịch?' : 'Need to report an issue or cancel?')}
               </span>
-              <span className="text-[11px] text-gray-500">
+              <span className="text-[11px] text-[#919099]">
                 {isDisputed
                   ? (isVie
                     ? 'Quản trị viên đang phân xử hồ sơ. Các thao tác hủy hoặc hoàn tất tạm thời bị khóa.'
@@ -1720,14 +1720,14 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
 
         {/* COMPLETED CELEBRATION (No download button, watermark removed on both sides) */}
         {trade.status === 'Completed' && (
-          <div className="mt-8 p-6 rounded-2xl bg-gradient-to-r from-emerald-950/60 via-teal-950/40 to-indigo-950/60 border border-emerald-500/30 text-center flex flex-col items-center">
+          <div className="mt-8 p-6 rounded-2xl bg-emerald-950/35 border border-emerald-500/30 text-center flex flex-col items-center">
             <div className="w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center mb-3">
               <Sparkles className="w-6 h-6 animate-bounce" />
             </div>
-            <h3 className="text-lg font-bold text-white mb-1">
+            <h3 className="text-lg font-bold text-white mb-1 font-h1">
               {isVie ? 'Giao dịch trao đổi hoàn tất thành công!' : 'Art Trade Successfully Completed!'}
             </h3>
-            <p className="text-xs text-gray-300 max-w-md">
+            <p className="text-xs text-[#C7C5CF] max-w-md">
               {isVie
                 ? 'Cả hai bên đã xác nhận hài lòng. Hình mờ (watermark) đã được gỡ bỏ hoàn toàn cho tác phẩm của cả hai bên.'
                 : 'Both parties have confirmed satisfaction. Watermarks have been removed from the artworks of both sides.'}
@@ -1742,7 +1742,7 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
           onClick={() => setPreviewModalUrl(null)}
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 cursor-zoom-out"
         >
-          <div className="relative max-w-4xl max-h-[90vh] overflow-hidden rounded-2xl border border-white/10 bg-[#161722]" onClick={(e) => e.stopPropagation()}>
+          <div className="relative max-w-4xl max-h-[90vh] overflow-hidden rounded-2xl border border-white/10 bg-[#161926]" onClick={(e) => e.stopPropagation()}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={previewModalUrl} alt="Preview" className="max-w-full max-h-[85vh] object-contain" />
             <button
@@ -1763,7 +1763,7 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4"
         >
           <div
-            className="relative w-full max-w-md rounded-3xl border border-rose-500/30 bg-[#161726] p-6 shadow-2xl"
+            className="relative w-full max-w-md rounded-3xl border border-rose-500/30 bg-[#161926] p-6 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center gap-3 mb-4">
@@ -1774,14 +1774,14 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
                 <h3 className="text-base font-bold text-white">
                   {isVie ? 'Hủy cuộc trao đổi tranh' : 'Cancel Art Trade'}
                 </h3>
-                <p className="text-xs text-gray-400">
+                <p className="text-xs text-[#919099]">
                   {isVie ? 'Thao tác này sẽ chấm dứt lượt trao đổi và không thể hoàn tác.' : 'This will end the trade session and cannot be undone.'}
                 </p>
               </div>
             </div>
 
             <div className="space-y-3 mb-5">
-              <label className="block text-xs font-semibold text-gray-300">
+              <label className="block text-xs font-semibold text-[#C7C5CF]">
                 {isVie ? 'Lý do hủy giao dịch *' : 'Reason for cancellation *'}
               </label>
 
@@ -1799,7 +1799,7 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
                     className={`text-[11px] px-2.5 py-1 rounded-lg border transition cursor-pointer ${
                       cancelReason === quickR
                         ? 'bg-rose-500/25 border-rose-500/50 text-rose-200 font-semibold'
-                        : 'bg-white/5 border-white/10 text-gray-400 hover:text-white'
+                        : 'bg-white/5 border-white/10 text-[#919099] hover:text-white'
                     }`}
                   >
                     {quickR}
@@ -1812,7 +1812,7 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
                 onChange={(e) => setCancelReason(e.target.value)}
                 placeholder={isVie ? 'Nhập chi tiết lý do bạn muốn hủy giao dịch này...' : 'Describe why you want to cancel this trade...'}
                 rows={3}
-                className="w-full px-3.5 py-2.5 bg-[#10111a] border border-white/10 rounded-xl text-xs text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-rose-500 focus:border-rose-500 transition resize-none"
+                className="w-full px-3.5 py-2.5 bg-[#131316] border border-white/10 rounded-xl text-xs text-white placeholder-[#919099] focus:outline-none focus:ring-1 focus:ring-rose-500 focus:border-rose-500 transition resize-none"
               />
             </div>
 
@@ -1824,7 +1824,7 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
                   setCancelReason('');
                 }}
                 disabled={cancelling}
-                className="px-4 py-2 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-xs font-semibold text-gray-300 transition cursor-pointer"
+                className="px-4 py-2 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-xs font-semibold text-[#C7C5CF] transition cursor-pointer"
               >
                 {isVie ? 'Đóng' : 'Keep Trade'}
               </button>

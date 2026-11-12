@@ -72,7 +72,7 @@ export function HeadJuryProgressTab({
 
         <div className="grid gap-6 lg:grid-cols-12 items-start">
           {/* Left: Jury table + overall progress */}
-          <div className="rounded-2xl border border-white/10 bg-[#151926]/90 backdrop-blur-xl p-4 lg:col-span-5 flex flex-col space-y-3">
+          <div className="glass-container rounded-2xl p-4 lg:col-span-5 flex flex-col space-y-3">
             {/* Searchbar & Status Filter on the same line */}
             <EventSearchFilterBar
               variant="inline"
@@ -90,7 +90,7 @@ export function HeadJuryProgressTab({
 
             <div className="overflow-y-auto max-h-[380px] sm:max-h-[410px] pr-1 custom-scrollbar">
               <table className="w-full border-collapse text-left text-xs">
-                <thead className="sticky top-0 z-10 bg-[#151926] shadow-sm">
+                <thead className="sticky top-0 z-10 bg-[#161926] shadow-sm">
                   <tr className="border-b border-white/10 text-[#858694] uppercase font-semibold text-[10px]">
                     <th className="py-2.5 px-3">Jury</th>
                     <th className="py-2.5 px-3 w-[55%]">Progress</th>
@@ -161,7 +161,7 @@ export function HeadJuryProgressTab({
               </div>
               <div className="w-full bg-white/10 h-2.5 rounded-full overflow-hidden">
                 <div
-                  className="h-full rounded-full bg-gradient-to-r from-purple-500 via-[#A7ACD9] to-[#7FD5E8] transition-all"
+                  className="h-full rounded-full bg-gradient-to-r from-[#A7ACD9] to-[#c2c7f6] transition-all"
                   style={{ width: `${overallJuryProgress.percent}%` }}
                 />
               </div>
@@ -169,7 +169,7 @@ export function HeadJuryProgressTab({
           </div>
 
           {/* Right: Selected jury's scoring list */}
-          <div className="rounded-2xl border border-white/10 bg-[#151926]/90 backdrop-blur-xl p-5 lg:col-span-7">
+          <div className="glass-container rounded-2xl p-5 lg:col-span-7">
             {!selectedJury ? (
               <p className="py-16 text-center text-sm text-[#9695a1]">Select a jury member to view their scoring.</p>
             ) : (

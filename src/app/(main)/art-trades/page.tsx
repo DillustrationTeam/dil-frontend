@@ -124,7 +124,7 @@ export default function MyTradesPage() {
     }
     if (isBothSubmittedStatus(status)) {
       return (
-        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-500/15 text-indigo-300 border border-indigo-500/30">
+        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-brand-periwinkle/15 text-brand-periwinkle border border-brand-periwinkle/30">
           <Sparkles className="w-3 h-3" /> {isVie ? 'Đã nộp tranh' : 'Both Submitted'}
         </span>
       );
@@ -145,13 +145,13 @@ export default function MyTradesPage() {
     }
     if (isCancelledStatus(status)) {
       return (
-        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gray-500/15 text-gray-400 border border-gray-500/30">
+        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-white/5 text-[#919099] border border-white/15">
           <XCircle className="w-3 h-3" /> {isVie ? 'Đã hủy' : 'Cancelled'}
         </span>
       );
     }
     return (
-      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gray-500/15 text-gray-300">
+      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-white/5 text-[#C7C5CF] border border-white/10">
         {status}
       </span>
     );
@@ -215,26 +215,26 @@ export default function MyTradesPage() {
   if (!isCreator && !isAdmin) {
     return (
       <div className="w-full max-w-2xl mx-auto px-4 py-16 text-center">
-        <div className="glass-container rounded-3xl p-8 md:p-12 border border-white/10 bg-[#14151e]/80 backdrop-blur-xl shadow-2xl">
-          <div className="w-16 h-16 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center mx-auto mb-5">
+        <div className="glass-container rounded-3xl p-8 md:p-12 shadow-2xl">
+          <div className="w-16 h-16 rounded-2xl bg-brand-periwinkle/10 border border-brand-periwinkle/25 text-brand-periwinkle flex items-center justify-center mx-auto mb-5">
             <Palette className="w-8 h-8" />
           </div>
-          <h2 className="text-xl md:text-2xl font-bold text-white mb-2">
+          <h2 className="text-xl md:text-2xl font-bold text-white mb-2 font-h1">
             Art Trading is Exclusive to Creators
           </h2>
-          <p className="text-sm text-gray-400 mb-6 max-w-md mx-auto">
+          <p className="text-sm text-[#919099] mb-6 max-w-md mx-auto">
             Because trading involves exchanging and uploading original artwork, you must be a registered Creator to manage or participate in art trades.
           </p>
           <div className="flex items-center justify-center gap-4">
             <Link
               href="/become-creator"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-xs font-bold uppercase tracking-wider shadow-lg shadow-indigo-600/30 transition hover:scale-105"
+              className="commission-primary inline-flex items-center gap-2 px-6 py-3 rounded-xl text-xs uppercase tracking-wider shadow-lg transition hover:scale-105"
             >
               <Palette className="w-4 h-4" /> Become a Creator
             </Link>
             <Link
               href="/explore"
-              className="px-5 py-3 rounded-xl bg-white/5 border border-white/10 text-xs font-semibold text-gray-300 hover:text-white transition"
+              className="px-5 py-3 rounded-xl bg-white/5 border border-white/10 text-xs font-semibold text-[#C7C5CF] hover:text-white transition"
             >
               Explore Artworks
             </Link>
@@ -250,14 +250,14 @@ export default function MyTradesPage() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-8 mb-8 border-b border-white/10">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="text-xs uppercase tracking-wider text-indigo-400 font-semibold flex items-center gap-1.5">
+            <span className="text-xs uppercase tracking-wider text-brand-periwinkle font-semibold flex items-center gap-1.5">
               <ArrowLeftRight className="w-3.5 h-3.5" /> {isVie ? 'Quản lý Trao đổi tác phẩm' : 'Art Trade Management'}
             </span>
           </div>
           <h1 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight font-h1">
             {isVie ? 'Trao đổi của tôi' : 'My Art Trades'}
           </h1>
-          <p className="text-sm text-gray-400 mt-1">
+          <p className="text-sm text-[#919099] mt-1">
             {isVie
               ? 'Quản lý các lượt trao đổi tranh ngang hàng giữa các họa sĩ, phản hồi đề xuất và theo dõi tiến trình.'
               : 'Manage your peer-to-peer artist exchanges, accept proposals, and track active sessions.'}
@@ -267,26 +267,26 @@ export default function MyTradesPage() {
         {/* CTA Button: Link to default create art trade */}
         <Link
           href="/art-trades/create"
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-xs font-bold uppercase tracking-wider shadow-lg shadow-indigo-600/30 transition hover:scale-105 active:scale-95 shrink-0"
+          className="commission-primary inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl text-xs uppercase tracking-wider shadow-lg transition hover:scale-105 active:scale-95 shrink-0"
         >
           <Plus className="w-4 h-4" /> {isVie ? 'Tạo đề nghị trao đổi' : 'Propose New Trade'}
         </Link>
       </div>
 
       {/* Slot Quota Status Card */}
-      <div className="mb-8 p-5 rounded-2xl bg-[#14151e]/80 border border-white/10 backdrop-blur-xl shadow-lg flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div className="glass-container mb-8 p-5 rounded-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
+          <div className="w-10 h-10 rounded-xl bg-brand-periwinkle/10 border border-brand-periwinkle/25 flex items-center justify-center text-brand-periwinkle">
             <ShieldCheck className="w-5 h-5" />
           </div>
           <div>
             <h4 className="text-sm font-bold text-white flex items-center gap-2">
               {isVie ? 'Hạn mức lượt trao đổi (Slots):' : 'Trade Slots Quota:'}
-              <span className="text-indigo-300 font-mono text-base">
+              <span className="text-brand-periwinkle font-mono text-base">
                 {slotStatus?.activeTradesCount ?? 0} / {slotStatus?.totalSlots ?? 2} {isVie ? 'Đang chạy' : 'Active'}
               </span>
             </h4>
-            <p className="text-xs text-gray-400">
+            <p className="text-xs text-[#919099]">
               {isVie
                 ? `Họa sĩ có thể tham gia tối đa ${slotStatus?.totalSlots ?? 2} lượt trao đổi cùng lúc. Số slot còn trống: `
                 : `Creators can run up to ${slotStatus?.totalSlots ?? 2} simultaneous trades to prevent over-commitment. Available slots: `}
@@ -341,7 +341,7 @@ export default function MyTradesPage() {
       />
 
       {/* Filter Status & Counter Info */}
-      <div className="flex items-center justify-between gap-3 pb-4 mb-2 text-xs text-gray-400">
+      <div className="flex items-center justify-between gap-3 pb-4 mb-2 text-xs text-[#919099]">
         <span>
           {isVie
             ? `Hiển thị ${filteredTrades.length} trên tổng số ${trades.length} lượt trao đổi`
@@ -355,7 +355,7 @@ export default function MyTradesPage() {
               setStatusFilter('ALL');
               setSortBy('latest');
             }}
-            className="inline-flex items-center gap-1.5 text-indigo-400 hover:text-indigo-300 font-medium transition cursor-pointer"
+            className="inline-flex items-center gap-1.5 text-brand-periwinkle hover:text-white font-medium transition cursor-pointer"
           >
             <RotateCcw className="w-3.5 h-3.5" />
             <span>{isVie ? 'Đặt lại bộ lọc' : 'Reset filters'}</span>
@@ -365,36 +365,36 @@ export default function MyTradesPage() {
 
       {/* Trades List */}
       {loading ? (
-        <div className="min-h-[300px] flex flex-col items-center justify-center p-8 text-center text-gray-400">
-          <Loader2 className="w-8 h-8 animate-spin text-indigo-400 mb-3" />
+        <div className="min-h-[300px] flex flex-col items-center justify-center p-8 text-center text-[#919099]">
+          <Loader2 className="w-8 h-8 animate-spin text-brand-periwinkle mb-3" />
           <p className="text-xs font-medium">{isVie ? 'Đang tải danh sách trao đổi...' : 'Loading your trades...'}</p>
         </div>
       ) : filteredTrades.length === 0 ? (
         trades.length === 0 ? (
-          <div className="p-12 text-center rounded-3xl border border-white/10 bg-white/[0.02] max-w-lg mx-auto">
-            <ArrowLeftRight className="w-12 h-12 mx-auto mb-3 text-gray-500 opacity-60" />
-            <h3 className="text-base font-bold text-white mb-1">
+          <div className="glass-container p-12 text-center rounded-3xl max-w-lg mx-auto">
+            <ArrowLeftRight className="w-12 h-12 mx-auto mb-3 text-[#919099] opacity-60" />
+            <h3 className="text-base font-bold text-white mb-1 font-h1">
               {isVie ? 'Chưa có lượt trao đổi nào' : 'No Art Trades Found'}
             </h3>
-            <p className="text-xs text-gray-400 mb-6">
+            <p className="text-xs text-[#919099] mb-6">
               {isVie
                 ? 'Bạn chưa tham gia lượt trao đổi tranh nào. Hãy bắt đầu tạo một đề nghị trao đổi mới!'
                 : 'You do not have any trade sessions yet. Start by proposing a new art trade!'}
             </p>
             <Link
               href="/art-trades/create"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-lg shadow-indigo-600/30 transition"
+              className="commission-primary inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs shadow-lg transition"
             >
               <Plus className="w-4 h-4" /> {isVie ? 'Tạo đề nghị trao đổi' : 'Propose a Trade'}
             </Link>
           </div>
         ) : (
-          <div className="p-12 text-center rounded-3xl border border-white/10 bg-white/[0.02] max-w-lg mx-auto space-y-3">
-            <ArrowLeftRight className="w-12 h-12 mx-auto mb-2 text-gray-500 opacity-60" />
-            <h3 className="text-base font-bold text-white font-sora">
+          <div className="glass-container p-12 text-center rounded-3xl max-w-lg mx-auto space-y-3">
+            <ArrowLeftRight className="w-12 h-12 mx-auto mb-2 text-[#919099] opacity-60" />
+            <h3 className="text-base font-bold text-white font-h1">
               {isVie ? 'Không tìm thấy lượt trao đổi phù hợp' : 'No Matching Trades Found'}
             </h3>
-            <p className="text-xs text-gray-400 max-w-sm mx-auto">
+            <p className="text-xs text-[#919099] max-w-sm mx-auto">
               {isVie
                 ? 'Không có lượt trao đổi nào khớp với từ khóa tìm kiếm hoặc tiêu chí lọc hiện tại của bạn.'
                 : 'There are currently no trade sessions matching your search or filter criteria.'}
@@ -426,12 +426,12 @@ export default function MyTradesPage() {
             return (
               <div
                 key={trade.id}
-                className="p-5 rounded-2xl bg-[#14151e]/80 border border-white/10 backdrop-blur-xl shadow-md hover:border-indigo-500/40 transition flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+                className="glass-container p-5 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
               >
                 {/* Trade Left Details */}
                 <div className="flex items-start gap-4">
                   {/* Partner Avatar */}
-                  <div className="w-12 h-12 rounded-full border-2 border-indigo-500/40 bg-gradient-to-tr from-indigo-950 to-slate-800 flex items-center justify-center shrink-0 overflow-hidden text-sm font-bold text-white shadow-md">
+                  <div className="w-12 h-12 rounded-full border-2 border-brand-periwinkle/40 bg-brand-navy flex items-center justify-center shrink-0 overflow-hidden text-sm font-bold text-brand-periwinkle shadow-md">
                     {trade.partner.avatarUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
@@ -447,19 +447,19 @@ export default function MyTradesPage() {
                   <div>
                     <div className="flex items-center gap-2 flex-wrap mb-1">
                       {getStatusBadge(trade.status)}
-                      <span className="text-[11px] text-gray-400">
+                      <span className="text-[11px] text-[#919099]">
                         {isInitiator
                           ? (isVie ? 'Bạn đề xuất' : 'Proposed by You')
                           : (isVie ? `Nhận từ ${trade.partner.fullName}` : `Received from ${trade.partner.fullName}`)}
                       </span>
                     </div>
 
-                    <h3 className="text-base font-bold text-white">
+                    <h3 className="text-base font-bold text-white font-h1">
                       {trade.title}
                     </h3>
 
-                    <div className="flex items-center gap-3 text-xs text-gray-400 mt-1">
-                      <span>{isVie ? 'Đối tác:' : 'Partner:'} <strong className="text-gray-300">{trade.partner.fullName}</strong></span>
+                    <div className="flex items-center gap-3 text-xs text-[#919099] mt-1">
+                      <span>{isVie ? 'Đối tác:' : 'Partner:'} <strong className="text-[#C7C5CF]">{trade.partner.fullName}</strong></span>
                       {trade.submissionDeadlineAt && (
                         <span>• {isVie ? 'Hạn nộp:' : 'Deadline:'} {new Date(trade.submissionDeadlineAt).toLocaleDateString()}</span>
                       )}
@@ -473,7 +473,7 @@ export default function MyTradesPage() {
                     <>
                       <Link
                         href={`/art-trades/${trade.id}`}
-                        className="px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-gray-300 text-xs font-semibold border border-white/10 transition"
+                        className="px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-[#C7C5CF] text-xs font-semibold border border-white/10 transition"
                       >
                         {isVie ? 'Xem đề nghị' : 'View Proposal'}
                       </Link>
@@ -481,7 +481,7 @@ export default function MyTradesPage() {
                         type="button"
                         onClick={() => handleRespond(trade.id, false)}
                         disabled={actionLoadingId === trade.id}
-                        className="px-3 py-2 rounded-xl bg-white/5 hover:bg-rose-500/20 hover:text-rose-300 text-gray-300 text-xs font-semibold border border-white/10 transition disabled:opacity-50"
+                        className="px-3 py-2 rounded-xl bg-white/5 hover:bg-rose-500/20 hover:text-rose-300 text-[#C7C5CF] text-xs font-semibold border border-white/10 transition disabled:opacity-50"
                       >
                         {isVie ? 'Từ chối' : 'Decline'}
                       </button>
@@ -489,7 +489,7 @@ export default function MyTradesPage() {
                         type="button"
                         onClick={() => handleRespond(trade.id, true)}
                         disabled={actionLoadingId === trade.id}
-                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md shadow-indigo-600/30 transition disabled:opacity-50"
+                        className="commission-primary inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs shadow-md transition disabled:opacity-50"
                       >
                         {actionLoadingId === trade.id ? (
                           <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -506,7 +506,7 @@ export default function MyTradesPage() {
                       </div>
                       <Link
                         href={`/art-trades/${trade.id}`}
-                        className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-gray-300 text-xs font-medium border border-white/10 transition"
+                        className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-[#C7C5CF] text-xs font-medium border border-white/10 transition"
                       >
                         {isVie ? 'Xem đề nghị' : 'View Proposal'}
                       </Link>
@@ -516,13 +516,13 @@ export default function MyTradesPage() {
                       <Link
                         href={`/art-trades/${trade.id}?tab=chat`}
                         title={isVie ? 'Mở phòng trò chuyện' : 'Open Trade Chat'}
-                        className="p-2 rounded-xl bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 border border-purple-500/30 transition hover:scale-105"
+                        className="p-2 rounded-xl bg-brand-periwinkle/10 hover:bg-brand-periwinkle/20 text-brand-periwinkle border border-brand-periwinkle/30 transition hover:scale-105"
                       >
                         <MessageSquare className="w-4 h-4" />
                       </Link>
                       <Link
                         href={`/art-trades/${trade.id}`}
-                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white border border-indigo-500/30 text-xs font-bold transition shadow-sm"
+                        className="commission-primary inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs transition shadow-sm"
                       >
                         <span>{isVie ? 'Vào phòng vẽ trao đổi' : 'Enter Trade Room'}</span>
                         <ChevronRight className="w-3.5 h-3.5" />
@@ -533,7 +533,7 @@ export default function MyTradesPage() {
                       <Link
                         href={`/art-trades/${trade.id}?tab=chat`}
                         title={isVie ? 'Xem lịch sử trò chuyện' : 'View Chat History'}
-                        className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white border border-white/10 transition"
+                        className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-[#919099] hover:text-white border border-white/10 transition"
                       >
                         <MessageSquare className="w-4 h-4" />
                       </Link>
@@ -550,13 +550,13 @@ export default function MyTradesPage() {
                       <Link
                         href={`/art-trades/${trade.id}?tab=chat`}
                         title={isVie ? 'Mở phòng trò chuyện' : 'Open Trade Chat'}
-                        className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white border border-white/10 transition"
+                        className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-[#919099] hover:text-white border border-white/10 transition"
                       >
                         <MessageSquare className="w-4 h-4" />
                       </Link>
                       <Link
                         href={`/art-trades/${trade.id}`}
-                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-gray-300 border border-white/10 text-xs font-semibold transition shadow-sm"
+                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-[#C7C5CF] border border-white/10 text-xs font-semibold transition shadow-sm"
                       >
                         <span>{isVie ? 'Xem chi tiết' : 'View Details'}</span>
                         <ChevronRight className="w-3.5 h-3.5" />

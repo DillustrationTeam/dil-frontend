@@ -32,6 +32,7 @@ export interface EventSearchFilterBarProps {
 
 export const DEFAULT_STATUS_OPTIONS: FilterOption[] = [
   { value: '', label: 'All (Default)' },
+  { value: 'Upcoming', label: 'Waiting to Open' },
   { value: 'Open', label: 'Open for Submission' },
   { value: 'Judging', label: 'Judging And Voting' },
   { value: 'Ended', label: 'Ended' },

@@ -4,7 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { ArrowUpRight, Clock, Trophy, Users, Sparkles, CheckCircle2, Flame, Eye, Edit3, Trash2 } from 'lucide-react';
 import type { EventListItemDto } from '../../types/event.types';
-import { eventStatusBadgeStyles, eventStatusLabels } from '../../types/event.types';
+import { eventStatusBadgeStyles, eventStatusLabels, normalizeEventStatus } from '../../types/event.types';
 import { useEventCountdown } from '../../hooks/use-event-countdown';
 
 interface EventCardProps {
@@ -19,9 +19,7 @@ interface EventCardProps {
 export function EventCard({ event, adminActions }: EventCardProps) {
   const countdown = useEventCountdown(event);
 
-  const statusStr = typeof event.status === 'number'
-    ? (event.status === 2 ? 'Open' : event.status === 3 ? 'Judging' : event.status === 4 ? 'Ended' : 'Draft')
-    : String(event.status);
+  const statusStr = normalizeEventStatus(event.status);
 
   const statusColor = eventStatusBadgeStyles[statusStr] || 'border-white/10 bg-white/5 text-outline';
   const statusLabel = eventStatusLabels[statusStr] || statusStr;

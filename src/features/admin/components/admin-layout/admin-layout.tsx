@@ -1,12 +1,13 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/use-auth-store';
 import TopNavbar from '@/components/navigation/TopNavbar';
-import { VerticalNavbar } from '../vertical-navbar';
+import { DEFAULT_ADMIN_NAV_SECTIONS, VerticalNavbar } from '../vertical-navbar';
 import { AdminNavItem, AdminNavSection } from '../vertical-navbar/types';
+import { adminDisputeService } from '../../services/dispute.service';
 
 export interface AdminLayoutProps {
   children: React.ReactNode;
@@ -34,12 +35,70 @@ export function AdminLayout({
   const router = useRouter();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
+  const [openEventDisputesCount, setOpenEventDisputesCount] = useState(0);
   const authenticated = useAuthStore((state) => state.isAuthenticated);
   const roles = useAuthStore((state) => state.roles);
   const pathname = usePathname();
   const administrator = roles.some((role) => role.toLowerCase() === 'administrator');
   const moderator = roles.some((role) => role.toLowerCase() === 'moderator');
   const adminOnly = ['/admin/users', '/admin/fee-policy', '/admin/platform-config', '/admin/payouts'].some((path) => pathname === path || pathname.startsWith(`${path}/`));
+
+  useEffect(() => {
+    if (!authenticated || (!administrator && !moderator)) return;
+
+    let ignore = false;
+    const fetchOpenCount = async () => {
+      try {
+        const res = await adminDisputeService.getSubmissionDisputeQueue({ page: 1, pageSize: 100 });
+        if (!ignore) {
+          const count = (res.items || []).filter(
+            (d) => d.status === 'Pending' || d.status === 'UnderReview'
+          ).length;
+          setOpenEventDisputesCount(count);
+        }
+      } catch {
+        // Ignore if background count fails
+      }
+    };
+
+    void fetchOpenCount();
+    const handleFocus = () => {
+      if (document.visibilityState === 'visible') {
+        void fetchOpenCount();
+      }
+    };
+    const handleDisputesUpdated = () => {
+      void fetchOpenCount();
+    };
+    window.addEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleFocus);
+    window.addEventListener('dil:disputes-updated', handleDisputesUpdated);
+    return () => {
+      ignore = true;
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleFocus);
+      window.removeEventListener('dil:disputes-updated', handleDisputesUpdated);
+    };
+  }, [authenticated, administrator, moderator]);
+
+  const effectiveSidebarSections = useMemo(() => {
+    if (sidebarSections) return sidebarSections;
+    if (sidebarItems) return undefined;
+    if (openEventDisputesCount <= 0) return DEFAULT_ADMIN_NAV_SECTIONS;
+
+    return DEFAULT_ADMIN_NAV_SECTIONS.map((sec) => ({
+      ...sec,
+      items: sec.items.map((item) =>
+        item.id === 'event-operations'
+          ? {
+              ...item,
+              badge: openEventDisputesCount,
+              badgeVariant: 'warning' as const,
+            }
+          : item
+      ),
+    }));
+  }, [sidebarSections, sidebarItems, openEventDisputesCount]);
 
   const toggleMobileNav = () => {
     setIsMobileNavOpen((prev) => !prev);
@@ -90,7 +149,7 @@ if (!authenticated || (!administrator && (!moderator || adminOnly))) {
           <div className="relative w-72 max-w-[80vw] h-full z-10 bg-[#1F2335] border-r border-white/10 shadow-2xl flex flex-col">
             <VerticalNavbar
               items={sidebarItems}
-              sections={sidebarSections}
+              sections={effectiveSidebarSections}
               adminName={adminName}
               adminRole={adminRole}
               showScreenIds={showScreenIds}
@@ -108,7 +167,7 @@ if (!authenticated || (!administrator && (!moderator || adminOnly))) {
         <div className="hidden md:flex">
           <VerticalNavbar
             items={sidebarItems}
-            sections={sidebarSections}
+            sections={effectiveSidebarSections}
             adminName={adminName}
             adminRole={adminRole}
             showScreenIds={showScreenIds}
