@@ -23,7 +23,7 @@ function formatTimestamp(dateStr?: string | null) {
 import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { Package, Sparkles, ChevronLeft, ChevronRight, X, Clock, Star, ArrowUpDown } from 'lucide-react';
+import { Package, Sparkles, ChevronLeft, ChevronRight, X, Clock, Star, ArrowUpDown, Gavel } from 'lucide-react';
 import CreateCommissionModal from '@/components/modals/CreateCommissionModal';
 import { useAuthStore } from '@/store/use-auth-store';
 import { creatorRateCardService, getPackageSlotInfo, type RateCardPackage } from '@/features/creator-studio/services/creator-rate-card.service';
@@ -391,6 +391,7 @@ export function CreatorProfileScreen({ id }: { id: string }) {
             1: reviews.filter((r) => r.rating === 1).length,
           };
           const countWithReply = reviews.filter((r) => Boolean(r.reviewerReply)).length;
+          const auctionReviewCount = reviews.filter((r) => r.source === 'auction').length;
 
           const avgRating = (reviews.reduce((acc, r) => acc + r.rating, 0) / totalReviewCount).toFixed(1);
 
@@ -398,6 +399,7 @@ export function CreatorProfileScreen({ id }: { id: string }) {
           const availablePackages = Array.from(
             new Set(
               reviews
+                .filter((r) => r.source !== 'auction')
                 .map((r) => r.commissionTitle)
                 .filter((title): title is string => Boolean(title && title.trim()))
             )
@@ -418,7 +420,11 @@ export function CreatorProfileScreen({ id }: { id: string }) {
               }
             }
             if (packageFilter !== 'all') {
-              if (r.commissionTitle !== packageFilter) return false;
+              if (packageFilter === 'auction') {
+                if (r.source !== 'auction') return false;
+              } else if (r.source === 'auction' || r.commissionTitle !== packageFilter) {
+                return false;
+              }
             }
             return true;
           });
@@ -569,12 +575,12 @@ export function CreatorProfileScreen({ id }: { id: string }) {
                   </div>
                 </div>
 
-                {/* Package Filter Row (Lọc theo gói commission) */}
-                {availablePackages.length > 0 && (
+                {/* Review source filter */}
+                {(availablePackages.length > 0 || auctionReviewCount > 0) && (
                   <div className="pt-3 border-t border-white/10 flex flex-wrap items-center gap-2">
                     <span className="text-xs text-slate-400 font-semibold flex items-center gap-1.5 mr-1">
                       <Package size={13} className="text-[#A7ACD9]" />
-                      Gói:
+                      Nguồn:
                     </span>
 
                     <button
@@ -586,8 +592,22 @@ export function CreatorProfileScreen({ id }: { id: string }) {
                           : 'bg-white/5 border-white/10 text-slate-300 hover:border-white/20 hover:text-white'
                       }`}
                     >
-                      Tất cả các gói (${totalReviewCount})
+                      Tất cả đánh giá (${totalReviewCount})
                     </button>
+
+                    {auctionReviewCount > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => handlePackageChange('auction')}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all flex items-center gap-1 ${
+                          packageFilter === 'auction'
+                            ? 'bg-[#A7ACD9] text-[#1F2335] border-[#A7ACD9] shadow-sm font-bold'
+                            : 'bg-white/5 border-white/10 text-slate-300 hover:border-white/20 hover:text-white'
+                        }`}
+                      >
+                        <Gavel size={11} /> Đấu giá ({auctionReviewCount})
+                      </button>
+                    )}
 
                     {availablePackages.map((pkg) => {
                       const isActive = packageFilter === pkg;
@@ -623,6 +643,7 @@ export function CreatorProfileScreen({ id }: { id: string }) {
                     const { userComment, tags } = parseReviewComment(review.comment);
                     const reviewerName = review.reviewerName || 'Khách hàng';
                     const packageName = review.commissionTitle || 'Đơn vẽ theo yêu cầu';
+                    const isAuctionReview = review.source === 'auction';
                     const timestamp = formatTimestamp(review.createdAt);
 
                     return (
@@ -650,10 +671,16 @@ export function CreatorProfileScreen({ id }: { id: string }) {
                                 </div>
                               </div>
                               <div className="flex flex-wrap items-center gap-2 mt-1 text-[11px] text-slate-400">
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-[#C5C9F8] font-medium">
-                                  <Package size={11} className="text-[#A7ACD9]" />
-                                  Gói: <strong className="text-white">{packageName}</strong>
-                                </span>
+                                {isAuctionReview ? (
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-400/10 border border-amber-400/20 text-amber-300 font-medium">
+                                    <Gavel size={11} /> Đấu giá
+                                  </span>
+                                ) : (
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-[#C5C9F8] font-medium">
+                                    <Package size={11} className="text-[#A7ACD9]" />
+                                    Gói: <strong className="text-white">{packageName}</strong>
+                                  </span>
+                                )}
                                 {timestamp && (
                                   <span className="inline-flex items-center gap-1 text-slate-400">
                                     <Clock size={11} className="text-slate-500" />

@@ -214,7 +214,7 @@ export default function DigitalCertificateModal({
                       <>
                         <li>Ghi nguồn tác giả (Credit): <strong>{extTerms.requireCredit ? 'Bắt buộc ghi nguồn Creator' : 'Không bắt buộc'}</strong> • Đăng Portfolio: <strong>{extTerms.allowPortfolioDisplay ? 'Creator được phép đăng mẫu' : 'Giữ kín riêng tư'}</strong>.</li>
                         {extTerms.prohibitAiTraining && <li><strong>Cấm sử dụng tác phẩm để huấn luyện AI (AI Training) hoặc phát hành NFT.</strong></li>}
-                        {extTerms.usageRestrictions && <li>Ghi ch? b? sung: {extTerms.usageRestrictions}</li>}
+                        {extTerms.usageRestrictions && <li>Ghi chú bổ sung: {extTerms.usageRestrictions}</li>}
                       </>
                     )}
                   </ul>
