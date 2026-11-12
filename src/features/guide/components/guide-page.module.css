@@ -1,0 +1,975 @@
+/* Scoped styles for the DILLUSTRATION Platform Guide & Legal Escrow Flow (/guide) */
+
+.guideWrapper {
+  --guide-bg-base: transparent;
+  --guide-bg-node: #1f2335;
+  --guide-bg-card: rgba(24, 27, 41, 0.72);
+  --guide-bg-card-solid: #181b29;
+  --guide-bubble-bg: #181b29;
+  --guide-border-subtle: rgba(255, 255, 255, 0.08);
+  --guide-border-top: rgba(255, 255, 255, 0.18);
+  --guide-border-strong: rgba(167, 172, 217, 0.28);
+  --guide-accent: #a7acd9;
+  --guide-accent-bright: #c2c7f6;
+  --guide-text-main: #e4e1e5;
+  --guide-text-muted: #c7c5cf;
+  --guide-tablet-body: #161926;
+  --guide-tablet-screen: #101320;
+  --guide-tablet-border: rgba(167, 172, 217, 0.28);
+  --guide-pen-body: #272c44;
+  --guide-pen-accent: #a7acd9;
+  --guide-divider: rgba(255, 255, 255, 0.09);
+  --guide-cascade-bg: rgba(19, 19, 22, 0.55);
+  --guide-cascade-row: rgba(167, 172, 217, 0.07);
+  --guide-tag-bg: rgba(167, 172, 217, 0.14);
+  --guide-btn-primary-bg: #a7acd9;
+  --guide-btn-primary-hover: #c2c7f6;
+  --guide-btn-primary-text: #1f2335;
+  --guide-btn-secondary-bg: rgba(255, 255, 255, 0.05);
+  --guide-sidebar-bg: rgba(255, 255, 255, 0.03);
+
+  min-height: calc(100vh - 80px);
+  width: 100%;
+  background: transparent;
+  color: var(--guide-text-main);
+  font-family: var(--font-body-grotesk), system-ui, -apple-system, sans-serif;
+}
+
+:global(html.light) .guideWrapper {
+  --guide-bg-base: transparent;
+  --guide-bg-node: #f8fafc;
+  --guide-bg-card: #ffffff;
+  --guide-bg-card-solid: #ffffff;
+  --guide-bubble-bg: #ffffff;
+  --guide-border-subtle: #e2e8f0;
+  --guide-border-top: #e2e8f0;
+  --guide-border-strong: rgba(74, 84, 142, 0.28);
+  --guide-accent: #4a548e;
+  --guide-accent-bright: #3b4478;
+  --guide-text-main: #0f172a;
+  --guide-text-muted: #475569;
+  --guide-tablet-body: #e2e8f0;
+  --guide-tablet-screen: #1f2335;
+  --guide-tablet-border: #cbd5e1;
+  --guide-pen-body: #334155;
+  --guide-pen-accent: #6872aa;
+  --guide-divider: #e2e8f0;
+  --guide-cascade-bg: #f8fafc;
+  --guide-cascade-row: rgba(74, 84, 142, 0.06);
+  --guide-tag-bg: rgba(74, 84, 142, 0.1);
+  --guide-btn-primary-bg: #a7acd9;
+  --guide-btn-primary-hover: #c2c7f6;
+  --guide-btn-primary-text: #1f2335;
+  --guide-btn-secondary-bg: #ffffff;
+  --guide-sidebar-bg: #ffffff;
+
+  background: transparent;
+}
+
+.deskStage {
+  position: relative;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 28px 24px 64px;
+}
+
+.guideFlowContainer {
+  position: relative;
+  z-index: 4;
+}
+
+/* ============================================================
+   ARTIST DESK PROPS UNDERLAY IN HERO (BẢNG VẼ & BÚT CẢM ỨNG)
+   ============================================================ */
+.deskTablet {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 320px;
+  height: 205px;
+  border-radius: 20px;
+  background: var(--guide-tablet-body);
+  border: 2px solid var(--guide-tablet-border);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.38), inset 0 2px 4px rgba(255, 255, 255, 0.08);
+  transform: rotate(4deg);
+  z-index: 1;
+  opacity: 0.92;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding: 14px 18px;
+  pointer-events: none;
+}
+
+.tabletScreen {
+  padding: 12px;
+  flex: 1;
+  border-radius: 12px;
+  background: var(--guide-tablet-screen);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tabletSketchCurve {
+  position: absolute;
+  stroke: var(--guide-pen-accent);
+  stroke-width: 2;
+  stroke-dasharray: 4 3;
+  opacity: 0.6;
+  fill: none;
+}
+
+.tabletTouchDial {
+  position: absolute;
+  top: 14px;
+  left: 12px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tabletTouchDial::after {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--guide-pen-accent);
+}
+
+.tabletKeys {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.tabletKey {
+  width: 14px;
+  height: 8px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.deskStylus {
+  position: absolute;
+  top: 100px;
+  right: 215px;
+  width: 155px;
+  height: 16px;
+  transform: rotate(-16deg);
+  z-index: 2;
+  filter: drop-shadow(4px 8px 12px rgba(0, 0, 0, 0.45));
+  pointer-events: none;
+}
+
+@media (max-width: 980px) {
+  .deskStage {
+    padding: 24px 16px 56px;
+  }
+
+  .deskTablet,
+  .deskStylus {
+    display: none;
+  }
+}
+
+/* ============================================================
+   1. TOP SECTION: HERO FLOW PANEL & TALKING BUBBLE
+   ============================================================ */
+.heroFlowPanel {
+  position: relative;
+  width: 100%;
+  padding: 12px 0 36px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.heroFlowHeading {
+  position: relative;
+  z-index: 6;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: min(760px, calc(100% - 385px));
+}
+
+@media (max-width: 980px) {
+  .heroFlowHeading {
+    max-width: 100%;
+  }
+}
+
+.heroFlowTitle {
+  font-family: var(--font-heading), system-ui, sans-serif;
+  font-size: clamp(26px, 3vw, 36px);
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  color: var(--guide-text-main);
+  line-height: 1.25;
+}
+
+.heroFlowSub {
+  font-size: 15px;
+  color: var(--guide-text-muted);
+  max-width: 820px;
+  line-height: 1.6;
+}
+
+/* TALKING BUBBLE */
+.talkBubble {
+  position: relative;
+  z-index: 5;
+  background: var(--guide-bubble-bg);
+  border: 1px solid var(--guide-border-strong);
+  border-top: 1px solid rgba(194, 199, 246, 0.36);
+  border-radius: 18px 22px 20px 20px;
+  padding: 20px 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.28), 0 0 20px rgba(167, 172, 217, 0.05);
+  margin-top: 8px;
+}
+
+:global(html.light) .talkBubble {
+  border-top-color: var(--guide-border-strong);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+}
+
+.bubbleTailWrap {
+  position: absolute;
+  top: -16px;
+  left: 48px;
+  width: 32px;
+  height: 18px;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.bubbleTailSvg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.bubbleTailFill {
+  fill: var(--guide-bg-card-solid);
+}
+
+.bubbleTailStroke {
+  stroke: var(--guide-border-strong);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+}
+
+.bubbleTailBase {
+  stroke: var(--guide-bg-card-solid);
+  stroke-width: 3;
+}
+
+.heroEscrowHead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14.5px;
+  font-weight: 800;
+  color: var(--guide-text-main);
+  flex-wrap: wrap;
+}
+
+.heroEscrowIcon {
+  width: 18px;
+  height: 18px;
+  color: var(--guide-accent);
+  flex-shrink: 0;
+}
+
+.bubbleSpeakerTag {
+  font-size: 11.5px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  background: var(--guide-tag-bg);
+  color: var(--guide-accent);
+  border: 1px solid var(--guide-border-strong);
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.heroEscrowDesc {
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--guide-text-muted);
+}
+
+.trustBadgesRow {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  padding-top: 10px;
+  border-top: 1px dashed var(--guide-border-subtle);
+}
+
+.trustBadgeItem {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--guide-text-muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.trustPlus {
+  color: var(--guide-accent);
+  flex-shrink: 0;
+}
+
+/* CTA BUTTONS */
+.heroFlowActions {
+  position: relative;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.btnBrandPrimary {
+  background: var(--guide-btn-primary-bg);
+  color: var(--guide-btn-primary-text);
+  padding: 10px 24px;
+  border-radius: 9999px;
+  font-size: 13.5px;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.22);
+  transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btnBrandPrimary:hover {
+  background: var(--guide-btn-primary-hover);
+  transform: translateY(-1px);
+}
+
+.btnGuideSecondary {
+  background: var(--guide-btn-secondary-bg);
+  border: 1px solid var(--guide-border-strong);
+  color: var(--guide-text-main);
+  padding: 10px 22px;
+  border-radius: 9999px;
+  font-size: 13.5px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+}
+
+.btnGuideSecondary:hover {
+  background: var(--guide-tag-bg);
+  transform: translateY(-1px);
+}
+
+.guideLinkSecondary {
+  color: var(--guide-accent);
+  font-size: 13.5px;
+  text-decoration: underline;
+  margin-left: 6px;
+  font-weight: 700;
+  transition: color 0.2s ease;
+}
+
+.guideLinkSecondary:hover {
+  color: var(--guide-text-main);
+}
+
+/* ============================================================
+   2. MIDDLE SECTION: 4 CORE OPERATIONS ZIG-ZAG TIMELINE
+   ============================================================ */
+.timelineFlowPanel {
+  position: relative;
+  width: 100%;
+  padding: 44px 0 54px;
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+  border-top: 1px solid var(--guide-border-subtle);
+}
+
+.timelineFlowHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: center;
+  align-items: center;
+}
+
+.timelineFlowTitle {
+  font-family: var(--font-heading), system-ui, sans-serif;
+  font-size: clamp(22px, 2.4vw, 28px);
+  font-weight: 800;
+  color: var(--guide-text-main);
+  letter-spacing: -0.02em;
+}
+
+.timelineFlowSub {
+  font-size: 14px;
+  color: var(--guide-text-muted);
+  max-width: 740px;
+  line-height: 1.55;
+}
+
+.verticalZigzagTimeline {
+  position: relative;
+  width: 100%;
+  padding: 10px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.timelineCentralSpine {
+  position: absolute;
+  top: 24px;
+  bottom: 24px;
+  left: 50%;
+  width: 2px;
+  transform: translateX(-50%);
+  background: linear-gradient(
+    180deg,
+    rgba(194, 199, 246, 0.15) 0%,
+    var(--guide-accent) 15%,
+    var(--guide-accent) 85%,
+    rgba(194, 199, 246, 0.15) 100%
+  );
+  z-index: 1;
+}
+
+.timelineZigzagRow {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: 1fr 64px 1fr;
+  align-items: center;
+  gap: 24px;
+  width: 100%;
+}
+
+.spineNodeAnchor {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3;
+}
+
+.spineNodeBadge {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--guide-bg-node);
+  border: 2px solid var(--guide-accent);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--guide-text-main);
+  font-family: var(--font-guide-mono), ui-monospace, monospace;
+  position: relative;
+  z-index: 2;
+}
+
+.nodeConnectorArm {
+  position: absolute;
+  top: 50%;
+  height: 2px;
+  background: linear-gradient(90deg, rgba(194, 199, 246, 0.35), var(--guide-accent));
+  z-index: 1;
+}
+
+.connectorLeft {
+  right: 50%;
+  width: 32px;
+}
+
+.connectorRight {
+  left: 50%;
+  width: 32px;
+}
+
+.timelineStepCard {
+  position: relative;
+  background: var(--guide-bg-card);
+  border: 1px solid var(--guide-border-subtle);
+  border-top: 1px solid var(--guide-border-top);
+  border-radius: 16px;
+  padding: 22px 26px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25), 0 0 20px rgba(167, 172, 217, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  backdrop-filter: blur(12px);
+  transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+:global(html.light) .timelineStepCard {
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+}
+
+.timelineStepCard:hover {
+  border-color: var(--guide-border-strong);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35), 0 0 0 1px var(--guide-border-strong);
+  transform: translateY(-3px) scale(1.008) !important;
+}
+
+.cardTiltLeft {
+  transform: rotate(-0.35deg);
+}
+
+.cardTiltRight {
+  transform: rotate(0.35deg);
+}
+
+.timelineSpacer {
+  min-height: 10px;
+}
+
+.cardClipAnchor {
+  position: absolute;
+  top: -12px;
+  left: 20px;
+  width: 18px;
+  height: 28px;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.cardClipSvg {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.45));
+}
+
+.cardStepHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.cardStepTag {
+  font-size: 11.5px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--guide-accent);
+  background: var(--guide-tag-bg);
+  padding: 3px 9px;
+  border-radius: 6px;
+  border: 1px solid var(--guide-border-strong);
+}
+
+.cardStepSub {
+  font-size: 12px;
+  font-family: var(--font-guide-mono), ui-monospace, monospace;
+  color: var(--guide-accent);
+}
+
+.cardStepTitle {
+  font-family: var(--font-heading), system-ui, sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--guide-text-main);
+  line-height: 1.35;
+}
+
+.cardStepDesc {
+  font-size: 13.5px;
+  color: var(--guide-text-muted);
+  line-height: 1.6;
+}
+
+.cardStepFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding-top: 10px;
+  border-top: 1px dashed var(--guide-border-subtle);
+}
+
+.footerChipPrimary {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--guide-accent);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.footerChipSec {
+  font-size: 11.5px;
+  font-family: var(--font-guide-mono), ui-monospace, monospace;
+  color: var(--guide-text-main);
+  background: var(--guide-tag-bg);
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+/* CASCADING MILESTONE FLOW IN OPERATION 02 */
+.cascadingFlowContainer {
+  background: var(--guide-cascade-bg);
+  border: 1px solid var(--guide-border-subtle);
+  border-radius: 10px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 4px 0;
+}
+
+.cascadeStageRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 5px 10px;
+  border-radius: 6px;
+  background: var(--guide-cascade-row);
+}
+
+.cascadeStageBadge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  color: var(--guide-text-main);
+  font-weight: 700;
+}
+
+.cascadeStepNum {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--guide-tag-bg);
+  color: var(--guide-accent);
+  font-size: 11.5px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-guide-mono), ui-monospace, monospace;
+}
+
+.cascadePct {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--guide-accent);
+  background: var(--guide-tag-bg);
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-family: var(--font-guide-mono), ui-monospace, monospace;
+}
+
+.cascadeConnectorDown {
+  display: flex;
+  justify-content: flex-start;
+  padding-left: 11px;
+  color: var(--guide-accent);
+  opacity: 0.65;
+  height: 14px;
+  align-items: center;
+}
+
+@media (max-width: 860px) {
+  .timelineCentralSpine {
+    left: 28px;
+    transform: none;
+  }
+
+  .timelineZigzagRow {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding-left: 58px;
+  }
+
+  .spineNodeAnchor {
+    position: absolute;
+    left: 6px;
+    top: 20px;
+  }
+
+  .nodeConnectorArm,
+  .timelineSpacer {
+    display: none;
+  }
+
+  .cardTiltLeft,
+  .cardTiltRight {
+    transform: none !important;
+    width: 100%;
+  }
+}
+
+/* ============================================================
+   3. BOTTOM SECTION: FAQS ACCORDION & PLATFORM META HUB
+   ============================================================ */
+.faqHubSection {
+  position: relative;
+  width: 100%;
+  padding: 44px 0 24px;
+  border-top: 1px solid var(--guide-border-subtle);
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 48px;
+}
+
+@media (max-width: 980px) {
+  .faqHubSection {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+}
+
+.faqFlatColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.flatFaqHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.flatFaqTitle {
+  font-family: var(--font-heading), system-ui, sans-serif;
+  font-size: clamp(20px, 2vw, 24px);
+  font-weight: 800;
+  color: var(--guide-text-main);
+  letter-spacing: -0.015em;
+}
+
+.flatFaqSubtitle {
+  font-size: 13.5px;
+  color: var(--guide-text-muted);
+  line-height: 1.5;
+}
+
+.flatFaqList {
+  display: flex;
+  flex-direction: column;
+}
+
+.flatFaqItem {
+  border-bottom: 1px solid var(--guide-divider);
+  padding: 18px 0;
+}
+
+.flatFaqSummary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  cursor: pointer;
+  user-select: none;
+  list-style: none;
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--guide-text-main);
+}
+
+.flatFaqSummary::-webkit-details-marker {
+  display: none;
+}
+
+.flatFaqSummaryLeft {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+}
+
+.faqTag {
+  font-size: 11.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: var(--guide-tag-bg);
+  color: var(--guide-accent);
+  border: 1px solid var(--guide-border-strong);
+  flex-shrink: 0;
+}
+
+.faqChevron {
+  width: 16px;
+  height: 16px;
+  color: var(--guide-accent);
+  transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+  flex-shrink: 0;
+}
+
+.flatFaqItem[open] .faqChevron {
+  transform: rotate(180deg);
+}
+
+.flatFaqBody {
+  padding: 12px 0 6px;
+  font-size: 13.5px;
+  color: var(--guide-text-muted);
+  line-height: 1.65;
+}
+
+.flatFaqBody strong {
+  color: var(--guide-text-main);
+}
+
+.flatFaqBody ul {
+  margin: 8px 0 0 18px;
+  padding: 0;
+  list-style: disc;
+}
+
+.flatFaqBody li {
+  margin-bottom: 4px;
+}
+
+/* META SIDEBAR / SUPPORT CARD */
+.supportMetaSidebar {
+  background: var(--guide-sidebar-bg);
+  border: 1px solid var(--guide-border-subtle);
+  border-top: 1px solid var(--guide-border-top);
+  border-radius: 16px;
+  padding: 22px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  height: fit-content;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.22);
+}
+
+:global(html.light) .supportMetaSidebar {
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+}
+
+.supportMetaHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-bottom: 10px;
+  border-bottom: 1px dashed var(--guide-border-subtle);
+}
+
+.supportMetaTitle {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--guide-text-main);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.subCardIconSvg {
+  width: 15px;
+  height: 15px;
+  color: var(--guide-accent);
+  flex-shrink: 0;
+}
+
+.subCardTag {
+  font-size: 11.5px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: var(--guide-tag-bg);
+  color: var(--guide-accent);
+  border: 1px solid var(--guide-border-strong);
+}
+
+.supportMetaContent {
+  font-size: 13px;
+  color: var(--guide-text-muted);
+  line-height: 1.6;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.supportMetaContent strong {
+  color: var(--guide-text-main);
+}
+
+.supportMetaList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12.5px;
+}
+
+.supportMetaItem {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.supportMetaDot {
+  color: var(--guide-accent);
+  font-weight: 800;
+}
+
+.supportMetaFooter {
+  padding-top: 12px;
+  border-top: 1px dashed var(--guide-border-subtle);
+  font-size: 12.5px;
+  color: var(--guide-text-muted);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.supportMetaLink,
+.supportMetaActionLink {
+  color: var(--guide-accent);
+  font-weight: 700;
+  text-decoration: underline;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.supportMetaLink:hover,
+.supportMetaActionLink:hover {
+  color: var(--guide-text-main);
+}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -8,13 +8,11 @@ import {
   CheckCircle2,
   CircleAlert,
   FileText,
-  FolderArchive,
+  Frame,
   Gavel,
   Package,
   RefreshCw,
   ShieldCheck,
-  Trash2,
-  UploadCloud,
 } from 'lucide-react';
 import { useAuthStore } from '@/store/use-auth-store';
 import { auctionError, auctionService } from '../services/auction.service';
@@ -27,13 +25,9 @@ const auctionSchema = z.object({
   artworkId: z.string().uuid('Vui lòng chọn tác phẩm nghệ thuật.'),
   startPrice: z.number().min(10000, 'Giá khởi điểm tối thiểu là 10.000 ₫.'),
   bidStep: z.number().min(1000, 'Bước giá tối thiểu là 1.000 ₫.'),
-  reservePrice: z.number().nullable(),
   buyNowPrice: z.number().nullable(),
   startAt: z.string().min(1),
   endAt: z.string().min(1),
-  masterFileUrl: z.string().min(1, 'Đường dẫn file nén không hợp lệ').nullable().optional(),
-  masterFileName: z.string().nullable().optional(),
-  masterFileSizeBytes: z.number().nullable().optional(),
   hasPhysicalCopy: z.boolean().optional(),
   physicalDescription: z.string().max(500, 'Mô tả tranh vật lý không quá 500 ký tự').nullable().optional(),
 }).superRefine((value, ctx) => {
@@ -44,7 +38,6 @@ const auctionSchema = z.object({
   if (end <= new Date()) ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['endAt'], message: 'Thời gian kết thúc phải nằm trong tương lai.' });
   if (duration < 3600000) ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['endAt'], message: 'Phiên đấu giá phải kéo dài ít nhất 1 giờ.' });
   if (duration > 30 * 86400000) ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['endAt'], message: 'Phiên đấu giá tối đa 30 ngày.' });
-  if (value.reservePrice !== null && value.reservePrice < value.startPrice) ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['reservePrice'], message: 'Giá bảo lưu không được thấp hơn giá khởi điểm.' });
   if (value.buyNowPrice !== null && value.buyNowPrice <= value.startPrice) ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['buyNowPrice'], message: 'Giá mua ngay phải cao hơn giá khởi điểm.' });
 });
 
@@ -64,13 +57,9 @@ export function AuctionCreateScreen({ userId }: { userId: string | null }) {
       artworkId: initialArtworkId,
       startPrice: 500000,
       bidStep: 50000,
-      reservePrice: null,
       buyNowPrice: null,
       startAt: now.toISOString().slice(0, 16),
       endAt: new Date(now.getTime() + 3 * 86400000).toISOString().slice(0, 16),
-      masterFileUrl: null,
-      masterFileName: null,
-      masterFileSizeBytes: null,
       hasPhysicalCopy: false,
       physicalDescription: '',
     };
@@ -84,53 +73,6 @@ export function AuctionCreateScreen({ userId }: { userId: string | null }) {
   const [selectedArtworkTitle, setSelectedArtworkTitle] = useState<string>('');
   const [agreedCommercialRights, setAgreedCommercialRights] = useState(false);
   const [showCommercialRightsModal, setShowCommercialRightsModal] = useState(false);
-
-  const [isUploadingPack, setIsUploadingPack] = useState(false);
-  const [uploadError, setUploadError] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const processFileUpload = async (file: File) => {
-    if (file.size > 150 * 1024 * 1024) {
-      setUploadError('Tệp quá lớn. Giới hạn dung lượng tối đa là 150MB.');
-      return;
-    }
-
-    try {
-      setIsUploadingPack(true);
-      setUploadError(null);
-      const res = await auctionService.uploadMasterPack(file);
-      setForm((prev) => ({
-        ...prev,
-        masterFileUrl: res.fileUrl,
-        masterFileName: res.fileName,
-        masterFileSizeBytes: res.fileSizeBytes,
-      }));
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Tải lên tệp thất bại.';
-      setUploadError(msg);
-    } finally {
-      setIsUploadingPack(false);
-    }
-  };
-
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    await processFileUpload(file);
-  };
-
-  const handleRemoveFile = () => {
-    setForm((prev) => ({
-      ...prev,
-      masterFileUrl: null,
-      masterFileName: null,
-      masterFileSizeBytes: null,
-    }));
-    setUploadError(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
-  };
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -203,7 +145,7 @@ export function AuctionCreateScreen({ userId }: { userId: string | null }) {
             <div>
               <p className="font-bold text-amber-300">Niêm yết bán lại trên thị trường thứ cấp (Secondary Market / Resell)</p>
               <p className="mt-0.5 text-amber-200/80">
-                Bạn đang thực hiện quyền tài sản độc bản 1-of-1 để mở phiên đấu giá cho tác phẩm thuộc sở hữu của bạn. Khi phiên chốt, quyền sở hữu và chứng chỉ số mới sẽ được chuyển giao toàn bộ cho người thắng tiếp theo.
+                Bạn đang thực hiện quyền tài sản độc bản để mở phiên đấu giá cho tác phẩm thuộc sở hữu của bạn. Khi phiên chốt, quyền sở hữu và chứng chỉ số mới sẽ được chuyển giao toàn bộ cho người thắng tiếp theo.
               </p>
             </div>
           </div>
@@ -280,24 +222,6 @@ export function AuctionCreateScreen({ userId }: { userId: string | null }) {
               </span>
             </div>
 
-            <div>
-              <label htmlFor="reservePrice" className="mb-1.5 block text-xs font-semibold text-on-surface-variant">
-                Giá bảo lưu (₫) (Tùy chọn)
-              </label>
-              <input
-                id="reservePrice"
-                type="number"
-                min={form.startPrice}
-                step="1000"
-                value={form.reservePrice ?? ''}
-                onChange={(e) => setForm({ ...form, reservePrice: e.target.value ? Number(e.target.value) : null })}
-                placeholder="Để trống nếu không bảo lưu"
-                className="w-full rounded-xl border border-white/15 bg-brand-navy/60 px-4 py-2.5 text-sm text-on-surface focus:border-brand-periwinkle focus:outline-none"
-              />
-              <span className="mt-1 block text-[11px] text-outline">
-                Mức giá tối thiểu phiên phải đạt được để chốt bán thành công.
-              </span>
-            </div>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
@@ -330,118 +254,6 @@ export function AuctionCreateScreen({ userId }: { userId: string | null }) {
             </div>
           </div>
 
-          {/* Master File Pack Section (Optional) */}
-          <div className="rounded-2xl border border-white/10 bg-black/25 p-4 space-y-3">
-            <div className="flex items-start justify-between">
-              <div>
-                <label className="text-xs font-bold text-white flex items-center gap-1.5">
-                  <FolderArchive size={16} className="text-amber-400" />
-                  Đính kèm Master File Pack (.zip, .psd, .rar) (Tùy chọn)
-                </label>
-                <p className="text-[11px] text-outline mt-0.5">
-                  Tải lên tệp gốc bí mật (.zip chứa PSD phân layer, file in ấn 300 DPI, asset độc quyền). Tệp được lưu trữ bảo mật trên máy chủ, chỉ duy nhất người thắng phiên sau khi thanh toán mới nhận được link tải an toàn.
-                </p>
-              </div>
-              <span className="text-[10px] font-semibold text-amber-300 bg-amber-400/10 border border-amber-400/20 px-2.5 py-0.5 rounded-full shrink-0">
-                Bảo mật cho Winner
-              </span>
-            </div>
-
-            {/* Input file ẩn */}
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".zip,.rar,.7z,.tar,.gz,.psd,.clip,.png,.tif,.tiff"
-              onChange={handleFileChange}
-              className="hidden"
-              id="masterPackFileInput"
-            />
-
-            {/* Trạng thái đã tải lên tệp */}
-            {form.masterFileUrl ? (
-              <div className="flex items-center justify-between rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3.5">
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="rounded-lg bg-emerald-500/20 p-2 text-emerald-400 shrink-0">
-                    <CheckCircle2 size={20} />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-xs font-bold text-white truncate">
-                      {form.masterFileName || 'Master-File-Pack.zip'}
-                    </p>
-                    <p className="text-[11px] text-emerald-300/80 mt-0.5">
-                      {form.masterFileSizeBytes
-                        ? `${(form.masterFileSizeBytes / (1024 * 1024)).toFixed(2)} MB • `
-                        : ''}
-                      Đã tải lên hệ thống lưu trữ bảo mật
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2 shrink-0 ml-3">
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={isUploadingPack}
-                    className="rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs text-white hover:bg-white/10 transition"
-                  >
-                    Thay file
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleRemoveFile}
-                    className="rounded-lg border border-rose-500/30 bg-rose-500/10 p-1.5 text-rose-300 hover:bg-rose-500/20 transition"
-                    title="Xóa tệp đính kèm"
-                  >
-                    <Trash2 size={15} />
-                  </button>
-                </div>
-              </div>
-            ) : (
-              /* Khung Kéo thả / Bấm để tải lên */
-              <div
-                onClick={() => !isUploadingPack && fileInputRef.current?.click()}
-                onDragOver={(e) => e.preventDefault()}
-                onDrop={async (e) => {
-                  e.preventDefault();
-                  if (isUploadingPack) return;
-                  const droppedFile = e.dataTransfer.files?.[0];
-                  if (droppedFile) await processFileUpload(droppedFile);
-                }}
-                className={`relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-6 text-center transition cursor-pointer ${
-                  isUploadingPack
-                    ? 'border-amber-400/50 bg-amber-400/5 cursor-wait'
-                    : 'border-white/15 bg-white/5 hover:border-brand-periwinkle hover:bg-brand-periwinkle/5'
-                }`}
-              >
-                {isUploadingPack ? (
-                  <div className="space-y-2">
-                    <RefreshCw size={24} className="mx-auto animate-spin text-amber-400" />
-                    <p className="text-xs font-semibold text-white">Đang tải lên và mã hóa tệp bàn giao...</p>
-                    <p className="text-[11px] text-outline">Vui lòng đợi giây lát</p>
-                  </div>
-                ) : (
-                  <div className="space-y-1.5">
-                    <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-brand-periwinkle/15 text-brand-periwinkle">
-                      <UploadCloud size={20} />
-                    </div>
-                    <p className="text-xs font-bold text-white">
-                      Bấm để tải tệp lên hoặc kéo thả file vào đây
-                    </p>
-                    <p className="text-[11px] text-outline">
-                      Định dạng hỗ trợ: <span className="text-brand-periwinkle">.ZIP, .RAR, .7Z, .PSD</span> (Tối đa 150MB)
-                    </p>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {uploadError && (
-              <p className="text-xs text-rose-400 flex items-center gap-1.5">
-                <CircleAlert size={13} /> {uploadError}
-              </p>
-            )}
-          </div>
-
           {/* Bàn giao tranh vật lý (Tùy chọn) */}
           <div className="rounded-2xl border border-white/10 bg-white/5 p-4 space-y-3">
             <div className="flex items-start gap-3">
@@ -458,7 +270,7 @@ export function AuctionCreateScreen({ userId }: { userId: string | null }) {
                   Có thể cung cấp bản tranh vật lý cho người thắng cuộc
                 </label>
                 <p className="text-xs text-outline">
-                  Người xem sẽ thấy huy hiệu <span className="text-amber-300 font-semibold">[🖼️ Có bản vật lý]</span> để quyết định đấu giá.
+                  Người xem sẽ thấy huy hiệu <span className="inline-flex items-center gap-1 align-middle text-amber-300 font-semibold"><Frame size={11} aria-hidden /> Có bản vật lý</span> để quyết định đấu giá.
                   Nếu người thắng yêu cầu nhận tranh thật, tiền sẽ được sàn tạm giữ ký quỹ cho đến khi người mua ký nhận PoD từ bưu cục.
                 </p>
               </div>
@@ -489,7 +301,7 @@ export function AuctionCreateScreen({ userId }: { userId: string | null }) {
             <ul className="mt-2 list-inside list-disc space-y-1 text-outline">
               <li>Khi người mua đặt giá, số tiền cọc tương ứng sẽ được tự động phong tỏa an toàn trong ví của họ.</li>
               <li>Nếu có người trả giá cao hơn, tiền cọc phong tỏa của người trả giá trước sẽ lập tức được hoàn trả 100% vào ví.</li>
-              <li>Sau khi phiên kết thúc thành công, người thắng cuộc nhận toàn bộ quyền tài sản, quyền sở hữu độc bản 1-of-1 và quyền khai thác thương mại tác phẩm.</li>
+              <li>Sau khi phiên kết thúc thành công, người thắng cuộc nhận toàn bộ quyền tài sản, quyền sở hữu độc bản và quyền khai thác thương mại tác phẩm.</li>
               <li><strong className="text-amber-300">Bảo hộ Quyền nhân thân:</strong> Quyền tác giả gốc vĩnh viễn thuộc về Họa sĩ sáng tác; người mua không được mạo danh tác giả của tác phẩm.</li>
             </ul>
           </div>

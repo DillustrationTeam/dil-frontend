@@ -17,7 +17,6 @@ export function ContentModerationConsole() {
     isQueueLoading,
     isInspectionLoading,
     isDecisionSubmitting,
-    isRescanSubmitting,
     queueError,
     loadQueue,
     inspectArtwork,
@@ -26,7 +25,7 @@ export function ContentModerationConsole() {
     setSearchFilter,
     setPage,
     executeDecision,
-    rescanArtwork,
+    updateArtworkMetadata,
   } = useModeration();
 
   return (
@@ -58,9 +57,8 @@ export function ContentModerationConsole() {
         artwork={selectedArtwork}
         isLoading={isInspectionLoading}
         isSubmitting={isDecisionSubmitting}
-        isRescanning={isRescanSubmitting}
         onExecuteDecision={executeDecision}
-        onRescanArtwork={rescanArtwork}
+        onUpdateMetadata={updateArtworkMetadata}
         onClose={selectedArtwork ? clearSelectedArtwork : undefined}
       />
     </div>

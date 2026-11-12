@@ -15,8 +15,8 @@ import {
   ShieldCheck,
   Wallet,
   FolderKanban,
-  Crown,
   Menu,
+  ArrowLeftRight,
 } from 'lucide-react';
 import { useAuthStore } from '@/store/use-auth-store';
 import { useRouter } from 'next/navigation';
@@ -64,7 +64,7 @@ export default function TopNavbar<T extends string = string>({
             type="button"
             onClick={onToggleSidebar}
             className="md:hidden p-2 rounded-xl text-[#919099] hover:text-white hover:bg-white/5 border border-white/10 transition-colors focus:outline-none cursor-pointer"
-            aria-label="Toggle navigation menu"
+            aria-label={t('Toggle navigation menu')}
           >
             <Menu className="w-5 h-5 shrink-0" />
           </button>
@@ -76,7 +76,7 @@ export default function TopNavbar<T extends string = string>({
             width={180}
             height={48}
             priority
-            style={{ width: 'auto' }}
+            style={{ width: 'auto', height: 'auto' }}
             className="h-11 md:h-12 w-auto object-contain transition-transform group-hover:scale-105"
           />
         </Link>
@@ -89,8 +89,8 @@ export default function TopNavbar<T extends string = string>({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyDown={(event) => { if (event.key === 'Enter') router.push(`/explore?q=${encodeURIComponent(searchQuery.trim())}`); }}
-            aria-label="Tìm tác phẩm hoặc tác giả"
-            placeholder="Search artworks, creators..."
+            aria-label={t('Tìm tác phẩm hoặc tác giả')}
+            placeholder={t('Search artworks, creators...')}
             className="w-full h-9 pl-9 pr-4 bg-[#1b1b1e] border border-white/10 rounded-full text-xs text-white placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-[#A7ACD9] focus:border-[#A7ACD9] transition-all"
           />
         </div>
@@ -109,7 +109,7 @@ export default function TopNavbar<T extends string = string>({
                 }`}
             >
               <Briefcase className="h-3.5 w-3.5 text-[#A7ACD9]" />
-              Client Mode
+              {t('Client Mode')}
             </button>
             {isCreator && (
               <button
@@ -178,8 +178,8 @@ export default function TopNavbar<T extends string = string>({
           {showProfileMenu && (
             <div className="absolute right-0 mt-2 w-60 bg-[#1F2335] border border-white/10 rounded-2xl shadow-2xl p-2 z-50 backdrop-blur-2xl">
               <div className="p-3 border-b border-white/10 mb-1">
-                <p className="text-xs font-bold text-white">{user?.fullName || 'Guest'}</p>
-                <p className="text-[11px] text-slate-400 truncate">{user?.email || 'No email'}</p>
+                <p className="text-xs font-bold text-white">{user?.fullName || t('Guest')}</p>
+                <p className="text-[11px] text-slate-400 truncate">{user?.email || t('No email')}</p>
                 <span className={`inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 rounded-full text-[10px] font-medium border ${
                   isAdmin
                     ? 'bg-purple-500/20 text-purple-300 border-purple-500/30'
@@ -196,13 +196,6 @@ export default function TopNavbar<T extends string = string>({
                 <Wallet className="w-4 h-4 text-[#A7ACD9]" /> {t('Ví của tôi')}
               </Link>
               <Link
-                href="/collections"
-                onClick={() => setShowProfileMenu(false)}
-                className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs text-[#e4e1e5] hover:text-white hover:bg-white/5 transition-colors"
-              >
-                <Crown className="w-4 h-4 text-[#A7ACD9]" /> {t('Bộ sưu tập tranh đấu giá')}
-              </Link>
-              <Link
                 href={isAdmin ? '/admin' : '/client/commissions'}
                 onClick={() => setShowProfileMenu(false)}
                 className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs text-[#e4e1e5] hover:text-white hover:bg-white/5 transition-colors"
@@ -211,6 +204,13 @@ export default function TopNavbar<T extends string = string>({
               </Link>
               {isCreator && (
                 <>
+                  <Link
+                    href="/art-trades"
+                    onClick={() => setShowProfileMenu(false)}
+                    className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs text-[#e4e1e5] hover:text-white hover:bg-white/5 transition-colors"
+                  >
+                    <ArrowLeftRight className="w-4 h-4 text-[#A7ACD9]" /> {t('My Trades')}
+                  </Link>
                   <Link
                     href="/creator/commissions"
                     onClick={() => setShowProfileMenu(false)}

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
+  AlertTriangle,
   ArrowLeft,
   Award,
   CheckCircle2,
@@ -113,6 +114,9 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
   const [showCommercialDeed, setShowCommercialDeed] = useState<boolean>(false);
   const [showRulesModal, setShowRulesModal] = useState<boolean>(false);
   const [downloadDeliverable, setDownloadDeliverable] = useState<DeliverableDownloadDto | null>(null);
+  // Hộp thoại cảnh báo khi người thắng đã chọn nhận tranh vật lý nhưng muốn tải bản điện tử ngay
+  const [showDigitalNowWarning, setShowDigitalNowWarning] = useState<boolean>(false);
+  const [acceptingDigital, setAcceptingDigital] = useState<boolean>(false);
   const [deliverableInfo, setDeliverableInfo] = useState<{
     fileName: string;
     mimeType?: string | null;
@@ -375,7 +379,16 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
     }
   }
 
-  async function handleDownloadOriginal() {
+  /** Có đang chờ giao tranh vật lý (chưa xác nhận đã nhận) hay không. */
+  const isAwaitingPhysicalDelivery =
+    Boolean(auction?.hasPhysicalCopy) &&
+    auction?.auctionStatus !== 'Completed' &&
+    (['AwaitingPhysical', 'InTransit'].includes(auction?.auctionStatus ?? '') ||
+      (Boolean(auction?.delivery) &&
+        !['Delivered', 'Cancelled'].includes(auction?.delivery?.status ?? '')));
+
+  /** Tải thật sự — dùng sau khi đã qua bước xác nhận chính sách. */
+  async function performDownloadOriginal() {
     setDownloading(true);
     try {
       const res = await auctionService.download(auctionId);
@@ -394,6 +407,36 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
       setError(`Không thể tải tệp gốc: ${auctionError(err)}. Nếu bạn vừa thắng phiên, vui lòng đợi 1–2 phút để hệ thống hoàn tất giải ngân hợp đồng.`);
     } finally {
       setDownloading(false);
+    }
+  }
+
+  /**
+   * Người thắng đã chọn nhận tranh vật lý mà vẫn muốn lấy bản điện tử ngay:
+   * bắt buộc đi qua hộp thoại cảnh báo trước, vì thao tác này giải ngân ký quỹ
+   * cho người bán và mất quyền khiếu nại bưu phẩm.
+   * Tranh vật lý đã giao xong thì tải bình thường, không cần hỏi.
+   */
+  async function handleDownloadOriginal() {
+    if (isAwaitingPhysicalDelivery) {
+      setShowDigitalNowWarning(true);
+      return;
+    }
+    await performDownloadOriginal();
+  }
+
+  async function handleConfirmDigitalNow() {
+    setAcceptingDigital(true);
+    setError(null);
+    try {
+      await auctionService.acceptDigitalDelivery(auctionId);
+      setShowDigitalNowWarning(false);
+      await loadDetail();
+      await performDownloadOriginal();
+    } catch (err: unknown) {
+      setError(`Không thể chuyển sang nhận tranh điện tử: ${auctionError(err)}`);
+      setShowDigitalNowWarning(false);
+    } finally {
+      setAcceptingDigital(false);
     }
   }
 
@@ -436,9 +479,16 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
 
   const isLive = auction.auctionStatus === 'Active';
   const isScheduled = auction.auctionStatus === 'Scheduled';
-  const isFinished = ['Settled', 'Ended', 'Cancelled', 'Expired', 'AwaitingPhysical', 'InTransit', 'Completed'].includes(auction.auctionStatus);
+  const isFinished = ['Settled', 'Ended', 'Cancelled', 'Expired', 'AwaitingPhysical', 'InTransit', 'Completed', 'Disputed'].includes(auction.auctionStatus);
   const isEnded = clock.isEnded || isFinished;
   const isWinner = userId && auction.winnerId === userId;
+  // Winner chỉ thấy khối "chúc mừng + tải tranh + chứng nhận" SAU KHI đã chọn hình thức nhận hàng.
+  // Phiên có bản vật lý: phải chọn nhận tranh thật (đã tạo delivery) hoặc từ chối để nhận file số
+  // (requiresPhysicalDelivery = false). Phiên không có bản vật lý thì không có gì phải chọn.
+  const hasCompletedDeliveryChoice =
+    !auction.hasPhysicalCopy ||
+    Boolean(auction.delivery) ||
+    auction.requiresPhysicalDelivery === false;
   const isSeller = userId && auction.seller?.userId === userId;
   const statusLabel = auctionStatusLabels[auction.auctionStatus] || auction.auctionStatus;
   const bidAmountNum = Number(bidAmount) || 0;
@@ -534,7 +584,7 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
               {auction.artwork?.imageUrl || auction.artwork?.thumbnailUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
-                  src={auction.artwork.imageUrl || auction.artwork.thumbnailUrl || ''}
+                  src={auction.artwork.imageUrl || auction.artwork.thumbnailUrl || '/weblogo.png'}
                   alt={auction.artwork.artworkTitle || 'Tác phẩm'}
                   className="size-full object-contain"
                 />
@@ -558,7 +608,7 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
               <p className="flex items-center gap-2"><User size={14} className="shrink-0 text-brand-periwinkle" /><span className="text-outline">Tác giả:</span> <strong className="truncate">{auction.seller?.fullName || 'Nghệ sĩ ẩn danh'}</strong></p>
               <p className="flex items-center gap-2"><CalendarDays size={14} className="shrink-0 text-brand-periwinkle" /><span className="text-outline">Ngày tạo:</span> <strong>{auction.artwork?.createdAt ? new Date(auction.artwork.createdAt).toLocaleDateString('vi-VN') : 'Chưa cập nhật'}</strong></p>
               <p className="flex items-center gap-2"><FileType2 size={14} className="shrink-0 text-brand-periwinkle" /><span className="text-outline">Định dạng:</span> <strong>{[auction.artwork?.fileFormat, auction.artwork?.resolution, formatFileSize(auction.artwork?.fileSizeBytes)].filter(Boolean).join(' · ') || 'Chưa cập nhật'}</strong></p>
-              <p className="flex items-center gap-2"><PackageCheck size={14} className="shrink-0 text-brand-periwinkle" /><span className="text-outline">Tệp bàn giao:</span> <strong className={auction.artwork?.hasMasterFilePack ? 'text-amber-300 font-bold' : ''}>{auction.artwork?.hasMasterFilePack ? 'Đính kèm Master File Pack (.zip)' : `${auction.artwork?.deliverableCount ?? 0} tệp tiêu chuẩn`}</strong></p>
+              <p className="flex items-center gap-2"><PackageCheck size={14} className="shrink-0 text-brand-periwinkle" /><span className="text-outline">Tệp bàn giao:</span> <strong>{`${auction.artwork?.deliverableCount ?? 0} tệp tranh gốc`}</strong></p>
             </div>
           </div>
 
@@ -666,6 +716,11 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
                   {formatVnd(auction.currentPrice)}
                 </p>
                 <p className="mt-2 text-xs text-outline">Khởi điểm: {formatVnd(auction.startPrice)}</p>
+                {auction.finalPrice ? (
+                  <p className="mt-1 text-xs font-semibold text-emerald-300">
+                    Giá chốt: {formatVnd(auction.finalPrice)}
+                  </p>
+                ) : null}
               </div>
 
               {/* FE-03 Balance Overview */}
@@ -686,14 +741,14 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
             </div>
 
             {/* Winner Badge & Download */}
-            {isWinner && (
+            {isWinner && hasCompletedDeliveryChoice && (
               <div className="mb-6 rounded-2xl border border-emerald-400/30 bg-emerald-500/10 p-5 text-xs text-emerald-200">
                 <div className="flex items-center gap-2 text-sm font-bold text-emerald-300">
                   <Award size={18} />
                   <span>Chúc mừng! Bạn đã thắng phiên đấu giá này.</span>
                 </div>
                 <p className="mt-1 text-emerald-200/80">
-                  Bạn nắm giữ quyền sở hữu độc bản 1-of-1 và toàn quyền khai thác thương mại tác phẩm.
+                  Bạn nắm giữ quyền sở hữu độc bản và toàn quyền khai thác thương mại đối với bức tranh này.
                 </p>
 
                 {deliverableInfo && (
@@ -711,7 +766,7 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
                     onClick={handleDownloadOriginal}
                     className="inline-flex items-center gap-1.5 rounded-full bg-emerald-400 px-4 py-2 font-h1 font-bold text-brand-navy shadow hover:brightness-110 disabled:opacity-50"
                   >
-                    <Download size={14} /> {downloading ? 'Đang tạo liên kết...' : 'Tải xuống tệp gốc / Master Pack'}
+                    <Download size={14} /> {downloading ? 'Đang tạo liên kết...' : 'Tải xuống tranh gốc'}
                   </button>
 
                   <button
@@ -720,7 +775,7 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
                     onClick={handleViewCertificate}
                     className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/50 bg-emerald-950/40 px-4 py-2 font-h1 font-bold text-emerald-200 shadow hover:bg-emerald-900/50 disabled:opacity-50"
                   >
-                    <ShieldCheck size={14} /> {loadingCert ? 'Đang tải chứng nhận...' : 'Xem Chứng nhận sở hữu 1-of-1'}
+                    <ShieldCheck size={14} /> {loadingCert ? 'Đang tải chứng nhận...' : 'Xem Chứng nhận sở hữu'}
                   </button>
 
                   <button
@@ -740,7 +795,7 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div className="flex items-center gap-2 font-semibold text-brand-periwinkle">
                     <ShieldCheck size={16} />
-                    <span>Phiên đấu giá đã chốt quyền sở hữu độc bản 1-of-1</span>
+                    <span>Phiên đấu giá đã chốt quyền sở hữu độc bản</span>
                   </div>
                   {isSeller && (
                     <div className="flex items-center gap-3">
@@ -782,6 +837,7 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
                     </label>
                     <span className="text-[11px] text-outline">Tối thiểu: {formatVnd(minimumNextBid)}</span>
                   </div>
+
 
                   <input
                     id="bid-amount"
@@ -1033,7 +1089,7 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
         </div>
       </div>
 
-      {/* Modal Chứng nhận quyền sở hữu số 1-of-1 VIP Card (chỉ Winner hoặc Seller) */}
+      {/* Modal Chứng nhận quyền sở hữu số VIP Card (chỉ Winner hoặc Seller) */}
       {showCertModal && certificate && (isWinner || isSeller) && (
         <AuctionCertificateCard
           certificate={certificate}
@@ -1053,7 +1109,69 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
         />
       )}
 
-      {/* Modal Tải bàn giao Master Pack & Tranh gốc HD (cho Winner) */}
+      {/* Cảnh báo: nhận tranh điện tử ngay khi đang chờ giao tranh vật lý */}
+      {showDigitalNowWarning && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 backdrop-blur-md">
+          <div className="w-full max-w-lg rounded-3xl border border-amber-400/40 bg-[#1F2335] p-6 shadow-2xl">
+            <div className="flex items-start gap-3">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-amber-400/30 bg-amber-400/15 text-amber-300">
+                <AlertTriangle size={22} />
+              </div>
+              <div>
+                <h3 className="font-h1 text-base font-bold text-amber-300">
+                  Nhận tranh điện tử ngay?
+                </h3>
+                <p className="mt-1 text-xs text-on-surface-variant">
+                  Bạn đang chờ bưu cục giao bản tranh vật lý. Nếu nhận bản điện tử ngay bây giờ:
+                </p>
+              </div>
+            </div>
+
+            <ul className="mt-4 space-y-2 rounded-2xl border border-white/10 bg-black/25 p-4 text-xs text-on-surface-variant">
+              <li className="flex gap-2">
+                <span className="text-amber-400">•</span>
+                <span>Tiền ký quỹ được <strong className="text-white">giải ngân ngay cho người bán</strong>, phiên đấu giá đóng lại.</span>
+              </li>
+              <li className="flex gap-2">
+                <span className="text-rose-400">•</span>
+                <span>
+                  Sàn <strong className="text-white">không còn giữ tiền</strong>, nên nếu bưu phẩm đến muộn, hư hỏng hoặc
+                  không đúng tranh, bạn <strong className="text-rose-300">không được hoàn tiền</strong> và không mở khiếu nại được nữa.
+                </span>
+              </li>
+              <li className="flex gap-2">
+                <span className="text-emerald-400">•</span>
+                <span>Đổi lại bạn nhận ngay bản tranh gốc độ phân giải cao và giấy chứng nhận sở hữu.</span>
+              </li>
+            </ul>
+
+            <p className="mt-3 text-[11px] text-outline">
+              Nếu muốn giữ quyền khiếu nại bưu phẩm, hãy bấm Huỷ và chờ xác nhận đã nhận tranh vật lý.
+            </p>
+
+            <div className="mt-5 flex flex-wrap items-center justify-end gap-3 border-t border-white/10 pt-4">
+              <button
+                type="button"
+                onClick={() => setShowDigitalNowWarning(false)}
+                disabled={acceptingDigital}
+                className="rounded-xl px-4 py-2 text-xs font-semibold text-outline hover:text-white transition disabled:opacity-50"
+              >
+                Huỷ, chờ nhận tranh vật lý
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmDigitalNow}
+                disabled={acceptingDigital}
+                className="inline-flex items-center gap-2 rounded-xl bg-amber-400 px-5 py-2 text-xs font-bold text-brand-navy shadow-md hover:brightness-110 transition disabled:opacity-50"
+              >
+                <Download size={14} /> {acceptingDigital ? 'Đang xử lý...' : 'Tôi đồng ý, nhận tranh điện tử ngay'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Tải bàn giao tranh gốc HD (cho Winner) */}
       {downloadDeliverable && (
         <DeliverablesDownloadModal
           deliverable={downloadDeliverable}
@@ -1098,9 +1216,9 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
               <div className="flex items-start gap-2.5 rounded-xl border border-white/5 bg-black/20 p-3">
                 <CheckCircle2 size={16} className="text-emerald-400 shrink-0 mt-0.5" />
                 <div>
-                  <strong className="text-white">Quyền khai thác thương mại 100% cho Người thắng:</strong>
+                  <strong className="text-white">Quyền sở hữu &amp; khai thác thương mại 100% cho Người thắng:</strong>
                   <p className="text-outline mt-0.5">
-                    Người thắng phiên nhận quyền tài sản độc quyền: toàn quyền sử dụng hình ảnh sinh lời (Game, VTuber, Merchandise...), quyền niêm yết bán lại thứ cấp, tải tệp tranh gốc chất lượng cao kèm tệp nén Master Pack và Giấy chứng nhận độc bản 1-of-1.
+                    Người thắng phiên nhận quyền tài sản độc quyền đối với bức tranh: toàn quyền khai thác hình ảnh tranh để sinh lời (in ấn tranh, trưng bày, quảng cáo), quyền niêm yết bán lại thứ cấp, tải tệp tranh gốc chất lượng cao và Giấy chứng nhận độc bản.
                   </p>
                 </div>
               </div>

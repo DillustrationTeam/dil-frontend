@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { ArrowUpRight, Clock, Eye, Gavel, Plus, RefreshCw, Search } from 'lucide-react';
+import { ArrowUpRight, Clock, Eye, Frame, Gavel, Plus, RefreshCw, Search } from 'lucide-react';
 import { useLanguage } from '@/context/language-context';
 import { auctionService, auctionError } from '../services/auction.service';
 import { useAuctionClock } from '../hooks/use-auction-clock';
@@ -19,12 +19,16 @@ const statusBadgeColors: Record<string, string> = {
   Settled: 'border-brand-periwinkle/40 bg-brand-periwinkle/15 text-brand-periwinkle',
   Cancelled: 'border-red-400/40 bg-red-500/15 text-red-300',
   Expired: 'border-white/20 bg-white/5 text-outline',
+  Disputed: 'border-rose-400/40 bg-rose-500/15 text-rose-200',
+  AwaitingPhysical: 'border-amber-400/40 bg-amber-500/15 text-amber-200',
+  InTransit: 'border-sky-400/40 bg-sky-500/15 text-sky-200',
+  Completed: 'border-emerald-400/40 bg-emerald-500/15 text-emerald-200',
 };
 
 function AuctionCard({ item }: { item: AuctionListItemDto }) {
   const { lang, t } = useLanguage();
   const isScheduled = item.auctionStatus === 'Scheduled';
-  const isFinished = ['Settled', 'Ended', 'Cancelled', 'Expired'].includes(item.auctionStatus);
+  const isFinished = ['Settled', 'Ended', 'Cancelled', 'Expired', 'AwaitingPhysical', 'InTransit', 'Completed', 'Disputed'].includes(item.auctionStatus);
   const targetTime = isScheduled ? item.startAt : item.endAt;
   const clock = useAuctionClock({ endAt: targetTime });
   const hasEnded = isFinished || (!isScheduled && clock.isEnded);
@@ -43,7 +47,7 @@ function AuctionCard({ item }: { item: AuctionListItemDto }) {
           {item.artwork?.thumbnailUrl || item.artwork?.imageUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
-              src={item.artwork.thumbnailUrl || item.artwork.imageUrl || ''}
+              src={item.artwork.thumbnailUrl || item.artwork.imageUrl || '/weblogo.png'}
               alt={item.artwork.artworkTitle || t('Tranh đấu giá')}
               className="size-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.035]"
             />
@@ -57,8 +61,8 @@ function AuctionCard({ item }: { item: AuctionListItemDto }) {
             {statusText}
           </span>
           {item.hasPhysicalCopy && (
-            <span className="absolute left-4 top-13 rounded-full border border-amber-500/40 bg-amber-950/60 px-2.5 py-0.5 text-[10px] font-semibold text-amber-300 backdrop-blur-md">
-              🖼️ {t('Có bản vật lý')}
+            <span className="absolute left-4 top-13 inline-flex items-center gap-1 rounded-full border border-amber-500/40 bg-amber-950/60 px-2.5 py-0.5 text-[10px] font-semibold text-amber-300 backdrop-blur-md">
+              <Frame size={11} className="shrink-0" aria-hidden /> {t('Có bản vật lý')}
             </span>
           )}
           <span className="absolute bottom-4 right-4 flex items-center gap-1.5 rounded-full border border-white/10 bg-[#11131d]/80 px-3 py-1.5 font-mono text-[11px] tabular-nums text-white backdrop-blur-md">

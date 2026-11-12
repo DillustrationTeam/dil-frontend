@@ -11,7 +11,8 @@ interface SubmitMilestoneModalProps {
   commissionId: string;
   milestoneId: string;
   milestoneTitle: string;
-  onSuccess?: () => void;
+  isRevision?: boolean;
+  onSuccess?: (action: 'submitted' | 'resubmitted') => void;
 }
 
 export default function SubmitMilestoneModal({
@@ -20,7 +21,10 @@ export default function SubmitMilestoneModal({
   commissionId,
   milestoneId,
   milestoneTitle,
+  isRevision = false,
   onSuccess,
+
+
 }: SubmitMilestoneModalProps) {
   const [file, setFile] = useState<File | null>(null);
   const [creatorNote, setCreatorNote] = useState('');
@@ -52,7 +56,7 @@ export default function SubmitMilestoneModal({
       await commissionService.submitMilestone(commissionId, milestoneId, file, creatorNote);
       setUploaded(true);
       setTimeout(() => {
-        if (onSuccess) onSuccess();
+        if (onSuccess) onSuccess(isRevision ? 'resubmitted' : 'submitted');
       }, 1500);
     } catch (cause) {
       setError(extractErrorMessage(cause, 'Không thể tải bản phác thảo lên. Vui lòng thử lại.'));

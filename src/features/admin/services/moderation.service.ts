@@ -1,6 +1,7 @@
-import { apiClient } from '@/lib/api-client';
+﻿import { apiClient } from '@/lib/api-client';
 import { ApiResponse } from '@/types/api.types';
 import {
+  ArtworkDuplicateCheckResultDto,
   ArtworkInspectionDetailDto,
   ExecuteModerationDecisionRequest,
   ModerationQueueFilters,
@@ -113,6 +114,50 @@ export const adminModerationService = {
         response.data.error?.details?.join(', ') ||
           response.data.error?.title ||
           'Failed to request AI rescan.'
+      );
+    }
+
+    return response.data.data;
+  },
+
+  /**
+   * Kiểm tra trùng lặp tác phẩm trên hệ thống (SHA-256, mã DWT, dấu vân tay ảnh)
+   */
+  async checkArtworkDuplicates(
+    artworkId: string
+  ): Promise<ArtworkDuplicateCheckResultDto> {
+    const response = await apiClient.get<ApiResponse<ArtworkDuplicateCheckResultDto>>(
+      `/admin/moderation/${artworkId}/duplicates`
+    );
+
+    if (response.data.error || !response.data.data) {
+      throw new Error(
+        response.data.error?.details?.join(', ') ||
+          response.data.error?.title ||
+          'Failed to check artwork duplicates.'
+      );
+    }
+
+    return response.data.data;
+  },
+
+  /**
+   * Chỉnh sửa Danh mục lớn và Tag con của tác phẩm trước/sau khi duyệt
+   */
+  async updateArtworkMetadata(
+    artworkId: string,
+    payload: { categoryId?: string | null; tags?: string[] }
+  ): Promise<ArtworkInspectionDetailDto> {
+    const response = await apiClient.put<ApiResponse<ArtworkInspectionDetailDto>>(
+      `/admin/moderation/${artworkId}/metadata`,
+      payload
+    );
+
+    if (response.data.error || !response.data.data) {
+      throw new Error(
+        response.data.error?.details?.join(', ') ||
+          response.data.error?.title ||
+          'Không thể cập nhật phân loại danh mục & tag.'
       );
     }
 

@@ -1,4 +1,4 @@
-import { apiClient } from '@/lib/api-client';
+import { apiClient, extractErrorMessage } from '@/lib/api-client';
 import type { ApiResponse } from '@/types/api.types';
 import type {
   EventDetailDto,
@@ -154,11 +154,15 @@ export const eventService = {
    * Lấy chi tiết sự kiện
    */
   detail: async (id: string): Promise<EventDetailDto> => {
-    const response = await apiClient.get<ApiResponse<EventDetailDto>>(`/events/${id}`);
-    if (response.data.data) {
-      return response.data.data;
+    try {
+      const response = await apiClient.get<ApiResponse<EventDetailDto>>(`/events/${id}`);
+      if (response.data.data) {
+        return response.data.data;
+      }
+      throw new Error(response.data.error?.detail || response.data.error?.title || 'Không tìm thấy thông tin sự kiện.');
+    } catch (error) {
+      throw new Error(extractErrorMessage(error, 'Không thể tải thông tin sự kiện. Vui lòng thử lại.'));
     }
-    throw new Error(response.data.error?.detail || response.data.error?.title || 'Không tìm thấy thông tin sự kiện.');
   },
 
   /**
@@ -198,29 +202,41 @@ export const eventService = {
    * Create a new platform event
    */
   create: async (data: Record<string, unknown>): Promise<EventDetailDto> => {
-    const response = await apiClient.post<ApiResponse<EventDetailDto>>('/events', data);
-    if (response.data.data) {
-      return response.data.data;
+    try {
+      const response = await apiClient.post<ApiResponse<EventDetailDto>>('/events', data);
+      if (response.data.data) {
+        return response.data.data;
+      }
+      throw new Error(response.data.error?.detail || 'Failed to create event.');
+    } catch (error) {
+      throw new Error(extractErrorMessage(error, 'Không thể tạo sự kiện. Vui lòng thử lại.'));
     }
-    throw new Error(response.data.error?.detail || 'Failed to create event.');
   },
 
   /**
    * Update an existing platform event
    */
   update: async (id: string, data: Record<string, unknown>): Promise<EventDetailDto> => {
-    const response = await apiClient.put<ApiResponse<EventDetailDto>>(`/events/${id}`, data);
-    if (response.data.data) {
-      return response.data.data;
+    try {
+      const response = await apiClient.put<ApiResponse<EventDetailDto>>(`/events/${id}`, data);
+      if (response.data.data) {
+        return response.data.data;
+      }
+      throw new Error(response.data.error?.detail || 'Failed to update event.');
+    } catch (error) {
+      throw new Error(extractErrorMessage(error, 'Không thể cập nhật sự kiện. Vui lòng thử lại.'));
     }
-    throw new Error(response.data.error?.detail || 'Failed to update event.');
   },
 
   /**
    * Delete an existing platform event
    */
   delete: async (id: string): Promise<void> => {
-    await apiClient.delete(`/events/${id}`);
+    try {
+      await apiClient.delete(`/events/${id}`);
+    } catch (error) {
+      throw new Error(extractErrorMessage(error, 'Không thể xóa sự kiện. Vui lòng thử lại.'));
+    }
   },
 
   // Re-exports for backwards compatibility

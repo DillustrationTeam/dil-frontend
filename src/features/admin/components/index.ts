@@ -6,5 +6,7 @@ export * from './top-navbar';
 export * from './admin-layout';
 export * from './platform-fee-policy';
 export * from './content-moderation';
+export * from './category-management';
 export * from './dispute-arbitration';
+export * from './trade-operations/trade-operations-console';
 

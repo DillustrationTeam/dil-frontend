@@ -3,17 +3,26 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useLanguage } from '@/context/language-context';
 import { ArrowUpRight, Bot, CircleAlert, Maximize2, RefreshCw, Send, Sparkles, X } from 'lucide-react';
 import { AiMarkdown } from '@/features/ai-assistant/components/ai-markdown';
 import { aiService } from '@/features/ai-assistant/services/ai.service';
 import type { AiConversationDto, AiMessageDto } from '@/features/ai-assistant/types/ai.types';
 
-const quickQuestions = [
-  'Quy chế ký quỹ thanh toán hoạt động thế nào?',
-  'Làm sao để mở phiên đấu giá tranh?',
-  'Phí nền tảng là bao nhiêu phần trăm?',
-  'Cách rút doanh thu về ngân hàng?',
-];
+const quickQuestionsByLang = {
+  VIE: [
+    'Quy chế ký quỹ thanh toán hoạt động thế nào?',
+    'Làm sao để mở phiên đấu giá tranh?',
+    'Phí nền tảng là bao nhiêu phần trăm?',
+    'Cách rút doanh thu về ngân hàng?',
+  ],
+  ENG: [
+    'How does milestone escrow payment work?',
+    'How do I open an art auction?',
+    'What percentage is the platform fee?',
+    'How do I withdraw earnings to my bank?',
+  ],
+};
 
 /**
  * Nút nổi góc phải dưới: mở cửa sổ chat với trợ lý AI ngay tại trang đang xem,
@@ -23,6 +32,9 @@ const quickQuestions = [
  */
 export function AiFloatingWidget({ userId }: { userId: string | null }) {
   const pathname = usePathname() ?? '';
+  const { lang } = useLanguage();
+  const isEng = lang === 'ENG';
+  const quickQuestions = quickQuestionsByLang[lang];
   const [open, setOpen] = useState(false);
   const [conversation, setConversation] = useState<AiConversationDto | null>(null);
   const [messages, setMessages] = useState<AiMessageDto[]>([]);
@@ -128,9 +140,9 @@ export function AiFloatingWidget({ userId }: { userId: string | null }) {
                 <Bot size={16} aria-hidden />
               </span>
               <div>
-                <p className="font-h1 text-xs font-bold text-on-surface">Trợ lý AI Dillustration</p>
+                <p className="font-h1 text-xs font-bold text-on-surface">{isEng ? 'Dillustration AI Assistant' : 'Trợ lý AI Dillustration'}</p>
                 <p className="text-[10px] text-outline">
-                  {userId ? 'Sẵn sàng giải đáp' : 'Cần đăng nhập'}
+                  {userId ? (isEng ? 'Ready to help' : 'Sẵn sàng giải đáp') : (isEng ? 'Sign in required' : 'Cần đăng nhập')}
                 </p>
               </div>
             </div>
@@ -176,13 +188,13 @@ export function AiFloatingWidget({ userId }: { userId: string | null }) {
             {!userId ? (
               <div className="flex h-full flex-col items-center justify-center text-center">
                 <Bot size={26} className="mb-2 text-outline" aria-hidden />
-                <p className="text-xs text-on-surface-variant">Vui lòng đăng nhập để trò chuyện với trợ lý.</p>
+                <p className="text-xs text-on-surface-variant">{isEng ? 'Please sign in to chat with the AI assistant.' : 'Vui lòng đăng nhập để trò chuyện với trợ lý.'}</p>
                 <Link
                   href="/login"
                   onClick={() => setOpen(false)}
                   className="mt-4 rounded-full bg-brand-periwinkle px-5 py-2 text-xs font-bold text-brand-navy"
                 >
-                  Đăng nhập
+                  {isEng ? 'Sign In' : 'Đăng nhập'}
                 </Link>
               </div>
             ) : loading && messages.length === 0 ? (
@@ -193,7 +205,7 @@ export function AiFloatingWidget({ userId }: { userId: string | null }) {
               </div>
             ) : messages.length === 0 ? (
               <div className="space-y-2">
-                <p className="text-[11px] text-outline">Bạn muốn hỏi gì trước?</p>
+                <p className="text-[11px] text-outline">{isEng ? 'What would you like to ask first?' : 'Bạn muốn hỏi gì trước?'}</p>
                 {quickQuestions.map((question) => (
                   <button
                     key={question}
@@ -225,7 +237,7 @@ export function AiFloatingWidget({ userId }: { userId: string | null }) {
             )}
             {sending && (
               <p className="flex items-center gap-1.5 text-[11px] text-brand-periwinkle">
-                <RefreshCw size={11} className="animate-spin" aria-hidden /> Trợ lý đang trả lời...
+                <RefreshCw size={11} className="animate-spin" aria-hidden /> {isEng ? 'Assistant is replying...' : 'Trợ lý đang trả lời...'}
               </p>
             )}
             <div ref={bottomRef} />
@@ -245,7 +257,7 @@ export function AiFloatingWidget({ userId }: { userId: string | null }) {
                 value={input}
                 disabled={!userId}
                 onChange={(event) => setInput(event.target.value)}
-                placeholder={userId ? 'Nhập câu hỏi...' : 'Cần đăng nhập'}
+                placeholder={userId ? (isEng ? 'Ask a question...' : 'Nhập câu hỏi...') : (isEng ? 'Sign in required' : 'Cần đăng nhập')}
                 className="min-w-0 flex-1 rounded-2xl border border-white/15 bg-brand-navy/80 px-3 py-2 text-[11px] text-on-surface placeholder:text-outline focus:border-brand-periwinkle focus:outline-none disabled:opacity-50"
               />
               <button
@@ -263,7 +275,7 @@ export function AiFloatingWidget({ userId }: { userId: string | null }) {
               onClick={() => setOpen(false)}
               className="mt-2 flex items-center justify-center gap-1 text-[11px] font-semibold text-brand-periwinkle hover:underline"
             >
-              Mở trang trợ lý đầy đủ <ArrowUpRight size={12} aria-hidden />
+              {isEng ? 'Open full assistant page' : 'Mở trang trợ lý đầy đủ'} <ArrowUpRight size={12} aria-hidden />
             </Link>
           </div>
         </div>
@@ -274,7 +286,7 @@ export function AiFloatingWidget({ userId }: { userId: string | null }) {
         type="button"
         onClick={() => setOpen((prev) => !prev)}
         aria-expanded={open}
-        aria-label={open ? 'Đóng trợ lý AI' : 'Mở trợ lý AI'}
+        aria-label={open ? (isEng ? 'Close AI assistant' : 'Đóng trợ lý AI') : (isEng ? 'Open AI assistant' : 'Mở trợ lý AI')}
         className="fixed bottom-6 right-4 z-50 flex size-14 items-center justify-center rounded-full bg-brand-periwinkle text-brand-navy shadow-[0_8px_30px_rgba(167,172,217,0.45)] transition hover:brightness-110 active:scale-95 sm:right-6"
       >
         {open ? <X size={22} aria-hidden /> : <Sparkles size={22} aria-hidden />}

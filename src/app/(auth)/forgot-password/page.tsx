@@ -1,36 +1,70 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { ArrowLeft, ArrowRight, History, KeyRound, Lock, Mail } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useLanguage } from '@/context/language-context';
 import { authService } from '@/services/auth.service';
+import {
+  AUTH_INPUT_CLASS,
+  AUTH_INPUT_WRAP_CLASS,
+  AUTH_LABEL_CLASS,
+  AUTH_PRIMARY_BTN_CLASS,
+  AuthShell,
+} from '@/features/auth/components/auth-shell';
 
-const emailSchema = z.object({
-  email: z.string().min(1, 'Email is required').email('Invalid email address'),
-});
+interface EmailFormValues {
+  email: string;
+}
 
-type EmailFormValues = z.infer<typeof emailSchema>;
-
-const resetSchema = z
-  .object({
-    code: z.string().min(1, 'Verification code is required'),
-    newPassword: z.string().min(6, 'Password must be at least 6 characters'),
-    confirmPassword: z.string().min(1, 'Please confirm your new password'),
-  })
-  .refine((data) => data.newPassword === data.confirmPassword, {
-    message: 'Passwords do not match',
-    path: ['confirmPassword'],
-  });
-
-type ResetFormValues = z.infer<typeof resetSchema>;
+interface ResetFormValues {
+  code: string;
+  newPassword: string;
+  confirmPassword: string;
+}
 
 export default function ForgotPasswordPage() {
   const router = useRouter();
+  const { lang } = useLanguage();
+  const isEng = lang === 'ENG';
+
+  const emailSchema = useMemo(
+    () =>
+      z.object({
+        email: z
+          .string()
+          .min(1, isEng ? 'Email is required' : 'Vui lòng nhập email')
+          .email(isEng ? 'Invalid email address' : 'Email không hợp lệ'),
+      }),
+    [isEng]
+  );
+
+  const resetSchema = useMemo(
+    () =>
+      z
+        .object({
+          code: z
+            .string()
+            .min(1, isEng ? 'Verification code is required' : 'Vui lòng nhập mã xác minh'),
+          newPassword: z
+            .string()
+            .min(6, isEng ? 'Password must be at least 6 characters' : 'Mật khẩu phải có ít nhất 6 ký tự'),
+          confirmPassword: z
+            .string()
+            .min(1, isEng ? 'Please confirm your new password' : 'Vui lòng xác nhận mật khẩu mới'),
+        })
+        .refine((data) => data.newPassword === data.confirmPassword, {
+          message: isEng ? 'Passwords do not match' : 'Mật khẩu xác nhận không khớp',
+          path: ['confirmPassword'],
+        }),
+    [isEng]
+  );
+
   const [step, setStep] = useState<'email' | 'reset'>('email');
   const [submittedEmail, setSubmittedEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -61,9 +95,17 @@ export default function ForgotPasswordPage() {
     setIsLoading(true);
     try {
       await requestCode(data.email);
-      toast.success('Mã xác minh đã được gửi, vui lòng kiểm tra hộp thư.');
+      toast.success(
+        isEng
+          ? 'Verification code sent, please check your inbox.'
+          : 'Mã xác minh đã được gửi, vui lòng kiểm tra hộp thư.'
+      );
     } catch {
-      toast.error('Không thể gửi mã xác minh. Vui lòng thử lại.');
+      toast.error(
+        isEng
+          ? 'Unable to send verification code. Please try again.'
+          : 'Không thể gửi mã xác minh. Vui lòng thử lại.'
+      );
     } finally {
       setIsLoading(false);
     }
@@ -74,9 +116,11 @@ export default function ForgotPasswordPage() {
     setIsLoading(true);
     try {
       await requestCode(submittedEmail);
-      toast.success('Đã gửi lại mã xác minh.');
+      toast.success(isEng ? 'Verification code resent.' : 'Đã gửi lại mã xác minh.');
     } catch {
-      toast.error('Không thể gửi lại mã. Vui lòng thử lại.');
+      toast.error(
+        isEng ? 'Unable to resend code. Please try again.' : 'Không thể gửi lại mã. Vui lòng thử lại.'
+      );
     } finally {
       setIsLoading(false);
     }
@@ -90,198 +134,215 @@ export default function ForgotPasswordPage() {
         code: data.code.trim(),
         newPassword: data.newPassword,
       });
-      toast.success('Đổi mật khẩu thành công! Vui lòng đăng nhập lại.');
+      toast.success(
+        isEng
+          ? 'Password changed successfully! Please sign in again.'
+          : 'Đổi mật khẩu thành công! Vui lòng đăng nhập lại.'
+      );
       router.push('/login');
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Không thể đổi mật khẩu. Vui lòng thử lại.');
+      toast.error(
+        err instanceof Error
+          ? err.message
+          : isEng
+            ? 'Unable to reset password. Please try again.'
+            : 'Không thể đổi mật khẩu. Vui lòng thử lại.'
+      );
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen w-full flex flex-col justify-between p-6 md:p-8 bg-[#1F2335] text-[#e4e1e5] font-body relative overflow-hidden">
-      {/* Ambient Atmospheric Glows */}
-      <div className="fixed top-0 left-0 w-full h-full -z-10 pointer-events-none">
-        <div className="absolute top-[-15%] left-[-15%] w-[55%] h-[55%] bg-[#A7ACD9]/10 rounded-full blur-[140px]" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[45%] h-[45%] bg-[#C6AC6D]/10 rounded-full blur-[120px]" />
+    <AuthShell>
+      <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-2xl border border-[#A7ACD9]/30 bg-[#A7ACD9]/15 text-[#A7ACD9]">
+        <History className="h-5 w-5" aria-hidden />
       </div>
 
-      {/* Header */}
-      <header className="w-full flex justify-between items-center z-10">
-        <Link href="/" className="flex items-center gap-3">
-          <Image src="/studiologo.png" alt="dillustration" width={160} height={40} style={{ width: 'auto' }} className="h-10 w-auto object-contain" />
-        </Link>
-      </header>
+      {step === 'email' ? (
+        <>
+          <h1 className="font-h1 text-2xl font-bold text-white sm:text-3xl">
+            {isEng ? 'Recover Access' : 'Khôi phục truy cập'}
+          </h1>
+          <p className="mt-1.5 mb-7 text-sm leading-relaxed text-[#C7C5CF]">
+            {isEng
+              ? 'Enter your registered email and we will send a 6-digit verification code to reset your password.'
+              : 'Nhập email đã đăng ký, chúng tôi sẽ gửi mã xác minh gồm 6 số để bạn đặt lại mật khẩu.'}
+          </p>
 
-      {/* Main Card */}
-      <main className="w-full max-w-md mx-auto my-auto z-10 py-6">
-        <div className="glass-container rounded-[28px] p-8 md:p-10 relative overflow-hidden">
-          {/* Icon Badge */}
-          <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-6 text-white/70">
-            <span className="material-symbols-outlined text-2xl">history</span>
-          </div>
+          <form onSubmit={emailForm.handleSubmit(onSubmitEmail)} className="space-y-5">
+            <div className="space-y-1.5">
+              <label className={AUTH_LABEL_CLASS} htmlFor="recover-email">
+                {isEng ? 'Email Address' : 'Địa chỉ Email'}
+              </label>
+              <div className={AUTH_INPUT_WRAP_CLASS}>
+                <Mail className="pointer-events-none ml-3.5 h-4 w-4 shrink-0 text-[#919099]" aria-hidden />
+                <input
+                  {...emailForm.register('email')}
+                  id="recover-email"
+                  type="email"
+                  placeholder="name@example.com"
+                  className={`${AUTH_INPUT_CLASS} px-3.5`}
+                  disabled={isLoading}
+                />
+              </div>
+              {emailForm.formState.errors.email && (
+                <p className="text-xs text-red-400">{emailForm.formState.errors.email.message}</p>
+              )}
+            </div>
 
-          <div className="relative z-10">
-            {step === 'email' ? (
+            <button type="submit" disabled={isLoading} className={AUTH_PRIMARY_BTN_CLASS}>
+              <span>
+                {isLoading
+                  ? isEng
+                    ? 'Sending...'
+                    : 'Đang gửi...'
+                  : isEng
+                    ? 'Send Verification Code'
+                    : 'Gửi mã xác minh'}
+              </span>
+              <ArrowRight className="h-4 w-4" aria-hidden />
+            </button>
+
+            <div className="pt-1 text-center">
+              <Link
+                href="/login"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#919099] transition-colors hover:text-white"
+              >
+                <ArrowLeft className="h-3.5 w-3.5" aria-hidden />
+                <span>{isEng ? 'Return to sign in' : 'Quay lại đăng nhập'}</span>
+              </Link>
+            </div>
+          </form>
+        </>
+      ) : (
+        <>
+          <h1 className="font-h1 text-2xl font-bold text-white sm:text-3xl">
+            {isEng ? 'Enter Verification Code' : 'Nhập mã xác minh'}
+          </h1>
+          <p className="mt-1.5 mb-7 text-sm leading-relaxed text-[#C7C5CF]">
+            {isEng ? (
               <>
-                <h1 className="font-h1 text-3xl font-bold text-white mb-2">Recover access</h1>
-                <p className="text-sm text-[#78767A] mb-8 leading-relaxed">
-                  Nhập email đã đăng ký, chúng tôi sẽ gửi mã xác minh gồm 6 số để bạn đặt lại mật khẩu.
-                </p>
-
-                <form onSubmit={emailForm.handleSubmit(onSubmitEmail)} className="space-y-6">
-                  <div className="space-y-2">
-                    <label className="text-[11px] uppercase tracking-[0.12em] text-[#78767A] font-semibold block">
-                      EMAIL ADDRESS
-                    </label>
-                    <div className="input-field rounded-xl flex items-center px-4 py-3.5 text-white bg-[#0e0e11]/50 border border-[#78767A]/30">
-                      <input
-                        {...emailForm.register('email')}
-                        type="email"
-                        placeholder="artist@dillustration.com"
-                        className="w-full bg-transparent text-sm text-white focus:outline-none placeholder-[#78767A]"
-                        disabled={isLoading}
-                      />
-                    </div>
-                    {emailForm.formState.errors.email && (
-                      <p className="text-red-400 text-xs ml-1">{emailForm.formState.errors.email.message}</p>
-                    )}
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={isLoading}
-                    className="w-full py-4 bg-[#A7ACD9] hover:bg-white text-[#161826] font-bold text-base rounded-xl transition-all duration-200 flex items-center justify-center gap-2 group cursor-pointer disabled:opacity-50"
-                  >
-                    <span>{isLoading ? 'Đang gửi...' : 'Gửi mã xác minh'}</span>
-                    <span className="material-symbols-outlined text-xl transition-transform duration-300 group-hover:translate-x-1">
-                      arrow_forward
-                    </span>
-                  </button>
-
-                  <div className="text-center pt-2">
-                    <Link href="/login" className="text-xs font-semibold text-[#78767A] hover:text-white transition-colors">
-                      ← Return to sign in
-                    </Link>
-                  </div>
-                </form>
+                We sent a 6-digit code to <span className="font-medium text-white">{submittedEmail}</span>. It expires in 10 minutes.
               </>
             ) : (
               <>
-                <h1 className="font-h1 text-3xl font-bold text-white mb-2">Nhập mã xác minh</h1>
-                <p className="text-sm text-[#78767A] mb-8 leading-relaxed">
-                  Chúng tôi đã gửi mã 6 số tới <span className="text-white">{submittedEmail}</span>. Mã có hiệu lực
-                  trong 10 phút. Nhập mã cùng mật khẩu mới bên dưới.
-                </p>
-
-                <form onSubmit={resetForm.handleSubmit(onSubmitReset)} className="space-y-6">
-                  <div className="space-y-2">
-                    <label className="text-[11px] uppercase tracking-[0.12em] text-[#78767A] font-semibold block">
-                      MÃ XÁC MINH
-                    </label>
-                    <div className="flex gap-2">
-                      <div className="input-field flex-1 rounded-xl flex items-center px-4 py-3.5 text-white bg-[#0e0e11]/50 border border-[#78767A]/30">
-                        <input
-                          {...resetForm.register('code')}
-                          type="text"
-                          maxLength={6}
-                          placeholder="6-digit code"
-                          className="w-full bg-transparent text-sm text-white tracking-widest focus:outline-none placeholder-[#78767A]"
-                          disabled={isLoading}
-                        />
-                      </div>
-                      <button
-                        type="button"
-                        onClick={handleResend}
-                        disabled={isLoading || resendCooldown > 0}
-                        className="shrink-0 rounded-xl border border-[#78767A]/30 px-4 text-xs font-semibold text-[#A7ACD9] hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-40"
-                      >
-                        {resendCooldown > 0 ? `Gửi lại (${resendCooldown}s)` : 'Gửi lại mã'}
-                      </button>
-                    </div>
-                    {resetForm.formState.errors.code && (
-                      <p className="text-red-400 text-xs ml-1">{resetForm.formState.errors.code.message}</p>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-[11px] uppercase tracking-[0.12em] text-[#78767A] font-semibold block">
-                      MẬT KHẨU MỚI
-                    </label>
-                    <div className="input-field rounded-xl flex items-center px-4 py-3.5 text-white bg-[#0e0e11]/50 border border-[#78767A]/30">
-                      <input
-                        {...resetForm.register('newPassword')}
-                        type="password"
-                        placeholder="••••••••"
-                        className="w-full bg-transparent text-sm text-white focus:outline-none placeholder-[#78767A]"
-                        disabled={isLoading}
-                      />
-                    </div>
-                    {resetForm.formState.errors.newPassword && (
-                      <p className="text-red-400 text-xs ml-1">{resetForm.formState.errors.newPassword.message}</p>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-[11px] uppercase tracking-[0.12em] text-[#78767A] font-semibold block">
-                      XÁC NHẬN MẬT KHẨU MỚI
-                    </label>
-                    <div className="input-field rounded-xl flex items-center px-4 py-3.5 text-white bg-[#0e0e11]/50 border border-[#78767A]/30">
-                      <input
-                        {...resetForm.register('confirmPassword')}
-                        type="password"
-                        placeholder="••••••••"
-                        className="w-full bg-transparent text-sm text-white focus:outline-none placeholder-[#78767A]"
-                        disabled={isLoading}
-                      />
-                    </div>
-                    {resetForm.formState.errors.confirmPassword && (
-                      <p className="text-red-400 text-xs ml-1">{resetForm.formState.errors.confirmPassword.message}</p>
-                    )}
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={isLoading}
-                    className="w-full py-4 bg-[#A7ACD9] hover:bg-white text-[#161826] font-bold text-base rounded-xl transition-all duration-200 flex items-center justify-center gap-2 group cursor-pointer disabled:opacity-50"
-                  >
-                    <span>{isLoading ? 'Đang xử lý...' : 'Đặt lại mật khẩu'}</span>
-                    <span className="material-symbols-outlined text-xl transition-transform duration-300 group-hover:translate-x-1">
-                      arrow_forward
-                    </span>
-                  </button>
-
-                  <div className="text-center pt-2">
-                    <button
-                      type="button"
-                      onClick={() => setStep('email')}
-                      className="text-xs font-semibold text-[#78767A] hover:text-white transition-colors"
-                    >
-                      ← Đổi email khác
-                    </button>
-                  </div>
-                </form>
+                Chúng tôi đã gửi mã 6 số tới <span className="font-medium text-white">{submittedEmail}</span>. Mã có hiệu lực trong 10 phút.
               </>
             )}
-          </div>
-        </div>
-
-        <div className="text-center mt-6">
-          <p className="text-xs text-[#78767A]">
-            Having trouble? <a href="#" className="text-[#A7ACD9] hover:underline">Contact collective support</a>
           </p>
-        </div>
-      </main>
 
-      {/* Footer */}
-      <footer className="w-full flex justify-between items-center text-xs text-[#78767A] z-10 pt-4">
-        <div>© 2026 dillustration. Digital Etherealism Art Collective.</div>
-        <div className="flex gap-6">
-          <Link href="#" className="hover:text-white">Privacy</Link>
-          <Link href="#" className="hover:text-white">Guidelines</Link>
-        </div>
-      </footer>
-    </div>
+          <form onSubmit={resetForm.handleSubmit(onSubmitReset)} className="space-y-5">
+            <div className="space-y-1.5">
+              <label className={AUTH_LABEL_CLASS} htmlFor="reset-code">
+                {isEng ? 'Verification Code' : 'Mã xác minh'}
+              </label>
+              <div className="flex gap-2">
+                <div className={`${AUTH_INPUT_WRAP_CLASS} flex-1`}>
+                  <KeyRound className="pointer-events-none ml-3.5 h-4 w-4 shrink-0 text-[#919099]" aria-hidden />
+                  <input
+                    {...resetForm.register('code')}
+                    id="reset-code"
+                    type="text"
+                    maxLength={6}
+                    placeholder={isEng ? '6-digit code' : 'Mã 6 chữ số'}
+                    className={`${AUTH_INPUT_CLASS} px-3.5 tracking-widest`}
+                    disabled={isLoading}
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={handleResend}
+                  disabled={isLoading || resendCooldown > 0}
+                  className="h-12 shrink-0 cursor-pointer rounded-xl border border-white/10 bg-white/5 px-4 text-xs font-semibold text-[#A7ACD9] transition-colors hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  {resendCooldown > 0
+                    ? isEng
+                      ? `Resend (${resendCooldown}s)`
+                      : `Gửi lại (${resendCooldown}s)`
+                    : isEng
+                      ? 'Resend code'
+                      : 'Gửi lại mã'}
+                </button>
+              </div>
+              {resetForm.formState.errors.code && (
+                <p className="text-xs text-red-400">{resetForm.formState.errors.code.message}</p>
+              )}
+            </div>
+
+            <div className="space-y-1.5">
+              <label className={AUTH_LABEL_CLASS} htmlFor="new-password">
+                {isEng ? 'New Password' : 'Mật khẩu mới'}
+              </label>
+              <div className={AUTH_INPUT_WRAP_CLASS}>
+                <Lock className="pointer-events-none ml-3.5 h-4 w-4 shrink-0 text-[#919099]" aria-hidden />
+                <input
+                  {...resetForm.register('newPassword')}
+                  id="new-password"
+                  type="password"
+                  placeholder="••••••••••••"
+                  className={`${AUTH_INPUT_CLASS} px-3.5`}
+                  disabled={isLoading}
+                />
+              </div>
+              {resetForm.formState.errors.newPassword && (
+                <p className="text-xs text-red-400">{resetForm.formState.errors.newPassword.message}</p>
+              )}
+            </div>
+
+            <div className="space-y-1.5">
+              <label className={AUTH_LABEL_CLASS} htmlFor="confirm-password">
+                {isEng ? 'Confirm New Password' : 'Xác nhận mật khẩu mới'}
+              </label>
+              <div className={AUTH_INPUT_WRAP_CLASS}>
+                <Lock className="pointer-events-none ml-3.5 h-4 w-4 shrink-0 text-[#919099]" aria-hidden />
+                <input
+                  {...resetForm.register('confirmPassword')}
+                  id="confirm-password"
+                  type="password"
+                  placeholder="••••••••••••"
+                  className={`${AUTH_INPUT_CLASS} px-3.5`}
+                  disabled={isLoading}
+                />
+              </div>
+              {resetForm.formState.errors.confirmPassword && (
+                <p className="text-xs text-red-400">{resetForm.formState.errors.confirmPassword.message}</p>
+              )}
+            </div>
+
+            <button type="submit" disabled={isLoading} className={AUTH_PRIMARY_BTN_CLASS}>
+              <span>
+                {isLoading
+                  ? isEng
+                    ? 'Processing...'
+                    : 'Đang xử lý...'
+                  : isEng
+                    ? 'Reset Password'
+                    : 'Đặt lại mật khẩu'}
+              </span>
+              <ArrowRight className="h-4 w-4" aria-hidden />
+            </button>
+
+            <div className="pt-1 text-center">
+              <button
+                type="button"
+                onClick={() => setStep('email')}
+                className="inline-flex cursor-pointer items-center gap-1.5 text-xs font-semibold text-[#919099] transition-colors hover:text-white"
+              >
+                <ArrowLeft className="h-3.5 w-3.5" aria-hidden />
+                <span>{isEng ? 'Use another email' : 'Đổi email khác'}</span>
+              </button>
+            </div>
+          </form>
+        </>
+      )}
+
+      <div className="mt-7 border-t border-white/10 pt-5 text-center text-xs text-[#919099]">
+        {isEng ? 'Having trouble?' : 'Gặp sự cố?'}{' '}
+        <Link href="/guide#guide-faq" className="text-[#A7ACD9] hover:underline">
+          {isEng ? 'Contact platform support' : 'Liên hệ hỗ trợ nền tảng'}
+        </Link>
+      </div>
+    </AuthShell>
   );
 }

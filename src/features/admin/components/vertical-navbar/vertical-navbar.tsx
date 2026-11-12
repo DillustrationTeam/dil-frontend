@@ -4,7 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
-  BarChart3, Bug,
+  BarChart3,
   Users,
   UserCheck,
   ShieldAlert,
@@ -17,7 +17,12 @@ import {
   Shield,
   Calendar,
   Banknote,
+  ArrowLeftRight,
+  Truck,
+  Tags,
+  Bug,
 } from 'lucide-react';
+import { useLanguage } from '@/context/language-context';
 import { useAuthStore } from '@/store/use-auth-store';
 import { AdminNavItem, AdminNavSection, AdminVerticalNavbarProps } from './types';
 
@@ -25,13 +30,6 @@ export const DEFAULT_ADMIN_NAV_SECTIONS: AdminNavSection[] = [
   {
     title: 'Platform Overview',
     items: [
-      {
-        id: 'bug-reports',
-        label: 'Báo cáo sự cố',
-        href: '/admin/bugs',
-        icon: <Bug className="w-4 h-4 shrink-0 text-rose-400" />,
-        materialIcon: 'bug_report',
-      },
       {
         id: 'system-overview',
         label: 'System Overview KPIs',
@@ -46,6 +44,13 @@ export const DEFAULT_ADMIN_NAV_SECTIONS: AdminNavSection[] = [
         href: '/admin/fee-policy',
         icon: <SlidersHorizontal className="w-4 h-4 shrink-0" />,
         materialIcon: 'tune',
+      },
+      {
+        id: 'category-management',
+        label: 'Category & Tags',
+        href: '/admin/categories',
+        icon: <Tags className="w-4 h-4 shrink-0" />,
+        materialIcon: 'category',
       },
     ],
   },
@@ -97,6 +102,20 @@ export const DEFAULT_ADMIN_NAV_SECTIONS: AdminNavSection[] = [
         icon: <Gavel className="w-4 h-4 shrink-0" />,
         materialIcon: 'gavel',
       },
+      {
+        id: 'trade-operations',
+        label: 'Trade Operations',
+        href: '/admin/trades',
+        icon: <ArrowLeftRight className="w-4 h-4 shrink-0" />,
+        materialIcon: 'sync_alt',
+      },
+      {
+        id: 'physical-deliveries',
+        label: 'Shipping & Escrow',
+        href: '/admin/deliveries',
+        icon: <Truck className="w-4 h-4 shrink-0" />,
+        materialIcon: 'local_shipping',
+      },
     ],
   },
   {
@@ -115,6 +134,20 @@ export const DEFAULT_ADMIN_NAV_SECTIONS: AdminNavSection[] = [
         href: '/admin/disputes',
         icon: <Gavel className="w-4 h-4 shrink-0" />,
         materialIcon: 'gavel',
+      },
+      {
+        id: 'forensic-watermark',
+        label: 'Forensic Watermark',
+        href: '/admin/forensic',
+        icon: <Shield className="w-4 h-4 shrink-0" />,
+        materialIcon: 'verified_user',
+      },
+      {
+        id: 'bug-reports',
+        label: 'Bug Reports',
+        href: '/admin/bugs',
+        icon: <Bug className="w-4 h-4 shrink-0" />,
+        materialIcon: 'bug_report',
       },
     ],
   },
@@ -150,7 +183,9 @@ export function VerticalNavbar({
   onLogout,
 }: AdminVerticalNavbarProps) {
   const pathname = usePathname();
+  const { t } = useLanguage();
   const { user, clearAuth } = useAuthStore();
+  const localizedRole = adminRole === 'Platform Control' ? t('Platform Control') : t(adminRole);
 
   const displayName = adminName || user?.fullName || 'System Admin';
   const displayInitials = avatarText || getInitials(displayName);
@@ -207,8 +242,8 @@ export function VerticalNavbar({
           type="button"
           onClick={onToggleCollapse}
           className="absolute -right-3.5 top-6 w-7 h-7 rounded-full bg-[#1b1b1e] border border-white/20 text-slate-300 hover:text-white hover:border-[#A7ACD9]/50 flex items-center justify-center shadow-lg transition-all z-40 cursor-pointer"
-          title={isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
-          aria-label={isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
+          title={isCollapsed ? t('Expand Sidebar') : t('Collapse Sidebar')}
+          aria-label={isCollapsed ? t('Expand Sidebar') : t('Collapse Sidebar')}
         >
           {isCollapsed ? (
             <ChevronRight className="w-4 h-4" />
@@ -238,7 +273,7 @@ export function VerticalNavbar({
                 <div className="flex items-center gap-1.5 mt-0.5">
                   <Shield className="w-3 h-3 text-[#A7ACD9]" />
                   <span className="text-[10px] text-[#A7ACD9] font-medium tracking-wide truncate">
-                    {adminRole}
+                    {localizedRole}
                   </span>
                 </div>
               </div>
@@ -254,7 +289,7 @@ export function VerticalNavbar({
               <div className="px-3 pt-2 pb-1">
                 {!isCollapsed ? (
                   <p className="text-[10px] font-space-grotesk tracking-widest uppercase font-bold text-[#919099]">
-                    {section.title}
+                    {t(section.title)}
                   </p>
                 ) : (
                   sectionIdx > 0 && (
@@ -279,7 +314,7 @@ export function VerticalNavbar({
                         ? 'bg-[#A7ACD9]/20 text-white border border-[#A7ACD9]/40 shadow-[0_0_15px_rgba(167,172,217,0.2)]'
                         : 'text-[#919099] hover:text-white hover:bg-white/5 border border-transparent'
                     } ${isCollapsed ? 'justify-center px-0' : ''}`}
-                    title={isCollapsed ? item.label : undefined}
+                    title={isCollapsed ? t(item.label) : undefined}
                     aria-current={active ? 'page' : undefined}
                   >
                     {/* Icon Rendering */}
@@ -307,7 +342,7 @@ export function VerticalNavbar({
 
                     {/* Label */}
                     {!isCollapsed && (
-                      <span className="truncate flex-1">{item.label}</span>
+                      <span className="truncate flex-1">{t(item.label)}</span>
                     )}
 
                     {/* Badge / Screen ID (only when expanded) */}
@@ -353,11 +388,11 @@ export function VerticalNavbar({
                 className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-sora text-[#919099] hover:text-white hover:bg-white/5 transition-colors group ${
                   isCollapsed ? 'justify-center px-0' : ''
                 }`}
-                title={isCollapsed ? 'Return to Marketplace' : undefined}
+                title={isCollapsed ? t('Return to Marketplace') : undefined}
               >
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
                 {!isCollapsed && (
-                  <span className="truncate flex-1 font-medium">Marketplace</span>
+                  <span className="truncate flex-1 font-medium">{t('Marketplace')}</span>
                 )}
                 {!isCollapsed && (
                   <ArrowUpRight className="w-3.5 h-3.5 text-[#919099] group-hover:text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
@@ -371,10 +406,10 @@ export function VerticalNavbar({
                 className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-sora text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 transition-colors text-left cursor-pointer ${
                   isCollapsed ? 'justify-center px-0' : ''
                 }`}
-                title={isCollapsed ? 'Exit Console' : undefined}
+                title={isCollapsed ? t('Exit Console') : undefined}
               >
                 <LogOut className="w-3.5 h-3.5 shrink-0" />
-                {!isCollapsed && <span className="font-medium">Exit Console</span>}
+                {!isCollapsed && <span className="font-medium">{t('Exit Console')}</span>}
               </button>
             </>
           )}

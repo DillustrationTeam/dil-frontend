@@ -19,7 +19,9 @@ import type {
   MyActiveBidsMeta,
   MyCollectionItemDto,
   ArtworkProvenanceDto,
+  PhysicalDeliveryListItemDto,
   RequestPhysicalDeliveryPayload,
+  SellerRatingResult,
   SellerStatisticsDto,
   UpdateShippingPayload,
   WalletOverviewDto,
@@ -232,29 +234,77 @@ export const auctionService = {
   getWallet: (signal?: AbortSignal): Promise<WalletOverviewDto> =>
     call<WalletOverviewDto>('get', '/wallets/me', undefined, undefined, signal).then((r) => r.data),
 
-  uploadMasterPack: async (file: File): Promise<{ fileUrl: string; fileName: string; fileSizeBytes: number }> => {
-    const formData = new FormData();
-    formData.append('file', file);
-    const res = await apiClient.post<ApiResponse<{ fileUrl: string; fileName: string; fileSizeBytes: number }>>(
-      '/auctions/upload-master-pack',
-      formData,
-      {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      }
-    );
-    if (!res.data.data) {
-      throw new Error(res.data.error?.detail || 'Không thể tải lên file gốc.');
-    }
-    return res.data.data;
-  },
-
   requestPhysicalDelivery: (auctionId: string, payload: RequestPhysicalDeliveryPayload): Promise<AuctionDeliveryDto> =>
     call<AuctionDeliveryDto>('post', `/auctions/${auctionId}/delivery/request-physical`, payload).then((r) => r.data),
 
   declinePhysicalDelivery: (auctionId: string): Promise<{ message: string }> =>
     call<{ message: string }>('post', `/auctions/${auctionId}/delivery/decline-physical`).then((r) => r.data),
+
+  /**
+   * Người thắng bỏ bước giao nhận bưu cục, nhận tranh điện tử ngay.
+   * Ký quỹ giải ngân tức thì cho người bán — chỉ gọi sau khi người dùng đã xác nhận cảnh báo.
+   */
+  acceptDigitalDelivery: (auctionId: string): Promise<AuctionDeliveryDto> =>
+    call<AuctionDeliveryDto>('post', `/auctions/${auctionId}/delivery/accept-digital`).then((r) => r.data),
+
+  /**
+   * Admin phân xử khiếu nại giao nhận:
+   * 'release' giải ngân cho seller, 'refund' hoàn tiền cho buyer,
+   * 'close' đóng hồ sơ khi ký quỹ đã giải ngân (không thể hoàn tiền).
+   */
+  resolveDeliveryDispute: (
+    auctionId: string,
+    decision: 'release' | 'refund' | 'close',
+    note?: string | null,
+  ): Promise<AuctionDeliveryDto> =>
+    call<AuctionDeliveryDto>('post', `/auctions/${auctionId}/delivery/resolve`, { decision, note }).then((r) => r.data),
+
+  /** Người mua đánh giá người bán sau khi giao dịch khép lại (1–5 sao). */
+  rateAuctionSeller: (
+    auctionId: string,
+    payload: { rating: number; comment?: string | null },
+  ): Promise<SellerRatingResult> =>
+    call<SellerRatingResult>('post', `/auctions/${auctionId}/rate-seller`, payload).then((r) => r.data),
+
+  /** Tải ảnh bằng chứng khiếu nại trực tiếp từ máy người dùng. */
+  uploadDisputeEvidence: async (
+    auctionId: string,
+    file: File,
+  ): Promise<{ fileUrl: string; fileName: string; fileSizeBytes: number }> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const res = await apiClient.post<
+      ApiResponse<{ fileUrl: string; fileName: string; fileSizeBytes: number }>
+    >(`/auctions/${auctionId}/delivery/dispute-evidence`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    if (!res.data.data) {
+      throw new Error(res.data.error?.detail || 'Không tải được ảnh bằng chứng.');
+    }
+    return res.data.data;
+  },
+
+  /**
+   * Người bán tải ảnh biên lai bưu cục / ảnh kiện hàng trực tiếp từ máy.
+   * `kind = receipt | package`; trả URL tuyệt đối để truyền vào `updateShipping`.
+   */
+  uploadShippingEvidence: async (
+    auctionId: string,
+    file: File,
+    kind: 'receipt' | 'package',
+  ): Promise<{ fileUrl: string; fileName: string; fileSizeBytes: number }> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const res = await apiClient.post<
+      ApiResponse<{ fileUrl: string; fileName: string; fileSizeBytes: number }>
+    >(`/auctions/${auctionId}/delivery/ship-evidence?kind=${kind}`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    if (!res.data.data) {
+      throw new Error(res.data.error?.detail || 'Không tải được ảnh.');
+    }
+    return res.data.data;
+  },
 
   updateShipping: (auctionId: string, payload: UpdateShippingPayload): Promise<AuctionDeliveryDto> =>
     call<AuctionDeliveryDto>('post', `/auctions/${auctionId}/delivery/ship`, payload).then((r) => r.data),
@@ -267,5 +317,8 @@ export const auctionService = {
 
   getReceipts: (auctionId: string, signal?: AbortSignal): Promise<AuctionReceiptDto[]> =>
     call<AuctionReceiptDto[]>('get', `/auctions/${auctionId}/receipts`, undefined, undefined, signal).then((r) => r.data),
+
+  getPhysicalDeliveries: (params?: { role?: string; status?: string }, signal?: AbortSignal): Promise<PhysicalDeliveryListItemDto[]> =>
+    call<PhysicalDeliveryListItemDto[]>('get', '/auctions/deliveries', undefined, params, signal).then((r) => r.data),
 };
 

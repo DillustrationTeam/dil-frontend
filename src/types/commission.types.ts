@@ -1,3 +1,4 @@
+import type { CreatorTermsDto } from '@/features/creator-studio/types/creator-profile.types';
 export type MilestoneType = 'Sketch' | 'Lineart' | 'Color' | 'Final';
 export type MilestoneStatus = 'Pending' | 'Submitted' | 'RevisionRequested' | 'Approved';
 export type CommissionStatus =
@@ -48,6 +49,8 @@ export interface Commission {
   finalPrice?: number;
   escrowHeldAmount?: number;
   disbursedAmount?: number;
+  isStagedEscrow?: boolean;
+  nextEscrowDepositAmount?: number;
   escrowStatus?: string;
   currentStage?: number;
   clientName?: string;
@@ -67,6 +70,7 @@ export interface Commission {
   creatorTermsAcceptedAt?: string | null;
   creatorTermsVersion?: string | null;
   currentWorkroomTermsVersion?: string;
+  creatorTermsSnapshot?: CreatorTermsDto | null;
   milestones?: Milestone[];
   review?: Review | null;
   dispute?: Dispute | null;

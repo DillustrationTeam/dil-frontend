@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React from 'react';
 import Link from 'next/link';
@@ -12,7 +12,6 @@ import {
   ChevronRight,
   Clock,
   CheckCircle,
-  Crown,
   ListChecks,
   MessageSquare,
   Ticket,
@@ -29,6 +28,8 @@ import {
   User,
   UserPen,
   Settings,
+  ArrowLeftRight,
+  Sparkles,
 } from 'lucide-react';
 
 interface SidebarItem {
@@ -52,11 +53,12 @@ const CLIENT_NAV_SECTIONS: SidebarSection[] = [
   {
     title: 'Client Workspace',
     items: [
+      { label: 'Tác phẩm đã sở hữu', href: '/client/owned-artworks', icon: Sparkles },
       { label: 'My Commissions', href: '/client/commissions', icon: FolderKanban },
-      { label: 'Bộ sưu tập tranh đấu giá', href: '/collections', icon: Crown },
       { label: 'My Vouchers', href: '/vouchers', icon: Ticket },
       { label: 'My Auctions', href: '/my-auctions', icon: Gavel },
       { label: 'Workroom Chat', href: '/workroom', icon: MessageSquare },
+      { label: 'Forensic Watermark', href: '/forensic', icon: ShieldCheck },
     ],
   },
   {
@@ -88,6 +90,13 @@ const CREATOR_NAV_SECTIONS: SidebarSection[] = [
     ],
   },
   {
+    title: 'Trade & Exchange',
+    items: [
+      { label: 'Trade', href: '/art-trades/create', icon: ArrowLeftRight },
+      { label: 'My Trades', href: '/art-trades', icon: FolderKanban },
+    ],
+  },
+  {
     title: 'Doanh thu & Rút tiền',
     items: [
       { label: 'Tổng quan doanh thu', href: '/creator/dashboard', icon: TrendingUp },
@@ -103,6 +112,7 @@ const CREATOR_NAV_SECTIONS: SidebarSection[] = [
       { label: 'Event Jury', href: '/creator/events/jury', icon: Gavel },
       { label: 'My Vouchers', href: '/creator/vouchers', icon: Ticket },
       { label: 'Terms & Licensing', href: '/creator/terms', icon: ShieldCheck },
+      { label: 'Forensic Watermark', href: '/forensic', icon: ShieldCheck },
       { label: 'AI Auto-reply', href: '/creator/ai-rules', icon: Bot },
       { label: 'Asset & Presets', href: '/creator/assets', icon: Palette },
     ],
@@ -135,7 +145,7 @@ export default function CollapsibleSidebar({
       <button
         onClick={onToggleCollapse}
         className="absolute -right-3.5 top-6 w-7 h-7 rounded-full bg-[#1b1b1e] border border-white/20 text-slate-300 hover:text-white hover:border-[#A7ACD9]/50 flex items-center justify-center shadow-lg transition-all z-40"
-        title={isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
+        title={isCollapsed ? t('Expand Sidebar') : t('Collapse Sidebar')}
       >
         {isCollapsed ? (
           <ChevronRight className="w-4 h-4" />
@@ -207,8 +217,8 @@ export default function CollapsibleSidebar({
           </div>
           {!isCollapsed && (
             <div className="overflow-hidden">
-              <p className="text-[11px] font-bold text-white truncate">Wallet escrow</p>
-              <p className="text-[10px] text-emerald-400 truncate">Released per milestone</p>
+              <p className="text-[11px] font-bold text-white truncate">{t('Wallet escrow')}</p>
+              <p className="text-[10px] text-emerald-400 truncate">{t('Released per milestone')}</p>
             </div>
           )}
         </div>

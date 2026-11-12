@@ -1,7 +1,14 @@
 import { apiClient } from '@/lib/api-client';
 import type { ApiResponse } from '@/types/api.types';
 import { z } from 'zod';
-export const metadataSchema = z.object({ title: z.string().trim().min(1).max(200), description: z.string().trim().min(1).max(2000), tags: z.array(z.string().trim().min(1).max(50)).max(10), style: z.string().max(100) });
+export const metadataSchema = z.object({
+  title: z.string().trim().min(1).max(200),
+  description: z.string().trim().min(1).max(2000),
+  tags: z.array(z.string().trim().min(1).max(50)).max(10),
+  style: z.string().max(100),
+  categoryId: z.string().nullable().optional(),
+  categoryName: z.string().nullable().optional(),
+});
 export type MetadataSuggestion = z.infer<typeof metadataSchema>;
 export type ScanStatus = { status: 'Queued' | 'Processing' | 'Succeeded' | 'Retrying' | 'Failed' | 'NotConfigured' | 'NotRequested'; score: number | null; provider: string | null; model: string | null; checkedAt: string | null; error: string | null };
 export type Recommendation = { artwork: { id: string; title: string; imageUrl: string; thumbnailUrl?: string | null; creatorName?: string | null; tags: string[] }; reason: string };

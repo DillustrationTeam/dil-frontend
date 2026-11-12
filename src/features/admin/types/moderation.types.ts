@@ -1,4 +1,4 @@
-// ==========================================
+﻿// ==========================================
 // SCREEN 20 (SCR-20 / UC28): CONTENT & AI MODERATION QUEUE
 // ==========================================
 
@@ -28,6 +28,8 @@ export interface ModerationQueueItemDto {
   imageUrl: string;
   thumbnailUrl?: string | null;
   style?: string | null;
+  categoryId?: string | null;
+  categoryName?: string | null;
   /** Tỷ lệ an toàn được AI phát hiện (0.0 - 1.0, e.g. 0.984 = 98.4% SAFE) */
   safeScore?: number | null;
   /** Lý do đưa vào hàng đợi kiểm duyệt (e.g. "AI NSFW Threshold Borderline", "User Reported") */
@@ -46,6 +48,8 @@ export interface ArtworkInspectionDetailDto {
   thumbnailUrl?: string | null;
   watermarkedUrl?: string | null;
   style?: string | null;
+  categoryId?: string | null;
+  categoryName?: string | null;
   likeCount: number;
   resolution?: string | null;
   fileSizeBytes?: number | null;
@@ -80,6 +84,31 @@ export interface ArtworkInspectionDetailDto {
 export interface ExecuteModerationDecisionRequest {
   action: ModerationActionType;
   moderationNote?: string;
+}
+
+export interface ArtworkDuplicateMatchDto {
+  artworkId: string;
+  title: string;
+  thumbnailUrl?: string | null;
+  imageUrl: string;
+  creatorProfileId: string;
+  creatorName: string;
+  moderationStatus: string;
+  createdAt: string;
+  matchType: 'ExactFile' | 'ReuploadedWatermark' | 'VisualSimilar' | string;
+  similarityPercent: number;
+  hammingDistance: number;
+  sameCreator: boolean;
+  receiptToken?: string | null;
+}
+
+export interface ArtworkDuplicateCheckResultDto {
+  artworkId: string;
+  hasDuplicates: boolean;
+  comparedArtworksCount: number;
+  sourceSha256?: string | null;
+  sourceVisualHash?: number | null;
+  matches: ArtworkDuplicateMatchDto[];
 }
 
 export interface ModerationQueueMeta {

@@ -6,7 +6,6 @@ import Link from 'next/link';
 import Image from 'next/image';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '@/store/use-auth-store';
-import { PageHeader } from '@/components/page-header';
 import { CreatorApplicationWizard } from '@/features/creator-studio/components/creator-application-wizard';
 import { creatorApplicationService } from '@/features/creator-studio/services/creator-application.service';
 import { MyCreatorApplicationDto } from '@/features/creator-studio/types/creator-application.types';
@@ -261,9 +260,8 @@ export default function BecomeCreatorPage() {
   const canResubmit = !application || application.status === 'Rejected';
 
   return (
-    <main className="min-h-screen bg-[#1F2335] px-6 py-12">
+    <div className="px-4 py-6 sm:px-6 sm:py-10">
       <div className="mx-auto max-w-5xl">
-        <PageHeader title="Đăng ký trở thành Creator" />
 
         {isCheckingStatus ? (
           <p className="text-center text-sm text-[#C7C5CF]">Đang kiểm tra trạng thái đơn của bạn...</p>
@@ -327,6 +325,6 @@ export default function BecomeCreatorPage() {
           </>
         )}
       </div>
-    </main>
+    </div>
   );
 }
