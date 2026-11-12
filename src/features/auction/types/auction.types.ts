@@ -59,6 +59,8 @@ export interface AuctionDetailDto extends AuctionListItemDto {
   physicalChoiceDeadline?: string | null;
   delivery?: AuctionDeliveryDto | null;
   receipts?: AuctionReceiptDto[] | null;
+  /** Mức phạt hiện tại của người bán trên thang 5 mức (0 = chưa bị phạt). */
+  sellerPenaltyLevel?: number;
 }
 
 export interface AuctionDeliveryDto {

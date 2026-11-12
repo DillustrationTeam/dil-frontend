@@ -326,6 +326,13 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
             : null,
         );
       }
+      // A bid that reaches the buy-now ceiling settles the session on the spot: reload so
+      // the page stops offering "Mua ngay" and shows the settled state.
+      if (auction.buyNowPrice && amountNum >= auction.buyNowPrice) {
+        setSuccess(`Giá đặt đã chạm mức mua ngay — phiên đã chốt ở ${formatVnd(auction.buyNowPrice)}.`);
+        await loadDetail();
+      }
+
     } catch (err: unknown) {
       if (err instanceof AuctionConflictError) {
         // FE-03: Handle 409 Conflict gracefully by updating price and next bid without page reload
@@ -843,7 +850,7 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
                     id="bid-amount"
                     type="number"
                     min={minimumNextBid}
-                    step={auction.bidStep}
+                    step="any"
                     value={bidAmount}
                     onChange={(e) => setBidAmount(e.target.value)}
                     className={`w-full rounded-xl border bg-brand-navy/60 px-4 py-3 font-h1 text-lg font-bold text-on-surface focus:outline-none transition ${
@@ -855,6 +862,11 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
                   {bidAmountNum > 0 && bidAmountNum < minimumNextBid && (
                     <p className="mt-1 text-xs text-rose-400">
                       Mức giá đặt chưa đủ! Tối thiểu là {formatVnd(minimumNextBid)}.
+                    </p>
+                  )}
+                  {auction.buyNowPrice && bidAmountNum >= auction.buyNowPrice && (
+                    <p className="mt-1 text-xs text-brand-periwinkle/90">
+                      Giá đặt đã chạm mức mua ngay: phiên sẽ chốt ngay ở {formatVnd(auction.buyNowPrice)}, phần vượt không bị trừ.
                     </p>
                   )}
                   {isBalanceShortage && (
@@ -984,7 +996,7 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
                 </button>
 
                 {/* Mua ngay nếu phiên hỗ trợ */}
-                {auction.buyNowPrice && (
+                {auction.buyNowPrice && auction.currentPrice < auction.buyNowPrice && (
                   <div className="space-y-1">
                     <button
                       type="button"
