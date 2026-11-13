@@ -1055,7 +1055,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                         )}
                       </div>
                       <p className="text-[11px] text-on-surface-variant mt-0.5">
-                        Thành viên: {room.members.map((m) => m.fullName || 'Người dùng').join(', ')}
+                        Thành viên: {room.members.map((m) => (m.userId === userId ? ("Bạn (" + (m.fullName || "You") + ")") : (m.fullName || "Người dùng"))).join(", ")}
                       </p>
                     </div>
                   </div>

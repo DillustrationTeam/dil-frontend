@@ -1,4 +1,5 @@
 import { BugReportFloatingButton } from '@/components/feedback/BugReportFloatingButton';
+import { FloatingUtilitiesDock } from '@/components/feedback/FloatingUtilitiesDock';
 import type { Metadata } from "next";
 import { Be_Vietnam_Pro, Space_Grotesk } from "next/font/google";
 import { GoogleOAuthProvider } from "@react-oauth/google";
@@ -61,8 +62,10 @@ export default function RootLayout({
         <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
           <LanguageProvider>
             {children}
-            <AiAssistantLauncher />
-            <BugReportFloatingButton />
+            <FloatingUtilitiesDock>
+              <AiAssistantLauncher />
+              <BugReportFloatingButton />
+            </FloatingUtilitiesDock>
             <AppToaster />
           </LanguageProvider>
         </GoogleOAuthProvider>

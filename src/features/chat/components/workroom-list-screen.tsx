@@ -376,7 +376,8 @@ function WorkroomCard({ row }: { row: WorkroomRow }) {
   const { commission, viewerRole, partnerName } = row;
   const approved = (commission.milestones ?? []).filter((milestone) => milestone.status === 'Approved').length;
   const totalMilestones = (commission.milestones ?? []).length;
-  const remainingDays = daysUntil(commission.deadlineAt);
+  const isEnded = commission.status === 'Completed' || commission.status === 'Cancelled';
+  const remainingDays = isEnded ? null : daysUntil(commission.deadlineAt);
   const escrowHeld = commission.escrowHeldAmount ?? 0;
 
   return (
