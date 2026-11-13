@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import type { AuctionDetailDto } from '../types/auction.types';
 import { auctionError, auctionService } from '../services/auction.service';
+import { SellerPenaltyLadder } from './seller-penalty-ladder';
 
 interface PhysicalDeliveryCardProps {
   auction: AuctionDetailDto;
@@ -387,6 +388,9 @@ export function PhysicalDeliveryCard({ auction, userId, onReload }: PhysicalDeli
               <p className="text-xs text-outline">
                 Bạn có thể yêu cầu Người bán gửi bản gốc vật lý tận nơi (có bưu cục đối soát), hoặc chỉ nhận file số độc quyền để hoàn tất phiên ngay.
               </p>
+              <p className="text-xs text-amber-200/70">
+                Quá 48 giờ mà bạn chưa chọn, phiên sẽ <span className="font-semibold text-amber-200">tự huỷ và hoàn lại toàn bộ tiền về ví của bạn</span>; tác phẩm trở về quyền sở hữu của Người bán. Bạn cũng sẽ không nhận được file gốc của phiên này.
+              </p>
             </div>
           </div>
 
@@ -654,6 +658,9 @@ export function PhysicalDeliveryCard({ auction, userId, onReload }: PhysicalDeli
                       );
                     })}
                   </div>
+                  {/* Thang cảnh báo 5 mức: đặt ngay trên nút gửi để người bán đọc hậu quả
+                      trước khi xác nhận gửi hàng, và thấy mình đang đứng ở mức nào. */}
+                  <SellerPenaltyLadder level={auction.sellerPenaltyLevel ?? 0} />
                   <div className="flex gap-2">
                     <button
                       type="submit"
@@ -1009,8 +1016,13 @@ export function PhysicalDeliveryCard({ auction, userId, onReload }: PhysicalDeli
                           <>
                             Người bán thực nhận: {formatVnd(rec.netAmount ?? rec.amount)}
                             {rec.feeAmount
-                              ? ` · Phí sàn: ${formatVnd(rec.feeAmount)} (trên tổng ${formatVnd(rec.amount)})`
+                              ? ` · Phí sàn: ${formatVnd(rec.feeAmount)} (trên tổng ${formatVnd((rec.netAmount ?? rec.amount) + rec.feeAmount)})`
                               : ''}
+                          </>
+                        ) : rec.receiptType === 'EscrowRefund' ? (
+                          <>
+                            Đã hoàn về ví: {formatVnd(rec.amount)}
+                            {' · hoàn toàn bộ, không trừ phí'}
                           </>
                         ) : (
                           <>

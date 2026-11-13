@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 import Link from 'next/link';
 import {
   AlertTriangle,
@@ -90,8 +90,27 @@ function BiddingCard({ bid }: { bid: MyActiveBidDto }) {
   );
 }
 
+
+/** Lắng nghe quá trình hydrate của auth store (persist Zustand). */
+function subscribeAuthHydration(listener: () => void) {
+  const unsubscribeStart = useAuthStore.persist.onHydrate(listener);
+  const unsubscribeFinish = useAuthStore.persist.onFinishHydration(listener);
+  return () => {
+    unsubscribeStart();
+    unsubscribeFinish();
+  };
+}
 export function BiddingDashboardScreen() {
   const userId = useAuthStore((state) => state.user?.id);
+  // Chờ auth store hydrate xong rồi mới quyết định "chưa đăng nhập": nếu không, SSR và lần
+  // render đầu ở client đều thấy userId = null nên hiện "Vui lòng đăng nhập" rồi mới nháy
+  // sang nội dung (hydration mismatch), đồng thời gọi API khi chưa có token (401 vô ích).
+  const authReady = useSyncExternalStore(
+    subscribeAuthHydration,
+    () => useAuthStore.persist.hasHydrated(),
+    () => false,
+  );
+  const accessToken = useAuthStore((state) => state.accessToken);
   const [bids, setBids] = useState<MyActiveBidDto[]>([]);
   const [meta, setMeta] = useState<MyActiveBidsMeta | null>(null);
   const [loading, setLoading] = useState(true);
@@ -124,11 +143,26 @@ export function BiddingDashboardScreen() {
   }
 
   useEffect(() => {
+    if (!authReady || !accessToken) {
+      setLoading(false);
+      return;
+    }
+
     void (async () => {
       await Promise.resolve();
       await loadDashboard();
     })();
-  }, []);
+    // Chỉ chạy lại khi trạng thái đăng nhập thực sự đổi.
+     
+  }, [authReady, accessToken]);
+
+  if (!authReady) {
+    return (
+      <div className="mx-auto w-full max-w-4xl px-4 py-16 text-center text-on-surface-variant">
+        Đang tải phiên đấu giá của bạn…
+      </div>
+    );
+  }
 
   if (!userId) {
     return (

@@ -36,6 +36,7 @@ const auctionSchema = z.object({
   const duration = end.getTime() - start.getTime();
   if (!Number.isFinite(duration) || end <= start) ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['endAt'], message: 'Thời gian kết thúc phải sau thời gian bắt đầu.' });
   if (end <= new Date()) ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['endAt'], message: 'Thời gian kết thúc phải nằm trong tương lai.' });
+  if (start.getTime() < Date.now() - 3600000) ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['startAt'], message: 'Thời gian bắt đầu không được ở quá khứ quá 1 giờ.' });
   if (duration < 3600000) ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['endAt'], message: 'Phiên đấu giá phải kéo dài ít nhất 1 giờ.' });
   if (duration > 30 * 86400000) ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['endAt'], message: 'Phiên đấu giá tối đa 30 ngày.' });
   if (value.buyNowPrice !== null && value.buyNowPrice <= value.startPrice) ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['buyNowPrice'], message: 'Giá mua ngay phải cao hơn giá khởi điểm.' });
@@ -43,6 +44,18 @@ const auctionSchema = z.object({
 
 function formatVnd(value: number) {
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 }).format(value);
+}
+
+/**
+ * Định dạng Date thành chuỗi cho <input type="datetime-local">.
+ *
+ * Ô datetime-local hiểu giá trị theo GIỜ MÁY, không phải UTC. Trước đây form đổ
+ * `now.toISOString().slice(0,16)` (giờ UTC) vào đây nên ở UTC+7 mặc định lệch 7 giờ:
+ * phiên "hẹn giờ" bị tạo với startAt trong quá khứ và chạy ngay, endAt cũng lệch 7 giờ.
+ */
+function toLocalDateTimeInput(date: Date) {
+  const pad = (value: number) => String(value).padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
 export function AuctionCreateScreen({ userId }: { userId: string | null }) {
@@ -58,14 +71,16 @@ export function AuctionCreateScreen({ userId }: { userId: string | null }) {
       startPrice: 500000,
       bidStep: 50000,
       buyNowPrice: null,
-      startAt: now.toISOString().slice(0, 16),
-      endAt: new Date(now.getTime() + 3 * 86400000).toISOString().slice(0, 16),
+      startAt: toLocalDateTimeInput(now),
+      endAt: toLocalDateTimeInput(new Date(now.getTime() + 3 * 86400000)),
       hasPhysicalCopy: false,
       physicalDescription: '',
     };
   });
 
   const [submitting, setSubmitting] = useState(false);
+  // Người dùng đã tự sửa ô thời gian bắt đầu chưa (dùng để tự làm mới mốc mặc định).
+  const [startAtTouched, setStartAtTouched] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [reloadTrigger, setReloadTrigger] = useState<number>(0);
 
@@ -86,7 +101,14 @@ export function AuctionCreateScreen({ userId }: { userId: string | null }) {
       return;
     }
 
-    const parsed = auctionSchema.safeParse(form);
+    // Nếu người dùng KHÔNG sửa ô "bắt đầu", làm mới mốc này về hiện tại trước khi validate.
+    // Form có thể mở rất lâu; giữ nguyên mốc cũ sẽ bị luật "không ở quá khứ quá 1 giờ" chặn
+    // ở đúng field mà người dùng không hề đụng vào.
+    const formToSubmit = startAtTouched
+      ? form
+      : { ...form, startAt: toLocalDateTimeInput(new Date()) };
+
+    const parsed = auctionSchema.safeParse(formToSubmit);
     if (!parsed.success) {
       setError(parsed.error.issues[0]?.message ?? 'Thông tin phiên đấu giá không hợp lệ.');
       return;
@@ -234,7 +256,10 @@ export function AuctionCreateScreen({ userId }: { userId: string | null }) {
                 type="datetime-local"
                 required
                 value={form.startAt}
-                onChange={(e) => setForm({ ...form, startAt: e.target.value })}
+                onChange={(e) => {
+                    setStartAtTouched(true);
+                    setForm({ ...form, startAt: e.target.value });
+                  }}
                 className="w-full rounded-xl border border-white/15 bg-brand-navy/60 px-4 py-2.5 text-sm text-on-surface focus:border-brand-periwinkle focus:outline-none"
               />
             </div>

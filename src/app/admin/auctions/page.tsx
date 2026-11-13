@@ -34,6 +34,8 @@ const money = (val?: number) =>
 
 export default function AdminAuctionsPage() {
   const [auctions, setAuctions] = useState<AuctionListItemDto[]>([]);
+  // Danh sách KHÔNG lọc, chỉ dùng để tính 4 ô KPI (xem `stats` bên dưới).
+  const [allAuctions, setAllAuctions] = useState<AuctionListItemDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<StatusTabKey>('Active');
   const [searchQuery, setSearchQuery] = useState('');
@@ -46,8 +48,13 @@ export default function AdminAuctionsPage() {
     setLoading(true);
     try {
       const filter = statusFilter === 'ALL' ? {} : { status: statusFilter };
-      const res = await auctionService.list(filter);
+      // Trang quản trị cần thấy đủ phiên để chốt/huỷ, không phải 12 dòng của chợ.
+      const [res, allRes] = await Promise.all([
+        auctionService.list(filter, undefined, undefined, 100),
+        auctionService.list({}, undefined, undefined, 100),
+      ]);
       setAuctions(res.items || []);
+      setAllAuctions(allRes.items || []);
     } catch (err) {
       toast.error(auctionError(err));
     } finally {
@@ -58,11 +65,14 @@ export default function AdminAuctionsPage() {
   useEffect(() => {
     let ignore = false;
     const filter = statusFilter === 'ALL' ? {} : { status: statusFilter };
-    auctionService
-      .list(filter)
-      .then((res) => {
+    Promise.all([
+      auctionService.list(filter, undefined, undefined, 100),
+      auctionService.list({}, undefined, undefined, 100),
+    ])
+      .then(([res, allRes]) => {
         if (!ignore) {
           setAuctions(res.items || []);
+          setAllAuctions(allRes.items || []);
         }
       })
       .catch((err) => {
@@ -92,14 +102,19 @@ export default function AdminAuctionsPage() {
     );
   }, [auctions, searchQuery]);
 
+  /**
+   * KPI tính trên TOÀN BỘ phiên, không phải trên danh sách đang lọc theo tab.
+   * Trước đây `stats` đếm từ `auctions` (đã lọc status ở server) nên tab mặc định "Active"
+   * khiến "Sắp diễn ra / Đã chốt / Đã kết thúc & huỷ" luôn bằng 0.
+   */
   const stats = useMemo(() => {
     return {
-      active: auctions.filter((a) => a.auctionStatus === 'Active').length,
-      scheduled: auctions.filter((a) => a.auctionStatus === 'Scheduled').length,
-      settled: auctions.filter((a) => a.auctionStatus === 'Settled').length,
-      ended: auctions.filter((a) => a.auctionStatus === 'Ended' || a.auctionStatus === 'Cancelled').length,
+      active: allAuctions.filter((a) => a.auctionStatus === 'Active').length,
+      scheduled: allAuctions.filter((a) => a.auctionStatus === 'Scheduled').length,
+      settled: allAuctions.filter((a) => a.auctionStatus === 'Settled').length,
+      ended: allAuctions.filter((a) => a.auctionStatus === 'Ended' || a.auctionStatus === 'Cancelled').length,
     };
-  }, [auctions]);
+  }, [allAuctions]);
 
   const handleForceSettle = async () => {
     if (!actionAuction) return;
