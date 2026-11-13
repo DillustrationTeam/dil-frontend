@@ -118,10 +118,19 @@ export function formatCountdownDetail(remainingMs: number): string {
  * không làm trôi thời gian khi tab ở background và tự cập nhật khi endAt thay đổi (vd gia hạn phiên).
  */
 export function useAuctionClock({ endAt, serverTime, isDetail = false }: AuctionClockOptions): AuctionClockResult {
-  const [syncTime] = useState(() => ({
+  // Mốc đồng bộ server phải cập nhật LẠI mỗi khi có serverTime mới. Trước đây dùng
+  // useState(() => ...) nên chỉ chốt một lần lúc mount — khi đó trang chi tiết chưa nạp
+  // xong phiên nên serverTime là undefined, và phần bù lệch đồng hồ server trở thành
+  // code chết: máy khách sai giờ là đếm ngược sai theo.
+  const [syncTime, setSyncTime] = useState(() => ({
     serverTime,
     localTimeMs: Date.now(),
   }));
+
+  useEffect(() => {
+    if (!serverTime) return;
+    setSyncTime({ serverTime, localTimeMs: Date.now() });
+  }, [serverTime]);
 
   const [remainingMs, setRemainingMs] = useState(() =>
     calculateRemainingMs(endAt, syncTime.serverTime, syncTime.localTimeMs),

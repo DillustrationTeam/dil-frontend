@@ -24,6 +24,24 @@ function formatVnd(value?: number | null) {
   }).format(value);
 }
 
+/** Nhãn tiếng Việt cho lý do chuyển quyền sở hữu (backend trả enum dạng chuỗi). */
+function transferReasonLabel(reason?: string | null) {
+  switch (reason) {
+    case 'AuctionWin':
+      return 'Thắng đấu giá';
+    case 'BuyNow':
+      return 'Mua ngay';
+    case 'CommissionCompleted':
+      return 'Hoàn tất đơn đặt vẽ';
+    case 'ArtTrade':
+      return 'Trao đổi tranh';
+    case 'AdminAdjustment':
+      return 'Quản trị viên điều chỉnh';
+    default:
+      return reason ?? '—';
+  }
+}
+
 export function ArtworkProvenanceCard({ artworkId }: { artworkId: string }) {
   const userId = useAuthStore((s) => s.user?.id);
   const [provenance, setProvenance] = useState<ArtworkProvenanceDto | null>(null);
@@ -135,7 +153,7 @@ export function ArtworkProvenanceCard({ artworkId }: { artworkId: string }) {
                     )}
                   </p>
                   <p className="text-[10px] text-outline">
-                    {new Date(h.acquiredAt).toLocaleDateString('vi-VN')} • Lý do: {h.transferReason === 'AuctionWin' ? 'Thắng đấu giá' : h.transferReason}
+                    {new Date(h.acquiredAt).toLocaleDateString('vi-VN')} • Lý do: {transferReasonLabel(h.transferReason)}
                   </p>
                 </div>
 

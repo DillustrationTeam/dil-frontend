@@ -1016,8 +1016,13 @@ export function PhysicalDeliveryCard({ auction, userId, onReload }: PhysicalDeli
                           <>
                             Người bán thực nhận: {formatVnd(rec.netAmount ?? rec.amount)}
                             {rec.feeAmount
-                              ? ` · Phí sàn: ${formatVnd(rec.feeAmount)} (trên tổng ${formatVnd(rec.amount)})`
+                              ? ` · Phí sàn: ${formatVnd(rec.feeAmount)} (trên tổng ${formatVnd((rec.netAmount ?? rec.amount) + rec.feeAmount)})`
                               : ''}
+                          </>
+                        ) : rec.receiptType === 'EscrowRefund' ? (
+                          <>
+                            Đã hoàn về ví: {formatVnd(rec.amount)}
+                            {' · hoàn toàn bộ, không trừ phí'}
                           </>
                         ) : (
                           <>

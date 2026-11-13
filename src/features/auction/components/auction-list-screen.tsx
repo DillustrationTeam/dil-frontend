@@ -245,7 +245,8 @@ export function AuctionListScreen({ userId }: { userId: string | null }) {
             <option value="ending_soon">{t('Sắp kết thúc')}</option>
             <option value="price_desc">{t('Giá cao nhất')}</option>
             <option value="price_asc">{t('Giá thấp nhất')}</option>
-            <option value="bids_desc">{t('Nhiều lượt đặt giá')}</option>
+            {/* Không có option "Nhiều lượt đặt giá": backend chưa hỗ trợ sort theo bidCount,
+                chọn xong thứ tự không đổi nên gây hiểu nhầm là bộ lọc hỏng. */}
             <option value="newest">{t('Mới nhất')}</option>
           </select>
         </div>

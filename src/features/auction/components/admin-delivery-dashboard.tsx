@@ -464,7 +464,10 @@ export function AdminDeliveryDashboard() {
                             type="button"
                             onClick={() => {
                               setResolveTarget(item);
-                              setResolveNote(item.delivery?.disputeReason ?? '');
+                              // KHÔNG điền sẵn lời người mua vào ô ghi chú phân xử: đây là nhật ký phán quyết của
+      // admin, điền sẵn khiến log audit bị hiểu là do admin viết. Lý do của người mua đã
+      // hiển thị riêng ở khối bằng chứng phía trên.
+      setResolveNote('');
                             }}
                             className="inline-flex items-center gap-1 rounded-xl border border-rose-400/40 bg-rose-500/15 px-3 py-1.5 text-[11px] font-bold text-rose-200 hover:bg-rose-500/25 transition"
                           >
