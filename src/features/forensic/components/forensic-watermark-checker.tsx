@@ -295,10 +295,19 @@ export function ForensicWatermarkChecker({ mode = 'user' }: ForensicWatermarkChe
     setTracing(true);
     setTraceError(null);
     try {
+      const cleanQuery = q;
       const params: Record<string, string> = {};
-      if (traceMode === 'token') params.receiptToken = q;
-      if (traceMode === 'artwork') params.artworkId = q;
-      if (traceMode === 'commission') params.commissionId = q;
+
+      // Tự động nhận diện định dạng không cần người dùng chọn dropdown
+      if (cleanQuery.toUpperCase().startsWith('#CMD-') || cleanQuery.toUpperCase().startsWith('CMD-')) {
+        params.commissionId = cleanQuery;
+      } else if (cleanQuery.toUpperCase().startsWith('WR-') || cleanQuery.toUpperCase().startsWith('FIN-') || cleanQuery.toUpperCase().startsWith('WIP-') || cleanQuery.toUpperCase().startsWith('PUB-') || cleanQuery.toUpperCase().startsWith('BND-')) {
+        params.receiptToken = cleanQuery;
+      } else {
+        // Mặc định truyền cả receiptToken và commissionId nếu không rõ
+        params.receiptToken = cleanQuery;
+        params.commissionId = cleanQuery;
+      }
 
       const res = await apiClient.get<ApiResponse<ForensicTraceMatch[]>>('/artworks/forensic/trace', {
         params,
@@ -708,35 +717,33 @@ export function ForensicWatermarkChecker({ mode = 'user' }: ForensicWatermarkChe
             Tìm theo mã biên lai (WR-..., PUB-..., WIP-..., FIN-...), mã tác phẩm hoặc mã đơn hàng.
           </p>
 
-          <form onSubmit={handleTraceSearch} className="mt-4 flex flex-col gap-3 sm:flex-row">
-            <select
-              value={traceMode}
-              onChange={(e) => setTraceMode(e.target.value as 'token' | 'artwork' | 'commission')}
-              className="rounded-xl border border-white/15 bg-[#131624] px-3 py-2.5 text-sm text-white outline-none focus:border-[#A7ACD9]"
-            >
-              <option value="token">Mã biên lai</option>
-              <option value="artwork">Artwork ID</option>
-              <option value="commission">Commission ID</option>
-            </select>
+          {/* Hộp ghi chú hướng dẫn lấy mã rõ ràng */}
+          <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+            <div className="rounded-xl border border-white/10 bg-white/[0.02] p-3 text-slate-300">
+              <span className="font-bold text-white block mb-0.5">📌 Lấy Mã đơn hàng (#CMD-...):</span>
+              Vào <strong>Phòng làm việc</strong> hoặc <strong>Đơn vẽ của tôi</strong>, copy mã hiển thị trên đầu đơn (ví dụ: <code className="text-[#A7ACD9] font-mono">#CMD-454C01A4</code>).
+            </div>
+            <div className="rounded-xl border border-white/10 bg-white/[0.02] p-3 text-slate-300">
+              <span className="font-bold text-white block mb-0.5">🔍 Lấy Mã biên lai (FIN-... / WIP-...):</span>
+              Tự động sinh khi nộp phác thảo hoặc tải file bàn giao. Hoặc kéo ảnh nghi vấn thả vào mục 1 ở trên để quét tự động.
+            </div>
+          </div>
 
+          <form onSubmit={handleTraceSearch} className="mt-3 flex flex-col gap-3 sm:flex-row">
             <input
               type="text"
               value={traceInput}
               onChange={(e) => setTraceInput(e.target.value)}
-              placeholder={
-                traceMode === 'token'
-                  ? 'Ví dụ: WR-9F3A... hoặc FIN-...'
-                  : 'Dán mã UUID cần tìm...'
-              }
+              placeholder="Nhập mã đơn hàng (ví dụ: #CMD-454C01A4) hoặc mã biên lai (FIN-..., WIP-...)..."
               className="flex-1 rounded-xl border border-white/15 bg-[#131624] px-4 py-2.5 text-sm text-white placeholder-[#919099] outline-none focus:border-[#A7ACD9]"
             />
 
             <button
               type="submit"
               disabled={!traceInput.trim() || tracing || !isAuthenticated}
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/[.06] px-5 py-2.5 text-sm font-medium text-white transition hover:bg-white/[.12] disabled:opacity-50"
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/15 bg-[#A7ACD9] text-[#1F2335] hover:bg-[#B8BCDF] px-6 py-2.5 text-sm font-bold transition shadow disabled:opacity-50"
             >
-              {tracing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+              {tracing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4 stroke-[2.5]" />}
               <span>Tra cứu</span>
             </button>
           </form>
