@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React from 'react';
 import Link from 'next/link';
@@ -30,6 +30,7 @@ import {
   Settings,
   ArrowLeftRight,
   Sparkles,
+  Send,
 } from 'lucide-react';
 
 interface SidebarItem {
@@ -55,6 +56,7 @@ const CLIENT_NAV_SECTIONS: SidebarSection[] = [
     items: [
       { label: 'Tác phẩm đã sở hữu', href: '/client/owned-artworks', icon: Sparkles },
       { label: 'My Commissions', href: '/client/commissions', icon: FolderKanban },
+      { label: 'Sent Requests', href: '/client/requests', icon: Send },
       { label: 'My Vouchers', href: '/vouchers', icon: Ticket },
       { label: 'My Auctions', href: '/my-auctions', icon: Gavel },
       { label: 'Workroom Chat', href: '/workroom', icon: MessageSquare },

@@ -13,6 +13,7 @@ const dictionary: Record<string, { VIE: string; ENG: string }> = {
   'Owned Artworks': { VIE: 'Tác phẩm đã sở hữu', ENG: 'Owned Artworks' },
   'Trade Operations': { VIE: 'Vận hành Trao đổi tranh', ENG: 'Trade Operations' },
   'My Commissions': { VIE: 'Đơn vẽ của tôi', ENG: 'My Commissions' },
+  'Sent Requests': { VIE: 'Yêu cầu đã gửi', ENG: 'Sent Requests' },
   'Auctions & Trade': { VIE: 'Đấu giá & Mua bán', ENG: 'Auctions & Trade' },
   'Workroom Chat': { VIE: 'Phòng làm việc', ENG: 'Workroom Chat' },
   'My Vouchers': { VIE: 'Mã giảm giá', ENG: 'My Vouchers' },
