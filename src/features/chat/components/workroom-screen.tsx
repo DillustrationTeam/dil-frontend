@@ -2,6 +2,7 @@
 
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
+import toast from 'react-hot-toast';
 import { z } from 'zod';
 import {
   ArrowLeft,
@@ -48,6 +49,7 @@ import { WorkroomStickyNotes } from './workroom-sticky-notes';
 import type { ChatMessageDto, ChatRoomDto } from '../types/chat.types';
 import { CreatorAssetPicker } from '@/features/creator-studio';
 import { PageLoader } from '@/features/navigation';
+import { useNotificationHub } from '@/features/notification/hooks/use-notification-hub';
 import { commissionService } from '@/services/commission.service';
 import { extractErrorMessage } from '@/lib/api-client';
 import type { Commission, CommissionStatus, Milestone } from '@/types/commission.types';
@@ -138,6 +140,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
   const [showDisputeDetailsModal, setShowDisputeDetailsModal] = useState(false);
   const [acceptingTerms, setAcceptingTerms] = useState(false);
   const [termsError, setTermsError] = useState<string | null>(null);
+  const cancelToastShownRef = useRef(false);
 
   // States & handlers cho tính năng đổi tên dự án (Workroom title)
   const [isEditingTitle, setIsEditingTitle] = useState(false);
@@ -548,6 +551,25 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
     });
   }, [roomId, userId, loadData]);
 
+  useNotificationHub((incoming) => {
+    if (!room?.commissionId || incoming.refType !== 'Commission' || incoming.refId !== room.commissionId) {
+      return;
+    }
+    const titleLower = (incoming.notificationTitle || '').toLowerCase();
+    if (incoming.notificationType === 'CommissionStatusChanged' && titleLower.includes('hủy')) {
+      if (!cancelToastShownRef.current) {
+        cancelToastShownRef.current = true;
+        toast(incoming.body || incoming.notificationTitle, { icon: '🚫', duration: 6000 });
+      }
+      refresh();
+      return;
+    }
+    if (incoming.notificationType === 'DisputeStatusChanged' && titleLower.includes('yêu cầu hủy')) {
+      toast(incoming.body || incoming.notificationTitle, { icon: '⏳', duration: 5000 });
+      refresh();
+    }
+  });
+
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, pending, partnerTyping]);
@@ -631,12 +653,19 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
     const stageParam = params.get('depositedStage');
     if (!stageParam) return;
     checkoutNoticeSentRef.current = true;
+    window.history.replaceState(null, '', window.location.pathname);
+
     const stage = Number(stageParam) || commission.currentStage || 1;
     const isStaged = params.get('staged') === '1';
     const amount = Number(params.get('depositAmount')) || 0;
+    const dedupeKey = `workroom_escrow_notice_${commission.id}_${stage}`;
+    const alreadyAnnounced = typeof window !== 'undefined' && sessionStorage.getItem(dedupeKey) === '1';
+    const stageAlreadyDone = sortedMilestones.some((m) => m.sequence <= stage && m.status === 'Approved');
+    if (alreadyAnnounced || stageAlreadyDone) return;
+
+    if (typeof window !== 'undefined') sessionStorage.setItem(dedupeKey, '1');
     const milestoneTitle = sortedMilestones.find((m) => m.sequence === stage)?.title;
     void chat.sendMessage(formatEscrowDepositNotice(stage, isStaged, milestoneTitle, amount), 'SystemEvent').catch(() => null);
-    window.history.replaceState(null, '', window.location.pathname);
   }, [chat, commission, sortedMilestones]);
 
   async function handleDepositEscrow() {
@@ -2222,6 +2251,17 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                 cancel_approved: '✅ Yêu cầu hủy đơn đã được chấp thuận — đơn hàng đã hủy và hoàn trả phần Escrow còn lại.',
                 cancel_rejected: '↩️ Yêu cầu hủy đơn đã bị từ chối — đơn hàng tiếp tục được thực hiện.',
               } as const;
+              if (action === 'cancelled_immediately' || action === 'cancel_approved') {
+                cancelToastShownRef.current = true;
+                toast('Đơn hàng đã được hủy và hoàn phần Escrow còn lại. Phòng làm việc sẽ khóa lưu trữ.', {
+                  icon: '🚫',
+                  duration: 6000,
+                });
+              } else if (action === 'cancel_requested') {
+                toast('Đã gửi yêu cầu hủy đơn. Đối tác có 48 giờ để phản hồi.', { icon: '⏳', duration: 5000 });
+              } else if (action === 'cancel_rejected') {
+                toast('Yêu cầu hủy đơn đã bị từ chối — đơn hàng tiếp tục được thực hiện.', { icon: '↩️', duration: 5000 });
+              }
               void chat.sendMessage(msgMap[action], 'SystemEvent').catch(() => null);
             }}
           />
@@ -2246,7 +2286,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
               </section>
             ) : null
           )}
-          {showDisputeDetailsModal && <DisputeDetailsModal key={room.commissionId} isOpen commissionId={room.commissionId} initialDispute={commission?.dispute} onClose={() => setShowDisputeDetailsModal(false)} />}
+          {showDisputeDetailsModal && <DisputeDetailsModal key={room.commissionId} isOpen commissionId={room.commissionId} initialDispute={commission?.dispute} commission={commission} onClose={() => setShowDisputeDetailsModal(false)} />}
           {showReplyModal && <CreatorReplyModal isOpen commissionId={room.commissionId} reviewComment={commission?.review?.comment} reviewRating={commission?.review?.rating} onClose={() => setShowReplyModal(false)} onSuccess={() => { setShowReplyModal(false); refresh(); }} />}
           {commission && (currentMemberRole === 'client' || currentMemberRole === 'creator') && (
             <WorkroomTermsModal

@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Eye, EyeOff, Plus, RotateCcw, Minus, X, Check, ChevronDown, ChevronUp, Maximize2 } from 'lucide-react';
+import { createPortal } from 'react-dom';
+import { Eye, EyeOff, Plus, RotateCcw, Minus, X, Check, ChevronDown, ChevronUp, Maximize2, Pencil } from 'lucide-react';
 import type { Milestone } from '@/types/commission.types';
 import { addonService, type CommissionAddon } from '@/services/addon.service';
 
@@ -38,6 +39,13 @@ export const WorkroomStickyNotes: React.FC<WorkroomStickyNotesProps> = ({
   const [allNotesVisible, setAllNotesVisible] = useState<boolean>(true);
   const [activeDragId, setActiveDragId] = useState<string | null>(null);
   const [expandedContentIds, setExpandedContentIds] = useState<Record<string, boolean>>({});
+  const [noteModal, setNoteModal] = useState<{
+    mode: 'create' | 'edit';
+    noteId?: string;
+    title: string;
+    subtitle: string;
+  } | null>(null);
+  const [noteModalError, setNoteModalError] = useState('');
 
   const storageKey = `workroom_notes_v1_${commissionId}`;
 
@@ -190,30 +198,67 @@ export const WorkroomStickyNotes: React.FC<WorkroomStickyNotesProps> = ({
     });
   };
 
-  // Add manual note (Creator only)
+  // Open modal to add manual note (Creator only)
   const handleAddManualNote = () => {
     if (!isCreator) return;
-    const text = prompt('Nhập nội dung ghi chú cần dán lên tranh:', 'Lưu ý vẽ thêm phụ kiện...');
-    if (!text || !text.trim()) return;
+    setNoteModalError('');
+    setNoteModal({ mode: 'create', title: '', subtitle: '' });
+  };
 
-    const newNote: StickyNoteItem = {
-      id: `manual-${Date.now()}`,
-      milestoneId: displayedMilestone?.id,
-      type: 'custom',
-      title: text.trim(),
-      subtitle: 'Ghi chú công việc riêng ♡',
-      isDone: false,
-      leftPct: 18,
-      topPct: 55,
-      isCollapsed: false,
-      createdAt: new Date().toISOString(),
-    };
-
-    setNotes((prev) => {
-      const next = [...prev, newNote];
-      saveNotesToStorage(next);
-      return next;
+  // Open modal to edit manual note (Creator only)
+  const handleEditManualNote = (note: StickyNoteItem) => {
+    if (!isCreator || note.type !== 'custom') return;
+    setNoteModalError('');
+    setNoteModal({
+      mode: 'edit',
+      noteId: note.id,
+      title: note.title,
+      subtitle: note.subtitle && note.subtitle !== 'Ghi chú công việc riêng ♡' ? note.subtitle : '',
     });
+  };
+
+  const handleSaveNoteModal = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!noteModal || !isCreator) return;
+    const trimmedTitle = noteModal.title.trim();
+    if (!trimmedTitle) {
+      setNoteModalError('Vui lòng nhập tiêu đề ghi chú.');
+      return;
+    }
+    const trimmedSubtitle = noteModal.subtitle.trim();
+
+    if (noteModal.mode === 'create') {
+      const newNote: StickyNoteItem = {
+        id: `manual-${Date.now()}`,
+        milestoneId: displayedMilestone?.id,
+        type: 'custom',
+        title: trimmedTitle,
+        subtitle: trimmedSubtitle || undefined,
+        isDone: false,
+        leftPct: 18,
+        topPct: 55,
+        isCollapsed: false,
+        createdAt: new Date().toISOString(),
+      };
+      setNotes((prev) => {
+        const next = [...prev, newNote];
+        saveNotesToStorage(next);
+        return next;
+      });
+    } else if (noteModal.noteId) {
+      setNotes((prev) => {
+        const next = prev.map((n) =>
+          n.id === noteModal.noteId
+            ? { ...n, title: trimmedTitle, subtitle: trimmedSubtitle || undefined }
+            : n
+        );
+        saveNotesToStorage(next);
+        return next;
+      });
+    }
+
+    setNoteModal(null);
+    setNoteModalError('');
   };
 
   // Reset positions (Creator only)
@@ -453,6 +498,16 @@ export const WorkroomStickyNotes: React.FC<WorkroomStickyNotesProps> = ({
                       </span>
 
                       <div className="flex items-center gap-0.5">
+                        {isCreator && note.type === 'custom' && (
+                          <button
+                            type="button"
+                            onClick={() => handleEditManualNote(note)}
+                            title="Sửa note"
+                            className="size-4 rounded-full hover:bg-purple-100 text-purple-400 hover:text-purple-700 flex items-center justify-center transition"
+                          >
+                            <Pencil size={9} />
+                          </button>
+                        )}
                         <button
                           type="button"
                           onClick={() => handleToggleCollapse(note.id)}
@@ -562,6 +617,95 @@ export const WorkroomStickyNotes: React.FC<WorkroomStickyNotesProps> = ({
             );
           })}
         </div>
+      )}
+
+      {noteModal && typeof document !== 'undefined' && createPortal(
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-xs"
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget) setNoteModal(null);
+          }}
+        >
+          <form
+            onSubmit={handleSaveNoteModal}
+            className="w-full max-w-md rounded-2xl border border-white/15 bg-[#191d2d] p-5 text-white shadow-2xl"
+          >
+            <div className="flex items-center justify-between gap-3 border-b border-white/10 pb-3">
+              <h3 className="font-h1 text-base font-bold">
+                {noteModal.mode === 'create' ? 'Thêm ghi chú lên tranh' : 'Chỉnh sửa ghi chú'}
+              </h3>
+              <button
+                type="button"
+                onClick={() => setNoteModal(null)}
+                className="rounded-lg p-1 text-slate-400 hover:bg-white/5 hover:text-white"
+                aria-label="Đóng"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <div className="mt-4 space-y-3">
+              <div>
+                <label htmlFor="sticky-note-title" className="mb-1.5 block text-xs font-semibold text-slate-300">
+                  Tiêu đề ngắn <span className="text-rose-400">*</span>
+                </label>
+                <input
+                  id="sticky-note-title"
+                  type="text"
+                  autoFocus
+                  maxLength={120}
+                  value={noteModal.title}
+                  onChange={(e) => {
+                    setNoteModal((prev) => (prev ? { ...prev, title: e.target.value } : null));
+                    if (noteModalError) setNoteModalError('');
+                  }}
+                  placeholder="VD: Lưu ý vẽ thêm phụ kiện..."
+                  className="w-full rounded-xl border border-white/15 bg-[#10131f] px-3 py-2 text-sm text-white placeholder:text-slate-500 outline-none focus:border-[#A7ACD9]"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="sticky-note-subtitle" className="mb-1.5 block text-xs font-semibold text-slate-300">
+                  Chi tiết ghi chú <span className="font-normal text-slate-500">(không bắt buộc)</span>
+                </label>
+                <textarea
+                  id="sticky-note-subtitle"
+                  rows={3}
+                  maxLength={500}
+                  value={noteModal.subtitle}
+                  onChange={(e) =>
+                    setNoteModal((prev) => (prev ? { ...prev, subtitle: e.target.value } : null))
+                  }
+                  placeholder="Nhập mô tả chi tiết hoặc checklist cần nhớ..."
+                  className="w-full rounded-xl border border-white/15 bg-[#10131f] px-3 py-2 text-sm text-white placeholder:text-slate-500 outline-none focus:border-[#A7ACD9]"
+                />
+              </div>
+
+              {noteModalError && (
+                <p role="alert" className="text-xs text-rose-300">
+                  {noteModalError}
+                </p>
+              )}
+            </div>
+
+            <div className="mt-5 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setNoteModal(null)}
+                className="rounded-xl border border-white/15 px-4 py-2 text-xs font-semibold text-slate-300 hover:bg-white/5"
+              >
+                Huỷ
+              </button>
+              <button
+                type="submit"
+                className="rounded-xl bg-[#A7ACD9] px-4 py-2 text-xs font-bold text-[#151725] transition hover:bg-[#c0c4ea]"
+              >
+                {noteModal.mode === 'create' ? 'Dán ghi chú' : 'Lưu thay đổi'}
+              </button>
+            </div>
+          </form>
+        </div>,
+        document.body
       )}
     </>
   );

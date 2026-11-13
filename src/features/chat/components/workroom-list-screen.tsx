@@ -20,7 +20,7 @@ import type { Commission, CommissionStatus } from '@/types/commission.types';
 import { extractErrorMessage } from '@/lib/api-client';
 
 /** Trạng thái KHÔNG còn phòng làm việc hoạt động (chưa nhận đơn / đã huỷ). */
-const NO_WORKROOM_STATUSES: CommissionStatus[] = ['PendingAcceptance', 'Negotiating', 'Cancelled'];
+const NO_WORKROOM_STATUSES: CommissionStatus[] = ['PendingAcceptance', 'Negotiating'];
 
 const STATUS_LABEL: Record<CommissionStatus, string> = {
   PendingAcceptance: 'Chờ họa sĩ nhận đơn',
@@ -75,13 +75,19 @@ interface WorkroomRow {
   partnerName: string;
 }
 
-type FilterKey = 'all' | 'active' | 'done';
+type FilterKey = 'all' | 'active' | 'disputed' | 'done' | 'cancelled';
+type RoleFilterKey = 'all' | 'Client' | 'Creator';
+type DeadlineFilterKey = 'all' | 'overdue' | 'due_soon' | 'escrow';
+type SortKey = 'newest' | 'deadline' | 'escrow';
 
 export function WorkroomListScreen({ userId }: { userId: string | null }) {
   const [rows, setRows] = useState<WorkroomRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<FilterKey>('all');
+  const [roleFilter, setRoleFilter] = useState<RoleFilterKey>('all');
+  const [deadlineFilter, setDeadlineFilter] = useState<DeadlineFilterKey>('all');
+  const [sortBy, setSortBy] = useState<SortKey>('newest');
   const [keyword, setKeyword] = useState('');
 
   const load = useCallback(async () => {
@@ -149,24 +155,52 @@ export function WorkroomListScreen({ userId }: { userId: string | null }) {
 
   const visibleRows = useMemo(() => {
     const needle = keyword.trim().toLowerCase();
-    return rows.filter((row) => {
-      const isDone = row.commission.status === 'Completed';
-      if (filter === 'active' && isDone) return false;
-      if (filter === 'done' && !isDone) return false;
+    const filtered = rows.filter((row) => {
+      const status = row.commission.status;
+      if (filter === 'active' && (status === 'Completed' || status === 'Disputed' || status === 'Cancelled')) return false;
+      if (filter === 'disputed' && status !== 'Disputed') return false;
+      if (filter === 'done' && status !== 'Completed') return false;
+      if (filter === 'cancelled' && status !== 'Cancelled') return false;
+      if (filter === 'disputed' && status !== 'Disputed') return false;
+      if (filter === 'done' && status !== 'Completed') return false;
+
+      if (roleFilter !== 'all' && row.viewerRole !== roleFilter) return false;
+
+      const remainingDays = daysUntil(row.commission.deadlineAt);
+      if (deadlineFilter === 'overdue') {
+        if (remainingDays === null || remainingDays >= 0 || status === 'Completed' || status === 'Cancelled') return false;
+      } else if (deadlineFilter === 'due_soon') {
+        if (remainingDays === null || remainingDays < 0 || remainingDays > 3 || status === 'Completed' || status === 'Cancelled') return false;
+      } else if (deadlineFilter === 'escrow') {
+        if ((row.commission.escrowHeldAmount ?? 0) <= 0) return false;
+      }
+
       if (!needle) return true;
+      const shortCode = `#cmd-${row.commission.id.slice(0, 8)}`.toLowerCase();
       return (
         row.commission.title.toLowerCase().includes(needle) ||
-        row.partnerName.toLowerCase().includes(needle)
+        row.partnerName.toLowerCase().includes(needle) ||
+        shortCode.includes(needle)
       );
     });
-  }, [rows, filter, keyword]);
+
+    if (sortBy === 'newest') return filtered;
+    return [...filtered].sort((a, b) => {
+      if (sortBy === 'escrow') {
+        return (b.commission.escrowHeldAmount ?? 0) - (a.commission.escrowHeldAmount ?? 0);
+      }
+      const aTime = a.commission.deadlineAt ? new Date(a.commission.deadlineAt).getTime() : Number.MAX_SAFE_INTEGER;
+      const bTime = b.commission.deadlineAt ? new Date(b.commission.deadlineAt).getTime() : Number.MAX_SAFE_INTEGER;
+      return aTime - bTime;
+    });
+  }, [rows, filter, roleFilter, deadlineFilter, sortBy, keyword]);
 
   const metrics = useMemo(() => {
-    const active = rows.filter((row) => row.commission.status !== 'Completed');
+    const active = rows.filter((row) => row.commission.status !== 'Completed' && row.commission.status !== 'Cancelled');
     return {
       active: active.length,
       escrow: rows.reduce((total, row) => total + (row.commission.escrowHeldAmount ?? 0), 0),
-      completed: rows.length - active.length,
+      completed: rows.filter((row) => row.commission.status === 'Completed').length,
     };
   }, [rows]);
 
@@ -216,37 +250,90 @@ export function WorkroomListScreen({ userId }: { userId: string | null }) {
       </div>
 
       <section className="rounded-2xl border border-white/10 bg-white/[0.035] p-5 sm:p-6">
-        <div className="flex flex-col gap-4 border-b border-white/10 pb-4 lg:flex-row lg:items-center lg:justify-between">
-          <div className="inline-flex rounded-xl border border-white/10 bg-black/20 p-1">
-            {([
-              ['all', 'Tất cả'],
-              ['active', 'Đang làm'],
-              ['done', 'Hoàn tất'],
-            ] as const).map(([key, label]) => (
-              <button
-                key={key}
-                type="button"
-                onClick={() => setFilter(key)}
-                className={`rounded-lg px-3.5 py-1.5 text-[11px] font-bold transition ${
-                  filter === key ? 'bg-brand-periwinkle text-brand-navy' : 'text-on-surface-variant hover:text-on-surface'
-                }`}
-              >
-                {label}
-              </button>
-            ))}
+        <div className="flex flex-col gap-3 border-b border-white/10 pb-4">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <div className="inline-flex flex-wrap rounded-xl border border-white/10 bg-black/20 p-1">
+              {([
+                ['all', 'Tất cả'],
+                ['active', 'Đang làm'],
+                ['disputed', 'Đang khiếu nại'],
+                ['done', 'Hoàn tất'],
+                ['cancelled', 'Đã hủy'],
+              ] as const).map(([key, label]) => (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => setFilter(key)}
+                  className={`rounded-lg px-3.5 py-1.5 text-[11px] font-bold transition ${filter === key ? 'bg-brand-periwinkle text-brand-navy' : 'text-on-surface-variant hover:text-on-surface'}`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+
+            <div className="relative w-full lg:w-72">
+              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-outline" aria-hidden />
+              <input
+                value={keyword}
+                onChange={(event) => setKeyword(event.target.value)}
+                placeholder="Tìm theo tên đơn, mã hoặc đối tác…"
+                className="w-full rounded-xl border border-white/10 bg-black/20 py-2.5 pl-9 pr-3 text-xs text-on-surface outline-none transition placeholder:text-outline focus:border-brand-periwinkle"
+              />
+            </div>
           </div>
 
-          <div className="relative w-full lg:w-72">
-            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-outline" aria-hidden />
-            <input
-              value={keyword}
-              onChange={(event) => setKeyword(event.target.value)}
-              placeholder="Tìm theo tên đơn hoặc đối tác…"
-              className="w-full rounded-xl border border-white/10 bg-black/20 py-2.5 pl-9 pr-3 text-xs text-on-surface outline-none transition placeholder:text-outline focus:border-brand-periwinkle"
-            />
+          <div className="flex flex-wrap items-center gap-2.5">
+            <select
+              aria-label="Lọc theo vai trò"
+              value={roleFilter}
+              onChange={(event) => setRoleFilter(event.target.value as RoleFilterKey)}
+              className="rounded-xl border border-white/10 bg-[#161926] px-3 py-2 text-xs text-on-surface outline-none transition focus:border-brand-periwinkle"
+            >
+              <option value="all">Tất cả vai trò</option>
+              <option value="Client">Bạn là Khách hàng</option>
+              <option value="Creator">Bạn là Họa sĩ</option>
+            </select>
+
+            <select
+              aria-label="Lọc theo hạn chót và ký quỹ"
+              value={deadlineFilter}
+              onChange={(event) => setDeadlineFilter(event.target.value as DeadlineFilterKey)}
+              className="rounded-xl border border-white/10 bg-[#161926] px-3 py-2 text-xs text-on-surface outline-none transition focus:border-brand-periwinkle"
+            >
+              <option value="all">Mọi hạn chót</option>
+              <option value="overdue">Quá hạn</option>
+              <option value="due_soon">Sắp đến hạn (≤ 3 ngày)</option>
+              <option value="escrow">Đang có ký quỹ</option>
+            </select>
+
+            <select
+              aria-label="Sắp xếp phòng làm việc"
+              value={sortBy}
+              onChange={(event) => setSortBy(event.target.value as SortKey)}
+              className="rounded-xl border border-white/10 bg-[#161926] px-3 py-2 text-xs text-on-surface outline-none transition focus:border-brand-periwinkle"
+            >
+              <option value="newest">Mới nhất</option>
+              <option value="deadline">Hạn chót gần nhất</option>
+              <option value="escrow">Ký quỹ cao nhất</option>
+            </select>
+
+            {(filter !== 'all' || roleFilter !== 'all' || deadlineFilter !== 'all' || sortBy !== 'newest' || keyword.trim() !== '') && (
+              <button
+                type="button"
+                onClick={() => {
+                  setFilter('all');
+                  setRoleFilter('all');
+                  setDeadlineFilter('all');
+                  setSortBy('newest');
+                  setKeyword('');
+                }}
+                className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-[11px] font-semibold text-on-surface-variant transition hover:bg-white/10 hover:text-on-surface"
+              >
+                Xóa bộ lọc
+              </button>
+            )}
           </div>
         </div>
-
         {loading ? (
           <div className="flex min-h-48 items-center justify-center text-sm text-on-surface-variant">
             <LoaderCircle className="mr-2 h-4 w-4 animate-spin" aria-hidden /> Đang tải phòng làm việc…

@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { ShieldCheck, RefreshCw, AlertTriangle, X, EyeOff } from 'lucide-react';
@@ -226,6 +226,7 @@ export function ProtectedArtworkViewer({
   // 3. Nạp ảnh
   useEffect(() => {
     let isCancelled = false;
+    let retriedWithoutCors = false;
     const img = new window.Image();
     if (effectiveUrl.startsWith(API_ORIGIN)) {
       img.crossOrigin = 'anonymous';
@@ -240,7 +241,16 @@ export function ProtectedArtworkViewer({
 
     img.onerror = () => {
       if (isCancelled) return;
+      if (img.crossOrigin && !retriedWithoutCors) {
+        retriedWithoutCors = true;
+        img.removeAttribute('crossOrigin');
+        img.crossOrigin = null;
+        img.src = effectiveUrl;
+        return;
+      }
       if (img.src !== DEFAULT_FALLBACK_IMAGE) {
+        img.removeAttribute('crossOrigin');
+        img.crossOrigin = null;
         img.src = DEFAULT_FALLBACK_IMAGE;
       } else {
         setError('Không thể nạp dữ liệu ảnh bảo mật.');
