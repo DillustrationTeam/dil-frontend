@@ -13,6 +13,7 @@ export const engToVieMap: Record<string, string> = {
   'My Studio': 'Studio của tôi',
   'Client Mode': 'Chế độ Client',
   'My Commissions': 'Đơn vẽ của tôi',
+  'Sent Requests': 'Yêu cầu đã gửi',
   'My Auctions': 'Đấu giá của tôi',
   'My Vouchers': 'Mã giảm giá',
   'My Trades': 'Trao đổi của tôi',

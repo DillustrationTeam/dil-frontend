@@ -11,6 +11,7 @@ import {
   AlertCircle,
   XCircle,
   ChevronRight,
+  ChevronLeft,
   ShieldCheck,
   Loader2,
   Palette,
@@ -39,7 +40,14 @@ export default function MyTradesPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [sortBy, setSortBy] = useState('latest');
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 5;
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
+
+  // Reset page when search or filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, statusFilter, sortBy]);
 
   // Load trades and slot quota
   useEffect(() => {
@@ -49,7 +57,7 @@ export default function MyTradesPage() {
       try {
         setLoading(true);
         const [tradesRes, slotsRes] = await Promise.allSettled([
-          artTradeService.getMyTrades(),
+          artTradeService.getMyTrades(undefined, 1, 100),
           artTradeService.getMySlotStatus(),
         ]);
 
@@ -90,7 +98,7 @@ export default function MyTradesPage() {
           : (isVie ? 'Đã từ chối lời mời trao đổi.' : 'Trade proposal declined.')
       );
       // Refresh
-      const updated = await artTradeService.getMyTrades();
+      const updated = await artTradeService.getMyTrades(undefined, 1, 100);
       setTrades(updated.items || []);
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Failed to process response.';
@@ -211,6 +219,14 @@ export default function MyTradesPage() {
 
     return list;
   }, [trades, searchQuery, statusFilter, sortBy]);
+
+  const totalItems = filteredTrades.length;
+  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+
+  const paginatedTrades = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filteredTrades.slice(start, start + pageSize);
+  }, [filteredTrades, currentPage, pageSize]);
 
   if (!isCreator && !isAdmin) {
     return (
@@ -417,7 +433,7 @@ export default function MyTradesPage() {
         )
       ) : (
         <div className="grid grid-cols-1 gap-4">
-          {filteredTrades.map((trade) => {
+          {paginatedTrades.map((trade) => {
             const isInitiator = trade.role?.toLowerCase() === 'initiator';
             const isProposed = isProposedStatus(trade.status);
             const isPendingProposalForMe = isProposed && !isInitiator;
@@ -567,6 +583,92 @@ export default function MyTradesPage() {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* Pagination Controls */}
+      {!loading && totalItems > 0 && (
+        <div className="mt-8 flex flex-wrap items-center justify-between gap-4 border-t border-white/10 pt-6">
+          <p className="text-xs text-[#8A8FA9]">
+            {isVie ? (
+              <>
+                Hiển thị <span className="font-semibold text-white">{Math.min((currentPage - 1) * pageSize + 1, totalItems)}</span> -{' '}
+                <span className="font-semibold text-white">{Math.min(currentPage * pageSize, totalItems)}</span> trên tổng số{' '}
+                <span className="font-semibold text-white">{totalItems}</span> giao dịch
+              </>
+            ) : (
+              <>
+                Showing <span className="font-semibold text-white">{Math.min((currentPage - 1) * pageSize + 1, totalItems)}</span> -{' '}
+                <span className="font-semibold text-white">{Math.min(currentPage * pageSize, totalItems)}</span> of{' '}
+                <span className="font-semibold text-white">{totalItems}</span> trades
+              </>
+            )}
+          </p>
+
+          {totalPages > 1 && (
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setCurrentPage((p) => Math.max(1, p - 1));
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                disabled={currentPage <= 1}
+                className="flex h-9 items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-3.5 text-xs font-semibold text-[#c7c5cf] transition hover:border-white/20 hover:bg-white/10 hover:text-white disabled:pointer-events-none disabled:opacity-40 cursor-pointer"
+              >
+                <ChevronLeft size={15} />
+                <span>{isVie ? 'Trước' : 'Previous'}</span>
+              </button>
+
+              <div className="flex items-center gap-1">
+                {Array.from({ length: totalPages }, (_, i) => i + 1)
+                  .filter((p) => p === 1 || p === totalPages || Math.abs(p - currentPage) <= 1)
+                  .reduce<(number | string)[]>((acc, p, idx, arr) => {
+                    if (idx > 0 && p - (arr[idx - 1] as number) > 1) {
+                      acc.push('...');
+                    }
+                    acc.push(p);
+                    return acc;
+                  }, [])
+                  .map((item, idx) =>
+                    item === '...' ? (
+                      <span key={`ellipsis-${idx}`} className="px-2 text-xs text-[#8A8FA9]">
+                        ...
+                      </span>
+                    ) : (
+                      <button
+                        key={`page-${item}`}
+                        type="button"
+                        onClick={() => {
+                          setCurrentPage(Number(item));
+                          window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }}
+                        className={`h-9 min-w-9 rounded-xl px-3 text-xs font-bold transition cursor-pointer ${
+                          currentPage === item
+                            ? 'bg-brand-periwinkle text-brand-navy shadow-[0_4px_15px_rgba(167,172,217,0.3)]'
+                            : 'border border-white/10 bg-white/5 text-[#c7c5cf] hover:border-white/20 hover:bg-white/10 hover:text-white'
+                        }`}
+                      >
+                        {item}
+                      </button>
+                    )
+                  )}
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setCurrentPage((p) => Math.min(totalPages, p + 1));
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                disabled={currentPage >= totalPages}
+                className="flex h-9 items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-3.5 text-xs font-semibold text-[#c7c5cf] transition hover:border-white/20 hover:bg-white/10 hover:text-white disabled:pointer-events-none disabled:opacity-40 cursor-pointer"
+              >
+                <span>{isVie ? 'Sau' : 'Next'}</span>
+                <ChevronRight size={15} />
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>
