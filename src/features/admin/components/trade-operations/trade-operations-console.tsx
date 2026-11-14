@@ -406,7 +406,104 @@ export function TradeOperationsConsole() {
         </div>
       </div>
 
-      {/* 2. Navigation Tabs Bar (Directly under Header Title like in Admin Event page) */}
+      {/* 2. Executive Overview KPI Cards (Consistent with System Overview) */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-3.5 sm:gap-4 mb-8">
+        {/* Card 1: Total Trades */}
+        <div className="glass-container rounded-[24px] p-5 space-y-2 shadow-lg border border-white/10">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] text-[#8A8FA9] font-bold uppercase tracking-wider font-h1">
+              TOTAL SESSIONS
+            </span>
+            <div className="p-1.5 rounded-lg bg-[#C5C9F8]/10 text-[#C5C9F8]">
+              <ArrowLeftRight className="w-4 h-4" />
+            </div>
+          </div>
+          <h3 className="font-h1 text-2xl font-extrabold text-[#C5C9F8] tracking-tight">
+            {tradeMeta.totalCount}
+          </h3>
+          <p className="text-[11px] text-[#8A8FA9]">
+            {isEng ? 'Total art trade sessions on platform' : 'Tổng số phiên giao dịch trên toàn sàn'}
+          </p>
+        </div>
+
+        {/* Card 2: In Progress / Active */}
+        <div className="glass-container rounded-[24px] p-5 space-y-2 shadow-lg border border-white/10">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] text-[#8A8FA9] font-bold uppercase tracking-wider font-h1">
+              IN PROGRESS SESSIONS
+            </span>
+            <div className="p-1.5 rounded-lg bg-sky-400/10 text-sky-400">
+              <Clock className="w-4 h-4" />
+            </div>
+          </div>
+          <h3 className="font-h1 text-2xl font-extrabold text-sky-400 tracking-tight">
+            {tradeMeta.activeCount}
+          </h3>
+          <p className="text-[11px] text-[#8A8FA9]">
+            <span className="font-h1 font-bold text-white/90">{tradeMeta.activeCount}</span> {isEng ? 'In drawing & submission phase' : 'Đang vẽ & chờ nộp tranh'}
+          </p>
+        </div>
+
+        {/* Card 3: Completed */}
+        <div className="glass-container rounded-[24px] p-5 space-y-2 shadow-lg border border-white/10">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] text-[#8A8FA9] font-bold uppercase tracking-wider font-h1">
+              COMPLETED TRADES
+            </span>
+            <div className="p-1.5 rounded-lg bg-emerald-400/10 text-emerald-400">
+              <CheckCircle2 className="w-4 h-4" />
+            </div>
+          </div>
+          <h3 className="font-h1 text-2xl font-extrabold text-emerald-400 tracking-tight">
+            {tradeMeta.completedCount}
+          </h3>
+          <p className="text-[11px] text-[#8A8FA9]">
+            {isEng ? 'Mutual delivery & verified' : 'Hai bên đã trao đổi thành công'}
+          </p>
+        </div>
+
+        {/* Card 4: Disputed */}
+        <div className="glass-container rounded-[24px] p-5 space-y-2 shadow-lg border border-white/10">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] text-[#8A8FA9] font-bold uppercase tracking-wider font-h1">
+              DISPUTES & CLAIMS
+            </span>
+            <div className="p-1.5 rounded-lg bg-red-500/10 text-red-400">
+              <ShieldAlert className="w-4 h-4" />
+            </div>
+          </div>
+          <h3 className="font-h1 text-2xl font-extrabold text-red-400 tracking-tight">
+            {disputeMeta.totalCount || tradeMeta.disputedCount}
+          </h3>
+          <p className="text-[11px] text-[#8A8FA9]">
+            {(disputeMeta.totalCount || tradeMeta.disputedCount) > 0 ? (
+              <span className="text-red-400 font-medium">{isEng ? 'Claims pending arbitration' : 'Khiếu nại cần Admin phân xử'}</span>
+            ) : (
+              <span className="text-emerald-400 font-medium">{isEng ? 'No pending trade disputes' : 'Không có khiếu nại tồn đọng'}</span>
+            )}
+          </p>
+        </div>
+
+        {/* Card 5: Cancelled / Rejected */}
+        <div className="glass-container rounded-[24px] p-5 space-y-2 shadow-lg border border-white/10">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] text-[#8A8FA9] font-bold uppercase tracking-wider font-h1">
+              CANCELLED / REJECTED
+            </span>
+            <div className="p-1.5 rounded-lg bg-zinc-500/10 text-zinc-400">
+              <XCircle className="w-4 h-4" />
+            </div>
+          </div>
+          <h3 className="font-h1 text-2xl font-extrabold text-zinc-300 tracking-tight">
+            {tradeMeta.cancelledCount}
+          </h3>
+          <p className="text-[11px] text-[#8A8FA9]">
+            {isEng ? 'Cancelled or declined by artists' : 'Kèo đã bị hủy hoặc đối tác từ chối'}
+          </p>
+        </div>
+      </div>
+
+      {/* 3. Navigation Tabs Bar (Directly under Header Title like in Admin Event page) */}
       <nav className="glass-container rounded-2xl p-1.5 backdrop-blur-xl bg-[#121620]/90 flex gap-1.5 overflow-x-auto mb-6">
         <button
           type="button"
@@ -465,48 +562,6 @@ export function TradeOperationsConsole() {
       {/* ========================================================= */}
       {activeTab === 'trades' && (
         <div className="space-y-6">
-          {/* Quick Metrics */}
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-            <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4">
-              <span className="text-[11px] font-medium text-slate-400 block">{isEng ? 'Total Trades' : 'Tổng giao dịch'}</span>
-              <span className="text-xl sm:text-2xl font-black text-white font-mono mt-1 block">
-                {tradeMeta.totalCount}
-              </span>
-            </div>
-            <div className="rounded-2xl border border-sky-500/20 bg-sky-500/5 p-4">
-              <span className="text-[11px] font-medium text-sky-300 block flex items-center gap-1.5">
-                <Clock size={13} /> {isEng ? 'In Progress' : 'Đang diễn ra'}
-              </span>
-              <span className="text-xl sm:text-2xl font-black text-sky-300 font-mono mt-1 block">
-                {tradeMeta.activeCount}
-              </span>
-            </div>
-            <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-4">
-              <span className="text-[11px] font-medium text-emerald-300 block flex items-center gap-1.5">
-                <CheckCircle2 size={13} /> {isEng ? 'Completed' : 'Hoàn tất'}
-              </span>
-              <span className="text-xl sm:text-2xl font-black text-emerald-300 font-mono mt-1 block">
-                {tradeMeta.completedCount}
-              </span>
-            </div>
-            <div className="rounded-2xl border border-red-500/20 bg-red-500/5 p-4">
-              <span className="text-[11px] font-medium text-red-300 block flex items-center gap-1.5">
-                <ShieldAlert size={13} /> {isEng ? 'Disputed' : 'Tranh chấp'}
-              </span>
-              <span className="text-xl sm:text-2xl font-black text-red-300 font-mono mt-1 block">
-                {tradeMeta.disputedCount}
-              </span>
-            </div>
-            <div className="rounded-2xl border border-zinc-500/20 bg-zinc-500/5 p-4">
-              <span className="text-[11px] font-medium text-zinc-400 block flex items-center gap-1.5">
-                <XCircle size={13} /> {isEng ? 'Cancelled / Rejected' : 'Đã hủy / Từ chối'}
-              </span>
-              <span className="text-xl sm:text-2xl font-black text-zinc-300 font-mono mt-1 block">
-                {tradeMeta.cancelledCount}
-              </span>
-            </div>
-          </div>
-
           {/* Filters & Search */}
           <div className="rounded-2xl border border-white/10 bg-[#1F2335]/70 backdrop-blur-lg p-4 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
             {/* Search Input */}
@@ -811,42 +866,6 @@ export function TradeOperationsConsole() {
       {/* ========================================================= */}
       {activeTab === 'disputes' && (
         <div className="space-y-6">
-          {/* Dispute Quick Stats */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4">
-              <span className="text-[11px] font-medium text-slate-400 block">
-                {isEng ? 'Total Disputes' : 'Tổng số khiếu nại'}
-              </span>
-              <span className="text-xl sm:text-2xl font-black text-white font-mono mt-1 block">
-                {disputeMeta.totalCount}
-              </span>
-            </div>
-            <div className="rounded-2xl border border-red-500/20 bg-red-500/5 p-4">
-              <span className="text-[11px] font-medium text-red-300 block flex items-center gap-1.5">
-                <Clock size={13} /> {isEng ? 'Pending' : 'Chờ phân xử'}
-              </span>
-              <span className="text-xl sm:text-2xl font-black text-red-300 font-mono mt-1 block">
-                {disputes.filter((d) => d.status === 'Pending').length}
-              </span>
-            </div>
-            <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-4">
-              <span className="text-[11px] font-medium text-emerald-300 block flex items-center gap-1.5">
-                <CheckCircle2 size={13} /> {isEng ? 'Resolved' : 'Đã phân xử'}
-              </span>
-              <span className="text-xl sm:text-2xl font-black text-emerald-300 font-mono mt-1 block">
-                {disputes.filter((d) => d.status === 'Resolved').length}
-              </span>
-            </div>
-            <div className="rounded-2xl border border-zinc-500/20 bg-zinc-500/5 p-4">
-              <span className="text-[11px] font-medium text-zinc-400 block flex items-center gap-1.5">
-                <XCircle size={13} /> {isEng ? 'Dismissed' : 'Đã bác bỏ'}
-              </span>
-              <span className="text-xl sm:text-2xl font-black text-zinc-400 font-mono mt-1 block">
-                {disputes.filter((d) => d.status === 'Dismissed').length}
-              </span>
-            </div>
-          </div>
-
           {/* Filter Bar */}
           <div className="rounded-2xl border border-white/10 bg-[#1F2335]/70 backdrop-blur-lg p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">

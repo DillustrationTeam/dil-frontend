@@ -20,6 +20,8 @@ export function AdminDashboardConsole() {
     actionRequiredQueue,
     revenueTrend,
     recentTransactions,
+    auctionMetrics,
+    tradeMetrics,
     loading,
     error,
     refresh,
@@ -62,6 +64,9 @@ export function AdminDashboardConsole() {
             completedCommissions={commissionMetrics?.completedCount ?? 0}
             inProgressCommissions={commissionMetrics?.inProgressCount ?? 0}
             disputedCommissions={commissionMetrics?.disputedCount ?? 0}
+            commissionMetrics={commissionMetrics}
+            auctionMetrics={auctionMetrics}
+            tradeMetrics={tradeMetrics}
           />
         </div>
       </div>

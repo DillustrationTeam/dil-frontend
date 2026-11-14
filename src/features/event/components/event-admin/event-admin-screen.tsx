@@ -90,7 +90,7 @@ export function EventAdminScreen() {
 
   const contestGridRef = useRef<HTMLDivElement>(null);
 
-  const [, setStats] = useState<EventStatsDto>({
+  const [stats, setStats] = useState<EventStatsDto>({
     totalPrizePool: 0,
     formattedTotalPrizePool: '0 đ',
     openEventsCount: 0,
@@ -233,7 +233,86 @@ export function EventAdminScreen() {
         </div>
       </div>
 
-      {/* 2. Navigation Tabs Bar (Directly under Illustration Contests & Events title) */}
+      {/* 2. Executive Overview KPI Cards (Consistent with System Overview) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-5 mb-8">
+        {/* Card 1: Total Events */}
+        <div className="glass-container rounded-[24px] p-5 space-y-2 shadow-lg border border-white/10">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] text-[#8A8FA9] font-bold uppercase tracking-wider font-h1">
+              TOTAL CONTESTS & EVENTS
+            </span>
+            <div className="p-1.5 rounded-lg bg-[#C5C9F8]/10 text-[#C5C9F8]">
+              <Trophy className="w-4 h-4" />
+            </div>
+          </div>
+          <h3 className="font-h1 text-2xl font-extrabold text-[#C5C9F8] tracking-tight">
+            {stats.totalEventsCount || events.length}
+          </h3>
+          <p className="text-[11px] text-[#8A8FA9]">
+            <span className="font-h1 font-bold text-white/90">{stats.openEventsCount}</span> Đang mở nhận bài thi
+          </p>
+        </div>
+
+        {/* Card 2: Open Submissions */}
+        <div className="glass-container rounded-[24px] p-5 space-y-2 shadow-lg border border-white/10">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] text-[#8A8FA9] font-bold uppercase tracking-wider font-h1">
+              TOTAL SUBMISSIONS
+            </span>
+            <div className="p-1.5 rounded-lg bg-emerald-400/10 text-emerald-400">
+              <Layers className="w-4 h-4" />
+            </div>
+          </div>
+          <h3 className="font-h1 text-2xl font-extrabold text-emerald-400 tracking-tight">
+            {stats.totalSubmissionsCount}
+          </h3>
+          <p className="text-[11px] text-[#8A8FA9]">
+            Bài dự thi đã nộp trên toàn sàn
+          </p>
+        </div>
+
+        {/* Card 3: Prize Pool */}
+        <div className="glass-container rounded-[24px] p-5 space-y-2 shadow-lg border border-white/10">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] text-[#8A8FA9] font-bold uppercase tracking-wider font-h1">
+              TOTAL PRIZE POOL
+            </span>
+            <div className="p-1.5 rounded-lg bg-amber-400/10 text-amber-400">
+              <Trophy className="w-4 h-4 text-amber-400" />
+            </div>
+          </div>
+          <h3 className="font-h1 text-2xl font-extrabold text-amber-300 tracking-tight">
+            {stats.formattedTotalPrizePool || '0 ₫'}
+          </h3>
+          <p className="text-[11px] text-amber-400/80 font-medium">
+            Quỹ giải thưởng cam kết bảo chứng
+          </p>
+        </div>
+
+        {/* Card 4: Open Disputes / Jury Pending */}
+        <div className="glass-container rounded-[24px] p-5 space-y-2 shadow-lg border border-white/10">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] text-[#8A8FA9] font-bold uppercase tracking-wider font-h1">
+              DISPUTES & FLAGS
+            </span>
+            <div className="p-1.5 rounded-lg bg-rose-500/10 text-rose-400">
+              <AlertTriangle className="w-4 h-4" />
+            </div>
+          </div>
+          <h3 className="font-h1 text-2xl font-extrabold text-rose-400 tracking-tight">
+            {openDisputesCount}
+          </h3>
+          <p className="text-[11px] text-[#8A8FA9]">
+            {openDisputesCount > 0 ? (
+              <span className="text-rose-400 font-medium">Khiếu nại bài thi cần phân xử</span>
+            ) : (
+              <span className="text-emerald-400 font-medium">Không có tranh chấp tồn đọng</span>
+            )}
+          </p>
+        </div>
+      </div>
+
+      {/* 3. Navigation Tabs Bar (Directly under Illustration Contests & Events title) */}
       <nav className="glass-container rounded-2xl p-1.5 backdrop-blur-xl bg-[#121620]/90 flex gap-1.5 overflow-x-auto mb-6">
         <button
           onClick={() => setActiveTab('create')}

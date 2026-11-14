@@ -1,6 +1,6 @@
-﻿'use client';
+'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useLanguage } from '@/context/language-context';
@@ -135,6 +135,55 @@ export default function CollapsibleSidebar({
   const { t } = useLanguage();
   const sections = role === 'client' ? CLIENT_NAV_SECTIONS : CREATOR_NAV_SECTIONS;
 
+  const allNavHrefs = useMemo(() => {
+    return sections.flatMap((section) => section.items.map((item) => item.href));
+  }, [sections]);
+
+  const isItemActive = (itemHref: string) => {
+    if (!pathname) return false;
+
+    const currentPath = pathname;
+    const baseItemHref = itemHref.split('#')[0];
+
+    // If itemHref has hash, only exact match if hash matches or treat as base
+    if (currentPath === itemHref || currentPath === baseItemHref) {
+      // Check if there is another item that matches more specifically (longer base href)
+      const hasMoreSpecificMatch = allNavHrefs.some((otherHref) => {
+        if (otherHref === itemHref) return false;
+        const otherBase = otherHref.split('#')[0];
+        return (
+          otherBase.length > baseItemHref.length &&
+          (currentPath === otherBase || currentPath.startsWith(`${otherBase}/`))
+        );
+      });
+
+      if (hasMoreSpecificMatch) return false;
+
+      // If this item has a hash, don't activate on the bare path if the bare path item exists
+      if (itemHref.includes('#') && allNavHrefs.includes(baseItemHref)) {
+        return false;
+      }
+
+      return true;
+    }
+
+    // Prefix match (for sub-routes like /art-trades/[id] under /art-trades)
+    if (baseItemHref !== '/' && currentPath.startsWith(`${baseItemHref}/`)) {
+      const hasMoreSpecificMatch = allNavHrefs.some((otherHref) => {
+        if (otherHref === itemHref) return false;
+        const otherBase = otherHref.split('#')[0];
+        return (
+          otherBase.length > baseItemHref.length &&
+          (currentPath === otherBase || currentPath.startsWith(`${otherBase}/`))
+        );
+      });
+
+      return !hasMoreSpecificMatch;
+    }
+
+    return false;
+  };
+
   return (
     <aside
       className={`relative sticky top-16 h-[calc(100vh-4rem)] bg-[#1F2335]/90 backdrop-blur-[20px] border-r border-white/10 transition-all duration-300 hidden md:flex flex-col justify-between z-30 shrink-0 ${
@@ -175,7 +224,7 @@ export default function CollapsibleSidebar({
             <nav className="space-y-1">
               {section.items.map((item) => {
                 const Icon = item.icon;
-                const isActive = pathname === item.href || (item.href !== '/' && pathname?.startsWith(item.href));
+                const isActive = isItemActive(item.href);
 
                 return (
                   <Link
