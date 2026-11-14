@@ -65,7 +65,7 @@ export function CommissionBreakdownCard({
           <h3 className="font-h1 font-bold text-white text-base">
             Phân bổ trạng thái giao dịch
           </h3>
-          <p className="text-[11px] text-[#8A8FA9]">Lifecycle stage distribution</p>
+          <p className="text-[11px] text-[#8A8FA9]">Tỷ lệ phân bổ theo trạng thái vòng đời</p>
         </div>
 
         {/* Tab Switcher Pills */}
@@ -80,7 +80,7 @@ export function CommissionBreakdownCard({
             }`}
           >
             <Palette className="w-3.5 h-3.5" />
-            <span>Commission</span>
+            <span>Đơn đặt vẽ</span>
             <span className="text-[10px] opacity-80 font-mono">({totalComm})</span>
           </button>
 
@@ -94,7 +94,7 @@ export function CommissionBreakdownCard({
             }`}
           >
             <Gavel className="w-3.5 h-3.5" />
-            <span>Auction</span>
+            <span>Đơn đấu giá</span>
             <span className="text-[10px] opacity-80 font-mono">({totalAuct})</span>
           </button>
 
@@ -108,7 +108,7 @@ export function CommissionBreakdownCard({
             }`}
           >
             <ArrowLeftRight className="w-3.5 h-3.5" />
-            <span>Trade</span>
+            <span>Trao đổi tranh</span>
             <span className="text-[10px] opacity-80 font-mono">({totalTr})</span>
           </button>
         </div>
@@ -200,7 +200,7 @@ export function CommissionBreakdownCard({
           <div className="space-y-1.5">
             <div className="flex justify-between text-xs font-medium">
               <span className="text-white">
-                Đang diễn ra (Active Bidding) (<strong className="font-h1 font-bold text-emerald-400">{activeAuct}</strong>)
+                Đang diễn ra đấu giá (<strong className="font-h1 font-bold text-emerald-400">{activeAuct}</strong>)
               </span>
               <span className="text-emerald-400 font-h1 font-extrabold text-sm">
                 {calcPct(activeAuct, totalAuct)}%
@@ -236,7 +236,7 @@ export function CommissionBreakdownCard({
           <div className="space-y-1.5">
             <div className="flex justify-between text-xs font-medium">
               <span className="text-white">
-                Sắp diễn ra (Scheduled) (<strong className="font-h1 font-bold text-blue-400">{scheduledAuct}</strong>)
+                Sắp diễn ra (<strong className="font-h1 font-bold text-blue-400">{scheduledAuct}</strong>)
               </span>
               <span className="text-blue-400 font-h1 font-extrabold text-sm">
                 {calcPct(scheduledAuct, totalAuct)}%
@@ -297,7 +297,7 @@ export function CommissionBreakdownCard({
           <div className="space-y-1.5">
             <div className="flex justify-between text-xs font-medium">
               <span className="text-white">
-                Đang vẽ & Nộp bài (Accepted / BothSubmitted) (<strong className="font-h1 font-bold text-sky-400">{inProgressTr}</strong>)
+                Đang vẽ & Nộp tranh (<strong className="font-h1 font-bold text-sky-400">{inProgressTr}</strong>)
               </span>
               <span className="text-sky-400 font-h1 font-extrabold text-sm">
                 {calcPct(inProgressTr, totalTr)}%
@@ -333,7 +333,7 @@ export function CommissionBreakdownCard({
           <div className="space-y-1.5">
             <div className="flex justify-between text-xs font-medium">
               <span className="text-white">
-                Chờ xác nhận đề xuất (Proposed) (<strong className="font-h1 font-bold text-amber-300">{proposedTr}</strong>)
+                Chờ phản hồi đề xuất (<strong className="font-h1 font-bold text-amber-300">{proposedTr}</strong>)
               </span>
               <span className="text-amber-300 font-h1 font-extrabold text-sm">
                 {calcPct(proposedTr, totalTr)}%
