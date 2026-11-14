@@ -303,7 +303,7 @@ export function TradeChatRoom({ trade, currentUser, onOpenDispute }: TradeChatRo
   };
 
   return (
-    <div className="glass-container relative flex flex-col rounded-3xl shadow-2xl overflow-hidden h-[620px] md:h-[680px] max-h-[calc(100vh-220px)] min-h-[500px] border border-white/10 bg-[#16161b]/90 backdrop-blur-xl">
+    <div className="glass-container relative flex flex-col rounded-3xl shadow-2xl overflow-hidden h-[560px] md:h-[640px] max-h-[calc(100vh-210px)] min-h-[420px] border border-white/10 bg-[#16161b]/90 backdrop-blur-xl">
       {/* 1. CHAT HEADER */}
       <div className="flex-none flex items-center justify-between px-6 py-4 border-b border-white/10 bg-[#1a1a24]/90 backdrop-blur-md z-10">
         <div className="flex items-center gap-3">

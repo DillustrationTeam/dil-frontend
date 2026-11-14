@@ -983,7 +983,9 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
         <div className="absolute -bottom-32 -right-32 w-80 h-80 bg-brand-periwinkle/5 rounded-full blur-3xl pointer-events-none" />
 
         {/* Top Header with Title and Status */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4 pb-8 mb-8 border-b border-white/10">
+        <div className={`flex flex-col md:flex-row items-center justify-between gap-4 border-b border-white/10 ${
+          activeTab === 'chat' ? 'pb-4 mb-4' : 'pb-8 mb-8'
+        }`}>
           <div>
             <div className="flex items-center gap-2 mb-1.5">
               <span className="text-xs uppercase tracking-wider text-brand-periwinkle font-semibold">
@@ -995,7 +997,7 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
             <h1 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight font-h1">
               {trade.title}
             </h1>
-            {trade.description && (
+            {trade.description && activeTab !== 'chat' && (
               <p className="text-sm text-[#919099] mt-1 max-w-2xl">{trade.description}</p>
             )}
           </div>
@@ -1020,19 +1022,17 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
               )}
             </div>
 
-            {/* Quick Switch to Chat */}
-            <button
-              type="button"
-              onClick={() => setActiveTab('chat')}
-              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold border transition cursor-pointer ${
-                activeTab === 'chat'
-                  ? 'commission-primary border-transparent shadow-lg'
-                  : 'bg-white/5 border-white/10 text-[#C7C5CF] hover:text-white hover:bg-white/10'
-              }`}
-            >
-              <MessageSquare className={`w-4 h-4 ${activeTab === 'chat' ? 'text-brand-navy' : 'text-brand-periwinkle'}`} />
-              <span>{isVie ? 'Phòng trò chuyện' : 'Trade Chat'}</span>
-            </button>
+            {/* Quick Switch to Chat (when not in chat tab) */}
+            {activeTab !== 'chat' && (
+              <button
+                type="button"
+                onClick={() => setActiveTab('chat')}
+                className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold border bg-white/5 border-white/10 text-[#C7C5CF] hover:text-white hover:bg-white/10 transition cursor-pointer"
+              >
+                <MessageSquare className="w-4 h-4 text-brand-periwinkle" />
+                <span>{isVie ? 'Phòng trò chuyện' : 'Trade Chat'}</span>
+              </button>
+            )}
           </div>
         </div>
 
@@ -1122,7 +1122,9 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
         )}
 
         {/* TAB NAVBAR: Reference <-> Artwork Submission <-> Trade Chat */}
-        <div className="mb-6 flex items-center gap-1 rounded-2xl border border-white/10 bg-white/[0.03] p-1.5">
+        <div className={`flex items-center gap-1 rounded-2xl border border-white/10 bg-white/[0.03] p-1.5 ${
+          activeTab === 'chat' ? 'mb-4' : 'mb-6'
+        }`}>
           {([
             { key: 'reference', label: isVie ? 'Tham khảo' : 'Reference', Icon: ImageIcon },
             { key: 'submission', label: isVie ? 'Nộp tranh' : 'Artwork Submission', Icon: Upload },
