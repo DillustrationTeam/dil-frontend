@@ -306,7 +306,7 @@ export default function MyTradesPage() {
               {isVie
                 ? `Họa sĩ có thể tham gia tối đa ${slotStatus?.totalSlots ?? 2} lượt trao đổi cùng lúc. Số slot còn trống: `
                 : `Creators can run up to ${slotStatus?.totalSlots ?? 2} simultaneous trades to prevent over-commitment. Available slots: `}
-              <strong className="text-white">{slotStatus?.availableSlots ?? 1}</strong>
+              <strong className="text-white">{loading ? '...' : (slotStatus?.availableSlots ?? 0)}</strong>
             </p>
           </div>
         </div>
