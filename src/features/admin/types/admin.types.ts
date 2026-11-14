@@ -110,6 +110,24 @@ export interface AdminRecentTransactionDto {
   createdAt: string;
 }
 
+export interface AdminAuctionMetricsDto {
+  totalAuctions: number;
+  scheduledCount: number;
+  activeCount: number;
+  completedSettledCount: number;
+  disputedCount: number;
+  cancelledExpiredCount: number;
+}
+
+export interface AdminTradeMetricsDto {
+  totalTrades: number;
+  proposedCount: number;
+  inProgressCount: number;
+  completedCount: number;
+  disputedCount: number;
+  cancelledRejectedCount: number;
+}
+
 export interface AdminDashboardOverviewDto {
   financialKpis: AdminFinancialKpiDto;
   userMetrics: AdminUserMetricsDto;
@@ -117,6 +135,8 @@ export interface AdminDashboardOverviewDto {
   actionRequiredQueue: AdminActionRequiredQueueDto;
   revenueTrend: AdminDailyRevenueDto[];
   recentTransactions: AdminRecentTransactionDto[];
+  auctionMetrics?: AdminAuctionMetricsDto;
+  tradeMetrics?: AdminTradeMetricsDto;
 }
 
 // Alias for backwards compatibility

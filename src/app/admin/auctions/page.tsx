@@ -238,23 +238,78 @@ export default function AdminAuctionsPage() {
         </button>
       </div>
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <div className="glass-container rounded-2xl p-4">
-          <p className="text-[11px] font-medium uppercase tracking-wider text-[#919099]">Đang diễn ra</p>
-          <p className="mt-1 font-h1 text-2xl font-bold text-emerald-400">{stats.active}</p>
+      {/* Executive Overview KPI Cards (Consistent with System Overview) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-5">
+        {/* Card 1: Active Auctions */}
+        <div className="glass-container rounded-[24px] p-5 space-y-2 shadow-lg border border-white/10">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] text-[#8A8FA9] font-bold uppercase tracking-wider font-h1">
+              ACTIVE SESSIONS
+            </span>
+            <div className="p-1.5 rounded-lg bg-emerald-400/10 text-emerald-400">
+              <Gavel className="w-4 h-4" />
+            </div>
+          </div>
+          <h3 className="font-h1 text-2xl font-extrabold text-emerald-400 tracking-tight">
+            {stats.active}
+          </h3>
+          <p className="text-[11px] text-[#8A8FA9]">
+            <span className="font-h1 font-bold text-emerald-400">Đang diễn ra</span> sôi động trên sàn
+          </p>
         </div>
-        <div className="glass-container rounded-2xl p-4">
-          <p className="text-[11px] font-medium uppercase tracking-wider text-[#919099]">Sắp diễn ra</p>
-          <p className="mt-1 font-h1 text-2xl font-bold text-blue-400">{stats.scheduled}</p>
+
+        {/* Card 2: Upcoming / Scheduled */}
+        <div className="glass-container rounded-[24px] p-5 space-y-2 shadow-lg border border-white/10">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] text-[#8A8FA9] font-bold uppercase tracking-wider font-h1">
+              SCHEDULED SESSIONS
+            </span>
+            <div className="p-1.5 rounded-lg bg-blue-400/10 text-blue-400">
+              <Clock className="w-4 h-4" />
+            </div>
+          </div>
+          <h3 className="font-h1 text-2xl font-extrabold text-blue-400 tracking-tight">
+            {stats.scheduled}
+          </h3>
+          <p className="text-[11px] text-[#8A8FA9]">
+            <span className="font-h1 font-bold text-white/90">Sắp mở phiên</span> nhận lượt đặt giá
+          </p>
         </div>
-        <div className="glass-container rounded-2xl p-4">
-          <p className="text-[11px] font-medium uppercase tracking-wider text-[#919099]">Đã chốt phiên</p>
-          <p className="mt-1 font-h1 text-2xl font-bold text-purple-300">{stats.settled}</p>
+
+        {/* Card 3: Settled & Completed */}
+        <div className="glass-container rounded-[24px] p-5 space-y-2 shadow-lg border border-white/10">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] text-[#8A8FA9] font-bold uppercase tracking-wider font-h1">
+              SETTLED & DELIVERED
+            </span>
+            <div className="p-1.5 rounded-lg bg-purple-400/10 text-purple-300">
+              <CheckCircle2 className="w-4 h-4" />
+            </div>
+          </div>
+          <h3 className="font-h1 text-2xl font-extrabold text-purple-300 tracking-tight">
+            {stats.settled}
+          </h3>
+          <p className="text-[11px] text-[#8A8FA9]">
+            Đã xác định Winner & giải ngân
+          </p>
         </div>
-        <div className="glass-container rounded-2xl p-4">
-          <p className="text-[11px] font-medium uppercase tracking-wider text-[#919099]">Đã kết thúc / Huỷ</p>
-          <p className="mt-1 font-h1 text-2xl font-bold text-slate-300">{stats.ended}</p>
+
+        {/* Card 4: Total Sessions */}
+        <div className="glass-container rounded-[24px] p-5 space-y-2 shadow-lg border border-white/10">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] text-[#8A8FA9] font-bold uppercase tracking-wider font-h1">
+              TOTAL SESSIONS
+            </span>
+            <div className="p-1.5 rounded-lg bg-[#C5C9F8]/10 text-[#C5C9F8]">
+              <Layers className="w-4 h-4" />
+            </div>
+          </div>
+          <h3 className="font-h1 text-2xl font-extrabold text-[#C5C9F8] tracking-tight">
+            {auctions.length}
+          </h3>
+          <p className="text-[11px] text-[#8A8FA9]">
+            <span className="font-h1 font-bold text-white/90">{stats.ended}</span> Phiên đã kết thúc / huỷ
+          </p>
         </div>
       </div>
 
