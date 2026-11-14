@@ -101,16 +101,21 @@ export function TradeChatRoom({ trade, currentUser, onOpenDispute }: TradeChatRo
 
   const isChatDisabled = Boolean(room?.isLocked || isTradeEnded);
 
-  // Auto scroll to bottom
+  // Auto scroll to bottom without affecting window scroll
   const scrollToBottom = useCallback((smooth = true) => {
-    messagesEndRef.current?.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto' });
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTo({
+        top: scrollContainerRef.current.scrollHeight,
+        behavior: smooth ? 'smooth' : 'auto',
+      });
+    }
   }, []);
 
   // Monitor scroll for "Scroll to bottom" button
   const handleScroll = () => {
     if (!scrollContainerRef.current) return;
     const { scrollTop, scrollHeight, clientHeight } = scrollContainerRef.current;
-    const isNearBottom = scrollHeight - scrollTop - clientHeight < 120;
+    const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
     setShowScrollBottom(!isNearBottom);
   };
 
@@ -298,9 +303,9 @@ export function TradeChatRoom({ trade, currentUser, onOpenDispute }: TradeChatRo
   };
 
   return (
-    <div className="glass-container relative flex flex-col rounded-3xl shadow-2xl overflow-hidden min-h-[620px] max-h-[820px]">
+    <div className="glass-container relative flex flex-col rounded-3xl shadow-2xl overflow-hidden h-[620px] md:h-[680px] max-h-[calc(100vh-220px)] min-h-[500px] border border-white/10 bg-[#16161b]/90 backdrop-blur-xl">
       {/* 1. CHAT HEADER */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-white/[0.02]">
+      <div className="flex-none flex items-center justify-between px-6 py-4 border-b border-white/10 bg-[#1a1a24]/90 backdrop-blur-md z-10">
         <div className="flex items-center gap-3">
           <div className="relative">
             <div className="size-11 rounded-2xl bg-brand-navy border border-brand-periwinkle/35 flex items-center justify-center text-brand-periwinkle font-bold text-sm shadow-md">
@@ -402,7 +407,7 @@ export function TradeChatRoom({ trade, currentUser, onOpenDispute }: TradeChatRo
 
       {/* 2. NOTICE BANNER IF TRADE IS CLOSED / LOCKED */}
       {isChatDisabled && (
-        <div className="flex items-center gap-3 px-6 py-2.5 bg-amber-500/10 border-b border-amber-500/20 text-xs text-amber-200">
+        <div className="flex-none flex items-center gap-3 px-6 py-2.5 bg-amber-500/10 border-b border-amber-500/20 text-xs text-amber-200">
           <Lock className="size-4 text-amber-400 shrink-0" />
           <span>
             {isVie
@@ -413,11 +418,12 @@ export function TradeChatRoom({ trade, currentUser, onOpenDispute }: TradeChatRo
       )}
 
       {/* 3. MESSAGE LIST CONTAINER */}
-      <div
-        ref={scrollContainerRef}
-        onScroll={handleScroll}
-        className="flex-1 overflow-y-auto px-6 py-6 space-y-4 custom-scrollbar"
-      >
+      <div className="relative flex-1 min-h-0 overflow-hidden flex flex-col">
+        <div
+          ref={scrollContainerRef}
+          onScroll={handleScroll}
+          className="flex-1 overflow-y-auto px-4 sm:px-6 py-6 space-y-4 custom-scrollbar overscroll-contain"
+        >
         {loading && (
           <div className="flex flex-col items-center justify-center py-20 text-[#919099]">
             <RefreshCw className="size-8 animate-spin text-brand-periwinkle mb-3" />
@@ -487,7 +493,7 @@ export function TradeChatRoom({ trade, currentUser, onOpenDispute }: TradeChatRo
                 }`}
               >
                 {/* Body Text */}
-                {msg.body && <p className="whitespace-pre-wrap">{msg.body}</p>}
+                {msg.body && <p className="whitespace-pre-wrap break-words">{msg.body}</p>}
 
                 {/* Translated Body */}
                 {msg.translatedBody && msg.translatedBody.trim() !== msg.body.trim() && (
@@ -588,23 +594,24 @@ export function TradeChatRoom({ trade, currentUser, onOpenDispute }: TradeChatRo
           );
         })}
 
-        <div ref={messagesEndRef} />
+        <div ref={messagesEndRef} className="h-1" />
+        </div>
+
+        {/* Scroll to bottom button */}
+        {showScrollBottom && (
+          <button
+            type="button"
+            onClick={() => scrollToBottom(true)}
+            className="commission-primary absolute bottom-4 right-6 z-20 flex size-9 items-center justify-center rounded-full shadow-2xl transition hover:scale-105 cursor-pointer animate-in fade-in"
+            title={isVie ? 'Cuộn xuống tin mới nhất' : 'Scroll to latest messages'}
+          >
+            <ChevronDown className="size-5" />
+          </button>
+        )}
       </div>
 
-      {/* Scroll to bottom button */}
-      {showScrollBottom && (
-        <button
-          type="button"
-          onClick={() => scrollToBottom(true)}
-          className="commission-primary absolute bottom-24 right-8 z-10 flex size-9 items-center justify-center rounded-full shadow-xl transition cursor-pointer"
-          title={isVie ? 'Cuộn xuống tin mới nhất' : 'Scroll to latest messages'}
-        >
-          <ChevronDown className="size-5" />
-        </button>
-      )}
-
       {/* 4. CHAT INPUT BAR */}
-      <div className="border-t border-white/10 bg-white/[0.02] p-4">
+      <div className="flex-none border-t border-white/10 bg-[#1a1a24]/90 backdrop-blur-md p-3 sm:p-4 z-10">
         {/* Selected File Preview */}
         {selectedFile && (
           <div className="mb-3 flex items-center gap-3 rounded-2xl border border-brand-periwinkle/30 bg-brand-periwinkle/10 p-2.5">

@@ -68,6 +68,7 @@ export interface ArtTradeSummaryDto {
   partnerHasConfirmed: boolean;
   submissionDeadlineAt?: string | null;
   createdAt: string;
+  receiverAcceptedAt?: string | null;
 }
 
 export interface FrozenSlotDetailDto {
