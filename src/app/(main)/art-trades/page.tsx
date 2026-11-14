@@ -107,25 +107,11 @@ export default function MyTradesPage() {
   const isDisputedStatus = (s: unknown) => s === 'Disputed' || s === 7 || s === '7';
   const isCancelledStatus = (s: unknown) => s === 'Cancelled' || s === 6 || s === '6' || s === 'Rejected' || s === 5 || s === '5';
 
-  const getStatusBadge = (status: TradeStatus) => {
-    if (isProposedStatus(status)) {
+  const getStatusBadge = (status: TradeStatus, receiverAcceptedAt?: string | null) => {
+    if (isDisputedStatus(status)) {
       return (
-        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-300 border border-amber-500/30">
-          <Clock className="w-3 h-3" /> {isVie ? 'Chờ xác nhận' : 'Proposal Pending'}
-        </span>
-      );
-    }
-    if (isAcceptedStatus(status)) {
-      return (
-        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-500/15 text-blue-300 border border-blue-500/30">
-          <Clock className="w-3 h-3" /> {isVie ? 'Đang thực hiện' : 'In Progress'}
-        </span>
-      );
-    }
-    if (isBothSubmittedStatus(status)) {
-      return (
-        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-brand-periwinkle/15 text-brand-periwinkle border border-brand-periwinkle/30">
-          <Sparkles className="w-3 h-3" /> {isVie ? 'Đã nộp tranh' : 'Both Submitted'}
+        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-500/15 text-rose-300 border border-rose-500/30">
+          <AlertCircle className="w-3 h-3" /> {isVie ? 'Khiếu nại' : 'Under Dispute'}
         </span>
       );
     }
@@ -136,17 +122,31 @@ export default function MyTradesPage() {
         </span>
       );
     }
-    if (isDisputedStatus(status)) {
-      return (
-        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-500/15 text-rose-300 border border-rose-500/30">
-          <AlertCircle className="w-3 h-3" /> {isVie ? 'Khiếu nại' : 'Under Dispute'}
-        </span>
-      );
-    }
     if (isCancelledStatus(status)) {
       return (
         <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-white/5 text-[#919099] border border-white/15">
           <XCircle className="w-3 h-3" /> {isVie ? 'Đã hủy' : 'Cancelled'}
+        </span>
+      );
+    }
+    if (isBothSubmittedStatus(status)) {
+      return (
+        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-500/15 text-purple-300 border border-purple-500/30">
+          <CheckCircle2 className="w-3 h-3" /> {isVie ? 'Cả hai đã nộp' : 'Both Submitted'}
+        </span>
+      );
+    }
+    if (isAcceptedStatus(status) || (isProposedStatus(status) && !!receiverAcceptedAt)) {
+      return (
+        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-500/15 text-blue-300 border border-blue-500/30">
+          <Clock className="w-3 h-3" /> {isVie ? 'Đang thực hiện' : 'In Progress'}
+        </span>
+      );
+    }
+    if (isProposedStatus(status)) {
+      return (
+        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-300 border border-amber-500/30">
+          <Clock className="w-3 h-3" /> {isVie ? 'Chờ xác nhận' : 'Proposal Pending'}
         </span>
       );
     }
@@ -175,10 +175,10 @@ export default function MyTradesPage() {
     if (statusFilter && statusFilter !== 'ALL') {
       switch (statusFilter) {
         case 'ACTIVE':
-          list = list.filter((trade) => isAcceptedStatus(trade.status) || isBothSubmittedStatus(trade.status));
+          list = list.filter((trade) => isAcceptedStatus(trade.status) || isBothSubmittedStatus(trade.status) || (isProposedStatus(trade.status) && !!trade.receiverAcceptedAt));
           break;
         case 'PROPOSALS':
-          list = list.filter((trade) => isProposedStatus(trade.status));
+          list = list.filter((trade) => isProposedStatus(trade.status) && !trade.receiverAcceptedAt);
           break;
         case 'COMPLETED':
           list = list.filter((trade) => isCompletedStatus(trade.status));
@@ -419,8 +419,12 @@ export default function MyTradesPage() {
         <div className="grid grid-cols-1 gap-4">
           {filteredTrades.map((trade) => {
             const isInitiator = trade.role?.toLowerCase() === 'initiator';
-            const isProposed = isProposedStatus(trade.status);
-            const isPendingProposalForMe = isProposed && !isInitiator;
+            const isAccepted =
+              isAcceptedStatus(trade.status) ||
+              isBothSubmittedStatus(trade.status) ||
+              (!isInitiator && !!trade.receiverAcceptedAt && isProposedStatus(trade.status));
+            const isProposed = isProposedStatus(trade.status) && !isAccepted;
+            const isPendingProposalForMe = isProposed && !isInitiator && !trade.receiverAcceptedAt;
             const isMyProposalPending = isProposed && isInitiator;
 
             return (
@@ -446,7 +450,7 @@ export default function MyTradesPage() {
 
                   <div>
                     <div className="flex items-center gap-2 flex-wrap mb-1">
-                      {getStatusBadge(trade.status)}
+                      {getStatusBadge(trade.status, trade.receiverAcceptedAt)}
                       <span className="text-[11px] text-[#919099]">
                         {isInitiator
                           ? (isVie ? 'Bạn đề xuất' : 'Proposed by You')
@@ -511,7 +515,7 @@ export default function MyTradesPage() {
                         {isVie ? 'Xem đề nghị' : 'View Proposal'}
                       </Link>
                     </div>
-                  ) : isAcceptedStatus(trade.status) || isBothSubmittedStatus(trade.status) ? (
+                  ) : isAccepted ? (
                     <div className="flex items-center gap-2">
                       <Link
                         href={`/art-trades/${trade.id}?tab=chat`}
@@ -542,6 +546,23 @@ export default function MyTradesPage() {
                         className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600/20 hover:bg-emerald-600 text-emerald-300 hover:text-white border border-emerald-500/30 text-xs font-semibold transition shadow-sm"
                       >
                         <span>{isVie ? 'Xem kết quả trao đổi' : 'View Completed Trade'}</span>
+                        <ChevronRight className="w-3.5 h-3.5" />
+                      </Link>
+                    </div>
+                  ) : isDisputedStatus(trade.status) ? (
+                    <div className="flex items-center gap-2">
+                      <Link
+                        href={`/art-trades/${trade.id}?tab=chat`}
+                        title={isVie ? 'Mở phòng trò chuyện' : 'Open Trade Chat'}
+                        className="p-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 transition"
+                      >
+                        <MessageSquare className="w-4 h-4" />
+                      </Link>
+                      <Link
+                        href={`/art-trades/${trade.id}`}
+                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/30 text-xs font-semibold transition shadow-sm"
+                      >
+                        <span>{isVie ? 'Xem tranh chấp' : 'View Dispute'}</span>
                         <ChevronRight className="w-3.5 h-3.5" />
                       </Link>
                     </div>

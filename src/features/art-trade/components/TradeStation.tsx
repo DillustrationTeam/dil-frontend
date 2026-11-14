@@ -191,14 +191,19 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
   const isCurrentUserReceiver = !!currentUserId && (currentUserId === trade.receiver?.id?.toLowerCase() || currentUser?.fullName === trade.receiver?.fullName);
   const isReceiverRole = isCurrentUserReceiver || !isCurrentUserInitiator;
 
-  const isProposed = trade.status === 'Proposed' || (trade.status as unknown) === 1 || (trade.status as unknown) === '1';
+  const isProposedStatus = trade.status === 'Proposed' || (trade.status as unknown) === 1 || (trade.status as unknown) === '1';
+  const hasReceiverAccepted = !!trade.receiverAcceptedAt;
   const isAccepted =
     trade.status === 'Accepted' ||
     trade.status === 'BothSubmitted' ||
     (trade.status as unknown) === 2 ||
     (trade.status as unknown) === '2' ||
     (trade.status as unknown) === 3 ||
-    (trade.status as unknown) === '3';
+    (trade.status as unknown) === '3' ||
+    (isProposedStatus && hasReceiverAccepted);
+  const isProposed =
+    isProposedStatus &&
+    !hasReceiverAccepted;
   const isCompleted =
     trade.status === 'Completed' ||
     (trade.status as unknown) === 4 ||
@@ -393,6 +398,13 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
   const getStatusBadge = (status: TradeStatus) => {
     const s = status as unknown;
     if (s === 'Proposed' || s === 1 || s === '1') {
+      if (hasReceiverAccepted) {
+        return (
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-500/15 text-blue-300 border border-blue-500/30">
+            <Clock className="w-3.5 h-3.5" /> {isVie ? 'Giai đoạn vẽ tranh' : 'Drawing Phase'}
+          </span>
+        );
+      }
       return (
         <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-300 border border-amber-500/30">
           <Clock className="w-3.5 h-3.5" /> {isVie ? 'Chờ phản hồi đề nghị' : 'Proposal Pending'}
@@ -1024,88 +1036,90 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
           </div>
         </div>
 
-        {/* TWO PARTICIPANT AVATARS */}
-        <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] items-center gap-6 mb-10">
-          {/* Participant A (Initiator) Avatar Circle */}
-          <div className="flex flex-col items-center text-center">
-            <div className="relative group mb-3">
-              <div className="w-24 h-24 md:w-28 md:h-28 rounded-full border-4 border-brand-periwinkle/60 shadow-xl overflow-hidden ring-4 ring-brand-periwinkle/20 bg-brand-navy flex items-center justify-center">
-                {trade.initiator.avatarUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={trade.initiator.avatarUrl}
-                    alt={trade.initiator.fullName}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <span className="text-2xl md:text-3xl font-bold text-brand-periwinkle">
-                    {trade.initiator.fullName.charAt(0).toUpperCase()}
-                  </span>
-                )}
+        {/* TWO PARTICIPANT AVATARS (shown in Reference & Submission tabs to give space for chatroom) */}
+        {activeTab !== 'chat' && (
+          <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] items-center gap-6 mb-10">
+            {/* Participant A (Initiator) Avatar Circle */}
+            <div className="flex flex-col items-center text-center">
+              <div className="relative group mb-3">
+                <div className="w-24 h-24 md:w-28 md:h-28 rounded-full border-4 border-brand-periwinkle/60 shadow-xl overflow-hidden ring-4 ring-brand-periwinkle/20 bg-brand-navy flex items-center justify-center">
+                  {trade.initiator.avatarUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={trade.initiator.avatarUrl}
+                      alt={trade.initiator.fullName}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-2xl md:text-3xl font-bold text-brand-periwinkle">
+                      {trade.initiator.fullName.charAt(0).toUpperCase()}
+                    </span>
+                  )}
+                </div>
+                <div className="absolute -bottom-1 -right-1 bg-brand-periwinkle text-brand-navy rounded-full p-1.5 shadow-md">
+                  <Sparkles className="w-3.5 h-3.5" />
+                </div>
               </div>
-              <div className="absolute -bottom-1 -right-1 bg-brand-periwinkle text-brand-navy rounded-full p-1.5 shadow-md">
-                <Sparkles className="w-3.5 h-3.5" />
+
+              <div className="space-y-0.5">
+                <h3 className="font-semibold text-white text-base md:text-lg flex items-center justify-center gap-1.5">
+                  {trade.initiator.fullName}
+                  {isCurrentUserInitiator && (
+                    <span className="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded bg-brand-periwinkle/20 text-brand-periwinkle border border-brand-periwinkle/30">
+                      {isVie ? 'Bạn' : 'You'}
+                    </span>
+                  )}
+                </h3>
+                <p className="text-xs text-brand-periwinkle font-medium">Initiator (Side A)</p>
               </div>
             </div>
 
-            <div className="space-y-0.5">
-              <h3 className="font-semibold text-white text-base md:text-lg flex items-center justify-center gap-1.5">
-                {trade.initiator.fullName}
-                {isCurrentUserInitiator && (
-                  <span className="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded bg-brand-periwinkle/20 text-brand-periwinkle border border-brand-periwinkle/30">
-                    {isVie ? 'Bạn' : 'You'}
-                  </span>
-                )}
-              </h3>
-              <p className="text-xs text-brand-periwinkle font-medium">Initiator (Side A)</p>
+            {/* Center Trade Crest / Exchange Arrows */}
+            <div className="flex flex-col items-center justify-center py-2 md:py-0">
+              <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-brand-periwinkle shadow-inner group hover:scale-105 transition">
+                <ArrowLeftRight className="w-6 h-6 text-brand-periwinkle animate-pulse" />
+              </div>
+              <span className="text-[11px] uppercase tracking-wider text-[#919099] font-semibold mt-2">
+                Exchange
+              </span>
+            </div>
+
+            {/* Participant B (Receiver) Avatar Circle */}
+            <div className="flex flex-col items-center text-center">
+              <div className="relative group mb-3">
+                <div className="w-24 h-24 md:w-28 md:h-28 rounded-full border-4 border-white/30 shadow-xl overflow-hidden ring-4 ring-white/10 bg-brand-navy flex items-center justify-center">
+                  {trade.receiver.avatarUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={trade.receiver.avatarUrl}
+                      alt={trade.receiver.fullName}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-2xl md:text-3xl font-bold text-[#C7C5CF]">
+                      {trade.receiver.fullName.charAt(0).toUpperCase()}
+                    </span>
+                  )}
+                </div>
+                <div className="absolute -bottom-1 -right-1 bg-white/15 border border-white/25 text-white rounded-full p-1.5 shadow-md backdrop-blur-md">
+                  <Sparkles className="w-3.5 h-3.5" />
+                </div>
+              </div>
+
+              <div className="space-y-0.5">
+                <h3 className="font-semibold text-white text-base md:text-lg flex items-center justify-center gap-1.5">
+                  {trade.receiver.fullName}
+                  {isCurrentUserReceiver && (
+                    <span className="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded bg-brand-periwinkle/20 text-brand-periwinkle border border-brand-periwinkle/30">
+                      {isVie ? 'Bạn' : 'You'}
+                    </span>
+                  )}
+                </h3>
+                <p className="text-xs text-[#C7C5CF] font-medium">Receiver (Side B)</p>
+              </div>
             </div>
           </div>
-
-          {/* Center Trade Crest / Exchange Arrows */}
-          <div className="flex flex-col items-center justify-center py-2 md:py-0">
-            <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-brand-periwinkle shadow-inner group hover:scale-105 transition">
-              <ArrowLeftRight className="w-6 h-6 text-brand-periwinkle animate-pulse" />
-            </div>
-            <span className="text-[11px] uppercase tracking-wider text-[#919099] font-semibold mt-2">
-              Exchange
-            </span>
-          </div>
-
-          {/* Participant B (Receiver) Avatar Circle */}
-          <div className="flex flex-col items-center text-center">
-            <div className="relative group mb-3">
-              <div className="w-24 h-24 md:w-28 md:h-28 rounded-full border-4 border-white/30 shadow-xl overflow-hidden ring-4 ring-white/10 bg-brand-navy flex items-center justify-center">
-                {trade.receiver.avatarUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={trade.receiver.avatarUrl}
-                    alt={trade.receiver.fullName}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <span className="text-2xl md:text-3xl font-bold text-[#C7C5CF]">
-                    {trade.receiver.fullName.charAt(0).toUpperCase()}
-                  </span>
-                )}
-              </div>
-              <div className="absolute -bottom-1 -right-1 bg-white/15 border border-white/25 text-white rounded-full p-1.5 shadow-md backdrop-blur-md">
-                <Sparkles className="w-3.5 h-3.5" />
-              </div>
-            </div>
-
-            <div className="space-y-0.5">
-              <h3 className="font-semibold text-white text-base md:text-lg flex items-center justify-center gap-1.5">
-                {trade.receiver.fullName}
-                {isCurrentUserReceiver && (
-                  <span className="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded bg-brand-periwinkle/20 text-brand-periwinkle border border-brand-periwinkle/30">
-                    {isVie ? 'Bạn' : 'You'}
-                  </span>
-                )}
-              </h3>
-              <p className="text-xs text-[#C7C5CF] font-medium">Receiver (Side B)</p>
-            </div>
-          </div>
-        </div>
+        )}
 
         {/* TAB NAVBAR: Reference <-> Artwork Submission <-> Trade Chat */}
         <div className="mb-6 flex items-center gap-1 rounded-2xl border border-white/10 bg-white/[0.03] p-1.5">
