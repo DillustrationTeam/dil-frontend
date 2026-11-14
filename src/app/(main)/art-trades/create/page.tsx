@@ -367,6 +367,13 @@ function CreateArtTradeContent() {
                 <span>Trade Slot Frozen: {slotStatus.frozenDetails?.[0]?.reason || 'Penalty'}</span>
               </div>
             )}
+
+            {slotStatus && slotStatus.availableSlots <= 0 && slotStatus.frozenSlotsCount === 0 && (
+              <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-300">
+                <AlertCircle className="w-4 h-4 text-amber-400" />
+                <span>Đã hết Slot ({slotStatus.activeTradesCount}/{slotStatus.totalSlots} đang chạy) - Hoàn tất kèo hiện tại để tạo thêm</span>
+              </div>
+            )}
           </div>
         </div>
 
@@ -731,29 +738,40 @@ function CreateArtTradeContent() {
           </div>
 
           {/* Submit Action */}
-          <div className="pt-4 flex items-center justify-end gap-4 border-t border-white/10">
-            <Link
-              href="/art-trades"
-              className="px-5 py-2.5 rounded-xl border border-white/10 text-xs font-semibold text-[#919099] hover:text-white hover:bg-white/5 transition"
-            >
-              Cancel
-            </Link>
+          <div className="pt-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 border-t border-white/10">
+            {slotStatus && slotStatus.availableSlots <= 0 ? (
+              <p className="text-xs text-amber-300/90 flex items-center gap-1.5">
+                <AlertCircle className="w-4 h-4 text-amber-400 shrink-0" />
+                <span>Bạn đã dùng hết {slotStatus.totalSlots} slot ({slotStatus.activeTradesCount} kèo đang chạy). Vui lòng hoàn tất kèo cũ để mở khóa nút gửi.</span>
+              </p>
+            ) : (
+              <div />
+            )}
 
-            <button
-              type="submit"
-              disabled={submitting || (slotStatus ? slotStatus.availableSlots <= 0 || !slotStatus.canTrade : false)}
-              className="commission-primary inline-flex items-center gap-2 px-6 py-3 rounded-xl text-xs uppercase tracking-wider shadow-lg transition disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
-            >
-              {submitting ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" /> Sending Proposal...
-                </>
-              ) : (
-                <>
-                  <ArrowLeftRight className="w-4 h-4" /> Send Trade Proposal
-                </>
-              )}
-            </button>
+            <div className="flex items-center justify-end gap-4">
+              <Link
+                href="/art-trades"
+                className="px-5 py-2.5 rounded-xl border border-white/10 text-xs font-semibold text-[#919099] hover:text-white hover:bg-white/5 transition"
+              >
+                Cancel
+              </Link>
+
+              <button
+                type="submit"
+                disabled={submitting || (slotStatus ? slotStatus.availableSlots <= 0 || !slotStatus.canTrade : false)}
+                className="commission-primary inline-flex items-center gap-2 px-6 py-3 rounded-xl text-xs uppercase tracking-wider shadow-lg transition disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
+              >
+                {submitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" /> Sending Proposal...
+                  </>
+                ) : (
+                  <>
+                    <ArrowLeftRight className="w-4 h-4" /> Send Trade Proposal
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </form>
       </div>
