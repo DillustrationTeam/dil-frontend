@@ -11,6 +11,7 @@ import {
   AlertTriangle,
 } from 'lucide-react';
 import { DisputeStatus } from '@/features/admin/types/dispute-arbitration.types';
+import { useLanguage } from '@/context/language-context';
 
 export interface DisputeHeaderProps {
   pendingCount: number;
@@ -25,17 +26,17 @@ export interface DisputeHeaderProps {
   onRefresh: () => void;
 }
 
-const STATUS_TABS: { label: string; value: DisputeStatus }[] = [
-  { label: 'All Cases', value: 'All' },
-  { label: 'Pending', value: 'Pending' },
-  { label: 'Under Review', value: 'UnderReview' },
-  { label: 'Resolved', value: 'Resolved' },
+const STATUS_TABS: { labelVi: string; labelEn: string; value: DisputeStatus }[] = [
+  { labelVi: 'Tất cả hồ sơ', labelEn: 'All Cases', value: 'All' },
+  { labelVi: 'Chờ phân xử', labelEn: 'Pending', value: 'Pending' },
+  { labelVi: 'Đang xem xét', labelEn: 'Under Review', value: 'UnderReview' },
+  { labelVi: 'Đã giải quyết', labelEn: 'Resolved', value: 'Resolved' },
 ];
 
 function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat('en-US', {
+  return new Intl.NumberFormat('vi-VN', {
     style: 'currency',
-    currency: 'USD',
+    currency: 'VND',
     maximumFractionDigits: 0,
   }).format(amount);
 }
@@ -52,6 +53,8 @@ export function DisputeHeader({
   onSearchChange,
   onRefresh,
 }: DisputeHeaderProps) {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
   const [prevSearchQuery, setPrevSearchQuery] = useState(searchQuery);
   const [localSearch, setLocalSearch] = useState(searchQuery);
 
@@ -78,11 +81,13 @@ export function DisputeHeader({
             <div>
               <div className="flex items-center gap-2.5">
                 <h1 className="text-2xl font-black text-white font-h1 tracking-tight">
-                  Dispute Resolution & Escrow Arbitration
+                  {isVie ? 'Phân xử Tranh chấp & Ký quỹ Escrow' : 'Dispute Resolution & Escrow Arbitration'}
                 </h1>
               </div>
               <p className="text-xs text-[#8A8FA9] mt-0.5">
-                Investigate workroom chat transcripts, review party claims, and execute atomic escrow refund settlements.
+                {isVie
+                  ? 'Thẩm tra lịch sử trao đổi phòng làm việc, đánh giá yêu cầu hai bên và thực thi quyết toán hoàn tiền Escrow.'
+                  : 'Investigate workroom chat transcripts, review party claims, and execute atomic escrow refund settlements.'}
               </p>
             </div>
           </div>
@@ -95,10 +100,10 @@ export function DisputeHeader({
             onClick={onRefresh}
             disabled={isLoading}
             className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold bg-white/5 hover:bg-white/10 text-white/90 border border-white/10 transition-all cursor-pointer disabled:opacity-50"
-            title="Refresh dispute queue"
+            title={isVie ? 'Làm mới hàng đợi' : 'Refresh dispute queue'}
           >
             <RotateCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin text-red-400' : ''}`} />
-            <span>Sync Live Queue</span>
+            <span>{isVie ? 'Đồng bộ hàng đợi' : 'Sync Live Queue'}</span>
           </button>
         </div>
       </div>
@@ -109,7 +114,7 @@ export function DisputeHeader({
         <div className="glass-container bg-[#161926]/85 backdrop-blur-[32px] border border-white/10 rounded-2xl p-4 flex items-center justify-between">
           <div className="space-y-1">
             <span className="text-[10px] uppercase tracking-wider text-[#8A8FA9] font-bold">
-              Total Locked Escrow
+              {isVie ? 'Tổng tiền đang ký quỹ' : 'Total Locked Escrow'}
             </span>
             <div className="text-lg font-black font-h1 text-white">
               {formatCurrency(totalLockedEscrow)}
@@ -124,10 +129,10 @@ export function DisputeHeader({
         <div className="glass-container bg-[#161926]/85 backdrop-blur-[32px] border border-white/10 rounded-2xl p-4 flex items-center justify-between">
           <div className="space-y-1">
             <span className="text-[10px] uppercase tracking-wider text-[#8A8FA9] font-bold">
-              Pending Adjudication
+              {isVie ? 'Chờ phân xử' : 'Pending Adjudication'}
             </span>
             <div className="text-lg font-black font-h1 text-amber-300">
-              {pendingCount} cases
+              {pendingCount} {isVie ? 'hồ sơ' : 'cases'}
             </div>
           </div>
           <div className="w-9 h-9 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-300">
@@ -139,10 +144,10 @@ export function DisputeHeader({
         <div className="glass-container bg-[#161926]/85 backdrop-blur-[32px] border border-white/10 rounded-2xl p-4 flex items-center justify-between">
           <div className="space-y-1">
             <span className="text-[10px] uppercase tracking-wider text-[#8A8FA9] font-bold">
-              Under Review
+              {isVie ? 'Đang xem xét' : 'Under Review'}
             </span>
             <div className="text-lg font-black font-h1 text-sky-400">
-              {underReviewCount} cases
+              {underReviewCount} {isVie ? 'hồ sơ' : 'cases'}
             </div>
           </div>
           <div className="w-9 h-9 rounded-xl bg-sky-500/15 border border-sky-500/30 flex items-center justify-center text-sky-400">
@@ -154,10 +159,10 @@ export function DisputeHeader({
         <div className="glass-container bg-[#161926]/85 backdrop-blur-[32px] border border-white/10 rounded-2xl p-4 flex items-center justify-between">
           <div className="space-y-1">
             <span className="text-[10px] uppercase tracking-wider text-[#8A8FA9] font-bold">
-              Resolved & Settled
+              {isVie ? 'Đã giải quyết & Quyết toán' : 'Resolved & Settled'}
             </span>
             <div className="text-lg font-black font-h1 text-emerald-400">
-              {resolvedCount} cases
+              {resolvedCount} {isVie ? 'hồ sơ' : 'cases'}
             </div>
           </div>
           <div className="w-9 h-9 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
@@ -183,7 +188,7 @@ export function DisputeHeader({
                     : 'text-[#8A8FA9] hover:text-white hover:bg-white/5'
                 }`}
               >
-                {tab.label}
+                {isVie ? tab.labelVi : tab.labelEn}
               </button>
             );
           })}
@@ -194,7 +199,7 @@ export function DisputeHeader({
           <Search className="w-4 h-4 text-[#8A8FA9] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
           <input
             type="text"
-            placeholder="Search dispute ID, client, creator..."
+            placeholder={isVie ? 'Tìm mã tranh chấp, khách hàng, họa sĩ...' : 'Search dispute ID, client, creator...'}
             value={localSearch}
             onChange={(e) => setLocalSearch(e.target.value)}
             onKeyDown={handleKeyDown}

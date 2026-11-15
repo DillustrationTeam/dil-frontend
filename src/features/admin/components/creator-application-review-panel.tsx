@@ -13,14 +13,7 @@ import {
   CreatorApplicationDto,
   ListApplicationsMeta,
 } from '@/features/admin/types/creator-application-review.types';
-
-const tabs: Array<{ key: ApplicationStatusName | 'All'; label: string }> = [
-  { key: 'Pending', label: 'Pending' },
-  { key: 'AdditionalProofRequested', label: 'Additional Proof' },
-  { key: 'Approved', label: 'Approved' },
-  { key: 'Rejected', label: 'Rejected' },
-  { key: 'All', label: 'All' },
-];
+import { useLanguage } from '@/context/language-context';
 
 const statusBadgeClass: Record<ApplicationStatusName, string> = {
   Pending: 'bg-purple-500/20 text-purple-300 border-purple-500/30',
@@ -29,9 +22,35 @@ const statusBadgeClass: Record<ApplicationStatusName, string> = {
   AdditionalProofRequested: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
 };
 
+const getStatusLabel = (status: ApplicationStatusName, isVie: boolean) => {
+  switch (status) {
+    case 'Pending':
+      return isVie ? 'Chờ duyệt' : 'Pending';
+    case 'AdditionalProofRequested':
+      return isVie ? 'Cần bổ sung' : 'Additional Proof';
+    case 'Approved':
+      return isVie ? 'Đã duyệt' : 'Approved';
+    case 'Rejected':
+      return isVie ? 'Đã từ chối' : 'Rejected';
+    default:
+      return status;
+  }
+};
+
 type PendingAction = 'reject' | 'more-proof' | null;
 
 export function CreatorApplicationReviewPanel() {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
+
+  const tabs: Array<{ key: ApplicationStatusName | 'All'; label: string }> = [
+    { key: 'Pending', label: isVie ? 'Chờ duyệt' : 'Pending' },
+    { key: 'AdditionalProofRequested', label: isVie ? 'Cần thêm minh chứng' : 'Additional Proof' },
+    { key: 'Approved', label: isVie ? 'Đã duyệt' : 'Approved' },
+    { key: 'Rejected', label: isVie ? 'Đã từ chối' : 'Rejected' },
+    { key: 'All', label: isVie ? 'Tất cả' : 'All' },
+  ];
+
   const [statusFilter, setStatusFilter] = useState<ApplicationStatusName | 'All'>('Pending');
   const [applications, setApplications] = useState<CreatorApplicationDto[]>([]);
   const [meta, setMeta] = useState<ListApplicationsMeta | null>(null);
@@ -192,12 +211,12 @@ export function CreatorApplicationReviewPanel() {
                       <span
                         className={`rounded-full border px-2 py-0.5 text-[10px] font-bold ${statusBadgeClass[application.status]}`}
                       >
-                        {application.status}
+                        {getStatusLabel(application.status, isVie)}
                       </span>
                     </div>
                     <p className="mt-1 text-xs text-[#8A8FA9]">{application.applicantEmail}</p>
                     <p className="mt-1 text-[10px] uppercase tracking-wider text-[#8A8FA9]">
-                      {application.primaryStyle ?? 'Chưa ghi phong cách'} · {new Date(application.submittedAt).toLocaleDateString('vi-VN')}
+                      {application.primaryStyle ?? (isVie ? 'Chưa ghi phong cách' : 'No style specified')} · {new Date(application.submittedAt).toLocaleDateString('vi-VN')}
                     </p>
                   </button>
                 </li>
@@ -213,10 +232,10 @@ export function CreatorApplicationReviewPanel() {
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 className="rounded-lg border border-white/10 px-3 py-1.5 disabled:opacity-40"
               >
-                Previous
+                {isVie ? 'Trước' : 'Previous'}
               </button>
               <span>
-                Page {meta.page} / {meta.totalPages}
+                {isVie ? `Trang ${meta.page} / ${meta.totalPages}` : `Page ${meta.page} / ${meta.totalPages}`}
               </span>
               <button
                 type="button"
@@ -224,7 +243,7 @@ export function CreatorApplicationReviewPanel() {
                 onClick={() => setPage((p) => p + 1)}
                 className="rounded-lg border border-white/10 px-3 py-1.5 disabled:opacity-40"
               >
-                Next
+                {isVie ? 'Sau' : 'Next'}
               </button>
             </div>
           )}
@@ -233,20 +252,22 @@ export function CreatorApplicationReviewPanel() {
         {/* Chi tiết đơn */}
         <div className="glass-container rounded-3xl border border-white/10 p-6 lg:col-span-7">
           {!selectedApplication ? (
-            <p className="py-16 text-center text-sm text-[#8A8FA9]">Chọn 1 đơn để xem chi tiết.</p>
+            <p className="py-16 text-center text-sm text-[#8A8FA9]">
+              {isVie ? 'Chọn 1 đơn để xem chi tiết.' : 'Select an application to view details.'}
+            </p>
           ) : (
             <div className="space-y-6">
               <div className="flex flex-col gap-2 border-b border-white/10 pb-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <h3 className="font-h1 text-lg font-bold text-white">{selectedApplication.applicantName}</h3>
                   <p className="text-xs text-[#8A8FA9]">
-                    {selectedApplication.applicantEmail} · {selectedApplication.primaryStyle ?? 'Chưa ghi phong cách'}
+                    {selectedApplication.applicantEmail} · {selectedApplication.primaryStyle ?? (isVie ? 'Chưa ghi phong cách' : 'No style specified')}
                   </p>
                 </div>
                 <span
                   className={`w-fit rounded-full border px-3 py-1 text-xs font-bold ${statusBadgeClass[selectedApplication.status]}`}
                 >
-                  {selectedApplication.status}
+                  {getStatusLabel(selectedApplication.status, isVie)}
                 </span>
               </div>
 
@@ -397,7 +418,7 @@ export function CreatorApplicationReviewPanel() {
                           disabled={isSubmitting}
                           className="flex-1 rounded-2xl bg-emerald-400 py-3.5 text-sm font-extrabold text-black transition hover:bg-emerald-300 disabled:opacity-60"
                         >
-                          ✓ Approve & Grant Creator Role
+                          {isVie ? '✓ Phê duyệt & Cấp quyền Họa sĩ' : '✓ Approve & Grant Creator Role'}
                         </button>
                         <button
                           type="button"
@@ -405,7 +426,7 @@ export function CreatorApplicationReviewPanel() {
                           disabled={isSubmitting}
                           className="rounded-2xl border border-amber-500/40 bg-amber-500/20 px-5 py-3.5 text-sm font-bold text-amber-300 hover:bg-amber-500/30 disabled:opacity-60"
                         >
-                          Request Additional Proof
+                          {isVie ? 'Yêu cầu thêm minh chứng' : 'Request Additional Proof'}
                         </button>
                         <button
                           type="button"
@@ -413,7 +434,7 @@ export function CreatorApplicationReviewPanel() {
                           disabled={isSubmitting}
                           className="rounded-2xl border border-red-500/40 bg-red-500/20 px-5 py-3.5 text-sm font-bold text-red-300 hover:bg-red-500/30 disabled:opacity-60"
                         >
-                          Reject
+                          {isVie ? 'Từ chối' : 'Reject'}
                         </button>
                       </>
                     ) : (

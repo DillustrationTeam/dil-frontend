@@ -17,6 +17,7 @@ import {
   DisputeQueueMeta,
   DisputeStatus,
 } from '@/features/admin/types/dispute-arbitration.types';
+import { useLanguage } from '@/context/language-context';
 
 export interface DisputeQueueTableProps {
   items: DisputeQueueItemDto[];
@@ -29,34 +30,34 @@ export interface DisputeQueueTableProps {
 }
 
 function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat('en-US', {
+  return new Intl.NumberFormat('vi-VN', {
     style: 'currency',
-    currency: 'USD',
+    currency: 'VND',
     maximumFractionDigits: 0,
   }).format(amount);
 }
 
-function getStatusBadge(status: DisputeStatus) {
+function getStatusBadge(status: DisputeStatus, isVie: boolean) {
   switch (status) {
     case 'Pending':
       return (
         <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30 text-[10px] font-bold">
           <Clock className="w-3 h-3" />
-          Pending Action
+          {isVie ? 'Cần xử lý' : 'Pending Action'}
         </span>
       );
     case 'UnderReview':
       return (
         <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-sky-500/15 text-sky-400 border border-sky-500/30 text-[10px] font-bold">
           <AlertTriangle className="w-3 h-3" />
-          Under Review
+          {isVie ? 'Đang xem xét' : 'Under Review'}
         </span>
       );
     case 'Resolved':
       return (
         <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold">
           <CheckCircle2 className="w-3 h-3" />
-          Resolved
+          {isVie ? 'Đã phân xử' : 'Resolved'}
         </span>
       );
     default:
@@ -68,27 +69,27 @@ function getStatusBadge(status: DisputeStatus) {
   }
 }
 
-function getResolutionBadge(resolution?: string | null) {
+function getResolutionBadge(resolution: string | null | undefined, isVie: boolean) {
   if (!resolution) {
     return <span className="text-[11px] text-[#8A8FA9] italic">—</span>;
   }
   if (resolution === 'ClientWin100') {
     return (
       <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-        100% Client Refund
+        {isVie ? 'Hoàn 100% cho Khách' : '100% Client Refund'}
       </span>
     );
   }
   if (resolution === 'ArtistWin100') {
     return (
       <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-sky-500/20 text-sky-300 border border-sky-500/30">
-        100% Creator Payout
+        {isVie ? 'Trả 100% cho Họa sĩ' : '100% Creator Payout'}
       </span>
     );
   }
   return (
     <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30">
-      Split Compromise
+      {isVie ? 'Chia thỏa thuận' : 'Split Compromise'}
     </span>
   );
 }
@@ -102,6 +103,8 @@ export function DisputeQueueTable({
   onInspect,
   onPageChange,
 }: DisputeQueueTableProps) {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
   return (
     <div className="glass-container bg-[#161926]/85 backdrop-blur-[32px] border border-white/10 rounded-[28px] p-6 space-y-4">
       {/* Header Info */}
@@ -132,14 +135,14 @@ export function DisputeQueueTable({
         <table className="w-full text-left text-xs">
           <thead className="text-[10px] uppercase font-bold text-[#8A8FA9] border-b border-white/10">
             <tr>
-              <th className="py-3 px-4">Dispute ID</th>
-              <th className="py-3 px-4">Commission Title</th>
-              <th className="py-3 px-4">Dispute Parties</th>
-              <th className="py-3 px-4">Raised By</th>
-              <th className="py-3 px-4">Locked Escrow</th>
-              <th className="py-3 px-4 text-center">Status</th>
-              <th className="py-3 px-4 text-center">Resolution</th>
-              <th className="py-3 px-4 text-right">Action</th>
+              <th className="py-3 px-4">{isVie ? 'Mã khiếu nại' : 'Dispute ID'}</th>
+              <th className="py-3 px-4">{isVie ? 'Tên đơn đặt vẽ' : 'Commission Title'}</th>
+              <th className="py-3 px-4">{isVie ? 'Các bên tranh chấp' : 'Dispute Parties'}</th>
+              <th className="py-3 px-4">{isVie ? 'Người khiếu nại' : 'Raised By'}</th>
+              <th className="py-3 px-4">{isVie ? 'Tiền ký quỹ' : 'Locked Escrow'}</th>
+              <th className="py-3 px-4 text-center">{isVie ? 'Trạng thái' : 'Status'}</th>
+              <th className="py-3 px-4 text-center">{isVie ? 'Phán quyết' : 'Resolution'}</th>
+              <th className="py-3 px-4 text-right">{isVie ? 'Thao tác' : 'Action'}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-white/5 text-white/90">
@@ -235,12 +238,12 @@ export function DisputeQueueTable({
 
                     {/* 6. Status */}
                     <td className="py-3.5 px-4 text-center">
-                      {getStatusBadge(dispute.status)}
+                      {getStatusBadge(dispute.status, isVie)}
                     </td>
 
                     {/* 7. Resolution */}
                     <td className="py-3.5 px-4 text-center">
-                      {getResolutionBadge(dispute.resolution)}
+                      {getResolutionBadge(dispute.resolution, isVie)}
                     </td>
 
                     {/* 8. Action Button */}
@@ -258,7 +261,15 @@ export function DisputeQueueTable({
                         }`}
                       >
                         <Gavel className="w-3.5 h-3.5" />
-                        <span>{isSelected ? 'Arbitrating' : 'Arbitrate'}</span>
+                        <span>
+                          {isVie
+                            ? isSelected
+                              ? 'Đang phân xử'
+                              : 'Phân xử'
+                            : isSelected
+                            ? 'Arbitrating'
+                            : 'Arbitrate'}
+                        </span>
                       </button>
                     </td>
                   </tr>
