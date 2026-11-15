@@ -109,7 +109,7 @@ const dictionary: Record<string, { VIE: string; ENG: string }> = {
   'Payout Approvals': { VIE: 'Duyệt rút tiền', ENG: 'Payout Approvals' },
   'User Management': { VIE: 'Quản lý người dùng', ENG: 'User Management' },
   'User Accounts': { VIE: 'Tài khoản người dùng', ENG: 'User Accounts' },
-  'Creator Verifications': { VIE: 'Duyệt hồ sơ Creator', ENG: 'Creator Verifications' },
+  'Creator Verifications': { VIE: 'Duyệt hồ sơ Họa sĩ', ENG: 'Creator Verifications' },
   'Event & Market': { VIE: 'Sự kiện & Thị trường', ENG: 'Event & Market' },
   'Event Operations': { VIE: 'Vận hành sự kiện', ENG: 'Event Operations' },
   'Auction Operations': { VIE: 'Vận hành đấu giá', ENG: 'Auction Operations' },

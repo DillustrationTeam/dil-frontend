@@ -4,12 +4,16 @@ import React from 'react';
 import Link from 'next/link';
 import { AlertTriangle, FileCheck, Image as ImageIcon, CreditCard } from 'lucide-react';
 import { AdminActionRequiredQueueDto } from '@/features/admin/types/admin.types';
+import { useLanguage } from '@/context/language-context';
 
 interface ActionRequiredQueueProps {
   queue?: AdminActionRequiredQueueDto | null;
 }
 
 export function ActionRequiredQueue({ queue }: ActionRequiredQueueProps) {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
+
   if (!queue) return null;
 
   return (
@@ -23,9 +27,10 @@ export function ActionRequiredQueue({ queue }: ActionRequiredQueueProps) {
             <AlertTriangle className="w-4 h-4" />
           </div>
           <div className="truncate">
-            <p className="text-[10px] text-[#8A8FA9] uppercase font-bold">Disputes</p>
+            <p className="text-[10px] text-[#8A8FA9] uppercase font-bold">{isVie ? 'Khiếu nại' : 'Disputes'}</p>
             <p className="font-h1 font-bold text-white text-sm">
-              <span className="font-h1 font-extrabold text-white">{queue.pendingDisputesCount}</span> Pending
+              <span className="font-h1 font-extrabold text-white">{queue.pendingDisputesCount}</span>{' '}
+              {isVie ? 'Chờ xử lý' : 'Pending'}
             </p>
           </div>
         </div>
@@ -40,9 +45,10 @@ export function ActionRequiredQueue({ queue }: ActionRequiredQueueProps) {
             <FileCheck className="w-4 h-4" />
           </div>
           <div className="truncate">
-            <p className="text-[10px] text-[#8A8FA9] uppercase font-bold">Creators</p>
+            <p className="text-[10px] text-[#8A8FA9] uppercase font-bold">{isVie ? 'Hồ sơ Họa sĩ' : 'Creators'}</p>
             <p className="font-h1 font-bold text-white text-sm">
-              <span className="font-h1 font-extrabold text-white">{queue.pendingCreatorApplicationsCount}</span> Pending
+              <span className="font-h1 font-extrabold text-white">{queue.pendingCreatorApplicationsCount}</span>{' '}
+              {isVie ? 'Chờ duyệt' : 'Pending'}
             </p>
           </div>
         </div>
@@ -57,9 +63,10 @@ export function ActionRequiredQueue({ queue }: ActionRequiredQueueProps) {
             <ImageIcon className="w-4 h-4" />
           </div>
           <div className="truncate">
-            <p className="text-[10px] text-[#8A8FA9] uppercase font-bold">AI Flagged</p>
+            <p className="text-[10px] text-[#8A8FA9] uppercase font-bold">{isVie ? 'Cảnh báo AI' : 'AI Flagged'}</p>
             <p className="font-h1 font-bold text-white text-sm">
-              <span className="font-h1 font-extrabold text-white">{queue.flaggedArtworksCount}</span> Artworks
+              <span className="font-h1 font-extrabold text-white">{queue.flaggedArtworksCount}</span>{' '}
+              {isVie ? 'Tác phẩm' : 'Artworks'}
             </p>
           </div>
         </div>
@@ -71,9 +78,10 @@ export function ActionRequiredQueue({ queue }: ActionRequiredQueueProps) {
             <CreditCard className="w-4 h-4" />
           </div>
           <div className="truncate">
-            <p className="text-[10px] text-[#8A8FA9] uppercase font-bold">Payouts</p>
+            <p className="text-[10px] text-[#8A8FA9] uppercase font-bold">{isVie ? 'Rút tiền' : 'Payouts'}</p>
             <p className="font-h1 font-bold text-white text-sm">
-              <span className="font-h1 font-extrabold text-white">{queue.pendingPayoutsCount}</span> In Queue
+              <span className="font-h1 font-extrabold text-white">{queue.pendingPayoutsCount}</span>{' '}
+              {isVie ? 'Trong hàng đợi' : 'In Queue'}
             </p>
           </div>
         </div>

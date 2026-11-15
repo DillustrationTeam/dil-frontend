@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { TrendingUp, ShieldCheck, DollarSign, Users } from 'lucide-react';
+import { useLanguage } from '@/context/language-context';
 
 interface FinancialKpiCardsProps {
   totalGmv: number;
@@ -28,6 +29,9 @@ export function FinancialKpiCards({
   loading,
   hasOverviewData,
 }: FinancialKpiCardsProps) {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
+
   const formatCurrency = (amount?: number) => {
     return new Intl.NumberFormat('vi-VN', {
       style: 'currency',
@@ -42,7 +46,7 @@ export function FinancialKpiCards({
       <div className="glass-container rounded-[24px] p-5 space-y-2 shadow-lg">
         <div className="flex items-center justify-between">
           <span className="text-[10px] text-[#8A8FA9] font-bold uppercase tracking-wider">
-            TOTAL PLATFORM GMV
+            {isVie ? 'TỔNG GIÁ TRỊ GIAO DỊCH (GMV)' : 'TOTAL PLATFORM GMV'}
           </span>
           <div className="p-1.5 rounded-lg bg-[#C5C9F8]/10 text-[#C5C9F8]">
             <TrendingUp className="w-4 h-4" />
@@ -52,7 +56,8 @@ export function FinancialKpiCards({
           {loading && !hasOverviewData ? '...' : formatCurrency(totalGmv)}
         </h3>
         <p className="text-[11px] text-[#8A8FA9]">
-          <span className="font-h1 font-bold text-white/90">{completedCommissions.toLocaleString()}</span> Completed Commissions
+          <span className="font-h1 font-bold text-white/90">{completedCommissions.toLocaleString()}</span>{' '}
+          {isVie ? 'Đơn hoàn tất' : 'Completed Commissions'}
         </p>
       </div>
 
@@ -60,7 +65,7 @@ export function FinancialKpiCards({
       <div className="glass-container rounded-[24px] p-5 space-y-2 shadow-lg">
         <div className="flex items-center justify-between">
           <span className="text-[10px] text-[#8A8FA9] font-bold uppercase tracking-wider">
-            ACTIVE ESCROW LOCKED
+            {isVie ? 'QUỸ KÝ QUỸ ĐANG TẠM GIỮ' : 'ACTIVE ESCROW LOCKED'}
           </span>
           <div className="p-1.5 rounded-lg bg-amber-400/10 text-amber-400">
             <ShieldCheck className="w-4 h-4" />
@@ -70,7 +75,8 @@ export function FinancialKpiCards({
           {loading && !hasOverviewData ? '...' : formatCurrency(escrowLocked)}
         </h3>
         <p className="text-[11px] text-amber-400/90 font-medium">
-          <span className="font-h1 font-bold">{inProgressCommissions}</span> Active Commissions
+          <span className="font-h1 font-bold">{inProgressCommissions}</span>{' '}
+          {isVie ? 'Đơn đang thực hiện' : 'Active Commissions'}
         </p>
       </div>
 
@@ -78,7 +84,7 @@ export function FinancialKpiCards({
       <div className="glass-container rounded-[24px] p-5 space-y-2 shadow-lg">
         <div className="flex items-center justify-between">
           <span className="text-[10px] text-[#8A8FA9] font-bold uppercase tracking-wider">
-            NET REVENUE (<span className="font-h1 font-bold">10%</span> FEE)
+            {isVie ? 'DOANH THU RÒNG (10% PHÍ SÀN)' : 'NET REVENUE (10% FEE)'}
           </span>
           <div className="p-1.5 rounded-lg bg-emerald-400/10 text-emerald-400">
             <DollarSign className="w-4 h-4" />
@@ -88,7 +94,7 @@ export function FinancialKpiCards({
           {loading && !hasOverviewData ? '...' : formatCurrency(netRevenue)}
         </h3>
         <p className="text-[11px] text-emerald-400/80 font-medium">
-          Platform 10% Commission Fee
+          {isVie ? 'Phí hoa hồng nền tảng 10%' : 'Platform 10% Commission Fee'}
         </p>
       </div>
 
@@ -96,7 +102,7 @@ export function FinancialKpiCards({
       <div className="glass-container rounded-[24px] p-5 space-y-2 shadow-lg">
         <div className="flex items-center justify-between">
           <span className="text-[10px] text-[#8A8FA9] font-bold uppercase tracking-wider">
-            REGISTERED USERS
+            {isVie ? 'NGƯỜI DÙNG ĐĂNG KÝ' : 'REGISTERED USERS'}
           </span>
           <div className="p-1.5 rounded-lg bg-purple-400/10 text-purple-400">
             <Users className="w-4 h-4" />
@@ -108,13 +114,15 @@ export function FinancialKpiCards({
           ) : (
             <>
               <span className="font-h1 font-extrabold">{totalUsers.toLocaleString()}</span>{' '}
-              <span className="text-xl font-bold text-white/90">Users</span>
+              <span className="text-xl font-bold text-white/90">{isVie ? 'Người dùng' : 'Users'}</span>
             </>
           )}
         </h3>
         <p className="text-[11px] text-purple-300 font-medium">
-          <span className="font-h1 font-bold text-purple-200">{totalClients.toLocaleString()}</span> Clients •{' '}
-          <span className="font-h1 font-bold text-purple-200">{totalCreators.toLocaleString()}</span> Creators
+          <span className="font-h1 font-bold text-purple-200">{totalClients.toLocaleString()}</span>{' '}
+          {isVie ? 'Khách hàng' : 'Clients'} •{' '}
+          <span className="font-h1 font-bold text-purple-200">{totalCreators.toLocaleString()}</span>{' '}
+          {isVie ? 'Họa sĩ' : 'Creators'}
         </p>
       </div>
     </div>

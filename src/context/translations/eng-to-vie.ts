@@ -36,7 +36,7 @@ export const engToVieMap: Record<string, string> = {
   'Payout Approvals': 'Duyệt rút tiền',
   'User Management': 'Quản lý người dùng',
   'User Accounts': 'Tài khoản người dùng',
-  'Creator Verifications': 'Duyệt hồ sơ Creator',
+  'Creator Verifications': 'Duyệt hồ sơ Họa sĩ',
   'Event & Market': 'Sự kiện & Thị trường',
   'Event Operations': 'Vận hành sự kiện',
   'Auction Operations': 'Vận hành đấu giá',
@@ -1010,6 +1010,7 @@ export const engToVieMap: Record<string, string> = {
   'Suspension': 'Tạm đình chỉ',
   'Warning': 'Cảnh cáo',
   'Lift Sanction': 'Gỡ bỏ chế tài',
+  'Apply Sanctions': 'Xử phạt',
   'Verified': 'Đã xác minh',
   'Registered Date': 'Ngày đăng ký',
   'User ID': 'Mã người dùng',
@@ -1263,9 +1264,13 @@ export const engToVieMap: Record<string, string> = {
   'Failed to upload back-side ID image.': 'Không thể tải lên ảnh mặt sau CCCD.',
   'Failed to upload sample artwork.': 'Không thể tải lên ảnh tác phẩm mẫu.',
   'Category & Tags': 'Danh mục & Thẻ tag',
+  'Category & Tag Management': 'Quản lý Danh mục & Thẻ tag',
 };
 
 export const engToVieRegex: Array<{ pattern: RegExp; replacement: string }> = [
+  { pattern: /^(\d+)\s+Clients\s+•\s+(\d+)\s+Creators$/i, replacement: '$1 Khách hàng • $2 Họa sĩ' },
+  { pattern: /^(\d+)\s+Clients\s+•\s+(\d+)\s+Họa sĩ$/i, replacement: '$1 Khách hàng • $2 Họa sĩ' },
+  { pattern: /^(\d+)\s+Khách hàng\s+•\s+(\d+)\s+Creators$/i, replacement: '$1 Khách hàng • $2 Họa sĩ' },
   { pattern: /^Event Artworks \((\d+)\)$/i, replacement: 'Tác phẩm dự thi ($1)' },
   { pattern: /^Lineart \((.+)\)$/i, replacement: 'Đi nét ($1)' },
   { pattern: /^Master PSD\/AI \((.+)\)$/i, replacement: 'Tệp gốc PSD/AI ($1)' },

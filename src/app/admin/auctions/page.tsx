@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { auctionService, auctionError } from '@/features/auction/services/auction.service';
 import type { AuctionListItemDto } from '@/features/auction/types/auction.types';
+import { useLanguage } from '@/context/language-context';
 
 const statusTabs = [
   { key: 'ALL', label: 'Tất cả' },
@@ -33,6 +34,8 @@ const money = (val?: number) =>
   new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(val ?? 0);
 
 export default function AdminAuctionsPage() {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
   const [auctions, setAuctions] = useState<AuctionListItemDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<StatusTabKey>('Active');
@@ -229,7 +232,7 @@ export default function AdminAuctionsPage() {
         <div className="glass-container rounded-[24px] p-5 space-y-2 shadow-lg border border-white/10">
           <div className="flex items-center justify-between">
             <span className="text-[10px] text-[#8A8FA9] font-bold uppercase tracking-wider font-h1">
-              ACTIVE SESSIONS
+              {isVie ? 'PHIÊN ĐANG DIỄN RA' : 'ACTIVE SESSIONS'}
             </span>
             <div className="p-1.5 rounded-lg bg-emerald-400/10 text-emerald-400">
               <Gavel className="w-4 h-4" />
@@ -239,7 +242,7 @@ export default function AdminAuctionsPage() {
             {stats.active}
           </h3>
           <p className="text-[11px] text-[#8A8FA9]">
-            <span className="font-h1 font-bold text-emerald-400">Đang diễn ra</span> sôi động trên sàn
+            <span className="font-h1 font-bold text-emerald-400">{isVie ? 'Đang diễn ra' : 'Active'}</span> {isVie ? 'sôi động trên sàn' : 'on the live floor'}
           </p>
         </div>
 
@@ -247,7 +250,7 @@ export default function AdminAuctionsPage() {
         <div className="glass-container rounded-[24px] p-5 space-y-2 shadow-lg border border-white/10">
           <div className="flex items-center justify-between">
             <span className="text-[10px] text-[#8A8FA9] font-bold uppercase tracking-wider font-h1">
-              SCHEDULED SESSIONS
+              {isVie ? 'PHIÊN SẮP BẮT ĐẦU' : 'SCHEDULED SESSIONS'}
             </span>
             <div className="p-1.5 rounded-lg bg-blue-400/10 text-blue-400">
               <Clock className="w-4 h-4" />
@@ -257,7 +260,7 @@ export default function AdminAuctionsPage() {
             {stats.scheduled}
           </h3>
           <p className="text-[11px] text-[#8A8FA9]">
-            <span className="font-h1 font-bold text-white/90">Sắp mở phiên</span> nhận lượt đặt giá
+            <span className="font-h1 font-bold text-white/90">{isVie ? 'Sắp mở phiên' : 'Opening soon'}</span> {isVie ? 'nhận lượt đặt giá' : 'for incoming bids'}
           </p>
         </div>
 
@@ -265,7 +268,7 @@ export default function AdminAuctionsPage() {
         <div className="glass-container rounded-[24px] p-5 space-y-2 shadow-lg border border-white/10">
           <div className="flex items-center justify-between">
             <span className="text-[10px] text-[#8A8FA9] font-bold uppercase tracking-wider font-h1">
-              SETTLED & DELIVERED
+              {isVie ? 'ĐÃ CHỐT & BÀN GIAO' : 'SETTLED & DELIVERED'}
             </span>
             <div className="p-1.5 rounded-lg bg-purple-400/10 text-purple-300">
               <CheckCircle2 className="w-4 h-4" />
@@ -275,7 +278,7 @@ export default function AdminAuctionsPage() {
             {stats.settled}
           </h3>
           <p className="text-[11px] text-[#8A8FA9]">
-            Đã xác định Winner & giải ngân
+            {isVie ? 'Đã xác định Winner & giải ngân' : 'Winner settled & escrow released'}
           </p>
         </div>
 
@@ -283,7 +286,7 @@ export default function AdminAuctionsPage() {
         <div className="glass-container rounded-[24px] p-5 space-y-2 shadow-lg border border-white/10">
           <div className="flex items-center justify-between">
             <span className="text-[10px] text-[#8A8FA9] font-bold uppercase tracking-wider font-h1">
-              TOTAL SESSIONS
+              {isVie ? 'TỔNG CÁC PHIÊN' : 'TOTAL SESSIONS'}
             </span>
             <div className="p-1.5 rounded-lg bg-[#C5C9F8]/10 text-[#C5C9F8]">
               <Layers className="w-4 h-4" />
@@ -293,7 +296,7 @@ export default function AdminAuctionsPage() {
             {auctions.length}
           </h3>
           <p className="text-[11px] text-[#8A8FA9]">
-            <span className="font-h1 font-bold text-white/90">{stats.ended}</span> Phiên đã kết thúc / huỷ
+            <span className="font-h1 font-bold text-white/90">{stats.ended}</span> {isVie ? 'Phiên đã kết thúc / huỷ' : 'Sessions ended / cancelled'}
           </p>
         </div>
       </div>

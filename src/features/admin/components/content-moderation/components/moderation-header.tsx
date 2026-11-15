@@ -10,6 +10,7 @@ import {
   ChevronDown,
 } from 'lucide-react';
 import { ModerationStatus } from '@/features/admin/types/moderation.types';
+import { useLanguage } from '@/context/language-context';
 
 interface ModerationHeaderProps {
   pendingCount: number;
@@ -21,15 +22,6 @@ interface ModerationHeaderProps {
   onRefresh: () => void;
 }
 
-const STATUS_OPTIONS: { label: string; value: ModerationStatus }[] = [
-  { label: 'Pending Review', value: 'Pending' },
-  { label: 'Flagged Artworks', value: 'Flagged' },
-  { label: 'Approved', value: 'Approved' },
-  { label: 'Rejected', value: 'Rejected' },
-  { label: 'Hidden', value: 'Hidden' },
-  { label: 'All Items', value: 'All' },
-];
-
 export function ModerationHeader({
   pendingCount,
   activeStatus,
@@ -39,7 +31,18 @@ export function ModerationHeader({
   onSearchChange,
   onRefresh,
 }: ModerationHeaderProps) {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
   const [searchInput, setSearchInput] = useState(searchQuery);
+
+  const STATUS_OPTIONS: { label: string; value: ModerationStatus }[] = [
+    { label: isVie ? 'Chờ xem xét' : 'Pending Review', value: 'Pending' },
+    { label: isVie ? 'Tác phẩm bị cảnh báo' : 'Flagged Artworks', value: 'Flagged' },
+    { label: isVie ? 'Đã phê duyệt' : 'Approved', value: 'Approved' },
+    { label: isVie ? 'Đã từ chối' : 'Rejected', value: 'Rejected' },
+    { label: isVie ? 'Đã ẩn' : 'Hidden', value: 'Hidden' },
+    { label: isVie ? 'Tất cả tác phẩm' : 'All Items', value: 'All' },
+  ];
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,11 +59,13 @@ export function ModerationHeader({
               <Shield className="w-4 h-4" />
             </div>
             <h1 className="font-h1 text-2xl font-extrabold text-white">
-              Content & AI Moderation Queue
+              {isVie ? 'Hàng đợi kiểm duyệt nội dung & AI' : 'Content & AI Moderation Queue'}
             </h1>
           </div>
           <p className="text-xs text-[#8A8FA9] mt-1 font-body">
-            Evaluate AI Cloud NSFW scan results, tag classifications, and user-flagged artworks.
+            {isVie
+              ? 'Đánh giá kết quả quét AI Cloud NSFW, phân loại tag và các tác phẩm bị người dùng báo cáo.'
+              : 'Evaluate AI Cloud NSFW scan results, tag classifications, and user-flagged artworks.'}
           </p>
         </div>
 
@@ -68,7 +73,9 @@ export function ModerationHeader({
           {/* Pending count badge */}
           <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-amber-500/20 text-amber-300 text-xs font-bold rounded-full border border-amber-500/30 shadow-[0_0_12px_rgba(245,158,11,0.2)]">
             <AlertTriangle className="w-3.5 h-3.5" />
-            <span>{pendingCount} Items Pending Review</span>
+            <span>
+              {isVie ? `${pendingCount} Tác phẩm chờ xem xét` : `${pendingCount} Items Pending Review`}
+            </span>
           </span>
 
           {/* Refresh button */}
@@ -77,10 +84,10 @@ export function ModerationHeader({
             onClick={onRefresh}
             disabled={isLoading}
             className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/10 hover:bg-white/15 text-white text-xs font-bold transition-all border border-white/10 disabled:opacity-50 cursor-pointer"
-            title="Refresh queue"
+            title={isVie ? 'Làm mới hàng đợi' : 'Refresh queue'}
           >
             <RotateCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin text-red-400' : ''}`} />
-            <span className="hidden sm:inline">Refresh</span>
+            <span className="hidden sm:inline">{isVie ? 'Làm mới' : 'Refresh'}</span>
           </button>
         </div>
       </div>
@@ -94,7 +101,7 @@ export function ModerationHeader({
               type="text"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              placeholder="Search by title, creator, or ID..."
+              placeholder={isVie ? 'Tìm theo tiêu đề, tác giả hoặc ID...' : 'Search by title, creator, or ID...'}
               className="w-full pl-9 pr-14 py-2.5 rounded-xl bg-black/40 border border-white/15 text-white text-xs placeholder:text-[#8A8FA9] focus:outline-none focus:border-red-400 transition-colors font-body shadow-inner"
             />
             <Search className="w-4 h-4 text-[#8A8FA9] absolute left-3 top-3" />
@@ -102,7 +109,7 @@ export function ModerationHeader({
               type="submit"
               className="absolute right-2 top-1.5 px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-[10px] text-white font-bold transition-colors cursor-pointer"
             >
-              Find
+              {isVie ? 'Tìm' : 'Find'}
             </button>
           </form>
 
@@ -118,7 +125,7 @@ export function ModerationHeader({
             >
               {STATUS_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value} className="bg-[#161926] text-white py-1.5">
-                  Filter: {opt.label}
+                  {isVie ? `Lọc: ${opt.label}` : `Filter: ${opt.label}`}
                 </option>
               ))}
             </select>
@@ -128,7 +135,7 @@ export function ModerationHeader({
 
         {/* Current status pill indication */}
         <div className="hidden lg:flex items-center gap-2 text-xs text-[#8A8FA9]">
-          <span className="text-[11px]">Filtered by:</span>
+          <span className="text-[11px]">{isVie ? 'Đang lọc theo:' : 'Filtered by:'}</span>
           <span className="px-2.5 py-1 rounded-lg bg-red-500/20 text-red-300 font-bold border border-red-500/30 text-[11px]">
             {activeStatus}
           </span>
