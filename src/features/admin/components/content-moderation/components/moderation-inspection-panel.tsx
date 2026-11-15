@@ -11,6 +11,7 @@ import {
   ArtworkInspectionDetailDto,
   ModerationActionType,
 } from '@/features/admin/types/moderation.types';
+import { useLanguage } from '@/context/language-context';
 import { ArtworkPreviewCard } from './artwork-preview-card';
 import { AiScanMetricsCard } from './ai-scan-metrics-card';
 import { ArtworkDuplicateCheckCard } from './artwork-duplicate-check-card';
@@ -160,6 +161,8 @@ export function ModerationInspectionPanel({
   onUpdateMetadata,
   onClose,
 }: ModerationInspectionPanelProps) {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
   const [categories, setCategories] = useState<CategoryDto[]>([]);
 
   useEffect(() => {
@@ -180,10 +183,12 @@ export function ModerationInspectionPanel({
       <div className="glass-container bg-[#161926]/85 backdrop-blur-[32px] border border-white/10 rounded-[28px] p-12 flex flex-col items-center justify-center min-h-[300px] text-center space-y-3">
         <Loader2 className="w-8 h-8 text-red-400 animate-spin" />
         <p className="font-h1 font-bold text-white text-sm">
-          Loading Artwork Inspection Details...
+          {isVie ? 'Đang tải chi tiết kiểm tra tác phẩm...' : 'Loading Artwork Inspection Details...'}
         </p>
         <p className="text-xs text-[#8A8FA9]">
-          Đang tải thông tin tác phẩm và kết quả kiểm tra.
+          {isVie
+            ? 'Đang tải thông tin tác phẩm và kết quả kiểm tra.'
+            : 'Fetching artwork metadata and safety scan results.'}
         </p>
       </div>
     );
@@ -194,10 +199,12 @@ export function ModerationInspectionPanel({
       <div className="glass-container bg-[#161926]/85 backdrop-blur-[32px] border border-white/10 rounded-[28px] p-10 flex flex-col items-center justify-center text-center space-y-3">
         <ShieldCheck className="w-10 h-10 text-[#8A8FA9]/40" />
         <p className="font-h1 font-bold text-white text-base">
-          No Artwork Selected for Inspection
+          {isVie ? 'Chưa chọn tác phẩm để kiểm tra' : 'No Artwork Selected for Inspection'}
         </p>
         <p className="text-xs text-[#8A8FA9] max-w-md">
-          Select any flagged artwork from the queue above to review AI NSFW scan breakdown, tag classifications, and execute moderation actions.
+          {isVie
+            ? 'Chọn bất kỳ tác phẩm bị cảnh báo nào từ hàng đợi phía trên để đối chiếu chi tiết chỉ số quét AI NSFW, gắn tag và thực hiện quyết định kiểm duyệt.'
+            : 'Select any flagged artwork from the queue above to review AI NSFW scan breakdown, tag classifications, and execute moderation actions.'}
         </p>
       </div>
     );
@@ -207,9 +214,9 @@ export function ModerationInspectionPanel({
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="font-h1 font-bold text-lg text-white flex items-center gap-2">
-          <span>Inspection Console</span>
+          <span>{isVie ? 'Bảng Kiểm Tra Tác Phẩm' : 'Inspection Console'}</span>
           <span className="text-xs font-mono text-[#8A8FA9]">
-            [Item #{artwork.artworkId.substring(0, 8)}]
+            [{isVie ? 'Mục' : 'Item'} #{artwork.artworkId.substring(0, 8)}]
           </span>
         </h2>
 
@@ -217,10 +224,10 @@ export function ModerationInspectionPanel({
           <button
             type="button"
             onClick={onClose}
-            className="flex items-center gap-1 text-xs text-[#8A8FA9] hover:text-white transition-colors"
+            className="flex items-center gap-1 text-xs text-[#8A8FA9] hover:text-white transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
-            <span>Collapse Panel</span>
+            <span>{isVie ? 'Thu gọn bảng' : 'Collapse Panel'}</span>
           </button>
         )}
       </div>

@@ -15,6 +15,7 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 import { UserAdminDetailDto } from '@/features/admin/types/user-management.types';
+import { useLanguage } from '@/context/language-context';
 
 export interface UserDetailCardProps {
   user: UserAdminDetailDto;
@@ -28,34 +29,34 @@ function formatVnd(amount: number): string {
   }).format(amount);
 }
 
-function getSanctionBadge(actionType: string) {
+function getSanctionBadge(actionType: string, isVie: boolean) {
   switch (actionType.toLowerCase()) {
     case 'ban':
       return (
         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 border border-red-500/30 text-[10px] font-bold">
           <Lock className="w-2.5 h-2.5" />
-          Permanent Ban
+          {isVie ? 'Cấm vĩnh viễn' : 'Permanent Ban'}
         </span>
       );
     case 'suspend':
       return (
         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] font-bold">
           <Clock className="w-2.5 h-2.5" />
-          Suspension
+          {isVie ? 'Tạm đình chỉ' : 'Suspension'}
         </span>
       );
     case 'warn':
       return (
         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-yellow-500/20 text-yellow-300 border border-yellow-500/30 text-[10px] font-bold">
           <AlertTriangle className="w-2.5 h-2.5" />
-          Warning
+          {isVie ? 'Cảnh cáo' : 'Warning'}
         </span>
       );
     case 'unban':
       return (
         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-bold">
           <Unlock className="w-2.5 h-2.5" />
-          Lift Sanction
+          {isVie ? 'Gỡ phạt' : 'Lift Sanction'}
         </span>
       );
     default:
@@ -68,6 +69,8 @@ function getSanctionBadge(actionType: string) {
 }
 
 export function UserDetailCard({ user }: UserDetailCardProps) {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
   const isPermanentBan = user.isLockedOut && user.lockoutEnd && new Date(user.lockoutEnd).getFullYear() > 2050;
 
   return (
@@ -91,11 +94,13 @@ export function UserDetailCard({ user }: UserDetailCardProps) {
               </h3>
               {user.isVerified && (
                 <span className="text-[10px] text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-                  Verified
+                  {isVie ? 'Đã xác minh' : 'Verified'}
                 </span>
               )}
             </div>
-            <p className="text-xs text-[#8A8FA9]">{user.fullName || 'No display name'}</p>
+            <p className="text-xs text-[#8A8FA9]">
+              {user.fullName || (isVie ? 'Chưa đặt tên hiển thị' : 'No display name')}
+            </p>
           </div>
         </div>
 
@@ -110,12 +115,12 @@ export function UserDetailCard({ user }: UserDetailCardProps) {
               }`}
             >
               <Lock className="w-3.5 h-3.5" />
-              {isPermanentBan ? 'BANNED' : 'SUSPENDED'}
+              {isPermanentBan ? (isVie ? 'BỊ CẤM' : 'BANNED') : (isVie ? 'TẠM KHÓA' : 'SUSPENDED')}
             </span>
           ) : (
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-bold">
               <Unlock className="w-3.5 h-3.5" />
-              ACTIVE
+              {isVie ? 'HOẠT ĐỘNG' : 'ACTIVE'}
             </span>
           )}
         </div>
@@ -132,16 +137,16 @@ export function UserDetailCard({ user }: UserDetailCardProps) {
 
         <div className="p-3 rounded-2xl bg-black/40 border border-white/5 space-y-1">
           <span className="text-[10px] uppercase font-bold text-[#8A8FA9] flex items-center gap-1.5">
-            <Phone className="w-3 h-3" /> Phone Number
+            <Phone className="w-3 h-3" /> {isVie ? 'Số điện thoại' : 'Phone Number'}
           </span>
           <p className="font-semibold text-white">
-            {user.phoneNumber || 'Not provided'}
+            {user.phoneNumber || (isVie ? 'Chưa cung cấp' : 'Not provided')}
           </p>
         </div>
 
         <div className="p-3 rounded-2xl bg-black/40 border border-white/5 space-y-1">
           <span className="text-[10px] uppercase font-bold text-[#8A8FA9] flex items-center gap-1.5">
-            <Calendar className="w-3 h-3" /> Registered Date
+            <Calendar className="w-3 h-3" /> {isVie ? 'Ngày đăng ký' : 'Registered Date'}
           </span>
           <p className="font-semibold text-white">
             {new Date(user.createdAt).toLocaleDateString('vi-VN', {
@@ -154,7 +159,7 @@ export function UserDetailCard({ user }: UserDetailCardProps) {
 
         <div className="p-3 rounded-2xl bg-black/40 border border-white/5 space-y-1">
           <span className="text-[10px] uppercase font-bold text-[#8A8FA9] flex items-center gap-1.5">
-            <User className="w-3 h-3" /> User ID
+            <User className="w-3 h-3" /> {isVie ? 'Mã người dùng' : 'User ID'}
           </span>
           <p className="font-mono text-[11px] text-white/70 truncate">{user.id}</p>
         </div>
@@ -165,7 +170,7 @@ export function UserDetailCard({ user }: UserDetailCardProps) {
         <div className="flex items-center justify-between">
           <h4 className="text-xs font-bold text-emerald-400 flex items-center gap-2">
             <Wallet className="w-4 h-4" />
-            Wallet & Platform Escrow
+            {isVie ? 'Ví & Ký quỹ Nền tảng' : 'Wallet & Platform Escrow'}
           </h4>
           <span className="text-[10px] font-mono text-emerald-300 font-bold px-2 py-0.5 rounded bg-emerald-500/10">
             {user.wallet?.currency || 'VND'}
@@ -175,7 +180,7 @@ export function UserDetailCard({ user }: UserDetailCardProps) {
         <div className="grid grid-cols-2 gap-4">
           <div>
             <span className="text-[10px] text-[#8A8FA9] uppercase font-bold">
-              Available Balance
+              {isVie ? 'Số dư khả dụng' : 'Available Balance'}
             </span>
             <p className="text-lg font-bold text-white font-mono">
               {formatVnd(user.wallet?.balance ?? 0)}
@@ -183,7 +188,7 @@ export function UserDetailCard({ user }: UserDetailCardProps) {
           </div>
           <div>
             <span className="text-[10px] text-[#8A8FA9] uppercase font-bold">
-              Locked / Escrow
+              {isVie ? 'Tạm giữ / Ký quỹ' : 'Locked / Escrow'}
             </span>
             <p className="text-lg font-bold text-amber-300 font-mono">
               {formatVnd(user.wallet?.lockedBalance ?? 0)}
@@ -197,17 +202,21 @@ export function UserDetailCard({ user }: UserDetailCardProps) {
         <div className="flex items-center justify-between">
           <h4 className="text-xs font-bold text-white flex items-center gap-2 font-h1">
             <History className="w-4 h-4 text-red-400" />
-            Sanctions & Disciplinary History
+            {isVie ? 'Lịch sử Xử lý & Vi phạm' : 'Sanctions & Disciplinary History'}
           </h4>
           <span className="text-[10px] text-[#8A8FA9]">
-            {user.sanctionsHistory.length} incident(s)
+            {isVie ? `${user.sanctionsHistory.length} vi phạm` : `${user.sanctionsHistory.length} incident(s)`}
           </span>
         </div>
 
         {user.sanctionsHistory.length === 0 ? (
           <div className="p-4 rounded-2xl bg-black/30 border border-white/5 text-center text-xs text-[#8A8FA9] flex items-center justify-center gap-2">
             <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-            <span>Clean record. No prior sanctions or warnings on this account.</span>
+            <span>
+              {isVie
+                ? 'Hồ sơ sạch. Tài khoản chưa có vi phạm hoặc cảnh cáo nào.'
+                : 'Clean record. No prior sanctions or warnings on this account.'}
+            </span>
           </div>
         ) : (
           <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
@@ -218,10 +227,10 @@ export function UserDetailCard({ user }: UserDetailCardProps) {
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    {getSanctionBadge(sanc.actionType)}
+                    {getSanctionBadge(sanc.actionType, isVie)}
                     {sanc.durationDays && (
                       <span className="text-[10px] text-[#8A8FA9]">
-                        ({sanc.durationDays} days)
+                        ({isVie ? `${sanc.durationDays} ngày` : `${sanc.durationDays} days`})
                       </span>
                     )}
                   </div>
@@ -235,10 +244,16 @@ export function UserDetailCard({ user }: UserDetailCardProps) {
                 </p>
 
                 <div className="text-[10px] text-[#8A8FA9] flex items-center justify-between pt-1 border-t border-white/5">
-                  <span>Issued by: {sanc.actionByAdminName || 'Administrator'}</span>
+                  <span>
+                    {isVie
+                      ? `Người xử lý: ${sanc.actionByAdminName || 'Quản trị viên'}`
+                      : `Issued by: ${sanc.actionByAdminName || 'Administrator'}`}
+                  </span>
                   {sanc.expiresAt && (
                     <span>
-                      Expires: {new Date(sanc.expiresAt).toLocaleDateString('vi-VN')}
+                      {isVie
+                        ? `Hết hạn: ${new Date(sanc.expiresAt).toLocaleDateString('vi-VN')}`
+                        : `Expires: ${new Date(sanc.expiresAt).toLocaleDateString('vi-VN')}`}
                     </span>
                   )}
                 </div>

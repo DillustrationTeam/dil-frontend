@@ -15,6 +15,7 @@ import {
   UserAdminListItemDto,
   UserSanctionActionType,
 } from '@/features/admin/types/user-management.types';
+import { useLanguage } from '@/context/language-context';
 
 export interface UserSanctionModalProps {
   isOpen: boolean;
@@ -24,13 +25,6 @@ export interface UserSanctionModalProps {
   onSubmit: (userId: string, payload: ApplyUserSanctionRequest) => Promise<boolean>;
 }
 
-const DURATION_PRESETS = [
-  { label: '3 Days', days: 3 },
-  { label: '7 Days', days: 7 },
-  { label: '14 Days', days: 14 },
-  { label: '30 Days', days: 30 },
-];
-
 export function UserSanctionModal({
   isOpen,
   user,
@@ -38,6 +32,16 @@ export function UserSanctionModal({
   onClose,
   onSubmit,
 }: UserSanctionModalProps) {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
+
+  const DURATION_PRESETS = [
+    { label: isVie ? '3 Ngày' : '3 Days', days: 3 },
+    { label: isVie ? '7 Ngày' : '7 Days', days: 7 },
+    { label: isVie ? '14 Ngày' : '14 Days', days: 14 },
+    { label: isVie ? '30 Ngày' : '30 Days', days: 30 },
+  ];
+
   const [prevUserId, setPrevUserId] = useState(user?.id);
   const [prevIsLockedOut, setPrevIsLockedOut] = useState(user?.isLockedOut);
 
@@ -46,7 +50,9 @@ export function UserSanctionModal({
   );
   const [durationDays, setDurationDays] = useState<number>(7);
   const [reason, setReason] = useState(() =>
-    user?.isLockedOut ? 'User completed review / appeal granted.' : ''
+    user?.isLockedOut
+      ? (isVie ? 'Người dùng đã hoàn thành xem xét / chấp thuận khiếu nại.' : 'User completed review / appeal granted.')
+      : ''
   );
   const [customDays, setCustomDays] = useState('');
 
@@ -130,11 +136,11 @@ export function UserSanctionModal({
           <div>
             <h3 className="text-lg font-bold text-white font-h1">
               {actionType === 'Unban'
-                ? 'Lift Sanctions & Unlock User'
-                : 'Apply Sanction & Penalty'}
+                ? (isVie ? 'Gỡ bỏ Chế tài & Mở khóa Người dùng' : 'Lift Sanctions & Unlock User')
+                : (isVie ? 'Áp dụng Chế tài & Xử lý Vi phạm' : 'Apply Sanction & Penalty')}
             </h3>
             <p className="text-xs text-[#8A8FA9]">
-              Target Account:{' '}
+              {isVie ? 'Tài khoản áp dụng:' : 'Target Account:'}{' '}
               <span className="text-white font-bold">@{user.userName}</span> ({user.email})
             </p>
           </div>
@@ -143,17 +149,19 @@ export function UserSanctionModal({
         {/* Target User Current State Card */}
         <div className="p-3.5 rounded-2xl bg-black/40 border border-white/5 flex items-center justify-between text-xs">
           <div>
-            <span className="text-[#8A8FA9]">Current Status:</span>
+            <span className="text-[#8A8FA9]">{isVie ? 'Trạng thái hiện tại:' : 'Current Status:'}</span>
             <span
               className={`ml-2 font-bold ${
                 user.isLockedOut ? 'text-red-400' : 'text-emerald-400'
               }`}
             >
-              {user.isLockedOut ? 'Locked Out / Suspended' : 'Active Account'}
+              {user.isLockedOut
+                ? (isVie ? 'Đang bị khóa / Tạm đình chỉ' : 'Locked Out / Suspended')
+                : (isVie ? 'Tài khoản hoạt động' : 'Active Account')}
             </span>
           </div>
           <div>
-            <span className="text-[#8A8FA9]">Roles:</span>
+            <span className="text-[#8A8FA9]">{isVie ? 'Vai trò:' : 'Roles:'}</span>
             <span className="ml-1 text-white font-semibold">{user.roles.join(', ')}</span>
           </div>
         </div>
@@ -163,7 +171,7 @@ export function UserSanctionModal({
           {/* Action Type Tabs */}
           <div className="space-y-1.5">
             <label className="text-xs font-semibold text-[#8A8FA9]">
-              Action Type <span className="text-red-400">*</span>
+              {isVie ? 'Hình thức Xử lý Kỷ luật' : 'Action Type'} <span className="text-red-400">*</span>
             </label>
             <div className="grid grid-cols-4 gap-1.5 p-1 rounded-xl bg-black/40 border border-white/10">
               <button
@@ -175,7 +183,7 @@ export function UserSanctionModal({
                     : 'text-[#8A8FA9] hover:text-white'
                 }`}
               >
-                Warn
+                {isVie ? 'Cảnh cáo' : 'Warn'}
               </button>
               <button
                 type="button"
@@ -186,7 +194,7 @@ export function UserSanctionModal({
                     : 'text-[#8A8FA9] hover:text-white'
                 }`}
               >
-                Suspend
+                {isVie ? 'Tạm khóa' : 'Suspend'}
               </button>
               <button
                 type="button"
@@ -197,20 +205,24 @@ export function UserSanctionModal({
                     : 'text-[#8A8FA9] hover:text-white'
                 }`}
               >
-                Ban
+                {isVie ? 'Cấm vĩnh viễn' : 'Ban'}
               </button>
               <button
                 type="button"
                 onClick={() => handleActionTypeChange('Unban')}
                 disabled={!user.isLockedOut}
-                title={!user.isLockedOut ? 'Account is active (not locked out)' : undefined}
+                title={
+                  !user.isLockedOut
+                    ? (isVie ? 'Tài khoản đang hoạt động (không bị khóa)' : 'Account is active (not locked out)')
+                    : undefined
+                }
                 className={`py-2 text-xs font-bold rounded-lg transition-all ${
                   actionType === 'Unban'
                     ? 'bg-emerald-500 text-black shadow-md'
                     : 'text-[#8A8FA9] hover:text-white'
                 } ${!user.isLockedOut ? 'opacity-30 cursor-not-allowed' : 'cursor-pointer'}`}
               >
-                Unban
+                {isVie ? 'Gỡ phạt' : 'Unban'}
               </button>
             </div>
           </div>
@@ -221,10 +233,10 @@ export function UserSanctionModal({
               <div className="flex items-center justify-between">
                 <label className="text-xs font-semibold text-red-300 flex items-center gap-1.5">
                   <Clock className="w-3.5 h-3.5" />
-                  Suspension Duration
+                  {isVie ? 'Thời hạn tạm khóa' : 'Suspension Duration'}
                 </label>
                 <span className="text-xs font-bold text-white font-mono">
-                  {durationDays} Day{durationDays > 1 ? 's' : ''}
+                  {isVie ? `${durationDays} Ngày` : `${durationDays} Day${durationDays > 1 ? 's' : ''}`}
                 </span>
               </div>
 
@@ -246,12 +258,14 @@ export function UserSanctionModal({
               </div>
 
               <div className="flex items-center gap-2 pt-1">
-                <span className="text-[11px] text-[#8A8FA9]">Custom days:</span>
+                <span className="text-[11px] text-[#8A8FA9]">
+                  {isVie ? 'Số ngày tùy chỉnh:' : 'Custom days:'}
+                </span>
                 <input
                   type="number"
                   min="1"
                   max="365"
-                  placeholder="e.g. 21"
+                  placeholder={isVie ? 'Ví dụ: 21' : 'e.g. 21'}
                   value={customDays}
                   onChange={(e) => handleCustomDaysChange(e.target.value)}
                   className="w-24 px-3 py-1 bg-black/40 rounded-lg border border-white/10 text-white text-xs focus:outline-none focus:border-red-400"
@@ -265,7 +279,9 @@ export function UserSanctionModal({
             <div className="p-3 rounded-xl bg-red-950/40 border border-red-600/40 text-xs text-red-200 flex items-start gap-2">
               <Ban className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
               <span>
-                Permanent Ban completely restricts this user from accessing platform features, initiating commissions, or logging in.
+                {isVie
+                  ? 'Cấm vĩnh viễn sẽ hạn chế hoàn toàn người dùng này truy cập các tính năng, tạo đơn vẽ hoặc đăng nhập vào hệ thống.'
+                  : 'Permanent Ban completely restricts this user from accessing platform features, initiating commissions, or logging in.'}
               </span>
             </div>
           )}
@@ -274,7 +290,9 @@ export function UserSanctionModal({
             <div className="p-3 rounded-xl bg-amber-950/40 border border-amber-600/40 text-xs text-amber-200 flex items-start gap-2">
               <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
               <span>
-                Official warning notice is logged to the user&apos;s permanent sanction audit trail without locking their account.
+                {isVie
+                  ? 'Thông báo cảnh cáo chính thức sẽ được ghi vào nhật ký xử phạt của người dùng mà không khóa tài khoản.'
+                  : 'Official warning notice is logged to the user\'s permanent sanction audit trail without locking their account.'}
               </span>
             </div>
           )}
@@ -283,7 +301,9 @@ export function UserSanctionModal({
             <div className="p-3 rounded-xl bg-emerald-950/40 border border-emerald-600/40 text-xs text-emerald-200 flex items-start gap-2">
               <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
               <span>
-                This will lift lockout restrictions and restore active status for @{user.userName}.
+                {isVie
+                  ? `Thao tác này sẽ gỡ bỏ hạn chế khóa và khôi phục trạng thái hoạt động cho @${user.userName}.`
+                  : `This will lift lockout restrictions and restore active status for @${user.userName}.`}
               </span>
             </div>
           )}
@@ -292,7 +312,7 @@ export function UserSanctionModal({
           <div className="space-y-1.5">
             <label className="text-xs font-semibold text-[#8A8FA9] flex justify-between">
               <span>
-                Violation / Action Reason <span className="text-red-400">*</span>
+                {isVie ? 'Lý do Xử phạt / Vi phạm' : 'Violation / Action Reason'} <span className="text-red-400">*</span>
               </span>
               <span className="text-[11px] text-[#8A8FA9] font-normal">
                 {reason.length}/300
@@ -304,7 +324,11 @@ export function UserSanctionModal({
               maxLength={300}
               value={reason}
               onChange={(e) => setReason(e.target.value)}
-              placeholder="Detail the policy clause violated or rationale for this action..."
+              placeholder={
+                isVie
+                  ? 'Chi tiết điều khoản vi phạm hoặc căn cứ áp dụng biện pháp này...'
+                  : 'Detail the policy clause violated or rationale for this action...'
+              }
               className="w-full px-3.5 py-2.5 bg-black/40 rounded-xl border border-white/10 text-white placeholder-[#8A8FA9]/60 text-xs focus:outline-none focus:border-red-400/80 transition-colors resize-none"
             />
           </div>
@@ -317,7 +341,7 @@ export function UserSanctionModal({
               disabled={isSubmitting}
               className="px-4 py-2.5 rounded-xl text-xs font-bold text-[#8A8FA9] hover:text-white hover:bg-white/5 transition-colors cursor-pointer"
             >
-              Cancel
+              {isVie ? 'Hủy' : 'Cancel'}
             </button>
 
             <button
@@ -332,16 +356,16 @@ export function UserSanctionModal({
               } disabled:opacity-50 disabled:cursor-not-allowed`}
             >
               {isSubmitting ? (
-                <span>Processing...</span>
+                <span>{isVie ? 'Đang xử lý...' : 'Processing...'}</span>
               ) : (
                 <span>
                   {actionType === 'Unban'
-                    ? 'Confirm Restore Account'
+                    ? (isVie ? 'Xác nhận Khôi phục Tài khoản' : 'Confirm Restore Account')
                     : actionType === 'Warn'
-                    ? 'Issue Official Warning'
+                    ? (isVie ? 'Gửi Cảnh cáo Chính thức' : 'Issue Official Warning')
                     : actionType === 'Suspend'
-                    ? `Issue ${durationDays}-Day Suspension`
-                    : 'Confirm Permanent Ban'}
+                    ? (isVie ? `Thực thi Tạm khóa ${durationDays} Ngày` : `Issue ${durationDays}-Day Suspension`)
+                    : (isVie ? 'Xác nhận Cấm Vĩnh viễn' : 'Confirm Permanent Ban')}
                 </span>
               )}
             </button>

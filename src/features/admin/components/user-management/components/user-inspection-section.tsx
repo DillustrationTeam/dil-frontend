@@ -6,6 +6,7 @@ import {
   ApplyUserSanctionRequest,
   UserAdminDetailDto,
 } from '@/features/admin/types/user-management.types';
+import { useLanguage } from '@/context/language-context';
 import { UserDetailCard } from './user-detail-card';
 import { UserActionPanel } from './user-action-panel';
 
@@ -35,15 +36,20 @@ export function UserInspectionSection({
   onUpdateRoles,
   onClose,
 }: UserInspectionSectionProps) {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
+
   if (isLoading && !user) {
     return (
       <div className="glass-container bg-[#161926]/85 backdrop-blur-[32px] border border-white/10 rounded-[28px] p-12 flex flex-col items-center justify-center min-h-[300px] text-center space-y-3">
         <Loader2 className="w-8 h-8 text-red-400 animate-spin" />
         <p className="font-h1 font-bold text-white text-sm">
-          Loading User Account Details...
+          {isVie ? 'Đang tải thông tin tài khoản người dùng...' : 'Loading User Account Details...'}
         </p>
         <p className="text-xs text-[#8A8FA9]">
-          Retrieving wallet balances and sanction history.
+          {isVie
+            ? 'Đang lấy số dư ví và lịch sử xử phạt vi phạm.'
+            : 'Retrieving wallet balances and sanction history.'}
         </p>
       </div>
     );
@@ -54,10 +60,12 @@ export function UserInspectionSection({
       <div className="glass-container bg-[#161926]/85 backdrop-blur-[32px] border border-white/10 rounded-[28px] p-10 flex flex-col items-center justify-center text-center space-y-3">
         <UserCheck className="w-10 h-10 text-[#8A8FA9]/40" />
         <p className="font-h1 font-bold text-white text-base">
-          No User Selected for Inspection
+          {isVie ? 'Chưa chọn tài khoản người dùng' : 'No User Selected for Inspection'}
         </p>
         <p className="text-xs text-[#8A8FA9] max-w-md">
-          Click any user row or action button in the table above to review their detailed profile, wallet funds, and execute sanction or role assignment actions.
+          {isVie
+            ? 'Nhấp vào bất kỳ hàng người dùng hoặc nút thao tác nào trong bảng phía trên để xem hồ sơ chi tiết, số dư ví và thực hiện xử phạt hoặc phân quyền vai trò.'
+            : 'Click any user row or action button in the table above to review their detailed profile, wallet funds, and execute sanction or role assignment actions.'}
         </p>
       </div>
     );
@@ -68,7 +76,7 @@ export function UserInspectionSection({
       {/* Console Header */}
       <div className="flex items-center justify-between">
         <h2 className="font-h1 font-bold text-lg text-white">
-          Account Governance Console
+          {isVie ? 'Bảng Điều hành & Quản trị Tài khoản' : 'Account Governance Console'}
         </h2>
 
         {onClose && (
@@ -78,7 +86,7 @@ export function UserInspectionSection({
             className="flex items-center gap-1 text-xs text-[#8A8FA9] hover:text-white transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
-            <span>Collapse Panel</span>
+            <span>{isVie ? 'Thu gọn bảng' : 'Collapse Panel'}</span>
           </button>
         )}
       </div>

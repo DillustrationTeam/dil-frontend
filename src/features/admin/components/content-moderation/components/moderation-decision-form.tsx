@@ -11,6 +11,7 @@ import {
   FileText,
 } from 'lucide-react';
 import { ModerationActionType } from '@/features/admin/types/moderation.types';
+import { useLanguage } from '@/context/language-context';
 import { z } from 'zod';
 
 const moderationSchema = z.object({
@@ -37,6 +38,9 @@ export function ModerationDecisionForm({
   isSubmitting,
   onExecuteDecision,
 }: ModerationDecisionFormProps) {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
+
   const [selectedAction, setSelectedAction] = useState<ModerationActionType>('approve');
   const [auditNote, setAuditNote] = useState('');
   const [touched, setTouched] = useState(false);
@@ -96,7 +100,7 @@ export function ModerationDecisionForm({
           htmlFor="moderation-action-select"
           className="block font-bold text-white font-h1 text-xs"
         >
-          Select Moderation Action
+          {isVie ? 'Chọn Quyết định Kiểm duyệt' : 'Select Moderation Action'}
         </label>
 
         {/* Action Select Dropdown matching SCR-20 mockup */}
@@ -111,16 +115,16 @@ export function ModerationDecisionForm({
           className="w-full px-4 py-3 rounded-xl bg-black/50 border border-white/15 text-white font-bold text-xs focus:border-red-400 focus:outline-none transition-colors cursor-pointer"
         >
           <option value="approve" className="bg-[#161926] text-emerald-400 py-2">
-            ✓ Approve & Publish to Public Feed
+            {isVie ? '✓ Phê duyệt & Công khai lên Sàn' : '✓ Approve & Publish to Public Feed'}
           </option>
           <option value="reject" className="bg-[#161926] text-red-400 py-2">
-            ✕ Reject & Delete Artwork
+            {isVie ? '✕ Từ chối & Xóa tác phẩm' : '✕ Reject & Delete Artwork'}
           </option>
           <option value="hide" className="bg-[#161926] text-amber-400 py-2">
-            👁️ Hide from Recommendations
+            {isVie ? '👁️ Ẩn khỏi Đề xuất' : '👁️ Hide from Recommendations'}
           </option>
           <option value="flag_ai" className="bg-[#161926] text-purple-400 py-2">
-            🤖 Flag as AI Generated (Tag.IsAiGenerated = true)
+            {isVie ? '🤖 Gắn nhãn AI tạo (Tag.IsAiGenerated = true)' : '🤖 Flag as AI Generated (Tag.IsAiGenerated = true)'}
           </option>
         </select>
       </div>
@@ -131,7 +135,9 @@ export function ModerationDecisionForm({
           <>
             <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
             <span>
-              Artwork will be approved immediately and shown in marketplace discovery and artist profile.
+              {isVie
+                ? 'Tác phẩm sẽ được phê duyệt ngay và xuất hiện trên bảng khám phá và trang cá nhân họa sĩ.'
+                : 'Artwork will be approved immediately and shown in marketplace discovery and artist profile.'}
             </span>
           </>
         )}
@@ -139,7 +145,9 @@ export function ModerationDecisionForm({
           <>
             <XCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
             <span className="text-red-300/90">
-              Artwork will be permanently soft-deleted from public view due to community guideline violations. Audit note is required.
+              {isVie
+                ? 'Tác phẩm sẽ bị ẩn/xóa mềm vĩnh viễn khỏi chế độ xem công khai do vi phạm tiêu chuẩn cộng đồng. Bắt buộc nhập ghi chú kiểm toán.'
+                : 'Artwork will be permanently soft-deleted from public view due to community guideline violations. Audit note is required.'}
             </span>
           </>
         )}
@@ -147,7 +155,9 @@ export function ModerationDecisionForm({
           <>
             <EyeOff className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
             <span>
-              Artwork remains accessible directly via URL but excluded from algorithmic recommendations.
+              {isVie
+                ? 'Tác phẩm vẫn có thể truy cập trực tiếp qua URL nhưng không xuất hiện trong đề xuất thuật toán.'
+                : 'Artwork remains accessible directly via URL but excluded from algorithmic recommendations.'}
             </span>
           </>
         )}
@@ -155,7 +165,9 @@ export function ModerationDecisionForm({
           <>
             <Bot className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
             <span>
-              Artworks created by generative AI tools will have the AI badge enforced and search filtered accordingly.
+              {isVie
+                ? 'Tác phẩm được tạo bởi AI sẽ được gắn huy hiệu AI bắt buộc và lọc tìm kiếm tương ứng.'
+                : 'Artworks created by generative AI tools will have the AI badge enforced and search filtered accordingly.'}
             </span>
           </>
         )}
@@ -169,7 +181,7 @@ export function ModerationDecisionForm({
             className="block font-bold text-white text-xs font-h1 flex items-center gap-1.5"
           >
             <FileText className="w-3.5 h-3.5 text-[#8A8FA9]" />
-            <span>Internal Moderation Audit Note</span>
+            <span>{isVie ? 'Ghi chú Kiểm duyệt Nội bộ' : 'Internal Moderation Audit Note'}</span>
             {isRejectAction && <span className="text-red-400">*</span>}
           </label>
           <span className="text-[10px] text-[#8A8FA9] font-mono">
@@ -184,7 +196,11 @@ export function ModerationDecisionForm({
           value={auditNote}
           onChange={(e) => setAuditNote(e.target.value)}
           disabled={isSubmitting}
-          placeholder="e.g. Verified image content meets community standards..."
+          placeholder={
+            isVie
+              ? 'Ví dụ: Đã kiểm tra nội dung tranh đạt tiêu chuẩn cộng đồng...'
+              : 'e.g. Verified image content meets community standards...'
+          }
           className={`w-full px-3.5 py-2.5 bg-black/40 rounded-xl border text-white text-xs placeholder:text-[#8A8FA9] focus:outline-none transition-colors font-body ${
             touched && isNoteInvalid
               ? 'border-red-500 bg-red-500/10'
@@ -194,7 +210,9 @@ export function ModerationDecisionForm({
 
         {touched && isNoteInvalid && (
           <p className="text-[10px] text-red-400 font-semibold">
-            Audit note is required when rejecting an artwork to inform review logs.
+            {isVie
+              ? 'Bắt buộc nhập ghi chú khi từ chối tác phẩm để lưu lại nhật ký xem xét.'
+              : 'Audit note is required when rejecting an artwork to inform review logs.'}
           </p>
         )}
       </div>
@@ -203,8 +221,9 @@ export function ModerationDecisionForm({
       {confirming ? (
         <div className="p-3.5 rounded-xl bg-black/60 border border-amber-400/30 space-y-3">
           <p className="text-white text-xs font-semibold">
-            Xác nhận thực hiện hành động{' '}
-            <strong className="text-amber-300 uppercase">{selectedAction}</strong> đối với tác phẩm này?
+            {isVie ? 'Xác nhận thực hiện hành động ' : 'Confirm executing action '}
+            <strong className="text-amber-300 uppercase">{selectedAction}</strong>{' '}
+            {isVie ? 'đối với tác phẩm này?' : 'for this artwork?'}
           </p>
           <div className="flex items-center gap-2">
             <button
@@ -216,12 +235,12 @@ export function ModerationDecisionForm({
               {isSubmitting ? (
                 <>
                   <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  <span>Đang xử lý...</span>
+                  <span>{isVie ? 'Đang xử lý...' : 'Processing...'}</span>
                 </>
               ) : (
                 <>
                   <CheckCircle2 className="w-3.5 h-3.5" />
-                  <span>Xác nhận thực thi</span>
+                  <span>{isVie ? 'Xác nhận thực thi' : 'Confirm Execution'}</span>
                 </>
               )}
             </button>
@@ -231,7 +250,7 @@ export function ModerationDecisionForm({
               onClick={() => setConfirming(false)}
               className="px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white font-bold rounded-xl text-xs transition-all cursor-pointer"
             >
-              Hủy
+              {isVie ? 'Hủy' : 'Cancel'}
             </button>
           </div>
         </div>
@@ -244,12 +263,12 @@ export function ModerationDecisionForm({
           {isSubmitting ? (
             <>
               <Loader2 className="w-4 h-4 animate-spin" />
-              <span>Executing Moderation Decision...</span>
+              <span>{isVie ? 'Đang thực thi quyết định...' : 'Executing Moderation Decision...'}</span>
             </>
           ) : (
             <>
               <Send className="w-4 h-4" />
-              <span>Execute Moderation Decision</span>
+              <span>{isVie ? 'Thực thi Quyết định Kiểm duyệt' : 'Execute Moderation Decision'}</span>
             </>
           )}
         </button>

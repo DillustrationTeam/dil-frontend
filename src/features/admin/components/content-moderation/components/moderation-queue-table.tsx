@@ -14,6 +14,7 @@ import {
   ModerationQueueItemDto,
   ModerationQueueMeta,
 } from '@/features/admin/types/moderation.types';
+import { useLanguage } from '@/context/language-context';
 
 interface ModerationQueueTableProps {
   items: ModerationQueueItemDto[];
@@ -34,6 +35,9 @@ export function ModerationQueueTable({
   onInspect,
   onPageChange,
 }: ModerationQueueTableProps) {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
+
   const formatShortId = (id: string) => {
     if (!id) return '#ART-0000';
     const parts = id.split('-');
@@ -45,7 +49,7 @@ export function ModerationQueueTable({
     if (score === null || score === undefined) {
       return (
         <span className="px-2.5 py-0.5 rounded bg-white/10 text-white/70 font-bold text-[10px] uppercase">
-          Scan Pending
+          {isVie ? 'Chờ quét' : 'Scan Pending'}
         </span>
       );
     }
@@ -55,7 +59,7 @@ export function ModerationQueueTable({
     if (score >= 0.9) {
       return (
         <span className="px-2.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold text-[10px] border border-emerald-500/30">
-          {percent}% SAFE
+          {percent}% {isVie ? 'AN TOÀN' : 'SAFE'}
         </span>
       );
     }
@@ -63,14 +67,14 @@ export function ModerationQueueTable({
     if (score >= 0.7) {
       return (
         <span className="px-2.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold text-[10px] border border-amber-500/30">
-          {percent}% BORDERLINE
+          {percent}% {isVie ? 'CẦN XEM XÉT' : 'BORDERLINE'}
         </span>
       );
     }
 
     return (
       <span className="px-2.5 py-0.5 rounded bg-red-500/20 text-red-300 font-bold text-[10px] border border-red-500/30">
-        {percent}% NSFW RISK
+        {percent}% {isVie ? 'RỦI RO NSFW' : 'NSFW RISK'}
       </span>
     );
   };
@@ -80,25 +84,25 @@ export function ModerationQueueTable({
       case 'approved':
         return (
           <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-            Approved
+            {isVie ? 'Đã duyệt' : 'Approved'}
           </span>
         );
       case 'rejected':
         return (
           <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-red-500/20 text-red-300 border border-red-500/30">
-            Rejected
+            {isVie ? 'Đã từ chối' : 'Rejected'}
           </span>
         );
       case 'hidden':
         return (
           <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-white/10 text-white/70 border border-white/20">
-            Hidden
+            {isVie ? 'Đang ẩn' : 'Hidden'}
           </span>
         );
       default:
         return (
           <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
-            Pending
+            {isVie ? 'Chờ duyệt' : 'Pending'}
           </span>
         );
     }
@@ -108,9 +112,9 @@ export function ModerationQueueTable({
     <div className="glass-container bg-[#161926]/85 backdrop-blur-[32px] border border-white/10 rounded-[28px] p-6 space-y-4 text-xs">
       <div className="flex items-center justify-between">
         <h3 className="font-h1 text-base font-bold text-white flex items-center gap-2">
-          <span>Flagged Artwork Queue</span>
+          <span>{isVie ? 'Hàng đợi Tác phẩm Cảnh báo' : 'Flagged Artwork Queue'}</span>
           <span className="text-xs font-mono font-normal text-[#8A8FA9]">
-            ({meta.totalCount} total)
+            {isVie ? `(Tổng ${meta.totalCount} tác phẩm)` : `(${meta.totalCount} total)`}
           </span>
         </h3>
       </div>
@@ -127,12 +131,12 @@ export function ModerationQueueTable({
         <table className="w-full text-left font-body">
           <thead className="text-[10px] uppercase font-bold text-[#8A8FA9] border-b border-white/10">
             <tr>
-              <th className="py-3 px-4">Artwork ID</th>
-              <th className="py-3 px-4">Title & Creator</th>
-              <th className="py-3 px-4">AI NSFW Scan</th>
-              <th className="py-3 px-4">Flag Reason</th>
-              <th className="py-3 px-4">Status</th>
-              <th className="py-3 px-4 text-right">Action</th>
+              <th className="py-3 px-4">{isVie ? 'Mã tác phẩm' : 'Artwork ID'}</th>
+              <th className="py-3 px-4">{isVie ? 'Tên tranh & Tác giả' : 'Title & Creator'}</th>
+              <th className="py-3 px-4">{isVie ? 'Quét AI NSFW' : 'AI NSFW Scan'}</th>
+              <th className="py-3 px-4">{isVie ? 'Lý do cảnh báo' : 'Flag Reason'}</th>
+              <th className="py-3 px-4">{isVie ? 'Trạng thái' : 'Status'}</th>
+              <th className="py-3 px-4 text-right">{isVie ? 'Thao tác' : 'Action'}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-white/5 text-white/90">
@@ -141,7 +145,7 @@ export function ModerationQueueTable({
                 <td colSpan={6} className="py-12 text-center text-[#8A8FA9]">
                   <div className="flex flex-col items-center justify-center space-y-2">
                     <div className="w-6 h-6 border-2 border-red-500/30 border-t-red-400 rounded-full animate-spin"></div>
-                    <p className="text-xs">Loading moderation queue...</p>
+                    <p className="text-xs">{isVie ? 'Đang tải hàng đợi kiểm duyệt...' : 'Loading moderation queue...'}</p>
                   </div>
                 </td>
               </tr>
@@ -150,9 +154,11 @@ export function ModerationQueueTable({
                 <td colSpan={6} className="py-12 text-center text-[#8A8FA9]">
                   <div className="flex flex-col items-center justify-center space-y-2">
                     <ShieldAlert className="w-8 h-8 text-[#8A8FA9]/40" />
-                    <p className="font-bold text-white">No Artworks in Queue</p>
+                    <p className="font-bold text-white">{isVie ? 'Không có tác phẩm trong hàng đợi' : 'No Artworks in Queue'}</p>
                     <p className="text-[11px] text-[#8A8FA9]">
-                      All uploaded artworks have satisfied AI safety checks or matching filters.
+                      {isVie
+                        ? 'Tất cả tác phẩm tải lên đều đáp ứng tiêu chuẩn an toàn AI hoặc bộ lọc tìm kiếm.'
+                        : 'All uploaded artworks have satisfied AI safety checks or matching filters.'}
                     </p>
                   </div>
                 </td>
@@ -254,7 +260,11 @@ export function ModerationQueueTable({
                         }`}
                       >
                         <Eye className="w-3.5 h-3.5" />
-                        <span>{isSelected ? 'Inspecting' : 'Inspect Item'}</span>
+                        <span>
+                          {isSelected
+                            ? (isVie ? 'Đang kiểm tra' : 'Inspecting')
+                            : (isVie ? 'Kiểm tra' : 'Inspect Item')}
+                        </span>
                       </button>
                     </td>
                   </tr>
@@ -268,9 +278,19 @@ export function ModerationQueueTable({
       {/* Pagination Bar (Always visible with page size = 10) */}
       <div className="flex items-center justify-between pt-4 border-t border-white/10 text-xs">
         <div className="text-[#8A8FA9] text-[11px]">
-          Showing page <span className="text-white font-bold">{meta.page}</span> of{' '}
-          <span className="text-white font-bold">{Math.max(1, meta.totalPages)}</span>
-          <span className="ml-1 text-[#8A8FA9]/70">({meta.totalCount} artworks)</span>
+          {isVie ? (
+            <>
+              Hiển thị trang <span className="text-white font-bold">{meta.page}</span> trên{' '}
+              <span className="text-white font-bold">{Math.max(1, meta.totalPages)}</span>
+              <span className="ml-1 text-[#8A8FA9]/70">({meta.totalCount} tác phẩm)</span>
+            </>
+          ) : (
+            <>
+              Showing page <span className="text-white font-bold">{meta.page}</span> of{' '}
+              <span className="text-white font-bold">{Math.max(1, meta.totalPages)}</span>
+              <span className="ml-1 text-[#8A8FA9]/70">({meta.totalCount} artworks)</span>
+            </>
+          )}
         </div>
 
         <div className="flex items-center gap-2">
@@ -281,11 +301,19 @@ export function ModerationQueueTable({
             className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white font-bold disabled:opacity-40 disabled:pointer-events-none transition-colors cursor-pointer"
           >
             <ChevronLeft className="w-4 h-4" />
-            <span>Previous</span>
+            <span>{isVie ? 'Trước' : 'Previous'}</span>
           </button>
 
           <span className="px-3 py-1.5 rounded-lg bg-black/40 border border-white/10 text-white font-semibold text-xs">
-            Page <span className="font-bold text-red-300">{meta.page}</span> of {Math.max(1, meta.totalPages)}
+            {isVie ? (
+              <>
+                Trang <span className="font-bold text-red-300">{meta.page}</span> / {Math.max(1, meta.totalPages)}
+              </>
+            ) : (
+              <>
+                Page <span className="font-bold text-red-300">{meta.page}</span> of {Math.max(1, meta.totalPages)}
+              </>
+            )}
           </span>
 
           <button
@@ -294,7 +322,7 @@ export function ModerationQueueTable({
             onClick={() => onPageChange(meta.page + 1)}
             className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white font-bold disabled:opacity-40 disabled:pointer-events-none transition-colors cursor-pointer"
           >
-            <span>Next</span>
+            <span>{isVie ? 'Sau' : 'Next'}</span>
             <ChevronRight className="w-4 h-4" />
           </button>
         </div>
