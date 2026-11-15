@@ -90,7 +90,18 @@ export default function ClientDashboardPage() {
           <h1 className="font-h1 text-base font-bold text-white">
             {isEng ? 'Your commissions' : 'Đơn đặt vẽ của bạn'}
           </h1>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
+            <Link
+              href="/client/requests"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-[#d8dbff] transition hover:bg-white/10"
+            >
+              {isEng ? 'Sent requests' : 'Yêu cầu đã gửi'}
+              {metrics.awaiting > 0 && (
+                <span className="rounded-full bg-[#A7ACD9]/25 px-1.5 py-0.5 text-[10px] font-bold text-[#d8dbff]">
+                  {metrics.awaiting}
+                </span>
+              )}
+            </Link>
             <select
               aria-label={isEng ? 'Filter commissions by status' : 'Lọc đơn đặt vẽ theo trạng thái'}
               value={statusFilter}

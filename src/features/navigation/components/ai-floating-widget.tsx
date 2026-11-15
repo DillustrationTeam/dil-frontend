@@ -11,16 +11,16 @@ import type { AiConversationDto, AiMessageDto } from '@/features/ai-assistant/ty
 
 const quickQuestionsByLang = {
   VIE: [
-    'Quy chế ký quỹ thanh toán hoạt động thế nào?',
-    'Làm sao để mở phiên đấu giá tranh?',
-    'Phí nền tảng là bao nhiêu phần trăm?',
-    'Cách rút doanh thu về ngân hàng?',
+    'Mức phạt giao tranh vật lý tính thế nào?',
+    'Vì sao tôi không đặt giá được?',
+    'Giá mua ngay khác gì đặt giá thường?',
+    'Sau khi thắng phiên, tôi có 48 giờ để làm gì?',
   ],
   ENG: [
-    'How does milestone escrow payment work?',
-    'How do I open an art auction?',
-    'What percentage is the platform fee?',
-    'How do I withdraw earnings to my bank?',
+    'How is the physical-delivery penalty calculated?',
+    'Why can I not place a bid?',
+    'How is Buy Now different from a normal bid?',
+    'What must I do in the 48 hours after winning?',
   ],
 };
 
@@ -99,6 +99,14 @@ export function AiFloatingWidget({ userId }: { userId: string | null }) {
     };
   }, [open]);
 
+  // Trang chi tiết phiên đấu giá: gắn ngữ cảnh Auction để AI trả lời bằng dữ liệu thật
+  // của chính phiên đang xem (giá, hạn 48h, trạng thái bưu phẩm, tiền đang giữ).
+  // Trang khác thì hỏi đáp chung.
+  const auctionContextId = (() => {
+    const match = /^\/auctions\/([0-9a-fA-F-]{36})(?:\/|$)/.exec(pathname);
+    return match ? match[1] : null;
+  })();
+
   async function handleSend(prompt?: string) {
     const text = (prompt ?? input).trim();
     if (!text || sending || !userId) return;
@@ -108,7 +116,9 @@ export function AiFloatingWidget({ userId }: { userId: string | null }) {
     try {
       let current = conversation;
       if (!current) {
-        current = await aiService.create(text.slice(0, 40), 'General');
+        current = auctionContextId
+          ? await aiService.create(text.slice(0, 40), 'Auction', auctionContextId)
+          : await aiService.create(text.slice(0, 40), 'General');
         setConversation(current);
       }
       setInput('');

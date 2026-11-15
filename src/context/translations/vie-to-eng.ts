@@ -535,6 +535,8 @@ export const extraVieToEngMap: Record<string, string> = {
   'Lựa chọn nhận tranh vật lý (Hạn chót trong 48 giờ)': 'Physical Delivery Preference (48h deadline)',
   'Bạn có thể yêu cầu Người bán gửi bản gốc vật lý tận nơi (có bưu cục đối soát), hoặc chỉ nhận file số độc quyền để hoàn tất phiên ngay.':
     'You can request courier delivery of the physical original or accept the exclusive digital files to settle immediately.',
+  'Quá 48 giờ mà bạn chưa chọn, phiên sẽ tự huỷ và hoàn lại toàn bộ tiền về ví của bạn; tác phẩm trở về quyền sở hữu của Người bán. Bạn cũng sẽ không nhận được file gốc của phiên này.':
+    'If you do not choose within 48 hours, the session is cancelled and the full amount is refunded to your wallet; the artwork returns to the seller. The master files of this session are no longer available.',
   'Điền thông tin địa chỉ nhận tranh:': 'Enter delivery shipping details:',
   'Họ và tên người nhận *': 'Recipient Full Name *',
   'Số điện thoại nhận hàng *': 'Recipient Phone Number *',
@@ -1366,6 +1368,37 @@ export const extraVieToEngMap: Record<string, string> = {
   'Mặt sau CCCD/CMND': 'National ID (Back)',
   'Danh mục lớn': 'Categories',
   'Tag phổ biến': 'Popular Tags',
+  // Bảng thang cảnh báo 5 mức trong form giao tranh vật lý (seller) — câu chữ cho người bán
+  'Xem mức phạt khi bị khiếu nại': 'See the penalty levels if you are reported',
+  'Bị phạt thế nào nếu người mua khiếu nại đúng?': 'What happens if the buyer is proven right?',
+  'Ban quản trị xác nhận người mua đúng thì bạn bị tính một mức phạt. Mức phạt chỉ tăng, không giảm. Tiền bán tranh còn ở sàn: mỗi lần bị xác nhận bạn lên 1 mức. Tiền đã về ví bạn: mỗi lần bị xác nhận bạn lên 2 mức.':
+    'If an admin confirms the buyer is right, one penalty level is added to your account. Levels only go up, never down. While the sale money is still held by the platform each confirmed case adds 1 level; once the money is already in your wallet each confirmed case adds 2 levels.',
+  'Mức': 'Level',
+  'Bạn sẽ bị gì': 'What happens to you',
+  'Mức 1': 'Level 1',
+  'Mức 2': 'Level 2',
+  'Mức 3': 'Level 3',
+  'Mức 4': 'Level 4',
+  'Mức 5': 'Level 5',
+  'Chỉ bị nhắc nhở, bạn không mất tiền và vẫn bán bình thường.':
+    'A warning only: you lose no money and can keep selling as usual.',
+  'Bị nhắc nhở và không được đăng bán tranh trong 1 ngày.': 'A warning, and you cannot list artwork for 1 day.',
+  '5 phiên bán tiếp theo bị trừ thêm 20%: bán 1.000.000đ bạn nhận 700.000đ thay vì 900.000đ.':
+    'Your next 5 sold sessions are charged 20% more: sell for 1,000,000đ and you receive 700,000đ instead of 900,000đ.',
+  '5 phiên bán tiếp theo bị trừ thêm 40%: bán 1.000.000đ bạn nhận 500.000đ. Đồng thời không được đăng bán 7 ngày.':
+    'Your next 5 sold sessions are charged 40% more: sell for 1,000,000đ and you receive 500,000đ. You also cannot list artwork for 7 days.',
+  'Không được đăng bán tranh nữa, vĩnh viễn.': 'You can never list artwork again.',
+  'Lần đầu bị xác nhận, khi tiền bán tranh còn ở sàn (người mua được trả lại tiền).':
+    'First confirmed case while the sale money is still held by the platform (the buyer gets a refund).',
+  'Lần thứ 2, khi tiền bán tranh vẫn còn ở sàn.': 'Second case while the sale money is still held by the platform.',
+  'Lần thứ 3 khi tiền còn ở sàn. Hoặc lần đầu tiên khi tiền đã về ví bạn.':
+    'Third case with the money still held. Or the first case after the money already reached your wallet.',
+  'Lần thứ 4 khi tiền còn ở sàn. Hoặc lần thứ 2 khi tiền đã về ví bạn.':
+    'Fourth case with the money still held. Or the second case after the money already reached your wallet.',
+  'Lần thứ 5 khi tiền còn ở sàn. Hoặc lần thứ 3 khi tiền đã về ví bạn.':
+    'Fifth case with the money still held. Or the third case after the money already reached your wallet.',
+  '(Bạn đang ở đây)': '(You are here)',
+  'Bạn chưa bị mức phạt nào.': 'You have no penalty level.',
 };
 
 export const extraVieToEngRegex: Array<{ pattern: RegExp; replacement: string }> = [
@@ -1406,4 +1439,6 @@ export const extraVieToEngRegex: Array<{ pattern: RegExp; replacement: string }>
   { pattern: /^Số dư ví của bạn \((.+)\) chưa đủ để Mua ngay \(thiếu (.+)\)\.$/i, replacement: 'Your wallet balance ($1) is insufficient to Buy Now (short by $2).' },
   { pattern: /^Tất cả đánh giá \((.+)\)$/i, replacement: 'All Reviews ($1)' },
   { pattern: /^Gợi ý nghệ sĩ \((\d+)\)$/i, replacement: 'Suggested Artists ($1)' },
+  { pattern: /^Bạn đang ở mức (\d)\/5$/i, replacement: 'You are at level $1/5' },
+  { pattern: /^Giao hàng đúng mô tả và giữ biên lai bưu cục để không bị nâng mức\.$/i, replacement: 'Ship exactly as described and keep the courier receipt so your level does not go up.' },
 ];

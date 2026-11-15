@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import {
   AlertTriangle,
@@ -102,7 +102,13 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
   const [isAuto, setIsAuto] = useState<boolean>(false);
   const [maxAutoBid, setMaxAutoBid] = useState<string>('');
   const [activeAutoBidCap, setActiveAutoBidCap] = useState<number | null>(null);
+  // Mức tối thiểu đang hiển thị trong ô giá — dùng để biết người dùng đã tự sửa ô hay chưa
+  // trước khi ghi đè bằng giá mới từ realtime.
+  const previousMinimumBidRef = useRef<string>('');
   const [submittingBid, setSubmittingBid] = useState(false);
+  // Xác nhận trước khi Auto-bid chạm giá mua ngay (mua luôn, không hoàn tác).
+  const [showAutoBuyConfirm, setShowAutoBuyConfirm] = useState(false);
+  const [pendingAutoBuy, setPendingAutoBuy] = useState<{ amount: number; cap: number } | null>(null);
 
   // Actions
   const [watching, setWatching] = useState<boolean>(false);
@@ -131,8 +137,16 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
     isDetail: true,
   });
 
-  const loadDetail = useCallback(async () => {
-    setLoading(true);
+  /**
+   * `silent` = tải lại ngầm sau một thao tác đã thành công.
+   *
+   * Trước đây mọi lần reload đều bật `loading`, mà component return <PageLoader/> khi
+   * loading ⇒ cả trang bị unmount nên thông báo thành công của thao tác giao nhận
+   * (đã gửi hàng / đã nhận hàng / đã gửi khiếu nại...) không bao giờ hiển thị.
+   */
+  const loadDetail = useCallback(async (options?: { silent?: boolean }) => {
+    const silent = options?.silent === true;
+    if (!silent) setLoading(true);
     setError(null);
     try {
       const [detailRes, walletRes] = await Promise.all([
@@ -145,15 +159,23 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
       setWatching(detailRes.auction.isWatching);
       if (walletRes) setWallet(walletRes);
 
+      // Khôi phục trần auto-bid từ server để banner "Auto-bid đang hoạt động" không mất
+      // sau khi tải lại trang (trước đây giá trị này chỉ sống trong RAM của tab).
+      setActiveAutoBidCap(detailRes.auction.myAutoBidMax ?? null);
+
       const minNext = detailRes.auction.bidCount === 0
         ? detailRes.auction.startPrice
         : detailRes.auction.currentPrice + detailRes.auction.bidStep;
 
-      setBidAmount(minNext.toString());
+      // Chỉ điền lại ô giá khi người dùng CHƯA gõ gì khác, tránh xoá số đang nhập.
+      setBidAmount((current) => (current.trim() === '' ? minNext.toString() : current));
+      // Ghi lại mức tối thiểu đang hiển thị để handler realtime biết ô giá còn "nguyên bản"
+      // hay người dùng đã tự sửa (nếu không seed, lượt bid realtime đầu tiên không cập nhật ô).
+      previousMinimumBidRef.current = minNext.toString();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Không tải được chi tiết phiên đấu giá.');
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }, [auctionId, userId]);
 
@@ -170,7 +192,7 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
       // Khi proxy-bid thắng thay người vừa gửi request, payload là bid Outbid của
       // requestor; refetch để lấy bid Leading do auto-bid tạo trong cùng transaction.
       if (payload.bid.bidStatus === 'Outbid') {
-        void loadDetail();
+        void loadDetail({ silent: true });
         return;
       }
 
@@ -186,9 +208,14 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
         };
       });
 
-      // Update minimum next bid for form
+      // Cập nhật mức tối thiểu cho form, nhưng KHÔNG xoá số người dùng đang gõ: nếu ô giá
+      // vẫn đang là mức tối thiểu cũ (hoặc để trống) thì mới điền lại, còn nếu người dùng
+      // đã tự nhập số khác thì giữ nguyên.
       const nextMin = payload.minimumNextBid;
-      setBidAmount(nextMin.toString());
+      setBidAmount((current) =>
+        current.trim() === '' || current === previousMinimumBidRef.current ? nextMin.toString() : current,
+      );
+      previousMinimumBidRef.current = nextMin.toString();
 
       // Prepend bid to history if not exists
       setBids((prevBids) => {
@@ -214,11 +241,11 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
     },
 
     onAuctionSettled: () => {
-      void loadDetail();
+      void loadDetail({ silent: true });
     },
 
     onReconnectedRefetch: () => {
-      void loadDetail();
+      void loadDetail({ silent: true });
     },
   });
 
@@ -242,8 +269,10 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
     setWatching(nextWatch);
     try {
       await auctionService.watch(auctionId, nextWatch);
-    } catch {
+    } catch (err: unknown) {
+      // Rollback UI + báo lỗi: trước đây chỉ rollback im lặng nên người dùng tưởng đã theo dõi.
       setWatching(!nextWatch);
+      setError(auctionError(err));
     }
   }
 
@@ -274,26 +303,51 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
         setError(`Giá trần tự động phải lớn hơn hoặc bằng mức giá đặt tối thiểu (${formatVnd(minimumNextBid)}).`);
         return;
       }
-      if (maxNum <= amountNum) {
-        setError(`Giá trần tự động (${formatVnd(maxNum)}) phải lớn hơn mức giá đặt ban đầu (${formatVnd(amountNum)}).`);
+      // Backend chỉ yêu cầu trần >= mức tối thiểu, và lượt đặt thực tế luôn là
+      // min(trần, mức tối thiểu). Trước đây FE đòi trần > giá đang nhập nên chặn nhầm
+      // trường hợp hợp lệ (trần đúng bằng mức tối thiểu).
+      if (maxNum < amountNum) {
+        setError(`Giá trần tự động (${formatVnd(maxNum)}) phải lớn hơn hoặc bằng mức giá sẽ đặt (${formatVnd(amountNum)}).`);
         return;
       }
     }
 
-    // Wallet balance check
-    if (wallet && wallet.wallet.balance < amountNum) {
+    // Ví chỉ bị khoá đúng MỨC ĐẶT thực tế (backend dùng min(trần, mức tối thiểu)), 
+    // không khoá toàn bộ giá trần — nên chỉ cần kiểm số dư theo amountNum.
+    const payableNow = amountNum;
+    if (wallet && wallet.wallet.balance < payableNow) {
       setError(
-        `Số dư ví khả dụng không đủ để đặt giá! Cần: ${formatVnd(amountNum)}, Hiện có: ${formatVnd(wallet.wallet.balance)} (còn thiếu ${formatVnd(amountNum - wallet.wallet.balance)}).`
+        `Số dư ví khả dụng không đủ để đặt giá! Cần: ${formatVnd(payableNow)}, Hiện có: ${formatVnd(wallet.wallet.balance)} (còn thiếu ${formatVnd(payableNow - wallet.wallet.balance)}).`
       );
       return;
     }
+
+    // Auto-bid có trần bằng/vượt giá mua ngay: backend coi đây là MUA NGAY tức thì
+    // (trần chạm giá mua ngay ⇒ chốt luôn ở giá mua ngay, không qua đấu giá tiếp). Đây là
+    // chức năng, không phải lỗi — nhưng phải hỏi lại một lần vì tiền ra khỏi ví ngay và
+    // không hoàn tác được.
+    if (isAuto && auction?.buyNowPrice && Number(maxAutoBid) >= auction.buyNowPrice) {
+      setPendingAutoBuy({ amount: amountNum, cap: Number(maxAutoBid) });
+      setShowAutoBuyConfirm(true);
+      return;
+    }
+
+    await submitBid(amountNum, isAuto && maxAutoBid ? Number(maxAutoBid) : undefined);
+  }
+
+  /**
+   * Gửi lượt đặt giá lên server. Tách khỏi `handlePlaceBid` để luồng "xác nhận mua ngay
+   * bằng Auto-bid" gọi lại được ngay sau khi người dùng bấm đồng ý.
+   */
+  async function submitBid(amountNum: number, autoMaxNum?: number) {
+    if (!auction) return;
+    const isAuto = autoMaxNum !== undefined;
 
     setSubmittingBid(true);
     setError(null);
     setSuccess(null);
 
     try {
-      const autoMaxNum = isAuto && maxAutoBid ? Number(maxAutoBid) : undefined;
       const res = await auctionService.bid(auctionId, amountNum, isAuto, autoMaxNum);
       if (isAuto && autoMaxNum) setActiveAutoBidCap(autoMaxNum);
 
@@ -307,7 +361,7 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
         setError(
           `Lượt đặt giá ${formatVnd(amountNum)} đã được ghi nhận, nhưng bị Auto-bid của đối thủ vượt qua ngay lập tức. Mức giá dẫn đầu hiện tại đã tăng.`
         );
-        await loadDetail();
+        await loadDetail({ silent: true });
       } else {
         setSuccess('Đã gửi lượt đặt giá lên hệ thống.');
       }
@@ -326,12 +380,20 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
             : null,
         );
       }
+      // A bid that reaches the buy-now ceiling settles the session on the spot: reload so
+      // the page stops offering "Mua ngay" and shows the settled state.
+      if (auction.buyNowPrice && amountNum >= auction.buyNowPrice) {
+        setSuccess(`Giá đặt đã chạm mức mua ngay — phiên đã chốt ở ${formatVnd(auction.buyNowPrice)}.`);
+        await loadDetail();
+      }
+
     } catch (err: unknown) {
       if (err instanceof AuctionConflictError) {
         // FE-03: Handle 409 Conflict gracefully by updating price and next bid without page reload
         const c = err.conflictData;
         setAuction((prev) => (prev ? { ...prev, currentPrice: c.currentPrice, endAt: c.endAt } : prev));
         setBidAmount(c.minimumNextBid.toString());
+        previousMinimumBidRef.current = c.minimumNextBid.toString();
         setError(
           `Có người vừa đặt giá trước bạn! Giá hiện tại đã tăng lên ${formatVnd(c.currentPrice)}. Chúng tôi đã tự động cập nhật mức giá tối thiểu mới (${formatVnd(c.minimumNextBid)}), bạn có thể kiểm tra và bấm Đặt giá ngay.`
         );
@@ -716,7 +778,7 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
                   {formatVnd(auction.currentPrice)}
                 </p>
                 <p className="mt-2 text-xs text-outline">Khởi điểm: {formatVnd(auction.startPrice)}</p>
-                {auction.finalPrice ? (
+                {auction.finalPrice != null ? (
                   <p className="mt-1 text-xs font-semibold text-emerald-300">
                     Giá chốt: {formatVnd(auction.finalPrice)}
                   </p>
@@ -823,7 +885,7 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
             {/* Quản lý giao nhận tranh vật lý & Biên lai ký quỹ/bưu cục (UC35) */}
             {auction.hasPhysicalCopy && (
               <div className="mb-6">
-                <PhysicalDeliveryCard auction={auction} userId={userId} onReload={loadDetail} />
+                <PhysicalDeliveryCard auction={auction} userId={userId} onReload={() => void loadDetail({ silent: true })} />
               </div>
             )}
 
@@ -843,7 +905,7 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
                     id="bid-amount"
                     type="number"
                     min={minimumNextBid}
-                    step={auction.bidStep}
+                    step="any"
                     value={bidAmount}
                     onChange={(e) => setBidAmount(e.target.value)}
                     className={`w-full rounded-xl border bg-brand-navy/60 px-4 py-3 font-h1 text-lg font-bold text-on-surface focus:outline-none transition ${
@@ -855,6 +917,11 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
                   {bidAmountNum > 0 && bidAmountNum < minimumNextBid && (
                     <p className="mt-1 text-xs text-rose-400">
                       Mức giá đặt chưa đủ! Tối thiểu là {formatVnd(minimumNextBid)}.
+                    </p>
+                  )}
+                  {auction.buyNowPrice && bidAmountNum >= auction.buyNowPrice && (
+                    <p className="mt-1 text-xs text-brand-periwinkle/90">
+                      Giá đặt đã chạm mức mua ngay: phiên sẽ chốt ngay ở {formatVnd(auction.buyNowPrice)}, phần vượt không bị trừ.
                     </p>
                   )}
                   {isBalanceShortage && (
@@ -941,7 +1008,7 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
                         onChange={(e) => setMaxAutoBid(e.target.value)}
                         placeholder={`Tối thiểu ${minimumNextBid}`}
                         className={`w-full rounded-lg border bg-brand-navy px-3 py-2 text-on-surface focus:outline-none transition ${
-                          maxAutoBid && (Number(maxAutoBid) < minimumNextBid || Number(maxAutoBid) <= bidAmountNum)
+                          maxAutoBid && (Number(maxAutoBid) < minimumNextBid || Number(maxAutoBid) < bidAmountNum)
                             ? 'border-rose-400 focus:border-rose-400'
                             : 'border-white/10 focus:border-brand-periwinkle'
                         }`}
@@ -951,9 +1018,16 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
                           Giá trần tự động phải lớn hơn hoặc bằng mức giá đặt tối thiểu ({formatVnd(minimumNextBid)}).
                         </p>
                       )}
-                      {maxAutoBid && Number(maxAutoBid) >= minimumNextBid && Number(maxAutoBid) <= bidAmountNum && (
+                      {maxAutoBid && Number(maxAutoBid) >= minimumNextBid && Number(maxAutoBid) < bidAmountNum && (
                         <p className="mt-1 text-xs text-rose-400">
-                          Giá trần tự động ({formatVnd(Number(maxAutoBid))}) phải cao hơn mức giá đặt ban đầu ({formatVnd(bidAmountNum)}).
+                          Giá trần tự động ({formatVnd(Number(maxAutoBid))}) phải lớn hơn hoặc bằng mức giá sẽ đặt ({formatVnd(bidAmountNum)}).
+                        </p>
+                      )}
+                      {/* Cảnh báo trước khi bấm: trần chạm giá mua ngay = mua luôn, không đấu giá tiếp. */}
+                      {auction.buyNowPrice != null && Number(maxAutoBid) >= auction.buyNowPrice && (
+                        <p className="mt-1 rounded-lg border border-amber-400/30 bg-amber-400/10 px-2 py-1.5 text-[11px] text-amber-200">
+                          Trần này chạm giá mua ngay ({formatVnd(auction.buyNowPrice)}): khi gửi, hệ thống sẽ hỏi xác nhận và
+                          mua ngay tác phẩm ở mức giá đó.
                         </p>
                       )}
                     </div>
@@ -967,7 +1041,7 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
                     isEnded ||
                     isBalanceShortage ||
                     bidAmountNum < minimumNextBid ||
-                    Boolean(isAuto && (!maxAutoBid || Number(maxAutoBid) < minimumNextBid || Number(maxAutoBid) <= bidAmountNum))
+                    Boolean(isAuto && (!maxAutoBid || Number(maxAutoBid) < minimumNextBid || Number(maxAutoBid) < bidAmountNum))
                   }
                   className="w-full rounded-full bg-brand-periwinkle py-3 text-center font-h1 text-sm font-bold text-brand-navy shadow-lg transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
                 >
@@ -984,7 +1058,7 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
                 </button>
 
                 {/* Mua ngay nếu phiên hỗ trợ */}
-                {auction.buyNowPrice && (
+                {auction.buyNowPrice && auction.currentPrice < auction.buyNowPrice && (
                   <div className="space-y-1">
                     <button
                       type="button"
@@ -1034,10 +1108,10 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
           {/* Lịch sử đặt giá gần đây */}
           <section className="glass-container rounded-3xl border border-white/10 p-6">
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="font-h1 text-base font-bold">Lịch sử đặt giá ({bids.length})</h2>
+              <h2 className="font-h1 text-base font-bold">Lịch sử đặt giá ({auction.bidCount})</h2>
               <button
                 type="button"
-                onClick={loadDetail}
+                onClick={() => void loadDetail()}
                 disabled={loading}
                 className="text-xs text-outline hover:text-white"
                 title="Làm mới lịch sử"
@@ -1254,6 +1328,72 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
                 className="rounded-full bg-brand-periwinkle px-5 py-2 text-xs font-bold text-brand-navy hover:brightness-110 transition cursor-pointer"
               >
                 Đã hiểu &amp; Đóng
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Xác nhận mua ngay bằng Auto-bid: trần >= giá mua ngay thì hệ thống chốt phiên
+          ngay ở giá mua ngay (không đấu giá tiếp). Tiền ra khỏi ví ngay, không hoàn tác. */}
+      {showAutoBuyConfirm && auction?.buyNowPrice && pendingAutoBuy && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="auto-buy-confirm-title"
+            className="w-full max-w-md space-y-4 rounded-2xl border border-amber-400/40 bg-brand-navy p-6 shadow-2xl"
+          >
+            <div className="flex items-start gap-3">
+              <Gavel size={20} className="mt-0.5 shrink-0 text-amber-300" />
+              <div className="space-y-1">
+                <h3 id="auto-buy-confirm-title" className="font-h1 text-base font-bold text-white">
+                  Xác nhận mua ngay bằng Auto-bid
+                </h3>
+                <p className="text-xs text-outline">
+                  Giá trần bạn đặt ({formatVnd(pendingAutoBuy.cap)}) đã chạm hoặc vượt giá mua ngay
+                  ({formatVnd(auction.buyNowPrice)}).
+                </p>
+              </div>
+            </div>
+
+            <div className="rounded-xl border border-amber-400/30 bg-amber-400/10 p-3 text-xs text-amber-100 space-y-1.5">
+              <p>
+                Theo quy chế, khi trần auto-bid chạm giá mua ngay thì hệ thống{' '}
+                <strong className="text-amber-200">mua ngay tác phẩm ở {formatVnd(auction.buyNowPrice)}</strong> cho bạn:
+                phiên kết thúc ngay, không đấu giá tiếp.
+              </p>
+              <p>
+                Số tiền <strong className="text-amber-200">{formatVnd(auction.buyNowPrice)}</strong> được trừ từ ví khả dụng
+                và giữ ở sàn theo quy trình giao nhận. Lệnh này không huỷ được sau khi xác nhận.
+              </p>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-1">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowAutoBuyConfirm(false);
+                  setPendingAutoBuy(null);
+                }}
+                className="rounded-full border border-white/15 px-4 py-2 text-xs font-semibold text-white/80 hover:bg-white/5 transition"
+              >
+                Huỷ, để tôi chỉnh lại
+              </button>
+              <button
+                type="button"
+                disabled={submittingBid}
+                onClick={async () => {
+                  const pending = pendingAutoBuy;
+                  setShowAutoBuyConfirm(false);
+                  setPendingAutoBuy(null);
+                  if (pending) {
+                    await submitBid(pending.amount, pending.cap);
+                  }
+                }}
+                className="rounded-full bg-amber-400 px-4 py-2 text-xs font-bold text-brand-navy hover:brightness-110 disabled:opacity-50 transition"
+              >
+                {submittingBid ? 'Đang xử lý...' : `Xác nhận mua ngay ${formatVnd(auction.buyNowPrice)}`}
               </button>
             </div>
           </div>

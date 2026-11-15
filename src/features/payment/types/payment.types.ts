@@ -45,7 +45,7 @@ export interface VoucherRedeemedDto {
   voucherRedemptionId: string; voucherId: string; voucherCode: string;
   discountAmount: number; orderAmount: number; finalAmount: number; redeemedAt: string;
 }
-export interface RevenueSummaryDto { grossAmount: number; feeAmount: number; netAmount: number; completedOrderCount: number; averageOrderValue: number }
+export interface RevenueSummaryDto { grossAmount: number; feeAmount: number; netAmount: number; completedOrderCount: number; averageOrderValue: number; /** Trong feeAmount, bao nhiêu là phụ phí vi phạm giao hàng. */ penaltyFeeAmount?: number; /** Tiền sàn đang giữ trong ký quỹ (chưa phải doanh thu). */ escrowHeldAmount?: number; /** Phần ký quỹ đang bị đóng băng do khiếu nại. */ escrowDisputedAmount?: number }
 export interface RevenuePointDto { periodLabel: string; grossAmount: number; feeAmount: number; netAmount: number }
 export interface RevenueBreakdownDto { key: string; label: string; grossAmount: number; feeAmount: number; netAmount: number; orderCount: number }
-export interface RevenueSnapshotDto { revenueSnapshotId: string; scope: string; snapshotDate: string; grossAmount: number; feeAmount: number; netAmount: number; completedOrderCount: number; rebuiltAt: string | null }
+export interface RevenueSnapshotDto { revenueSnapshotId: string; scope: string; snapshotDate: string; grossAmount: number; feeAmount: number; netAmount: number; completedOrderCount: number; rebuiltAt: string | null; /** Doanh thu gộp từ đơn đặt vẽ trong kỳ. */ commissionGrossAmount?: number; /** Doanh thu gộp từ phiên đấu giá trong kỳ. */ auctionGrossAmount?: number }

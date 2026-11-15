@@ -151,8 +151,12 @@ async function list<T>(url: string, params: object, signal?: AbortSignal): Promi
 }
 
 export const auctionService = {
-  list: (filters: AuctionFilters, cursor?: string, signal?: AbortSignal) =>
-    list<AuctionListItemDto>('/auctions', { ...filters, cursor, limit: 12 }, signal),
+  /**
+   * Danh sách phiên. `limit` cho phép trang quản trị tải nhiều hơn 12 dòng mặc định —
+   * trước đây hardcode 12 nên admin chỉ thấy 12 phiên đầu và không chốt/huỷ được phiên 13+.
+   */
+  list: (filters: AuctionFilters, cursor?: string, signal?: AbortSignal, limit = 12) =>
+    list<AuctionListItemDto>('/auctions', { ...filters, cursor, limit }, signal),
 
   detail: async (id: string, signal?: AbortSignal): Promise<{ auction: AuctionDetailDto; recentBids: BidDto[] }> => {
     const res = await call<{ auction: AuctionDetailDto; recentBids: BidDto[] }>('get', `/auctions/${id}`, undefined, { recentBids: 10 }, signal);
