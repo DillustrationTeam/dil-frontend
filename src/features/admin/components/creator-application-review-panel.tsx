@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
+import { Search, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { creatorApplicationReviewService } from '@/features/admin/services/creator-application-review.service';
 import { isPortfolioImageUrl } from '@/lib/portfolio-link';
@@ -63,6 +64,19 @@ export function CreatorApplicationReviewPanel() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filteredApplications = useMemo(() => {
+    if (!searchQuery.trim()) return applications;
+    const q = searchQuery.toLowerCase().trim();
+    return applications.filter(
+      (app) =>
+        app.applicantName.toLowerCase().includes(q) ||
+        app.applicantEmail.toLowerCase().includes(q) ||
+        (app.applicantUsername && app.applicantUsername.toLowerCase().includes(q)) ||
+        (app.primaryStyle && app.primaryStyle.toLowerCase().includes(q))
+    );
+  }, [applications, searchQuery]);
 
   const selectedApplication = useMemo(
     () => applications.find((application) => application.id === selectedId) ?? null,
@@ -167,25 +181,48 @@ export function CreatorApplicationReviewPanel() {
         )}
       </div>
 
-      <div className="mb-6 flex flex-wrap gap-2">
-        {tabs.map((tab) => (
-          <button
-            key={tab.key}
-            type="button"
-            onClick={() => {
-              setStatusFilter(tab.key);
-              setPage(1);
-              resetSelection();
-            }}
-            className={`rounded-full border px-4 py-2 text-xs font-bold transition ${
-              statusFilter === tab.key
-                ? 'border-red-500/40 bg-red-500/20 text-red-300'
-                : 'border-white/10 text-[#8A8FA9] hover:text-white'
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-wrap gap-2">
+          {tabs.map((tab) => (
+            <button
+              key={tab.key}
+              type="button"
+              onClick={() => {
+                setStatusFilter(tab.key);
+                setPage(1);
+                resetSelection();
+              }}
+              className={`rounded-full border px-4 py-2 text-xs font-bold transition ${
+                statusFilter === tab.key
+                  ? 'border-red-500/40 bg-red-500/20 text-red-300'
+                  : 'border-white/10 text-[#8A8FA9] hover:text-white'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Search bar */}
+        <div className="relative w-full sm:w-72">
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder={isVie ? 'Tìm theo tên ứng viên (Bùi Thị Lan...)' : 'Search by applicant name...'}
+            className="w-full rounded-2xl border border-white/10 bg-white/5 py-2 pl-9 pr-8 text-xs text-white placeholder-[#8A8FA9] outline-none transition focus:border-red-500/50"
+          />
+          <Search className="absolute left-3 top-2.5 h-4 w-4 text-[#8A8FA9]" />
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => setSearchQuery('')}
+              className="absolute right-3 top-2.5 text-[#8A8FA9] hover:text-white"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-12">
@@ -199,10 +236,21 @@ export function CreatorApplicationReviewPanel() {
             <div className="flex flex-1 flex-col items-center justify-center p-8 text-center text-sm text-[#8A8FA9]">
               <p>{isVie ? 'Không có đơn nào ở trạng thái này.' : 'No applications with this status.'}</p>
             </div>
+          ) : filteredApplications.length === 0 ? (
+            <div className="flex flex-1 flex-col items-center justify-center p-8 text-center text-sm text-[#8A8FA9]">
+              <p>{isVie ? 'Không tìm thấy hồ sơ phù hợp.' : 'No matching applications found.'}</p>
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                className="mt-2 text-xs font-bold text-red-300 hover:underline"
+              >
+                {isVie ? 'Xóa từ khóa tìm kiếm' : 'Clear search'}
+              </button>
+            </div>
           ) : (
             <div className="flex flex-1 flex-col justify-between">
               <ul className="space-y-2">
-                {applications.map((application) => (
+                {filteredApplications.map((application) => (
                   <li key={application.id}>
                     <button
                       type="button"
