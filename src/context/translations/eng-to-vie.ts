@@ -906,7 +906,6 @@ export const engToVieMap: Record<string, string> = {
   '+1 Step': '+1 Bước giá',
   '+2 Step': '+2 Bước giá',
   '+5 Step': '+5 Bước giá',
-  'Auto-bid': 'Đấu giá tự động',
   'Loading Dispute Dossier...': 'Đang tải hồ sơ tranh chấp...',
   'Retrieving evidence files, telemetry logs, and submission records.': 'Đang truy xuất tệp bằng chứng, nhật ký hệ thống và hồ sơ bài dự thi.',
   'No Dispute Selected for Review': 'Chưa chọn tranh chấp để xem xét',
