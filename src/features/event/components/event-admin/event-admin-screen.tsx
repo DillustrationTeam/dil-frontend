@@ -22,6 +22,7 @@ import { EventCard } from '../event/event-card';
 import { PermissionsTab } from './permissions-tab/permissions-tab';
 import { DisputesTab } from './disputes-tab/disputes-tab';
 import { PublishTab } from './publish-tab/publish-tab';
+import { useLanguage } from '@/context/language-context';
 
 export type AdminEventsTab = 'create' | 'permissions' | 'disputes' | 'publish';
 
@@ -30,6 +31,8 @@ export type AdminEventsTab = 'create' | 'permissions' | 'disputes' | 'publish';
 const emptySubscribe = () => () => {};
 
 export function EventAdminScreen() {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
   const router = useRouter();
   const mounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
   const [activeTab, setActiveTab] = useState<AdminEventsTab>('create');
@@ -452,7 +455,7 @@ export function EventAdminScreen() {
                   className="h-10 px-4 rounded-xl bg-gradient-to-r from-[#a7acd9] to-[#7fd5e8] text-brand-navy font-bold text-xs hover:brightness-110 transition-all shadow-[0_0_20px_rgba(167,172,217,0.3)] flex items-center gap-1.5 shrink-0 cursor-pointer"
                 >
                   <PlusCircle className="w-4 h-4" />
-                  <span>+ Create Event</span>
+                  <span>{isVie ? '+ Tạo sự kiện' : '+ Create Event'}</span>
                 </button>
               </div>
             </div>

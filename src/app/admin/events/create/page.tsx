@@ -5,8 +5,11 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Trophy } from 'lucide-react';
 import { CreateTab } from '@/features/event/components/event-admin/create-tab/create-tab';
+import { useLanguage } from '@/context/language-context';
 
 export default function AdminCreateEventPage() {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
   const router = useRouter();
 
   const handleSaveSuccess = () => {
@@ -26,20 +29,22 @@ export default function AdminCreateEventPage() {
           className="mb-4 inline-flex items-center gap-2 text-xs font-semibold text-brand-periwinkle hover:text-white transition-colors"
         >
           <ArrowLeft size={14} />
-          <span>Back to Event Operations</span>
+          <span>{isVie ? 'Quay lại Quản lý sự kiện' : 'Back to Event Operations'}</span>
         </Link>
 
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <div className="mb-2.5 inline-flex items-center gap-2 rounded-full border border-brand-periwinkle/30 bg-brand-periwinkle/10 px-3.5 py-1 text-xs font-semibold text-brand-periwinkle">
               <Trophy size={13} className="text-amber-300" />
-              <span>Admin Center · Event Operations</span>
+              <span>{isVie ? 'Trung tâm Quản trị · Vận hành Sự kiện' : 'Admin Center · Event Operations'}</span>
             </div>
             <h1 className="font-h1 text-3xl sm:text-4xl font-extrabold tracking-tight text-white leading-tight">
-              Create New Illustration Contest
+              {isVie ? 'Tạo cuộc thi minh họa mới' : 'Create New Illustration Contest'}
             </h1>
             <p className="mt-2 text-sm text-[#A7ACD9] leading-relaxed max-w-3xl">
-              Fill in contest details, banner image, prize structure, max votes, and timeline stages to publish a new contest.
+              {isVie
+                ? 'Điền thông tin chi tiết cuộc thi, ảnh bìa, cơ cấu giải thưởng, giới hạn bình chọn và các mốc thời gian để xuất bản cuộc thi.'
+                : 'Fill in contest details, banner image, prize structure, max votes, and timeline stages to publish a new contest.'}
             </p>
           </div>
         </div>

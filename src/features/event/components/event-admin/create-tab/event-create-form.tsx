@@ -20,6 +20,7 @@ import { normalizeEventStatus, toEventStatusEnumValue, type EventStatus, type Ev
 import { eventService } from '../../../services/event.service';
 import { eventCriteriaService } from '../../../services/event-criteria.service';
 import { creatorProfileService } from '@/features/creator-studio/services/creator-profile.service';
+import { useLanguage } from '@/context/language-context';
 
 function formatDateForInput(dateStr?: string | null): string {
   if (!dateStr) return '';
@@ -68,6 +69,8 @@ export function EventCreateForm({
   onCancelEdit,
   bannerUrl,
 }: EventCreateFormProps) {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
   const isEditing = Boolean(selectedEvent);
 
   const [title, setTitle] = useState(selectedEvent?.title || '');
@@ -573,7 +576,13 @@ export function EventCreateForm({
         <div>
           <div className="flex items-center gap-2">
             <h2 className="text-xl sm:text-2xl font-bold font-h1 text-white">
-              {isEditing ? 'Update Contest Details' : 'Create New Illustration Contest'}
+              {isEditing
+                ? isVie
+                  ? 'Cập nhật chi tiết cuộc thi'
+                  : 'Update Contest Details'
+                : isVie
+                  ? 'Tạo cuộc thi minh họa mới'
+                  : 'Create New Illustration Contest'}
             </h2>
             {isEditing && (
               <span className="text-xs px-2.5 py-0.5 rounded-full bg-brand-periwinkle/20 text-brand-periwinkle border border-brand-periwinkle/30 font-mono">
@@ -582,7 +591,9 @@ export function EventCreateForm({
             )}
           </div>
           <p className="text-xs text-[#8A8FA9] mt-1">
-            Configure contest overview, prize structure, submission deadlines, and banner image.
+            {isVie
+              ? 'Thiết lập thông tin cuộc thi, cơ cấu giải thưởng, thời hạn nộp bài và ảnh bìa.'
+              : 'Configure contest overview, prize structure, submission deadlines, and banner image.'}
           </p>
         </div>
 
@@ -592,7 +603,7 @@ export function EventCreateForm({
           className="rounded-xl border border-white/10 px-3.5 py-2 text-xs font-semibold text-[#A7ACD9] hover:bg-white/5 hover:text-white transition cursor-pointer flex items-center gap-1.5"
         >
           <ArrowLeft size={14} />
-          <span>Back</span>
+          <span>{isVie ? 'Quay lại' : 'Back'}</span>
         </button>
       </div>
 
@@ -1092,7 +1103,7 @@ export function EventCreateForm({
             className="rounded-xl border border-white/10 px-5 py-2.5 text-xs font-semibold text-[#A7ACD9] hover:bg-white/5 hover:text-white transition cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
           >
             <Save size={14} className="text-brand-periwinkle" />
-            <span>Save Draft</span>
+            <span>{isVie ? 'Lưu bản nháp' : 'Save Draft'}</span>
           </button>
         )}
 
@@ -1104,12 +1115,20 @@ export function EventCreateForm({
           <CheckCircle size={16} />
           <span>
             {submitting
-              ? 'Saving...'
+              ? isVie
+                ? 'Đang lưu...'
+                : 'Saving...'
               : isEditing
                 ? String(status).toLowerCase() === 'draft' || String(status) === '1'
-                  ? 'Publish Event'
-                  : 'Update Event'
-                : 'Create Event'}
+                  ? isVie
+                    ? 'Xuất bản cuộc thi'
+                    : 'Publish Event'
+                  : isVie
+                    ? 'Cập nhật cuộc thi'
+                    : 'Update Event'
+                : isVie
+                  ? 'Tạo cuộc thi'
+                  : 'Create Event'}
           </span>
         </button>
       </div>

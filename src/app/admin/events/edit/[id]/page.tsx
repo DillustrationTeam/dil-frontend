@@ -7,9 +7,12 @@ import { AlertTriangle, ArrowLeft, RefreshCw, Trophy } from 'lucide-react';
 import { CreateTab } from '@/features/event/components/event-admin/create-tab/create-tab';
 import { eventService } from '@/features/event/services/event.service';
 import type { EventListItemDto } from '@/features/event/types/event.types';
+import { useLanguage } from '@/context/language-context';
 import toast from 'react-hot-toast';
 
 export default function AdminEditEventPage() {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const [event, setEvent] = useState<EventListItemDto | null>(null);
@@ -72,20 +75,22 @@ export default function AdminEditEventPage() {
           className="mb-4 inline-flex items-center gap-2 text-xs font-semibold text-brand-periwinkle hover:text-white transition-colors"
         >
           <ArrowLeft size={14} />
-          <span>Back to Event Operations</span>
+          <span>{isVie ? 'Quay lại Quản lý sự kiện' : 'Back to Event Operations'}</span>
         </Link>
 
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <div className="mb-2.5 inline-flex items-center gap-2 rounded-full border border-brand-periwinkle/30 bg-brand-periwinkle/10 px-3.5 py-1 text-xs font-semibold text-brand-periwinkle">
               <Trophy size={13} className="text-amber-300" />
-              <span>Admin Center · Event Operations</span>
+              <span>{isVie ? 'Trung tâm Quản trị · Vận hành Sự kiện' : 'Admin Center · Event Operations'}</span>
             </div>
             <h1 className="font-h1 text-3xl sm:text-4xl font-extrabold tracking-tight text-white leading-tight">
-              Update Contest: {event?.title || params?.id}
+              {isVie ? 'Cập nhật cuộc thi: ' : 'Update Contest: '}{event?.title || params?.id}
             </h1>
             <p className="mt-2 text-sm text-[#A7ACD9] leading-relaxed max-w-3xl">
-              Modify contest overview, prize structure, submission deadlines, and jury configuration.
+              {isVie
+                ? 'Điều chỉnh thông tin cuộc thi, cơ cấu giải thưởng, thời hạn nộp bài và cấu hình ban giám khảo.'
+                : 'Modify contest overview, prize structure, submission deadlines, and jury configuration.'}
             </p>
           </div>
         </div>
