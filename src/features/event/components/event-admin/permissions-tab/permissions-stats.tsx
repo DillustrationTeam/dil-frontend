@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Crown, Users, MailCheck, FileSpreadsheet } from 'lucide-react';
+import { useLanguage } from '@/context/language-context';
 
 interface PermissionsStatsProps {
   headJuryCount?: number;
@@ -16,27 +17,30 @@ export function PermissionsStats({
   pendingInvitesCount = 0,
   assignedCount = 0,
 }: PermissionsStatsProps) {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
+
   const stats = [
     {
-      label: 'Head Jury',
+      label: isVie ? 'Trưởng ban' : 'Head Jury',
       value: headJuryCount,
       icon: Crown,
       color: 'text-amber-300',
     },
     {
-      label: 'Jury Members',
+      label: isVie ? 'Thành viên BGK' : 'Jury Members',
       value: juryCount,
       icon: Users,
       color: 'text-brand-periwinkle',
     },
     {
-      label: 'Pending Invites',
+      label: isVie ? 'Lời mời đang chờ' : 'Pending Invites',
       value: pendingInvitesCount,
       icon: MailCheck,
       color: 'text-cyan-300',
     },
     {
-      label: 'Assigned Submissions',
+      label: isVie ? 'Bài thi đã giao' : 'Assigned Submissions',
       value: assignedCount,
       icon: FileSpreadsheet,
       color: 'text-emerald-300',

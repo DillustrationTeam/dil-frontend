@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useLanguage } from '@/context/language-context';
 
 interface FeeRateSliderCardProps {
   feePercent: number;
@@ -11,6 +12,9 @@ export function FeeRateSliderCard({
   feePercent,
   onChange,
 }: FeeRateSliderCardProps) {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
+
   const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = parseFloat(e.target.value);
     onChange(Number(val.toFixed(1)));
@@ -22,21 +26,23 @@ export function FeeRateSliderCard({
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <label htmlFor="platform-fee-slider" className="font-bold text-white text-sm font-h1">
-              Global Platform Fee Rate Percentage
+              {isVie ? 'Tỷ lệ phí hoa hồng nền tảng' : 'Global Platform Fee Rate Percentage'}
             </label>
             <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-white/10 text-white/80">
               5.0% - 15.0%
             </span>
           </div>
           <p className="text-[11px] text-[#8A8FA9] font-body">
-            Applies to all newly created commission milestone escrow disbursements.
+            {isVie
+              ? 'Áp dụng cho tất cả các giao dịch giải ngân ký quỹ hợp đồng hoa hồng mới tạo.'
+              : 'Applies to all newly created commission milestone escrow disbursements.'}
           </p>
         </div>
 
         {/* Rate Display Badge */}
         <div className="flex items-center gap-3 self-start sm:self-center">
           <span className="text-xs text-[#8A8FA9] uppercase font-semibold tracking-wider">
-            Current Rate:
+            {isVie ? 'Mức phí hiện tại:' : 'Current Rate:'}
           </span>
           <span className="px-4 py-2 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 font-mono font-extrabold text-xl shadow-[0_0_15px_rgba(52,211,153,0.2)]">
             {feePercent.toFixed(1)}%
@@ -59,11 +65,11 @@ export function FeeRateSliderCard({
 
         {/* Slider scale markers */}
         <div className="flex justify-between text-[10px] text-[#8A8FA9] font-mono px-1">
-          <span>5.0% (Min)</span>
+          <span>5.0% ({isVie ? 'Tối thiểu' : 'Min'})</span>
           <span>7.5%</span>
-          <span className="text-white/60 font-bold">10.0% (Default)</span>
+          <span className="text-white/60 font-bold">10.0% ({isVie ? 'Mặc định' : 'Default'})</span>
           <span>12.5%</span>
-          <span>15.0% (Max)</span>
+          <span>15.0% ({isVie ? 'Tối đa' : 'Max'})</span>
         </div>
       </div>
     </div>

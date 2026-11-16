@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useState, useRef, useSyncExternalStore }
 import { createPortal } from 'react-dom';
 import { Search, ChevronDown, Check } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useLanguage } from '@/context/language-context';
 import { PermissionsStats } from './permissions-stats';
 import { PermissionsTable, JuryPermissionMember } from './permissions-table';
 import { InviteJuryCard } from './invite-jury-card';
@@ -58,6 +59,8 @@ export function ContestSearchSelect({
   onSelectEvent,
   showAllOption = false,
 }: ContestSearchSelectProps) {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
   const mounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState('');
@@ -67,7 +70,7 @@ export function ContestSearchSelect({
 
   const ALL_CONTESTS_ITEM: EventListItemDto = {
     id: 'all',
-    title: 'All Contests (Queue-wide)',
+    title: isVie ? 'Tất cả cuộc thi (Toàn hàng đợi)' : 'All Contests (Queue-wide)',
     status: 'All',
   } as EventListItemDto;
 
@@ -149,7 +152,7 @@ export function ContestSearchSelect({
             if (!isOpen) setIsOpen(true);
             updateCoords();
           }}
-          placeholder={selectedEvent ? selectedEvent.title : 'Type to search contest...'}
+          placeholder={selectedEvent ? selectedEvent.title : (isVie ? 'Nhập để tìm cuộc thi...' : 'Type to search contest...')}
           className="w-full h-10 pl-9 pr-24 bg-[#090b12] border border-white/20 rounded-xl text-xs text-white font-medium placeholder:text-slate-400 focus:outline-none focus:border-brand-periwinkle focus:ring-1 focus:ring-brand-periwinkle/30 transition-all cursor-text"
         />
 
@@ -186,7 +189,11 @@ export function ContestSearchSelect({
         >
           {filteredEvents.length === 0 ? (
             <div className="p-3 text-center text-xs text-slate-400">
-              No contests found matching &ldquo;<span className="text-white">{query}</span>&rdquo;
+              {isVie ? (
+                <>Không tìm thấy cuộc thi phù hợp &ldquo;<span className="text-white">{query}</span>&rdquo;</>
+              ) : (
+                <>No contests found matching &ldquo;<span className="text-white">{query}</span>&rdquo;</>
+              )}
             </div>
           ) : (
             filteredEvents.map((evt) => {
@@ -234,6 +241,9 @@ export function ContestSearchSelect({
 }
 
 export function PermissionsTab() {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
+
   const [events, setEvents] = useState<EventListItemDto[]>([]);
   const [selectedEventId, setSelectedEventId] = useState<string>('');
   const [members, setMembers] = useState<JuryPermissionMember[]>([]);
@@ -314,18 +324,18 @@ export function PermissionsTab() {
 
   const handleInviteSent = async (email: string, isHeadJury = false): Promise<boolean> => {
     if (isJudgingPhaseActive) {
-      toast.error('Cannot send jury invitation once the judging phase has started.');
+      toast.error(isVie ? 'Không thể gửi lời mời khi giai đoạn chấm thi đã bắt đầu.' : 'Cannot send jury invitation once the judging phase has started.');
       return false;
     }
 
     try {
       await juryService.sendInvitation(selectedEventId, email, isHeadJury);
-      toast.success(`Invitation sent to ${email} successfully!`);
+      toast.success(isVie ? `Đã gửi lời mời tới ${email} thành công!` : `Invitation sent to ${email} successfully!`);
       await loadEventMembers(selectedEventId);
       setCandidateRefreshKey((k) => k + 1);
       return true;
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Failed to send invitation.';
+      const msg = err instanceof Error ? err.message : (isVie ? 'Gửi lời mời thất bại.' : 'Failed to send invitation.');
       toast.error(msg);
       return false;
     }
@@ -333,23 +343,23 @@ export function PermissionsTab() {
 
   const handleUpdateRole = async (memberId: string, newRole: 'Head Jury' | 'Jury') => {
     if (isJudgingPhaseActive) {
-      toast.error('Cannot edit jury role once the judging phase has started.');
+      toast.error(isVie ? 'Không thể đổi vai trò khi giai đoạn chấm thi đã bắt đầu.' : 'Cannot edit jury role once the judging phase has started.');
       return;
     }
 
     try {
       await juryService.updateJuryRole(selectedEventId, memberId, newRole);
-      toast.success(`Updated role for member to ${newRole}.`);
+      toast.success(isVie ? `Đã cập nhật vai trò thành viên thành ${newRole === 'Head Jury' ? 'Trưởng ban' : 'Giám khảo'}.` : `Updated role for member to ${newRole}.`);
       await loadEventMembers(selectedEventId);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Failed to update jury role.';
+      const msg = err instanceof Error ? err.message : (isVie ? 'Cập nhật vai trò thất bại.' : 'Failed to update jury role.');
       toast.error(msg);
     }
   };
 
   const handleRemoveMember = async (memberId: string) => {
     if (isJudgingPhaseActive) {
-      toast.error('Cannot remove jury member once the judging phase has started.');
+      toast.error(isVie ? 'Không thể xóa thành viên khi giai đoạn chấm thi đã bắt đầu.' : 'Cannot remove jury member once the judging phase has started.');
       return;
     }
 
@@ -358,15 +368,15 @@ export function PermissionsTab() {
     try {
       if (target?.status === 'Pending') {
         await juryService.cancelInvitation(memberId);
-        toast.success('Pending jury invitation canceled.');
+        toast.success(isVie ? 'Đã hủy lời mời giám khảo đang chờ.' : 'Pending jury invitation canceled.');
       } else {
         await juryService.removeJury(memberId);
-        toast.success('Jury member removed successfully.');
+        toast.success(isVie ? 'Đã xóa thành viên ban giám khảo thành công.' : 'Jury member removed successfully.');
       }
       await loadEventMembers(selectedEventId);
       setCandidateRefreshKey((k) => k + 1);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Failed to remove jury member.';
+      const msg = err instanceof Error ? err.message : (isVie ? 'Xóa thành viên thất bại.' : 'Failed to remove jury member.');
       toast.error(msg);
     }
   };
@@ -382,7 +392,7 @@ export function PermissionsTab() {
       <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl border border-white/10 bg-[#161926]/80 backdrop-blur-xl mb-6">
         <div className="flex flex-wrap items-center gap-3">
           <label className="text-xs font-semibold text-[#A7ACD9] uppercase tracking-wider shrink-0">
-            Target Contest:
+            {isVie ? 'Cuộc thi mục tiêu:' : 'Target Contest:'}
           </label>
           <ContestSearchSelect
             events={events}
@@ -393,7 +403,7 @@ export function PermissionsTab() {
 
         {/* Status Indicator */}
         <div className="flex items-center gap-2">
-          <span className="text-xs text-outline">Judging Phase Status:</span>
+          <span className="text-xs text-outline">{isVie ? 'Trạng thái giai đoạn chấm:' : 'Judging Phase Status:'}</span>
           <span
             className={`px-3 py-1 rounded-full text-xs font-bold ${
               isJudgingPhaseActive
@@ -401,7 +411,9 @@ export function PermissionsTab() {
                 : 'bg-emerald-500/20 text-emerald-300 border border-emerald-400/30'
             }`}
           >
-            {isJudgingPhaseActive ? '🔒 Judging Started (Locked)' : '🔓 Open for Jury Assignments'}
+            {isJudgingPhaseActive
+              ? (isVie ? '🔒 Đã bắt đầu chấm (Đã khóa)' : '🔒 Judging Started (Locked)')
+              : (isVie ? '🔓 Mở phân công giám khảo' : '🔓 Open for Jury Assignments')}
           </span>
         </div>
       </div>

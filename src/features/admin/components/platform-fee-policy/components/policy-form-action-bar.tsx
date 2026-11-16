@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Clock, Save, RefreshCw } from 'lucide-react';
+import { useLanguage } from '@/context/language-context';
 
 interface PolicyFormActionBarProps {
   lastUpdated?: string | null;
@@ -16,11 +17,14 @@ export function PolicyFormActionBar({
   updating,
   policyExists,
 }: PolicyFormActionBarProps) {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
+
   const formatLastUpdated = (dateString?: string | null) => {
-    if (!dateString) return 'System Default Initialized';
+    if (!dateString) return isVie ? 'Khởi tạo mặc định hệ thống' : 'System Default Initialized';
     try {
       const date = new Date(dateString);
-      return date.toLocaleString('en-US', {
+      return date.toLocaleString(isVie ? 'vi-VN' : 'en-US', {
         month: 'short',
         day: 'numeric',
         year: 'numeric',
@@ -37,11 +41,12 @@ export function PolicyFormActionBar({
       <div className="flex items-center gap-3 text-xs text-[#8A8FA9] w-full sm:w-auto">
         <Clock className="w-3.5 h-3.5 text-[#8A8FA9]" />
         <span>
-          Last Modified: <span className="text-white font-medium">{formatLastUpdated(lastUpdated)}</span>
+          {isVie ? 'Sửa đổi lần cuối:' : 'Last Modified:'}{' '}
+          <span className="text-white font-medium">{formatLastUpdated(lastUpdated)}</span>
         </span>
         {isDirty && (
           <span className="px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 text-[10px] font-bold border border-amber-500/30">
-            Unsaved Changes
+            {isVie ? 'Thay đổi chưa lưu' : 'Unsaved Changes'}
           </span>
         )}
       </div>
@@ -56,12 +61,12 @@ export function PolicyFormActionBar({
           {updating ? (
             <>
               <RefreshCw className="w-4 h-4 animate-spin text-[#0f1017]" />
-              <span>Saving Changes...</span>
+              <span>{isVie ? 'Đang lưu...' : 'Saving Changes...'}</span>
             </>
           ) : (
             <>
               <Save className="w-4 h-4 text-[#0f1017]" />
-              <span>Save Changes</span>
+              <span>{isVie ? 'Lưu thay đổi' : 'Save Changes'}</span>
             </>
           )}
         </button>
