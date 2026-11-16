@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { isAxiosError } from 'axios';
+import { ExternalLink, FileText, Maximize2 } from 'lucide-react';
+import ReferenceLightboxModal from '@/components/modals/ReferenceLightboxModal';
 import { useLanguage } from '@/context/language-context';
 import { commissionService } from '@/services/commission.service';
 import { Commission } from '@/types/commission.types';
@@ -75,6 +77,7 @@ export default function ClientRequestPage() {
   const [error, setError] = useState('');
   const [showWithdraw, setShowWithdraw] = useState(false);
   const [withdrawReason, setWithdrawReason] = useState('');
+  const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
 
   useEffect(() => {
     if (!hasHydrated) return;
@@ -218,6 +221,50 @@ export default function ClientRequestPage() {
             {commission.description || (isEng ? 'No detailed description provided.' : 'Không có mô tả chi tiết.')}
           </p>
         </div>
+
+        {(commission.referenceImages?.length ?? 0) > 0 && (
+          <div className="mt-4 rounded-xl border border-white/10 bg-white/[0.03] p-5">
+            <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+              {isEng ? 'Reference materials' : 'Tài liệu & Hình ảnh tham khảo'} ({commission.referenceImages?.length})
+            </p>
+            <div className="mt-3 grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+              {commission.referenceImages?.map((url, idx) => {
+                const isImg = /\.(png|jpe?g|webp|gif|avif)(\?|$)/i.test(url) || url.includes('cloudinary.com') || (url.includes('commissions/references') && !/\.pdf(\?|$)/i.test(url));
+                const isPdf = /\.pdf(\?|$)/i.test(url);
+                const isDrive = url.includes('drive.google.com') || url.includes('docs.google.com');
+                const isPinterest = url.includes('pinterest.com') || url.includes('pin.it');
+                return (
+                  <div key={idx} className="group relative overflow-hidden rounded-lg border border-white/10 bg-black/40 p-2">
+                    {isImg ? (
+                      <button
+                        type="button"
+                        onClick={() => setLightboxUrl(url)}
+                        className="relative block h-24 w-full overflow-hidden rounded cursor-pointer"
+                        title={isEng ? 'Preview original image' : 'Xem ảnh gốc'}
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={url} alt={`Ref #${idx + 1}`} className="h-full w-full object-cover transition-transform group-hover:scale-105" />
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/35 opacity-0 transition-opacity group-hover:opacity-100">
+                          <Maximize2 className="h-4 w-4 text-white" />
+                        </div>
+                      </button>
+                    ) : (
+                      <a href={url} target="_blank" rel="noopener noreferrer" className="flex h-24 w-full flex-col items-center justify-center gap-1 overflow-hidden p-2 text-center text-xs text-slate-300 hover:text-white" title={url}>
+                        {isPdf ? <FileText className="h-5 w-5 shrink-0 text-rose-400" /> : <ExternalLink className="h-4 w-4 shrink-0 text-[#A7ACD9]" />}
+                        <span className="text-[11px] font-bold text-white">
+                          {isPdf ? (isEng ? 'PDF Document' : 'Tài liệu PDF') : isDrive ? 'Google Drive' : isPinterest ? 'Pinterest' : isEng ? 'External Link' : 'Liên kết ngoài'}
+                        </span>
+                        <span className="w-full truncate text-[10px] text-slate-400">
+                          {url.replace(/^https?:\/\/(www\.)?/, '')}
+                        </span>
+                      </a>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {milestones.length > 0 && (
           <div className="mt-4 rounded-xl border border-white/10 bg-white/[0.03] p-5">
@@ -373,6 +420,7 @@ export default function ClientRequestPage() {
           </p>
         )}
       </section>
+      <ReferenceLightboxModal url={lightboxUrl} onClose={() => setLightboxUrl(null)} />
     </main>
   );
 }

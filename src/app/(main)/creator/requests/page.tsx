@@ -7,13 +7,17 @@ import {
   CalendarClock,
   CheckCircle2,
   ChevronRight,
+  ExternalLink,
+  FileText,
   LoaderCircle,
+  Maximize2,
   PanelLeftClose,
   PanelLeftOpen,
   Send,
   X,
 } from 'lucide-react';
 import { useLanguage } from '@/context/language-context';
+import ReferenceLightboxModal from '@/components/modals/ReferenceLightboxModal';
 import { commissionService } from '@/services/commission.service';
 import { useAuthStore } from '@/store/use-auth-store';
 import { Commission, RespondToCommissionPayload } from '@/types/commission.types';
@@ -95,6 +99,7 @@ export default function CreatorRequestsPage() {
   const [rejecting, setRejecting] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
 
   useEffect(() => {
     if (!hasHydrated) return;
@@ -536,6 +541,50 @@ export default function CreatorRequestsPage() {
                       </p>
                     </div>
 
+                    {(selectedRequest.referenceImages?.length ?? 0) > 0 && (
+                      <div>
+                        <p className="mb-2 text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                          {isEng ? 'Reference materials' : 'Tài liệu & Hình ảnh tham khảo'} ({selectedRequest.referenceImages?.length})
+                        </p>
+                        <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+                          {selectedRequest.referenceImages?.map((url, idx) => {
+                            const isImg = /\.(png|jpe?g|webp|gif|avif)(\?|$)/i.test(url) || url.includes('cloudinary.com') || (url.includes('commissions/references') && !/\.pdf(\?|$)/i.test(url));
+                            const isPdf = /\.pdf(\?|$)/i.test(url);
+                            const isDrive = url.includes('drive.google.com') || url.includes('docs.google.com');
+                            const isPinterest = url.includes('pinterest.com') || url.includes('pin.it');
+                            return (
+                              <div key={idx} className="group relative overflow-hidden rounded-lg border border-[#1E2536] bg-[#121624] p-2">
+                                {isImg ? (
+                                  <button
+                                    type="button"
+                                    onClick={() => setLightboxUrl(url)}
+                                    className="relative block h-24 w-full overflow-hidden rounded cursor-pointer"
+                                    title={isEng ? 'Preview original image' : 'Xem ảnh gốc'}
+                                  >
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                    <img src={url} alt={`Ref #${idx + 1}`} className="h-full w-full object-cover transition-transform group-hover:scale-105" />
+                                    <div className="absolute inset-0 flex items-center justify-center bg-black/35 opacity-0 transition-opacity group-hover:opacity-100">
+                                      <Maximize2 className="h-4 w-4 text-white" />
+                                    </div>
+                                  </button>
+                                ) : (
+                                  <a href={url} target="_blank" rel="noopener noreferrer" className="flex h-24 w-full flex-col items-center justify-center gap-1 overflow-hidden p-2 text-center text-xs text-slate-300 hover:text-white" title={url}>
+                                    {isPdf ? <FileText className="h-5 w-5 shrink-0 text-rose-400" /> : <ExternalLink className="h-4 w-4 shrink-0 text-[#A7ACD9]" />}
+                                    <span className="text-[11px] font-bold text-white">
+                                      {isPdf ? (isEng ? 'PDF Document' : 'Tài liệu PDF') : isDrive ? 'Google Drive' : isPinterest ? 'Pinterest' : isEng ? 'External Link' : 'Liên kết ngoài'}
+                                    </span>
+                                    <span className="w-full truncate text-[10px] text-slate-400">
+                                      {url.replace(/^https?:\/\/(www\.)?/, '')}
+                                    </span>
+                                  </a>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+
                     <dl className="grid gap-4 border-y border-[#1E2536] py-4 text-sm sm:grid-cols-3">
                       <div>
                         <dt className="text-xs text-slate-500">
@@ -763,6 +812,7 @@ export default function CreatorRequestsPage() {
           )}
         </div>
       )}
+      <ReferenceLightboxModal url={lightboxUrl} onClose={() => setLightboxUrl(null)} />
     </div>
   );
 }

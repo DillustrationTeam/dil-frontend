@@ -7,9 +7,10 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { X, AlertCircle, Sparkles, Loader2, Check, RefreshCw, Dice5 } from 'lucide-react';
+import { X, AlertCircle, Sparkles, Loader2, Check, RefreshCw, Dice5, UploadCloud, Link2, Plus, FolderOpen } from 'lucide-react';
 import { aiService } from '@/features/ai-assistant/services/ai.service';
 import { commissionService } from '@/services/commission.service';
+import { validateReferenceFile, validateReferenceLink, type ReferenceType } from '@/lib/validation/link-validator';
 import { creatorRateCardService, getPackageSlotInfo, RateCardPackage } from '@/features/creator-studio/services/creator-rate-card.service';
 import { creatorProfileService } from '@/features/creator-studio/services/creator-profile.service';
 import { CreatorTermsOverview } from '@/components/terms/CreatorTermsOverview';
@@ -47,6 +48,108 @@ export default function CreateCommissionModal({ creatorId, creatorName, onClose,
   const [aiBriefing, setAiBriefing] = useState(false);
   const [aiSuggestion, setAiSuggestion] = useState<string | null>(null);
   const [isRandomIdea, setIsRandomIdea] = useState(false);
+
+  // States & handlers cho Tệp & Liên kết tham khảo (Reference Materials / Ref)
+  interface ReferenceItem {
+    id: string;
+    url: string;
+    name: string;
+    size?: number;
+    type: ReferenceType;
+    isUploading?: boolean;
+  }
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [referenceItems, setReferenceItems] = useState<ReferenceItem[]>([]);
+  const [linkInput, setLinkInput] = useState('');
+  const [linkError, setLinkError] = useState<string | null>(null);
+  const [isUploadingFile, setIsUploadingFile] = useState(false);
+
+  const handleFilesSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+
+    if (referenceItems.length + files.length > 10) {
+      setLinkError('Chỉ được đính kèm tối đa 10 tệp/liên kết tham chiếu cho một đơn vẽ.');
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      return;
+    }
+
+    for (const file of files) {
+      const val = validateReferenceFile(file);
+      if (!val.isValid) {
+        setLinkError(val.error || 'Tệp không hợp lệ.');
+        if (fileInputRef.current) fileInputRef.current.value = '';
+        return;
+      }
+    }
+
+    setIsUploadingFile(true);
+    setLinkError(null);
+
+    try {
+      for (const file of files) {
+        const tempId = `${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+        const ext = file.name.split('.').pop()?.toLowerCase();
+        const type: ReferenceType = ext === 'pdf' ? 'pdf' : 'image';
+
+        const uploaded = await commissionService.uploadAttachment(file);
+        setReferenceItems((prev) => [
+          ...prev,
+          {
+            id: tempId,
+            url: uploaded.url,
+            name: file.name,
+            size: file.size,
+            type,
+            isUploading: false,
+          },
+        ]);
+      }
+    } catch (err: unknown) {
+      setLinkError(extractErrorMessage(err, 'Tải tệp đính kèm thất bại. Vui lòng thử lại.'));
+    } finally {
+      setIsUploadingFile(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const handleAddLink = () => {
+    setLinkError(null);
+    const trimmed = linkInput.trim();
+    if (!trimmed) return;
+
+    if (referenceItems.length >= 10) {
+      setLinkError('Chỉ được đính kèm tối đa 10 tệp/liên kết tham chiếu.');
+      return;
+    }
+
+    const val = validateReferenceLink(trimmed);
+    if (!val.isValid || !val.normalizedUrl) {
+      setLinkError(val.error || 'Liên kết không hợp lệ.');
+      return;
+    }
+
+    if (referenceItems.some((i) => i.url.toLowerCase() === val.normalizedUrl!.toLowerCase())) {
+      setLinkError('Liên kết này đã có trong danh sách đính kèm.');
+      return;
+    }
+
+    setReferenceItems((prev) => [
+      ...prev,
+      {
+        id: `${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+        url: val.normalizedUrl!,
+        name: val.domain ? `${val.domain} (${(val.type || 'LINK').toUpperCase()})` : trimmed,
+        type: val.type || 'link',
+        isUploading: false,
+      },
+    ]);
+    setLinkInput('');
+  };
+
+  const handleRemoveItem = (id: string) => {
+    setReferenceItems((prev) => prev.filter((item) => item.id !== id));
+  };
 
   const { register, handleSubmit, setValue, getValues, formState: { errors } } = useForm<Form>({
     resolver: zodResolver(schema),
@@ -136,6 +239,7 @@ export default function CreateCommissionModal({ creatorId, creatorName, onClose,
 
     setBusy(true);
     try {
+      const refUrls = referenceItems.filter((i) => !i.isUploading && i.url).map((i) => i.url);
       const created = await commissionService.create({
         creatorId,
         packageId: selectedPackage.id,
@@ -145,6 +249,7 @@ export default function CreateCommissionModal({ creatorId, creatorName, onClose,
         description: values.description,
         voucherCode: values.voucherCode || undefined,
         deadlineAt: values.deadlineAt ? new Date(values.deadlineAt).toISOString() : undefined,
+        referenceImages: refUrls,
       });
       onClose();
       router.push(`/client/requests/${created.id}`);
@@ -342,6 +447,132 @@ export default function CreateCommissionModal({ creatorId, creatorName, onClose,
                     <span>Gợi ý ngẫu nhiên</span>
                   </button>
                 </div>
+              </div>
+            )}
+          </div>
+
+          {/* TÀI LIỆU & HÌNH ẢNH THAM KHẢO (REFERENCE / REF) */}
+          <div className="space-y-3 rounded-2xl border border-white/10 bg-white/[0.02] p-4">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <label className={label}>ẢNH / TÀI LIỆU THAM KHẢO</label>
+                <p className="mt-0.5 text-[11px] text-[#8A8FA9]">
+                  Đính kèm ảnh mẫu hoặc liên kết tham khảo cho họa sĩ.
+                </p>
+              </div>
+              <span className="shrink-0 whitespace-nowrap text-[10px] font-mono font-bold text-slate-400">
+                {referenceItems.length}/10 tệp
+              </span>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-2">
+              {/* Tải tệp lên */}
+              <div>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  multiple
+                  accept="image/png,image/jpeg,image/webp,image/gif,application/pdf,.pdf"
+                  className="hidden"
+                  onChange={(e) => void handleFilesSelected(e)}
+                />
+                <button
+                  type="button"
+                  disabled={busy || isUploadingFile || referenceItems.length >= 10}
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-white/20 bg-white/[0.03] px-4 py-3 text-xs font-semibold text-slate-200 transition hover:border-[#A7ACD9] hover:bg-[#A7ACD9]/10 disabled:opacity-45"
+                >
+                  {isUploadingFile ? (
+                    <Loader2 className="h-4 w-4 animate-spin text-[#A7ACD9]" />
+                  ) : (
+                    <UploadCloud className="h-4 w-4 text-[#A7ACD9]" />
+                  )}
+                  <span>{isUploadingFile ? 'Đang tải tệp lên…' : 'Tải ảnh mẫu (PNG, JPG, PDF ≤ 10MB)'}</span>
+                </button>
+              </div>
+
+              {/* Dán link */}
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <input
+                    type="url"
+                    value={linkInput}
+                    onChange={(e) => {
+                      setLinkInput(e.target.value);
+                      if (linkError) setLinkError(null);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleAddLink();
+                      }
+                    }}
+                    placeholder="Dán liên kết Drive, Pinterest, Imgur…"
+                    className="w-full rounded-xl border border-white/10 bg-black/40 px-3.5 py-3 text-xs text-white placeholder:text-slate-500 focus:border-[#C5C9F8] focus:outline-none"
+                  />
+                </div>
+                <button
+                  type="button"
+                  disabled={busy || !linkInput.trim() || referenceItems.length >= 10}
+                  onClick={handleAddLink}
+                  title="Thêm liên kết"
+                  className="shrink-0 rounded-xl border border-white/15 bg-white/5 px-3.5 py-3 text-xs font-bold text-white transition hover:bg-white/10 disabled:opacity-40"
+                >
+                  <Plus className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+
+            {linkError && (
+              <p role="alert" className="flex items-center gap-1.5 text-xs text-red-300">
+                <AlertCircle className="h-3.5 w-3.5 shrink-0" /> {linkError}
+              </p>
+            )}
+
+            {/* Danh sách tệp/link đã thêm */}
+            {referenceItems.length > 0 && (
+              <div className="grid grid-cols-2 gap-2 pt-1 sm:grid-cols-3">
+                {referenceItems.map((item) => (
+                  <div
+                    key={item.id}
+                    className="group relative flex items-center gap-2.5 overflow-hidden rounded-xl border border-white/10 bg-[#191D2B] p-2 pr-7 text-xs transition hover:border-white/20"
+                  >
+                    {item.type === 'image' && item.url ? (
+                      <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-black/40">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={item.url} alt={item.name} className="h-full w-full object-cover" />
+                      </div>
+                    ) : (
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white/5 text-[#A7ACD9]">
+                        {item.type === 'drive' ? <FolderOpen className="h-5 w-5" /> : <Link2 className="h-5 w-5" />}
+                      </div>
+                    )}
+
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-[11px] font-semibold text-white">{item.name}</p>
+                      <p className="text-[10px] text-slate-400">
+                        {item.isUploading
+                          ? 'Đang tải lên…'
+                          : item.size
+                            ? `${(item.size / (1024 * 1024)).toFixed(1)} MB`
+                            : item.type === 'drive'
+                              ? 'Google Drive'
+                              : item.type === 'pinterest'
+                                ? 'Pinterest'
+                                : 'Liên kết web'}
+                      </p>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveItem(item.id)}
+                      className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded-md p-1 text-slate-400 transition hover:bg-rose-500/20 hover:text-rose-300"
+                      title="Xóa tệp tham khảo này"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                ))}
               </div>
             )}
           </div>

@@ -81,6 +81,7 @@ export interface Commission {
   currentWorkroomTermsVersion?: string;
   creatorTermsSnapshot?: CreatorTermsDto | null;
   milestones?: Milestone[];
+  referenceImages?: string[];
   review?: Review | null;
   dispute?: Dispute | null;
   createdAt: string;
@@ -121,6 +122,7 @@ export interface CreateCommissionPayload {
   title: string;
   description: string;
   deadlineAt?: string;
+  referenceImages?: string[];
 }
 
 export interface Review {

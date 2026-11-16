@@ -20,6 +20,22 @@ async function getAll(role: 'Client' | 'Creator', status?: string): Promise<Comm
 }
 
 export const commissionService = {
+  uploadAttachment: async (file: File): Promise<{ url: string; fileName: string; fileSize: number }> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const res = await apiClient.post<ApiResponse<{ url: string; fileName: string; fileSize: number }>>(
+      '/commissions/attachments',
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
+    if (!res.data.data?.url) throw new Error('Không thể tải tệp đính kèm lên.');
+    return res.data.data;
+  },
+
   create: async (data: CreateCommissionPayload) => {
     const res = await apiClient.post<ApiResponse<Commission>>('/commissions', data);
     return res.data.data as Commission;
