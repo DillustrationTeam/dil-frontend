@@ -102,6 +102,10 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
   const [isAuto, setIsAuto] = useState<boolean>(false);
   const [maxAutoBid, setMaxAutoBid] = useState<string>('');
   const [activeAutoBidCap, setActiveAutoBidCap] = useState<number | null>(null);
+  const [cancellingAutoBid, setCancellingAutoBid] = useState<boolean>(false);
+  // Phân trang lịch sử đặt giá: `recentBids` của API chi tiết chỉ có 10 lượt gần nhất.
+  const [bidCursor, setBidCursor] = useState<string | null>(null);
+  const [loadingMoreBids, setLoadingMoreBids] = useState<boolean>(false);
   // Mức tối thiểu đang hiển thị trong ô giá — dùng để biết người dùng đã tự sửa ô hay chưa
   // trước khi ghi đè bằng giá mới từ realtime.
   const previousMinimumBidRef = useRef<string>('');
@@ -156,6 +160,7 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
 
       setAuction(detailRes.auction);
       setBids(sortBids(detailRes.recentBids));
+      setBidCursor(null);
       setWatching(detailRes.auction.isWatching);
       if (walletRes) setWallet(walletRes);
 
@@ -402,6 +407,73 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
       }
     } finally {
       setSubmittingBid(false);
+    }
+  }
+
+  /**
+   * Huỷ đăng ký Auto-bid. Lượt đặt giá đang dẫn đầu vẫn được giữ — chỉ dừng việc tự động
+   * nâng giá khi có người đè, nên phải nói rõ điều đó trước khi người dùng bấm.
+   */
+  async function handleCancelAutoBid() {
+    if (!activeAutoBidCap || cancellingAutoBid) return;
+    if (!confirm(
+      `Huỷ Auto-bid với giá trần ${formatVnd(activeAutoBidCap)}?\n\nLượt đặt giá hiện tại của bạn vẫn được giữ, nhưng hệ thống sẽ KHÔNG tự nâng giá nữa khi có người đè — bạn phải tự đặt giá lại.`,
+    )) return;
+
+    setCancellingAutoBid(true);
+    setError(null);
+    setSuccess(null);
+    try {
+      await auctionService.cancelAutoBid(auctionId);
+      setActiveAutoBidCap(null);
+      setIsAuto(false);
+      setMaxAutoBid('');
+      setSuccess('Đã huỷ Auto-bid. Lượt đặt giá hiện tại của bạn vẫn được giữ nguyên.');
+      await loadDetail({ silent: true });
+    } catch (err: unknown) {
+      setError(auctionError(err));
+    } finally {
+      setCancellingAutoBid(false);
+    }
+  }
+
+  /**
+   * Tải thêm lịch sử đặt giá (API trả theo cursor, mỗi trang 10 lượt).
+   *
+   * Trang đầu của `/bids` trùng đúng 10 lượt `recentBids` đã hiển thị, nên lần bấm đầu tiên
+   * sẽ không thêm dòng nào — vòng lặp dưới đây đi tiếp cho tới khi có lượt mới thật sự.
+   */
+  async function loadMoreBids() {
+    if (loadingMoreBids) return;
+    setLoadingMoreBids(true);
+    setError(null);
+    try {
+      const seen = new Set(bids.map((b) => b.bidId));
+      let cursor = bidCursor ?? undefined;
+      let appended = 0;
+      let next: string | null = bidCursor;
+
+      for (let page = 0; page < 4; page += 1) {
+        const res = await auctionService.bids(auctionId, cursor);
+        const fresh = res.items.filter((b) => !seen.has(b.bidId));
+        fresh.forEach((b) => seen.add(b.bidId));
+        if (fresh.length > 0) {
+          setBids((prev) => sortBids([...prev, ...fresh]));
+          appended += fresh.length;
+        }
+        next = res.nextCursor;
+        cursor = res.nextCursor ?? undefined;
+        if (appended > 0 || !next) break;
+      }
+
+      setBidCursor(next);
+      if (appended === 0) {
+        setSuccess('Đã hiển thị toàn bộ lịch sử đặt giá của phiên này.');
+      }
+    } catch (err: unknown) {
+      setError(auctionError(err));
+    } finally {
+      setLoadingMoreBids(false);
     }
   }
 
@@ -882,6 +954,25 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
               </div>
             )}
 
+            {/* AUCT-04 — người bán sửa thông số phiên khi phiên chưa mở và chưa có lượt đặt giá */}
+            {isSeller && auction.auctionStatus === 'Scheduled' && auction.bidCount === 0 && (
+              <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-amber-400/25 bg-amber-400/10 p-4 text-xs">
+                <div className="flex items-start gap-2 text-amber-100">
+                  <CalendarDays size={16} className="mt-0.5 shrink-0 text-amber-300" />
+                  <span>
+                    Phiên <strong>chưa bắt đầu</strong> và chưa có lượt đặt giá — bạn vẫn sửa được giá khởi điểm,
+                    bước giá, giá mua ngay và thời gian.
+                  </span>
+                </div>
+                <Link
+                  href={`/auctions/${auctionId}/edit`}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-amber-300/40 bg-amber-400 px-4 py-2 font-h1 text-[11px] font-bold text-brand-navy transition hover:brightness-110"
+                >
+                  <RefreshCw size={13} /> Sửa phiên
+                </Link>
+              </div>
+            )}
+
             {/* Quản lý giao nhận tranh vật lý & Biên lai ký quỹ/bưu cục (UC35) */}
             {auction.hasPhysicalCopy && (
               <div className="mb-6">
@@ -971,7 +1062,7 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
                 {/* FE-08 Auto-bid settings */}
                 <div className="rounded-xl border border-white/10 bg-white/5 p-3 text-xs">
                   {activeAutoBidCap && (
-                    <div className="mb-3 flex items-center justify-between rounded-lg border border-emerald-400/30 bg-emerald-500/10 px-3 py-2 text-emerald-200">
+                    <div className="mb-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-emerald-400/30 bg-emerald-500/10 px-3 py-2 text-emerald-200">
                       <span className="flex items-center gap-2 font-semibold">
                         <LoaderCircle size={14} className="animate-spin motion-reduce:animate-none" aria-hidden="true" />
                         <span>
@@ -979,7 +1070,18 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
                         </span>
                         <span className="size-1.5 rounded-full bg-emerald-300 animate-pulse motion-reduce:animate-none" aria-hidden="true" />
                       </span>
-                      <span className="font-mono">Trần {formatVnd(activeAutoBidCap)}</span>
+                      <span className="flex items-center gap-2">
+                        <span className="font-mono">Trần {formatVnd(activeAutoBidCap)}</span>
+                        <button
+                          type="button"
+                          onClick={() => void handleCancelAutoBid()}
+                          disabled={cancellingAutoBid}
+                          className="inline-flex items-center gap-1 rounded-full border border-rose-300/40 bg-rose-500/15 px-2.5 py-1 text-[11px] font-semibold text-rose-200 transition hover:bg-rose-500/25 disabled:opacity-50"
+                          title="Dừng tự động nâng giá khi bị đè"
+                        >
+                          <X size={12} /> {cancellingAutoBid ? 'Đang huỷ…' : 'Huỷ Auto-bid'}
+                        </button>
+                      </span>
                     </div>
                   )}
                   <label className="flex cursor-pointer items-center justify-between gap-3">
@@ -1158,6 +1260,30 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
                   );
                 })}
               </div>
+            )}
+
+            {/* Tải thêm lịch sử: API chi tiết chỉ trả 10 lượt gần nhất, còn bidCount là tổng thật. */}
+            {auction.bidCount > bids.length && (
+              <div className="mt-3 text-center">
+                <button
+                  type="button"
+                  onClick={() => void loadMoreBids()}
+                  disabled={loadingMoreBids}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-brand-periwinkle/40 bg-brand-periwinkle/10 px-4 py-2 text-[11px] font-semibold text-brand-periwinkle transition hover:bg-brand-periwinkle hover:text-brand-navy disabled:opacity-50"
+                >
+                  {loadingMoreBids ? (
+                    <LoaderCircle size={12} className="animate-spin motion-reduce:animate-none" />
+                  ) : (
+                    <RefreshCw size={12} />
+                  )}
+                  {loadingMoreBids
+                    ? 'Đang tải thêm…'
+                    : `Xem thêm lượt đặt giá cũ hơn (còn ${Math.max(auction.bidCount - bids.length, 0)})`}
+                </button>
+              </div>
+            )}
+            {bids.length > 0 && auction.bidCount <= bids.length && bids.length > 10 && (
+              <p className="mt-2 text-center text-[10px] text-outline">Đã hiển thị toàn bộ lượt đặt giá của phiên này.</p>
             )}
           </section>
         </div>

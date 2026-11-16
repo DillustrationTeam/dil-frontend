@@ -564,27 +564,54 @@ export function AdminDeliveryDashboard() {
               </p>
             )}
 
-            {resolveTarget.delivery?.disputeEvidenceUrl && (
-              <div className="mt-3 rounded-xl border border-rose-400/30 bg-rose-500/10 p-3">
-                <p className="text-[11px] font-semibold text-rose-200">Ảnh bằng chứng người mua tải lên:</p>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {resolveTarget.delivery.disputeEvidenceUrl
-                    .split(',')
-                    .map((url) => url.trim())
-                    .filter(Boolean)
-                    .map((url, idx) => (
-                      <button
-                        key={url}
-                        type="button"
-                        onClick={() => setPreviewImage({ url, title: `Bằng chứng khiếu nại #${idx + 1}` })}
-                        className="relative h-20 w-20 cursor-zoom-in overflow-hidden rounded-lg border border-white/20 transition hover:border-rose-300 hover:ring-2 hover:ring-rose-400/40"
+            {(() => {
+              // Gộp ảnh cũ (1 URL, có thể phân tách bằng dấu phẩy) với danh sách ảnh mới (tối đa 5).
+              const legacy = resolveTarget.delivery?.disputeEvidenceUrl
+                ? resolveTarget.delivery.disputeEvidenceUrl.split(',').map((u) => u.trim()).filter(Boolean)
+                : [];
+              const gallery = Array.from(
+                new Set([...(resolveTarget.delivery?.disputeImageUrls ?? []), ...legacy].filter(Boolean)),
+              );
+              const videoUrl = resolveTarget.delivery?.disputeVideoUrl ?? null;
+              if (gallery.length === 0 && !videoUrl) return null;
+
+              return (
+                <div className="mt-3 rounded-xl border border-rose-400/30 bg-rose-500/10 p-3">
+                  <p className="text-[11px] font-semibold text-rose-200">
+                    Bằng chứng người mua tải lên ({gallery.length} ảnh{videoUrl ? ' + 1 video' : ''}):
+                  </p>
+                  {gallery.length > 0 && (
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {gallery.map((url, idx) => (
+                        <button
+                          key={url}
+                          type="button"
+                          onClick={() => setPreviewImage({ url, title: `Bằng chứng khiếu nại #${idx + 1}` })}
+                          className="relative h-20 w-20 cursor-zoom-in overflow-hidden rounded-lg border border-white/20 transition hover:border-rose-300 hover:ring-2 hover:ring-rose-400/40"
+                        >
+                          <Image src={url} alt={`Bằng chứng ${idx + 1}`} fill unoptimized className="object-cover" />
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  {videoUrl && (
+                    <div className="mt-2 space-y-1">
+                      <p className="text-[11px] font-semibold text-rose-200">Video bằng chứng:</p>
+                      { }
+                      <video src={videoUrl} controls className="max-h-56 w-full rounded-lg border border-white/15" />
+                      <a
+                        href={videoUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1 text-[10px] text-brand-periwinkle underline"
                       >
-                        <Image src={url} alt={`Bằng chứng ${idx + 1}`} fill unoptimized className="object-cover" />
-                      </button>
-                    ))}
+                        Mở video ở tab mới <ExternalLink size={10} />
+                      </a>
+                    </div>
+                  )}
                 </div>
-              </div>
-            )}
+              );
+            })()}
 
             <label className="mt-4 block text-[11px] font-semibold text-on-surface-variant">
               Ghi chú phân xử (lưu vào nhật ký)
