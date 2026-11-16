@@ -2,7 +2,7 @@ import { z } from 'zod';
 import type { CreatorAssetDto } from '../types/creator-profile.types';
 
 export const assetSchema = z.object({
-  assetType: z.enum(['Pose', 'Palette', 'Preset']),
+  assetType: z.enum(['Pose', 'Palette', 'Preset', 'Ref']),
   name: z.string().trim().min(1, 'Nhập tên tài nguyên.').max(120, 'Tên tối đa 120 ký tự.'),
   assetUrl: z.string().trim().max(2048).refine(value => {
     if (!value) return true;
@@ -18,11 +18,13 @@ export const assetSchema = z.object({
     ctx.addIssue({ code: 'custom', path: ['assetUrl'], message: 'Tải lên hoặc nhập URL ảnh pose mẫu.' });
   if (value.assetType === 'Preset' && !value.assetUrl && !value.notes)
     ctx.addIssue({ code: 'custom', path: ['notes'], message: 'Nhập hướng dẫn preset hoặc thêm ảnh tham chiếu.' });
+  if (value.assetType === 'Ref' && !value.assetUrl && !value.notes)
+    ctx.addIssue({ code: 'custom', path: ['assetUrl'], message: 'Tải lên hoặc nhập đường dẫn tài liệu tham khảo.' });
 });
 
 export type AssetDraft = z.infer<typeof assetSchema>;
 
-export function assetDetails(asset: CreatorAssetDto): { colors: string[]; notes: string } {
+export function assetDetails(asset: CreatorAssetDto): { colors: string[]; notes: string; commissionId?: string } {
   try {
     const value: unknown = JSON.parse(asset.metadataJson || '{}');
     if (!value || typeof value !== 'object') return { colors: [], notes: '' };
@@ -30,12 +32,18 @@ export function assetDetails(asset: CreatorAssetDto): { colors: string[]; notes:
     return {
       colors: Array.isArray(data.colors) ? data.colors.filter((x): x is string => typeof x === 'string' && /^#[0-9a-fA-F]{6}$/.test(x)).slice(0, 16) : [],
       notes: typeof data.notes === 'string' ? data.notes : typeof data.preset === 'string' ? data.preset : '',
+      commissionId: typeof data.commissionId === 'string' ? data.commissionId : undefined,
     };
   } catch { return { colors: [], notes: '' }; }
 }
 
 export function assetMessage(asset: CreatorAssetDto): string {
   const { colors, notes } = assetDetails(asset);
-  return [asset.assetType === 'Palette' ? `Bảng màu: ${asset.name}` : `Tài nguyên ${asset.assetType}: ${asset.name}`,
-    colors.length ? colors.join(' · ') : '', notes, asset.assetUrl || ''].filter(Boolean).join('\n');
+  const label = asset.assetType === 'Palette'
+    ? `Bảng màu: ${asset.name}`
+    : asset.assetType === 'Ref'
+      ? `Tài liệu tham khảo: ${asset.name}`
+      : `Tài nguyên ${asset.assetType}: ${asset.name}`;
+  return [label,
+    colors.length ? colors.join(' · ') : '', asset.assetType === 'Ref' ? '' : notes, asset.assetUrl || ''].filter(Boolean).join('\n');
 }
