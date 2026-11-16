@@ -374,6 +374,7 @@ export function PermissionsTab() {
   const headJuryCount = members.filter((m) => m.role === 'Head Jury').length;
   const juryCount = members.filter((m) => m.role === 'Jury').length;
   const pendingInvitesCount = members.filter((m) => m.status === 'Pending').length;
+  const assignedSubmissionsCount = selectedEvent?.submissionCount ?? 0;
 
   return (
     <div>
@@ -409,7 +410,7 @@ export function PermissionsTab() {
         headJuryCount={headJuryCount}
         juryCount={juryCount}
         pendingInvitesCount={pendingInvitesCount}
-        assignedCount={248}
+        assignedCount={assignedSubmissionsCount}
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">

@@ -932,6 +932,9 @@ export function EventHeadJuryScreen({ eventId }: EventHeadJuryScreenProps) {
         {activeTab === 'progress' && (
           <HeadJuryProgressTab
             overallJuryProgress={overallJuryProgress}
+            totalSubmissions={headData?.totalSubmissions || submissions.length}
+            fullyGradedCount={headData?.gradedSubmissions || submissions.filter((s) => s.isGraded).length}
+            anomalyFlagsCount={headData?.anomalyFlagsCount || arbitrationCasesList.length}
             juryList={juryList}
             filteredJuryList={filteredJuryList}
             selectedJuryId={selectedJuryId}

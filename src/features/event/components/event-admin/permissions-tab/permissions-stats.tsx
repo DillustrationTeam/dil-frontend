@@ -11,10 +11,10 @@ interface PermissionsStatsProps {
 }
 
 export function PermissionsStats({
-  headJuryCount = 1,
-  juryCount = 7,
-  pendingInvitesCount = 2,
-  assignedCount = 248,
+  headJuryCount = 0,
+  juryCount = 0,
+  pendingInvitesCount = 0,
+  assignedCount = 0,
 }: PermissionsStatsProps) {
   const stats = [
     {

@@ -7,6 +7,9 @@ import { EventSearchFilterBar } from '../event/event-search-filter-bar';
 
 interface HeadJuryProgressTabProps {
   overallJuryProgress: { completed: number; total: number; percent: number };
+  totalSubmissions?: number;
+  fullyGradedCount?: number;
+  anomalyFlagsCount?: number;
   juryList: JuryProgressItem[];
   filteredJuryList: JuryProgressItem[];
   selectedJuryId: string | null;
@@ -24,6 +27,9 @@ interface HeadJuryProgressTabProps {
 
 export function HeadJuryProgressTab({
   overallJuryProgress,
+  totalSubmissions = 0,
+  fullyGradedCount = 0,
+  anomalyFlagsCount = 0,
   juryList,
   filteredJuryList,
   selectedJury,
@@ -37,28 +43,39 @@ export function HeadJuryProgressTab({
   selectedJuryAssignments,
   filteredJuryAssignments,
 }: HeadJuryProgressTabProps) {
+  const completedJuries = juryList.filter((j) => j.isCompleted).length;
+  const totalJuries = juryList.length;
+
   return (
     <section className="space-y-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <article className="p-5 rounded-2xl bg-white/[0.03] border border-white/10 backdrop-blur-xl relative overflow-hidden">
           <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#A7ACD9] via-[#7FD5E8] to-transparent opacity-75" />
           <span className="text-[11px] uppercase tracking-wider text-[#9695a1]">Total Submissions</span>
-          <strong className="block mt-1 font-sora text-2xl sm:text-3xl font-bold text-white">248</strong>
+          <strong className="block mt-1 font-sora text-2xl sm:text-3xl font-bold text-white">
+            {totalSubmissions}
+          </strong>
         </article>
         <article className="p-5 rounded-2xl bg-white/[0.03] border border-white/10 backdrop-blur-xl relative overflow-hidden">
           <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-emerald-400 via-teal-300 to-transparent opacity-75" />
           <span className="text-[11px] uppercase tracking-wider text-[#9695a1]">Fully Graded</span>
-          <strong className="block mt-1 font-sora text-2xl sm:text-3xl font-bold text-emerald-400">231</strong>
+          <strong className="block mt-1 font-sora text-2xl sm:text-3xl font-bold text-emerald-400">
+            {fullyGradedCount}
+          </strong>
         </article>
         <article className="p-5 rounded-2xl bg-white/[0.03] border border-white/10 backdrop-blur-xl relative overflow-hidden">
           <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-amber-400 via-orange-300 to-transparent opacity-75" />
           <span className="text-[11px] uppercase tracking-wider text-[#9695a1]">Juries Completed</span>
-          <strong className="block mt-1 font-sora text-2xl sm:text-3xl font-bold text-amber-300">5 / 7</strong>
+          <strong className="block mt-1 font-sora text-2xl sm:text-3xl font-bold text-amber-300">
+            {completedJuries} / {totalJuries}
+          </strong>
         </article>
         <article className="p-5 rounded-2xl bg-white/[0.03] border border-white/10 backdrop-blur-xl relative overflow-hidden">
           <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-rose-400 via-pink-300 to-transparent opacity-75" />
           <span className="text-[11px] uppercase tracking-wider text-[#9695a1]">Dispute Flags</span>
-          <strong className="block mt-1 font-sora text-2xl sm:text-3xl font-bold text-rose-400">7</strong>
+          <strong className="block mt-1 font-sora text-2xl sm:text-3xl font-bold text-rose-400">
+            {anomalyFlagsCount}
+          </strong>
         </article>
       </div>
 
