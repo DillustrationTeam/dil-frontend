@@ -9,6 +9,7 @@ import {
   ShieldCheck,
   Shield,
 } from 'lucide-react';
+import { useLanguage } from '@/context/language-context';
 import {
   UserAdminListItemDto,
   UserAdminDetailDto,
@@ -60,6 +61,48 @@ export function UserRolesModal({
   onClose,
   onSubmit,
 }: UserRolesModalProps) {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
+
+  const availableRoles = [
+    {
+      id: 'Client',
+      name: isVie ? 'Khách hàng' : 'Client',
+      badge: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
+      icon: <ShoppingBag className="w-4 h-4 text-emerald-400" />,
+      description: isVie
+        ? 'Khám phá tác phẩm, đặt vẽ hoa hồng, nạp tiền ký quỹ.'
+        : 'Browse artworks, request commissions, deposit escrow funds.',
+    },
+    {
+      id: 'Creator',
+      name: isVie ? 'Tác giả' : 'Creator',
+      badge: 'bg-sky-500/20 text-sky-400 border-sky-500/30',
+      icon: <Palette className="w-4 h-4 text-sky-400" />,
+      description: isVie
+        ? 'Đăng tải tranh, nhận đơn hoa hồng, quản lý rút tiền.'
+        : 'Publish illustrations, accept commission orders, manage payouts.',
+    },
+    {
+      id: 'Moderator',
+      name: isVie ? 'Kiểm duyệt viên' : 'Moderator',
+      badge: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
+      icon: <ShieldCheck className="w-4 h-4 text-purple-400" />,
+      description: isVie
+        ? 'Kiểm duyệt nội dung bị gắn cờ, đánh giá điểm AI, xử lý khiếu nại/tranh chấp.'
+        : 'Review flagged content, evaluate AI moderation scores, arbitrate disputes.',
+    },
+    {
+      id: 'Administrator',
+      name: isVie ? 'Quản trị viên' : 'Administrator',
+      badge: 'bg-red-500/20 text-red-400 border-red-500/30',
+      icon: <Shield className="w-4 h-4 text-red-400" />,
+      description: isVie
+        ? 'Toàn quyền quản trị: chính sách biểu phí, xử phạt người dùng, phân tích tài chính.'
+        : 'Full governance: platform fee policies, user sanctioning, financial KPI analytics.',
+    },
+  ];
+
   const [prevUserId, setPrevUserId] = useState(user?.id);
   const [prevRolesKey, setPrevRolesKey] = useState(() => user?.roles?.join(',') ?? '');
   const [selectedRoles, setSelectedRoles] = useState<string[]>(() => (user ? [...user.roles] : []));
@@ -109,9 +152,11 @@ export function UserRolesModal({
             <Shield className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-white font-h1">Edit User Roles</h3>
+            <h3 className="text-lg font-bold text-white font-h1">
+              {isVie ? 'Chỉnh sửa vai trò người dùng' : 'Edit User Roles'}
+            </h3>
             <p className="text-xs text-[#8A8FA9]">
-              Assign system permissions for{' '}
+              {isVie ? 'Phân quyền hệ thống cho' : 'Assign system permissions for'}{' '}
               <span className="text-white font-bold">@{user.userName}</span>
             </p>
           </div>
@@ -120,7 +165,7 @@ export function UserRolesModal({
         {/* Role Toggles */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2.5">
-            {AVAILABLE_ROLES.map((role) => {
+            {availableRoles.map((role) => {
               const isChecked = selectedRoles.includes(role.id);
 
               return (
@@ -165,7 +210,9 @@ export function UserRolesModal({
           </div>
 
           <p className="text-[11px] text-[#8A8FA9]/70 italic">
-            * Note: Every account must hold at least one assigned role.
+            {isVie
+              ? '* Lưu ý: Mỗi tài khoản phải giữ ít nhất một vai trò được phân công.'
+              : '* Note: Every account must hold at least one assigned role.'}
           </p>
 
           {/* Action Buttons */}
@@ -176,7 +223,7 @@ export function UserRolesModal({
               disabled={isSubmitting}
               className="px-4 py-2 rounded-xl text-xs font-bold text-[#8A8FA9] hover:text-white hover:bg-white/5 transition-colors cursor-pointer"
             >
-              Cancel
+              {isVie ? 'Hủy' : 'Cancel'}
             </button>
 
             <button
@@ -184,7 +231,9 @@ export function UserRolesModal({
               disabled={isSubmitting || selectedRoles.length === 0}
               className="px-5 py-2.5 rounded-xl text-xs font-bold bg-red-500 hover:bg-red-400 text-white shadow-lg shadow-red-500/20 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isSubmitting ? 'Saving Changes...' : 'Save Role Assignment'}
+              {isSubmitting
+                ? (isVie ? 'Đang lưu...' : 'Saving Changes...')
+                : (isVie ? 'Lưu phân quyền' : 'Save Role Assignment')}
             </button>
           </div>
         </form>

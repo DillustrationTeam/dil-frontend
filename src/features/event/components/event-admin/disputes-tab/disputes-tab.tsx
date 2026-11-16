@@ -18,6 +18,7 @@ import {
   resolveEventId,
 } from '../permissions-tab/permissions-tab';
 import { adminDisputeService } from '@/features/admin/services/dispute.service';
+import { useLanguage } from '@/context/language-context';
 import { eventService } from '../../../services/event.service';
 import type { EventListItemDto } from '../../../types/event.types';
 import type {
@@ -26,6 +27,9 @@ import type {
 } from '@/features/admin/types/dispute-arbitration.types';
 
 export function DisputesTab() {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
+
   const [events, setEvents] = useState<EventListItemDto[]>([]);
   // Default to 'all' so admin initially sees the queue-wide disputes
   const [selectedEventId, setSelectedEventId] = useState<string>('all');
@@ -271,7 +275,7 @@ export function DisputesTab() {
       <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl border border-white/10 bg-[#161926]/80 backdrop-blur-xl">
         <div className="flex flex-wrap items-center gap-3">
           <label className="text-xs font-semibold text-[#A7ACD9] uppercase tracking-wider shrink-0">
-            Target Contest:
+            {isVie ? 'Cuộc thi mục tiêu:' : 'Target Contest:'}
           </label>
           <ContestSearchSelect
             events={events}
@@ -286,7 +290,7 @@ export function DisputesTab() {
 
         {/* Status Indicator */}
         <div className="flex items-center gap-2">
-          <span className="text-xs text-outline">Judging Phase Status:</span>
+          <span className="text-xs text-outline">{isVie ? 'Trạng thái giai đoạn chấm:' : 'Judging Phase Status:'}</span>
           <span
             className={`px-3 py-1 rounded-full text-xs font-bold ${selectedEventId === 'all'
                 ? 'bg-brand-periwinkle/20 text-brand-periwinkle border border-brand-periwinkle/30'
@@ -296,10 +300,10 @@ export function DisputesTab() {
               }`}
           >
             {selectedEventId === 'all'
-              ? '🌐 Global Queue Active'
+              ? (isVie ? '🌐 Hàng đợi chung đang kích hoạt' : '🌐 Global Queue Active')
               : isJudgingPhaseActive
-                ? '🔒 Judging Started (Locked)'
-                : '🔓 Open for Jury Assignments'}
+                ? (isVie ? '🔒 Đã bắt đầu chấm (Đã khóa)' : '🔒 Judging Started (Locked)')
+                : (isVie ? '🔓 Mở phân công giám khảo' : '🔓 Open for Jury Assignments')}
           </span>
         </div>
       </div>
@@ -324,7 +328,7 @@ export function DisputesTab() {
               setSearchQuery(e.target.value);
               setPage(1);
             }}
-            placeholder="Search dispute by case ID, title, or reason..."
+            placeholder={isVie ? 'Tìm tranh chấp theo mã đơn, tiêu đề hoặc lý do...' : 'Search dispute by case ID, title, or reason...'}
             className="w-full h-10 pl-10 pr-9 bg-[#090b12]/80 border border-white/10 rounded-xl text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-brand-periwinkle focus:ring-1 focus:ring-brand-periwinkle/30 transition-all font-body"
           />
           {searchQuery && (
@@ -348,11 +352,11 @@ export function DisputesTab() {
             }}
             className="w-full h-10 px-3 pr-8 bg-[#090b12]/80 border border-white/10 rounded-xl text-xs text-white focus:outline-none focus:border-brand-periwinkle focus:ring-1 focus:ring-brand-periwinkle/30 transition-all cursor-pointer font-medium"
           >
-            <option value="All" className="bg-[#161926]">All Statuses</option>
-            <option value="Pending" className="bg-[#161926]">Pending</option>
-            <option value="UnderReview" className="bg-[#161926]">Under Review</option>
-            <option value="Resolved" className="bg-[#161926]">Resolved</option>
-            <option value="Rejected" className="bg-[#161926]">Rejected</option>
+            <option value="All" className="bg-[#161926]">{isVie ? 'Tất cả trạng thái' : 'All Statuses'}</option>
+            <option value="Pending" className="bg-[#161926]">{isVie ? 'Chờ xử lý' : 'Pending'}</option>
+            <option value="UnderReview" className="bg-[#161926]">{isVie ? 'Đang duyệt' : 'Under Review'}</option>
+            <option value="Resolved" className="bg-[#161926]">{isVie ? 'Đã giải quyết' : 'Resolved'}</option>
+            <option value="Rejected" className="bg-[#161926]">{isVie ? 'Đã từ chối' : 'Rejected'}</option>
           </select>
         </div>
       </div>

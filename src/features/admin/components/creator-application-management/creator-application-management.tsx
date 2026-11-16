@@ -2,11 +2,14 @@
 
 import { useState } from 'react';
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useLanguage } from '@/context/language-context';
 import { useCreators } from '@/features/admin/hooks/use-creators';
 import { CreatorApplicationDetail } from './creator-application-detail';
 import { CreatorApplicationItem } from './creator-application-item';
 
 export function CreatorApplicationManagement() {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
   const { state, setPage, getCreatorApplicationById } = useCreators();
   const [showDetail, setShowDetail] = useState(false);
 
@@ -34,12 +37,12 @@ export function CreatorApplicationManagement() {
 
       {state.applications.loading && applications.length === 0 ? (
         <div className="glass-container flex h-48 items-center justify-center rounded-[28px] text-sm text-[#A7ACD9]">
-          Loading creator applications...
+          {isVie ? 'Đang tải đơn đăng ký Creator...' : 'Loading creator applications...'}
         </div>
       ) : applications.length === 0 ? (
         <div className="glass-container flex h-48 flex-col items-center justify-center rounded-[28px] text-center p-6">
-          <p className="font-h1 text-lg font-medium text-white">No applications found</p>
-          <p className="mt-1 text-xs text-[#919099]">There are currently no creator applications to review.</p>
+          <p className="font-h1 text-lg font-medium text-white">{isVie ? 'Không tìm thấy đơn đăng ký' : 'No applications found'}</p>
+          <p className="mt-1 text-xs text-[#919099]">{isVie ? 'Hiện tại không có đơn đăng ký Creator nào cần duyệt.' : 'There are currently no creator applications to review.'}</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -60,7 +63,7 @@ export function CreatorApplicationManagement() {
             onClick={() => setPage(page - 1)}
             disabled={isFirst}
             className="p-1.5 rounded-lg border border-white/10 bg-black/40 text-white hover:bg-white/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
-            title="Previous page"
+            title={isVie ? 'Trang trước' : 'Previous page'}
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
@@ -72,7 +75,7 @@ export function CreatorApplicationManagement() {
             onClick={() => setPage(page + 1)}
             disabled={isLast}
             className="p-1.5 rounded-lg border border-white/10 bg-black/40 text-white hover:bg-white/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
-            title="Next page"
+            title={isVie ? 'Trang sau' : 'Next page'}
           >
             <ChevronRight className="w-4 h-4" />
           </button>
@@ -86,14 +89,16 @@ export function CreatorApplicationManagement() {
               type="button"
               onClick={handleClose}
               className="absolute top-5 right-5 p-1.5 rounded-full bg-white/5 hover:bg-white/10 text-[#8A8FA9] hover:text-white transition-colors cursor-pointer"
-              title="Close modal"
+              title={isVie ? 'Đóng cửa sổ' : 'Close modal'}
             >
               <X className="w-4 h-4" />
             </button>
-            <h2 className="font-h1 text-xl font-bold text-white">Creator Application Detail</h2>
+            <h2 className="font-h1 text-xl font-bold text-white">
+              {isVie ? 'Chi tiết đơn đăng ký Creator' : 'Creator Application Detail'}
+            </h2>
             {state.application.loading ? (
               <div className="flex h-48 items-center justify-center text-sm text-[#A7ACD9]">
-                Loading application details...
+                {isVie ? 'Đang tải chi tiết đơn đăng ký...' : 'Loading application details...'}
               </div>
             ) : (
               <CreatorApplicationDetail application={state.application.data} />

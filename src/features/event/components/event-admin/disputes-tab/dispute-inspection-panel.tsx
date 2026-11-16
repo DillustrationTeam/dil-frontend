@@ -12,6 +12,7 @@ import {
   Scale,
   FileText,
 } from 'lucide-react';
+import { useLanguage } from '@/context/language-context';
 import type { SubmissionDisputeDto } from '@/features/admin/types/dispute-arbitration.types';
 import { formatDisputeCategory, formatDisputeCode } from './dispute-queue-table';
 import { createPortal } from 'react-dom';
@@ -35,12 +36,17 @@ export function DisputeInspectionPanel({
   onExecuteRuling,
   onClose,
 }: DisputeInspectionPanelProps) {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
+
   const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
   const [selectedResolution, setSelectedResolution] = useState<
     'Dismiss' | 'Disqualify' | 'RequestReEvaluation'
   >('Dismiss');
   const [moderatorNote, setModeratorNote] = useState(
-    'Based on cross-referenced telemetry data, metadata inspection, and jury feedback, the committee confirms the official ruling.'
+    isVie
+      ? 'Dựa trên dữ liệu đối chiếu, thông tin tệp và phản hồi từ ban giám khảo, hội đồng xác nhận phán quyết chính thức.'
+      : 'Based on cross-referenced telemetry data, metadata inspection, and jury feedback, the committee confirms the official ruling.'
   );
 
   if (isLoading && !dispute) {
@@ -48,10 +54,10 @@ export function DisputeInspectionPanel({
       <div className="glass-container bg-[#161926]/85 backdrop-blur-[32px] border border-white/10 rounded-[28px] p-12 flex flex-col items-center justify-center min-h-[300px] text-center space-y-3">
         <div className="w-8 h-8 border-2 border-brand-periwinkle border-t-transparent rounded-full animate-spin" />
         <p className="font-h1 font-bold text-white text-sm">
-          Loading Dispute Dossier...
+          {isVie ? 'Đang tải hồ sơ tranh chấp...' : 'Loading Dispute Dossier...'}
         </p>
         <p className="text-xs text-[#8A8FA9]">
-          Retrieving evidence files, telemetry logs, and submission records.
+          {isVie ? 'Đang truy xuất tệp bằng chứng, nhật ký và bài thi.' : 'Retrieving evidence files, telemetry logs, and submission records.'}
         </p>
       </div>
     );
@@ -62,10 +68,12 @@ export function DisputeInspectionPanel({
       <div className="glass-container bg-[#161926]/85 backdrop-blur-[32px] border border-white/10 rounded-[28px] p-10 flex flex-col items-center justify-center text-center space-y-3">
         <Scale className="w-10 h-10 text-[#8A8FA9]/40" />
         <p className="font-h1 font-bold text-white text-base">
-          No Dispute Selected for Review
+          {isVie ? 'Chưa chọn tranh chấp để xem xét' : 'No Dispute Selected for Review'}
         </p>
         <p className="text-xs text-[#8A8FA9] max-w-md">
-          Select any dispute case from the queue above to inspect reported evidence, evaluate claims, and execute moderator rulings.
+          {isVie
+            ? 'Chọn bất kỳ vụ tranh chấp nào từ hàng đợi bên trên để kiểm tra bằng chứng và thực thi phán quyết.'
+            : 'Select any dispute case from the queue above to inspect reported evidence, evaluate claims, and execute moderator rulings.'}
         </p>
       </div>
     );
@@ -81,7 +89,7 @@ export function DisputeInspectionPanel({
       {/* 1. Panel Header */}
       <div className="flex items-center justify-between">
         <h2 className="font-h1 font-bold text-lg text-white flex items-center gap-2">
-          <span>Dispute Dossier & Ruling Console</span>
+          <span>{isVie ? 'Hồ sơ tranh chấp & Bảng phán quyết' : 'Dispute Dossier & Ruling Console'}</span>
           <span className="text-xs font-mono text-brand-periwinkle px-2 py-0.5 rounded bg-brand-periwinkle/15 border border-brand-periwinkle/30">
             [{formatDisputeCode(dispute.id)}]
           </span>
@@ -94,7 +102,7 @@ export function DisputeInspectionPanel({
             className="flex items-center gap-1 text-xs text-[#8A8FA9] hover:text-white transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
-            <span>Collapse Panel</span>
+            <span>{isVie ? 'Thu gọn' : 'Collapse Panel'}</span>
           </button>
         )}
       </div>
@@ -105,7 +113,7 @@ export function DisputeInspectionPanel({
         <div className="md:col-span-6 glass-container bg-[#161926]/85 backdrop-blur-[32px] border border-white/10 rounded-[28px] p-6 space-y-5">
           <div className="flex items-center justify-between gap-2 flex-wrap">
             <span className="text-[10px] font-mono text-[#8A8FA9] uppercase font-bold tracking-wider block">
-              Contest Artwork Evidence
+              {isVie ? 'Bằng chứng tác phẩm dự thi' : 'Contest Artwork Evidence'}
             </span>
             <div className="flex items-center gap-1.5">
               {dispute.category && (
@@ -120,7 +128,7 @@ export function DisputeInspectionPanel({
                     : 'bg-amber-500/20 text-amber-300 border-amber-500/30'
                 }`}
               >
-                {dispute.priority} Priority Claim
+                {dispute.priority === 'High' ? (isVie ? 'Ưu tiên cao' : 'High Priority Claim') : (isVie ? 'Ưu tiên thường' : `${dispute.priority} Priority Claim`)}
               </span>
             </div>
           </div>
@@ -143,13 +151,13 @@ export function DisputeInspectionPanel({
                   className="absolute bottom-3 right-3 p-2 rounded-xl bg-black/70 hover:bg-black text-white text-xs backdrop-blur-md border border-white/20 transition-all opacity-0 group-hover:opacity-100 flex items-center gap-1.5 cursor-pointer"
                 >
                   <Maximize2 className="w-3.5 h-3.5" />
-                  <span>View Fullsize</span>
+                  <span>{isVie ? 'Xem ảnh gốc' : 'View Fullsize'}</span>
                 </button>
               </>
             ) : (
               <div className="w-full h-full flex flex-col items-center justify-center text-slate-500 gap-2">
                 <FileText className="w-10 h-10" />
-                <span className="text-xs">No artwork image available</span>
+                <span className="text-xs">{isVie ? 'Không có hình ảnh bài thi' : 'No artwork image available'}</span>
               </div>
             )}
           </div>
@@ -157,23 +165,23 @@ export function DisputeInspectionPanel({
           {/* Submission & Event Info */}
           <div className="p-4 rounded-2xl bg-black/30 border border-white/5 space-y-2">
             <div className="flex items-center justify-between text-xs">
-              <span className="text-[#8A8FA9]">Submission Title:</span>
-              <strong className="text-white font-medium">{dispute.submissionTitle || 'Untitled Artwork'}</strong>
+              <span className="text-[#8A8FA9]">{isVie ? 'Tên bài thi:' : 'Submission Title:'}</span>
+              <strong className="text-white font-medium">{dispute.submissionTitle || (isVie ? 'Chưa đặt tên' : 'Untitled Artwork')}</strong>
             </div>
             <div className="flex items-center justify-between text-xs">
-              <span className="text-[#8A8FA9]">Target Contest:</span>
-              <span className="text-brand-periwinkle font-medium">{dispute.eventTitle || 'Contest Event'}</span>
+              <span className="text-[#8A8FA9]">{isVie ? 'Cuộc thi:' : 'Target Contest:'}</span>
+              <span className="text-brand-periwinkle font-medium">{dispute.eventTitle || (isVie ? 'Cuộc thi' : 'Contest Event')}</span>
             </div>
             <div className="flex items-center justify-between text-xs">
-              <span className="text-[#8A8FA9]">Reported By:</span>
-              <span className="text-slate-300 font-medium">{dispute.raisedByName || 'Participant'}</span>
+              <span className="text-[#8A8FA9]">{isVie ? 'Người báo cáo:' : 'Reported By:'}</span>
+              <span className="text-slate-300 font-medium">{dispute.raisedByName || (isVie ? 'Thí sinh' : 'Participant')}</span>
             </div>
           </div>
 
           {/* Reported Violation Rationale */}
           <div className="space-y-2">
             <span className="text-xs font-bold text-white uppercase tracking-wider block">
-              Claim Justification:
+              {isVie ? 'Lý do khiếu nại:' : 'Claim Justification:'}
             </span>
             <p className="text-xs text-slate-300 bg-black/40 p-3.5 rounded-xl border border-white/10 leading-relaxed font-body">
               {dispute.reason}
@@ -205,10 +213,10 @@ export function DisputeInspectionPanel({
               <div className="space-y-2.5">
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] font-bold text-[#8A8FA9] uppercase tracking-wider block">
-                    Attached Evidence:
+                    {isVie ? 'Bằng chứng đính kèm:' : 'Attached Evidence:'}
                   </span>
                   <span className="text-[10px] text-slate-400 font-mono">
-                    {evidenceList.length} item{evidenceList.length > 1 ? 's' : ''}
+                    {evidenceList.length} {isVie ? 'mục' : `item${evidenceList.length > 1 ? 's' : ''}`}
                   </span>
                 </div>
 
@@ -220,7 +228,7 @@ export function DisputeInspectionPanel({
                         key={idx}
                         onClick={() => setPreviewImageUrl(url)}
                         className="group relative aspect-video rounded-xl overflow-hidden border border-white/10 bg-black/40 cursor-pointer hover:border-brand-periwinkle/60 transition-all shadow-md"
-                        title="Click to view fullsize evidence"
+                        title={isVie ? 'Bấm để phóng to bằng chứng' : 'Click to view fullsize evidence'}
                       >
                         <Image
                           src={url}
@@ -233,7 +241,7 @@ export function DisputeInspectionPanel({
                         <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5 backdrop-blur-[2px]">
                           <span className="text-[10px] text-white font-medium flex items-center gap-1 bg-black/60 px-2 py-1 rounded-md border border-white/20">
                             <Maximize2 className="w-3 h-3 text-brand-periwinkle" />
-                            Zoom
+                            {isVie ? 'Phóng to' : 'Zoom'}
                           </span>
                         </div>
                       </div>
@@ -274,7 +282,7 @@ export function DisputeInspectionPanel({
                 <div>
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] font-mono text-[#8A8FA9] uppercase font-bold tracking-wider block">
-                      Arbitration Judgment
+                      {isVie ? 'Phán quyết trọng tài' : 'Arbitration Judgment'}
                     </span>
                     {isResolved && (
                       <span
@@ -285,22 +293,22 @@ export function DisputeInspectionPanel({
                         }`}
                       >
                         {dispute.resolution === 'Dismiss'
-                          ? 'Dismissed (Report Rejected)'
+                          ? (isVie ? 'Bác bỏ (Từ chối báo cáo)' : 'Dismissed (Report Rejected)')
                           : dispute.resolution === 'Disqualify'
-                          ? 'Disqualified (Ruling Applied)'
+                          ? (isVie ? 'Loại bài thi' : 'Disqualified (Ruling Applied)')
                           : dispute.resolution === 'RequestReEvaluation'
-                          ? 'Re-evaluation Requested'
+                          ? (isVie ? 'Yêu cầu chấm lại' : 'Re-evaluation Requested')
                           : `${dispute.status} · ${dispute.resolution || 'Concluded'}`}
                       </span>
                     )}
                   </div>
                   <h3 className="font-h1 font-bold text-white text-base mt-1">
-                    Select Resolution Action
+                    {isVie ? 'Chọn hành động xử lý' : 'Select Resolution Action'}
                   </h3>
                   <p className="text-xs text-[#8A8FA9] mt-0.5">
                     {isResolved
-                      ? 'This dispute case has already been resolved and its ruling executed.'
-                      : 'Choose the official resolution term to apply to this dispute case.'}
+                      ? (isVie ? 'Vụ tranh chấp này đã được giải quyết và thực thi phán quyết.' : 'This dispute case has already been resolved and its ruling executed.')
+                      : (isVie ? 'Chọn quyết định chính thức áp dụng cho vụ tranh chấp này.' : 'Choose the official resolution term to apply to this dispute case.')}
                   </p>
                 </div>
 
@@ -317,25 +325,25 @@ export function DisputeInspectionPanel({
                       {dispute.status === 'Rejected' ? (
                         <>
                           <XCircle className="w-4 h-4 shrink-0 text-slate-400" />
-                          <span className="text-slate-200">Dispute Dismissed (Report Rejected)</span>
+                          <span className="text-slate-200">{isVie ? 'Tranh chấp đã bị bác bỏ (Từ chối báo cáo)' : 'Dispute Dismissed (Report Rejected)'}</span>
                         </>
                       ) : (
                         <>
                           <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
                           <span className="text-emerald-300">
-                            Dispute Upheld: {dispute.resolution || 'Resolved'}
+                            {isVie ? `Đã chấp thuận tranh chấp: ${dispute.resolution || 'Đã giải quyết'}` : `Dispute Upheld: ${dispute.resolution || 'Resolved'}`}
                           </span>
                         </>
                       )}
                     </div>
                     {dispute.note && (
                       <p className="text-[#D6D9FF] text-[11px] leading-relaxed pl-6">
-                        <strong>Official Note:</strong> {dispute.note}
+                        <strong>{isVie ? 'Ghi chú chính thức:' : 'Official Note:'}</strong> {dispute.note}
                       </p>
                     )}
                     {dispute.resolvedAt && (
                       <p className="text-[#8A8FA9] text-[10px] pl-6 font-mono">
-                        Resolved on {new Date(dispute.resolvedAt).toLocaleString()}
+                        {isVie ? 'Giải quyết lúc' : 'Resolved on'} {new Date(dispute.resolvedAt).toLocaleString(isVie ? 'vi-VN' : 'en-US')}
                       </p>
                     )}
                   </div>
@@ -355,11 +363,11 @@ export function DisputeInspectionPanel({
                     } ${isResolved ? 'cursor-not-allowed' : 'cursor-pointer'}`}
                   >
                     <div className="flex items-center justify-between w-full">
-                      <span className="font-bold text-xs text-emerald-300">Dismiss Appeal</span>
+                      <span className="font-bold text-xs text-emerald-300">{isVie ? 'Bác bỏ khiếu nại' : 'Dismiss Appeal'}</span>
                       <CheckCircle2 className="w-4 h-4 text-emerald-400" />
                     </div>
                     <p className="text-[10px] text-slate-300">
-                      Reject the report and retain submission eligibility.
+                      {isVie ? 'Từ chối báo cáo và giữ nguyên tư cách bài dự thi.' : 'Reject the report and retain submission eligibility.'}
                     </p>
                   </button>
 
@@ -375,11 +383,11 @@ export function DisputeInspectionPanel({
                     } ${isResolved ? 'cursor-not-allowed' : 'cursor-pointer'}`}
                   >
                     <div className="flex items-center justify-between w-full">
-                      <span className="font-bold text-xs text-red-300">Disqualify Artwork</span>
+                      <span className="font-bold text-xs text-red-300">{isVie ? 'Loại bài thi' : 'Disqualify Artwork'}</span>
                       <XCircle className="w-4 h-4 text-red-400" />
                     </div>
                     <p className="text-[10px] text-slate-300">
-                      Strip submission eligibility for verified rules violation.
+                      {isVie ? 'Hủy bỏ tư cách bài thi do vi phạm thể lệ đã xác minh.' : 'Strip submission eligibility for verified rules violation.'}
                     </p>
                   </button>
 
@@ -395,11 +403,11 @@ export function DisputeInspectionPanel({
                     } ${isResolved ? 'cursor-not-allowed' : 'cursor-pointer'}`}
                   >
                     <div className="flex items-center justify-between w-full">
-                      <span className="font-bold text-xs text-blue-300">Request Re-evaluation</span>
+                      <span className="font-bold text-xs text-blue-300">{isVie ? 'Yêu cầu chấm lại' : 'Request Re-evaluation'}</span>
                       <Scale className="w-4 h-4 text-blue-400" />
                     </div>
                     <p className="text-[10px] text-slate-300">
-                      Instruct Jury Panel to unlock scoresheet & re-evaluate.
+                      {isVie ? 'Yêu cầu Ban giám khảo mở bảng điểm và đánh giá lại.' : 'Instruct Jury Panel to unlock scoresheet & re-evaluate.'}
                     </p>
                   </button>
                 </div>
@@ -407,14 +415,14 @@ export function DisputeInspectionPanel({
                 {/* Decision Notes Textarea */}
                 <div className="space-y-1.5">
                   <label className="text-xs font-semibold text-white uppercase tracking-wider block">
-                    Ruling Rationale & Audit Evidence Notes:
+                    {isVie ? 'Căn cứ phán quyết & Ghi chú kiểm toán:' : 'Ruling Rationale & Audit Evidence Notes:'}
                   </label>
                   <textarea
                     rows={5}
                     disabled={isResolved}
                     value={isResolved ? dispute.note || '' : moderatorNote}
                     onChange={(e) => setModeratorNote(e.target.value)}
-                    placeholder="Enter verified findings, citation of rules, and official justification..."
+                    placeholder={isVie ? 'Nhập kết quả xác minh, trích dẫn thể lệ và giải trình chính thức...' : 'Enter verified findings, citation of rules, and official justification...'}
                     className={`w-full rounded-xl border border-white/10 bg-[#090b12]/80 text-white p-3.5 text-xs focus:outline-none focus:border-brand-periwinkle focus:ring-1 focus:ring-brand-periwinkle/30 transition-all resize-y leading-relaxed ${
                       isResolved ? 'opacity-60 cursor-not-allowed' : ''
                     }`}
@@ -426,7 +434,9 @@ export function DisputeInspectionPanel({
                 <div className="p-3 rounded-xl border-l-4 border-brand-periwinkle bg-brand-periwinkle/10 text-xs text-slate-300 flex items-start gap-2.5 leading-relaxed">
                   <ShieldAlert className="w-4 h-4 text-brand-periwinkle shrink-0 mt-0.5" />
                   <span>
-                    All rulings are permanently recorded in the immutable contest audit ledger with handler identity and timestamp.
+                    {isVie
+                      ? 'Tất cả các phán quyết đều được ghi lại vĩnh viễn trong sổ cái kiểm toán cuộc thi cùng danh tính người xử lý và dấu thời gian.'
+                      : 'All rulings are permanently recorded in the immutable contest audit ledger with handler identity and timestamp.'}
                   </span>
                 </div>
 
@@ -438,7 +448,7 @@ export function DisputeInspectionPanel({
                       onClick={onClose}
                       className="px-4 py-2.5 rounded-xl border border-white/10 text-xs font-semibold text-slate-300 hover:bg-white/5 transition-all cursor-pointer"
                     >
-                      {isResolved ? 'Close Dossier' : 'Cancel'}
+                      {isResolved ? (isVie ? 'Đóng hồ sơ' : 'Close Dossier') : (isVie ? 'Hủy' : 'Cancel')}
                     </button>
                   )}
                   {!isResolved && (
@@ -450,11 +460,16 @@ export function DisputeInspectionPanel({
                       {isSubmitting ? (
                         <>
                           <div className="w-3.5 h-3.5 border-2 border-brand-navy border-t-transparent rounded-full animate-spin" />
-                          <span>Executing Ruling...</span>
+                          <span>{isVie ? 'Đang thực thi...' : 'Executing Ruling...'}</span>
                         </>
                       ) : (
                         <span>
-                          Execute Ruling · {selectedResolution === 'RequestReEvaluation' ? 'Re-evaluate' : selectedResolution}
+                          {isVie ? 'Thực thi phán quyết · ' : 'Execute Ruling · '}
+                          {selectedResolution === 'RequestReEvaluation'
+                            ? (isVie ? 'Chấm lại' : 'Re-evaluate')
+                            : selectedResolution === 'Dismiss'
+                            ? (isVie ? 'Bác bỏ' : 'Dismiss')
+                            : (isVie ? 'Loại' : 'Disqualify')}
                         </span>
                       )}
                     </button>

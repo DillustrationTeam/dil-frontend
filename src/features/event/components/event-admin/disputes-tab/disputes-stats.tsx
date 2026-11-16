@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { AlertCircle, AlertTriangle, CheckCircle2, Clock } from 'lucide-react';
+import { useLanguage } from '@/context/language-context';
 
 interface DisputesStatsProps {
   openCount?: number;
@@ -16,27 +17,30 @@ export function DisputesStats({
   resolvedCount = 8,
   overdueCount = 0,
 }: DisputesStatsProps) {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
+
   const stats = [
     {
-      label: 'Open Disputes',
+      label: isVie ? 'Tranh chấp mở' : 'Open Disputes',
       value: openCount,
       icon: AlertCircle,
       color: 'text-amber-300',
     },
     {
-      label: 'High Priority',
+      label: isVie ? 'Ưu tiên cao' : 'High Priority',
       value: highPriorityCount,
       icon: AlertTriangle,
       color: 'text-[#f2b3c4]',
     },
     {
-      label: 'Resolved',
+      label: isVie ? 'Đã giải quyết' : 'Resolved',
       value: resolvedCount,
       icon: CheckCircle2,
       color: 'text-emerald-300',
     },
     {
-      label: 'Overdue',
+      label: isVie ? 'Quá hạn' : 'Overdue',
       value: overdueCount,
       icon: Clock,
       color: 'text-outline',
