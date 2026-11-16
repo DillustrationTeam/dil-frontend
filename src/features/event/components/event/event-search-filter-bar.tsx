@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Search, ChevronDown } from 'lucide-react';
+import { useLanguage } from '@/context/language-context';
 
 export interface FilterOption {
   value: string;
@@ -38,6 +39,14 @@ export const DEFAULT_STATUS_OPTIONS: FilterOption[] = [
   { value: 'Ended', label: 'Ended' },
 ];
 
+export const DEFAULT_STATUS_OPTIONS_VIE: FilterOption[] = [
+  { value: '', label: 'Tất cả (Mặc định)' },
+  { value: 'Upcoming', label: 'Chờ mở nộp bài' },
+  { value: 'Open', label: 'Đang mở nộp bài' },
+  { value: 'Judging', label: 'Đang chấm điểm & Bình chọn' },
+  { value: 'Ended', label: 'Đã kết thúc' },
+];
+
 export const DEFAULT_SORT_OPTIONS: FilterOption[] = [
   { value: 'latest', label: 'Latest (Default)' },
   { value: 'title_asc', label: 'Title (A-Z)' },
@@ -46,20 +55,35 @@ export const DEFAULT_SORT_OPTIONS: FilterOption[] = [
   { value: 'most_votes', label: 'Most Votes' },
 ];
 
+export const DEFAULT_SORT_OPTIONS_VIE: FilterOption[] = [
+  { value: 'latest', label: 'Mới nhất (Mặc định)' },
+  { value: 'title_asc', label: 'Tên (A-Z)' },
+  { value: 'ending_soon', label: 'Sắp kết thúc' },
+  { value: 'most_submissions', label: 'Nhiều bài nộp nhất' },
+  { value: 'most_votes', label: 'Nhiều bình chọn nhất' },
+];
+
 export function EventSearchFilterBar({
   searchQuery,
   onSearchChange,
   searchPlaceholder,
   statusValue,
   onStatusChange,
-  statusOptions = DEFAULT_STATUS_OPTIONS,
+  statusOptions,
   sortValue,
   onSortChange,
-  sortOptions = DEFAULT_SORT_OPTIONS,
+  sortOptions,
   variant = 'horizontal',
   className = '',
   containerRef,
 }: EventSearchFilterBarProps) {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
+
+  const resolvedStatusOptions = statusOptions ?? (isVie ? DEFAULT_STATUS_OPTIONS_VIE : DEFAULT_STATUS_OPTIONS);
+  const resolvedSortOptions = sortOptions ?? (isVie ? DEFAULT_SORT_OPTIONS_VIE : DEFAULT_SORT_OPTIONS);
+  const resolvedPlaceholder = searchPlaceholder ?? (isVie ? 'Tìm kiếm cuộc thi...' : 'Search contests');
+
   const isInline = variant === 'inline';
   const isStacked = variant === 'stacked' || variant === 'compact';
 
@@ -73,7 +97,7 @@ export function EventSearchFilterBar({
               type="text"
               value={searchQuery || ''}
               onChange={(e) => onSearchChange(e.target.value)}
-              placeholder={searchPlaceholder || 'Search...'}
+              placeholder={resolvedPlaceholder}
               className="w-full rounded-2xl border border-white/10 bg-[#161926] py-2 pl-10 pr-9 text-xs text-white placeholder-[#919099] transition focus:border-brand-periwinkle focus:outline-none focus:ring-1 focus:ring-brand-periwinkle"
             />
             {searchQuery && (
@@ -95,7 +119,7 @@ export function EventSearchFilterBar({
               onChange={(e) => onStatusChange(e.target.value)}
               className="w-full appearance-none rounded-2xl border border-white/10 bg-[#161926] py-2 pl-3.5 pr-8 text-xs font-semibold text-white transition hover:border-white/20 focus:border-brand-periwinkle focus:outline-none focus:ring-1 focus:ring-brand-periwinkle cursor-pointer truncate"
             >
-              {statusOptions.map((opt) => (
+              {resolvedStatusOptions.map((opt) => (
                 <option key={opt.value} value={opt.value} className="bg-[#1F2335] text-white">
                   {opt.label}
                 </option>
@@ -120,7 +144,7 @@ export function EventSearchFilterBar({
               type="text"
               value={searchQuery || ''}
               onChange={(e) => onSearchChange(e.target.value)}
-              placeholder={searchPlaceholder || 'Search title or entry code...'}
+              placeholder={resolvedPlaceholder}
               className="w-full rounded-2xl border border-white/10 bg-[#161926] py-2 pl-10 pr-9 text-xs text-white placeholder-[#919099] transition focus:border-brand-periwinkle focus:outline-none focus:ring-1 focus:ring-brand-periwinkle"
             />
             {searchQuery && (
@@ -142,7 +166,7 @@ export function EventSearchFilterBar({
               onChange={(e) => onStatusChange(e.target.value)}
               className="w-full appearance-none rounded-2xl border border-white/10 bg-[#161926] py-2 pl-4 pr-10 text-xs font-semibold text-white transition hover:border-white/20 focus:border-brand-periwinkle focus:outline-none focus:ring-1 focus:ring-brand-periwinkle cursor-pointer"
             >
-              {statusOptions.map((opt) => (
+              {resolvedStatusOptions.map((opt) => (
                 <option key={opt.value} value={opt.value} className="bg-[#1F2335] text-white">
                   {opt.label}
                 </option>
@@ -170,7 +194,7 @@ export function EventSearchFilterBar({
             type="text"
             value={searchQuery || ''}
             onChange={(e) => onSearchChange(e.target.value)}
-            placeholder={searchPlaceholder || 'Search contests'}
+            placeholder={resolvedPlaceholder}
             className="w-full rounded-2xl border border-white/10 bg-[#161926] py-2.5 pl-11 pr-10 text-sm text-white placeholder-[#919099] transition focus:border-brand-periwinkle focus:outline-none focus:ring-1 focus:ring-brand-periwinkle"
           />
           {searchQuery && (
@@ -195,7 +219,7 @@ export function EventSearchFilterBar({
                 onChange={(e) => onStatusChange(e.target.value)}
                 className="w-full appearance-none rounded-2xl border border-white/10 bg-[#161926] py-2.5 pl-4 pr-10 text-xs font-semibold text-white transition hover:border-white/20 focus:border-brand-periwinkle focus:outline-none focus:ring-1 focus:ring-brand-periwinkle cursor-pointer"
               >
-                {statusOptions.map((opt) => (
+                {resolvedStatusOptions.map((opt) => (
                   <option key={opt.value} value={opt.value} className="bg-[#1F2335] text-white">
                     {opt.label}
                   </option>
@@ -214,7 +238,7 @@ export function EventSearchFilterBar({
                 onChange={(e) => onSortChange(e.target.value)}
                 className="w-full appearance-none rounded-2xl border border-white/10 bg-[#161926] py-2.5 pl-4 pr-10 text-xs font-semibold text-white transition hover:border-white/20 focus:border-brand-periwinkle focus:outline-none focus:ring-1 focus:ring-brand-periwinkle cursor-pointer"
               >
-                {sortOptions.map((opt) => (
+                {resolvedSortOptions.map((opt) => (
                   <option key={opt.value} value={opt.value} className="bg-[#1F2335] text-white">
                     {opt.label}
                   </option>

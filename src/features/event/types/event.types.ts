@@ -10,6 +10,19 @@ export const eventStatusLabels: Record<string, string> = {
   Ended: 'Ended',
 };
 
+export const eventStatusLabelsVie: Record<string, string> = {
+  Draft: 'Bản nháp',
+  Upcoming: 'Chờ mở nộp bài',
+  Open: 'Đang mở nộp bài',
+  Judging: 'Đang chấm điểm & Bình chọn',
+  Ended: 'Đã kết thúc',
+};
+
+export function getEventStatusLabel(status?: EventStatus | string | number | null, isVie?: boolean): string {
+  const normalized = normalizeEventStatus(status);
+  return isVie ? (eventStatusLabelsVie[normalized] || normalized) : (eventStatusLabels[normalized] || normalized);
+}
+
 export const eventStatusBadgeStyles: Record<string, string> = {
   Upcoming: 'border-sky-400/30 bg-sky-950/70 text-sky-300 shadow-[0_0_15px_rgba(56,189,248,0.15)]',
   Open: 'border-emerald-400/30 bg-emerald-950/70 text-emerald-300 shadow-[0_0_15px_rgba(52,211,153,0.15)]',

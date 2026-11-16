@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Check, CheckCircle2, Clock } from 'lucide-react';
+import { useLanguage } from '@/context/language-context';
 import type { WinnerApprovalItem } from '../../types/jury.types';
 
 interface HeadJuryApproveTabProps {
@@ -19,15 +20,22 @@ export function HeadJuryApproveTab({
   handleApproveAwardAllocations,
   handleApproveContestResults,
 }: HeadJuryApproveTabProps) {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
+
   return (
     <section className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.25fr)_minmax(320px,0.75fr)] gap-6 items-start">
       {/* Final Results Table */}
       <div className="glass-container p-6 rounded-2xl space-y-5">
         <div className="flex items-center justify-between flex-wrap gap-2">
           <div>
-            <h2 className="text-xl font-bold font-sora text-white">Final Contest Results</h2>
+            <h2 className="text-xl font-bold font-sora text-white">
+              {isVie ? 'Kết quả Cuộc thi Chung cuộc' : 'Final Contest Results'}
+            </h2>
             <p className="text-xs text-[#9695a1] mt-0.5">
-              Official ranking and award allocations for this contest.
+              {isVie
+                ? 'Bảng xếp hạng chính thức và cơ cấu phân bổ giải thưởng của cuộc thi.'
+                : 'Official ranking and award allocations for this contest.'}
             </p>
           </div>
           <span
@@ -37,7 +45,9 @@ export function HeadJuryApproveTab({
                 : 'bg-amber-500/15 border-amber-500/30 text-amber-300'
             }`}
           >
-            {isAwardAllocationsConfirmed ? 'Award Allocations Confirmed' : 'Pending Award Approval'}
+            {isAwardAllocationsConfirmed
+              ? (isVie ? 'Đã xác nhận phân bổ giải thưởng' : 'Award Allocations Confirmed')
+              : (isVie ? 'Chờ duyệt giải thưởng' : 'Pending Award Approval')}
           </span>
         </div>
 
@@ -45,17 +55,19 @@ export function HeadJuryApproveTab({
           <table className="w-full border-collapse text-left min-w-[500px] text-xs">
             <thead>
               <tr className="border-b border-white/10 bg-white/5 text-[#858694] uppercase font-semibold text-[10px]">
-                <th className="py-3 px-3.5">Award Category</th>
-                <th className="py-3 px-3.5">Winning Entry</th>
-                <th className="py-3 px-3.5">Score / Votes</th>
-                <th className="py-3 px-3.5 text-right">Status</th>
+                <th className="py-3 px-3.5">{isVie ? 'Hạng mục Giải thưởng' : 'Award Category'}</th>
+                <th className="py-3 px-3.5">{isVie ? 'Tác phẩm đạt giải' : 'Winning Entry'}</th>
+                <th className="py-3 px-3.5">{isVie ? 'Điểm / Bình chọn' : 'Score / Votes'}</th>
+                <th className="py-3 px-3.5 text-right">{isVie ? 'Trạng thái' : 'Status'}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/10 text-[#c8c6cf]">
               {finalWinnersList.length === 0 ? (
                 <tr>
                   <td colSpan={4} className="py-8 text-center text-xs text-[#9695a1]">
-                    No graded submissions yet. Award allocations will appear after submissions are evaluated.
+                    {isVie
+                      ? 'Chưa có bài thi nào được chấm. Phân bổ giải thưởng sẽ hiển thị sau khi các bài thi được đánh giá.'
+                      : 'No graded submissions yet. Award allocations will appear after submissions are evaluated.'}
                   </td>
                 </tr>
               ) : (
@@ -78,12 +90,12 @@ export function HeadJuryApproveTab({
                       {isAwardAllocationsConfirmed ? (
                         <>
                           <Check className="w-3 h-3" />
-                          Finalized
+                          {isVie ? 'Chính thức' : 'Finalized'}
                         </>
                       ) : (
                         <>
                           <Clock className="w-3 h-3 text-amber-400" />
-                          Pending
+                          {isVie ? 'Chờ duyệt' : 'Pending'}
                         </>
                       )}
                     </span>
@@ -98,8 +110,12 @@ export function HeadJuryApproveTab({
         <div className="pt-4 border-t border-white/10 flex items-center justify-between flex-wrap gap-3">
           <span className="text-xs text-[#9695a1]">
             {isAwardAllocationsConfirmed
-              ? '✓ Award allocations confirmed and officially locked.'
-              : 'Click Approve Results to confirm award allocations.'}
+              ? (isVie
+                  ? '✓ Phân bổ giải thưởng đã được xác nhận và khóa chính thức.'
+                  : '✓ Award allocations confirmed and officially locked.')
+              : (isVie
+                  ? 'Nhấp Phê duyệt kết quả để xác nhận cơ cấu giải thưởng.'
+                  : 'Click Approve Results to confirm award allocations.')}
           </span>
           <button
             type="button"
@@ -108,32 +124,44 @@ export function HeadJuryApproveTab({
             className="commission-primary px-5 py-2.5 rounded-xl font-sora text-xs shadow-lg transition-all flex items-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
           >
             <CheckCircle2 className="w-4 h-4" />
-            <span>{isAwardAllocationsConfirmed ? 'Award Allocations Confirmed' : 'Approve Results'}</span>
+            <span>
+              {isAwardAllocationsConfirmed
+                ? (isVie ? 'Đã xác nhận giải thưởng' : 'Award Allocations Confirmed')
+                : (isVie ? 'Phê duyệt giải thưởng' : 'Approve Results')}
+            </span>
           </button>
         </div>
       </div>
 
       {/* Checklist Sidebar */}
       <aside className="glass-container p-6 rounded-2xl space-y-4 lg:sticky lg:top-36">
-        <h2 className="text-xl font-bold font-sora text-white">Approval Checklist</h2>
+        <h2 className="text-xl font-bold font-sora text-white">
+          {isVie ? 'Danh mục Kiểm tra Phê duyệt' : 'Approval Checklist'}
+        </h2>
 
         <div className="space-y-2.5 text-xs">
           <div className="flex items-center justify-between p-3 rounded-xl border border-white/10 bg-white/[0.02]">
-            <span className="text-white font-medium">All Jury Evaluations Completed</span>
+            <span className="text-white font-medium">
+              {isVie ? 'Toàn bộ Giám khảo đã hoàn tất chấm' : 'All Jury Evaluations Completed'}
+            </span>
             <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-[10px] font-bold">
-              Completed
+              {isVie ? 'Hoàn thành' : 'Completed'}
             </span>
           </div>
 
           <div className="flex items-center justify-between p-3 rounded-xl border border-white/10 bg-white/[0.02]">
-            <span className="text-white font-medium">Disputes & Arbitrations Resolved</span>
+            <span className="text-white font-medium">
+              {isVie ? 'Tranh chấp & Tái thẩm định đã xử lý' : 'Disputes & Arbitrations Resolved'}
+            </span>
             <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-[10px] font-bold">
-              Completed
+              {isVie ? 'Hoàn thành' : 'Completed'}
             </span>
           </div>
 
           <div className="flex items-center justify-between p-3 rounded-xl border border-white/10 bg-white/[0.02]">
-            <span className="text-white font-medium">Award Allocations Confirmed</span>
+            <span className="text-white font-medium">
+              {isVie ? 'Phân bổ giải thưởng đã xác nhận' : 'Award Allocations Confirmed'}
+            </span>
             <span
               className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border transition-all ${
                 isAwardAllocationsConfirmed
@@ -141,7 +169,7 @@ export function HeadJuryApproveTab({
                   : 'bg-amber-500/15 border-amber-500/30 text-amber-300'
               }`}
             >
-              {isAwardAllocationsConfirmed ? 'Completed' : 'Pending'}
+              {isAwardAllocationsConfirmed ? (isVie ? 'Hoàn thành' : 'Completed') : (isVie ? 'Chờ duyệt' : 'Pending')}
             </span>
           </div>
         </div>
@@ -152,11 +180,15 @@ export function HeadJuryApproveTab({
           disabled={isContestResultsApproved}
           className="commission-primary w-full py-2.5 rounded-xl font-sora text-xs shadow-lg transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
         >
-          {isContestResultsApproved ? 'Contest Results Approved' : 'Approve Contest Results'}
+          {isContestResultsApproved
+            ? (isVie ? 'Kết quả cuộc thi đã được phê duyệt' : 'Contest Results Approved')
+            : (isVie ? 'Ký duyệt Kết quả Cuộc thi' : 'Approve Contest Results')}
         </button>
 
         <div className="p-3 rounded-xl border-l-4 border-[#A7ACD9] bg-[#A7ACD9]/10 text-xs text-[#c7c5cf] leading-relaxed">
-          Approval generates an immutable snapshot of contest results and transfers release permissions to Moderators.
+          {isVie
+            ? 'Việc ký duyệt sẽ tạo bản chụp dữ liệu kết quả bất biến và chuyển quyền công bố giải thưởng cho Ban Kiểm duyệt / Quản trị viên.'
+            : 'Approval generates an immutable snapshot of contest results and transfers release permissions to Moderators.'}
         </div>
       </aside>
     </section>

@@ -3,43 +3,58 @@
 import React, { useState } from 'react';
 import { X, AlertTriangle, ShieldAlert, Loader2, Link as LinkIcon, Plus, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useLanguage } from '@/context/language-context';
 import { eventSubmissionService } from '@/features/event/services/event-submission.service';
 import type { EventSubmissionDto, SubmissionDisputeCategory } from '@/features/event/types/event.types';
 
 const DISPUTE_CATEGORY_OPTIONS: Array<{
   value: SubmissionDisputeCategory;
   label: string;
+  labelVie: string;
   hint: string;
+  hintVie: string;
 }> = [
   {
     value: 'AiArt',
     label: 'AI-Generated Art',
+    labelVie: 'Tranh tạo bằng AI',
     hint: 'Suspected undisclosed AI usage',
+    hintVie: 'Nghi vấn sử dụng AI không khai báo',
   },
   {
     value: 'Copyright',
     label: 'Copyright / Plagiarism',
+    labelVie: 'Bản quyền / Đạo nhái',
     hint: 'Traced, stolen, or unauthorized artwork',
+    hintVie: 'Đồ nét, sao chép hoặc tranh không có bản quyền',
   },
   {
     value: 'VoteFraud',
     label: 'Vote Manipulation',
+    labelVie: 'Gian lận bình chọn',
     hint: 'Suspicious voting / bot activity',
+    hintVie: 'Buff vote, bot hoặc hành vi bất thường',
   },
   {
     value: 'RuleViolation',
     label: 'Contest Rule Violation',
+    labelVie: 'Vi phạm thể lệ cuộc thi',
     hint: 'Off-theme, NSFW, or format breach',
+    hintVie: 'Sai chủ đề, vi phạm thuần phong mỹ tục, sai định dạng',
   },
   {
     value: 'ScoreAppeal',
     label: 'Judging / Score Concern',
+    labelVie: 'Khiếu nại kết quả / Chấm điểm',
     hint: 'Scoring discrepancy or fairness issue',
+    hintVie: 'Sai lệch điểm số hoặc vấn đề tính công bằng',
   },
   {
     value: 'Other',
     label: 'Other Issue',
+    labelVie: 'Vấn đề khác',
     hint: 'Any other dispute not listed above',
+    hintVie: 'Các khiếu nại khác chưa có trong danh sách',
   },
 ];
 
@@ -54,6 +69,9 @@ export function SubmissionDisputeModal({
   onClose,
   onSuccess,
 }: SubmissionDisputeModalProps) {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
+
   const [reason, setReason] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState<SubmissionDisputeCategory>('Copyright');
@@ -79,7 +97,7 @@ export function SubmissionDisputeModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!reason.trim()) {
-      toast.error('Please specify the dispute reason.');
+      toast.error(isVie ? 'Vui lòng nêu rõ lý do khiếu nại.' : 'Please specify the dispute reason.');
       return;
     }
 
@@ -94,11 +112,15 @@ export function SubmissionDisputeModal({
         evidenceUrls: validUrls.length > 0 ? validUrls : undefined,
       });
 
-      toast.success('Dispute reported successfully. The contest moderators and jury will review this submission.');
+      toast.success(
+        isVie
+          ? 'Đã gửi khiếu nại thành công. Ban tổ chức và giám khảo sẽ xem xét bài thi này.'
+          : 'Dispute reported successfully. The contest moderators and jury will review this submission.'
+      );
       onSuccess?.();
       onClose();
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Failed to file dispute.';
+      const msg = err instanceof Error ? err.message : (isVie ? 'Không thể gửi khiếu nại.' : 'Failed to file dispute.');
       toast.error(msg);
     } finally {
       setSubmitting(false);
@@ -123,10 +145,12 @@ export function SubmissionDisputeModal({
             </div>
             <div>
               <h3 className="font-h1 text-lg font-bold text-white sm:text-xl">
-                File a Dispute
+                {isVie ? 'Khiếu nại bài dự thi' : 'File a Dispute'}
               </h3>
               <p className="text-xs text-[#8A8FA9]">
-                Report submission #{submission.id.slice(0, 8)} for review
+                {isVie
+                  ? `Báo cáo bài dự thi #${submission.id.slice(0, 8)} để xem xét`
+                  : `Report submission #${submission.id.slice(0, 8)} for review`}
               </p>
             </div>
           </div>
@@ -151,14 +175,17 @@ export function SubmissionDisputeModal({
             />
           ) : (
             <div className="size-14 shrink-0 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-xs text-[#8A8FA9]">
-              No img
+              {isVie ? 'Không có ảnh' : 'No img'}
             </div>
           )}
           <div className="min-w-0 flex-1">
-            <p className="text-xs text-brand-periwinkle font-medium">Contest Submission</p>
+            <p className="text-xs text-brand-periwinkle font-medium">
+              {isVie ? 'Bài dự thi' : 'Contest Submission'}
+            </p>
             <h4 className="truncate text-sm font-bold text-white">{submission.title}</h4>
             <p className="truncate text-xs text-[#8A8FA9]">
-              Artist: <span className="text-[#D6D9FF]">@{submission.submitterName || 'Artist'}</span>
+              {isVie ? 'Tác giả:' : 'Artist:'}{' '}
+              <span className="text-[#D6D9FF]">@{submission.submitterName || (isVie ? 'Họa sĩ' : 'Artist')}</span>
             </p>
           </div>
         </div>
@@ -169,27 +196,27 @@ export function SubmissionDisputeModal({
           {/* Reason */}
           <div>
             <label className="mb-1.5 block text-xs font-semibold text-white">
-              Reason / Summary <span className="text-rose-400">*</span>
+              {isVie ? 'Lý do / Tóm tắt' : 'Reason / Summary'} <span className="text-rose-400">*</span>
             </label>
             <input
               type="text"
               value={reason}
               onChange={(e) => setReason(e.target.value)}
-              placeholder="e.g. Artwork plagiarized from original art on ArtStation"
+              placeholder={isVie ? 'Ví dụ: Tác phẩm đạo nhái tranh gốc trên ArtStation' : 'e.g. Artwork plagiarized from original art on ArtStation'}
               maxLength={200}
               required
               className="w-full rounded-xl border border-white/10 bg-white/5 px-3.5 py-2.5 text-xs text-white placeholder-[#8A8FA9] focus:border-brand-periwinkle focus:outline-none"
             />
           </div>
 
-          {/* Dispute Content Category (server derives priority automatically) */}
+          {/* Dispute Content Category */}
           <div>
             <div className="flex items-center justify-between gap-2 mb-1.5">
               <label className="block text-xs font-semibold text-white">
-                Dispute Category <span className="text-rose-400">*</span>
+                {isVie ? 'Phân loại khiếu nại' : 'Dispute Category'} <span className="text-rose-400">*</span>
               </label>
               <span className="text-[10px] text-[#8A8FA9]">
-                Priority is auto-assigned by category
+                {isVie ? 'Mức độ ưu tiên tự động gán theo phân loại' : 'Priority is auto-assigned by category'}
               </span>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -207,10 +234,10 @@ export function SubmissionDisputeModal({
                     }`}
                   >
                     <span className={`block text-xs font-semibold ${active ? 'text-brand-periwinkle' : 'text-white'}`}>
-                      {opt.label}
+                      {isVie ? opt.labelVie : opt.label}
                     </span>
                     <span className="block text-[10px] text-[#8A8FA9] mt-0.5 line-clamp-1">
-                      {opt.hint}
+                      {isVie ? opt.hintVie : opt.hint}
                     </span>
                   </button>
                 );
@@ -221,12 +248,12 @@ export function SubmissionDisputeModal({
           {/* Detailed Description */}
           <div>
             <label className="mb-1.5 block text-xs font-semibold text-white">
-              Detailed Description (optional)
+              {isVie ? 'Mô tả chi tiết (tùy chọn)' : 'Detailed Description (optional)'}
             </label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Provide more context or notes for the jury/moderator..."
+              placeholder={isVie ? 'Cung cấp thêm ngữ cảnh hoặc ghi chú cho ban giám khảo / kiểm duyệt viên...' : 'Provide more context or notes for the jury/moderator...'}
               rows={3}
               maxLength={1000}
               className="w-full rounded-xl border border-white/10 bg-white/5 p-3 text-xs text-white placeholder-[#8A8FA9] focus:border-brand-periwinkle focus:outline-none"
@@ -236,14 +263,16 @@ export function SubmissionDisputeModal({
           {/* Evidence URLs */}
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label className="text-xs font-semibold text-white">Evidence Links (optional)</label>
+              <label className="text-xs font-semibold text-white">
+                {isVie ? 'Liên kết bằng chứng (tùy chọn)' : 'Evidence Links (optional)'}
+              </label>
               {evidenceInputs.length < 5 && (
                 <button
                   type="button"
                   onClick={handleAddEvidence}
                   className="inline-flex items-center gap-1 text-[11px] font-semibold text-brand-periwinkle hover:underline cursor-pointer"
                 >
-                  <Plus size={12} /> Add link
+                  <Plus size={12} /> {isVie ? 'Thêm liên kết' : 'Add link'}
                 </button>
               )}
             </div>
@@ -256,7 +285,7 @@ export function SubmissionDisputeModal({
                       type="url"
                       value={url}
                       onChange={(e) => handleEvidenceChange(idx, e.target.value)}
-                      placeholder="https://example.com/evidence-or-original-link"
+                      placeholder={isVie ? 'https://example.com/link-bang-chung-hoac-tranh-goc' : 'https://example.com/evidence-or-original-link'}
                       className="w-full rounded-xl border border-white/10 bg-white/5 py-2 pl-8 pr-3 text-xs text-white placeholder-[#8A8FA9] focus:border-brand-periwinkle focus:outline-none"
                     />
                   </div>
@@ -265,7 +294,7 @@ export function SubmissionDisputeModal({
                       type="button"
                       onClick={() => handleRemoveEvidence(idx)}
                       className="rounded-xl border border-white/10 bg-white/5 p-2 text-[#8A8FA9] hover:text-rose-400 hover:border-rose-400/30 transition cursor-pointer"
-                      title="Remove link"
+                      title={isVie ? 'Xóa liên kết' : 'Remove link'}
                     >
                       <Trash2 size={13} />
                     </button>
@@ -279,7 +308,9 @@ export function SubmissionDisputeModal({
           <div className="flex items-start gap-2.5 rounded-xl border border-amber-500/20 bg-amber-500/5 p-3 text-[11px] text-amber-200/90 leading-relaxed">
             <AlertTriangle size={14} className="shrink-0 mt-0.5 text-amber-400" />
             <span>
-              False or malicious disputes can result in penalties on your account. Please submit evidence truthfully.
+              {isVie
+                ? 'Khiếu nại sai sự thật hoặc mang tính phá hoại có thể dẫn đến xử phạt tài khoản. Vui lòng cung cấp thông tin trung thực.'
+                : 'False or malicious disputes can result in penalties on your account. Please submit evidence truthfully.'}
             </span>
           </div>
 
@@ -291,7 +322,7 @@ export function SubmissionDisputeModal({
               disabled={submitting}
               className="rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-xs font-semibold text-[#8A8FA9] hover:bg-white/10 hover:text-white transition disabled:opacity-50 cursor-pointer"
             >
-              Cancel
+              {isVie ? 'Hủy bỏ' : 'Cancel'}
             </button>
             <button
               type="submit"
@@ -301,12 +332,12 @@ export function SubmissionDisputeModal({
               {submitting ? (
                 <>
                   <Loader2 size={14} className="animate-spin" />
-                  Submitting...
+                  {isVie ? 'Đang gửi...' : 'Submitting...'}
                 </>
               ) : (
                 <>
                   <ShieldAlert size={14} />
-                  Submit Dispute
+                  {isVie ? 'Gửi khiếu nại' : 'Submit Dispute'}
                 </>
               )}
             </button>

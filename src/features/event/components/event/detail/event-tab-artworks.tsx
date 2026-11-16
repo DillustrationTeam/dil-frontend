@@ -6,6 +6,7 @@ import { Search, Palette, UserCheck, Trophy, ExternalLink, ThumbsUp, ShieldAlert
 import type { EventSubmissionDto } from '@/features/event/types/event.types';
 import type { TabType } from './event-detail-tab-nav';
 import { SubmissionDisputeModal } from './submission-dispute-modal';
+import { useLanguage } from '@/context/language-context';
 
 interface EventTabArtworksProps {
   filteredArtworks: EventSubmissionDto[];
@@ -34,7 +35,10 @@ export function EventTabArtworks({
   handleVote,
   isCreatorOrClient = false,
 }: EventTabArtworksProps) {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
   const [disputeTarget, setDisputeTarget] = useState<EventSubmissionDto | null>(null);
+
   return (
     <div className="space-y-6">
       {/* Filter and Search Bar */}
@@ -45,14 +49,14 @@ export function EventTabArtworks({
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search artworks or artists..."
+            placeholder={isVie ? 'Tìm tác phẩm hoặc họa sĩ...' : 'Search artworks or artists...'}
             className="w-full rounded-xl border border-white/10 bg-white/5 py-2 pl-9 pr-4 text-xs text-white placeholder-[#8A8FA9] focus:border-brand-periwinkle focus:outline-none"
           />
         </div>
 
         <div className="flex items-center justify-between w-full sm:w-auto gap-3">
           <div className="flex items-center gap-2">
-            <span className="text-xs text-[#8A8FA9]">Sort:</span>
+            <span className="text-xs text-[#8A8FA9]">{isVie ? 'Sắp xếp:' : 'Sort:'}</span>
             <button
               type="button"
               onClick={() => setSortBy('votes')}
@@ -62,7 +66,7 @@ export function EventTabArtworks({
                   : 'bg-white/5 text-[#A7ACD9] hover:bg-white/10'
               }`}
             >
-              Most Votes
+              {isVie ? 'Nhiều bình chọn nhất' : 'Most Votes'}
             </button>
             <button
               type="button"
@@ -73,7 +77,7 @@ export function EventTabArtworks({
                   : 'bg-white/5 text-[#A7ACD9] hover:bg-white/10'
               }`}
             >
-              Newest
+              {isVie ? 'Mới nhất' : 'Newest'}
             </button>
           </div>
         </div>
@@ -83,9 +87,15 @@ export function EventTabArtworks({
       {filteredArtworks.length === 0 ? (
         <div className="rounded-3xl border border-dashed border-white/15 p-16 text-center">
           <Palette size={40} className="mx-auto text-outline/50 mb-3" />
-          <h3 className="font-h1 text-lg font-bold text-white">No submissions found</h3>
+          <h3 className="font-h1 text-lg font-bold text-white">
+            {isVie ? 'Chưa có bài dự thi nào' : 'No submissions found'}
+          </h3>
           <p className="mt-1 text-xs text-[#8A8FA9] max-w-md mx-auto">
-            {searchQuery
+            {isVie
+              ? searchQuery
+                ? 'Không có tác phẩm nào khớp với tiêu chí tìm kiếm. Hãy thử từ khóa khác.'
+                : 'Hãy là người đầu tiên nộp tác phẩm nguyên bản cho cuộc thi này! Chuyển sang mục Bài dự thi của tôi để bắt đầu.'
+              : searchQuery
               ? 'No artworks matched your search criteria. Try a different query.'
               : 'Be the pioneer creator to submit your original artwork for this competition! Go to My Submission tab to enter.'}
           </p>
@@ -96,7 +106,7 @@ export function EventTabArtworks({
               className="mt-5 inline-flex items-center gap-2 rounded-2xl border border-brand-periwinkle/30 bg-brand-periwinkle/15 px-6 py-2.5 text-xs font-bold text-brand-periwinkle hover:bg-brand-periwinkle/25 transition cursor-pointer"
             >
               <UserCheck size={16} />
-              <span>Go to My Submission</span>
+              <span>{isVie ? 'Đến mục Bài dự thi của tôi' : 'Go to My Submission'}</span>
             </button>
           )}
         </div>
@@ -128,27 +138,27 @@ export function EventTabArtworks({
                     />
                   ) : (
                     <div className="flex size-full items-center justify-center text-xs text-outline">
-                      No preview available
+                      {isVie ? 'Không có ảnh xem trước' : 'No preview available'}
                     </div>
                   )}
 
                   {isMine && (
                     <div className="absolute left-3 top-3 rounded-full border border-brand-periwinkle/40 bg-brand-periwinkle/90 px-3 py-1 text-[11px] font-extrabold text-brand-navy shadow-md backdrop-blur-md">
-                      My Entry
+                      {isVie ? 'Bài của tôi' : 'My Entry'}
                     </div>
                   )}
 
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/img:opacity-100 transition flex items-center justify-center gap-1.5 text-xs font-bold text-white backdrop-blur-[2px]">
                     <ExternalLink size={14} />
-                    <span>View Artwork</span>
+                    <span>{isVie ? 'Xem tác phẩm' : 'View Artwork'}</span>
                   </div>
                 </Link>
 
                 <div className="p-5 space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-[#A7ACD9] font-medium">@{sub.submitterName || 'Artist'}</span>
+                    <span className="text-xs text-[#A7ACD9] font-medium">@{sub.submitterName || (isVie ? 'Họa sĩ' : 'Artist')}</span>
                     <span className="inline-flex items-center gap-1 text-xs font-bold text-amber-300">
-                      <Trophy size={13} /> {sub.voteCount} votes
+                      <Trophy size={13} /> {sub.voteCount} {isVie ? 'bình chọn' : 'votes'}
                     </span>
                   </div>
 
@@ -176,7 +186,7 @@ export function EventTabArtworks({
                         }`}
                       >
                         <ThumbsUp size={14} className={sub.hasVoted ? 'fill-current' : ''} />
-                        <span>{sub.hasVoted ? 'Voted' : 'Vote'}</span>
+                        <span>{isVie ? (sub.hasVoted ? 'Đã bình chọn' : 'Bình chọn') : (sub.hasVoted ? 'Voted' : 'Vote')}</span>
                       </button>
                     )}
 
@@ -187,17 +197,17 @@ export function EventTabArtworks({
                         onClick={() => {
                           if (!effectiveUserId) {
                             import('react-hot-toast').then(({ default: toast }) => {
-                              toast.error('Please log in to raise a dispute.');
+                              toast.error(isVie ? 'Vui lòng đăng nhập để gửi khiếu nại.' : 'Please log in to raise a dispute.');
                             });
                             return;
                           }
                           setDisputeTarget(sub);
                         }}
                         className="flex-1 flex items-center justify-center gap-1.5 rounded-xl border border-rose-500/30 bg-rose-500/10 py-2.5 px-2 text-xs font-semibold text-rose-300 hover:bg-rose-500/20 hover:text-rose-200 transition cursor-pointer text-center"
-                        title="Raise a dispute for this submission"
+                        title={isVie ? 'Gửi khiếu nại cho bài dự thi này' : 'Raise a dispute for this submission'}
                       >
                         <ShieldAlert size={14} className="text-rose-400 shrink-0" />
-                        <span className="truncate">Raise Dispute</span>
+                        <span className="truncate">{isVie ? 'Khiếu nại' : 'Raise Dispute'}</span>
                       </button>
                     )}
 
@@ -205,10 +215,10 @@ export function EventTabArtworks({
                     <Link
                       href={artworkLink}
                       className="flex-1 flex items-center justify-center gap-1.5 rounded-xl border border-white/10 bg-white/5 py-2.5 px-2 text-xs font-semibold text-[#A7ACD9] hover:bg-white/10 hover:text-white transition cursor-pointer text-center"
-                      title="View artwork details"
+                      title={isVie ? 'Xem chi tiết bài dự thi' : 'View artwork details'}
                     >
                       <ExternalLink size={13} className="shrink-0" />
-                      <span>Details</span>
+                      <span>{isVie ? 'Chi tiết' : 'Details'}</span>
                     </Link>
                   </div>
                 </div>

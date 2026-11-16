@@ -34,9 +34,11 @@ function subscribeSharedTick(listener: TickListener): () => void {
 export interface EventCountdownResult {
   phase: 'Upcoming' | 'Submission' | 'Judging' | 'Voting' | 'Ended';
   phaseLabel: string;
+  phaseLabelVie: string;
   targetDate: string | null;
   remainingMs: number;
   formatted: string;
+  formattedVie: string;
   days: number;
   hours: number;
   minutes: number;
@@ -58,9 +60,11 @@ export function useEventCountdown(event?: EventListItemDto | null): EventCountdo
       return {
         phase: 'Ended',
         phaseLabel: 'Ended',
+        phaseLabelVie: 'Đã kết thúc',
         targetDate: null,
         remainingMs: 0,
         formatted: '00:00:00',
+        formattedVie: '00:00:00',
         days: 0,
         hours: 0,
         minutes: 0,
@@ -74,9 +78,11 @@ export function useEventCountdown(event?: EventListItemDto | null): EventCountdo
       return {
         phase: 'Upcoming',
         phaseLabel: 'Draft — Not Published',
+        phaseLabelVie: 'Bản nháp — Chưa phát hành',
         targetDate: null,
         remainingMs: 0,
         formatted: 'Draft',
+        formattedVie: 'Bản nháp',
         days: 0,
         hours: 0,
         minutes: 0,
@@ -89,9 +95,11 @@ export function useEventCountdown(event?: EventListItemDto | null): EventCountdo
       return {
         phase: 'Ended',
         phaseLabel: 'Contest Concluded',
+        phaseLabelVie: 'Cuộc thi đã kết thúc',
         targetDate: null,
         remainingMs: 0,
         formatted: 'Time Expired',
+        formattedVie: 'Đã hết hạn',
         days: 0,
         hours: 0,
         minutes: 0,
@@ -107,32 +115,38 @@ export function useEventCountdown(event?: EventListItemDto | null): EventCountdo
 
     let phase: EventCountdownResult['phase'] = 'Ended';
     let phaseLabel = 'Ended';
+    let phaseLabelVie = 'Đã kết thúc';
     let targetTimeMs = 0;
     let targetDateStr: string | null = null;
 
     if (!isNaN(subStart) && now < subStart) {
       phase = 'Upcoming';
       phaseLabel = 'Waiting to Open in';
+      phaseLabelVie = 'Mở nộp bài sau';
       targetTimeMs = subStart;
       targetDateStr = event.submissionStartAt;
     } else if (!isNaN(subEnd) && now < subEnd) {
       phase = 'Submission';
       phaseLabel = 'Submission Deadline in';
+      phaseLabelVie = 'Hạn chót nộp bài sau';
       targetTimeMs = subEnd;
       targetDateStr = event.submissionEndAt;
     } else if (!isNaN(votingEnd) && now < votingEnd) {
       phase = 'Voting';
       phaseLabel = 'Voting Ends in';
+      phaseLabelVie = 'Bình chọn kết thúc sau';
       targetTimeMs = votingEnd;
       targetDateStr = event.votingEndAt || event.judgingEndAt;
     } else if (!isNaN(resultAnnounce) && now < resultAnnounce) {
       phase = 'Judging';
       phaseLabel = 'Results Announced in';
+      phaseLabelVie = 'Công bố kết quả sau';
       targetTimeMs = resultAnnounce;
       targetDateStr = event.resultAnnouncementAt;
     } else {
       phase = 'Ended';
       phaseLabel = 'Contest Concluded';
+      phaseLabelVie = 'Cuộc thi đã kết thúc';
       targetTimeMs = 0;
       targetDateStr = null;
     }
@@ -149,12 +163,18 @@ export function useEventCountdown(event?: EventListItemDto | null): EventCountdo
       ? `${days}d ${pad(hours)}:${pad(minutes)}:${pad(seconds)}`
       : `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
 
+    const formattedVie = days > 0
+      ? `${days} ngày ${pad(hours)}:${pad(minutes)}:${pad(seconds)}`
+      : `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+
     return {
       phase,
       phaseLabel,
+      phaseLabelVie,
       targetDate: targetDateStr,
       remainingMs,
       formatted: remainingMs <= 0 ? 'Time Expired' : formatted,
+      formattedVie: remainingMs <= 0 ? 'Đã hết hạn' : formattedVie,
       days,
       hours,
       minutes,

@@ -15,6 +15,7 @@ import { SubmissionModalHeader } from './submission-modal/submission-modal-heade
 import { SubmissionModalNav, SubmissionMode } from './submission-modal/submission-modal-nav';
 import { SubmissionModalPortfolioPicker } from './submission-modal/submission-modal-portfolio-picker';
 import { SubmissionModalFileUploader } from './submission-modal/submission-modal-file-uploader';
+import { useLanguage } from '@/context/language-context';
 
 interface EventSubmissionModalProps {
   isOpen: boolean;
@@ -47,6 +48,9 @@ function EventSubmissionModalInner({
   userId,
   existingSubmission,
 }: EventSubmissionModalProps) {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
+
   const [isJury, setIsJury] = useState(isJuryMember || false);
   const isEditing = Boolean(existingSubmission);
   const [mode, setMode] = useState<SubmissionMode>(
@@ -148,12 +152,12 @@ function EventSubmissionModalInner({
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
-      toast.error('Please select an image file (PNG, JPG, WEBP).');
+      toast.error(isVie ? 'Vui lòng chọn một tệp hình ảnh hợp lệ (PNG, JPG, WEBP).' : 'Please select an image file (PNG, JPG, WEBP).');
       return;
     }
 
     if (file.size > 25 * 1024 * 1024) {
-      toast.error('Image size must be less than 25MB.');
+      toast.error(isVie ? 'Dung lượng hình ảnh phải nhỏ hơn 25MB.' : 'Image size must be less than 25MB.');
       return;
     }
 
@@ -178,29 +182,33 @@ function EventSubmissionModalInner({
     e.preventDefault();
 
     if (!isCreator) {
-      toast.error('Only registered creators can participate in this contest. Please set up your creator profile.');
+      toast.error(
+        isVie
+          ? 'Chỉ có họa sĩ đã đăng ký mới có thể tham gia cuộc thi này. Vui lòng thiết lập hồ sơ họa sĩ của bạn.'
+          : 'Only registered creators can participate in this contest. Please set up your creator profile.'
+      );
       return;
     }
 
     if (mode === 'existing') {
       if (!selectedArtwork) {
-        toast.error('Please select an artwork from your collection.');
+        toast.error(isVie ? 'Vui lòng chọn một tác phẩm từ bộ sưu tập của bạn.' : 'Please select an artwork from your collection.');
         return;
       }
     } else {
       if (!localFile && !localPreviewUrl) {
-        toast.error('Please select an artwork file from your PC.');
+        toast.error(isVie ? 'Vui lòng chọn một tệp tác phẩm từ máy tính của bạn.' : 'Please select an artwork file from your PC.');
         return;
       }
     }
 
     if (!title.trim()) {
-      toast.error('Please enter an artwork title.');
+      toast.error(isVie ? 'Vui lòng nhập tiêu đề cho tác phẩm.' : 'Please enter an artwork title.');
       return;
     }
 
     if (!agreed) {
-      toast.error('You must confirm that this artwork is your original creation.');
+      toast.error(isVie ? 'Bạn phải cam kết tác phẩm này là tác phẩm nguyên bản của mình.' : 'You must confirm that this artwork is your original creation.');
       return;
     }
 
@@ -231,7 +239,11 @@ function EventSubmissionModalInner({
           isAiGenerated: false,
         });
 
-        toast.success('Your contest entry has been updated successfully!');
+        toast.success(
+          isVie
+            ? 'Bài dự thi của bạn đã được cập nhật thành công!'
+            : 'Your contest entry has been updated successfully!'
+        );
       } else {
         resultSub = await eventSubmissionService.submitArtwork(eventId, {
           eventId,
@@ -243,13 +255,21 @@ function EventSubmissionModalInner({
           isAiGenerated: false,
         });
 
-        toast.success('Your artwork has been submitted successfully to the contest!');
+        toast.success(
+          isVie
+            ? 'Tác phẩm của bạn đã được gửi thành công đến cuộc thi!'
+            : 'Your artwork has been submitted successfully to the contest!'
+        );
       }
 
       onSuccess(resultSub);
       onClose();
     } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : 'Failed to submit artwork. Please check inputs.');
+      toast.error(
+        err instanceof Error
+          ? err.message
+          : (isVie ? 'Không thể gửi tác phẩm. Vui lòng kiểm tra lại thông tin.' : 'Failed to submit artwork. Please check inputs.')
+      );
     } finally {
       setSubmitting(false);
     }
@@ -274,15 +294,19 @@ function EventSubmissionModalInner({
             <div className="rounded-2xl border border-amber-400/30 bg-amber-500/10 p-4 flex items-start gap-3">
               <AlertCircle size={18} className="text-amber-400 shrink-0 mt-0.5" />
               <div className="space-y-1">
-                <p className="text-xs font-bold text-amber-300">Creator Profile Required</p>
+                <p className="text-xs font-bold text-amber-300">
+                  {isVie ? 'Yêu cầu có hồ sơ Họa sĩ' : 'Creator Profile Required'}
+                </p>
                 <p className="text-xs text-amber-200/90 leading-relaxed">
-                  Contest submissions are exclusively reserved for verified Creators. Please complete your creator profile to submit artwork.
+                  {isVie
+                    ? 'Bài dự thi cuộc thi chỉ dành riêng cho các Họa sĩ (Creator). Vui lòng hoàn tất hồ sơ họa sĩ để nộp tranh.'
+                    : 'Contest submissions are exclusively reserved for verified Creators. Please complete your creator profile to submit artwork.'}
                 </p>
                 <Link
                   href="/creator-setup"
                   className="inline-block text-xs font-bold text-brand-periwinkle underline mt-1 hover:text-white"
                 >
-                  Set up Creator Profile →
+                  {isVie ? 'Thiết lập hồ sơ Họa sĩ →' : 'Set up Creator Profile →'}
                 </Link>
               </div>
             </div>
@@ -325,27 +349,27 @@ function EventSubmissionModalInner({
           {/* Submission Details */}
           <div>
             <label className="block text-xs font-semibold uppercase tracking-wider text-[#A7ACD9] mb-1.5">
-              Artwork Title <span className="text-rose-400">*</span>
+              {isVie ? 'Tiêu đề tác phẩm' : 'Artwork Title'} <span className="text-rose-400">*</span>
             </label>
             <input
               type="text"
               required
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="e.g. Celestial Guardian of Neo-Saigon"
+              placeholder={isVie ? 'Ví dụ: Hộ Thần Tinh Tú xứ Sài Gòn' : 'e.g. Celestial Guardian of Neo-Saigon'}
               className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-[#8A8FA9] focus:border-brand-periwinkle focus:outline-none"
             />
           </div>
 
           <div>
             <label className="block text-xs font-semibold uppercase tracking-wider text-[#A7ACD9] mb-1.5">
-              Artist Statement / Lore
+              {isVie ? 'Tuyên ngôn nghệ thuật / Câu chuyện tác phẩm' : 'Artist Statement / Lore'}
             </label>
             <textarea
               rows={3}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Describe your creative process, technique, storytelling, or tools used..."
+              placeholder={isVie ? 'Mô tả quá trình sáng tác, kỹ thuật, thông điệp hoặc công cụ sử dụng...' : 'Describe your creative process, technique, storytelling, or tools used...'}
               className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-[#8A8FA9] focus:border-brand-periwinkle focus:outline-none"
             />
           </div>
@@ -355,7 +379,9 @@ function EventSubmissionModalInner({
             <div className="flex items-start gap-2.5">
               <ShieldAlert size={18} className="text-amber-400 shrink-0 mt-0.5" />
               <div className="text-xs text-amber-200/90 leading-relaxed">
-                By entering this contest, you certify that this artwork is 100% original work created by you, adhering strictly to contest rules and copyright regulations.
+                {isVie
+                  ? 'Khi tham gia cuộc thi này, bạn xác nhận rằng tác phẩm này là tác phẩm nguyên bản 100% do chính bạn tạo ra, tuân thủ nghiêm ngặt thể lệ cuộc thi và các quy định về bản quyền.'
+                  : 'By entering this contest, you certify that this artwork is 100% original work created by you, adhering strictly to contest rules and copyright regulations.'}
               </div>
             </div>
 
@@ -367,7 +393,9 @@ function EventSubmissionModalInner({
                 className="size-4 rounded border-white/20 bg-white/5 text-brand-periwinkle focus:ring-0 cursor-pointer"
               />
               <span className="text-xs font-medium text-white">
-                I verify this is my original work and accept the official competition rules.
+                {isVie
+                  ? 'Tôi xác nhận đây là tác phẩm nguyên bản của tôi và chấp nhận thể lệ chính thức của cuộc thi.'
+                  : 'I verify this is my original work and accept the official competition rules.'}
               </span>
             </label>
           </div>
@@ -379,7 +407,7 @@ function EventSubmissionModalInner({
               onClick={onClose}
               className="rounded-xl border border-white/10 px-5 py-2.5 text-xs font-semibold text-[#A7ACD9] hover:bg-white/5 hover:text-white transition cursor-pointer"
             >
-              Cancel
+              {isVie ? 'Hủy bỏ' : 'Cancel'}
             </button>
 
             <button
@@ -390,12 +418,20 @@ function EventSubmissionModalInner({
               {submitting ? (
                 <>
                   <div className="size-3.5 animate-spin rounded-full border-2 border-brand-navy border-t-transparent" />
-                  <span>{isEditing ? 'Updating...' : 'Submitting...'}</span>
+                  <span>
+                    {isEditing
+                      ? (isVie ? 'Đang cập nhật...' : 'Updating...')
+                      : (isVie ? 'Đang gửi...' : 'Submitting...')}
+                  </span>
                 </>
               ) : (
                 <>
                   <UploadCloud size={16} />
-                  <span>{isEditing ? 'Update Entry' : 'Submit Artwork'}</span>
+                  <span>
+                    {isEditing
+                      ? (isVie ? 'Cập nhật bài thi' : 'Update Entry')
+                      : (isVie ? 'Nộp tác phẩm' : 'Submit Artwork')}
+                  </span>
                 </>
               )}
             </button>

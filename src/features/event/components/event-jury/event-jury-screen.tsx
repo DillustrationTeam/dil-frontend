@@ -31,7 +31,7 @@ import toast from 'react-hot-toast';
 import { useAuthStore } from '@/store/use-auth-store';
 import { creatorProfileService } from '@/features/creator-studio/services/creator-profile.service';
 import type { EventDetailDto } from '../../types/event.types';
-import { eventStatusBadgeStyles, eventStatusLabels, normalizeEventStatus } from '../../types/event.types';
+import { eventStatusBadgeStyles, eventStatusLabels, normalizeEventStatus, getEventStatusLabel } from '../../types/event.types';
 import type {
   JuryCriterion,
   JurySubmissionItem,
@@ -45,6 +45,7 @@ import { juryService } from '../../services/jury.service';
 import { computeIsJudgingPhase, getJudgingLockMessage, getRubricMaxTotal } from '../../utils/jury-phase';
 import { JuryArtworkLightbox } from './jury-artwork-lightbox';
 import { EventSearchFilterBar } from '../event/event-search-filter-bar';
+import { useLanguage } from '@/context/language-context';
 
 interface EventJuryScreenProps {
   eventId: string;
@@ -64,6 +65,9 @@ function formatDisplayDate(dateStr?: string | null): string {
 }
 
 export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
+
   const [nowMs, setNowMs] = useState(() => Date.now());
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -88,7 +92,7 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
   // Status badge styling matching event-detail-screen
   const statusStr = event?.status != null ? normalizeEventStatus(event.status) : 'Judging';
   const statusColor = eventStatusBadgeStyles[statusStr] || 'border-white/10 bg-white/5 text-[#9695a1]';
-  const statusLabel = eventStatusLabels[statusStr] || statusStr;
+  const statusLabel = getEventStatusLabel(statusStr, isVie);
 
   useEffect(() => {
     const timer = setInterval(() => setNowMs(Date.now()), 15000);
@@ -229,7 +233,7 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
 
   const handleScoreChange = (criteriaId: string, val: number, maxScore: number) => {
     if (activeSubmission?.isLocked) {
-      toast.error('Điểm của bài dự thi này đã được khóa và không thể chỉnh sửa.');
+      toast.error(isVie ? 'Điểm của bài dự thi này đã được khóa và không thể chỉnh sửa.' : 'The score for this submission is locked and cannot be edited.');
       return;
     }
     if (!isJudgingPhase) {
@@ -246,7 +250,7 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
   const handleSaveDraft = () => {
     if (!activeSubmission) return;
     if (activeSubmission.isLocked) {
-      toast.error('Điểm của bài dự thi này đã được khóa và không thể chỉnh sửa.');
+      toast.error(isVie ? 'Điểm của bài dự thi này đã được khóa và không thể chỉnh sửa.' : 'The score for this submission is locked and cannot be edited.');
       return;
     }
     if (!isJudgingPhase) {
@@ -282,7 +286,11 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
       )
     );
 
-    toast.success(`Draft saved for #${activeSubmission.code} (${totalScore} pts)`);
+    toast.success(
+      isVie
+        ? `Đã lưu bản nháp cho #${activeSubmission.code} (${totalScore} điểm)`
+        : `Draft saved for #${activeSubmission.code} (${totalScore} pts)`
+    );
   };
 
   const handleSubmitScore = async (e?: React.FormEvent) => {
@@ -290,12 +298,12 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
     if (!activeSubmission) return;
 
     if (activeSubmission.isLocked) {
-      toast.error('Điểm của bài dự thi này đã được khóa và không thể chỉnh sửa.');
+      toast.error(isVie ? 'Điểm của bài dự thi này đã được khóa và không thể chỉnh sửa.' : 'The score for this submission is locked and cannot be edited.');
       return;
     }
 
     if (!isJuryMember) {
-      toast.error('Bạn không có quyền chấm điểm vì không được phân công làm Giám khảo cho sự kiện này.');
+      toast.error(isVie ? 'Bạn không có quyền chấm điểm vì không được phân công làm Giám khảo cho sự kiện này.' : 'You do not have grading permissions because you are not assigned as a Jury member for this event.');
       return;
     }
 
@@ -305,7 +313,7 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
     }
 
     if (!noConflict) {
-      toast.error('Please confirm that you have no conflict of interest before submitting.');
+      toast.error(isVie ? 'Vui lòng xác nhận rằng bạn không có xung đột lợi ích trước khi gửi.' : 'Please confirm that you have no conflict of interest before submitting.');
       return;
     }
 
@@ -343,7 +351,11 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
         )
       );
 
-      toast.success(`Evaluation submitted successfully: ${totalScore} / ${maxTotalScore} points!`);
+      toast.success(
+        isVie
+          ? `Gửi điểm đánh giá thành công: ${totalScore} / ${maxTotalScore} điểm!`
+          : `Evaluation submitted successfully: ${totalScore} / ${maxTotalScore} points!`
+      );
 
       const nextPending = submissions.find(
         (s) => s.id !== activeSubmission.id && !s.isGraded
@@ -352,7 +364,7 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
         setSelectedSubmissionId(nextPending.id);
       }
     } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : 'Error submitting score.');
+      toast.error(err instanceof Error ? err.message : (isVie ? 'Có lỗi khi gửi điểm đánh giá.' : 'Error submitting score.'));
     } finally {
       setSubmitting(false);
     }
@@ -364,7 +376,9 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-3">
         <RefreshCw className="w-8 h-8 text-[#A7ACD9] animate-spin" />
-        <p className="text-sm text-[#9695a1]">Loading Jury Evaluation Workspace...</p>
+        <p className="text-sm text-[#9695a1]">
+          {isVie ? 'Đang tải không gian chấm thi của Giám khảo...' : 'Loading Jury Evaluation Workspace...'}
+        </p>
       </div>
     );
   }
@@ -376,10 +390,12 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
           <Lock className="w-8 h-8" />
         </div>
         <h2 className="font-sora text-xl sm:text-2xl font-bold text-white">
-          Truy cập bị từ chối
+          {isVie ? 'Truy cập bị từ chối' : 'Access Denied'}
         </h2>
         <p className="mt-2 text-sm text-[#9695a1] max-w-md mx-auto leading-relaxed">
-          Bạn không được phân công làm Giám khảo (Jury) cho sự kiện này. Chỉ những giám khảo được bổ nhiệm chính thức mới có quyền truy cập không gian chấm thi.
+          {isVie
+            ? 'Bạn không được phân công làm Giám khảo (Jury) cho sự kiện này. Chỉ những giám khảo được bổ nhiệm chính thức mới có quyền truy cập không gian chấm thi.'
+            : 'You are not assigned as a Jury member for this event. Only officially appointed jury members have access to the evaluation workspace.'}
         </p>
         <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
           <Link
@@ -387,13 +403,13 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
             className="commission-primary inline-flex items-center gap-2 rounded-xl px-6 py-2.5 text-xs transition shadow-lg"
           >
             <ChevronLeft size={16} />
-            <span>Quay lại chi tiết sự kiện</span>
+            <span>{isVie ? 'Quay lại chi tiết sự kiện' : 'Back to Event Details'}</span>
           </Link>
           <Link
             href="/events"
             className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-6 py-2.5 text-xs font-semibold text-[#9695a1] hover:text-white hover:bg-white/10 transition"
           >
-            <span>Tất cả sự kiện</span>
+            <span>{isVie ? 'Tất cả cuộc thi' : 'All Events'}</span>
           </Link>
         </div>
       </div>
@@ -404,17 +420,19 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] px-4 py-12 text-center">
         <h2 className="font-sora text-xl sm:text-2xl font-bold text-white">
-          Không tìm thấy sự kiện
+          {isVie ? 'Không tìm thấy sự kiện' : 'Event Not Found'}
         </h2>
         <p className="mt-2 text-sm text-[#9695a1] max-w-md mx-auto leading-relaxed">
-          Sự kiện này không tồn tại hoặc đã bị xóa khỏi hệ thống.
+          {isVie
+            ? 'Sự kiện này không tồn tại hoặc đã bị xóa khỏi hệ thống.'
+            : 'This event does not exist or has been removed from the platform.'}
         </p>
         <div className="mt-6">
           <Link
             href="/events"
             className="inline-flex items-center gap-2 rounded-xl bg-white/10 hover:bg-white/15 px-6 py-2.5 text-xs font-semibold text-white transition"
           >
-            <span>Tất cả sự kiện</span>
+            <span>{isVie ? 'Tất cả cuộc thi' : 'All Events'}</span>
           </Link>
         </div>
       </div>
@@ -460,7 +478,7 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
             className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold text-[#A7ACD9] transition hover:border-white/20 hover:text-white cursor-pointer"
           >
             <FileText size={14} />
-            <span>Rules & Guidelines</span>
+            <span>{isVie ? 'Thể lệ & Quy chế' : 'Rules & Guidelines'}</span>
           </button>
 
           <Link
@@ -468,7 +486,7 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
             className="px-3 py-1.5 rounded-xl border border-[#A7ACD9]/30 hover:border-[#A7ACD9] bg-[#A7ACD9]/10 text-xs font-semibold text-[#A7ACD9] hover:text-white transition-colors flex items-center gap-1.5"
           >
             <Crown className="w-3.5 h-3.5 text-amber-300" />
-            <span>Head Jury Room</span>
+            <span>{isVie ? 'Phòng Trưởng BGK' : 'Head Jury Room'}</span>
           </Link>
 
           <Link
@@ -476,7 +494,7 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
             className="px-3 py-1.5 rounded-xl border border-white/10 hover:border-white/20 bg-white/5 text-xs text-white transition-colors flex items-center gap-1.5"
           >
             <ExternalLink className="w-3.5 h-3.5 text-[#A7ACD9]" />
-            <span>Public Event Page</span>
+            <span>{isVie ? 'Trang cuộc thi' : 'Public Event Page'}</span>
           </Link>
         </div>
       </div>
@@ -501,7 +519,7 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
             {event?.isFeatured && (
               <span className="flex items-center gap-1.5 rounded-full border border-amber-400/40 bg-amber-500/20 px-3.5 py-1 text-xs font-bold text-amber-300 backdrop-blur-md">
                 <Flame size={13} className="text-amber-400" />
-                Featured Contest
+                {isVie ? 'Cuộc thi Nổi bật' : 'Featured Contest'}
               </span>
             )}
           </div>
@@ -512,14 +530,19 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
             <div className="flex items-center gap-2 text-xs text-[#8A8FA9]">
               <span className="flex items-center gap-1 font-semibold text-white">
                 <CheckCircle2 size={15} className="text-[#A7ACD9]" />
-                {event?.createdByAdminName || 'Dillustration Committee'}
+                {event?.createdByAdminName || (isVie ? 'Ban tổ chức Dillustration' : 'Dillustration Committee')}
               </span>
               <span>•</span>
               <span className="flex items-center gap-1">
-                <Calendar size={14} /> Started {event?.submissionStartAt ? new Date(event.submissionStartAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Oct 1, 2026'}
+                <Calendar size={14} /> {isVie ? 'Bắt đầu' : 'Started'}{' '}
+                {event?.submissionStartAt
+                  ? new Date(event.submissionStartAt).toLocaleDateString(isVie ? 'vi-VN' : 'en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+                  : '01/10/2026'}
               </span>
               <span>•</span>
-              <span className="text-amber-300 font-medium">Jury Due: {deadlineFormatted}</span>
+              <span className="text-amber-300 font-medium">
+                {isVie ? 'Hạn chót chấm điểm:' : 'Jury Due:'} {deadlineFormatted}
+              </span>
             </div>
 
             <h1 className="font-sora text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white leading-tight">
@@ -527,7 +550,7 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
             </h1>
 
             <p className="text-sm text-[#A7ACD9] leading-relaxed max-w-4xl">
-              {event?.description || 'Annual visual arts and illustration competition on Dillustration.'}
+              {event?.description || (isVie ? 'Cuộc thi minh họa và nghệ thuật thị giác thường niên trên Dillustration.' : 'Annual visual arts and illustration competition on Dillustration.')}
             </p>
           </div>
 
@@ -539,13 +562,15 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2 mb-1.5 flex-wrap">
                   <span className="text-xs font-extrabold uppercase tracking-widest text-amber-300">
-                    Official Prize Pool & Honors
+                    {isVie ? 'Cơ cấu giải thưởng & Vinh danh' : 'Official Prize Pool & Honors'}
                   </span>
                   <span className="size-1.5 rounded-full bg-amber-400" />
-                  <span className="text-[11px] text-amber-300/80 font-medium">Guaranteed Distribution</span>
+                  <span className="text-[11px] text-amber-300/80 font-medium">
+                    {isVie ? 'Cam kết trao giải đầy đủ' : 'Guaranteed Distribution'}
+                  </span>
                 </div>
                 <div className="font-sora text-xl sm:text-2xl font-extrabold text-white leading-relaxed break-words whitespace-pre-line">
-                  {event?.prize || '50,000,000 VND + Certified Art Honor Trophy'}
+                  {event?.prize || (isVie ? '50.000.000 VNĐ + Kỷ niệm chương Vinh danh' : '50,000,000 VND + Certified Art Honor Trophy')}
                 </div>
               </div>
             </div>
@@ -559,13 +584,15 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
           <div>
             <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#A7ACD9]">
               <Gavel className="w-4 h-4 text-[#A7ACD9]" />
-              <span>Events Jury Workspace</span>
+              <span>{isVie ? 'Không gian Ban giám khảo' : 'Events Jury Workspace'}</span>
             </div>
             <h2 className="text-xl sm:text-2xl font-extrabold text-white font-sora mt-1">
-              Submission Evaluation & Scoring
+              {isVie ? 'Đánh giá & Chấm điểm bài dự thi' : 'Submission Evaluation & Scoring'}
             </h2>
             <p className="text-xs sm:text-sm text-[#9695a1] mt-0.5">
-              Grade assigned entries independently using standardized rubric criteria.
+              {isVie
+                ? 'Độc lập chấm điểm các bài thi được phân công theo bảng tiêu chí chuẩn.'
+                : 'Grade assigned entries independently using standardized rubric criteria.'}
             </p>
           </div>
         </div>
@@ -575,8 +602,12 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
             <div className="p-4 border border-amber-500/30 rounded-2xl bg-amber-500/10 text-xs sm:text-sm text-amber-200 flex items-start gap-3">
               <Lock className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
               <div>
-                <strong className="text-amber-300 font-semibold block sm:inline">Grading Temporarily Locked: </strong>
-                This contest has not reached the Judging phase yet (current status: <span className="font-semibold text-white">{statusLabel}</span>). Evaluation controls will activate once the contest officially enters the Judging round.
+                <strong className="text-amber-300 font-semibold block sm:inline">
+                  {isVie ? 'Chấm điểm tạm thời bị khóa: ' : 'Grading Temporarily Locked: '}
+                </strong>
+                {isVie
+                  ? `Cuộc thi chưa bước vào giai đoạn Chấm điểm (trạng thái hiện tại: ${statusLabel}). Chức năng chấm bài sẽ kích hoạt khi cuộc thi chính thức sang vòng Chấm điểm.`
+                  : `This contest has not reached the Judging phase yet (current status: ${statusLabel}). Evaluation controls will activate once the contest officially enters the Judging round.`}
               </div>
             </div>
           )}
@@ -584,7 +615,10 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
           <div className="p-4 border border-[#A7ACD9]/30 rounded-2xl bg-[#A7ACD9]/10 text-xs sm:text-sm text-[#c8cbed] flex items-start gap-3">
             <Info className="w-5 h-5 text-[#A7ACD9] shrink-0 mt-0.5" />
             <div>
-              <strong>Confidentiality Notice:</strong> You can only view assigned entries and scores submitted by yourself. Aggregated leaderboard and jury deliberations remain confidential until the evaluation phase is officially concluded.
+              <strong>{isVie ? 'Thông báo Bảo mật:' : 'Confidentiality Notice:'}</strong>{' '}
+              {isVie
+                ? 'Bạn chỉ có thể xem các bài thi được phân công và điểm do chính bạn chấm. Điểm số tổng hợp và kết quả thảo luận của hội đồng được bảo mật tuyệt đối cho đến khi kết thúc vòng chấm điểm.'
+                : 'You can only view assigned entries and scores submitted by yourself. Aggregated leaderboard and jury deliberations remain confidential until the evaluation phase is officially concluded.'}
             </div>
           </div>
         </div>
@@ -592,26 +626,34 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
           <article className="relative overflow-hidden p-4 sm:p-5 rounded-2xl bg-white/[0.03] border border-white/10 backdrop-blur-xl">
             <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#A7ACD9] via-[#7FD5E8] to-transparent opacity-75" />
-            <span className="text-[11px] uppercase tracking-wider text-[#9695a1] font-medium block">Assigned Entries</span>
+            <span className="text-[11px] uppercase tracking-wider text-[#9695a1] font-medium block">
+              {isVie ? 'Bài được phân công' : 'Assigned Entries'}
+            </span>
             <strong className="block mt-1 text-2xl sm:text-3xl font-bold font-sora text-white">{stats.totalAssigned}</strong>
           </article>
 
           <article className="relative overflow-hidden p-4 sm:p-5 rounded-2xl bg-white/[0.03] border border-white/10 backdrop-blur-xl">
             <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-emerald-400 via-teal-300 to-transparent opacity-75" />
-            <span className="text-[11px] uppercase tracking-wider text-[#9695a1] font-medium block">Graded</span>
+            <span className="text-[11px] uppercase tracking-wider text-[#9695a1] font-medium block">
+              {isVie ? 'Đã chấm' : 'Graded'}
+            </span>
             <strong className="block mt-1 text-2xl sm:text-3xl font-bold font-sora text-emerald-400">{stats.gradedCount}</strong>
           </article>
 
           <article className="relative overflow-hidden p-4 sm:p-5 rounded-2xl bg-white/[0.03] border border-white/10 backdrop-blur-xl">
             <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-amber-400 via-orange-300 to-transparent opacity-75" />
-            <span className="text-[11px] uppercase tracking-wider text-[#9695a1] font-medium block">Pending</span>
+            <span className="text-[11px] uppercase tracking-wider text-[#9695a1] font-medium block">
+              {isVie ? 'Chưa chấm' : 'Pending'}
+            </span>
             <strong className="block mt-1 text-2xl sm:text-3xl font-bold font-sora text-amber-400">{stats.remainingCount}</strong>
           </article>
 
           <article className="relative overflow-hidden p-4 sm:p-5 rounded-2xl bg-white/[0.03] border border-white/10 backdrop-blur-xl">
             <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#A7ACD9] via-[#c2c7f6] to-transparent opacity-75" />
             <div className="flex items-center justify-between">
-              <span className="text-[11px] uppercase tracking-wider text-[#9695a1] font-medium block">Progress</span>
+              <span className="text-[11px] uppercase tracking-wider text-[#9695a1] font-medium block">
+                {isVie ? 'Tiến độ' : 'Progress'}
+              </span>
               <span className="text-xs font-semibold text-[#A7ACD9]">{stats.progressPercent}%</span>
             </div>
             <strong className="block mt-1 text-2xl sm:text-3xl font-bold font-sora text-white">{stats.progressPercent}%</strong>
@@ -630,11 +672,15 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
           <aside className="glass-container p-4 rounded-2xl lg:sticky lg:top-24 max-h-none lg:max-h-[calc(100vh-7rem)] flex flex-col">
             <div className="flex items-center justify-between gap-3 pb-3 border-b border-white/10 mb-3">
               <div>
-                <h2 className="font-sora font-semibold text-white text-base">Assigned Queue</h2>
-                <span className="text-xs text-[#9695a1]">{stats.remainingCount} pending evaluation</span>
+                <h2 className="font-sora font-semibold text-white text-base">
+                  {isVie ? 'Danh sách phân công' : 'Assigned Queue'}
+                </h2>
+                <span className="text-xs text-[#9695a1]">
+                  {stats.remainingCount} {isVie ? 'bài chờ đánh giá' : 'pending evaluation'}
+                </span>
               </div>
               <span className="text-xs font-mono px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-[#c7c5cf]">
-                {submissions.length} total
+                {submissions.length} {isVie ? 'tổng số' : 'total'}
               </span>
             </div>
 
@@ -642,19 +688,21 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
               variant="stacked"
               searchQuery={searchQuery}
               onSearchChange={setSearchQuery}
-              searchPlaceholder="Search title or entry code..."
+              searchPlaceholder={isVie ? 'Tìm theo tiêu đề hoặc mã bài thi...' : 'Search title or entry code...'}
               statusValue={filterTab}
               onStatusChange={(val: string) => setFilterTab(val as FilterTab)}
               statusOptions={[
-                { value: 'all', label: 'All Submissions (Default)' },
-                { value: 'pending', label: 'Pending Evaluation' },
-                { value: 'graded', label: 'Graded' },
+                { value: 'all', label: isVie ? 'Tất cả bài thi (Mặc định)' : 'All Submissions (Default)' },
+                { value: 'pending', label: isVie ? 'Chờ đánh giá' : 'Pending Evaluation' },
+                { value: 'graded', label: isVie ? 'Đã chấm điểm' : 'Graded' },
               ]}
             />
 
             <div className="space-y-2 overflow-y-auto max-h-[480px] lg:max-h-[calc(100vh-18rem)] pr-1.5 custom-scrollbar">
               {filteredSubmissions.length === 0 ? (
-                <div className="text-center py-8 text-xs text-[#9695a1]">No matching submissions found.</div>
+                <div className="text-center py-8 text-xs text-[#9695a1]">
+                  {isVie ? 'Không tìm thấy bài dự thi phù hợp.' : 'No matching submissions found.'}
+                </div>
               ) : (
                 filteredSubmissions.map((entry) => {
                   const isActive = entry.id === activeSubmission?.id;
@@ -673,13 +721,13 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
                           {entry.title}
                         </strong>
                         <small className="block text-[11px] text-[#9695a1] mt-0.5 truncate">
-                          {entry.code} · {entry.category || 'Illustration'}
+                          {entry.code} · {entry.category || (isVie ? 'Tranh minh họa' : 'Illustration')}
                         </small>
                       </div>
 
                       <div className="shrink-0 flex items-center gap-1.5">
                         {entry.isLocked ? (
-                          <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-[11px] font-mono font-bold" title="Điểm đã khóa">
+                          <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-[11px] font-mono font-bold" title={isVie ? 'Điểm đã khóa' : 'Score locked'}>
                             <Lock className="w-3 h-3 text-emerald-400" />
                             <span>{entry.gradedScore != null ? entry.gradedScore : '—'}</span>
                           </span>
@@ -690,7 +738,7 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
                           </span>
                         ) : (
                           <span className="px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[10px]">
-                            Pending
+                            {isVie ? 'Chưa chấm' : 'Pending'}
                           </span>
                         )}
                       </div>
@@ -709,10 +757,13 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
                   <Lock className="w-4 h-4 text-emerald-400 shrink-0" />
                   <div className="flex-1 flex flex-wrap items-center justify-between gap-2">
                     <span>
-                      <strong>Điểm đã được khóa (Locked):</strong> Bài dự thi này đã hoàn tất đánh giá và được khóa điểm. Điểm số không thể chỉnh sửa trừ khi có yêu cầu tái thẩm định từ Trưởng ban giám khảo.
+                      <strong>{isVie ? 'Điểm đã được khóa (Locked):' : 'Score Locked:'}</strong>{' '}
+                      {isVie
+                        ? 'Bài dự thi này đã hoàn tất đánh giá và được khóa điểm. Điểm số không thể chỉnh sửa trừ khi có yêu cầu tái thẩm định từ Trưởng ban giám khảo.'
+                        : 'This submission has been graded and locked. Scores cannot be edited unless a re-evaluation is requested by the Head Jury.'}
                     </span>
                     <span className="px-2 py-0.5 rounded-md bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 font-mono text-[11px] font-bold">
-                      {activeSubmission.gradedScore ?? totalScore} pts
+                      {activeSubmission.gradedScore ?? totalScore} {isVie ? 'điểm' : 'pts'}
                     </span>
                   </div>
                 </div>
@@ -735,20 +786,26 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
                   </div>
                   <span className="text-xs text-[#9695a1] mt-1 flex items-center gap-1.5">
                     <EyeOff className="w-3 h-3 text-[#A7ACD9]" />
-                    <span>Anonymous Candidate · {activeSubmission.category || 'Illustration'}</span>
+                    <span>
+                      {isVie ? 'Thí sinh ẩn danh' : 'Anonymous Candidate'} · {activeSubmission.category || (isVie ? 'Minh họa' : 'Illustration')}
+                    </span>
                   </span>
                 </div>
 
                 <div className="flex items-center gap-3">
                   <div className="text-right">
-                    <span className="text-[10px] text-[#9695a1] uppercase tracking-wider block font-semibold">Total Score</span>
+                    <span className="text-[10px] text-[#9695a1] uppercase tracking-wider block font-semibold">
+                      {isVie ? 'Tổng điểm' : 'Total Score'}
+                    </span>
                     <strong className="text-2xl sm:text-3xl font-sora font-extrabold text-[#A7ACD9] block">
                       {activeSubmission.isGraded || totalScore > 0 ? (
                         <>
                           {totalScore} <span className="text-sm font-normal text-[#9695a1]">/ {maxTotalScore}</span>
                         </>
                       ) : (
-                        <span className="text-lg sm:text-xl font-medium text-[#9695a1]">Pending</span>
+                        <span className="text-lg sm:text-xl font-medium text-[#9695a1]">
+                          {isVie ? 'Chờ chấm' : 'Pending'}
+                        </span>
                       )}
                     </strong>
                   </div>
@@ -763,7 +820,7 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
                   {activeSubmission.aiScanPassed && (
                     <span className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-black/60 backdrop-blur-md border border-emerald-500/30 text-emerald-400 text-xs">
                       <ShieldCheck className="w-3.5 h-3.5" />
-                      <span>AI Scan Passed</span>
+                      <span>{isVie ? 'Đạt kiểm tra AI' : 'AI Scan Passed'}</span>
                     </span>
                   )}
                 </div>
@@ -774,13 +831,15 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
                   className="absolute bottom-3 right-3 flex items-center gap-1.5 px-3 py-2 rounded-xl bg-black/70 hover:bg-black/90 backdrop-blur-md border border-white/20 text-white text-xs transition-all shadow-lg cursor-pointer"
                 >
                   <Maximize2 className="w-3.5 h-3.5 text-[#A7ACD9]" />
-                  <span>Inspect Brushwork</span>
+                  <span>{isVie ? 'Soi chi tiết nét vẽ' : 'Inspect Brushwork'}</span>
                 </button>
               </div>
 
               {activeSubmission.description && (
                 <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/10 text-xs text-[#c7c5cf]">
-                  <strong className="block text-[#9695a1] mb-1 uppercase tracking-wider text-[10px]">Artist Statement</strong>
+                  <strong className="block text-[#9695a1] mb-1 uppercase tracking-wider text-[10px]">
+                    {isVie ? 'Tuyên ngôn / Thông điệp tác giả' : 'Artist Statement'}
+                  </strong>
                   <p className="leading-relaxed">{activeSubmission.description}</p>
                 </div>
               )}
@@ -789,9 +848,11 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
                 <div className="flex items-center justify-between">
                   <h3 className="font-sora font-semibold text-white text-base flex items-center gap-2">
                     <Sliders className="w-4 h-4 text-[#A7ACD9]" />
-                    <span>Evaluation Rubric</span>
+                    <span>{isVie ? 'Tiêu chí chấm điểm' : 'Evaluation Rubric'}</span>
                   </h3>
-                  <span className="text-xs text-[#9695a1]">Adjust sliders or enter score points</span>
+                  <span className="text-xs text-[#9695a1]">
+                    {isVie ? 'Kéo thanh trượt hoặc nhập số điểm' : 'Adjust sliders or enter score points'}
+                  </span>
                 </div>
 
                 <div className="space-y-4">
@@ -843,14 +904,14 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
               <div className="space-y-2 pt-2">
                 <label className="font-sora font-semibold text-white text-sm flex items-center gap-2">
                   <FileText className="w-4 h-4 text-[#A7ACD9]" />
-                  <span>Jury Deliberation Notes</span>
+                  <span>{isVie ? 'Ghi chú & Nhận xét của Giám khảo' : 'Jury Deliberation Notes'}</span>
                 </label>
                 <textarea
                   rows={3}
                   value={notes}
                   disabled={Boolean(activeSubmission.isLocked) || !isJudgingPhase}
                   onChange={(e) => setNotes(e.target.value)}
-                  placeholder="Provide structured notes on execution, technique, or composition..."
+                  placeholder={isVie ? 'Đưa ra nhận xét cụ thể về kỹ thuật, nét vẽ, bố cục, màu sắc...' : 'Provide structured notes on execution, technique, or composition...'}
                   className={`w-full p-3 text-xs bg-white/5 border rounded-xl text-white placeholder-[#9695a1] focus:outline-none leading-relaxed ${Boolean(activeSubmission.isLocked) || !isJudgingPhase
                     ? 'border-white/5 opacity-60 cursor-not-allowed'
                     : 'border-white/10 focus:border-[#A7ACD9]'
@@ -867,7 +928,11 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
                     onChange={(e) => setNoConflict(e.target.checked)}
                     className="mt-0.5 rounded border-white/20 bg-white/5 text-[#A7ACD9] focus:ring-0 accent-[#A7ACD9] disabled:cursor-not-allowed"
                   />
-                  <span>I declare no personal or financial conflict of interest regarding this artwork.</span>
+                  <span>
+                    {isVie
+                      ? 'Tôi cam kết không có bất kỳ xung đột lợi ích cá nhân hay tài chính nào liên quan đến tác phẩm này.'
+                      : 'I declare no personal or financial conflict of interest regarding this artwork.'}
+                  </span>
                 </label>
               </div>
 
@@ -882,7 +947,7 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
                     className="px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs text-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center gap-1 cursor-pointer"
                   >
                     <ChevronLeft className="w-4 h-4" />
-                    <span>Previous</span>
+                    <span>{isVie ? 'Bài trước' : 'Previous'}</span>
                   </button>
 
                   <button
@@ -893,7 +958,7 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
                     }}
                     className="px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs text-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center gap-1 cursor-pointer"
                   >
-                    <span>Next</span>
+                    <span>{isVie ? 'Bài tiếp' : 'Next'}</span>
                     <ChevronRight className="w-4 h-4" />
                   </button>
                 </div>
@@ -906,7 +971,7 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
                     className="px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-white transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     <Save className="w-4 h-4 text-[#A7ACD9]" />
-                    <span>Save Draft</span>
+                    <span>{isVie ? 'Lưu bản nháp' : 'Save Draft'}</span>
                   </button>
 
                   <button
@@ -918,14 +983,18 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
                       }`}
                   >
                     {activeSubmission.isLocked ? <Lock className="w-4 h-4 text-emerald-400" /> : <Send className="w-4 h-4" />}
-                    <span>{activeSubmission.isLocked ? 'Điểm đã khóa' : 'Submit Evaluation Score'}</span>
+                    <span>
+                      {activeSubmission.isLocked
+                        ? (isVie ? 'Điểm đã khóa' : 'Score Locked')
+                        : (isVie ? 'Gửi điểm chấm thi' : 'Submit Evaluation Score')}
+                    </span>
                   </button>
                 </div>
               </div>
             </form>
           ) : (
             <div className="glass-container p-12 text-center rounded-2xl text-[#9695a1]">
-              Select a submission from the queue to start evaluation.
+              {isVie ? 'Chọn một bài dự thi từ danh sách để bắt đầu đánh giá.' : 'Select a submission from the queue to start evaluation.'}
             </div>
           )}
         </div>
@@ -938,7 +1007,9 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
             <div className="flex items-center justify-between border-b border-white/10 pb-4">
               <div className="flex items-center gap-2">
                 <FileText className="text-[#A7ACD9]" size={20} />
-                <h3 className="font-sora text-lg font-bold text-white">Contest Rules & Guidelines</h3>
+                <h3 className="font-sora text-lg font-bold text-white">
+                  {isVie ? 'Thể lệ & Quy chế cuộc thi' : 'Contest Rules & Guidelines'}
+                </h3>
               </div>
               <button
                 type="button"
@@ -951,20 +1022,22 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
 
             <div className="rounded-2xl border border-amber-400/25 bg-amber-500/5 p-5">
               <h4 className="font-sora text-sm font-bold text-amber-300 mb-2 flex items-center gap-2">
-                <Trophy size={16} /> Official Prizes & Rewards
+                <Trophy size={16} /> {isVie ? 'Cơ cấu giải thưởng chính thức' : 'Official Prizes & Rewards'}
               </h4>
               <p className="font-sora text-base font-semibold text-white leading-relaxed whitespace-pre-line break-words">
-                {event.prize || 'Official prize breakdown will be announced by the organizing committee.'}
+                {event.prize || (isVie ? 'Cơ cấu giải thưởng chi tiết sẽ do ban tổ chức thông báo.' : 'Official prize breakdown will be announced by the organizing committee.')}
               </p>
             </div>
 
             <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-5">
               <h4 className="font-sora text-sm font-bold text-[#A7ACD9] mb-2 flex items-center gap-2">
-                <AlertCircle size={16} /> Official Rules & Guidelines
+                <AlertCircle size={16} /> {isVie ? 'Thể lệ & Quy định chính thức' : 'Official Rules & Guidelines'}
               </h4>
               <p className="text-xs sm:text-sm text-[#A7ACD9] leading-relaxed whitespace-pre-line break-words">
                 {event.rules ||
-                  'All entries must be original works created by the submitter. Plagiarism, copyright infringement, or unauthorized AI generation will lead to immediate disqualification.'}
+                  (isVie
+                    ? 'Tất cả các tác phẩm tham gia phải là sáng tác nguyên bản của chính thí sinh nộp bài. Đạo nhái, vi phạm bản quyền hoặc sử dụng AI trái phép sẽ bị truất quyền thi đấu ngay lập tức.'
+                    : 'All entries must be original works created by the submitter. Plagiarism, copyright infringement, or unauthorized AI generation will lead to immediate disqualification.')}
               </p>
             </div>
 
@@ -974,7 +1047,7 @@ export function EventJuryScreen({ eventId }: EventJuryScreenProps) {
                 onClick={() => setIsRulesModalOpen(false)}
                 className="rounded-xl bg-[#A7ACD9] px-6 py-2.5 text-xs font-bold text-[#1F2335] cursor-pointer hover:brightness-110"
               >
-                Understood
+                {isVie ? 'Đã hiểu' : 'Understood'}
               </button>
             </div>
           </div>

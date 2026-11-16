@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import type { ArbitrationCase } from '../../types/jury.types';
 import { EventSearchFilterBar } from '../event/event-search-filter-bar';
+import { useLanguage } from '@/context/language-context';
 
 interface HeadJuryArbitrationTabProps {
   arbitrationCasesState: ArbitrationCase[];
@@ -48,15 +49,21 @@ export function HeadJuryArbitrationTab({
   setTieBreakerWinnerId,
   handleConfirmArbitration,
 }: HeadJuryArbitrationTabProps) {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
+
   const currentCases = arbitrationCasesState.length > 0 ? arbitrationCasesState : arbitrationCasesList;
 
   return (
     <section className="space-y-6">
       <section className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-xl font-bold font-sora text-white">Submissions Requiring Arbitration</h2>
+          <h2 className="text-xl font-bold font-sora text-white">
+            {isVie ? 'Các bài dự thi cần Tái thẩm định' : 'Submissions Requiring Arbitration'}
+          </h2>
           <span className="w-fit rounded-full border border-amber-400/30 bg-amber-500/15 px-3 py-1 text-xs font-bold text-amber-300">
-            {currentCases.filter((c) => c.status.toLowerCase() === 'pending').length} / {currentCases.length} Disputes Pending
+            {currentCases.filter((c) => c.status.toLowerCase() === 'pending').length} / {currentCases.length}{' '}
+            {isVie ? 'Tranh chấp chờ giải quyết' : 'Disputes Pending'}
           </span>
         </div>
 
@@ -68,18 +75,22 @@ export function HeadJuryArbitrationTab({
               variant="inline"
               searchQuery={arbitrationSearch}
               onSearchChange={setArbitrationSearch}
-              searchPlaceholder="Search entry code or title..."
+              searchPlaceholder={isVie ? 'Tìm mã hoặc tiêu đề bài thi...' : 'Search entry code or title...'}
               statusValue={arbitrationStatusFilter}
               onStatusChange={(val: string) => setArbitrationStatusFilter(val as 'all' | 'pending' | 'resolved')}
               statusOptions={[
-                { value: 'all', label: `All (${currentCases.length})` },
+                { value: 'all', label: isVie ? `Tất cả (${currentCases.length})` : `All (${currentCases.length})` },
                 {
                   value: 'pending',
-                  label: `Pending (${currentCases.filter((c) => c.status.toLowerCase() === 'pending').length})`,
+                  label: isVie
+                    ? `Chờ xử lý (${currentCases.filter((c) => c.status.toLowerCase() === 'pending').length})`
+                    : `Pending (${currentCases.filter((c) => c.status.toLowerCase() === 'pending').length})`,
                 },
                 {
                   value: 'resolved',
-                  label: `Resolved (${currentCases.filter((c) => c.status.toLowerCase() === 'resolved').length})`,
+                  label: isVie
+                    ? `Đã giải quyết (${currentCases.filter((c) => c.status.toLowerCase() === 'resolved').length})`
+                    : `Resolved (${currentCases.filter((c) => c.status.toLowerCase() === 'resolved').length})`,
                 },
               ]}
             />
@@ -88,15 +99,15 @@ export function HeadJuryArbitrationTab({
               <table className="w-full border-collapse text-left text-xs">
                 <thead className="sticky top-0 z-10 bg-[#161926] shadow-sm">
                   <tr className="border-b border-white/10 text-[#858694] uppercase font-semibold text-[10px]">
-                    <th className="py-2.5 px-3">Entry</th>
-                    <th className="py-2.5 px-3 text-right">Status</th>
+                    <th className="py-2.5 px-3">{isVie ? 'Bài dự thi' : 'Entry'}</th>
+                    <th className="py-2.5 px-3 text-right">{isVie ? 'Trạng thái' : 'Status'}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/5">
                   {filteredArbitrationCases.length === 0 ? (
                     <tr>
                       <td colSpan={2} className="py-8 text-center text-[#9695a1]">
-                        No arbitration cases match criteria.
+                        {isVie ? 'Không có trường hợp tái thẩm định nào phù hợp.' : 'No arbitration cases match criteria.'}
                       </td>
                     </tr>
                   ) : (
@@ -119,11 +130,11 @@ export function HeadJuryArbitrationTab({
                             <span
                               className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
                                 isResolved
-                                  ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400'
-                                  : 'bg-amber-500/15 border-amber-500/30 text-amber-300'
+                                    ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400'
+                                    : 'bg-amber-500/15 border-amber-500/30 text-amber-300'
                               }`}
                             >
-                              {isResolved ? 'Resolved' : 'Pending'}
+                              {isResolved ? (isVie ? 'Đã giải quyết' : 'Resolved') : (isVie ? 'Chờ xử lý' : 'Pending')}
                             </span>
                           </td>
                         </tr>
@@ -137,7 +148,9 @@ export function HeadJuryArbitrationTab({
             {/* Resolution Progress Bar */}
             <div className="mt-4 pt-4 border-t border-white/10 space-y-2">
               <div className="flex items-center justify-between text-xs">
-                <span className="font-sora font-semibold text-white">Dispute Resolution Progress</span>
+                <span className="font-sora font-semibold text-white">
+                  {isVie ? 'Tiến độ xử lý tranh chấp' : 'Dispute Resolution Progress'}
+                </span>
                 <span className="font-mono text-[#9695a1]">
                   {currentCases.filter((c) => c.status.toLowerCase() === 'resolved').length} / {currentCases.length} ·{' '}
                   <strong className="text-[#A7ACD9]">
@@ -174,7 +187,9 @@ export function HeadJuryArbitrationTab({
           {/* Right: Detailed Master View & Arbitration Action Panel */}
           <div className="glass-container rounded-2xl p-5 lg:col-span-7">
             {!selectedArbitrationCase ? (
-              <p className="py-16 text-center text-sm text-[#9695a1]">Select an entry to view arbitration details.</p>
+              <p className="py-16 text-center text-sm text-[#9695a1]">
+                {isVie ? 'Chọn một bài dự thi để xem chi tiết tái thẩm định.' : 'Select an entry to view arbitration details.'}
+              </p>
             ) : (
               <div className="space-y-5">
                 {/* Header info */}
@@ -195,14 +210,16 @@ export function HeadJuryArbitrationTab({
                         : 'bg-amber-500/15 text-amber-300 border-amber-500/30'
                     }`}
                   >
-                    {selectedArbitrationCase.status}
+                    {selectedArbitrationCase.status.toLowerCase() === 'resolved'
+                      ? (isVie ? 'Đã giải quyết' : 'Resolved')
+                      : (isVie ? 'Chờ xử lý' : 'Pending')}
                   </span>
                 </div>
 
                 {/* Select Resolution Action */}
                 <div className="space-y-3">
                   <label className="text-xs font-semibold text-[#A7ACD9] block uppercase tracking-wider">
-                    Select Arbitration Action:
+                    {isVie ? 'Chọn hành động tái thẩm định:' : 'Select Arbitration Action:'}
                   </label>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <button
@@ -217,10 +234,12 @@ export function HeadJuryArbitrationTab({
                       <div className="space-y-1">
                         <div className="flex items-center gap-1.5 font-sora text-xs font-bold">
                           <Scale className="w-4 h-4 text-[#7FD5E8] shrink-0" />
-                          <span>Maintain Median</span>
+                          <span>{isVie ? 'Giữ điểm trung vị' : 'Maintain Median'}</span>
                         </div>
                         <p className="text-[11px] text-[#9695a1] leading-normal">
-                          Lock current median score. Suppress outlier variance.
+                          {isVie
+                            ? 'Khóa điểm trung vị hiện tại. Loại trừ các điểm lệch bất thường.'
+                            : 'Lock current median score. Suppress outlier variance.'}
                         </p>
                       </div>
                       <span
@@ -228,7 +247,9 @@ export function HeadJuryArbitrationTab({
                           arbitrationDecision === 'Maintain Current Median Score' ? 'text-[#7FD5E8]' : 'text-[#858694]'
                         }`}
                       >
-                        {arbitrationDecision === 'Maintain Current Median Score' ? '✓ Selected' : 'Click to select'}
+                        {arbitrationDecision === 'Maintain Current Median Score'
+                          ? (isVie ? '✓ Đã chọn' : '✓ Selected')
+                          : (isVie ? 'Nhấp để chọn' : 'Click to select')}
                       </span>
                     </button>
 
@@ -244,10 +265,12 @@ export function HeadJuryArbitrationTab({
                       <div className="space-y-1">
                         <div className="flex items-center gap-1.5 font-sora text-xs font-bold text-amber-300">
                           <UserCheck className="w-4 h-4 text-amber-400 shrink-0" />
-                          <span>Request Re-evaluation</span>
+                          <span>{isVie ? 'Yêu cầu chấm lại' : 'Request Re-evaluation'}</span>
                         </div>
                         <p className="text-[11px] text-[#9695a1] leading-normal">
-                          Unlock scoresheet for specific jury members to re-review.
+                          {isVie
+                            ? 'Mở khóa bảng điểm cho các giám khảo cụ thể để đánh giá lại.'
+                            : 'Unlock scoresheet for specific jury members to re-review.'}
                         </p>
                       </div>
                       <span
@@ -255,7 +278,9 @@ export function HeadJuryArbitrationTab({
                           arbitrationDecision === 'Request Panel Re-evaluation' ? 'text-amber-300' : 'text-[#858694]'
                         }`}
                       >
-                        {arbitrationDecision === 'Request Panel Re-evaluation' ? '✓ Selected' : 'Click to select'}
+                        {arbitrationDecision === 'Request Panel Re-evaluation'
+                          ? (isVie ? '✓ Đã chọn' : '✓ Selected')
+                          : (isVie ? 'Nhấp để chọn' : 'Click to select')}
                       </span>
                     </button>
 
@@ -271,10 +296,12 @@ export function HeadJuryArbitrationTab({
                       <div className="space-y-1">
                         <div className="flex items-center gap-1.5 font-sora text-xs font-bold text-brand-periwinkle">
                           <Award className="w-4 h-4 text-brand-periwinkle shrink-0" />
-                          <span>Tie-Breaker Vote</span>
+                          <span>{isVie ? 'Bỏ phiếu Tie-Breaker' : 'Tie-Breaker Vote'}</span>
                         </div>
                         <p className="text-[11px] text-[#9695a1] leading-normal">
-                          Cast decisive Head Jury vote for tied placements.
+                          {isVie
+                            ? 'Bỏ phiếu quyết định của Trưởng ban GK đối với các bài đồng hạng.'
+                            : 'Cast decisive Head Jury vote for tied placements.'}
                         </p>
                       </div>
                       <span
@@ -282,7 +309,9 @@ export function HeadJuryArbitrationTab({
                           arbitrationDecision === 'Cast Head Jury Tie-Breaker' ? 'text-brand-periwinkle' : 'text-[#858694]'
                         }`}
                       >
-                        {arbitrationDecision === 'Cast Head Jury Tie-Breaker' ? '✓ Selected' : 'Click to select'}
+                        {arbitrationDecision === 'Cast Head Jury Tie-Breaker'
+                          ? (isVie ? '✓ Đã chọn' : '✓ Selected')
+                          : (isVie ? 'Nhấp để chọn' : 'Click to select')}
                       </span>
                     </button>
                   </div>
@@ -293,10 +322,12 @@ export function HeadJuryArbitrationTab({
                   <div className="p-4 rounded-xl border border-[#7FD5E8]/30 bg-[#7FD5E8]/10 space-y-2 text-xs">
                     <div className="flex items-center gap-2 font-sora font-bold text-white">
                       <Lock className="w-4 h-4 text-[#7FD5E8]" />
-                      <span>Lock Median Score Confirmation</span>
+                      <span>{isVie ? 'Xác nhận khóa điểm trung vị' : 'Lock Median Score Confirmation'}</span>
                     </div>
                     <p className="text-[#c7c5cf] leading-relaxed">
-                      Maintaining the panel median score will automatically disregard extreme score outliers without unlocking scoresheets. The calculated median score of <strong className="text-white">88.5 pts</strong> will be locked as the final baseline.
+                      {isVie
+                        ? 'Việc giữ điểm trung vị của hội đồng sẽ tự động bỏ qua các điểm số ngoại lai bất thường mà không cần mở khóa bảng điểm.'
+                        : 'Maintaining the panel median score will automatically disregard extreme score outliers without unlocking scoresheets.'}
                     </p>
                   </div>
                 )}
@@ -306,24 +337,32 @@ export function HeadJuryArbitrationTab({
                   <div className="p-4 rounded-xl border border-amber-400/30 bg-amber-500/10 space-y-3 text-xs">
                     <div className="flex items-center gap-2 font-sora font-bold text-amber-300">
                       <UserCheck className="w-4 h-4 text-amber-400" />
-                      <span>Select Target Outlier Jury Members for Re-evaluation</span>
+                      <span>
+                        {isVie ? 'Chọn giám khảo cần mở khóa để chấm lại' : 'Select Target Outlier Jury Members for Re-evaluation'}
+                      </span>
                     </div>
                     <p className="text-[#c7c5cf] leading-relaxed">
-                      Scoresheets for the selected jury members will be unlocked for a 24-hour window with audit notes attached:
+                      {isVie
+                        ? 'Bảng điểm của các giám khảo được chọn sẽ được mở khóa trong 24 giờ kèm theo ghi chú yêu cầu kiểm toán:'
+                        : 'Scoresheets for the selected jury members will be unlocked for a 24-hour window with audit notes attached:'}
                     </p>
                     <div className="space-y-2">
                       <label className="flex items-center gap-2.5 p-2.5 rounded-lg bg-black/40 border border-white/10 text-white cursor-pointer">
                         <input type="checkbox" defaultChecked className="rounded accent-amber-400" />
                         <div className="flex-1 flex items-center justify-between">
                           <span className="font-semibold">Alex Rivers (Jury #2)</span>
-                          <span className="font-mono text-xs text-amber-400 font-bold">Rated 98/100 (+18.4% variance)</span>
+                          <span className="font-mono text-xs text-amber-400 font-bold">
+                            {isVie ? 'Chấm 98/100 (+18.4% độ lệch)' : 'Rated 98/100 (+18.4% variance)'}
+                          </span>
                         </div>
                       </label>
                       <label className="flex items-center gap-2.5 p-2.5 rounded-lg bg-black/40 border border-white/10 text-white cursor-pointer">
                         <input type="checkbox" defaultChecked className="rounded accent-amber-400" />
                         <div className="flex-1 flex items-center justify-between">
                           <span className="font-semibold">Elena Rostova (Jury #4)</span>
-                          <span className="font-mono text-xs text-rose-400 font-bold">Rated 65/100 (-14.6% variance)</span>
+                          <span className="font-mono text-xs text-rose-400 font-bold">
+                            {isVie ? 'Chấm 65/100 (-14.6% độ lệch)' : 'Rated 65/100 (-14.6% variance)'}
+                          </span>
                         </div>
                       </label>
                     </div>
@@ -336,10 +375,10 @@ export function HeadJuryArbitrationTab({
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2 font-sora font-bold text-[#E4E1E5]">
                         <Award className="w-4 h-4 text-brand-periwinkle" />
-                        <span>Interactive Head-to-Head Comparison</span>
+                        <span>{isVie ? 'So sánh đối đầu trực tiếp' : 'Interactive Head-to-Head Comparison'}</span>
                       </div>
                       <span className="px-2 py-0.5 rounded bg-brand-periwinkle/20 text-brand-periwinkle text-[10px] font-bold">
-                        Tied at 89.6 pts
+                        {isVie ? 'Đồng hạng 89.6 điểm' : 'Tied at 89.6 pts'}
                       </span>
                     </div>
 
@@ -348,7 +387,7 @@ export function HeadJuryArbitrationTab({
                       <table className="w-full border-collapse text-left text-xs">
                         <thead>
                           <tr className="border-b border-white/10 bg-white/5 text-[#9695a1] uppercase font-semibold text-[10px]">
-                            <th className="py-2 px-3">Metric / Candidate</th>
+                            <th className="py-2 px-3">{isVie ? 'Tiêu chí / Ứng viên' : 'Metric / Candidate'}</th>
                             <th className="py-2 px-3 text-center border-l border-white/10 text-white font-bold">
                               {selectedArbitrationCase.title} ({selectedArbitrationCase.code})
                             </th>
@@ -359,7 +398,9 @@ export function HeadJuryArbitrationTab({
                         </thead>
                         <tbody className="divide-y divide-white/10 text-[#c7c5cf]">
                           <tr>
-                            <td className="py-2 px-3 text-[#9695a1] font-medium">Panel Avg Score</td>
+                            <td className="py-2 px-3 text-[#9695a1] font-medium">
+                              {isVie ? 'Điểm TB Hội đồng' : 'Panel Avg Score'}
+                            </td>
                             <td className="py-2 px-3 text-center font-mono font-bold text-[#A7ACD9] border-l border-white/10">
                               89.6 / 100
                             </td>
@@ -368,7 +409,9 @@ export function HeadJuryArbitrationTab({
                             </td>
                           </tr>
                           <tr>
-                            <td className="py-2 px-3 text-[#9695a1] font-medium">Head Jury Score</td>
+                            <td className="py-2 px-3 text-[#9695a1] font-medium">
+                              {isVie ? 'Điểm Trưởng ban GK' : 'Head Jury Score'}
+                            </td>
                             <td className="py-2 px-3 text-center font-mono font-bold text-amber-300 border-l border-white/10">
                               92 / 100
                             </td>
@@ -377,7 +420,9 @@ export function HeadJuryArbitrationTab({
                             </td>
                           </tr>
                           <tr>
-                            <td className="py-2 px-3 text-[#9695a1] font-medium">Creativity & Concept</td>
+                            <td className="py-2 px-3 text-[#9695a1] font-medium">
+                              {isVie ? 'Sáng tạo & Ý niệm' : 'Creativity & Concept'}
+                            </td>
                             <td className="py-2 px-3 text-center font-mono text-emerald-400 border-l border-white/10">
                               28 / 30
                             </td>
@@ -386,7 +431,9 @@ export function HeadJuryArbitrationTab({
                             </td>
                           </tr>
                           <tr>
-                            <td className="py-2 px-3 text-[#9695a1] font-medium">Technical Execution</td>
+                            <td className="py-2 px-3 text-[#9695a1] font-medium">
+                              {isVie ? 'Kỹ thuật thể hiện' : 'Technical Execution'}
+                            </td>
                             <td className="py-2 px-3 text-center font-mono text-brand-periwinkle border-l border-white/10">
                               27 / 30
                             </td>
@@ -401,7 +448,7 @@ export function HeadJuryArbitrationTab({
                     {/* Interactive Winner Selector Buttons */}
                     <div className="space-y-2 pt-1">
                       <label className="text-xs font-semibold text-[#E4E1E5] block">
-                        Declare Official Tie-Breaker Winner:
+                        {isVie ? 'Tuyên bố ứng viên thắng Tie-Breaker:' : 'Declare Official Tie-Breaker Winner:'}
                       </label>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                         <button
@@ -447,11 +494,13 @@ export function HeadJuryArbitrationTab({
                 )}
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-[#A7ACD9] block">Head Jury Audit Rationale Notes:</label>
+                  <label className="text-xs font-semibold text-[#A7ACD9] block">
+                    {isVie ? 'Ghi chú lý do kiểm toán của Trưởng ban GK:' : 'Head Jury Audit Rationale Notes:'}
+                  </label>
                   <textarea
                     value={arbitrationNotes}
                     onChange={(e) => setArbitrationNotes(e.target.value)}
-                    placeholder="Provide formal audit rationale for this decision..."
+                    placeholder={isVie ? 'Nêu rõ căn cứ và lý do quyết định kiểm toán...' : 'Provide formal audit rationale for this decision...'}
                     className="w-full min-h-[88px] p-3 rounded-xl bg-[#090b12]/80 border border-white/10 text-xs text-white placeholder-[#9695a1] focus:outline-none focus:border-[#A7ACD9]"
                   />
                 </div>
@@ -461,11 +510,13 @@ export function HeadJuryArbitrationTab({
                   onClick={handleConfirmArbitration}
                   className="w-full py-2.5 rounded-xl bg-gradient-to-r from-[#A7ACD9] to-[#7FD5E8] text-[#1F2335] font-sora font-extrabold text-xs shadow-lg hover:brightness-110 transition-all cursor-pointer"
                 >
-                  Confirm Arbitration Decision
+                  {isVie ? 'Xác nhận Quyết định Tái thẩm định' : 'Confirm Arbitration Decision'}
                 </button>
 
                 <div className="p-3 rounded-xl border-l-4 border-[#A7ACD9] bg-[#A7ACD9]/10 text-xs text-[#c7c5cf] leading-relaxed">
-                  All arbitration actions are permanently logged in the audit trail. Head Jury cannot directly override raw individual jury scores.
+                  {isVie
+                    ? 'Tất cả các hành động tái thẩm định được ghi nhận vĩnh viễn vào nhật ký kiểm toán. Trưởng ban GK không thể trực tiếp ghi đè điểm số thô của từng giám khảo.'
+                    : 'All arbitration actions are permanently logged in the audit trail. Head Jury cannot directly override raw individual jury scores.'}
                 </div>
               </div>
             )}

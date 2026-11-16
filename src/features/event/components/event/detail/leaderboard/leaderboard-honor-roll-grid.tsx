@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { Medal } from 'lucide-react';
+import { useLanguage } from '@/context/language-context';
 import type { EventLeaderboardItemDto } from '@/features/event/types/event.types';
 
 interface LeaderboardHonorRollGridProps {
@@ -16,6 +17,9 @@ export function LeaderboardHonorRollGrid({
   wallSort,
   formatScore,
 }: LeaderboardHonorRollGridProps) {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
+
   if (restLeaderboard.length === 0) return null;
 
   return (
@@ -23,10 +27,10 @@ export function LeaderboardHonorRollGrid({
       <div className="flex items-center justify-between border-b border-white/10 pb-3">
         <h3 className="font-h1 text-sm sm:text-base font-bold text-white flex items-center gap-2">
           <Medal size={18} className="text-slate-400" />
-          <span>Honor Roll Contenders</span>
+          <span>{isVie ? 'Danh sách Danh dự' : 'Honor Roll Contenders'}</span>
         </h3>
         <span className="text-xs text-[#8A8FA9]">
-          Ranks #{restLeaderboard[0]?.rank || 4} - #{restLeaderboard[restLeaderboard.length - 1]?.rank || (restLeaderboard.length + 3)}
+          {isVie ? 'Hạng' : 'Ranks'} #{restLeaderboard[0]?.rank || 4} - #{restLeaderboard[restLeaderboard.length - 1]?.rank || (restLeaderboard.length + 3)}
         </span>
       </div>
 
@@ -53,7 +57,7 @@ export function LeaderboardHonorRollGrid({
                   />
                 ) : (
                   <div className="flex size-full items-center justify-center text-xs text-outline">
-                    Artwork Preview
+                    {isVie ? 'Xem tác phẩm' : 'Artwork Preview'}
                   </div>
                 )}
 
@@ -77,16 +81,18 @@ export function LeaderboardHonorRollGrid({
                   <>
                     <div>
                       <span className="text-brand-periwinkle block text-[10px] font-bold uppercase tracking-wider">
-                        Jury Score
+                        {isVie ? 'Điểm Giám khảo' : 'Jury Score'}
                       </span>
                       <span className="font-h1 font-extrabold text-white text-base">
-                        {scoreDisplay ?? 'Pending'}
+                        {scoreDisplay ?? (isVie ? 'Chờ chấm' : 'Pending')}
                       </span>
                     </div>
                     <div className="text-right">
-                      <span className="text-[#8A8FA9] block text-[10px] uppercase">Votes</span>
+                      <span className="text-[#8A8FA9] block text-[10px] uppercase">
+                        {isVie ? 'Lượt bình chọn' : 'Votes'}
+                      </span>
                       <span className="text-xs text-[#A7ACD9] font-medium">
-                        {item.voteCount} votes
+                        {item.voteCount} {isVie ? 'lượt bình chọn' : 'votes'}
                       </span>
                     </div>
                   </>
@@ -94,7 +100,7 @@ export function LeaderboardHonorRollGrid({
                   <>
                     <div>
                       <span className="text-[#8A8FA9] block text-[10px] uppercase font-bold tracking-wider">
-                        Votes
+                        {isVie ? 'Lượt bình chọn' : 'Votes'}
                       </span>
                       <span className="font-h1 font-extrabold text-brand-periwinkle text-base">
                         {item.voteCount}
@@ -102,7 +108,9 @@ export function LeaderboardHonorRollGrid({
                     </div>
                     {scoreDisplay && (
                       <div className="text-right">
-                        <span className="text-[#8A8FA9] block text-[10px] uppercase">Jury</span>
+                        <span className="text-[#8A8FA9] block text-[10px] uppercase">
+                          {isVie ? 'Điểm GK' : 'Jury'}
+                        </span>
                         <span className="text-xs text-slate-300 font-semibold">
                           {scoreDisplay}
                         </span>

@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Trophy } from 'lucide-react';
+import { useLanguage } from '@/context/language-context';
 import type { EventDetailDto, EventLeaderboardItemDto } from '@/features/event/types/event.types';
 import type { TabType } from './event-detail-tab-nav';
 
@@ -35,6 +36,9 @@ export function EventTabLeaderboard({
   restLeaderboard,
   formatScore,
 }: EventTabLeaderboardProps) {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
+
   return (
     <div className="space-y-10">
       {!isAnnounced ? (
@@ -51,9 +55,13 @@ export function EventTabLeaderboard({
           {leaderboard.length === 0 ? (
             <div className="rounded-3xl border border-dashed border-white/15 p-16 text-center">
               <Trophy size={40} className="mx-auto text-amber-400/40 mb-3" />
-              <h3 className="font-h1 text-lg font-bold text-white">Wall of Fame Awaiting Champions</h3>
+              <h3 className="font-h1 text-lg font-bold text-white">
+                {isVie ? 'Bảng vinh danh đang chờ đón các quán quân' : 'Wall of Fame Awaiting Champions'}
+              </h3>
               <p className="mt-1 text-xs text-[#8A8FA9]">
-                As community votes and jury evaluations accumulate, the top artists will be immortalized here.
+                {isVie
+                  ? 'Khi lượt bình chọn của cộng đồng và điểm chấm từ ban giám khảo được tổng hợp, các họa sĩ xuất sắc nhất sẽ được vinh danh tại đây.'
+                  : 'As community votes and jury evaluations accumulate, the top artists will be immortalized here.'}
               </p>
             </div>
           ) : (

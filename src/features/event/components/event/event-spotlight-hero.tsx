@@ -14,9 +14,15 @@ import {
   Play,
   Calendar,
 } from 'lucide-react';
-import { eventStatusBadgeStyles, eventStatusLabels, normalizeEventStatus, type EventListItemDto } from '../../types/event.types';
+import {
+  eventStatusBadgeStyles,
+  getEventStatusLabel,
+  normalizeEventStatus,
+  type EventListItemDto,
+} from '../../types/event.types';
 import { useEventCountdown } from '../../hooks/use-event-countdown';
 import { isFeaturedCarouselEvent, sortEventItems } from '../../services/event.service';
+import { useLanguage } from '@/context/language-context';
 
 interface EventSpotlightHeroProps {
   events?: EventListItemDto[] | null;
@@ -29,6 +35,9 @@ export function EventSpotlightHero({
   event,
   maxItems = 5,
 }: EventSpotlightHeroProps) {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
+
   // Normalize items: ONLY show top latest featured events that have not ended, up to maxItems (default 5)
   const items = React.useMemo(() => {
     const rawList = events && events.length > 0 ? events : event ? [event] : [];
@@ -96,7 +105,7 @@ export function EventSpotlightHero({
 
   return (
     <section
-      aria-label="Featured Art Contests Carousel"
+      aria-label={isVie ? 'Bảng tin Cuộc thi Nổi bật' : 'Featured Art Contests Carousel'}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
       onTouchStart={handleTouchStart}
@@ -115,7 +124,9 @@ export function EventSpotlightHero({
         <div className="flex items-center gap-3">
           <div className="inline-flex items-center gap-2 rounded-full border border-amber-400/30 bg-amber-500/10 px-3.5 py-1.5 text-xs font-semibold text-amber-300 backdrop-blur-md shadow-sm">
             <Flame size={14} className="text-amber-400 animate-bounce" />
-            <span className="uppercase tracking-widest text-[11px] font-bold">Featured Art Contest</span>
+            <span className="uppercase tracking-widest text-[11px] font-bold">
+              {isVie ? 'Cuộc thi Nổi bật' : 'Featured Art Contest'}
+            </span>
           </div>
 
           {total > 1 && (
@@ -129,11 +140,11 @@ export function EventSpotlightHero({
               </span>
               {isPaused ? (
                 <span className="inline-flex items-center gap-1 rounded-full bg-white/5 px-2 py-0.5 text-[10px] text-amber-300">
-                  <Pause size={10} /> Paused
+                  <Pause size={10} /> {isVie ? 'Tạm dừng' : 'Paused'}
                 </span>
               ) : (
                 <span className="inline-flex items-center gap-1 rounded-full bg-white/5 px-2 py-0.5 text-[10px] text-emerald-400">
-                  <span className="size-1.5 rounded-full bg-emerald-400 animate-ping" /> Auto
+                  <span className="size-1.5 rounded-full bg-emerald-400 animate-ping" /> {isVie ? 'Tự động' : 'Auto'}
                 </span>
               )}
             </div>
@@ -147,8 +158,8 @@ export function EventSpotlightHero({
               type="button"
               onClick={() => setIsPaused((prev) => !prev)}
               className="flex size-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-[#A7ACD9] transition hover:border-white/25 hover:bg-white/10 hover:text-white cursor-pointer active:scale-95"
-              title={isPaused ? 'Resume auto-play' : 'Pause auto-play'}
-              aria-label={isPaused ? 'Resume auto-play' : 'Pause auto-play'}
+              title={isPaused ? (isVie ? 'Tiếp tục tự động chuyển' : 'Resume auto-play') : (isVie ? 'Tạm dừng tự động chuyển' : 'Pause auto-play')}
+              aria-label={isPaused ? (isVie ? 'Tiếp tục tự động chuyển' : 'Resume auto-play') : (isVie ? 'Tạm dừng tự động chuyển' : 'Pause auto-play')}
             >
               {isPaused ? <Play size={14} className="ml-0.5" /> : <Pause size={14} />}
             </button>
@@ -157,8 +168,8 @@ export function EventSpotlightHero({
               type="button"
               onClick={prevSlide}
               className="flex size-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-[#A7ACD9] transition hover:border-white/25 hover:bg-white/10 hover:text-white cursor-pointer active:scale-95"
-              title="Previous featured contest"
-              aria-label="Previous featured contest"
+              title={isVie ? 'Cuộc thi nổi bật trước' : 'Previous featured contest'}
+              aria-label={isVie ? 'Cuộc thi nổi bật trước' : 'Previous featured contest'}
             >
               <ChevronLeft size={16} />
             </button>
@@ -167,8 +178,8 @@ export function EventSpotlightHero({
               type="button"
               onClick={nextSlide}
               className="flex size-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-[#A7ACD9] transition hover:border-white/25 hover:bg-white/10 hover:text-white cursor-pointer active:scale-95"
-              title="Next featured contest"
-              aria-label="Next featured contest"
+              title={isVie ? 'Cuộc thi nổi bật kế tiếp' : 'Next featured contest'}
+              aria-label={isVie ? 'Cuộc thi nổi bật kế tiếp' : 'Next featured contest'}
             >
               <ChevronRight size={16} />
             </button>
@@ -203,6 +214,8 @@ export function EventSpotlightHero({
 
 // Sub-component for individual slide content with localized countdown
 function SlideItem({ event }: { event: EventListItemDto }) {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
   const countdown = useEventCountdown(event);
 
   return (
@@ -213,23 +226,23 @@ function SlideItem({ event }: { event: EventListItemDto }) {
           <div className="flex flex-wrap items-center gap-2 mb-2 text-xs font-semibold text-[#8A8FA9]">
             <span className="flex items-center gap-1.5 text-brand-periwinkle">
               <Calendar size={13} />
-              {new Date(event.submissionStartAt).toLocaleDateString('en-US', {
+              {new Date(event.submissionStartAt).toLocaleDateString(isVie ? 'vi-VN' : 'en-US', {
                 month: 'short',
                 day: 'numeric',
               })}{' '}
               -{' '}
-              {new Date(event.submissionEndAt).toLocaleDateString('en-US', {
+              {new Date(event.submissionEndAt).toLocaleDateString(isVie ? 'vi-VN' : 'en-US', {
                 month: 'short',
                 day: 'numeric',
                 year: 'numeric',
               })}
             </span>
             <span>•</span>
-            <span className="text-white/80">{event.submissionCount} entries</span>
+            <span className="text-white/80">{event.submissionCount} {isVie ? 'bài dự thi' : 'entries'}</span>
             {event.totalVoteCount ? (
               <>
                 <span>•</span>
-                <span className="text-white/80">{event.totalVoteCount} votes</span>
+                <span className="text-white/80">{event.totalVoteCount} {isVie ? 'lượt bình chọn' : 'votes'}</span>
               </>
             ) : null}
           </div>
@@ -251,7 +264,7 @@ function SlideItem({ event }: { event: EventListItemDto }) {
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-[11px] font-bold uppercase tracking-wider text-amber-300">
-                Prestigious Prize Pool
+                {isVie ? 'Cơ cấu giải thưởng danh giá' : 'Prestigious Prize Pool'}
               </p>
               <p className="font-h1 text-lg sm:text-xl font-extrabold text-white">
                 {event.prize}
@@ -266,7 +279,7 @@ function SlideItem({ event }: { event: EventListItemDto }) {
             href={`/events/${event.id}`}
             className="inline-flex items-center gap-2.5 rounded-2xl bg-gradient-to-r from-brand-periwinkle to-[#c2c7f6] px-7 py-3.5 text-sm font-bold text-brand-navy shadow-[0_12px_35px_rgba(167,172,217,0.3)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_16px_40px_rgba(167,172,217,0.4)] active:translate-y-0"
           >
-            <span>View Event Details</span>
+            <span>{isVie ? 'Xem chi tiết sự kiện' : 'View Event Details'}</span>
             <ArrowRight size={16} />
           </Link>
         </div>
@@ -274,10 +287,10 @@ function SlideItem({ event }: { event: EventListItemDto }) {
         {/* Trust Points */}
         <div className="flex flex-wrap items-center gap-4 sm:gap-5 pt-1 text-xs text-[#8A8FA9]">
           <span className="flex items-center gap-1.5">
-            <ShieldCheck size={15} className="text-emerald-400" /> Original IP Protected
+            <ShieldCheck size={15} className="text-emerald-400" /> {isVie ? 'Bảo hộ bản quyền IP nguyên bản' : 'Original IP Protected'}
           </span>
           <span className="flex items-center gap-1.5">
-            <Sparkles size={15} className="text-brand-periwinkle" /> Verified & AI-Screened
+            <Sparkles size={15} className="text-brand-periwinkle" /> {isVie ? 'Đã xác minh & Quét AI' : 'Verified & AI-Screened'}
           </span>
         </div>
       </div>
@@ -303,7 +316,7 @@ function SlideItem({ event }: { event: EventListItemDto }) {
           {(() => {
             const normalized = normalizeEventStatus(event.status);
             const badgeStyle = eventStatusBadgeStyles[normalized] || 'bg-slate-500/20 border-slate-400/40 text-slate-300';
-            const badgeLabel = eventStatusLabels[normalized] || normalized;
+            const badgeLabel = getEventStatusLabel(normalized, isVie);
             return (
               <div className="absolute top-4 left-4">
                 <span
@@ -317,10 +330,10 @@ function SlideItem({ event }: { event: EventListItemDto }) {
 
           <div className="absolute bottom-4 left-4 right-4">
             <p className="text-[11px] uppercase tracking-wider text-slate-300 font-bold">
-              Organized by
+              {isVie ? 'Tổ chức bởi' : 'Organized by'}
             </p>
             <p className="text-sm font-bold text-white drop-shadow">
-              {event.createdByAdminName || 'Dillustration Board & Jury'}
+              {event.createdByAdminName || (isVie ? 'Hội đồng & Ban giám khảo Dillustration' : 'Dillustration Board & Jury')}
             </p>
           </div>
         </div>
@@ -328,32 +341,32 @@ function SlideItem({ event }: { event: EventListItemDto }) {
         {/* Big Countdown Box */}
         <div className="rounded-3xl border border-white/10 bg-[#161926]/90 p-5 backdrop-blur-xl">
           <p className="mb-3 text-center text-xs font-bold uppercase tracking-widest text-[#A7ACD9]">
-            {countdown.phaseLabel}
+            {isVie ? countdown.phaseLabelVie : countdown.phaseLabel}
           </p>
           <div className="grid grid-cols-4 gap-2 text-center">
             <div className="rounded-2xl border border-white/5 bg-white/[0.03] p-3">
               <span className="block font-h1 text-2xl sm:text-3xl font-bold tabular-nums text-white">
                 {countdown.days}
               </span>
-              <span className="text-[10px] uppercase font-bold text-outline">Days</span>
+              <span className="text-[10px] uppercase font-bold text-outline">{isVie ? 'Ngày' : 'Days'}</span>
             </div>
             <div className="rounded-2xl border border-white/5 bg-white/[0.03] p-3">
               <span className="block font-h1 text-2xl sm:text-3xl font-bold tabular-nums text-white">
                 {String(countdown.hours).padStart(2, '0')}
               </span>
-              <span className="text-[10px] uppercase font-bold text-outline">Hours</span>
+              <span className="text-[10px] uppercase font-bold text-outline">{isVie ? 'Giờ' : 'Hours'}</span>
             </div>
             <div className="rounded-2xl border border-white/5 bg-white/[0.03] p-3">
               <span className="block font-h1 text-2xl sm:text-3xl font-bold tabular-nums text-white">
                 {String(countdown.minutes).padStart(2, '0')}
               </span>
-              <span className="text-[10px] uppercase font-bold text-outline">Mins</span>
+              <span className="text-[10px] uppercase font-bold text-outline">{isVie ? 'Phút' : 'Mins'}</span>
             </div>
             <div className="rounded-2xl border border-white/5 bg-white/[0.03] p-3">
               <span className="block font-h1 text-2xl sm:text-3xl font-bold tabular-nums text-brand-periwinkle animate-pulse">
                 {String(countdown.seconds).padStart(2, '0')}
               </span>
-              <span className="text-[10px] uppercase font-bold text-outline">Secs</span>
+              <span className="text-[10px] uppercase font-bold text-outline">{isVie ? 'Giây' : 'Secs'}</span>
             </div>
           </div>
         </div>

@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import type { EventDetailDto } from '@/features/event/types/event.types';
 import { EventStageProgress } from '../event-stage-progress';
+import { useLanguage } from '@/context/language-context';
 
 interface EventDetailHeroProps {
   event: EventDetailDto;
@@ -25,7 +26,9 @@ interface EventDetailHeroProps {
   countdown: {
     phase: string;
     phaseLabel: string;
+    phaseLabelVie?: string;
     formatted: string;
+    formattedVie?: string;
   };
   isCreator: boolean;
   isJuryMember?: boolean;
@@ -44,6 +47,9 @@ export function EventDetailHero({
   onOpenRulesModal,
   onCopyLink,
 }: EventDetailHeroProps) {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
+
   return (
     <>
       {/* Top Bar Navigation */}
@@ -53,7 +59,7 @@ export function EventDetailHero({
           className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold text-[#A7ACD9] transition hover:border-white/20 hover:text-white"
         >
           <ArrowLeft size={15} />
-          <span>All Contests</span>
+          <span>{isVie ? 'Tất cả cuộc thi' : 'All Contests'}</span>
         </Link>
 
         <div className="flex items-center gap-3">
@@ -63,7 +69,7 @@ export function EventDetailHero({
               className="inline-flex items-center gap-2 rounded-xl border border-[#A7ACD9]/40 bg-[#A7ACD9]/15 px-4 py-2 text-xs font-bold text-white transition hover:bg-[#A7ACD9]/25 hover:border-[#A7ACD9] shadow-sm"
             >
               <Gavel size={15} className="text-[#A7ACD9]" />
-              <span>Jury Workspace</span>
+              <span>{isVie ? 'Không gian giám khảo' : 'Jury Workspace'}</span>
             </Link>
           )}
 
@@ -73,7 +79,7 @@ export function EventDetailHero({
             className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold text-[#A7ACD9] transition hover:border-white/20 hover:text-white cursor-pointer"
           >
             <FileText size={15} />
-            <span>Rules & Guidelines</span>
+            <span>{isVie ? 'Thể lệ & Quy chế' : 'Rules & Guidelines'}</span>
           </button>
 
           <button
@@ -82,7 +88,7 @@ export function EventDetailHero({
             className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold text-[#A7ACD9] transition hover:border-white/20 hover:text-white cursor-pointer"
           >
             <Share2 size={15} />
-            <span>Share</span>
+            <span>{isVie ? 'Chia sẻ' : 'Share'}</span>
           </button>
         </div>
       </div>
@@ -109,7 +115,7 @@ export function EventDetailHero({
             {event.isFeatured && (
               <span className="flex items-center gap-1.5 rounded-full border border-amber-400/40 bg-amber-500/20 px-3.5 py-1 text-xs font-bold text-amber-300 backdrop-blur-md">
                 <Flame size={13} className="text-amber-400" />
-                Featured Contest
+                {isVie ? 'Cuộc thi Nổi bật' : 'Featured Contest'}
               </span>
             )}
           </div>
@@ -121,11 +127,14 @@ export function EventDetailHero({
             <div className="flex items-center gap-2 text-xs text-[#8A8FA9]">
               <span className="flex items-center gap-1 font-semibold text-white">
                 <CheckCircle2 size={15} className="text-brand-periwinkle" />
-                {event.createdByAdminName || 'Dillustration Committee'}
+                {event.createdByAdminName || (isVie ? 'Ban tổ chức Dillustration' : 'Dillustration Committee')}
               </span>
               <span>•</span>
               <span className="flex items-center gap-1">
-                <Calendar size={14} /> Started {new Date(event.submissionStartAt).toLocaleDateString('en-US')}
+                <Calendar size={14} />{' '}
+                {isVie
+                  ? `Bắt đầu ${new Date(event.submissionStartAt).toLocaleDateString('vi-VN')}`
+                  : `Started ${new Date(event.submissionStartAt).toLocaleDateString('en-US')}`}
               </span>
             </div>
 
@@ -147,13 +156,15 @@ export function EventDetailHero({
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2 mb-1.5 flex-wrap">
                   <span className="text-xs font-extrabold uppercase tracking-widest text-amber-300">
-                    Official Prize Pool & Honors
+                    {isVie ? 'Cơ cấu giải thưởng & Danh hiệu' : 'Official Prize Pool & Honors'}
                   </span>
                   <span className="size-1.5 rounded-full bg-amber-400" />
-                  <span className="text-[11px] text-amber-300/80 font-medium">Guaranteed Distribution</span>
+                  <span className="text-[11px] text-amber-300/80 font-medium">
+                    {isVie ? 'Đảm bảo trao giải' : 'Guaranteed Distribution'}
+                  </span>
                 </div>
                 <div className="font-h1 text-xl sm:text-2xl lg:text-3xl font-extrabold text-white leading-relaxed break-words whitespace-pre-line">
-                  {event.prize || 'Trophy & Official Cash Rewards (To Be Announced)'}
+                  {event.prize || (isVie ? 'Cúp & Giải thưởng tiền mặt chính thức (Sắp công bố)' : 'Trophy & Official Cash Rewards (To Be Announced)')}
                 </div>
               </div>
             </div>
@@ -162,20 +173,28 @@ export function EventDetailHero({
           {/* Key Metrics Banner */}
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 rounded-3xl border border-white/10 bg-white/[0.025] p-5 backdrop-blur-xl">
             <div>
-              <span className="text-[11px] font-bold uppercase tracking-wider text-brand-periwinkle">Submissions</span>
-              <p className="mt-1 font-h1 text-lg sm:text-xl font-bold text-white">{event.submissionCount} entries</p>
+              <span className="text-[11px] font-bold uppercase tracking-wider text-brand-periwinkle">
+                {isVie ? 'Bài dự thi' : 'Submissions'}
+              </span>
+              <p className="mt-1 font-h1 text-lg sm:text-xl font-bold text-white">
+                {event.submissionCount} {isVie ? 'bài' : 'entries'}
+              </p>
             </div>
             <div>
-              <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-300">Total Community Votes</span>
+              <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-300">
+                {isVie ? 'Tổng lượt bình chọn' : 'Total Community Votes'}
+              </span>
               <p className="mt-1 font-h1 text-lg sm:text-xl font-bold text-white">
                 {(event.totalVoteCount ?? 0).toLocaleString('en-US')}
               </p>
             </div>
             <div className="col-span-2 sm:col-span-1">
               <span className="text-[11px] font-bold uppercase tracking-wider text-brand-periwinkle">
-                {countdown.phaseLabel}
+                {isVie ? (countdown.phaseLabelVie || countdown.phaseLabel) : countdown.phaseLabel}
               </span>
-              <p className="mt-1 font-mono text-base sm:text-lg font-bold text-white">{countdown.formatted}</p>
+              <p className="mt-1 font-mono text-base sm:text-lg font-bold text-white">
+                {isVie ? (countdown.formattedVie || countdown.formatted) : countdown.formatted}
+              </p>
             </div>
           </div>
         </div>
@@ -190,10 +209,12 @@ export function EventDetailHero({
             </div>
             <div>
               <h4 className="font-sora font-bold text-white text-sm sm:text-base">
-                Official Jury Evaluation Workspace
+                {isVie ? 'Không gian Đánh giá của Ban giám khảo' : 'Official Jury Evaluation Workspace'}
               </h4>
               <p className="text-xs text-[#A7ACD9] mt-0.5">
-                Conduct independent blind evaluations based on established criteria and rubrics.
+                {isVie
+                  ? 'Tiến hành chấm điểm độc lập dựa trên tiêu chí và biểu điểm chuẩn hóa.'
+                  : 'Conduct independent blind evaluations based on established criteria and rubrics.'}
               </p>
             </div>
           </div>
@@ -201,7 +222,7 @@ export function EventDetailHero({
             href={`/events/${event.id}/jury`}
             className="shrink-0 px-4 py-2 rounded-xl bg-gradient-to-r from-[#A7ACD9] to-[#7FD5E8] hover:brightness-110 text-[#1F2335] text-xs font-bold font-sora flex items-center gap-2 transition-all shadow-md"
           >
-            <span>Enter Jury Workspace</span>
+            <span>{isVie ? 'Vào không gian chấm thi' : 'Enter Jury Workspace'}</span>
             <ExternalLink size={13} />
           </Link>
         </div>

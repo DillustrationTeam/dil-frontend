@@ -12,9 +12,10 @@ import { eventVoteService } from '../../services/event-vote.service';
 import { juryService } from '../../services/jury.service';
 import { creatorProfileService } from '@/features/creator-studio/services/creator-profile.service';
 import { useEventCountdown } from '../../hooks/use-event-countdown';
-import { eventStatusBadgeStyles, eventStatusLabels, normalizeEventStatus } from '../../types/event.types';
+import { eventStatusBadgeStyles, getEventStatusLabel, normalizeEventStatus } from '../../types/event.types';
 import { EventSubmissionModal } from './event-submission-modal';
 import { useAuthStore } from '@/store/use-auth-store';
+import { useLanguage } from '@/context/language-context';
 
 import { EventDetailHero } from './detail/event-detail-hero';
 import { EventDetailTabNav, TabType } from './detail/event-detail-tab-nav';
@@ -40,6 +41,9 @@ function formatScore(val?: number | null): string | null {
 }
 
 export function EventDetailScreen({ id, userId, isAdmin }: EventDetailScreenProps) {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
+
   const [event, setEvent] = useState<EventDetailDto | null>(null);
   const [submissions, setSubmissions] = useState<EventSubmissionDto[]>([]);
   const [leaderboard, setLeaderboard] = useState<EventLeaderboardItemDto[]>([]);
@@ -134,15 +138,23 @@ export function EventDetailScreen({ id, userId, isAdmin }: EventDetailScreenProp
 
   const handleOpenSubmitModal = () => {
     if (!effectiveUserId) {
-      toast.error('Please sign in to submit artwork.');
+      toast.error(isVie ? 'Vui lòng đăng nhập để nộp bài dự thi.' : 'Please sign in to submit artwork.');
       return;
     }
     if (isJuryMember) {
-      toast.error('Jury members are not eligible to submit entries for this event.');
+      toast.error(
+        isVie
+          ? 'Thành viên ban giám khảo không được phép nộp bài dự thi cho sự kiện này.'
+          : 'Jury members are not eligible to submit entries for this event.'
+      );
       return;
     }
     if (!isCreator) {
-      toast.error('Only creators can participate in this contest. Please set up your creator profile.');
+      toast.error(
+        isVie
+          ? 'Chỉ có họa sĩ (creator) mới có thể tham gia cuộc thi. Vui lòng thiết lập hồ sơ Creator của bạn.'
+          : 'Only creators can participate in this contest. Please set up your creator profile.'
+      );
       return;
     }
     setIsSubmitModalOpen(true);
@@ -150,7 +162,7 @@ export function EventDetailScreen({ id, userId, isAdmin }: EventDetailScreenProp
 
   const handleVote = async (submissionId: string, hasVoted?: boolean) => {
     if (!effectiveUserId) {
-      toast.error('Please sign in to vote for artworks.');
+      toast.error(isVie ? 'Vui lòng đăng nhập để bình chọn bài dự thi.' : 'Please sign in to vote for artworks.');
       return;
     }
 
@@ -158,19 +170,19 @@ export function EventDetailScreen({ id, userId, isAdmin }: EventDetailScreenProp
     try {
       if (hasVoted) {
         await eventVoteService.unvoteSubmission(submissionId);
-        toast.success('Vote removed.');
+        toast.success(isVie ? 'Đã hủy bình chọn.' : 'Vote removed.');
         setSubmissions((prev) =>
           prev.map((s) => (s.id === submissionId ? { ...s, voteCount: Math.max(0, s.voteCount - 1), hasVoted: false } : s)),
         );
       } else {
         await eventVoteService.voteSubmission(submissionId);
-        toast.success('Vote submitted successfully!');
+        toast.success(isVie ? 'Bình chọn thành công!' : 'Vote submitted successfully!');
         setSubmissions((prev) =>
           prev.map((s) => (s.id === submissionId ? { ...s, voteCount: s.voteCount + 1, hasVoted: true } : s)),
         );
       }
     } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : 'Error submitting vote.');
+      toast.error(err instanceof Error ? err.message : (isVie ? 'Lỗi khi gửi bình chọn.' : 'Error submitting vote.'));
     } finally {
       setVotingId(null);
     }
@@ -179,7 +191,7 @@ export function EventDetailScreen({ id, userId, isAdmin }: EventDetailScreenProp
   const handleCopyLink = () => {
     if (typeof window !== 'undefined') {
       void navigator.clipboard.writeText(window.location.href);
-      toast.success('Contest link copied to clipboard.');
+      toast.success(isVie ? 'Đã sao chép liên kết cuộc thi.' : 'Contest link copied to clipboard.');
     }
   };
 
@@ -200,16 +212,18 @@ export function EventDetailScreen({ id, userId, isAdmin }: EventDetailScreenProp
 
   const handleWithdrawSubmission = async (submissionId: string) => {
     const confirmed = window.confirm(
-      'Are you sure you want to withdraw your submission from this contest? You can resubmit anytime before the submission deadline ends.'
+      isVie
+        ? 'Bạn có chắc chắn muốn rút bài dự thi khỏi cuộc thi này? Bạn có thể nộp lại bất kỳ lúc nào trước khi hết hạn nộp bài.'
+        : 'Are you sure you want to withdraw your submission from this contest? You can resubmit anytime before the submission deadline ends.'
     );
     if (!confirmed) return;
 
     try {
       await eventSubmissionService.withdrawSubmission(submissionId);
-      toast.success('Your submission has been withdrawn successfully.');
+      toast.success(isVie ? 'Rút bài dự thi thành công.' : 'Your submission has been withdrawn successfully.');
       setSubmissions((prev) => prev.filter((s) => s.id !== submissionId));
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Failed to withdraw submission.';
+      const msg = err instanceof Error ? err.message : (isVie ? 'Không thể rút bài dự thi.' : 'Failed to withdraw submission.');
       toast.error(msg);
     }
   };
@@ -270,16 +284,16 @@ export function EventDetailScreen({ id, userId, isAdmin }: EventDetailScreenProp
     return (
       <div className="mx-auto max-w-4xl py-24 text-center px-4">
         <h2 className="font-h1 text-2xl font-bold text-white">
-          {loadError ? 'Unable to Load Contest' : 'Contest Not Found'}
+          {loadError ? (isVie ? 'Không thể tải cuộc thi' : 'Unable to Load Contest') : (isVie ? 'Không tìm thấy cuộc thi' : 'Contest Not Found')}
         </h2>
         <p className="mt-2 text-sm text-[#8A8FA9]">
-          {loadError || 'This event may have been removed or is no longer available.'}
+          {loadError || (isVie ? 'Sự kiện này có thể đã bị xóa hoặc không còn khả dụng.' : 'This event may have been removed or is no longer available.')}
         </p>
         <Link
           href="/events"
           className="mt-6 inline-flex rounded-2xl bg-brand-periwinkle px-6 py-2.5 text-xs font-bold text-brand-navy cursor-pointer"
         >
-          Back to Contests
+          {isVie ? 'Quay lại danh sách cuộc thi' : 'Back to Contests'}
         </Link>
       </div>
     );
@@ -287,7 +301,7 @@ export function EventDetailScreen({ id, userId, isAdmin }: EventDetailScreenProp
 
   const statusStr = normalizeEventStatus(event.status);
   const statusColor = eventStatusBadgeStyles[statusStr] || 'border-white/10 bg-white/5 text-outline';
-  const statusLabel = eventStatusLabels[statusStr] || statusStr;
+  const statusLabel = getEventStatusLabel(statusStr, isVie);
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 pb-28 pt-6 sm:px-6 lg:pt-8 text-[#e4e1e5]">

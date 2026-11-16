@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { X, ShieldAlert } from 'lucide-react';
+import { useLanguage } from '@/context/language-context';
 
 interface SubmissionModalJuryNoticeProps {
   onClose: () => void;
@@ -9,6 +10,9 @@ interface SubmissionModalJuryNoticeProps {
 }
 
 export function SubmissionModalJuryNotice({ onClose, eventTitle }: SubmissionModalJuryNoticeProps) {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
       <div className="relative w-full max-w-lg rounded-3xl border border-brand-periwinkle/30 bg-[#161926] p-8 text-center shadow-2xl space-y-5">
@@ -22,9 +26,23 @@ export function SubmissionModalJuryNotice({ onClose, eventTitle }: SubmissionMod
         <div className="flex size-14 items-center justify-center rounded-2xl bg-brand-periwinkle/20 text-brand-periwinkle mx-auto">
           <ShieldAlert size={28} />
         </div>
-        <h3 className="font-h1 text-xl font-bold text-white">Submission Not Permitted</h3>
+        <h3 className="font-h1 text-xl font-bold text-white">
+          {isVie ? 'Không cho phép gửi bài dự thi' : 'Submission Not Permitted'}
+        </h3>
         <p className="text-sm text-[#A7ACD9] leading-relaxed">
-          You are currently serving as a member of the <strong className="text-white">Jury Panel (Head Jury / Jury)</strong> for <strong className="text-white">{eventTitle}</strong>. Dillustration competition policies strictly prohibit jury panel members from submitting entries to ensure complete impartiality.
+          {isVie ? (
+            <>
+              Bạn hiện đang tham gia với tư cách thành viên{' '}
+              <strong className="text-white">Hội đồng Giám khảo (Trưởng ban / Giám khảo)</strong> của cuộc thi{' '}
+              <strong className="text-white">{eventTitle}</strong>. Quy chế cuộc thi của Dillustration nghiêm cấm các thành viên hội đồng giám khảo tham gia dự thi nhằm bảo đảm tính công tâm tuyệt đối.
+            </>
+          ) : (
+            <>
+              You are currently serving as a member of the{' '}
+              <strong className="text-white">Jury Panel (Head Jury / Jury)</strong> for{' '}
+              <strong className="text-white">{eventTitle}</strong>. Dillustration competition policies strictly prohibit jury panel members from submitting entries to ensure complete impartiality.
+            </>
+          )}
         </p>
         <div className="pt-2">
           <button
@@ -32,7 +50,7 @@ export function SubmissionModalJuryNotice({ onClose, eventTitle }: SubmissionMod
             onClick={onClose}
             className="w-full py-3 rounded-2xl bg-brand-periwinkle text-brand-navy font-bold text-xs hover:brightness-110 transition cursor-pointer"
           >
-            Close
+            {isVie ? 'Đóng thông báo' : 'Close'}
           </button>
         </div>
       </div>

@@ -4,8 +4,9 @@ import React from 'react';
 import Link from 'next/link';
 import { ArrowUpRight, Clock, Trophy, Users, Sparkles, CheckCircle2, Flame, Eye, Edit3, Trash2 } from 'lucide-react';
 import type { EventListItemDto } from '../../types/event.types';
-import { eventStatusBadgeStyles, eventStatusLabels, normalizeEventStatus } from '../../types/event.types';
+import { eventStatusBadgeStyles, getEventStatusLabel, normalizeEventStatus } from '../../types/event.types';
 import { useEventCountdown } from '../../hooks/use-event-countdown';
+import { useLanguage } from '@/context/language-context';
 
 interface EventCardProps {
   event: EventListItemDto;
@@ -17,12 +18,14 @@ interface EventCardProps {
 }
 
 export function EventCard({ event, adminActions }: EventCardProps) {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
   const countdown = useEventCountdown(event);
 
   const statusStr = normalizeEventStatus(event.status);
 
   const statusColor = eventStatusBadgeStyles[statusStr] || 'border-white/10 bg-white/5 text-outline';
-  const statusLabel = eventStatusLabels[statusStr] || statusStr;
+  const statusLabel = getEventStatusLabel(statusStr, isVie);
 
   return (
     <div className="group flex min-h-full flex-col justify-between overflow-hidden rounded-[2rem] border border-white/10 bg-[#161926]/80 shadow-[0_24px_70px_rgba(6,8,18,0.35)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1.5 hover:border-brand-periwinkle/50 hover:bg-[#1b1f31] hover:shadow-[0_28px_80px_rgba(167,172,217,0.18)]">
@@ -54,7 +57,7 @@ export function EventCard({ event, adminActions }: EventCardProps) {
               {event.isFeatured && (
                 <span className="flex items-center gap-1 rounded-full border border-amber-400/40 bg-amber-500/20 px-2.5 py-0.5 text-[10px] font-bold text-amber-300 backdrop-blur-md">
                   <Flame size={11} className="text-amber-400" />
-                  Featured
+                  {isVie ? 'Nổi bật' : 'Featured'}
                 </span>
               )}
             </div>
@@ -62,7 +65,7 @@ export function EventCard({ event, adminActions }: EventCardProps) {
             {/* Countdown Badge */}
             <span className="flex items-center gap-1.5 rounded-full border border-white/15 bg-[#11131d]/85 px-3 py-1 font-mono text-[11px] tabular-nums text-white shadow-lg backdrop-blur-md">
               <Clock size={12} className="text-brand-periwinkle animate-pulse" />
-              <span>{countdown.formatted}</span>
+              <span>{isVie ? countdown.formattedVie : countdown.formatted}</span>
             </span>
           </div>
         </Link>
@@ -72,13 +75,13 @@ export function EventCard({ event, adminActions }: EventCardProps) {
           <div className="flex items-center justify-between gap-2 text-xs text-[#8A8FA9] mb-2">
             <span className="inline-flex items-center gap-1 font-medium text-slate-300">
               <CheckCircle2 size={13} className="text-[#A7ACD9]" />
-              {event.createdByAdminName || 'Dillustration Official'}
+              {event.createdByAdminName || (isVie ? 'Ban tổ chức Dillustration' : 'Dillustration Official')}
             </span>
             <Link
               href={`/events/${event.id}`}
               className="flex items-center gap-1 text-brand-periwinkle font-semibold opacity-0 transition-opacity duration-300 group-hover:opacity-100"
             >
-              <span className="text-[11px]">View details</span>
+              <span className="text-[11px]">{isVie ? 'Xem chi tiết' : 'View details'}</span>
               <ArrowUpRight size={14} />
             </Link>
           </div>
@@ -101,7 +104,7 @@ export function EventCard({ event, adminActions }: EventCardProps) {
               </div>
               <div className="min-w-0 flex-1">
                 <span className="text-[10px] uppercase font-bold tracking-wider text-amber-300/80 block">
-                  Prize Pool
+                  {isVie ? 'Cơ cấu giải thưởng' : 'Prize Pool'}
                 </span>
                 <p className="line-clamp-1 text-xs font-bold text-white">
                   {event.prize}
@@ -118,7 +121,7 @@ export function EventCard({ event, adminActions }: EventCardProps) {
           <div className="flex items-center justify-around border-t border-white/10 pt-4">
             <button
               type="button"
-              title="View Details"
+              title={isVie ? 'Xem chi tiết' : 'View Details'}
               onClick={() => adminActions.onViewDetails?.()}
               className="flex items-center justify-center size-9 rounded-xl border border-white/10 bg-white/5 text-[#A7ACD9] hover:bg-brand-periwinkle/20 hover:border-brand-periwinkle/40 hover:text-brand-periwinkle transition-all cursor-pointer"
             >
@@ -127,7 +130,7 @@ export function EventCard({ event, adminActions }: EventCardProps) {
 
             <button
               type="button"
-              title="Update Event"
+              title={isVie ? 'Chỉnh sửa sự kiện' : 'Update Event'}
               onClick={() => adminActions.onUpdate?.()}
               className="flex items-center justify-center size-9 rounded-xl border border-white/10 bg-white/5 text-[#A7ACD9] hover:bg-blue-500/20 hover:border-blue-400/40 hover:text-blue-300 transition-all cursor-pointer"
             >
@@ -136,7 +139,7 @@ export function EventCard({ event, adminActions }: EventCardProps) {
 
             <button
               type="button"
-              title="Delete Event"
+              title={isVie ? 'Xóa sự kiện' : 'Delete Event'}
               onClick={() => adminActions.onDelete?.()}
               className="flex items-center justify-center size-9 rounded-xl border border-white/10 bg-white/5 text-[#A7ACD9] hover:bg-rose-500/20 hover:border-rose-400/40 hover:text-rose-400 transition-all cursor-pointer"
             >
@@ -148,11 +151,13 @@ export function EventCard({ event, adminActions }: EventCardProps) {
             <div className="flex items-center gap-1.5 text-on-surface-variant">
               <Users size={14} className="text-brand-periwinkle" />
               <span className="font-semibold text-white">{event.submissionCount}</span>
+              <span className="text-[11px] text-[#8A8FA9]">{isVie ? 'bài dự thi' : 'entries'}</span>
             </div>
 
             <div className="flex items-center gap-1.5 text-on-surface-variant">
               <Sparkles size={14} className="text-[#A7ACD9]" />
               <span className="font-semibold text-white">{(event.totalVoteCount ?? 0).toLocaleString('en-US')}</span>
+              <span className="text-[11px] text-[#8A8FA9]">{isVie ? 'bình chọn' : 'votes'}</span>
             </div>
           </div>
         )}
