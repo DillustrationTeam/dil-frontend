@@ -115,7 +115,7 @@ const CREATOR_NAV_SECTIONS: SidebarSection[] = [
       { label: 'My Vouchers', href: '/creator/vouchers', icon: Ticket },
       { label: 'Terms & Licensing', href: '/creator/terms', icon: ShieldCheck },
       { label: 'Forensic Watermark', href: '/forensic', icon: ShieldCheck },
-      { label: 'AI Auto-reply', href: '/creator/ai-rules', icon: Bot },
+      { label: 'Auto-reply', href: '/creator/ai-rules', icon: Bot },
       { label: 'Asset & Presets', href: '/creator/assets', icon: Palette },
     ],
   },
