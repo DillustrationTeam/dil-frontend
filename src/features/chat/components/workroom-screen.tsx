@@ -1317,11 +1317,10 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                                   return (
                                     <div key={att.messageAttachmentId} className="overflow-hidden rounded-xl border border-black/10 bg-black/20">
                                       {isImg ? (
-                                        <a
-                                          href={fullAttUrl}
-                                          target="_blank"
-                                          rel="noopener noreferrer"
-                                          className="group relative block overflow-hidden rounded-xl bg-black/40"
+                                        <button
+                                          type="button"
+                                          onClick={() => setActiveLightboxUrl(fullAttUrl)}
+                                          className="group relative block w-full overflow-hidden rounded-xl bg-black/40 cursor-pointer"
                                         >
                                           {/* eslint-disable-next-line @next/next/no-img-element */}
                                           <img
@@ -1332,7 +1331,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                                           <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition duration-200 group-hover:opacity-100 text-white text-xs font-semibold gap-1.5">
                                             <Eye size={16} /> Xem ảnh gốc
                                           </div>
-                                        </a>
+                                        </button>
                                       ) : (
                                         <div className="flex items-center justify-between p-2 text-[11px]">
                                           <span className="inline-flex items-center gap-1.5 truncate text-on-surface font-medium">
