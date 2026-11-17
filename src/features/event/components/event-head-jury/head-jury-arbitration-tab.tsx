@@ -1,12 +1,15 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   Scale,
   Lock,
   UserCheck,
   Award,
   Check,
+  ShieldAlert,
+  ShieldCheck,
+  AlertTriangle,
 } from 'lucide-react';
 import type { ArbitrationCase } from '../../types/jury.types';
 import { EventSearchFilterBar } from '../event/event-search-filter-bar';
@@ -53,6 +56,34 @@ export function HeadJuryArbitrationTab({
   const isVie = lang === 'VIE';
 
   const currentCases = arbitrationCasesState.length > 0 ? arbitrationCasesState : arbitrationCasesList;
+
+  const category = (selectedArbitrationCase?.category || '').toLowerCase();
+  const isRuleOrAiDispute =
+    category === 'aiart' ||
+    category === 'copyright' ||
+    category === 'roleviolation' ||
+    category === 'ruleviolation' ||
+    category === 'votefraud';
+
+  useEffect(() => {
+    if (!selectedArbitrationCase) return;
+    if (isRuleOrAiDispute) {
+      if (
+        arbitrationDecision !== 'Disqualify' &&
+        arbitrationDecision !== 'Dismiss' &&
+        arbitrationDecision !== 'Request Panel Re-evaluation'
+      ) {
+        setArbitrationDecision('Disqualify');
+      }
+    } else {
+      if (
+        arbitrationDecision === 'Disqualify' ||
+        arbitrationDecision === 'Dismiss'
+      ) {
+        setArbitrationDecision('Maintain Current Median Score');
+      }
+    }
+  }, [selectedArbitrationCase?.id, isRuleOrAiDispute]);
 
   return (
     <section className="space-y-6">
@@ -221,101 +252,231 @@ export function HeadJuryArbitrationTab({
                   <label className="text-xs font-semibold text-[#A7ACD9] block uppercase tracking-wider">
                     {isVie ? 'Chọn hành động tái thẩm định:' : 'Select Arbitration Action:'}
                   </label>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <button
-                      type="button"
-                      onClick={() => setArbitrationDecision('Maintain Current Median Score')}
-                      className={`p-3.5 rounded-xl border text-left transition-all flex flex-col justify-between cursor-pointer ${
-                        arbitrationDecision === 'Maintain Current Median Score'
-                          ? 'border-[#A7ACD9] bg-[#A7ACD9]/20 text-white shadow-lg shadow-[#A7ACD9]/10'
-                          : 'border-white/10 bg-white/5 text-[#c7c5cf] hover:bg-white/10 hover:border-white/20'
-                      }`}
-                    >
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-1.5 font-sora text-xs font-bold">
-                          <Scale className="w-4 h-4 text-[#7FD5E8] shrink-0" />
-                          <span>{isVie ? 'Giữ điểm trung vị' : 'Maintain Median'}</span>
-                        </div>
-                        <p className="text-[11px] text-[#9695a1] leading-normal">
-                          {isVie
-                            ? 'Khóa điểm trung vị hiện tại. Loại trừ các điểm lệch bất thường.'
-                            : 'Lock current median score. Suppress outlier variance.'}
-                        </p>
-                      </div>
-                      <span
-                        className={`mt-2 text-[10px] font-bold ${
-                          arbitrationDecision === 'Maintain Current Median Score' ? 'text-[#7FD5E8]' : 'text-[#858694]'
-                        }`}
-                      >
-                        {arbitrationDecision === 'Maintain Current Median Score'
-                          ? (isVie ? '✓ Đã chọn' : '✓ Selected')
-                          : (isVie ? 'Nhấp để chọn' : 'Click to select')}
-                      </span>
-                    </button>
 
-                    <button
-                      type="button"
-                      onClick={() => setArbitrationDecision('Request Panel Re-evaluation')}
-                      className={`p-3.5 rounded-xl border text-left transition-all flex flex-col justify-between cursor-pointer ${
-                        arbitrationDecision === 'Request Panel Re-evaluation'
-                          ? 'border-amber-400 bg-amber-500/20 text-white shadow-lg shadow-amber-500/10'
-                          : 'border-white/10 bg-white/5 text-[#c7c5cf] hover:bg-white/10 hover:border-white/20'
-                      }`}
-                    >
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-1.5 font-sora text-xs font-bold text-amber-300">
-                          <UserCheck className="w-4 h-4 text-amber-400 shrink-0" />
-                          <span>{isVie ? 'Yêu cầu chấm lại' : 'Request Re-evaluation'}</span>
-                        </div>
-                        <p className="text-[11px] text-[#9695a1] leading-normal">
-                          {isVie
-                            ? 'Mở khóa bảng điểm cho các giám khảo cụ thể để đánh giá lại.'
-                            : 'Unlock scoresheet for specific jury members to re-review.'}
-                        </p>
-                      </div>
-                      <span
-                        className={`mt-2 text-[10px] font-bold ${
-                          arbitrationDecision === 'Request Panel Re-evaluation' ? 'text-amber-300' : 'text-[#858694]'
+                  {isRuleOrAiDispute ? (
+                    /* CASE A: Rule / AI / Copyright Violation Dispute Actions */
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setArbitrationDecision('Disqualify')}
+                        className={`p-3.5 rounded-xl border text-left transition-all flex flex-col justify-between cursor-pointer ${
+                          arbitrationDecision === 'Disqualify'
+                            ? 'border-red-500 bg-red-500/20 text-white shadow-lg shadow-red-900/20'
+                            : 'border-white/10 bg-white/5 text-[#c7c5cf] hover:bg-white/10 hover:border-white/20'
                         }`}
                       >
-                        {arbitrationDecision === 'Request Panel Re-evaluation'
-                          ? (isVie ? '✓ Đã chọn' : '✓ Selected')
-                          : (isVie ? 'Nhấp để chọn' : 'Click to select')}
-                      </span>
-                    </button>
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-1.5 font-sora text-xs font-bold text-red-400">
+                            <ShieldAlert className="w-4 h-4 text-red-400 shrink-0" />
+                            <span>{isVie ? 'Truất quyền bài thi' : 'Disqualify Entry'}</span>
+                          </div>
+                          <p className="text-[11px] text-[#9695a1] leading-normal">
+                            {isVie
+                              ? 'Xác nhận vi phạm thể lệ hoặc AI/bản quyền. Hủy bài dự thi.'
+                              : 'Confirm rule or AI/copyright violation. Disqualify entry.'}
+                          </p>
+                        </div>
+                        <span
+                          className={`mt-2 text-[10px] font-bold ${
+                            arbitrationDecision === 'Disqualify' ? 'text-red-400' : 'text-[#858694]'
+                          }`}
+                        >
+                          {arbitrationDecision === 'Disqualify'
+                            ? (isVie ? '✓ Đã chọn' : '✓ Selected')
+                            : (isVie ? 'Nhấp để chọn' : 'Click to select')}
+                        </span>
+                      </button>
 
-                    <button
-                      type="button"
-                      onClick={() => setArbitrationDecision('Cast Head Jury Tie-Breaker')}
-                      className={`p-3.5 rounded-xl border text-left transition-all flex flex-col justify-between cursor-pointer ${
-                        arbitrationDecision === 'Cast Head Jury Tie-Breaker'
-                          ? 'border-brand-periwinkle bg-brand-periwinkle/20 text-white shadow-lg shadow-brand-periwinkle/10'
-                          : 'border-white/10 bg-white/5 text-[#c7c5cf] hover:bg-white/10 hover:border-white/20'
-                      }`}
-                    >
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-1.5 font-sora text-xs font-bold text-brand-periwinkle">
-                          <Award className="w-4 h-4 text-brand-periwinkle shrink-0" />
-                          <span>{isVie ? 'Bỏ phiếu Tie-Breaker' : 'Tie-Breaker Vote'}</span>
-                        </div>
-                        <p className="text-[11px] text-[#9695a1] leading-normal">
-                          {isVie
-                            ? 'Bỏ phiếu quyết định của Trưởng ban GK đối với các bài đồng hạng.'
-                            : 'Cast decisive Head Jury vote for tied placements.'}
-                        </p>
-                      </div>
-                      <span
-                        className={`mt-2 text-[10px] font-bold ${
-                          arbitrationDecision === 'Cast Head Jury Tie-Breaker' ? 'text-brand-periwinkle' : 'text-[#858694]'
+                      <button
+                        type="button"
+                        onClick={() => setArbitrationDecision('Dismiss')}
+                        className={`p-3.5 rounded-xl border text-left transition-all flex flex-col justify-between cursor-pointer ${
+                          arbitrationDecision === 'Dismiss'
+                            ? 'border-emerald-400 bg-emerald-500/20 text-white shadow-lg shadow-emerald-500/10'
+                            : 'border-white/10 bg-white/5 text-[#c7c5cf] hover:bg-white/10 hover:border-white/20'
                         }`}
                       >
-                        {arbitrationDecision === 'Cast Head Jury Tie-Breaker'
-                          ? (isVie ? '✓ Đã chọn' : '✓ Selected')
-                          : (isVie ? 'Nhấp để chọn' : 'Click to select')}
-                      </span>
-                    </button>
-                  </div>
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-1.5 font-sora text-xs font-bold text-emerald-400">
+                            <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
+                            <span>{isVie ? 'Bác bỏ khiếu nại' : 'Dismiss Dispute'}</span>
+                          </div>
+                          <p className="text-[11px] text-[#9695a1] leading-normal">
+                            {isVie
+                              ? 'Bài thi hợp lệ, khiếu nại không đủ căn cứ. Duy trì bài dự thi.'
+                              : 'Submission is valid and compliant. Retain entry in contest.'}
+                          </p>
+                        </div>
+                        <span
+                          className={`mt-2 text-[10px] font-bold ${
+                            arbitrationDecision === 'Dismiss' ? 'text-emerald-400' : 'text-[#858694]'
+                          }`}
+                        >
+                          {arbitrationDecision === 'Dismiss'
+                            ? (isVie ? '✓ Đã chọn' : '✓ Selected')
+                            : (isVie ? 'Nhấp để chọn' : 'Click to select')}
+                        </span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setArbitrationDecision('Request Panel Re-evaluation')}
+                        className={`p-3.5 rounded-xl border text-left transition-all flex flex-col justify-between cursor-pointer ${
+                          arbitrationDecision === 'Request Panel Re-evaluation'
+                            ? 'border-amber-400 bg-amber-500/20 text-white shadow-lg shadow-amber-500/10'
+                            : 'border-white/10 bg-white/5 text-[#c7c5cf] hover:bg-white/10 hover:border-white/20'
+                        }`}
+                      >
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-1.5 font-sora text-xs font-bold text-amber-300">
+                            <UserCheck className="w-4 h-4 text-amber-400 shrink-0" />
+                            <span>{isVie ? 'Yêu cầu kiểm tra lại' : 'Request Inspection'}</span>
+                          </div>
+                          <p className="text-[11px] text-[#9695a1] leading-normal">
+                            {isVie
+                              ? 'Yêu cầu thí sinh bổ sung bằng chứng và hội đồng thẩm định thêm.'
+                              : 'Request additional evidence and panel inspection.'}
+                          </p>
+                        </div>
+                        <span
+                          className={`mt-2 text-[10px] font-bold ${
+                            arbitrationDecision === 'Request Panel Re-evaluation' ? 'text-amber-300' : 'text-[#858694]'
+                          }`}
+                        >
+                          {arbitrationDecision === 'Request Panel Re-evaluation'
+                            ? (isVie ? '✓ Đã chọn' : '✓ Selected')
+                            : (isVie ? 'Nhấp để chọn' : 'Click to select')}
+                        </span>
+                      </button>
+                    </div>
+                  ) : (
+                    /* CASE B: Score Variance / Tie-Breaker Dispute Actions */
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setArbitrationDecision('Maintain Current Median Score')}
+                        className={`p-3.5 rounded-xl border text-left transition-all flex flex-col justify-between cursor-pointer ${
+                          arbitrationDecision === 'Maintain Current Median Score'
+                            ? 'border-[#A7ACD9] bg-[#A7ACD9]/20 text-white shadow-lg shadow-[#A7ACD9]/10'
+                            : 'border-white/10 bg-white/5 text-[#c7c5cf] hover:bg-white/10 hover:border-white/20'
+                        }`}
+                      >
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-1.5 font-sora text-xs font-bold">
+                            <Scale className="w-4 h-4 text-[#7FD5E8] shrink-0" />
+                            <span>{isVie ? 'Giữ điểm trung vị' : 'Maintain Median'}</span>
+                          </div>
+                          <p className="text-[11px] text-[#9695a1] leading-normal">
+                            {isVie
+                              ? 'Khóa điểm trung vị hiện tại. Loại trừ các điểm lệch bất thường.'
+                              : 'Lock current median score. Suppress outlier variance.'}
+                          </p>
+                        </div>
+                        <span
+                          className={`mt-2 text-[10px] font-bold ${
+                            arbitrationDecision === 'Maintain Current Median Score' ? 'text-[#7FD5E8]' : 'text-[#858694]'
+                          }`}
+                        >
+                          {arbitrationDecision === 'Maintain Current Median Score'
+                            ? (isVie ? '✓ Đã chọn' : '✓ Selected')
+                            : (isVie ? 'Nhấp để chọn' : 'Click to select')}
+                        </span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setArbitrationDecision('Request Panel Re-evaluation')}
+                        className={`p-3.5 rounded-xl border text-left transition-all flex flex-col justify-between cursor-pointer ${
+                          arbitrationDecision === 'Request Panel Re-evaluation'
+                            ? 'border-amber-400 bg-amber-500/20 text-white shadow-lg shadow-amber-500/10'
+                            : 'border-white/10 bg-white/5 text-[#c7c5cf] hover:bg-white/10 hover:border-white/20'
+                        }`}
+                      >
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-1.5 font-sora text-xs font-bold text-amber-300">
+                            <UserCheck className="w-4 h-4 text-amber-400 shrink-0" />
+                            <span>{isVie ? 'Yêu cầu chấm lại' : 'Request Re-evaluation'}</span>
+                          </div>
+                          <p className="text-[11px] text-[#9695a1] leading-normal">
+                            {isVie
+                              ? 'Mở khóa bảng điểm cho các giám khảo cụ thể để đánh giá lại.'
+                              : 'Unlock scoresheet for specific jury members to re-review.'}
+                          </p>
+                        </div>
+                        <span
+                          className={`mt-2 text-[10px] font-bold ${
+                            arbitrationDecision === 'Request Panel Re-evaluation' ? 'text-amber-300' : 'text-[#858694]'
+                          }`}
+                        >
+                          {arbitrationDecision === 'Request Panel Re-evaluation'
+                            ? (isVie ? '✓ Đã chọn' : '✓ Selected')
+                            : (isVie ? 'Nhấp để chọn' : 'Click to select')}
+                        </span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setArbitrationDecision('Cast Head Jury Tie-Breaker')}
+                        className={`p-3.5 rounded-xl border text-left transition-all flex flex-col justify-between cursor-pointer ${
+                          arbitrationDecision === 'Cast Head Jury Tie-Breaker'
+                            ? 'border-brand-periwinkle bg-brand-periwinkle/20 text-white shadow-lg shadow-brand-periwinkle/10'
+                            : 'border-white/10 bg-white/5 text-[#c7c5cf] hover:bg-white/10 hover:border-white/20'
+                        }`}
+                      >
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-1.5 font-sora text-xs font-bold text-brand-periwinkle">
+                            <Award className="w-4 h-4 text-brand-periwinkle shrink-0" />
+                            <span>{isVie ? 'Bỏ phiếu Tie-Breaker' : 'Tie-Breaker Vote'}</span>
+                          </div>
+                          <p className="text-[11px] text-[#9695a1] leading-normal">
+                            {isVie
+                              ? 'Bỏ phiếu quyết định của Trưởng ban GK đối với các bài đồng hạng.'
+                              : 'Cast decisive Head Jury vote for tied placements.'}
+                          </p>
+                        </div>
+                        <span
+                          className={`mt-2 text-[10px] font-bold ${
+                            arbitrationDecision === 'Cast Head Jury Tie-Breaker' ? 'text-brand-periwinkle' : 'text-[#858694]'
+                          }`}
+                        >
+                          {arbitrationDecision === 'Cast Head Jury Tie-Breaker'
+                            ? (isVie ? '✓ Đã chọn' : '✓ Selected')
+                            : (isVie ? 'Nhấp để chọn' : 'Click to select')}
+                        </span>
+                      </button>
+                    </div>
+                  )}
                 </div>
+
+                {/* Sub-Panel: Disqualify Entry */}
+                {arbitrationDecision === 'Disqualify' && (
+                  <div className="p-4 rounded-xl border border-red-500/30 bg-red-500/10 space-y-2 text-xs">
+                    <div className="flex items-center gap-2 font-sora font-bold text-red-300">
+                      <ShieldAlert className="w-4 h-4 text-red-400" />
+                      <span>{isVie ? 'Xác nhận truất quyền bài dự thi' : 'Confirm Entry Disqualification'}</span>
+                    </div>
+                    <p className="text-[#c7c5cf] leading-relaxed">
+                      {isVie
+                        ? 'Tác phẩm sẽ bị đánh dấu vi phạm và loại bỏ vĩnh viễn khỏi bảng xếp hạng cuộc thi. Điểm số của Ban Giám Khảo và lượt bình chọn cho bài thi này sẽ bị xóa bỏ.'
+                        : 'The artwork will be disqualified and permanently excluded from competition standings. All jury scores and votes cast for this entry will be cleared.'}
+                    </p>
+                  </div>
+                )}
+
+                {/* Sub-Panel: Dismiss Dispute */}
+                {arbitrationDecision === 'Dismiss' && (
+                  <div className="p-4 rounded-xl border border-emerald-500/30 bg-emerald-500/10 space-y-2 text-xs">
+                    <div className="flex items-center gap-2 font-sora font-bold text-emerald-300">
+                      <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                      <span>{isVie ? 'Bác bỏ khiếu nại - Công nhận tính hợp lệ' : 'Dismiss Dispute - Affirm Compliance'}</span>
+                    </div>
+                    <p className="text-[#c7c5cf] leading-relaxed">
+                      {isVie
+                        ? 'Khiếu nại được xác định là không có cơ sở. Tác phẩm vẫn tiếp tục duy trì tư cách dự thi và điểm số đã được chấm.'
+                        : 'The dispute is determined to be unfounded. The submission remains fully eligible and keeps its current evaluation.'}
+                    </p>
+                  </div>
+                )}
 
                 {/* Sub-Panel 1: Maintain Median Score */}
                 {arbitrationDecision === 'Maintain Current Median Score' && (
