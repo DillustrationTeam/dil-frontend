@@ -28,9 +28,9 @@ export function HeadJuryApproveTab({
   const isVie = lang === 'VIE';
 
   return (
-    <section className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.25fr)_minmax(320px,0.75fr)] gap-6 items-start">
+    <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
       {/* Final Results Table */}
-      <div className="glass-container p-6 rounded-2xl space-y-5">
+      <div className="glass-container p-6 rounded-2xl space-y-5 lg:col-span-7 xl:col-span-8">
         <div className="flex items-center justify-between flex-wrap gap-2">
           <div>
             <h2 className="text-xl font-bold font-sora text-white">
@@ -138,10 +138,34 @@ export function HeadJuryApproveTab({
       </div>
 
       {/* Checklist Sidebar */}
-      <aside className="glass-container p-6 rounded-2xl space-y-4 lg:sticky lg:top-36">
-        <h2 className="text-xl font-bold font-sora text-white">
-          {isVie ? 'Danh mục Kiểm tra Phê duyệt' : 'Approval Checklist'}
-        </h2>
+      <aside className="glass-container p-6 rounded-2xl space-y-5 lg:col-span-5 xl:col-span-4">
+        <div className="flex items-center justify-between flex-wrap gap-2">
+          <div>
+            <h2 className="text-xl font-bold font-sora text-white">
+              {isVie ? 'Danh mục Kiểm tra Phê duyệt' : 'Approval Checklist'}
+            </h2>
+            <p className="text-xs text-[#9695a1] mt-0.5">
+              {isVie
+                ? 'Điều kiện bắt buộc trước khi ký duyệt kết quả.'
+                : 'Mandatory prerequisites before final sign-off.'}
+            </p>
+          </div>
+          <span
+            className={`px-3 py-1 rounded-full text-xs font-bold border ${
+              isContestResultsApproved
+                ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400'
+                : disputesResolved && isAwardAllocationsConfirmed && allJuryCompleted
+                ? 'bg-sky-500/15 border-sky-500/30 text-sky-400'
+                : 'bg-amber-500/15 border-amber-500/30 text-amber-300'
+            }`}
+          >
+            {isContestResultsApproved
+              ? (isVie ? 'Đã phê duyệt' : 'Approved')
+              : disputesResolved && isAwardAllocationsConfirmed && allJuryCompleted
+              ? (isVie ? 'Đủ điều kiện' : 'Ready to Sign')
+              : (isVie ? 'Chờ hoàn tất' : 'Pending')}
+          </span>
+        </div>
 
         <div className="space-y-2.5 text-xs">
           <div className="flex items-center justify-between p-3 rounded-xl border border-white/10 bg-white/[0.02]">
