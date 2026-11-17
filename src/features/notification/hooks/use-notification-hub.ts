@@ -15,14 +15,22 @@ import { notificationHubUrl } from '../services/notification-hub';
  *
  * Server đẩy vào group `user-{userId}` nên client phải gọi `Subscribe` sau khi nối.
  */
+export interface WorkroomMessageEvent {
+  roomId: string;
+  senderId: string;
+  sentAt: string;
+}
+
 export function useNotificationHub(
   onNotification: (notification: NotificationDto) => void,
+  onWorkroomMessage?: (event: WorkroomMessageEvent) => void,
 ): { connected: boolean } {
   const accessToken = useAuthStore((state) => state.accessToken);
   const userId = useAuthStore((state) => state.user?.id ?? null);
   const [hubConnected, setHubConnected] = useState(false);
 
   const handlerRef = useRef(onNotification);
+  const workroomHandlerRef = useRef(onWorkroomMessage);
 
   // Trạng thái suy ra: chưa đăng nhập thì chắc chắn không có kết nối hub.
   const connected = Boolean(userId && accessToken) && hubConnected;
@@ -30,6 +38,10 @@ export function useNotificationHub(
   useEffect(() => {
     handlerRef.current = onNotification;
   }, [onNotification]);
+
+  useEffect(() => {
+    workroomHandlerRef.current = onWorkroomMessage;
+  }, [onWorkroomMessage]);
 
   useEffect(() => {
     if (!userId || !accessToken) {
@@ -44,6 +56,10 @@ export function useNotificationHub(
 
     connection.on('ReceiveNotification', (notification: NotificationDto) => {
       handlerRef.current(notification);
+    });
+
+    connection.on('WorkroomMessageReceived', (payload: WorkroomMessageEvent) => {
+      workroomHandlerRef.current?.(payload);
     });
 
     connection.onreconnected(() => {

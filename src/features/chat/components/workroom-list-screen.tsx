@@ -14,6 +14,9 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 
+import { chatService } from '../services/chat.service';
+import type { WorkroomUnreadCountDto } from '../types/chat.types';
+import { useNotificationHub } from '@/features/notification/hooks/use-notification-hub';
 import { commissionService } from '@/services/commission.service';
 import type { Commission, CommissionStatus } from '@/types/commission.types';
 
@@ -73,6 +76,10 @@ interface WorkroomRow {
   viewerRole: 'Client' | 'Creator';
   /** Tên đối tác còn lại trong phòng. */
   partnerName: string;
+  /** Số tin nhắn chưa đọc trong phòng. */
+  unreadCount: number;
+  /** Thời điểm có tin nhắn gần nhất. */
+  lastMessageAt?: string | null;
 }
 
 type FilterKey = 'all' | 'active' | 'disputed' | 'done' | 'cancelled';
@@ -97,19 +104,30 @@ export function WorkroomListScreen({ userId }: { userId: string | null }) {
     try {
       // Người dùng đa vai trò (Client + Creator) có thể có phòng ở CẢ HAI phía.
       // Một phía lỗi (ví dụ chưa có CreatorProfile) không được làm hỏng cả trang.
-      const [asClient, asCreator] = await Promise.allSettled([
+      const [asClient, asCreator, unreadRes] = await Promise.allSettled([
         commissionService.getByClient(),
         commissionService.getByCreator(),
+        chatService.getUnreadCounts(),
       ]);
+
+      const unreadMap = new Map<string, WorkroomUnreadCountDto>();
+      if (unreadRes.status === 'fulfilled' && Array.isArray(unreadRes.value)) {
+        for (const item of unreadRes.value) {
+          unreadMap.set(String(item.commissionId).toLowerCase(), item);
+        }
+      }
 
       const collected = new Map<string, WorkroomRow>();
 
       if (asClient.status === 'fulfilled') {
         for (const commission of asClient.value) {
+          const unread = unreadMap.get(String(commission.id).toLowerCase());
           collected.set(commission.id, {
             commission,
             viewerRole: 'Client',
             partnerName: commission.creatorName || 'Họa sĩ',
+            unreadCount: unread?.unreadCount ?? 0,
+            lastMessageAt: unread?.lastMessageAt ?? null,
           });
         }
       }
@@ -118,10 +136,13 @@ export function WorkroomListScreen({ userId }: { userId: string | null }) {
         for (const commission of asCreator.value) {
           // Phòng của chính mình ở vai Creator thắng nếu trùng id.
           if (collected.has(commission.id)) continue;
+          const unread = unreadMap.get(String(commission.id).toLowerCase());
           collected.set(commission.id, {
             commission,
             viewerRole: 'Creator',
             partnerName: commission.clientName || 'Khách hàng',
+            unreadCount: unread?.unreadCount ?? 0,
+            lastMessageAt: unread?.lastMessageAt ?? null,
           });
         }
       }
@@ -131,10 +152,17 @@ export function WorkroomListScreen({ userId }: { userId: string | null }) {
       }
 
       const list = Array.from(collected.values())
-        .filter((row) => !NO_WORKROOM_STATUSES.includes(row.commission.status))
+        .filter(
+          (row) =>
+            !NO_WORKROOM_STATUSES.includes(row.commission.status) &&
+            row.commission.escrowStatus !== 'Pending',
+        )
         .sort((a, b) => {
-          const left = new Date(a.commission.createdAt).getTime();
-          const right = new Date(b.commission.createdAt).getTime();
+          if ((a.unreadCount > 0) !== (b.unreadCount > 0)) {
+            return a.unreadCount > 0 ? -1 : 1;
+          }
+          const left = new Date(a.lastMessageAt || a.commission.createdAt).getTime();
+          const right = new Date(b.lastMessageAt || b.commission.createdAt).getTime();
           return right - left;
         });
 
@@ -152,6 +180,60 @@ export function WorkroomListScreen({ userId }: { userId: string | null }) {
       void load();
     });
   }, [load]);
+
+  const refreshUnread = useCallback(async () => {
+    if (!userId) return;
+    try {
+      const unreadList = await chatService.getUnreadCounts();
+      const unreadMap = new Map(unreadList.map((item) => [String(item.commissionId).toLowerCase(), item]));
+      setRows((current) =>
+        current
+          .map((row) => {
+            const match = unreadMap.get(String(row.commission.id).toLowerCase());
+            if (!match) return row;
+            return {
+              ...row,
+              unreadCount: match.unreadCount,
+              lastMessageAt: match.lastMessageAt ?? row.lastMessageAt,
+            };
+          })
+          .sort((a, b) => {
+            if ((a.unreadCount > 0) !== (b.unreadCount > 0)) {
+              return a.unreadCount > 0 ? -1 : 1;
+            }
+            const left = new Date(a.lastMessageAt || a.commission.createdAt).getTime();
+            const right = new Date(b.lastMessageAt || b.commission.createdAt).getTime();
+            return right - left;
+          }),
+      );
+    } catch {
+      // ignore background refresh errors
+    }
+  }, [userId]);
+
+  const handleNotificationNoop = useCallback(() => {}, []);
+  const handleWorkroomMessage = useCallback(() => {
+    void refreshUnread();
+  }, [refreshUnread]);
+
+  useNotificationHub(handleNotificationNoop, handleWorkroomMessage);
+
+  useEffect(() => {
+    if (!userId) return;
+
+    const onFocus = () => {
+      void refreshUnread();
+    };
+    window.addEventListener('focus', onFocus);
+    const timer = window.setInterval(() => {
+      void refreshUnread();
+    }, 8000);
+
+    return () => {
+      window.removeEventListener('focus', onFocus);
+      window.clearInterval(timer);
+    };
+  }, [userId, refreshUnread]);
 
   const visibleRows = useMemo(() => {
     const needle = keyword.trim().toLowerCase();
@@ -228,7 +310,15 @@ export function WorkroomListScreen({ userId }: { userId: string | null }) {
     <div className="mx-auto w-full max-w-6xl space-y-6 text-on-surface">
       <header className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
-          <h1 className="font-h1 text-2xl font-bold">Phòng làm việc</h1>
+          <div className="flex flex-wrap items-center gap-3">
+            <h1 className="font-h1 text-2xl font-bold">Phòng làm việc</h1>
+            {rows.some((r) => r.unreadCount > 0 && r.commission.status !== 'Completed' && r.commission.status !== 'Cancelled') && (
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-[#A7ACD9] bg-[#A7ACD9] px-3 py-1 text-xs font-extrabold text-[#1F2335] shadow-md shadow-[#A7ACD9]/25">
+                <span className="h-2 w-2 animate-ping rounded-full bg-[#1F2335]" />
+                {rows.filter((r) => r.unreadCount > 0 && r.commission.status !== 'Completed' && r.commission.status !== 'Cancelled').length} phòng có tin mới
+              </span>
+            )}
+          </div>
           <p className="mt-1 text-sm text-on-surface-variant">
             Trao đổi phác thảo, duyệt tiến độ và nhận tệp hoàn thiện cho từng đơn.
           </p>
@@ -373,15 +463,22 @@ function MetricCard({ label, value }: { label: string; value: string }) {
 }
 
 function WorkroomCard({ row }: { row: WorkroomRow }) {
-  const { commission, viewerRole, partnerName } = row;
+  const { commission, viewerRole, partnerName, unreadCount, lastMessageAt } = row;
   const approved = (commission.milestones ?? []).filter((milestone) => milestone.status === 'Approved').length;
   const totalMilestones = (commission.milestones ?? []).length;
   const isEnded = commission.status === 'Completed' || commission.status === 'Cancelled';
   const remainingDays = isEnded ? null : daysUntil(commission.deadlineAt);
   const escrowHeld = commission.escrowHeldAmount ?? 0;
+  const hasUnread = unreadCount > 0 && !isEnded;
 
   return (
-    <article className="rounded-2xl border border-white/10 bg-black/20 p-4 transition hover:border-brand-periwinkle/40 sm:p-5">
+    <article
+      className={`rounded-2xl border p-4 transition sm:p-5 ${
+        hasUnread
+          ? 'border-[#A7ACD9]/70 bg-[#A7ACD9]/[0.08] ring-1 ring-[#A7ACD9]/25 hover:border-[#A7ACD9]'
+          : 'border-white/10 bg-black/20 hover:border-brand-periwinkle/40'
+      }`}
+    >
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
@@ -396,6 +493,15 @@ function WorkroomCard({ row }: { row: WorkroomRow }) {
             <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] font-semibold text-on-surface-variant">
               Bạn là {viewerRole === 'Client' ? 'Khách hàng' : 'Họa sĩ'}
             </span>
+            {hasUnread && (
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-[#A7ACD9] bg-[#A7ACD9] px-3 py-0.5 text-[11px] font-extrabold text-[#1F2335] shadow-md shadow-[#A7ACD9]/25">
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#1F2335] opacity-75" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-[#1F2335]" />
+                </span>
+                {unreadCount} tin nhắn mới
+              </span>
+            )}
           </div>
 
           <h2 className="mt-2 truncate text-sm font-bold text-on-surface">{commission.title}</h2>
@@ -426,15 +532,21 @@ function WorkroomCard({ row }: { row: WorkroomRow }) {
                     : `Còn ${remainingDays} ngày`}
               </span>
             )}
-            <span>Cập nhật {lastActivity(commission.createdAt)}</span>
+            <span>Cập nhật {lastActivity(lastMessageAt || commission.createdAt)}</span>
           </div>
         </div>
 
         <Link
           href={`/workroom/${commission.id}`}
-          className="commission-primary inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl px-5 py-2.5 text-xs font-bold"
+          className="commission-primary relative inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl px-5 py-2.5 text-xs font-bold"
         >
-          Mở phòng làm việc <ArrowRight size={15} aria-hidden />
+          Mở phòng làm việc
+          {hasUnread && (
+            <span className="ml-0.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-[#1F2335] px-1.5 text-[11px] font-extrabold text-[#A7ACD9]">
+              {unreadCount}
+            </span>
+          )}
+          <ArrowRight size={15} aria-hidden />
         </Link>
       </div>
     </article>

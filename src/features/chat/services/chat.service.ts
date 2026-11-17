@@ -1,8 +1,16 @@
 import { apiClient } from '@/lib/api-client';
 import type { ApiResponse } from '@/types/api.types';
-import type { ChatAttachmentDto, ChatMessagesPage, ChatRoomDto, TranslationResultDto } from '../types/chat.types';
+import type { ChatAttachmentDto, ChatMessagesPage, ChatRoomDto, TranslationResultDto, WorkroomUnreadCountDto } from '../types/chat.types';
 
 export const chatService = {
+  async getUnreadCounts(): Promise<WorkroomUnreadCountDto[]> {
+    const res = await apiClient.get<ApiResponse<WorkroomUnreadCountDto[]>>('/chat/unread-counts');
+    if (res.data.error) {
+      return [];
+    }
+    return res.data.data ?? [];
+  },
+
   async getRoom(roomId: string): Promise<ChatRoomDto> {
     const res = await apiClient.get<ApiResponse<ChatRoomDto>>(`/chat/rooms/${roomId}`);
     if (res.data.error || !res.data.data) {

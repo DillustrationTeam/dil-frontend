@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ArrowLeftRight, ArrowRight, Award, Bell, BriefcaseBusiness, Bug, Check, CheckCheck, CircleAlert, Clock, Gavel, Info, LockKeyhole, Megaphone, RefreshCw, Scale, ShieldAlert, Wallet, X } from 'lucide-react';
+import { ArrowLeftRight, ArrowRight, Award, Bell, BriefcaseBusiness, Bug, Check, CheckCheck, CircleAlert, Clock, Gavel, Info, LockKeyhole, Megaphone, MessageSquare, RefreshCw, Scale, ShieldAlert, Wallet, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { getApiErrorMessage } from '@/lib/api-error';
 import { notificationService } from '../services/notification.service';
@@ -32,6 +32,8 @@ function getIcon(type: string, size = 15) {
       return <Megaphone size={size} className="text-brand-periwinkle" />;
     case 'CommissionStatusChanged':
       return <BriefcaseBusiness size={size} className="text-brand-periwinkle" />;
+    case 'WorkroomMessage':
+      return <MessageSquare size={size} className="text-brand-periwinkle" />;
     case 'EscrowStatusChanged':
       return <LockKeyhole size={size} className="text-emerald-400" />;
     case 'DisputeStatusChanged':
