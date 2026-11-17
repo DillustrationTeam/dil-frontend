@@ -23,6 +23,7 @@ import { EventTabArtworks } from './detail/event-tab-artworks';
 import { EventTabMySubmission } from './detail/event-tab-my-submission';
 import { EventTabLeaderboard } from './detail/event-tab-leaderboard';
 import { EventRulesModal } from './detail/event-rules-modal';
+import { SubmissionWithdrawModal } from './detail/submission-withdraw-modal';
 
 interface EventDetailScreenProps {
   id: string;
@@ -62,6 +63,8 @@ export function EventDetailScreen({ id, userId, isAdmin }: EventDetailScreenProp
   // Modal dialog states
   const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
   const [isRulesModalOpen, setIsRulesModalOpen] = useState(false);
+  const [withdrawTargetId, setWithdrawTargetId] = useState<string | null>(null);
+  const [isWithdrawing, setIsWithdrawing] = useState(false);
 
   // Jury & Creator states
   const [juries, setJuries] = useState<JuryMemberInfo[]>([]);
@@ -210,21 +213,23 @@ export function EventDetailScreen({ id, userId, isAdmin }: EventDetailScreenProp
     setActiveTab('my-submission');
   };
 
-  const handleWithdrawSubmission = async (submissionId: string) => {
-    const confirmed = window.confirm(
-      isVie
-        ? 'Bạn có chắc chắn muốn rút bài dự thi khỏi cuộc thi này? Bạn có thể nộp lại bất kỳ lúc nào trước khi hết hạn nộp bài.'
-        : 'Are you sure you want to withdraw your submission from this contest? You can resubmit anytime before the submission deadline ends.'
-    );
-    if (!confirmed) return;
+  const handleWithdrawSubmission = (submissionId: string) => {
+    setWithdrawTargetId(submissionId);
+  };
 
+  const handleConfirmWithdraw = async () => {
+    if (!withdrawTargetId) return;
+    setIsWithdrawing(true);
     try {
-      await eventSubmissionService.withdrawSubmission(submissionId);
+      await eventSubmissionService.withdrawSubmission(withdrawTargetId);
       toast.success(isVie ? 'Rút bài dự thi thành công.' : 'Your submission has been withdrawn successfully.');
-      setSubmissions((prev) => prev.filter((s) => s.id !== submissionId));
+      setSubmissions((prev) => prev.filter((s) => s.id !== withdrawTargetId));
+      setWithdrawTargetId(null);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : (isVie ? 'Không thể rút bài dự thi.' : 'Failed to withdraw submission.');
       toast.error(msg);
+    } finally {
+      setIsWithdrawing(false);
     }
   };
 
@@ -403,6 +408,18 @@ export function EventDetailScreen({ id, userId, isAdmin }: EventDetailScreenProp
         isOpen={isRulesModalOpen}
         onClose={() => setIsRulesModalOpen(false)}
         event={event}
+      />
+
+      {/* Withdraw Submission Confirmation Modal */}
+      <SubmissionWithdrawModal
+        isOpen={Boolean(withdrawTargetId)}
+        onClose={() => !isWithdrawing && setWithdrawTargetId(null)}
+        onConfirm={handleConfirmWithdraw}
+        isSubmitting={isWithdrawing}
+        artworkTitle={
+          submissions.find((s) => s.id === withdrawTargetId)?.title ||
+          mySubmission?.title
+        }
       />
     </div>
   );
