@@ -76,9 +76,9 @@ export function HeadJuryScoringTab({
   const maxTotalScore = getRubricMaxTotal(criteria);
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[320px_minmax(0,1fr)] gap-6 items-start">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
       {/* Left Column: Queue List */}
-      <aside className="glass-container p-4 rounded-2xl lg:sticky lg:top-36 max-h-none lg:max-h-[calc(100vh-10rem)] flex flex-col">
+      <aside className="glass-container p-4 rounded-2xl lg:col-span-4 xl:col-span-4 flex flex-col">
         {/* Panel Head */}
         <div className="flex items-center justify-between gap-3 pb-3 border-b border-white/10 mb-3">
           <div>
@@ -168,7 +168,7 @@ export function HeadJuryScoringTab({
       {activeSubmission ? (
         <form
           onSubmit={handleSubmitScore}
-          className="glass-container p-5 sm:p-6 rounded-2xl space-y-6"
+          className="glass-container p-5 sm:p-6 rounded-2xl space-y-6 lg:col-span-8 xl:col-span-8"
         >
           {activeSubmission.isLocked && (
             <div className="flex items-center gap-3 p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-200 text-xs">
@@ -436,7 +436,7 @@ export function HeadJuryScoringTab({
           </div>
         </form>
       ) : (
-        <div className="glass-container p-12 text-center rounded-2xl text-[#9695a1]">
+        <div className="glass-container p-12 text-center rounded-2xl text-[#9695a1] lg:col-span-8 xl:col-span-8">
           {isVie ? 'Chọn một bài dự thi từ danh sách để bắt đầu đánh giá.' : 'Select a submission from the queue to start evaluation.'}
         </div>
       )}
