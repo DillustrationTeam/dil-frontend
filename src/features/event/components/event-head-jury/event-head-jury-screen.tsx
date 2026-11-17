@@ -430,8 +430,9 @@ export function EventHeadJuryScreen({ eventId }: EventHeadJuryScreenProps) {
   const filteredArbitrationCases = useMemo(() => {
     const list = arbitrationCasesState.length > 0 ? arbitrationCasesState : arbitrationCasesList;
     return list.filter((item) => {
-      if (arbitrationStatusFilter === 'pending' && item.status.toLowerCase() !== 'pending') return false;
-      if (arbitrationStatusFilter === 'resolved' && item.status.toLowerCase() !== 'resolved') return false;
+      const isClosed = item.status.toLowerCase() === 'resolved' || item.status.toLowerCase() === 'rejected';
+      if (arbitrationStatusFilter === 'pending' && isClosed) return false;
+      if (arbitrationStatusFilter === 'resolved' && !isClosed) return false;
       if (arbitrationSearch.trim()) {
         const q = arbitrationSearch.toLowerCase();
         return (
@@ -485,8 +486,23 @@ export function EventHeadJuryScreen({ eventId }: EventHeadJuryScreenProps) {
           : item
       )
     );
-    toast.success(`Arbitration decision saved for ${selectedArbitrationCase.code}. Action recorded in official audit log.`);
+    toast.success(
+      isVie
+        ? `Đã lưu quyết định tái thẩm định cho ${selectedArbitrationCase.code}. Đã ghi nhận vào nhật ký kiểm toán.`
+        : `Arbitration decision saved for ${selectedArbitrationCase.code}. Action recorded in official audit log.`
+    );
   };
+
+  const disputesResolved = useMemo(() => {
+    const list = arbitrationCasesState.length > 0 ? arbitrationCasesState : arbitrationCasesList;
+    if (list.length === 0) return true;
+    return list.every((c) => {
+      const s = c.status.toLowerCase();
+      return s === 'resolved' || s === 'rejected';
+    });
+  }, [arbitrationCasesState, arbitrationCasesList]);
+
+  const allJuryCompleted = headData?.allJuryCompleted ?? false;
 
   // INDEPENDENT APPROVAL BUTTON HANDLERS
   const handleApproveAwardAllocations = () => {
@@ -1019,6 +1035,8 @@ export function EventHeadJuryScreen({ eventId }: EventHeadJuryScreenProps) {
             finalWinnersList={finalWinnersList}
             isAwardAllocationsConfirmed={isAwardAllocationsConfirmed}
             isContestResultsApproved={isContestResultsApproved}
+            allJuryCompleted={allJuryCompleted}
+            disputesResolved={disputesResolved}
             handleApproveAwardAllocations={handleApproveAwardAllocations}
             handleApproveContestResults={handleApproveContestResults}
           />

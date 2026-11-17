@@ -85,7 +85,7 @@ export function HeadJuryArbitrationTab({
             {isVie ? 'Các bài dự thi cần Tái thẩm định' : 'Submissions Requiring Arbitration'}
           </h2>
           <span className="w-fit rounded-full border border-amber-400/30 bg-amber-500/15 px-3 py-1 text-xs font-bold text-amber-300">
-            {currentCases.filter((c) => c.status.toLowerCase() === 'pending').length} / {currentCases.length}{' '}
+            {currentCases.filter((c) => c.status.toLowerCase() !== 'resolved' && c.status.toLowerCase() !== 'rejected').length} / {currentCases.length}{' '}
             {isVie ? 'Tranh chấp chờ giải quyết' : 'Disputes Pending'}
           </span>
         </div>
@@ -106,14 +106,14 @@ export function HeadJuryArbitrationTab({
                 {
                   value: 'pending',
                   label: isVie
-                    ? `Chờ xử lý (${currentCases.filter((c) => c.status.toLowerCase() === 'pending').length})`
-                    : `Pending (${currentCases.filter((c) => c.status.toLowerCase() === 'pending').length})`,
+                    ? `Chờ xử lý (${currentCases.filter((c) => c.status.toLowerCase() !== 'resolved' && c.status.toLowerCase() !== 'rejected').length})`
+                    : `Pending (${currentCases.filter((c) => c.status.toLowerCase() !== 'resolved' && c.status.toLowerCase() !== 'rejected').length})`,
                 },
                 {
                   value: 'resolved',
                   label: isVie
-                    ? `Đã giải quyết (${currentCases.filter((c) => c.status.toLowerCase() === 'resolved').length})`
-                    : `Resolved (${currentCases.filter((c) => c.status.toLowerCase() === 'resolved').length})`,
+                    ? `Đã giải quyết (${currentCases.filter((c) => c.status.toLowerCase() === 'resolved' || c.status.toLowerCase() === 'rejected').length})`
+                    : `Resolved (${currentCases.filter((c) => c.status.toLowerCase() === 'resolved' || c.status.toLowerCase() === 'rejected').length})`,
                 },
               ]}
             />
@@ -136,7 +136,8 @@ export function HeadJuryArbitrationTab({
                   ) : (
                     filteredArbitrationCases.map((c) => {
                       const isActive = selectedArbitrationCase?.id === c.id;
-                      const isResolved = c.status.toLowerCase() === 'resolved';
+                      const isClosed = c.status.toLowerCase() === 'resolved' || c.status.toLowerCase() === 'rejected';
+                      const isDismissed = c.status.toLowerCase() === 'rejected';
                       return (
                         <tr
                           key={c.id}
@@ -152,12 +153,16 @@ export function HeadJuryArbitrationTab({
                           <td className="py-3 px-3 text-right">
                             <span
                               className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
-                                isResolved
-                                    ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400'
-                                    : 'bg-amber-500/15 border-amber-500/30 text-amber-300'
+                                isClosed
+                                  ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400'
+                                  : 'bg-amber-500/15 border-amber-500/30 text-amber-300'
                               }`}
                             >
-                              {isResolved ? (isVie ? 'Đã giải quyết' : 'Resolved') : (isVie ? 'Chờ xử lý' : 'Pending')}
+                              {isClosed
+                                ? (isDismissed
+                                    ? (isVie ? 'Đã bác bỏ' : 'Dismissed')
+                                    : (isVie ? 'Đã giải quyết' : 'Resolved'))
+                                : (isVie ? 'Chờ xử lý' : 'Pending')}
                             </span>
                           </td>
                         </tr>
@@ -175,11 +180,11 @@ export function HeadJuryArbitrationTab({
                   {isVie ? 'Tiến độ xử lý tranh chấp' : 'Dispute Resolution Progress'}
                 </span>
                 <span className="font-mono text-[#9695a1]">
-                  {currentCases.filter((c) => c.status.toLowerCase() === 'resolved').length} / {currentCases.length} ·{' '}
+                  {currentCases.filter((c) => c.status.toLowerCase() === 'resolved' || c.status.toLowerCase() === 'rejected').length} / {currentCases.length} ·{' '}
                   <strong className="text-[#A7ACD9]">
                     {currentCases.length > 0
                       ? Math.round(
-                          (currentCases.filter((c) => c.status.toLowerCase() === 'resolved').length /
+                          (currentCases.filter((c) => c.status.toLowerCase() === 'resolved' || c.status.toLowerCase() === 'rejected').length /
                             currentCases.length) *
                             100
                         )
@@ -195,7 +200,7 @@ export function HeadJuryArbitrationTab({
                     width: `${
                       currentCases.length > 0
                         ? Math.round(
-                            (currentCases.filter((c) => c.status.toLowerCase() === 'resolved').length /
+                            (currentCases.filter((c) => c.status.toLowerCase() === 'resolved' || c.status.toLowerCase() === 'rejected').length /
                               currentCases.length) *
                               100
                           )
@@ -226,17 +231,25 @@ export function HeadJuryArbitrationTab({
                     </div>
                     <p className="text-xs text-[#9695a1] mt-1">{selectedArbitrationCase.notes}</p>
                   </div>
-                  <span
-                    className={`w-fit shrink-0 rounded-full border px-3 py-1 text-xs font-bold ${
-                      selectedArbitrationCase.status.toLowerCase() === 'resolved'
-                        ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
-                        : 'bg-amber-500/15 text-amber-300 border-amber-500/30'
-                    }`}
-                  >
-                    {selectedArbitrationCase.status.toLowerCase() === 'resolved'
-                      ? (isVie ? 'Đã giải quyết' : 'Resolved')
-                      : (isVie ? 'Chờ xử lý' : 'Pending')}
-                  </span>
+                  {(() => {
+                    const isClosed = selectedArbitrationCase.status.toLowerCase() === 'resolved' || selectedArbitrationCase.status.toLowerCase() === 'rejected';
+                    const isDismissed = selectedArbitrationCase.status.toLowerCase() === 'rejected';
+                    return (
+                      <span
+                        className={`w-fit shrink-0 rounded-full border px-3 py-1 text-xs font-bold ${
+                          isClosed
+                            ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
+                            : 'bg-amber-500/15 text-amber-300 border-amber-500/30'
+                        }`}
+                      >
+                        {isClosed
+                          ? (isDismissed
+                              ? (isVie ? 'Đã bác bỏ' : 'Dismissed')
+                              : (isVie ? 'Đã giải quyết' : 'Resolved'))
+                          : (isVie ? 'Chờ xử lý' : 'Pending')}
+                      </span>
+                    );
+                  })()}
                 </div>
 
                 {/* Select Resolution Action Form (Separated into specialized forms) */}

@@ -9,6 +9,8 @@ interface HeadJuryApproveTabProps {
   finalWinnersList: WinnerApprovalItem[];
   isAwardAllocationsConfirmed: boolean;
   isContestResultsApproved: boolean;
+  allJuryCompleted?: boolean;
+  disputesResolved?: boolean;
   handleApproveAwardAllocations: () => void;
   handleApproveContestResults: () => void;
 }
@@ -17,6 +19,8 @@ export function HeadJuryApproveTab({
   finalWinnersList,
   isAwardAllocationsConfirmed,
   isContestResultsApproved,
+  allJuryCompleted = false,
+  disputesResolved = false,
   handleApproveAwardAllocations,
   handleApproveContestResults,
 }: HeadJuryApproveTabProps) {
@@ -144,8 +148,16 @@ export function HeadJuryApproveTab({
             <span className="text-white font-medium">
               {isVie ? 'Toàn bộ Giám khảo đã hoàn tất chấm' : 'All Jury Evaluations Completed'}
             </span>
-            <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-[10px] font-bold">
-              {isVie ? 'Hoàn thành' : 'Completed'}
+            <span
+              className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border transition-all ${
+                allJuryCompleted
+                  ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300'
+                  : 'bg-amber-500/15 border-amber-500/30 text-amber-300'
+              }`}
+            >
+              {allJuryCompleted
+                ? (isVie ? 'Hoàn thành' : 'Completed')
+                : (isVie ? 'Chờ hoàn tất' : 'In Progress')}
             </span>
           </div>
 
@@ -153,8 +165,16 @@ export function HeadJuryApproveTab({
             <span className="text-white font-medium">
               {isVie ? 'Tranh chấp & Tái thẩm định đã xử lý' : 'Disputes & Arbitrations Resolved'}
             </span>
-            <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-[10px] font-bold">
-              {isVie ? 'Hoàn thành' : 'Completed'}
+            <span
+              className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border transition-all ${
+                disputesResolved
+                  ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300'
+                  : 'bg-amber-500/15 border-amber-500/30 text-amber-300'
+              }`}
+            >
+              {disputesResolved
+                ? (isVie ? 'Hoàn thành' : 'Completed')
+                : (isVie ? 'Chờ xử lý' : 'Pending')}
             </span>
           </div>
 
@@ -177,13 +197,29 @@ export function HeadJuryApproveTab({
         <button
           type="button"
           onClick={handleApproveContestResults}
-          disabled={isContestResultsApproved}
+          disabled={isContestResultsApproved || !disputesResolved || !isAwardAllocationsConfirmed}
           className="commission-primary w-full py-2.5 rounded-xl font-sora text-xs shadow-lg transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {isContestResultsApproved
             ? (isVie ? 'Kết quả cuộc thi đã được phê duyệt' : 'Contest Results Approved')
             : (isVie ? 'Ký duyệt Kết quả Cuộc thi' : 'Approve Contest Results')}
         </button>
+
+        {!disputesResolved && !isContestResultsApproved && (
+          <p className="text-[11px] text-amber-400/90 text-center leading-normal">
+            {isVie
+              ? '⚠️ Vui lòng giải quyết toàn bộ các vụ Tái thẩm định & Tranh chấp trước khi ký duyệt.'
+              : '⚠️ Please resolve all arbitration cases and disputes before signing off.'}
+          </p>
+        )}
+
+        {!isAwardAllocationsConfirmed && disputesResolved && !isContestResultsApproved && (
+          <p className="text-[11px] text-amber-400/90 text-center leading-normal">
+            {isVie
+              ? '⚠️ Vui lòng nhấn "Phê duyệt giải thưởng" ở bảng bên trái trước khi ký duyệt chính thức.'
+              : '⚠️ Please click "Approve Results" on the left table before official sign-off.'}
+          </p>
+        )}
 
         <div className="p-3 rounded-xl border-l-4 border-[#A7ACD9] bg-[#A7ACD9]/10 text-xs text-[#c7c5cf] leading-relaxed">
           {isVie
