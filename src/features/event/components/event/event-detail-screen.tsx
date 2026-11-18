@@ -2,6 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import { FastForward } from 'lucide-react';
 import toast from 'react-hot-toast';
 import type { EventDetailDto, EventSubmissionDto, EventLeaderboardItemDto } from '../../types/event.types';
 import type { JuryMemberInfo } from '../../types/jury.types';
@@ -24,6 +25,7 @@ import { EventTabMySubmission } from './detail/event-tab-my-submission';
 import { EventTabLeaderboard } from './detail/event-tab-leaderboard';
 import { EventRulesModal } from './detail/event-rules-modal';
 import { SubmissionWithdrawModal } from './detail/submission-withdraw-modal';
+import { AdvancePeriodModal } from './advance-period-modal';
 
 interface EventDetailScreenProps {
   id: string;
@@ -65,6 +67,7 @@ export function EventDetailScreen({ id, userId, isAdmin }: EventDetailScreenProp
   const [isRulesModalOpen, setIsRulesModalOpen] = useState(false);
   const [withdrawTargetId, setWithdrawTargetId] = useState<string | null>(null);
   const [isWithdrawing, setIsWithdrawing] = useState(false);
+  const [isAdvanceModalOpen, setIsAdvanceModalOpen] = useState(false);
 
   // Jury & Creator states
   const [juries, setJuries] = useState<JuryMemberInfo[]>([]);
@@ -323,6 +326,43 @@ export function EventDetailScreen({ id, userId, isAdmin }: EventDetailScreenProp
         onCopyLink={handleCopyLink}
       />
 
+      {/* Demo Period Testing Bar for Admins */}
+      {effectiveIsAdmin && (
+        <div className="mb-6 p-4 rounded-2xl border border-purple-500/35 bg-purple-500/10 backdrop-blur-md flex flex-wrap items-center justify-between gap-3 shadow-[0_0_25px_rgba(168,85,247,0.15)]">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-xl bg-purple-500/20 text-purple-300">
+              <FastForward className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-mono uppercase font-bold tracking-wider text-purple-300 bg-purple-500/20 px-2 py-0.5 rounded-full border border-purple-500/30">
+                  DEMO CONTROLS
+                </span>
+                <span className="text-[11px] text-purple-200/80">
+                  {isVie ? 'Công cụ kiểm thử từng giai đoạn sự kiện' : 'Event Period Testing Tool'}
+                </span>
+              </div>
+              <p className="text-xs font-semibold text-white mt-0.5">
+                {isVie ? 'Giai đoạn hiện tại:' : 'Current Period:'}{' '}
+                <span className="text-purple-300 font-bold">{isVie ? countdown.phaseLabelVie : countdown.phaseLabel}</span>
+                <span className="ml-2 font-mono text-[11px] text-purple-200 bg-purple-950/60 px-2 py-0.5 rounded border border-purple-500/20">
+                  {isVie ? countdown.formattedVie : countdown.formatted}
+                </span>
+              </p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setIsAdvanceModalOpen(true)}
+            className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs shadow-md shadow-purple-950/50 transition-all flex items-center gap-2 cursor-pointer active:scale-95"
+          >
+            <FastForward className="w-3.5 h-3.5" />
+            <span>{isVie ? 'Kết thúc / Chuyển giai đoạn' : 'End / Advance Period'}</span>
+          </button>
+        </div>
+      )}
+
       {/* 3 Primary Tabs Navigation */}
       <EventDetailTabNav
         activeTab={activeTab}
@@ -421,6 +461,16 @@ export function EventDetailScreen({ id, userId, isAdmin }: EventDetailScreenProp
           mySubmission?.title
         }
       />
+
+      {/* Advance Period (Demo Testing) Modal */}
+      {isAdvanceModalOpen && (
+        <AdvancePeriodModal
+          event={event}
+          isOpen={isAdvanceModalOpen}
+          onClose={() => setIsAdvanceModalOpen(false)}
+          onSuccess={(updated) => setEvent(updated)}
+        />
+      )}
     </div>
   );
 }

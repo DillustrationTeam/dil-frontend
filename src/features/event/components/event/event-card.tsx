@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { ArrowUpRight, Clock, Trophy, Users, Sparkles, CheckCircle2, Flame, Eye, Edit3, Trash2 } from 'lucide-react';
+import { ArrowUpRight, Clock, Trophy, Users, Sparkles, CheckCircle2, Flame, Eye, Edit3, Trash2, FastForward } from 'lucide-react';
 import type { EventListItemDto } from '../../types/event.types';
 import { eventStatusBadgeStyles, getEventStatusLabel, normalizeEventStatus } from '../../types/event.types';
 import { useEventCountdown } from '../../hooks/use-event-countdown';
@@ -14,6 +14,7 @@ interface EventCardProps {
     onViewDetails?: () => void;
     onUpdate?: () => void;
     onDelete?: () => void;
+    onAdvancePeriod?: () => void;
   };
 }
 
@@ -136,6 +137,17 @@ export function EventCard({ event, adminActions }: EventCardProps) {
             >
               <Edit3 size={16} />
             </button>
+
+            {adminActions.onAdvancePeriod && (
+              <button
+                type="button"
+                title={isVie ? 'Chuyển / Kết thúc giai đoạn (Demo Test)' : 'End / Advance Period (Demo Test)'}
+                onClick={() => adminActions.onAdvancePeriod?.()}
+                className="flex items-center justify-center size-9 rounded-xl border border-purple-500/35 bg-purple-500/10 text-purple-300 hover:bg-purple-500/25 hover:border-purple-400/50 hover:text-purple-200 transition-all cursor-pointer shadow-[0_0_12px_rgba(168,85,247,0.15)]"
+              >
+                <FastForward size={16} />
+              </button>
+            )}
 
             <button
               type="button"

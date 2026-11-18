@@ -332,6 +332,26 @@ export const eventService = {
     }
   },
 
+  /**
+   * [Demo/Testing] End current period or advance to specific period for an event
+   */
+  advancePeriod: async (id: string, targetPeriod?: string): Promise<{ message: string; data: EventDetailDto }> => {
+    try {
+      const response = await apiClient.post<ApiResponse<{ message: string; data: EventDetailDto }>>(
+        `/events/${id}/advance-period`,
+        targetPeriod ? { targetPeriod } : {}
+      );
+      if (response.data.data) {
+        return response.data.data;
+      }
+      throw new EventServiceError(
+        response.data.error?.detail || response.data.error?.title || 'Không thể chuyển giai đoạn sự kiện.'
+      );
+    } catch (err: unknown) {
+      throw buildEventServiceError(err, 'Không thể chuyển giai đoạn sự kiện.');
+    }
+  },
+
   // Re-exports for backwards compatibility
   getSubmissions: eventSubmissionService.getSubmissions,
   getLeaderboard: eventSubmissionService.getLeaderboard,
