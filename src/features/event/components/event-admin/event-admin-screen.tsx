@@ -384,10 +384,14 @@ export function EventAdminScreen() {
             </span>
             <div>
               <p className="font-bold text-amber-100">
-                {openDisputesCount} pending submission dispute{openDisputesCount > 1 ? 's' : ''} require admin moderation
+                {isVie
+                  ? `Có ${openDisputesCount} khiếu nại bài dự thi đang chờ quản trị viên xử lý`
+                  : `${openDisputesCount} pending submission dispute${openDisputesCount > 1 ? 's' : ''} require admin moderation`}
               </p>
               <p className="text-[11px] text-amber-200/80">
-                New or unresolved client reports have been queued in the Dispute Resolution tab.
+                {isVie
+                  ? 'Báo cáo mới hoặc chưa giải quyết từ người dùng đã được đưa vào hàng đợi tab Xử lý khiếu nại.'
+                  : 'New or unresolved client reports have been queued in the Dispute Resolution tab.'}
               </p>
             </div>
           </div>
@@ -396,7 +400,7 @@ export function EventAdminScreen() {
             onClick={() => setActiveTab('disputes')}
             className="inline-flex items-center gap-1.5 rounded-xl bg-amber-400 px-3.5 py-2 text-xs font-bold text-slate-950 transition hover:bg-amber-300 cursor-pointer shrink-0"
           >
-            <span>Open Dispute Queue</span>
+            <span>{isVie ? 'Mở hàng đợi khiếu nại' : 'Open Dispute Queue'}</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>

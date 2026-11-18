@@ -417,15 +417,23 @@ export function EventHeadJuryScreen({ eventId }: EventHeadJuryScreenProps) {
     return cases;
   }, [headData, submissions]);
 
-  const [prevArbListLen, setPrevArbListLen] = useState(0);
-  if (
-    arbitrationCasesList.length > 0 &&
-    arbitrationCasesState.length === 0 &&
-    arbitrationCasesList.length !== prevArbListLen
-  ) {
-    setPrevArbListLen(arbitrationCasesList.length);
-    setArbitrationCasesState(arbitrationCasesList);
-  }
+  useEffect(() => {
+    if (arbitrationCasesList.length > 0) {
+      setArbitrationCasesState((prevState) => {
+        // If state is empty, initialize with new list
+        if (prevState.length === 0) {
+          return arbitrationCasesList;
+        }
+        // Merge or append any new cases from arbitrationCasesList
+        const existingIds = new Set(prevState.map((c) => c.id));
+        const newCases = arbitrationCasesList.filter((c) => !existingIds.has(c.id));
+        if (newCases.length === 0) {
+          return prevState;
+        }
+        return [...prevState, ...newCases];
+      });
+    }
+  }, [arbitrationCasesList]);
 
   const filteredArbitrationCases = useMemo(() => {
     const list = arbitrationCasesState.length > 0 ? arbitrationCasesState : arbitrationCasesList;

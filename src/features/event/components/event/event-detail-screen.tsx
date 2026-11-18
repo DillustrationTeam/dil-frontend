@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { FastForward } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -31,16 +31,6 @@ interface EventDetailScreenProps {
   id: string;
   userId?: string | null;
   isAdmin?: boolean;
-}
-
-function formatScore(val?: number | null): string | null {
-  if (val === null || val === undefined) return null;
-  const num = typeof val === 'number' ? val : parseFloat(String(val));
-  if (isNaN(num) || num <= 0) return null;
-  if (num <= 10) {
-    return `${num.toFixed(1)} / 10`;
-  }
-  return `${num.toFixed(1)} / 100`;
 }
 
 export function EventDetailScreen({ id, userId, isAdmin }: EventDetailScreenProps) {
@@ -310,6 +300,22 @@ export function EventDetailScreen({ id, userId, isAdmin }: EventDetailScreenProp
   const statusStr = normalizeEventStatus(event.status);
   const statusColor = eventStatusBadgeStyles[statusStr] || 'border-white/10 bg-white/5 text-outline';
   const statusLabel = getEventStatusLabel(statusStr, isVie);
+
+  const maxRubricScore = useMemo(() => {
+    const rawCriteria = event.criteria || event.eventCriteria || [];
+    const sum = rawCriteria.reduce((acc, c) => acc + (Number(c.maxScore) || 0), 0);
+    return sum > 0 ? sum : 100;
+  }, [event]);
+
+  const formatScore = useCallback(
+    (val?: number | null): string | null => {
+      if (val === null || val === undefined) return null;
+      const num = typeof val === 'number' ? val : parseFloat(String(val));
+      if (isNaN(num) || num <= 0) return null;
+      return `${num.toFixed(1)} / ${maxRubricScore}`;
+    },
+    [maxRubricScore]
+  );
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 pb-28 pt-6 sm:px-6 lg:pt-8 text-[#e4e1e5]">

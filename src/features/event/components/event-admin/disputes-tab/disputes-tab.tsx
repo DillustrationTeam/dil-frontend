@@ -242,11 +242,13 @@ export function DisputesTab() {
               <Scale className="w-4 h-4" />
             </div>
             <h1 className="font-h1 text-2xl font-extrabold text-white">
-              Contest Dispute Resolution Queue
+              {isVie ? 'Hàng đợi Giải quyết Tranh chấp Sự kiện' : 'Contest Dispute Resolution Queue'}
             </h1>
           </div>
           <p className="text-xs text-[#8A8FA9] mt-1 font-body">
-            Investigate reported contest submissions, score variance appeals, AI artwork flags, and execute arbitrator rulings.
+            {isVie
+              ? 'Kiểm tra các bài dự thi bị báo cáo, khiếu nại chênh lệch điểm, cảnh báo tranh chấp AI và thực thi phán quyết trọng tài.'
+              : 'Investigate reported contest submissions, score variance appeals, AI artwork flags, and execute arbitrator rulings.'}
           </p>
         </div>
 
@@ -254,7 +256,7 @@ export function DisputesTab() {
           {/* Pending Count Pill */}
           <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-amber-500/20 text-amber-300 text-xs font-bold rounded-full border border-amber-500/30 shadow-[0_0_12px_rgba(245,158,11,0.2)]">
             <AlertTriangle className="w-3.5 h-3.5" />
-            <span>{openCount} Cases Under Review</span>
+            <span>{isVie ? `${openCount} Khiếu nại đang chờ xử lý` : `${openCount} Cases Under Review`}</span>
           </span>
 
           {/* Sync Live Queue Button */}
@@ -263,10 +265,10 @@ export function DisputesTab() {
             onClick={() => void loadDisputes(selectedEventId)}
             disabled={isLoading}
             className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/10 hover:bg-white/15 text-white text-xs font-bold transition-all border border-white/10 disabled:opacity-50 cursor-pointer"
-            title="Refresh queue"
+            title={isVie ? 'Làm mới hàng đợi' : 'Refresh queue'}
           >
             <RotateCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin text-brand-periwinkle' : ''}`} />
-            <span className="hidden sm:inline">Sync Live Queue</span>
+            <span className="hidden sm:inline">{isVie ? 'Đồng bộ hàng đợi' : 'Sync Live Queue'}</span>
           </button>
         </div>
       </div>
