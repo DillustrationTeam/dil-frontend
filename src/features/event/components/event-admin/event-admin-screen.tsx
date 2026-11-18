@@ -18,6 +18,7 @@ import type { EventListItemDto, EventFilters, EventSortOption, EventStatsDto } f
 import { eventService } from '../../services/event.service';
 import { adminDisputeService } from '@/features/admin/services/dispute.service';
 import { EventCard } from '../event/event-card';
+import { AdvancePeriodModal } from '../event/advance-period-modal';
 
 import { PermissionsTab } from './permissions-tab/permissions-tab';
 import { DisputesTab } from './disputes-tab/disputes-tab';
@@ -83,6 +84,9 @@ export function EventAdminScreen() {
   // Delete Event Modal state
   const [eventToDelete, setEventToDelete] = useState<EventListItemDto | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  // Advance Period (Demo Testing) Modal state
+  const [eventToAdvance, setEventToAdvance] = useState<EventListItemDto | null>(null);
 
   // Filters & Pagination
   const [status, setStatus] = useState<string>('');
@@ -494,6 +498,7 @@ export function EventAdminScreen() {
                       onViewDetails: () => router.push(`/events/${evt.id}`),
                       onUpdate: () => router.push(`/admin/events/edit/${evt.id}`),
                       onDelete: () => handleDeleteEventClick(evt),
+                      onAdvancePeriod: () => setEventToAdvance(evt),
                     }}
                   />
                 ))}
@@ -545,6 +550,16 @@ export function EventAdminScreen() {
           </div>
         </div>,
         document.body
+      )}
+
+      {/* Advance Period (Demo Testing) Modal */}
+      {mounted && eventToAdvance && (
+        <AdvancePeriodModal
+          event={eventToAdvance}
+          isOpen={Boolean(eventToAdvance)}
+          onClose={() => setEventToAdvance(null)}
+          onSuccess={() => void refreshEvents()}
+        />
       )}
     </div>
   );
