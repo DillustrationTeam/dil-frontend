@@ -14,13 +14,16 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 
+import { chatService } from '../services/chat.service';
+import type { WorkroomUnreadCountDto } from '../types/chat.types';
+import { useNotificationHub } from '@/features/notification/hooks/use-notification-hub';
 import { commissionService } from '@/services/commission.service';
 import type { Commission, CommissionStatus } from '@/types/commission.types';
 
 import { extractErrorMessage } from '@/lib/api-client';
 
 /** Trạng thái KHÔNG còn phòng làm việc hoạt động (chưa nhận đơn / đã huỷ). */
-const NO_WORKROOM_STATUSES: CommissionStatus[] = ['PendingAcceptance', 'Negotiating', 'Cancelled'];
+const NO_WORKROOM_STATUSES: CommissionStatus[] = ['PendingAcceptance', 'Negotiating'];
 
 const STATUS_LABEL: Record<CommissionStatus, string> = {
   PendingAcceptance: 'Chờ họa sĩ nhận đơn',
@@ -73,15 +76,25 @@ interface WorkroomRow {
   viewerRole: 'Client' | 'Creator';
   /** Tên đối tác còn lại trong phòng. */
   partnerName: string;
+  /** Số tin nhắn chưa đọc trong phòng. */
+  unreadCount: number;
+  /** Thời điểm có tin nhắn gần nhất. */
+  lastMessageAt?: string | null;
 }
 
-type FilterKey = 'all' | 'active' | 'done';
+type FilterKey = 'all' | 'active' | 'disputed' | 'done' | 'cancelled';
+type RoleFilterKey = 'all' | 'Client' | 'Creator';
+type DeadlineFilterKey = 'all' | 'overdue' | 'due_soon' | 'escrow';
+type SortKey = 'newest' | 'deadline' | 'escrow';
 
 export function WorkroomListScreen({ userId }: { userId: string | null }) {
   const [rows, setRows] = useState<WorkroomRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<FilterKey>('all');
+  const [roleFilter, setRoleFilter] = useState<RoleFilterKey>('all');
+  const [deadlineFilter, setDeadlineFilter] = useState<DeadlineFilterKey>('all');
+  const [sortBy, setSortBy] = useState<SortKey>('newest');
   const [keyword, setKeyword] = useState('');
 
   const load = useCallback(async () => {
@@ -91,19 +104,30 @@ export function WorkroomListScreen({ userId }: { userId: string | null }) {
     try {
       // Người dùng đa vai trò (Client + Creator) có thể có phòng ở CẢ HAI phía.
       // Một phía lỗi (ví dụ chưa có CreatorProfile) không được làm hỏng cả trang.
-      const [asClient, asCreator] = await Promise.allSettled([
+      const [asClient, asCreator, unreadRes] = await Promise.allSettled([
         commissionService.getByClient(),
         commissionService.getByCreator(),
+        chatService.getUnreadCounts(),
       ]);
+
+      const unreadMap = new Map<string, WorkroomUnreadCountDto>();
+      if (unreadRes.status === 'fulfilled' && Array.isArray(unreadRes.value)) {
+        for (const item of unreadRes.value) {
+          unreadMap.set(String(item.commissionId).toLowerCase(), item);
+        }
+      }
 
       const collected = new Map<string, WorkroomRow>();
 
       if (asClient.status === 'fulfilled') {
         for (const commission of asClient.value) {
+          const unread = unreadMap.get(String(commission.id).toLowerCase());
           collected.set(commission.id, {
             commission,
             viewerRole: 'Client',
             partnerName: commission.creatorName || 'Họa sĩ',
+            unreadCount: unread?.unreadCount ?? 0,
+            lastMessageAt: unread?.lastMessageAt ?? null,
           });
         }
       }
@@ -112,10 +136,13 @@ export function WorkroomListScreen({ userId }: { userId: string | null }) {
         for (const commission of asCreator.value) {
           // Phòng của chính mình ở vai Creator thắng nếu trùng id.
           if (collected.has(commission.id)) continue;
+          const unread = unreadMap.get(String(commission.id).toLowerCase());
           collected.set(commission.id, {
             commission,
             viewerRole: 'Creator',
             partnerName: commission.clientName || 'Khách hàng',
+            unreadCount: unread?.unreadCount ?? 0,
+            lastMessageAt: unread?.lastMessageAt ?? null,
           });
         }
       }
@@ -125,10 +152,17 @@ export function WorkroomListScreen({ userId }: { userId: string | null }) {
       }
 
       const list = Array.from(collected.values())
-        .filter((row) => !NO_WORKROOM_STATUSES.includes(row.commission.status))
+        .filter(
+          (row) =>
+            !NO_WORKROOM_STATUSES.includes(row.commission.status) &&
+            row.commission.escrowStatus !== 'Pending',
+        )
         .sort((a, b) => {
-          const left = new Date(a.commission.createdAt).getTime();
-          const right = new Date(b.commission.createdAt).getTime();
+          if ((a.unreadCount > 0) !== (b.unreadCount > 0)) {
+            return a.unreadCount > 0 ? -1 : 1;
+          }
+          const left = new Date(a.lastMessageAt || a.commission.createdAt).getTime();
+          const right = new Date(b.lastMessageAt || b.commission.createdAt).getTime();
           return right - left;
         });
 
@@ -147,26 +181,108 @@ export function WorkroomListScreen({ userId }: { userId: string | null }) {
     });
   }, [load]);
 
+  const refreshUnread = useCallback(async () => {
+    if (!userId) return;
+    try {
+      const unreadList = await chatService.getUnreadCounts();
+      const unreadMap = new Map(unreadList.map((item) => [String(item.commissionId).toLowerCase(), item]));
+      setRows((current) =>
+        current
+          .map((row) => {
+            const match = unreadMap.get(String(row.commission.id).toLowerCase());
+            if (!match) return row;
+            return {
+              ...row,
+              unreadCount: match.unreadCount,
+              lastMessageAt: match.lastMessageAt ?? row.lastMessageAt,
+            };
+          })
+          .sort((a, b) => {
+            if ((a.unreadCount > 0) !== (b.unreadCount > 0)) {
+              return a.unreadCount > 0 ? -1 : 1;
+            }
+            const left = new Date(a.lastMessageAt || a.commission.createdAt).getTime();
+            const right = new Date(b.lastMessageAt || b.commission.createdAt).getTime();
+            return right - left;
+          }),
+      );
+    } catch {
+      // ignore background refresh errors
+    }
+  }, [userId]);
+
+  const handleNotificationNoop = useCallback(() => {}, []);
+  const handleWorkroomMessage = useCallback(() => {
+    void refreshUnread();
+  }, [refreshUnread]);
+
+  useNotificationHub(handleNotificationNoop, handleWorkroomMessage);
+
+  useEffect(() => {
+    if (!userId) return;
+
+    const onFocus = () => {
+      void refreshUnread();
+    };
+    window.addEventListener('focus', onFocus);
+    const timer = window.setInterval(() => {
+      void refreshUnread();
+    }, 8000);
+
+    return () => {
+      window.removeEventListener('focus', onFocus);
+      window.clearInterval(timer);
+    };
+  }, [userId, refreshUnread]);
+
   const visibleRows = useMemo(() => {
     const needle = keyword.trim().toLowerCase();
-    return rows.filter((row) => {
-      const isDone = row.commission.status === 'Completed';
-      if (filter === 'active' && isDone) return false;
-      if (filter === 'done' && !isDone) return false;
+    const filtered = rows.filter((row) => {
+      const status = row.commission.status;
+      if (filter === 'active' && (status === 'Completed' || status === 'Disputed' || status === 'Cancelled')) return false;
+      if (filter === 'disputed' && status !== 'Disputed') return false;
+      if (filter === 'done' && status !== 'Completed') return false;
+      if (filter === 'cancelled' && status !== 'Cancelled') return false;
+      if (filter === 'disputed' && status !== 'Disputed') return false;
+      if (filter === 'done' && status !== 'Completed') return false;
+
+      if (roleFilter !== 'all' && row.viewerRole !== roleFilter) return false;
+
+      const remainingDays = daysUntil(row.commission.deadlineAt);
+      if (deadlineFilter === 'overdue') {
+        if (remainingDays === null || remainingDays >= 0 || status === 'Completed' || status === 'Cancelled') return false;
+      } else if (deadlineFilter === 'due_soon') {
+        if (remainingDays === null || remainingDays < 0 || remainingDays > 3 || status === 'Completed' || status === 'Cancelled') return false;
+      } else if (deadlineFilter === 'escrow') {
+        if ((row.commission.escrowHeldAmount ?? 0) <= 0) return false;
+      }
+
       if (!needle) return true;
+      const shortCode = `#cmd-${row.commission.id.slice(0, 8)}`.toLowerCase();
       return (
         row.commission.title.toLowerCase().includes(needle) ||
-        row.partnerName.toLowerCase().includes(needle)
+        row.partnerName.toLowerCase().includes(needle) ||
+        shortCode.includes(needle)
       );
     });
-  }, [rows, filter, keyword]);
+
+    if (sortBy === 'newest') return filtered;
+    return [...filtered].sort((a, b) => {
+      if (sortBy === 'escrow') {
+        return (b.commission.escrowHeldAmount ?? 0) - (a.commission.escrowHeldAmount ?? 0);
+      }
+      const aTime = a.commission.deadlineAt ? new Date(a.commission.deadlineAt).getTime() : Number.MAX_SAFE_INTEGER;
+      const bTime = b.commission.deadlineAt ? new Date(b.commission.deadlineAt).getTime() : Number.MAX_SAFE_INTEGER;
+      return aTime - bTime;
+    });
+  }, [rows, filter, roleFilter, deadlineFilter, sortBy, keyword]);
 
   const metrics = useMemo(() => {
-    const active = rows.filter((row) => row.commission.status !== 'Completed');
+    const active = rows.filter((row) => row.commission.status !== 'Completed' && row.commission.status !== 'Cancelled');
     return {
       active: active.length,
       escrow: rows.reduce((total, row) => total + (row.commission.escrowHeldAmount ?? 0), 0),
-      completed: rows.length - active.length,
+      completed: rows.filter((row) => row.commission.status === 'Completed').length,
     };
   }, [rows]);
 
@@ -194,7 +310,15 @@ export function WorkroomListScreen({ userId }: { userId: string | null }) {
     <div className="mx-auto w-full max-w-6xl space-y-6 text-on-surface">
       <header className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
-          <h1 className="font-h1 text-2xl font-bold">Phòng làm việc</h1>
+          <div className="flex flex-wrap items-center gap-3">
+            <h1 className="font-h1 text-2xl font-bold">Phòng làm việc</h1>
+            {rows.some((r) => r.unreadCount > 0 && r.commission.status !== 'Completed' && r.commission.status !== 'Cancelled') && (
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-[#A7ACD9] bg-[#A7ACD9] px-3 py-1 text-xs font-extrabold text-[#1F2335] shadow-md shadow-[#A7ACD9]/25">
+                <span className="h-2 w-2 animate-ping rounded-full bg-[#1F2335]" />
+                {rows.filter((r) => r.unreadCount > 0 && r.commission.status !== 'Completed' && r.commission.status !== 'Cancelled').length} phòng có tin mới
+              </span>
+            )}
+          </div>
           <p className="mt-1 text-sm text-on-surface-variant">
             Trao đổi phác thảo, duyệt tiến độ và nhận tệp hoàn thiện cho từng đơn.
           </p>
@@ -216,37 +340,90 @@ export function WorkroomListScreen({ userId }: { userId: string | null }) {
       </div>
 
       <section className="rounded-2xl border border-white/10 bg-white/[0.035] p-5 sm:p-6">
-        <div className="flex flex-col gap-4 border-b border-white/10 pb-4 lg:flex-row lg:items-center lg:justify-between">
-          <div className="inline-flex rounded-xl border border-white/10 bg-black/20 p-1">
-            {([
-              ['all', 'Tất cả'],
-              ['active', 'Đang làm'],
-              ['done', 'Hoàn tất'],
-            ] as const).map(([key, label]) => (
-              <button
-                key={key}
-                type="button"
-                onClick={() => setFilter(key)}
-                className={`rounded-lg px-3.5 py-1.5 text-[11px] font-bold transition ${
-                  filter === key ? 'bg-brand-periwinkle text-brand-navy' : 'text-on-surface-variant hover:text-on-surface'
-                }`}
-              >
-                {label}
-              </button>
-            ))}
+        <div className="flex flex-col gap-3 border-b border-white/10 pb-4">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <div className="inline-flex flex-wrap rounded-xl border border-white/10 bg-black/20 p-1">
+              {([
+                ['all', 'Tất cả'],
+                ['active', 'Đang làm'],
+                ['disputed', 'Đang khiếu nại'],
+                ['done', 'Hoàn tất'],
+                ['cancelled', 'Đã hủy'],
+              ] as const).map(([key, label]) => (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => setFilter(key)}
+                  className={`rounded-lg px-3.5 py-1.5 text-[11px] font-bold transition ${filter === key ? 'bg-brand-periwinkle text-brand-navy' : 'text-on-surface-variant hover:text-on-surface'}`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+
+            <div className="relative w-full lg:w-72">
+              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-outline" aria-hidden />
+              <input
+                value={keyword}
+                onChange={(event) => setKeyword(event.target.value)}
+                placeholder="Tìm theo tên đơn, mã hoặc đối tác…"
+                className="w-full rounded-xl border border-white/10 bg-black/20 py-2.5 pl-9 pr-3 text-xs text-on-surface outline-none transition placeholder:text-outline focus:border-brand-periwinkle"
+              />
+            </div>
           </div>
 
-          <div className="relative w-full lg:w-72">
-            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-outline" aria-hidden />
-            <input
-              value={keyword}
-              onChange={(event) => setKeyword(event.target.value)}
-              placeholder="Tìm theo tên đơn hoặc đối tác…"
-              className="w-full rounded-xl border border-white/10 bg-black/20 py-2.5 pl-9 pr-3 text-xs text-on-surface outline-none transition placeholder:text-outline focus:border-brand-periwinkle"
-            />
+          <div className="flex flex-wrap items-center gap-2.5">
+            <select
+              aria-label="Lọc theo vai trò"
+              value={roleFilter}
+              onChange={(event) => setRoleFilter(event.target.value as RoleFilterKey)}
+              className="rounded-xl border border-white/10 bg-[#161926] px-3 py-2 text-xs text-on-surface outline-none transition focus:border-brand-periwinkle"
+            >
+              <option value="all">Tất cả vai trò</option>
+              <option value="Client">Bạn là Khách hàng</option>
+              <option value="Creator">Bạn là Họa sĩ</option>
+            </select>
+
+            <select
+              aria-label="Lọc theo hạn chót và ký quỹ"
+              value={deadlineFilter}
+              onChange={(event) => setDeadlineFilter(event.target.value as DeadlineFilterKey)}
+              className="rounded-xl border border-white/10 bg-[#161926] px-3 py-2 text-xs text-on-surface outline-none transition focus:border-brand-periwinkle"
+            >
+              <option value="all">Mọi hạn chót</option>
+              <option value="overdue">Quá hạn</option>
+              <option value="due_soon">Sắp đến hạn (≤ 3 ngày)</option>
+              <option value="escrow">Đang có ký quỹ</option>
+            </select>
+
+            <select
+              aria-label="Sắp xếp phòng làm việc"
+              value={sortBy}
+              onChange={(event) => setSortBy(event.target.value as SortKey)}
+              className="rounded-xl border border-white/10 bg-[#161926] px-3 py-2 text-xs text-on-surface outline-none transition focus:border-brand-periwinkle"
+            >
+              <option value="newest">Mới nhất</option>
+              <option value="deadline">Hạn chót gần nhất</option>
+              <option value="escrow">Ký quỹ cao nhất</option>
+            </select>
+
+            {(filter !== 'all' || roleFilter !== 'all' || deadlineFilter !== 'all' || sortBy !== 'newest' || keyword.trim() !== '') && (
+              <button
+                type="button"
+                onClick={() => {
+                  setFilter('all');
+                  setRoleFilter('all');
+                  setDeadlineFilter('all');
+                  setSortBy('newest');
+                  setKeyword('');
+                }}
+                className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-[11px] font-semibold text-on-surface-variant transition hover:bg-white/10 hover:text-on-surface"
+              >
+                Xóa bộ lọc
+              </button>
+            )}
           </div>
         </div>
-
         {loading ? (
           <div className="flex min-h-48 items-center justify-center text-sm text-on-surface-variant">
             <LoaderCircle className="mr-2 h-4 w-4 animate-spin" aria-hidden /> Đang tải phòng làm việc…
@@ -286,14 +463,22 @@ function MetricCard({ label, value }: { label: string; value: string }) {
 }
 
 function WorkroomCard({ row }: { row: WorkroomRow }) {
-  const { commission, viewerRole, partnerName } = row;
+  const { commission, viewerRole, partnerName, unreadCount, lastMessageAt } = row;
   const approved = (commission.milestones ?? []).filter((milestone) => milestone.status === 'Approved').length;
   const totalMilestones = (commission.milestones ?? []).length;
-  const remainingDays = daysUntil(commission.deadlineAt);
+  const isEnded = commission.status === 'Completed' || commission.status === 'Cancelled';
+  const remainingDays = isEnded ? null : daysUntil(commission.deadlineAt);
   const escrowHeld = commission.escrowHeldAmount ?? 0;
+  const hasUnread = unreadCount > 0 && !isEnded;
 
   return (
-    <article className="rounded-2xl border border-white/10 bg-black/20 p-4 transition hover:border-brand-periwinkle/40 sm:p-5">
+    <article
+      className={`rounded-2xl border p-4 transition sm:p-5 ${
+        hasUnread
+          ? 'border-[#A7ACD9]/70 bg-[#A7ACD9]/[0.08] ring-1 ring-[#A7ACD9]/25 hover:border-[#A7ACD9]'
+          : 'border-white/10 bg-black/20 hover:border-brand-periwinkle/40'
+      }`}
+    >
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
@@ -308,6 +493,15 @@ function WorkroomCard({ row }: { row: WorkroomRow }) {
             <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] font-semibold text-on-surface-variant">
               Bạn là {viewerRole === 'Client' ? 'Khách hàng' : 'Họa sĩ'}
             </span>
+            {hasUnread && (
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-[#A7ACD9] bg-[#A7ACD9] px-3 py-0.5 text-[11px] font-extrabold text-[#1F2335] shadow-md shadow-[#A7ACD9]/25">
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#1F2335] opacity-75" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-[#1F2335]" />
+                </span>
+                {unreadCount} tin nhắn mới
+              </span>
+            )}
           </div>
 
           <h2 className="mt-2 truncate text-sm font-bold text-on-surface">{commission.title}</h2>
@@ -338,15 +532,21 @@ function WorkroomCard({ row }: { row: WorkroomRow }) {
                     : `Còn ${remainingDays} ngày`}
               </span>
             )}
-            <span>Cập nhật {lastActivity(commission.createdAt)}</span>
+            <span>Cập nhật {lastActivity(lastMessageAt || commission.createdAt)}</span>
           </div>
         </div>
 
         <Link
           href={`/workroom/${commission.id}`}
-          className="commission-primary inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl px-5 py-2.5 text-xs font-bold"
+          className="commission-primary relative inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl px-5 py-2.5 text-xs font-bold"
         >
-          Mở phòng làm việc <ArrowRight size={15} aria-hidden />
+          Mở phòng làm việc
+          {hasUnread && (
+            <span className="ml-0.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-[#1F2335] px-1.5 text-[11px] font-extrabold text-[#A7ACD9]">
+              {unreadCount}
+            </span>
+          )}
+          <ArrowRight size={15} aria-hidden />
         </Link>
       </div>
     </article>

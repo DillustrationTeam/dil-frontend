@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef, useState, useSyncExternalStore } from 'react';
+import React, { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
@@ -11,14 +11,19 @@ import {
   Search,
   Layers,
   AlertTriangle,
+  BellRing,
+  ArrowRight,
 } from 'lucide-react';
 import type { EventListItemDto, EventFilters, EventSortOption, EventStatsDto } from '../../types/event.types';
 import { eventService } from '../../services/event.service';
+import { adminDisputeService } from '@/features/admin/services/dispute.service';
 import { EventCard } from '../event/event-card';
+import { AdvancePeriodModal } from '../event/advance-period-modal';
 
 import { PermissionsTab } from './permissions-tab/permissions-tab';
 import { DisputesTab } from './disputes-tab/disputes-tab';
 import { PublishTab } from './publish-tab/publish-tab';
+import { useLanguage } from '@/context/language-context';
 
 export type AdminEventsTab = 'create' | 'permissions' | 'disputes' | 'publish';
 
@@ -27,15 +32,61 @@ export type AdminEventsTab = 'create' | 'permissions' | 'disputes' | 'publish';
 const emptySubscribe = () => () => {};
 
 export function EventAdminScreen() {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
   const router = useRouter();
   const mounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
   const [activeTab, setActiveTab] = useState<AdminEventsTab>('create');
   const [events, setEvents] = useState<EventListItemDto[]>([]);
   const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [openDisputesCount, setOpenDisputesCount] = useState(0);
+
+  useEffect(() => {
+    const tabParam = new URLSearchParams(window.location.search).get('tab');
+    if (tabParam === 'create' || tabParam === 'permissions' || tabParam === 'disputes' || tabParam === 'publish') {
+      setActiveTab(tabParam);
+    }
+  }, []);
+
+  const refreshOpenDisputesCount = useCallback(async () => {
+    try {
+      const res = await adminDisputeService.getSubmissionDisputeQueue({ page: 1, pageSize: 100 });
+      const count = (res.items || []).filter(
+        (d) => d.status === 'Pending' || d.status === 'UnderReview'
+      ).length;
+      setOpenDisputesCount(count);
+    } catch {
+      // Ignore if endpoint is temporarily unavailable
+    }
+  }, []);
+
+  useEffect(() => {
+    void refreshOpenDisputesCount();
+    const handleRefresh = () => {
+      if (document.visibilityState === 'visible') {
+        void refreshOpenDisputesCount();
+      }
+    };
+    const handleDisputesUpdated = () => {
+      void refreshOpenDisputesCount();
+    };
+    window.addEventListener('focus', handleRefresh);
+    document.addEventListener('visibilitychange', handleRefresh);
+    window.addEventListener('dil:disputes-updated', handleDisputesUpdated);
+    return () => {
+      window.removeEventListener('focus', handleRefresh);
+      document.removeEventListener('visibilitychange', handleRefresh);
+      window.removeEventListener('dil:disputes-updated', handleDisputesUpdated);
+    };
+  }, [refreshOpenDisputesCount]);
 
   // Delete Event Modal state
   const [eventToDelete, setEventToDelete] = useState<EventListItemDto | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  // Advance Period (Demo Testing) Modal state
+  const [eventToAdvance, setEventToAdvance] = useState<EventListItemDto | null>(null);
 
   // Filters & Pagination
   const [status, setStatus] = useState<string>('');
@@ -46,7 +97,7 @@ export function EventAdminScreen() {
 
   const contestGridRef = useRef<HTMLDivElement>(null);
 
-  const [, setStats] = useState<EventStatsDto>({
+  const [stats, setStats] = useState<EventStatsDto>({
     totalPrizePool: 0,
     formattedTotalPrizePool: '0 đ',
     openEventsCount: 0,
@@ -56,9 +107,11 @@ export function EventAdminScreen() {
 
   const refreshEvents = async () => {
     setLoading(true);
+    setLoadError(null);
     try {
       const filters: EventFilters = {
         status: status || undefined,
+        includeDrafts: true,
         sortBy,
         search: keyword.trim() || undefined,
         page,
@@ -74,8 +127,11 @@ export function EventAdminScreen() {
       if (statsData) {
         setStats(statsData);
       }
-    } catch {
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Không thể tải danh sách sự kiện.';
+      setLoadError(msg);
       setEvents([]);
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
@@ -85,9 +141,12 @@ export function EventAdminScreen() {
     let ignore = false;
 
     async function loadData() {
+      setLoading(true);
+      setLoadError(null);
       try {
         const filters: EventFilters = {
           status: status || undefined,
+          includeDrafts: true,
           sortBy,
           search: keyword.trim() || undefined,
           page,
@@ -105,9 +164,16 @@ export function EventAdminScreen() {
             setStats(statsData);
           }
         }
-      } catch {
+      } catch (err: unknown) {
         if (!ignore) {
+          const msg = err instanceof Error ? err.message : 'Không thể tải danh sách sự kiện.';
+          setLoadError(msg);
           setEvents([]);
+          toast.error(msg);
+        }
+      } finally {
+        if (!ignore) {
+          setLoading(false);
         }
       }
     }
@@ -174,7 +240,86 @@ export function EventAdminScreen() {
         </div>
       </div>
 
-      {/* 2. Navigation Tabs Bar (Directly under Illustration Contests & Events title) */}
+      {/* 2. Executive Overview KPI Cards (Consistent with System Overview) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-5 mb-8">
+        {/* Card 1: Total Events */}
+        <div className="glass-container rounded-[24px] p-5 space-y-2 shadow-lg border border-white/10">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] text-[#8A8FA9] font-bold uppercase tracking-wider font-h1">
+              TOTAL CONTESTS & EVENTS
+            </span>
+            <div className="p-1.5 rounded-lg bg-[#C5C9F8]/10 text-[#C5C9F8]">
+              <Trophy className="w-4 h-4" />
+            </div>
+          </div>
+          <h3 className="font-h1 text-2xl font-extrabold text-[#C5C9F8] tracking-tight">
+            {stats.totalEventsCount || events.length}
+          </h3>
+          <p className="text-[11px] text-[#8A8FA9]">
+            <span className="font-h1 font-bold text-white/90">{stats.openEventsCount}</span> Đang mở nhận bài thi
+          </p>
+        </div>
+
+        {/* Card 2: Open Submissions */}
+        <div className="glass-container rounded-[24px] p-5 space-y-2 shadow-lg border border-white/10">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] text-[#8A8FA9] font-bold uppercase tracking-wider font-h1">
+              TOTAL SUBMISSIONS
+            </span>
+            <div className="p-1.5 rounded-lg bg-emerald-400/10 text-emerald-400">
+              <Layers className="w-4 h-4" />
+            </div>
+          </div>
+          <h3 className="font-h1 text-2xl font-extrabold text-emerald-400 tracking-tight">
+            {stats.totalSubmissionsCount}
+          </h3>
+          <p className="text-[11px] text-[#8A8FA9]">
+            Bài dự thi đã nộp trên toàn sàn
+          </p>
+        </div>
+
+        {/* Card 3: Prize Pool */}
+        <div className="glass-container rounded-[24px] p-5 space-y-2 shadow-lg border border-white/10">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] text-[#8A8FA9] font-bold uppercase tracking-wider font-h1">
+              TOTAL PRIZE POOL
+            </span>
+            <div className="p-1.5 rounded-lg bg-amber-400/10 text-amber-400">
+              <Trophy className="w-4 h-4 text-amber-400" />
+            </div>
+          </div>
+          <h3 className="font-h1 text-2xl font-extrabold text-amber-300 tracking-tight">
+            {stats.formattedTotalPrizePool || '0 ₫'}
+          </h3>
+          <p className="text-[11px] text-amber-400/80 font-medium">
+            Quỹ giải thưởng cam kết bảo chứng
+          </p>
+        </div>
+
+        {/* Card 4: Open Disputes / Jury Pending */}
+        <div className="glass-container rounded-[24px] p-5 space-y-2 shadow-lg border border-white/10">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] text-[#8A8FA9] font-bold uppercase tracking-wider font-h1">
+              DISPUTES & FLAGS
+            </span>
+            <div className="p-1.5 rounded-lg bg-rose-500/10 text-rose-400">
+              <AlertTriangle className="w-4 h-4" />
+            </div>
+          </div>
+          <h3 className="font-h1 text-2xl font-extrabold text-rose-400 tracking-tight">
+            {openDisputesCount}
+          </h3>
+          <p className="text-[11px] text-[#8A8FA9]">
+            {openDisputesCount > 0 ? (
+              <span className="text-rose-400 font-medium">Khiếu nại bài thi cần phân xử</span>
+            ) : (
+              <span className="text-emerald-400 font-medium">Không có tranh chấp tồn đọng</span>
+            )}
+          </p>
+        </div>
+      </div>
+
+      {/* 3. Navigation Tabs Bar (Directly under Illustration Contests & Events title) */}
       <nav className="glass-container rounded-2xl p-1.5 backdrop-blur-xl bg-[#121620]/90 flex gap-1.5 overflow-x-auto mb-6">
         <button
           onClick={() => setActiveTab('create')}
@@ -198,13 +343,25 @@ export function EventAdminScreen() {
         </button>
         <button
           onClick={() => setActiveTab('disputes')}
-          className={`px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
+          className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
             activeTab === 'disputes'
               ? 'bg-brand-periwinkle text-brand-navy shadow-[inset_0_1px_0_rgba(255,255,255,0.5),0_0_20px_rgba(167,172,217,0.25)]'
               : 'text-[#aaa8b3] hover:text-white hover:bg-white/5'
           }`}
         >
-          Dispute Resolution
+          <span>Dispute Resolution</span>
+          {openDisputesCount > 0 && (
+            <span
+              className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-extrabold leading-none ${
+                activeTab === 'disputes'
+                  ? 'bg-brand-navy/20 text-brand-navy border border-brand-navy/30'
+                  : 'bg-amber-500/20 text-amber-300 border border-amber-400/40 animate-pulse'
+              }`}
+              title={`${openDisputesCount} open submission dispute(s) awaiting review`}
+            >
+              {openDisputesCount}
+            </span>
+          )}
         </button>
         <button
           onClick={() => setActiveTab('publish')}
@@ -217,6 +374,37 @@ export function EventAdminScreen() {
           Publish Results
         </button>
       </nav>
+
+      {/* Pending Disputes Signal Banner (visible on other tabs so admins never miss new disputes) */}
+      {openDisputesCount > 0 && activeTab !== 'disputes' && (
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-amber-400/30 bg-amber-500/10 px-4 py-3 text-xs text-amber-200">
+          <div className="flex items-center gap-2.5">
+            <span className="flex h-7 w-7 items-center justify-center rounded-xl bg-amber-500/20 text-amber-300 shrink-0">
+              <BellRing className="w-4 h-4" />
+            </span>
+            <div>
+              <p className="font-bold text-amber-100">
+                {isVie
+                  ? `Có ${openDisputesCount} khiếu nại bài dự thi đang chờ quản trị viên xử lý`
+                  : `${openDisputesCount} pending submission dispute${openDisputesCount > 1 ? 's' : ''} require admin moderation`}
+              </p>
+              <p className="text-[11px] text-amber-200/80">
+                {isVie
+                  ? 'Báo cáo mới hoặc chưa giải quyết từ người dùng đã được đưa vào hàng đợi tab Xử lý khiếu nại.'
+                  : 'New or unresolved client reports have been queued in the Dispute Resolution tab.'}
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setActiveTab('disputes')}
+            className="inline-flex items-center gap-1.5 rounded-xl bg-amber-400 px-3.5 py-2 text-xs font-bold text-slate-950 transition hover:bg-amber-300 cursor-pointer shrink-0"
+          >
+            <span>{isVie ? 'Mở hàng đợi khiếu nại' : 'Open Dispute Queue'}</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
 
       {/* 3. Active Tab Content */}
       <div ref={contestGridRef}>
@@ -246,6 +434,7 @@ export function EventAdminScreen() {
                   className="h-10 px-3.5 bg-[#090b12]/70 border border-white/10 rounded-xl text-xs text-white focus:outline-none focus:border-brand-periwinkle cursor-pointer"
                 >
                   <option value="" className="bg-[#1f2335]">All Statuses</option>
+                  <option value="Upcoming" className="bg-[#1f2335]">Waiting to Open</option>
                   <option value="Open" className="bg-[#1f2335]">Open</option>
                   <option value="Judging" className="bg-[#1f2335]">Judging</option>
                   <option value="Ended" className="bg-[#1f2335]">Ended</option>
@@ -274,13 +463,30 @@ export function EventAdminScreen() {
                   className="h-10 px-4 rounded-xl bg-gradient-to-r from-[#a7acd9] to-[#7fd5e8] text-brand-navy font-bold text-xs hover:brightness-110 transition-all shadow-[0_0_20px_rgba(167,172,217,0.3)] flex items-center gap-1.5 shrink-0 cursor-pointer"
                 >
                   <PlusCircle className="w-4 h-4" />
-                  <span>+ Create Event</span>
+                  <span>{isVie ? '+ Tạo sự kiện' : '+ Create Event'}</span>
                 </button>
               </div>
             </div>
 
             {/* Event Cards Grid */}
-            {events.length === 0 ? (
+            {loadError ? (
+              <div
+                role="alert"
+                className="rounded-2xl border border-red-500/35 bg-red-500/10 p-8 text-center"
+              >
+                <AlertTriangle className="mx-auto h-10 w-10 text-red-400 mb-3" />
+                <p className="text-base font-bold text-white">Không thể tải danh sách sự kiện</p>
+                <p className="mt-1 text-xs text-red-200 max-w-xl mx-auto">{loadError}</p>
+                <button
+                  type="button"
+                  onClick={() => void refreshEvents()}
+                  className="mt-4 inline-flex items-center gap-2 rounded-xl bg-red-500/25 border border-red-400/40 px-4 py-2 text-xs font-bold text-white hover:bg-red-500/35 transition cursor-pointer"
+                >
+                  <RefreshCw size={14} />
+                  <span>Thử tải lại</span>
+                </button>
+              </div>
+            ) : events.length === 0 ? (
               <div className="rounded-2xl border border-white/10 bg-[#161926]/50 p-12 text-center text-outline">
                 <Layers className="mx-auto h-12 w-12 text-brand-periwinkle/40 mb-3" />
                 <p className="text-base font-semibold text-white">No contests found</p>
@@ -296,6 +502,7 @@ export function EventAdminScreen() {
                       onViewDetails: () => router.push(`/events/${evt.id}`),
                       onUpdate: () => router.push(`/admin/events/edit/${evt.id}`),
                       onDelete: () => handleDeleteEventClick(evt),
+                      onAdvancePeriod: () => setEventToAdvance(evt),
                     }}
                   />
                 ))}
@@ -347,6 +554,16 @@ export function EventAdminScreen() {
           </div>
         </div>,
         document.body
+      )}
+
+      {/* Advance Period (Demo Testing) Modal */}
+      {mounted && eventToAdvance && (
+        <AdvancePeriodModal
+          event={eventToAdvance}
+          isOpen={Boolean(eventToAdvance)}
+          onClose={() => setEventToAdvance(null)}
+          onSuccess={() => void refreshEvents()}
+        />
       )}
     </div>
   );

@@ -10,7 +10,25 @@ import {
   FileText,
   CheckCircle2,
 } from 'lucide-react';
+import { useLanguage } from '@/context/language-context';
 import type { SubmissionDisputeDto } from '@/features/admin/types/dispute-arbitration.types';
+
+export function formatDisputeCategory(category?: string | null): string {
+  switch (category) {
+    case 'AiArt':
+      return 'AI Art';
+    case 'Copyright':
+      return 'Copyright';
+    case 'VoteFraud':
+      return 'Vote Fraud';
+    case 'RuleViolation':
+      return 'Rule Violation';
+    case 'ScoreAppeal':
+      return 'Score Appeal';
+    default:
+      return 'Other';
+  }
+}
 
 export function formatDisputeCode(id: string): string {
   if (!id) return 'DSP-000';
@@ -40,6 +58,26 @@ export function DisputeQueueTable({
   totalCount,
   onPageChange,
 }: DisputeQueueTableProps) {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
+
+  const formatDisputeCategoryText = (category?: string | null) => {
+    switch (category) {
+      case 'AiArt':
+        return isVie ? 'Tranh AI' : 'AI Art';
+      case 'Copyright':
+        return isVie ? 'Bản quyền' : 'Copyright';
+      case 'VoteFraud':
+        return isVie ? 'Gian lận vote' : 'Vote Fraud';
+      case 'RuleViolation':
+        return isVie ? 'Vi phạm thể lệ' : 'Rule Violation';
+      case 'ScoreAppeal':
+        return isVie ? 'Khiếu nại điểm' : 'Score Appeal';
+      default:
+        return isVie ? 'Khác' : 'Other';
+    }
+  };
+
   const getPriorityBadge = (priority: string) => {
     switch (priority) {
       case 'High':
@@ -50,6 +88,19 @@ export function DisputeQueueTable({
         return 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30';
       default:
         return 'bg-white/10 text-slate-300 border-white/10';
+    }
+  };
+
+  const formatPriorityText = (priority: string) => {
+    switch (priority) {
+      case 'High':
+        return isVie ? 'Cao' : 'High';
+      case 'Medium':
+        return isVie ? 'Trung bình' : 'Medium';
+      case 'Low':
+        return isVie ? 'Thấp' : 'Low';
+      default:
+        return priority;
     }
   };
 
@@ -68,18 +119,33 @@ export function DisputeQueueTable({
     }
   };
 
+  const formatStatusText = (status: string) => {
+    switch (status) {
+      case 'Pending':
+        return isVie ? 'Chờ xử lý' : 'Pending';
+      case 'UnderReview':
+        return isVie ? 'Đang duyệt' : 'Under Review';
+      case 'Resolved':
+        return isVie ? 'Đã giải quyết' : 'Resolved';
+      case 'Rejected':
+        return isVie ? 'Đã từ chối' : 'Rejected';
+      default:
+        return status;
+    }
+  };
+
   return (
     <div className="glass-container rounded-2xl border border-white/10 bg-[#161926]/90 backdrop-blur-xl overflow-hidden shadow-2xl">
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse min-w-[760px]">
           <thead>
             <tr className="border-b border-white/10 text-[11px] font-bold text-outline uppercase tracking-wider bg-black/20">
-              <th className="py-3.5 px-4">Case ID</th>
-              <th className="py-3.5 px-4">Title</th>
-              <th className="py-3.5 px-4">Contest</th>
-              <th className="py-3.5 px-4">Priority</th>
-              <th className="py-3.5 px-4">Status</th>
-              <th className="py-3.5 px-4 text-right">Actions</th>
+              <th className="py-3.5 px-4">{isVie ? 'Mã đơn' : 'Case ID'}</th>
+              <th className="py-3.5 px-4">{isVie ? 'Tác phẩm' : 'Title'}</th>
+              <th className="py-3.5 px-4">{isVie ? 'Cuộc thi' : 'Contest'}</th>
+              <th className="py-3.5 px-4">{isVie ? 'Ưu tiên' : 'Priority'}</th>
+              <th className="py-3.5 px-4">{isVie ? 'Trạng thái' : 'Status'}</th>
+              <th className="py-3.5 px-4 text-right">{isVie ? 'Thao tác' : 'Actions'}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-white/5 text-xs">
@@ -88,7 +154,7 @@ export function DisputeQueueTable({
                 <td colSpan={6} className="py-12 text-center text-slate-400">
                   <div className="flex flex-col items-center justify-center gap-2">
                     <div className="w-6 h-6 border-2 border-brand-periwinkle border-t-transparent rounded-full animate-spin" />
-                    <span>Loading dispute queue...</span>
+                    <span>{isVie ? 'Đang tải hàng đợi tranh chấp...' : 'Loading dispute queue...'}</span>
                   </div>
                 </td>
               </tr>
@@ -97,8 +163,10 @@ export function DisputeQueueTable({
                 <td colSpan={6} className="py-12 text-center text-slate-400">
                   <div className="flex flex-col items-center justify-center gap-2">
                     <CheckCircle2 className="w-8 h-8 text-emerald-400/60 mb-1" />
-                    <span className="font-semibold text-white">No Disputes In Queue</span>
-                    <span className="text-[11px] text-[#8A8FA9]">All contest disputes for this selection have been resolved.</span>
+                    <span className="font-semibold text-white">{isVie ? 'Không có tranh chấp nào' : 'No Disputes In Queue'}</span>
+                    <span className="text-[11px] text-[#8A8FA9]">
+                      {isVie ? 'Tất cả tranh chấp cuộc thi đã được giải quyết.' : 'All contest disputes for this selection have been resolved.'}
+                    </span>
                   </div>
                 </td>
               </tr>
@@ -126,7 +194,7 @@ export function DisputeQueueTable({
                         )}
                       </div>
                       <span className="text-[10px] text-[#8A8FA9] block mt-0.5">
-                        By {item.raisedByName || 'Participant'}
+                        {isVie ? 'Bởi' : 'By'} {item.raisedByName || (isVie ? 'Thí sinh' : 'Participant')}
                       </span>
                     </td>
 
@@ -139,6 +207,7 @@ export function DisputeQueueTable({
                               src={item.artworkImageUrl}
                               alt={item.submissionTitle || 'Artwork'}
                               fill
+                              unoptimized
                               sizes="44px"
                               className="object-cover"
                             />
@@ -150,10 +219,10 @@ export function DisputeQueueTable({
                         </div>
                         <div className="min-w-0 max-w-[240px]">
                           <p className="font-semibold text-white truncate text-xs">
-                            {item.submissionTitle || 'Untitled Artwork'}
+                            {item.submissionTitle || (isVie ? 'Chưa đặt tên' : 'Untitled Artwork')}
                           </p>
                           <span className="text-[10px] text-brand-periwinkle font-mono block mt-0.5">
-                            SUB-{item.submissionId.slice(0, 8)}
+                            {item.submissionId ? `SUB-${item.submissionId.slice(0, 8)}` : (isVie ? 'Đã rút bài' : 'Withdrawn entry')}
                           </span>
                         </div>
                       </div>
@@ -163,23 +232,28 @@ export function DisputeQueueTable({
                     <td className="py-3.5 px-4">
                       <div className="max-w-[200px]">
                         <p className="text-xs text-slate-300 font-medium truncate">
-                          {item.eventTitle || 'Contest Event'}
+                          {item.eventTitle || (isVie ? 'Cuộc thi' : 'Contest Event')}
                         </p>
                         <span className="text-[10px] text-[#8A8FA9] block mt-0.5">
-                          Event ID: {item.eventId.slice(0, 8)}
+                          ID: {item.eventId.slice(0, 8)}
                         </span>
                       </div>
                     </td>
 
-                    {/* 4. Priority */}
+                    {/* 4. Priority & Category */}
                     <td className="py-3.5 px-4">
-                      <span
-                        className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold border ${getPriorityBadge(
-                          item.priority
-                        )}`}
-                      >
-                        {item.priority}
-                      </span>
+                      <div className="flex flex-col items-start gap-1">
+                        <span
+                          className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold border ${getPriorityBadge(
+                            item.priority
+                          )}`}
+                        >
+                          {formatPriorityText(item.priority)}
+                        </span>
+                        <span className="text-[10px] text-[#A7ACD9] font-medium">
+                          {formatDisputeCategoryText(item.category)}
+                        </span>
+                      </div>
                     </td>
 
                     {/* 5. Status */}
@@ -189,7 +263,7 @@ export function DisputeQueueTable({
                           item.status
                         )}`}
                       >
-                        {item.status}
+                        {formatStatusText(item.status)}
                       </span>
                     </td>
 
@@ -208,7 +282,7 @@ export function DisputeQueueTable({
                         }`}
                       >
                         <Eye className="w-3.5 h-3.5" />
-                        <span>Inspect Case</span>
+                        <span>{isVie ? 'Kiểm tra' : 'Inspect Case'}</span>
                       </button>
                     </td>
                   </tr>
@@ -223,8 +297,8 @@ export function DisputeQueueTable({
       <div className="flex flex-wrap items-center justify-between gap-3 p-4 border-t border-white/10 text-xs text-[#8A8FA9] bg-black/20">
         <div>
           <span>
-            Showing <strong className="text-white">{items.length}</strong> of{' '}
-            <strong className="text-white">{totalCount}</strong> dispute cases
+            {isVie ? 'Hiển thị' : 'Showing'} <strong className="text-white">{items.length}</strong> {isVie ? 'trên' : 'of'}{' '}
+            <strong className="text-white">{totalCount}</strong> {isVie ? 'vụ tranh chấp' : 'dispute cases'}
           </span>
         </div>
 
@@ -234,19 +308,19 @@ export function DisputeQueueTable({
             onClick={() => onPageChange(page - 1)}
             disabled={page <= 1}
             className="p-1.5 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-white disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer"
-            title="Previous page"
+            title={isVie ? 'Trang trước' : 'Previous page'}
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
           <span className="font-semibold text-white px-2">
-            Page {page} of {Math.max(1, totalPages)}
+            {isVie ? `Trang ${page} / ${Math.max(1, totalPages)}` : `Page ${page} of ${Math.max(1, totalPages)}`}
           </span>
           <button
             type="button"
             onClick={() => onPageChange(page + 1)}
             disabled={page >= totalPages}
             className="p-1.5 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-white disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer"
-            title="Next page"
+            title={isVie ? 'Trang sau' : 'Next page'}
           >
             <ChevronRight className="w-4 h-4" />
           </button>

@@ -3,6 +3,7 @@
 import React from 'react';
 import { Trophy, AlertCircle, X } from 'lucide-react';
 import type { EventDetailDto } from '@/features/event/types/event.types';
+import { useLanguage } from '@/context/language-context';
 
 interface EventRulesModalProps {
   isOpen: boolean;
@@ -11,6 +12,9 @@ interface EventRulesModalProps {
 }
 
 export function EventRulesModal({ isOpen, onClose, event }: EventRulesModalProps) {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
+
   if (!isOpen) return null;
 
   return (
@@ -21,7 +25,9 @@ export function EventRulesModal({ isOpen, onClose, event }: EventRulesModalProps
             <div className="flex size-9 items-center justify-center rounded-xl bg-amber-400/20 text-amber-300">
               <Trophy size={18} />
             </div>
-            <h3 className="font-h1 text-lg font-bold text-white">Contest Rules & Prize Details</h3>
+            <h3 className="font-h1 text-lg font-bold text-white">
+              {isVie ? 'Thể lệ & Cơ cấu Giải thưởng' : 'Contest Rules & Prize Details'}
+            </h3>
           </div>
           <button
             type="button"
@@ -35,21 +41,26 @@ export function EventRulesModal({ isOpen, onClose, event }: EventRulesModalProps
         {/* Prize section */}
         <div className="rounded-2xl border border-amber-400/25 bg-amber-500/5 p-5">
           <h4 className="font-h1 text-sm font-bold text-amber-300 mb-2 flex items-center gap-2">
-            <Trophy size={16} /> Official Prizes & Rewards
+            <Trophy size={16} /> {isVie ? 'Giải thưởng chính thức' : 'Official Prizes & Rewards'}
           </h4>
           <p className="font-h1 text-base font-semibold text-white leading-relaxed whitespace-pre-line break-words">
-            {event.prize || 'Official prize breakdown will be announced by the organizing committee.'}
+            {event.prize ||
+              (isVie
+                ? 'Cơ cấu giải thưởng chính thức sẽ được ban tổ chức công bố.'
+                : 'Official prize breakdown will be announced by the organizing committee.')}
           </p>
         </div>
 
         {/* Rules section */}
         <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-5">
           <h4 className="font-h1 text-sm font-bold text-brand-periwinkle mb-2 flex items-center gap-2">
-            <AlertCircle size={16} /> Official Rules & Guidelines
+            <AlertCircle size={16} /> {isVie ? 'Thể lệ & Quy chế Cuộc thi' : 'Official Rules & Guidelines'}
           </h4>
           <p className="text-xs sm:text-sm text-[#A7ACD9] leading-relaxed whitespace-pre-line break-words">
             {event.rules ||
-              'All entries must be original works created by the submitter. Plagiarism, copyright infringement, or unauthorized AI generation will lead to immediate disqualification.'}
+              (isVie
+                ? 'Tất cả bài dự thi phải là tác phẩm nguyên bản do chính thí sinh sáng tác. Hành vi đạo nhái, xâm phạm bản quyền hoặc sử dụng AI trái quy định sẽ bị loại trực tiếp.'
+                : 'All entries must be original works created by the submitter. Plagiarism, copyright infringement, or unauthorized AI generation will lead to immediate disqualification.')}
           </p>
         </div>
 
@@ -59,7 +70,7 @@ export function EventRulesModal({ isOpen, onClose, event }: EventRulesModalProps
             onClick={onClose}
             className="rounded-xl bg-brand-periwinkle px-6 py-2.5 text-xs font-bold text-brand-navy cursor-pointer hover:brightness-110 transition"
           >
-            Got it
+            {isVie ? 'Đã hiểu' : 'Got it'}
           </button>
         </div>
       </div>

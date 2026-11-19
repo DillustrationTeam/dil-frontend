@@ -8,3 +8,4 @@ export default async function CreatorEventRootPage({
   const { id } = await params;
   redirect(`/creator/events/${id}/jury`);
 }
+

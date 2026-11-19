@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import { FastForward } from 'lucide-react';
 import toast from 'react-hot-toast';
 import type { EventDetailDto, EventSubmissionDto, EventLeaderboardItemDto } from '../../types/event.types';
 import type { JuryMemberInfo } from '../../types/jury.types';
@@ -12,9 +13,10 @@ import { eventVoteService } from '../../services/event-vote.service';
 import { juryService } from '../../services/jury.service';
 import { creatorProfileService } from '@/features/creator-studio/services/creator-profile.service';
 import { useEventCountdown } from '../../hooks/use-event-countdown';
-import { eventStatusBadgeStyles, eventStatusLabels } from '../../types/event.types';
+import { eventStatusBadgeStyles, getEventStatusLabel, normalizeEventStatus } from '../../types/event.types';
 import { EventSubmissionModal } from './event-submission-modal';
 import { useAuthStore } from '@/store/use-auth-store';
+import { useLanguage } from '@/context/language-context';
 
 import { EventDetailHero } from './detail/event-detail-hero';
 import { EventDetailTabNav, TabType } from './detail/event-detail-tab-nav';
@@ -22,6 +24,8 @@ import { EventTabArtworks } from './detail/event-tab-artworks';
 import { EventTabMySubmission } from './detail/event-tab-my-submission';
 import { EventTabLeaderboard } from './detail/event-tab-leaderboard';
 import { EventRulesModal } from './detail/event-rules-modal';
+import { SubmissionWithdrawModal } from './detail/submission-withdraw-modal';
+import { AdvancePeriodModal } from './advance-period-modal';
 
 interface EventDetailScreenProps {
   id: string;
@@ -29,22 +33,16 @@ interface EventDetailScreenProps {
   isAdmin?: boolean;
 }
 
-function formatScore(val?: number | null): string | null {
-  if (val === null || val === undefined) return null;
-  const num = typeof val === 'number' ? val : parseFloat(String(val));
-  if (isNaN(num) || num <= 0) return null;
-  if (num <= 10) {
-    return `${num.toFixed(1)} / 10`;
-  }
-  return `${num.toFixed(1)} / 100`;
-}
-
 export function EventDetailScreen({ id, userId, isAdmin }: EventDetailScreenProps) {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
+
   const [event, setEvent] = useState<EventDetailDto | null>(null);
   const [submissions, setSubmissions] = useState<EventSubmissionDto[]>([]);
   const [leaderboard, setLeaderboard] = useState<EventLeaderboardItemDto[]>([]);
   const [activeTab, setActiveTab] = useState<TabType>('artworks');
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [votingId, setVotingId] = useState<string | null>(null);
 
   // Filter & Search states for Artworks tab
@@ -57,6 +55,9 @@ export function EventDetailScreen({ id, userId, isAdmin }: EventDetailScreenProp
   // Modal dialog states
   const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
   const [isRulesModalOpen, setIsRulesModalOpen] = useState(false);
+  const [withdrawTargetId, setWithdrawTargetId] = useState<string | null>(null);
+  const [isWithdrawing, setIsWithdrawing] = useState(false);
+  const [isAdvanceModalOpen, setIsAdvanceModalOpen] = useState(false);
 
   // Jury & Creator states
   const [juries, setJuries] = useState<JuryMemberInfo[]>([]);
@@ -84,21 +85,25 @@ export function EventDetailScreen({ id, userId, isAdmin }: EventDetailScreenProp
   useEffect(() => {
     async function loadDetail() {
       setLoading(true);
+      setLoadError(null);
       try {
-        const [eventData, subData, leadData, juriesData, profileData] = await Promise.all([
-          eventService.detail(id).catch(() => null),
+        const eventData = await eventService.detail(id);
+        const [subData, leadData, juriesData, profileData] = await Promise.all([
           eventSubmissionService.getSubmissions(id).catch(() => ({ items: [], totalCount: 0 })),
           eventSubmissionService.getLeaderboard(id, wallSort).catch(() => []),
           juryService.getEventJuries(id).catch(() => []),
           effectiveUserId ? creatorProfileService.getMyProfile().catch(() => null) : Promise.resolve(null),
         ]);
-        if (eventData) setEvent(eventData);
+        setEvent(eventData);
         setSubmissions(subData.items || []);
         setLeaderboard(leadData || []);
         setJuries(juriesData || []);
         setMyCreatorProfile(profileData);
-      } catch {
-        toast.error('Failed to load contest details.');
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : 'Failed to load contest details.';
+        setEvent(null);
+        setLoadError(message);
+        toast.error(message);
       } finally {
         setLoading(false);
       }
@@ -129,15 +134,23 @@ export function EventDetailScreen({ id, userId, isAdmin }: EventDetailScreenProp
 
   const handleOpenSubmitModal = () => {
     if (!effectiveUserId) {
-      toast.error('Please sign in to submit artwork.');
+      toast.error(isVie ? 'Vui lòng đăng nhập để nộp bài dự thi.' : 'Please sign in to submit artwork.');
       return;
     }
     if (isJuryMember) {
-      toast.error('Jury members are not eligible to submit entries for this event.');
+      toast.error(
+        isVie
+          ? 'Thành viên ban giám khảo không được phép nộp bài dự thi cho sự kiện này.'
+          : 'Jury members are not eligible to submit entries for this event.'
+      );
       return;
     }
     if (!isCreator) {
-      toast.error('Only creators can participate in this contest. Please set up your creator profile.');
+      toast.error(
+        isVie
+          ? 'Chỉ có họa sĩ (creator) mới có thể tham gia cuộc thi. Vui lòng thiết lập hồ sơ Creator của bạn.'
+          : 'Only creators can participate in this contest. Please set up your creator profile.'
+      );
       return;
     }
     setIsSubmitModalOpen(true);
@@ -145,7 +158,7 @@ export function EventDetailScreen({ id, userId, isAdmin }: EventDetailScreenProp
 
   const handleVote = async (submissionId: string, hasVoted?: boolean) => {
     if (!effectiveUserId) {
-      toast.error('Please sign in to vote for artworks.');
+      toast.error(isVie ? 'Vui lòng đăng nhập để bình chọn bài dự thi.' : 'Please sign in to vote for artworks.');
       return;
     }
 
@@ -153,19 +166,19 @@ export function EventDetailScreen({ id, userId, isAdmin }: EventDetailScreenProp
     try {
       if (hasVoted) {
         await eventVoteService.unvoteSubmission(submissionId);
-        toast.success('Vote removed.');
+        toast.success(isVie ? 'Đã hủy bình chọn.' : 'Vote removed.');
         setSubmissions((prev) =>
           prev.map((s) => (s.id === submissionId ? { ...s, voteCount: Math.max(0, s.voteCount - 1), hasVoted: false } : s)),
         );
       } else {
         await eventVoteService.voteSubmission(submissionId);
-        toast.success('Vote submitted successfully!');
+        toast.success(isVie ? 'Bình chọn thành công!' : 'Vote submitted successfully!');
         setSubmissions((prev) =>
           prev.map((s) => (s.id === submissionId ? { ...s, voteCount: s.voteCount + 1, hasVoted: true } : s)),
         );
       }
     } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : 'Error submitting vote.');
+      toast.error(err instanceof Error ? err.message : (isVie ? 'Lỗi khi gửi bình chọn.' : 'Error submitting vote.'));
     } finally {
       setVotingId(null);
     }
@@ -174,7 +187,7 @@ export function EventDetailScreen({ id, userId, isAdmin }: EventDetailScreenProp
   const handleCopyLink = () => {
     if (typeof window !== 'undefined') {
       void navigator.clipboard.writeText(window.location.href);
-      toast.success('Contest link copied to clipboard.');
+      toast.success(isVie ? 'Đã sao chép liên kết cuộc thi.' : 'Contest link copied to clipboard.');
     }
   };
 
@@ -193,19 +206,23 @@ export function EventDetailScreen({ id, userId, isAdmin }: EventDetailScreenProp
     setActiveTab('my-submission');
   };
 
-  const handleWithdrawSubmission = async (submissionId: string) => {
-    const confirmed = window.confirm(
-      'Are you sure you want to withdraw your submission from this contest? You can resubmit anytime before the submission deadline ends.'
-    );
-    if (!confirmed) return;
+  const handleWithdrawSubmission = (submissionId: string) => {
+    setWithdrawTargetId(submissionId);
+  };
 
+  const handleConfirmWithdraw = async () => {
+    if (!withdrawTargetId) return;
+    setIsWithdrawing(true);
     try {
-      await eventSubmissionService.withdrawSubmission(submissionId);
-      toast.success('Your submission has been withdrawn successfully.');
-      setSubmissions((prev) => prev.filter((s) => s.id !== submissionId));
+      await eventSubmissionService.withdrawSubmission(withdrawTargetId);
+      toast.success(isVie ? 'Rút bài dự thi thành công.' : 'Your submission has been withdrawn successfully.');
+      setSubmissions((prev) => prev.filter((s) => s.id !== withdrawTargetId));
+      setWithdrawTargetId(null);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Failed to withdraw submission.';
+      const msg = err instanceof Error ? err.message : (isVie ? 'Không thể rút bài dự thi.' : 'Failed to withdraw submission.');
       toast.error(msg);
+    } finally {
+      setIsWithdrawing(false);
     }
   };
 
@@ -249,10 +266,25 @@ export function EventDetailScreen({ id, userId, isAdmin }: EventDetailScreenProp
   // Wall of Fame only opens after official result announcement or event ended
   const isAnnounced = useMemo(() => {
     if (!event) return false;
-    const status = String(event.status).toLowerCase();
-    if (status === 'ended' || status === '4') return true;
+    if (normalizeEventStatus(event.status) === 'Ended') return true;
     return countdown.phase === 'Ended';
   }, [event, countdown.phase]);
+
+  const maxRubricScore = useMemo(() => {
+    const rawCriteria = event?.criteria || event?.eventCriteria || [];
+    const sum = rawCriteria.reduce((acc, c) => acc + (Number(c.maxScore) || 0), 0);
+    return sum > 0 ? sum : 100;
+  }, [event]);
+
+  const formatScore = useCallback(
+    (val?: number | null): string | null => {
+      if (val === null || val === undefined) return null;
+      const num = typeof val === 'number' ? val : parseFloat(String(val));
+      if (isNaN(num) || num <= 0) return null;
+      return `${num.toFixed(1)} / ${maxRubricScore}`;
+    },
+    [maxRubricScore]
+  );
 
   if (loading && !event) {
     return (
@@ -264,31 +296,26 @@ export function EventDetailScreen({ id, userId, isAdmin }: EventDetailScreenProp
 
   if (!event) {
     return (
-      <div className="mx-auto max-w-4xl py-24 text-center">
-        <h2 className="font-h1 text-2xl font-bold text-white">Contest Not Found</h2>
-        <p className="mt-2 text-sm text-[#8A8FA9]">This event may have been removed or is no longer available.</p>
+      <div className="mx-auto max-w-4xl py-24 text-center px-4">
+        <h2 className="font-h1 text-2xl font-bold text-white">
+          {loadError ? (isVie ? 'Không thể tải cuộc thi' : 'Unable to Load Contest') : (isVie ? 'Không tìm thấy cuộc thi' : 'Contest Not Found')}
+        </h2>
+        <p className="mt-2 text-sm text-[#8A8FA9]">
+          {loadError || (isVie ? 'Sự kiện này có thể đã bị xóa hoặc không còn khả dụng.' : 'This event may have been removed or is no longer available.')}
+        </p>
         <Link
           href="/events"
           className="mt-6 inline-flex rounded-2xl bg-brand-periwinkle px-6 py-2.5 text-xs font-bold text-brand-navy cursor-pointer"
         >
-          Back to Contests
+          {isVie ? 'Quay lại danh sách cuộc thi' : 'Back to Contests'}
         </Link>
       </div>
     );
   }
 
-  const statusStr =
-    typeof event.status === 'number'
-      ? event.status === 2
-        ? 'Open'
-        : event.status === 3
-        ? 'Judging'
-        : event.status === 4
-        ? 'Ended'
-        : 'Draft'
-      : String(event.status);
+  const statusStr = normalizeEventStatus(event.status);
   const statusColor = eventStatusBadgeStyles[statusStr] || 'border-white/10 bg-white/5 text-outline';
-  const statusLabel = eventStatusLabels[statusStr] || statusStr;
+  const statusLabel = getEventStatusLabel(statusStr, isVie);
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 pb-28 pt-6 sm:px-6 lg:pt-8 text-[#e4e1e5]">
@@ -304,6 +331,43 @@ export function EventDetailScreen({ id, userId, isAdmin }: EventDetailScreenProp
         onOpenRulesModal={() => setIsRulesModalOpen(true)}
         onCopyLink={handleCopyLink}
       />
+
+      {/* Demo Period Testing Bar for Admins */}
+      {effectiveIsAdmin && (
+        <div className="mb-6 p-4 rounded-2xl border border-purple-500/35 bg-purple-500/10 backdrop-blur-md flex flex-wrap items-center justify-between gap-3 shadow-[0_0_25px_rgba(168,85,247,0.15)]">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-xl bg-purple-500/20 text-purple-300">
+              <FastForward className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-mono uppercase font-bold tracking-wider text-purple-300 bg-purple-500/20 px-2 py-0.5 rounded-full border border-purple-500/30">
+                  DEMO CONTROLS
+                </span>
+                <span className="text-[11px] text-purple-200/80">
+                  {isVie ? 'Công cụ kiểm thử từng giai đoạn sự kiện' : 'Event Period Testing Tool'}
+                </span>
+              </div>
+              <p className="text-xs font-semibold text-white mt-0.5">
+                {isVie ? 'Giai đoạn hiện tại:' : 'Current Period:'}{' '}
+                <span className="text-purple-300 font-bold">{isVie ? countdown.phaseLabelVie : countdown.phaseLabel}</span>
+                <span className="ml-2 font-mono text-[11px] text-purple-200 bg-purple-950/60 px-2 py-0.5 rounded border border-purple-500/20">
+                  {isVie ? countdown.formattedVie : countdown.formatted}
+                </span>
+              </p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setIsAdvanceModalOpen(true)}
+            className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs shadow-md shadow-purple-950/50 transition-all flex items-center gap-2 cursor-pointer active:scale-95"
+          >
+            <FastForward className="w-3.5 h-3.5" />
+            <span>{isVie ? 'Kết thúc / Chuyển giai đoạn' : 'End / Advance Period'}</span>
+          </button>
+        </div>
+      )}
 
       {/* 3 Primary Tabs Navigation */}
       <EventDetailTabNav
@@ -391,6 +455,28 @@ export function EventDetailScreen({ id, userId, isAdmin }: EventDetailScreenProp
         onClose={() => setIsRulesModalOpen(false)}
         event={event}
       />
+
+      {/* Withdraw Submission Confirmation Modal */}
+      <SubmissionWithdrawModal
+        isOpen={Boolean(withdrawTargetId)}
+        onClose={() => !isWithdrawing && setWithdrawTargetId(null)}
+        onConfirm={handleConfirmWithdraw}
+        isSubmitting={isWithdrawing}
+        artworkTitle={
+          submissions.find((s) => s.id === withdrawTargetId)?.title ||
+          mySubmission?.title
+        }
+      />
+
+      {/* Advance Period (Demo Testing) Modal */}
+      {isAdvanceModalOpen && (
+        <AdvancePeriodModal
+          event={event}
+          isOpen={isAdvanceModalOpen}
+          onClose={() => setIsAdvanceModalOpen(false)}
+          onSuccess={(updated) => setEvent(updated)}
+        />
+      )}
     </div>
   );
 }

@@ -17,6 +17,7 @@ import {
   UserAdminDetailDto,
   UserSanctionActionType,
 } from '@/features/admin/types/user-management.types';
+import { useLanguage } from '@/context/language-context';
 
 export interface UserActionPanelProps {
   user: UserAdminDetailDto;
@@ -31,44 +32,6 @@ export interface UserActionPanelProps {
   onUpdateRoles: (userId: string, roles: string[]) => Promise<boolean>;
 }
 
-const DURATION_PRESETS = [
-  { label: '3 Days', days: 3 },
-  { label: '7 Days', days: 7 },
-  { label: '14 Days', days: 14 },
-  { label: '30 Days', days: 30 },
-];
-
-const AVAILABLE_ROLES = [
-  {
-    id: 'Client',
-    name: 'Client',
-    badge: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
-    icon: <ShoppingBag className="w-3.5 h-3.5 text-emerald-400" />,
-    description: 'Browse artworks, request commissions, deposit escrow funds.',
-  },
-  {
-    id: 'Creator',
-    name: 'Creator',
-    badge: 'bg-sky-500/20 text-sky-400 border-sky-500/30',
-    icon: <Palette className="w-3.5 h-3.5 text-sky-400" />,
-    description: 'Publish illustrations, accept commission orders, manage payouts.',
-  },
-  {
-    id: 'Moderator',
-    name: 'Moderator',
-    badge: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
-    icon: <ShieldCheck className="w-3.5 h-3.5 text-purple-400" />,
-    description: 'Review flagged content, evaluate AI moderation scores, arbitrate disputes.',
-  },
-  {
-    id: 'Administrator',
-    name: 'Administrator',
-    badge: 'bg-red-500/20 text-red-400 border-red-500/30',
-    icon: <Shield className="w-3.5 h-3.5 text-red-400" />,
-    description: 'Full governance: fee policies, user sanctions, system overview KPIs.',
-  },
-];
-
 export function UserActionPanel({
   user,
   activeMode,
@@ -77,6 +40,55 @@ export function UserActionPanel({
   onApplySanction,
   onUpdateRoles,
 }: UserActionPanelProps) {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
+
+  const DURATION_PRESETS = [
+    { label: isVie ? '3 Ngày' : '3 Days', days: 3 },
+    { label: isVie ? '7 Ngày' : '7 Days', days: 7 },
+    { label: isVie ? '14 Ngày' : '14 Days', days: 14 },
+    { label: isVie ? '30 Ngày' : '30 Days', days: 30 },
+  ];
+
+  const AVAILABLE_ROLES = [
+    {
+      id: 'Client',
+      name: isVie ? 'Khách hàng' : 'Client',
+      badge: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
+      icon: <ShoppingBag className="w-3.5 h-3.5 text-emerald-400" />,
+      description: isVie
+        ? 'Duyệt tác phẩm, đặt vẽ tranh, nạp tiền ký quỹ Escrow.'
+        : 'Browse artworks, request commissions, deposit escrow funds.',
+    },
+    {
+      id: 'Creator',
+      name: isVie ? 'Họa sĩ' : 'Creator',
+      badge: 'bg-sky-500/20 text-sky-400 border-sky-500/30',
+      icon: <Palette className="w-3.5 h-3.5 text-sky-400" />,
+      description: isVie
+        ? 'Đăng tải tranh, nhận đơn đặt vẽ, quản lý rút tiền.'
+        : 'Publish illustrations, accept commission orders, manage payouts.',
+    },
+    {
+      id: 'Moderator',
+      name: isVie ? 'Kiểm duyệt viên' : 'Moderator',
+      badge: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
+      icon: <ShieldCheck className="w-3.5 h-3.5 text-purple-400" />,
+      description: isVie
+        ? 'Kiểm duyệt nội dung gắn cờ, đánh giá điểm AI, phân xử khiếu nại.'
+        : 'Review flagged content, evaluate AI moderation scores, arbitrate disputes.',
+    },
+    {
+      id: 'Administrator',
+      name: isVie ? 'Quản trị viên' : 'Administrator',
+      badge: 'bg-red-500/20 text-red-400 border-red-500/30',
+      icon: <Shield className="w-3.5 h-3.5 text-red-400" />,
+      description: isVie
+        ? 'Quản trị toàn diện: chính sách phí, xử phạt người dùng, chỉ số hệ thống.'
+        : 'Full governance: fee policies, user sanctions, system overview KPIs.',
+    },
+  ];
+
   // Track previous user state to sync form state without an effect (React 19 / Next.js recommended pattern)
   const [prevUserId, setPrevUserId] = useState(user.id);
   const [prevIsLockedOut, setPrevIsLockedOut] = useState(user.isLockedOut);
@@ -89,7 +101,9 @@ export function UserActionPanel({
   const [durationDays, setDurationDays] = useState<number>(7);
   const [customDays, setCustomDays] = useState('');
   const [reason, setReason] = useState(() =>
-    user.isLockedOut ? 'User completed review / appeal granted.' : ''
+    user.isLockedOut
+      ? (isVie ? 'Người dùng đã hoàn thành xem xét / chấp thuận khiếu nại.' : 'User completed review / appeal granted.')
+      : ''
   );
 
   // Roles form state
@@ -167,7 +181,9 @@ export function UserActionPanel({
         {/* Header: Displays solely Apply Sanction or Edit Role centered in the middle */}
         <div className="pb-3 border-b border-white/10 flex items-center justify-center text-center">
           <h3 className="font-h1 font-bold text-white text-base">
-            {activeMode === 'sanction' ? 'Apply Sanction' : 'Edit Role'}
+            {activeMode === 'sanction'
+              ? (isVie ? 'Áp dụng Chế tài Xử phạt' : 'Apply Sanction')
+              : (isVie ? 'Chỉnh sửa Phân quyền' : 'Edit Role')}
           </h3>
         </div>
 
@@ -177,7 +193,7 @@ export function UserActionPanel({
             {/* Action Type Tabs */}
             <div className="space-y-1.5">
               <label className="text-xs font-semibold text-[#8A8FA9]">
-                Disciplinary Action Type
+                {isVie ? 'Hình thức Xử lý Kỷ luật' : 'Disciplinary Action Type'}
               </label>
               <div className="grid grid-cols-4 gap-1.5 p-1 rounded-xl bg-black/40 border border-white/10">
                 <button
@@ -189,7 +205,7 @@ export function UserActionPanel({
                       : 'text-[#8A8FA9] hover:text-white'
                   }`}
                 >
-                  Warn
+                  {isVie ? 'Cảnh cáo' : 'Warn'}
                 </button>
                 <button
                   type="button"
@@ -200,7 +216,7 @@ export function UserActionPanel({
                       : 'text-[#8A8FA9] hover:text-white'
                   }`}
                 >
-                  Suspend
+                  {isVie ? 'Tạm khóa' : 'Suspend'}
                 </button>
                 <button
                   type="button"
@@ -211,20 +227,24 @@ export function UserActionPanel({
                       : 'text-[#8A8FA9] hover:text-white'
                   }`}
                 >
-                  Ban
+                  {isVie ? 'Cấm vĩnh viễn' : 'Ban'}
                 </button>
                 <button
                   type="button"
                   onClick={() => handleActionTypeChange('Unban')}
                   disabled={!user.isLockedOut}
-                  title={!user.isLockedOut ? 'Account is active (not locked out)' : undefined}
+                  title={
+                    !user.isLockedOut
+                      ? (isVie ? 'Tài khoản đang hoạt động (không bị khóa)' : 'Account is active (not locked out)')
+                      : undefined
+                  }
                   className={`py-2 text-xs font-bold rounded-lg transition-all ${
                     actionType === 'Unban'
                       ? 'bg-emerald-500 text-black shadow-md'
                       : 'text-[#8A8FA9] hover:text-white'
                   } ${!user.isLockedOut ? 'opacity-30 cursor-not-allowed' : 'cursor-pointer'}`}
                 >
-                  Unban
+                  {isVie ? 'Gỡ phạt' : 'Unban'}
                 </button>
               </div>
             </div>
@@ -235,10 +255,10 @@ export function UserActionPanel({
                 <div className="flex items-center justify-between">
                   <label className="text-xs font-semibold text-red-300 flex items-center gap-1.5">
                     <Clock className="w-3.5 h-3.5" />
-                    Suspension Length
+                    {isVie ? 'Thời hạn tạm khóa' : 'Suspension Length'}
                   </label>
                   <span className="text-xs font-bold text-white font-mono">
-                    {durationDays} Days
+                    {isVie ? `${durationDays} Ngày` : `${durationDays} Days`}
                   </span>
                 </div>
 
@@ -260,12 +280,14 @@ export function UserActionPanel({
                 </div>
 
                 <div className="flex items-center gap-2 pt-1">
-                  <span className="text-[11px] text-[#8A8FA9]">Custom days:</span>
+                  <span className="text-[11px] text-[#8A8FA9]">
+                    {isVie ? 'Số ngày tùy chỉnh:' : 'Custom days:'}
+                  </span>
                   <input
                     type="number"
                     min="1"
                     max="365"
-                    placeholder="e.g. 21"
+                    placeholder={isVie ? 'Ví dụ: 21' : 'e.g. 21'}
                     value={customDays}
                     onChange={(e) => handleCustomDaysChange(e.target.value)}
                     className="w-24 px-3 py-1 bg-black/40 rounded-lg border border-white/10 text-white text-xs focus:outline-none focus:border-red-400"
@@ -279,7 +301,9 @@ export function UserActionPanel({
               <div className="p-3 rounded-xl bg-red-950/40 border border-red-600/40 text-xs text-red-200 flex items-start gap-2">
                 <Ban className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
                 <span>
-                  Permanent Ban locks this user indefinitely and revokes all marketplace access.
+                  {isVie
+                    ? 'Cấm vĩnh viễn sẽ khóa tài khoản này vô thời hạn và thu hồi toàn bộ quyền truy cập sàn.'
+                    : 'Permanent Ban locks this user indefinitely and revokes all marketplace access.'}
                 </span>
               </div>
             )}
@@ -288,7 +312,9 @@ export function UserActionPanel({
               <div className="p-3 rounded-xl bg-amber-950/40 border border-amber-600/40 text-xs text-amber-200 flex items-start gap-2">
                 <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
                 <span>
-                  Issues a formal misconduct warning recorded to user history without restricting account.
+                  {isVie
+                    ? 'Gửi cảnh cáo vi phạm chính thức được ghi vào lịch sử người dùng mà không giới hạn tài khoản.'
+                    : 'Issues a formal misconduct warning recorded to user history without restricting account.'}
                 </span>
               </div>
             )}
@@ -297,7 +323,9 @@ export function UserActionPanel({
               <div className="p-3 rounded-xl bg-emerald-950/40 border border-emerald-600/40 text-xs text-emerald-200 flex items-start gap-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
                 <span>
-                  Restores active status and removes all lockout restrictions for this user.
+                  {isVie
+                    ? 'Khôi phục trạng thái hoạt động và gỡ bỏ toàn bộ hạn chế khóa tài khoản cho người dùng này.'
+                    : 'Restores active status and removes all lockout restrictions for this user.'}
                 </span>
               </div>
             )}
@@ -306,7 +334,7 @@ export function UserActionPanel({
             <div className="space-y-1.5">
               <label className="text-xs font-semibold text-[#8A8FA9] flex justify-between">
                 <span>
-                  Violation Reason <span className="text-red-400">*</span>
+                  {isVie ? 'Lý do Vi phạm' : 'Violation Reason'} <span className="text-red-400">*</span>
                 </span>
                 <span className="text-[11px] text-[#8A8FA9]">{reason.length}/300</span>
               </label>
@@ -316,7 +344,11 @@ export function UserActionPanel({
                 maxLength={300}
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
-                placeholder="State the terms violation or rationale for this action..."
+                placeholder={
+                  isVie
+                    ? 'Nêu rõ điều khoản vi phạm hoặc căn cứ áp dụng biện pháp xử phạt này...'
+                    : 'State the terms violation or rationale for this action...'
+                }
                 className="w-full px-3.5 py-2.5 bg-black/40 rounded-xl border border-white/10 text-white placeholder-[#8A8FA9]/60 text-xs focus:outline-none focus:border-red-400/80 transition-colors resize-none"
               />
             </div>
@@ -334,16 +366,16 @@ export function UserActionPanel({
               } disabled:opacity-50 disabled:cursor-not-allowed`}
             >
               {isSanctionSubmitting ? (
-                <span>Processing Action...</span>
+                <span>{isVie ? 'Đang xử lý...' : 'Processing Action...'}</span>
               ) : (
                 <span>
                   {actionType === 'Unban'
-                    ? 'Confirm Lift Sanctions'
+                    ? (isVie ? 'Xác nhận Gỡ phạt' : 'Confirm Lift Sanctions')
                     : actionType === 'Warn'
-                    ? 'Issue Warning Notice'
+                    ? (isVie ? 'Gửi Thông báo Cảnh cáo' : 'Issue Warning Notice')
                     : actionType === 'Suspend'
-                    ? `Execute ${durationDays}-Day Suspension`
-                    : 'Execute Permanent Ban'}
+                    ? (isVie ? `Thực thi Tạm khóa ${durationDays} Ngày` : `Execute ${durationDays}-Day Suspension`)
+                    : (isVie ? 'Thực thi Cấm Vĩnh viễn' : 'Execute Permanent Ban')}
                 </span>
               )}
             </button>
@@ -399,7 +431,9 @@ export function UserActionPanel({
             </div>
 
             <p className="text-[10px] text-[#8A8FA9]/70 italic">
-              * Every account must hold at least one role.
+              {isVie
+                ? '* Mỗi tài khoản phải giữ ít nhất một vai trò.'
+                : '* Every account must hold at least one role.'}
             </p>
 
             {/* Save Roles Button */}
@@ -408,7 +442,9 @@ export function UserActionPanel({
               disabled={isRolesSubmitting || selectedRoles.length === 0}
               className="w-full py-2.5 rounded-xl text-xs font-bold bg-red-500 hover:bg-red-400 text-white shadow-lg shadow-red-500/20 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isRolesSubmitting ? 'Saving Roles...' : 'Save Role Assignment'}
+              {isRolesSubmitting
+                ? (isVie ? 'Đang lưu vai trò...' : 'Saving Roles...')
+                : (isVie ? 'Lưu Phân quyền Vai trò' : 'Save Role Assignment')}
             </button>
           </form>
         )}

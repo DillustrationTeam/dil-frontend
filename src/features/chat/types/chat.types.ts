@@ -55,3 +55,10 @@ export interface ChatMessagesPage {
   items: ChatMessageDto[];
   nextCursor: string | null;
 }
+
+export interface WorkroomUnreadCountDto {
+  roomId: string;
+  commissionId: string;
+  unreadCount: number;
+  lastMessageAt?: string | null;
+}

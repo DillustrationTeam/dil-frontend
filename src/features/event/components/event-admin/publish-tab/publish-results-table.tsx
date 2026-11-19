@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Trophy, Award, Medal, HeartHandshake, Check, CheckCircle2, Clock } from 'lucide-react';
+import { useLanguage } from '@/context/language-context';
 
 export interface WinnerApprovalItem {
   awardName: string;
@@ -32,13 +33,22 @@ export function PublishResultsTable({
   handleApproveAwardAllocations,
   isLoading = false,
 }: PublishResultsTableProps) {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
+
   return (
-    <div className="p-6 rounded-2xl bg-[#151926]/90 border border-white/10 backdrop-blur-xl space-y-5">
+    <div className="glass-container p-6 rounded-2xl space-y-5">
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
-          <h2 className="text-xl font-bold font-sora text-white">Final Contest Results</h2>
+          <h2 className="text-xl font-bold font-sora text-white">
+            {isVie ? 'Kết quả chung cuộc' : 'Final Contest Results'}
+          </h2>
           <p className="text-xs text-[#9695a1] mt-0.5">
-            Official ranking and award allocations for <span className="text-white font-medium">{eventTitle}</span>.
+            {isVie ? (
+              <>Bảng xếp hạng và giải thưởng chính thức cho <span className="text-white font-medium">{eventTitle}</span>.</>
+            ) : (
+              <>Official ranking and award allocations for <span className="text-white font-medium">{eventTitle}</span>.</>
+            )}
           </p>
         </div>
         <span
@@ -51,10 +61,10 @@ export function PublishResultsTable({
           }`}
         >
           {isContestResultsPublished
-            ? 'Results Officially Published'
+            ? (isVie ? 'Kết quả đã công bố chính thức' : 'Results Officially Published')
             : isAwardAllocationsConfirmed
-            ? 'Award Allocations Confirmed'
-            : 'Pending Award Approval'}
+            ? (isVie ? 'Đã xác nhận phân bổ giải thưởng' : 'Award Allocations Confirmed')
+            : (isVie ? 'Chờ phê duyệt giải thưởng' : 'Pending Award Approval')}
         </span>
       </div>
 
@@ -62,10 +72,10 @@ export function PublishResultsTable({
         <table className="w-full border-collapse text-left min-w-[550px] text-xs">
           <thead>
             <tr className="border-b border-white/10 bg-white/5 text-[#858694] uppercase font-semibold text-[10px]">
-              <th className="py-3 px-3.5">Award Category</th>
-              <th className="py-3 px-3.5">Winning Entry</th>
-              <th className="py-3 px-3.5">Score / Votes</th>
-              <th className="py-3 px-3.5 text-right">Status</th>
+              <th className="py-3 px-3.5">{isVie ? 'Hạng mục giải thưởng' : 'Award Category'}</th>
+              <th className="py-3 px-3.5">{isVie ? 'Tác phẩm đạt giải' : 'Winning Entry'}</th>
+              <th className="py-3 px-3.5">{isVie ? 'Điểm / Bình chọn' : 'Score / Votes'}</th>
+              <th className="py-3 px-3.5 text-right">{isVie ? 'Trạng thái' : 'Status'}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-white/10 text-[#c8c6cf]">
@@ -74,14 +84,14 @@ export function PublishResultsTable({
                 <td colSpan={4} className="py-10 text-center text-slate-400">
                   <div className="flex items-center justify-center gap-2">
                     <div className="size-4 animate-spin rounded-full border-2 border-brand-periwinkle border-t-transparent" />
-                    <span>Loading final contest results from backend...</span>
+                    <span>{isVie ? 'Đang tải kết quả chung cuộc...' : 'Loading final contest results from backend...'}</span>
                   </div>
                 </td>
               </tr>
             ) : finalWinnersList.length === 0 ? (
               <tr>
                 <td colSpan={4} className="py-10 text-center text-slate-400">
-                  No submissions or leaderboard data found for this event yet.
+                  {isVie ? 'Chưa có bài thi hoặc dữ liệu bảng xếp hạng nào cho cuộc thi này.' : 'No submissions or leaderboard data found for this event yet.'}
                 </td>
               </tr>
             ) : (
@@ -128,7 +138,7 @@ export function PublishResultsTable({
                       <div>
                         <span className="font-semibold text-white block">{item.title}</span>
                         <span className="text-[11px] text-[#9695a1] block">
-                          {item.submitterName ? `by @${item.submitterName}` : ''}
+                          {item.submitterName ? `${isVie ? 'bởi' : 'by'} @${item.submitterName}` : ''}
                           {item.code ? ` • ${item.code}` : ''}
                         </span>
                       </div>
@@ -148,17 +158,17 @@ export function PublishResultsTable({
                       {isContestResultsPublished ? (
                         <>
                           <Check className="w-3 h-3" />
-                          Published
+                          {isVie ? 'Đã công bố' : 'Published'}
                         </>
                       ) : isAwardAllocationsConfirmed ? (
                         <>
                           <Check className="w-3 h-3" />
-                          Finalized
+                          {isVie ? 'Đã chốt' : 'Finalized'}
                         </>
                       ) : (
                         <>
                           <Clock className="w-3 h-3 text-amber-400" />
-                          Pending
+                          {isVie ? 'Chờ duyệt' : 'Pending'}
                         </>
                       )}
                     </span>
@@ -174,24 +184,24 @@ export function PublishResultsTable({
       <div className="pt-4 border-t border-white/10 flex items-center justify-between flex-wrap gap-3">
         <span className="text-xs text-[#9695a1]">
           {isContestResultsPublished
-            ? '✓ Final results officially published and visible on public Wall of Fame.'
+            ? (isVie ? '✓ Kết quả chung cuộc đã được công bố chính thức trên Bảng vinh danh công khai.' : '✓ Final results officially published and visible on public Wall of Fame.')
             : isAwardAllocationsConfirmed
-            ? '✓ Award allocations confirmed and officially locked by jury panel.'
-            : 'Click Approve Results to confirm award allocations.'}
+            ? (isVie ? '✓ Phân bổ giải thưởng đã được ban giám khảo xác nhận và khóa chính thức.' : '✓ Award allocations confirmed and officially locked by jury panel.')
+            : (isVie ? 'Bấm Phê duyệt kết quả để xác nhận phân bổ giải thưởng.' : 'Click Approve Results to confirm award allocations.')}
         </span>
         <button
           type="button"
           onClick={handleApproveAwardAllocations}
           disabled={isAwardAllocationsConfirmed || isContestResultsPublished || finalWinnersList.length === 0}
-          className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-[#7FD5E8] hover:brightness-110 text-white font-sora font-extrabold text-xs shadow-lg hover:shadow-purple-500/20 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+          className="commission-primary px-5 py-2.5 rounded-xl font-sora text-xs shadow-lg transition-all flex items-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
         >
           <CheckCircle2 className="w-4 h-4" />
           <span>
             {isContestResultsPublished
-              ? 'Results Published'
+              ? (isVie ? 'Kết quả đã công bố' : 'Results Published')
               : isAwardAllocationsConfirmed
-              ? 'Award Allocations Confirmed'
-              : 'Approve Results'}
+              ? (isVie ? 'Đã xác nhận giải thưởng' : 'Award Allocations Confirmed')
+              : (isVie ? 'Phê duyệt kết quả' : 'Approve Results')}
           </span>
         </button>
       </div>

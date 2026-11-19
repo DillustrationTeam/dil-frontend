@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import toast from 'react-hot-toast';
 import { RotateCw, AlertCircle, Trophy } from 'lucide-react';
+import { useLanguage } from '@/context/language-context';
 import { PublishResultsTable, WinnerApprovalItem } from './publish-results-table';
 import { PublishChecklistAside, PublishChecklistStatus } from './publish-checklist-aside';
 import { ContestSearchSelect, resolveEventId } from '../permissions-tab/permissions-tab';
@@ -10,11 +11,14 @@ import { eventService } from '../../../services/event.service';
 import { eventSubmissionService } from '../../../services/event-submission.service';
 import { juryService } from '../../../services/jury.service';
 import { adminDisputeService } from '@/features/admin/services/dispute.service';
-import type { EventListItemDto, EventDetailDto } from '../../../types/event.types';
+import { normalizeEventStatus, type EventListItemDto, type EventDetailDto } from '../../../types/event.types';
 import type { JuryMemberInfo } from '../../../types/jury.types';
 import type { SubmissionDisputeDto } from '@/features/admin/types/dispute-arbitration.types';
 
 export function PublishTab() {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
+
   const [events, setEvents] = useState<EventListItemDto[]>([]);
   const [selectedEventId, setSelectedEventId] = useState<string>('');
   const [eventDetail, setEventDetail] = useState<EventDetailDto | null>(null);
@@ -54,8 +58,11 @@ export function PublishTab() {
             items[0];
           setSelectedEventId(preferred.id);
         }
-      } catch {
-        if (active) setEvents([]);
+      } catch (err: unknown) {
+        if (active) {
+          setEvents([]);
+          toast.error(err instanceof Error ? err.message : 'Không thể tải danh sách sự kiện.');
+        }
       }
     }
     void loadEvents();
@@ -86,8 +93,7 @@ export function PublishTab() {
 
       // Check if event is already ended or published
       const isAlreadyEnded =
-        detailData?.status === 'Ended' ||
-        String(detailData?.status) === '4' ||
+        normalizeEventStatus(detailData?.status) === 'Ended' ||
         String(detailData?.status).toLowerCase() === 'concluded';
       setIsContestResultsPublished(isAlreadyEnded);
       setIsAwardAllocationsConfirmed(isAlreadyEnded || Boolean(detailData?.isHeadJurySignedOff));
@@ -216,14 +222,12 @@ export function PublishTab() {
 
   // 4. Dynamically compute Audit Checklist from real event parameters
   const checklist = useMemo<PublishChecklistStatus>(() => {
-    const eventStatusStr = String(eventDetail?.status || '').toLowerCase();
+    const normalizedEventStatus = normalizeEventStatus(eventDetail?.status);
     const eventConcluded =
       isContestResultsPublished ||
-      eventStatusStr === 'ended' ||
-      eventStatusStr === 'judging' ||
-      eventStatusStr === '3' ||
-      eventStatusStr === '4' ||
-      (eventDetail != null && eventDetail.isOpenForSubmission === false && eventStatusStr !== 'draft');
+      normalizedEventStatus === 'Ended' ||
+      normalizedEventStatus === 'Judging' ||
+      (eventDetail != null && eventDetail.isOpenForSubmission === false && normalizedEventStatus !== 'Draft');
 
     const juryCount = juries.length;
     // Considered done if there are juries and scores exist, or if marked completed
@@ -255,13 +259,15 @@ export function PublishTab() {
   // 5. Handlers
   const handleApproveAwardAllocations = () => {
     setIsAwardAllocationsConfirmed(true);
-    toast.success('Award Allocations Confirmed and locked by jury panel!');
+    toast.success(isVie ? 'Đã xác nhận và khóa phân bổ giải thưởng bởi ban giám khảo!' : 'Award Allocations Confirmed and locked by jury panel!');
   };
 
   const handlePublishResults = async () => {
     if (!eventDetail) return;
     const confirmed = window.confirm(
-      `Are you sure you want to officially publish the final contest results for "${eventDetail.title}"?\n\nThis will lock rankings and reveal winners publicly on the Wall of Fame.`
+      isVie
+        ? `Bạn có chắc chắn muốn công bố chính thức kết quả cuộc thi "${eventDetail.title}"?\n\nThao tác này sẽ khóa thứ hạng và hiển thị công khai người chiến thắng trên Bảng vinh danh.`
+        : `Are you sure you want to officially publish the final contest results for "${eventDetail.title}"?\n\nThis will lock rankings and reveal winners publicly on the Wall of Fame.`
     );
     if (!confirmed) return;
 
@@ -290,9 +296,9 @@ export function PublishTab() {
 
       setIsContestResultsPublished(true);
       setIsAwardAllocationsConfirmed(true);
-      toast.success('Final contest results published to platform feed and Wall of Fame successfully!');
+      toast.success(isVie ? 'Đã công bố kết quả chung cuộc thành công lên Bảng vinh danh!' : 'Final contest results published to platform feed and Wall of Fame successfully!');
     } catch {
-      toast.error('Failed to publish contest results.');
+      toast.error(isVie ? 'Công bố kết quả cuộc thi thất bại.' : 'Failed to publish contest results.');
     } finally {
       setIsPublishing(false);
     }
@@ -303,13 +309,15 @@ export function PublishTab() {
       {/* Contest Selector Bar */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 rounded-2xl border border-white/10 bg-[#161926] p-4">
         <div className="flex items-center gap-3 w-full sm:w-auto">
-          <div className="flex size-10 items-center justify-center rounded-xl bg-purple-500/15 text-purple-300 shrink-0">
+          <div className="flex size-10 items-center justify-center rounded-xl bg-brand-periwinkle/15 text-brand-periwinkle shrink-0">
             <Trophy size={20} />
           </div>
           <div>
-            <h3 className="font-sora text-sm font-bold text-white">Select Contest to Publish</h3>
+            <h3 className="font-sora text-sm font-bold text-white">
+              {isVie ? 'Chọn cuộc thi để công bố' : 'Select Contest to Publish'}
+            </h3>
             <p className="text-[11px] text-[#8A8FA9]">
-              Review audit criteria and publish official winners
+              {isVie ? 'Xem xét các tiêu chí kiểm toán và công bố người chiến thắng chính thức' : 'Review audit criteria and publish official winners'}
             </p>
           </div>
         </div>
@@ -334,7 +342,7 @@ export function PublishTab() {
               void loadEventData(selectedEventId);
             }}
             className="flex size-9 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-[#A7ACD9] hover:bg-white/10 hover:text-white transition cursor-pointer shrink-0"
-            title="Refresh contest data"
+            title={isVie ? 'Làm mới dữ liệu cuộc thi' : 'Refresh contest data'}
           >
             <RotateCw size={15} className={isLoading ? 'animate-spin' : ''} />
           </button>
@@ -345,8 +353,10 @@ export function PublishTab() {
       {!selectedEventId ? (
         <div className="rounded-2xl border border-white/10 bg-[#161926] p-12 text-center text-slate-400">
           <AlertCircle size={32} className="mx-auto text-[#A7ACD9] mb-3" />
-          <p className="font-semibold text-white">No contest selected</p>
-          <p className="text-xs text-[#8A8FA9] mt-1">Please select an event from the dropdown above to view results.</p>
+          <p className="font-semibold text-white">{isVie ? 'Chưa chọn cuộc thi' : 'No contest selected'}</p>
+          <p className="text-xs text-[#8A8FA9] mt-1">
+            {isVie ? 'Vui lòng chọn sự kiện từ danh sách bên trên để xem kết quả.' : 'Please select an event from the dropdown above to view results.'}
+          </p>
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.25fr)_minmax(320px,0.75fr)] gap-6 items-start">

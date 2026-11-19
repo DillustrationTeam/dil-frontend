@@ -16,6 +16,7 @@ import {
   UserAdminListItemDto,
   UserManagementMeta,
 } from '@/features/admin/types/user-management.types';
+import { useLanguage } from '@/context/language-context';
 
 export interface UserTableProps {
   items: UserAdminListItemDto[];
@@ -35,7 +36,7 @@ function formatVnd(amount: number): string {
   }).format(amount);
 }
 
-function getRoleBadge(roles: string[]) {
+function getRoleBadge(roles: string[], isVie: boolean = false) {
   const isCreator = roles.includes('Creator');
   const isClient = roles.includes('Client');
   const isAdmin = roles.includes('Administrator');
@@ -45,7 +46,7 @@ function getRoleBadge(roles: string[]) {
     return (
       <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-red-500/20 text-red-300 border border-red-500/30 font-bold text-[10px]">
         <Shield className="w-3 h-3" />
-        Administrator
+        {isVie ? 'Quản trị viên' : 'Administrator'}
       </span>
     );
   }
@@ -53,7 +54,7 @@ function getRoleBadge(roles: string[]) {
   if (isCreator && isClient) {
     return (
       <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold text-[10px]">
-        Dual-Role
+        {isVie ? 'Hai vai trò' : 'Dual-Role'}
       </span>
     );
   }
@@ -61,7 +62,7 @@ function getRoleBadge(roles: string[]) {
   if (isCreator) {
     return (
       <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/30 font-bold text-[10px]">
-        Creator
+        {isVie ? 'Họa sĩ' : 'Creator'}
       </span>
     );
   }
@@ -69,14 +70,14 @@ function getRoleBadge(roles: string[]) {
   if (isMod) {
     return (
       <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30 font-bold text-[10px]">
-        Moderator
+        {isVie ? 'Kiểm duyệt viên' : 'Moderator'}
       </span>
     );
   }
 
   return (
     <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold text-[10px]">
-      Client
+      {isVie ? 'Khách hàng' : 'Client'}
     </span>
   );
 }
@@ -96,11 +97,16 @@ export function UserTable({
   onInspect,
   onPageChange,
 }: UserTableProps) {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
+
   if (error) {
     return (
       <div className="bg-[#161926]/85 backdrop-blur-[32px] border border-red-500/30 rounded-[28px] p-8 text-center space-y-3">
         <AlertTriangle className="w-8 h-8 text-red-400 mx-auto" />
-        <h4 className="text-white font-bold text-sm">Failed to Load User Accounts</h4>
+        <h4 className="text-white font-bold text-sm">
+          {isVie ? 'Không thể tải danh sách tài khoản' : 'Failed to Load User Accounts'}
+        </h4>
         <p className="text-xs text-red-300/80">{error}</p>
       </div>
     );
@@ -112,12 +118,12 @@ export function UserTable({
         <table className="w-full text-left text-xs">
           <thead className="text-[10px] uppercase font-bold text-[#8A8FA9] border-b border-white/10">
             <tr>
-              <th className="py-3 px-4">User</th>
-              <th className="py-3 px-4">Email</th>
-              <th className="py-3 px-4">Assigned Roles</th>
-              <th className="py-3 px-4">Wallet Balance</th>
-              <th className="py-3 px-4">Status</th>
-              <th className="py-3 px-4 text-right">Actions</th>
+              <th className="py-3 px-4">{isVie ? 'Tài khoản' : 'User'}</th>
+              <th className="py-3 px-4">{isVie ? 'Email' : 'Email'}</th>
+              <th className="py-3 px-4">{isVie ? 'Vai trò đã gán' : 'Assigned Roles'}</th>
+              <th className="py-3 px-4">{isVie ? 'Số dư ví' : 'Wallet Balance'}</th>
+              <th className="py-3 px-4">{isVie ? 'Trạng thái' : 'Status'}</th>
+              <th className="py-3 px-4 text-right">{isVie ? 'Thao tác' : 'Actions'}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-white/5 text-white/90">
@@ -146,9 +152,11 @@ export function UserTable({
                 <td colSpan={6} className="py-12 text-center text-[#8A8FA9]">
                   <div className="flex flex-col items-center justify-center space-y-2">
                     <UserCheck className="w-8 h-8 text-[#8A8FA9]/40" />
-                    <span className="text-sm font-semibold">No user accounts found</span>
+                    <span className="text-sm font-semibold">
+                      {isVie ? 'Không tìm thấy tài khoản người dùng' : 'No user accounts found'}
+                    </span>
                     <span className="text-xs text-[#8A8FA9]/70">
-                      Try adjusting your search keywords or filter criteria.
+                      {isVie ? 'Thử điều chỉnh từ khóa tìm kiếm hoặc bộ lọc.' : 'Try adjusting your search keywords or filter criteria.'}
                     </span>
                   </div>
                 </td>
@@ -189,7 +197,7 @@ export function UserTable({
                             @{user.userName}
                           </p>
                           <p className="text-[11px] text-[#8A8FA9] truncate">
-                            {user.fullName || 'No display name'}
+                            {user.fullName || (isVie ? 'Chưa đặt tên hiển thị' : 'No display name')}
                           </p>
                         </div>
                       </div>
@@ -200,14 +208,14 @@ export function UserTable({
                       <div className="space-y-0.5">
                         <p className="text-[#C5C9F8]">{user.email}</p>
                         <span className="text-[10px] text-[#8A8FA9]">
-                          {user.isVerified ? '✓ Verified' : 'Unverified'}
+                          {user.isVerified ? (isVie ? '✓ Đã xác thực' : '✓ Verified') : (isVie ? 'Chưa xác thực' : 'Unverified')}
                         </span>
                       </div>
                     </td>
 
                     {/* 3. Assigned Roles */}
                     <td className="py-3.5 px-4">
-                      {getRoleBadge(user.roles)}
+                      {getRoleBadge(user.roles, isVie)}
                     </td>
 
                     {/* 4. Wallet Balance */}
@@ -229,18 +237,20 @@ export function UserTable({
                             }`}
                           >
                             <Lock className="w-2.5 h-2.5" />
-                            {isPermanentBan ? 'BANNED' : 'SUSPENDED'}
+                            {isPermanentBan ? (isVie ? 'BỊ CẤM' : 'BANNED') : (isVie ? 'TẠM KHÓA' : 'SUSPENDED')}
                           </span>
                           {!isPermanentBan && user.lockoutEnd && (
                             <p className="text-[9px] text-[#8A8FA9]">
-                              until {new Date(user.lockoutEnd).toLocaleDateString('vi-VN')}
+                              {isVie
+                                ? `Đến ${new Date(user.lockoutEnd).toLocaleDateString('vi-VN')}`
+                                : `until ${new Date(user.lockoutEnd).toLocaleDateString('vi-VN')}`}
                             </p>
                           )}
                         </div>
                       ) : (
                         <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold text-[10px]">
                           <Unlock className="w-2.5 h-2.5" />
-                          ACTIVE
+                          {isVie ? 'HOẠT ĐỘNG' : 'ACTIVE'}
                         </span>
                       )}
                     </td>
@@ -262,7 +272,11 @@ export function UserTable({
                           }`}
                         >
                           <ShieldAlert className="w-3.5 h-3.5" />
-                          <span>{user.isLockedOut ? 'Lift Sanction' : 'Apply Sanctions'}</span>
+                          <span>
+                            {user.isLockedOut
+                              ? (isVie ? 'Gỡ phạt' : 'Lift Sanction')
+                              : (isVie ? 'Xử phạt' : 'Apply Sanctions')}
+                          </span>
                         </button>
 
                         {/* Edit Roles Button */}
@@ -273,10 +287,10 @@ export function UserTable({
                             onInspect(user.id, 'roles');
                           }}
                           className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold bg-white/5 hover:bg-white/10 text-white/90 border border-white/10 transition-colors cursor-pointer"
-                          title="Edit User Roles"
+                          title={isVie ? 'Sửa vai trò người dùng' : 'Edit User Roles'}
                         >
                           <Sliders className="w-3.5 h-3.5" />
-                          <span>Edit Roles</span>
+                          <span>{isVie ? 'Sửa vai trò' : 'Edit Roles'}</span>
                         </button>
                       </div>
                     </td>
@@ -291,9 +305,19 @@ export function UserTable({
       {/* Pagination Bar (Always visible with page size = 10) */}
       <div className="flex items-center justify-between pt-4 border-t border-white/10 text-xs">
         <div className="text-[#8A8FA9] text-[11px]">
-          Showing page <span className="text-white font-bold">{meta.page}</span> of{' '}
-          <span className="text-white font-bold">{Math.max(1, meta.totalPages)}</span>
-          <span className="ml-1 text-[#8A8FA9]/70">({meta.totalCount} accounts)</span>
+          {isVie ? (
+            <>
+              Hiển thị trang <span className="text-white font-bold">{meta.page}</span> trên{' '}
+              <span className="text-white font-bold">{Math.max(1, meta.totalPages)}</span>
+              <span className="ml-1 text-[#8A8FA9]/70">({meta.totalCount} tài khoản)</span>
+            </>
+          ) : (
+            <>
+              Showing page <span className="text-white font-bold">{meta.page}</span> of{' '}
+              <span className="text-white font-bold">{Math.max(1, meta.totalPages)}</span>
+              <span className="ml-1 text-[#8A8FA9]/70">({meta.totalCount} accounts)</span>
+            </>
+          )}
         </div>
 
         <div className="flex items-center gap-2">
@@ -304,11 +328,19 @@ export function UserTable({
             className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white font-bold disabled:opacity-40 disabled:pointer-events-none transition-colors cursor-pointer"
           >
             <ChevronLeft className="w-4 h-4" />
-            <span>Previous</span>
+            <span>{isVie ? 'Trước' : 'Previous'}</span>
           </button>
 
           <span className="px-3 py-1.5 rounded-lg bg-black/40 border border-white/10 text-white font-semibold text-xs">
-            Page <span className="font-bold text-red-300">{meta.page}</span> of {Math.max(1, meta.totalPages)}
+            {isVie ? (
+              <>
+                Trang <span className="font-bold text-red-300">{meta.page}</span> / {Math.max(1, meta.totalPages)}
+              </>
+            ) : (
+              <>
+                Page <span className="font-bold text-red-300">{meta.page}</span> of {Math.max(1, meta.totalPages)}
+              </>
+            )}
           </span>
 
           <button
@@ -317,7 +349,7 @@ export function UserTable({
             onClick={() => onPageChange(meta.page + 1)}
             className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white font-bold disabled:opacity-40 disabled:pointer-events-none transition-colors cursor-pointer"
           >
-            <span>Next</span>
+            <span>{isVie ? 'Sau' : 'Next'}</span>
             <ChevronRight className="w-4 h-4" />
           </button>
         </div>

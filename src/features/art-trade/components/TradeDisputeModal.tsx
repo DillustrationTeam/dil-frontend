@@ -178,7 +178,7 @@ export function TradeDisputeModal({
       }}
     >
       <div
-        className="relative w-full max-w-xl max-h-[90vh] overflow-y-auto rounded-3xl border border-white/15 bg-[#171926] p-6 sm:p-7 shadow-2xl space-y-5"
+        className="relative w-full max-w-xl max-h-[90vh] overflow-y-auto rounded-3xl border border-white/15 bg-[#161926] p-6 sm:p-7 shadow-2xl space-y-5"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -268,7 +268,7 @@ export function TradeDisputeModal({
                   ? 'State why the partner artwork violates guidelines (e.g. AI-generation artifacts on hands/eyes, image search matches, character mismatch, or lack of response)...'
                   : 'Nêu rõ lý do tranh của đối tác vi phạm (ví dụ: phát hiện lỗi tranh AI ở bàn tay/mắt, tìm thấy ảnh gốc bị sao chép, vẽ sai hoàn toàn nhân vật OC đã thỏa thuận)...'
               }
-              className="w-full rounded-2xl border border-white/10 bg-[#121420] p-3.5 text-xs text-white placeholder-slate-500 focus:border-red-400 focus:outline-none transition"
+              className="w-full rounded-2xl border border-white/10 bg-[#131316] p-3.5 text-xs text-white placeholder-slate-500 focus:border-red-400 focus:outline-none transition"
             />
           </div>
 

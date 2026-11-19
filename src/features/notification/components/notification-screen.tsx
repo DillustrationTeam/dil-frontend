@@ -19,6 +19,7 @@ import {
   Info,
   LockKeyhole,
   Megaphone,
+  MessageSquare,
   RefreshCw,
   Scale,
   ShieldAlert,
@@ -55,6 +56,8 @@ function getIcon(type: string) {
       return <Megaphone size={18} className="text-brand-periwinkle" />;
     case 'CommissionStatusChanged':
       return <BriefcaseBusiness size={18} className="text-brand-periwinkle" />;
+    case 'WorkroomMessage':
+      return <MessageSquare size={18} className="text-brand-periwinkle" />;
     case 'EscrowStatusChanged':
       return <LockKeyhole size={18} className="text-emerald-400" />;
     case 'DisputeStatusChanged':

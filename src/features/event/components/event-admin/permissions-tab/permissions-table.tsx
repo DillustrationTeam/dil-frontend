@@ -4,6 +4,7 @@ import React, { useState, useSyncExternalStore } from 'react';
 import { createPortal } from 'react-dom';
 import { ShieldCheck, Clock, Crown, UserCheck, Edit2, UserX, X, Info, Search } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useLanguage } from '@/context/language-context';
 
 const emptySubscribe = () => () => {};
 
@@ -23,6 +24,8 @@ interface PermissionsTableProps {
 }
 
 export function PermissionsTable({ members, onUpdateRole, onRemoveMember, isJudgingPhaseActive = false }: PermissionsTableProps) {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
   const mounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState<'All' | 'Head Jury' | 'Jury'>('All');
@@ -114,9 +117,9 @@ export function PermissionsTable({ members, onUpdateRole, onRemoveMember, isJudg
             onChange={(e) => setRoleFilter(e.target.value as 'All' | 'Head Jury' | 'Jury')}
             className="h-10 px-3.5 pr-8 bg-[#090b12]/80 border border-white/10 rounded-xl text-xs text-white focus:outline-none focus:border-brand-periwinkle focus:ring-1 focus:ring-brand-periwinkle/30 transition-all cursor-pointer font-medium"
           >
-            <option value="All" className="bg-[#161926]">All Roles</option>
-            <option value="Head Jury" className="bg-[#161926]">Head Jury</option>
-            <option value="Jury" className="bg-[#161926]">Jury</option>
+            <option value="All" className="bg-[#161926]">{isVie ? 'Tất cả vai trò' : 'All Roles'}</option>
+            <option value="Head Jury" className="bg-[#161926]">{isVie ? 'Trưởng ban' : 'Head Jury'}</option>
+            <option value="Jury" className="bg-[#161926]">{isVie ? 'Giám khảo' : 'Jury'}</option>
           </select>
         </div>
       </div>
@@ -125,10 +128,10 @@ export function PermissionsTable({ members, onUpdateRole, onRemoveMember, isJudg
         <table className="w-full text-left border-collapse min-w-[550px]">
           <thead>
             <tr className="border-b border-white/10 text-[11px] font-bold text-outline uppercase tracking-wider">
-              <th className="pb-3 px-3">Member</th>
-              <th className="pb-3 px-3">Role</th>
-              <th className="pb-3 px-3">Status</th>
-              <th className="pb-3 px-3 text-right">Actions</th>
+              <th className="pb-3 px-3">{isVie ? 'Thành viên' : 'Member'}</th>
+              <th className="pb-3 px-3">{isVie ? 'Vai trò' : 'Role'}</th>
+              <th className="pb-3 px-3">{isVie ? 'Trạng thái' : 'Status'}</th>
+              <th className="pb-3 px-3 text-right">{isVie ? 'Thao tác' : 'Actions'}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-white/5 text-sm">
@@ -136,8 +139,12 @@ export function PermissionsTable({ members, onUpdateRole, onRemoveMember, isJudg
               <tr>
                 <td colSpan={4} className="py-8 text-center text-xs text-outline">
                   {members.length === 0
-                    ? 'No jury members assigned yet.'
-                    : 'No jury members found matching your search and filter criteria.'}
+                    ? isVie
+                      ? 'Chưa có thành viên ban giám khảo nào được phân công.'
+                      : 'No jury members assigned yet.'
+                    : isVie
+                      ? 'Không tìm thấy giám khảo nào khớp với điều kiện tìm kiếm.'
+                      : 'No jury members found matching your search and filter criteria.'}
                 </td>
               </tr>
             ) : (
@@ -164,7 +171,7 @@ export function PermissionsTable({ members, onUpdateRole, onRemoveMember, isJudg
                       ) : (
                         <UserCheck className="w-3 h-3" />
                       )}
-                      {member.role}
+                      {member.role === 'Head Jury' ? (isVie ? 'Trưởng ban' : 'Head Jury') : (isVie ? 'Giám khảo' : 'Jury')}
                     </span>
                   </td>
                   <td className="py-3.5 px-3">
@@ -180,27 +187,29 @@ export function PermissionsTable({ members, onUpdateRole, onRemoveMember, isJudg
                       ) : (
                         <Clock className="w-3.5 h-3.5" />
                       )}
-                      {member.status}
+                      {member.status === 'Confirmed' ? (isVie ? 'Đã xác nhận' : 'Confirmed') : (isVie ? 'Chờ chấp nhận' : 'Pending')}
                     </span>
                   </td>
                   <td className="py-3.5 px-3 text-right">
                     <div className="flex items-center justify-end gap-2">
-                      <button
-                        type="button"
-                        onClick={() => handleOpenEdit(member)}
-                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-xs text-white transition-all cursor-pointer"
-                      >
-                        <Edit2 className="w-3 h-3 text-brand-periwinkle" />
-                        <span>Edit Role</span>
-                      </button>
+                      {member.status === 'Confirmed' && (
+                        <button
+                          type="button"
+                          onClick={() => handleOpenEdit(member)}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-xs text-white transition-all cursor-pointer"
+                        >
+                          <Edit2 className="w-3 h-3 text-brand-periwinkle" />
+                          <span>{isVie ? 'Đổi vai trò' : 'Edit Role'}</span>
+                        </button>
+                      )}
                       <button
                         type="button"
                         onClick={() => handleOpenRemove(member)}
                         className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 text-xs text-red-400 transition-all cursor-pointer"
-                        title="Remove Member"
+                        title={member.status === 'Pending' ? (isVie ? 'Hủy lời mời' : 'Cancel Invitation') : (isVie ? 'Xóa thành viên' : 'Remove Member')}
                       >
                         <UserX className="w-3 h-3 text-red-400" />
-                        <span>Remove</span>
+                        <span>{member.status === 'Pending' ? (isVie ? 'Hủy mời' : 'Cancel Invite') : (isVie ? 'Xóa' : 'Remove')}</span>
                       </button>
                     </div>
                   </td>
@@ -222,35 +231,33 @@ export function PermissionsTable({ members, onUpdateRole, onRemoveMember, isJudg
             >
               <X className="w-4 h-4" />
             </button>
-            <h3 className="text-lg font-bold text-white font-h1">Edit Jury Role</h3>
+            <h3 className="text-lg font-bold text-white font-h1">
+              {isVie ? 'Chỉnh sửa vai trò Giám khảo' : 'Edit Jury Role'}
+            </h3>
             <p className="text-xs text-outline mt-1">
-              Change permissions for <span className="font-semibold text-white">{editingMember.name}</span> ({editingMember.email || 'No email'}).
+              {isVie ? (
+                <>Thay đổi quyền hạn cho <span className="font-semibold text-white">{editingMember.name}</span> ({editingMember.email || 'Không có email'}).</>
+              ) : (
+                <>Change permissions for <span className="font-semibold text-white">{editingMember.name}</span> ({editingMember.email || 'No email'}).</>
+              )}
             </p>
 
             <div className="mt-4 p-3 rounded-xl border border-blue-500/20 bg-blue-500/10 flex items-start gap-2.5 text-xs text-blue-300">
               <Info className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
               <span>
-                Role changes are allowed only before the judging phase starts (<code className="text-white">JudgingStartAt</code>).
+                {isVie ? (
+                  <>Chỉ được phép thay đổi vai trò trước khi giai đoạn chấm thi bắt đầu (<code className="text-white">JudgingStartAt</code>).</>
+                ) : (
+                  <>Role changes are allowed only before the judging phase starts (<code className="text-white">JudgingStartAt</code>).</>
+                )}
               </span>
             </div>
 
             <div className="mt-5 space-y-4">
               <div>
                 <label className="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-2">
-                  Select Role
+                  {isVie ? 'Chọn vai trò' : 'Select Role'}
                 </label>
-                <select
-                  value={editRole}
-                  onChange={(e) => setEditRole(e.target.value as 'Head Jury' | 'Jury')}
-                  className="w-full rounded-xl border border-white/10 bg-[#090b12]/90 text-white px-3.5 py-2.5 text-sm focus:outline-none focus:border-brand-periwinkle focus:ring-1 focus:ring-brand-periwinkle/30 transition-all cursor-pointer mb-3"
-                >
-                  <option value="Jury" className="bg-[#1f2335]">
-                    Jury Member
-                  </option>
-                  <option value="Head Jury" className="bg-[#1f2335]">
-                    Head Jury
-                  </option>
-                </select>
 
                 <div className="grid grid-cols-2 gap-3">
                   <button
@@ -263,7 +270,7 @@ export function PermissionsTable({ members, onUpdateRole, onRemoveMember, isJudg
                     }`}
                   >
                     <UserCheck className="w-4 h-4 text-brand-periwinkle" />
-                    Jury
+                    {isVie ? 'Giám khảo' : 'Jury'}
                   </button>
                   <button
                     type="button"
@@ -275,7 +282,7 @@ export function PermissionsTable({ members, onUpdateRole, onRemoveMember, isJudg
                     }`}
                   >
                     <Crown className="w-4 h-4 text-amber-300" />
-                    Head Jury
+                    {isVie ? 'Trưởng ban' : 'Head Jury'}
                   </button>
                 </div>
               </div>
@@ -287,13 +294,13 @@ export function PermissionsTable({ members, onUpdateRole, onRemoveMember, isJudg
                 onClick={() => setEditingMember(null)}
                 className="px-4 py-2 rounded-xl border border-white/10 text-xs font-semibold text-slate-300 hover:bg-white/5 transition-all cursor-pointer"
               >
-                Cancel
+                {isVie ? 'Hủy' : 'Cancel'}
               </button>
               <button
                 type="submit"
                 className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#a7acd9] to-[#7fd5e8] text-brand-navy text-xs font-bold hover:brightness-110 transition-all cursor-pointer"
               >
-                Save Changes
+                {isVie ? 'Lưu thay đổi' : 'Save Changes'}
               </button>
             </div>
           </form>
@@ -305,9 +312,37 @@ export function PermissionsTable({ members, onUpdateRole, onRemoveMember, isJudg
       {mounted && memberToRemove && createPortal(
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 overflow-y-auto">
           <div className="w-full max-w-md rounded-2xl border border-red-500/30 bg-[#161926] p-6 shadow-2xl relative animate-in fade-in zoom-in-95 duration-200 text-left m-auto">
-            <h3 className="text-lg font-bold text-white font-h1">Remove Jury Member</h3>
+            <h3 className="text-lg font-bold text-white font-h1">
+              {memberToRemove.status === 'Pending'
+                ? isVie
+                  ? 'Hủy lời mời Giám khảo'
+                  : 'Cancel Jury Invitation'
+                : isVie
+                  ? 'Xóa khỏi Ban giám khảo'
+                  : 'Remove Jury Member'}
+            </h3>
             <p className="text-xs text-slate-300 mt-2 leading-relaxed">
-              Are you sure you want to remove <span className="font-bold text-white">{memberToRemove.name}</span> from the Jury Panel? They will no longer have access to evaluation tasks for this event.
+              {memberToRemove.status === 'Pending' ? (
+                isVie ? (
+                  <>
+                    Bạn có chắc chắn muốn hủy lời mời tham gia ban giám khảo gửi tới{' '}
+                    <span className="font-bold text-white">{memberToRemove.name}</span> không?
+                  </>
+                ) : (
+                  <>
+                    Are you sure you want to cancel the pending jury invitation sent to{' '}
+                    <span className="font-bold text-white">{memberToRemove.name}</span>?
+                  </>
+                )
+              ) : isVie ? (
+                <>
+                  Bạn có chắc chắn muốn xóa <span className="font-bold text-white">{memberToRemove.name}</span> khỏi Ban giám khảo không? Thành viên này sẽ không còn quyền truy cập nhiệm vụ chấm thi cho sự kiện này.
+                </>
+              ) : (
+                <>
+                  Are you sure you want to remove <span className="font-bold text-white">{memberToRemove.name}</span> from the Jury Panel? They will no longer have access to evaluation tasks for this event.
+                </>
+              )}
             </p>
 
             <div className="mt-6 flex justify-end gap-3">
@@ -316,14 +351,20 @@ export function PermissionsTable({ members, onUpdateRole, onRemoveMember, isJudg
                 onClick={() => setMemberToRemove(null)}
                 className="px-4 py-2 rounded-xl border border-white/10 text-xs font-semibold text-slate-300 hover:bg-white/5 transition-all cursor-pointer"
               >
-                Cancel
+                {isVie ? 'Giữ lại' : 'Keep'}
               </button>
               <button
                 type="button"
                 onClick={handleConfirmRemove}
                 className="px-4 py-2 rounded-xl bg-red-500 hover:bg-red-600 text-white text-xs font-bold transition-all shadow-[0_0_15px_rgba(239,68,68,0.3)] cursor-pointer"
               >
-                Remove Member
+                {memberToRemove.status === 'Pending'
+                  ? isVie
+                    ? 'Hủy lời mời'
+                    : 'Cancel Invitation'
+                  : isVie
+                    ? 'Xóa thành viên'
+                    : 'Remove Member'}
               </button>
             </div>
           </div>

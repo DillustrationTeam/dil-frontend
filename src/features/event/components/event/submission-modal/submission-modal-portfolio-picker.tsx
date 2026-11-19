@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Search, Image as ImageIcon, Check, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useLanguage } from '@/context/language-context';
 import type { ArtworkDto } from '@/features/creator-studio/types/creator-profile.types';
 
 interface SubmissionModalPortfolioPickerProps {
@@ -31,15 +32,19 @@ export function SubmissionModalPortfolioPicker({
   totalArtworkPages,
   paginatedArtworks,
 }: SubmissionModalPortfolioPickerProps) {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
+
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between gap-3">
         <label className="text-xs font-semibold uppercase tracking-wider text-[#A7ACD9]">
-          Select an Artwork from Your Portfolio <span className="text-rose-400">*</span>
+          {isVie ? 'Chọn một tác phẩm từ bộ sưu tập của bạn' : 'Select an Artwork from Your Portfolio'}{' '}
+          <span className="text-rose-400">*</span>
         </label>
         {filteredArtworks.length > 0 && (
           <span className="text-[11px] text-[#8A8FA9]">
-            {filteredArtworks.length} {filteredArtworks.length === 1 ? 'artwork' : 'artworks'} found
+            {filteredArtworks.length} {isVie ? 'tác phẩm' : (filteredArtworks.length === 1 ? 'artwork' : 'artworks')} {isVie ? 'được tìm thấy' : 'found'}
           </span>
         )}
       </div>
@@ -54,7 +59,7 @@ export function SubmissionModalPortfolioPicker({
             setArtworkSearch(e.target.value);
             setArtworksPage(1);
           }}
-          placeholder="Search artworks by title..."
+          placeholder={isVie ? 'Tìm kiếm tác phẩm theo tiêu đề...' : 'Search artworks by title...'}
           className="w-full rounded-xl border border-white/10 bg-white/5 pl-9 pr-3 py-2 text-xs text-white placeholder-[#8A8FA9] focus:border-brand-periwinkle focus:outline-none"
         />
       </div>
@@ -66,7 +71,9 @@ export function SubmissionModalPortfolioPicker({
       ) : filteredArtworks.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-white/15 p-8 text-center bg-white/[0.01]">
           <ImageIcon size={32} className="mx-auto text-outline/50 mb-2" />
-          <p className="text-xs text-[#A7ACD9] mb-3">No matching artworks found.</p>
+          <p className="text-xs text-[#A7ACD9] mb-3">
+            {isVie ? 'Không tìm thấy tác phẩm nào phù hợp.' : 'No matching artworks found.'}
+          </p>
           <button
             type="button"
             onClick={() => {
@@ -75,7 +82,7 @@ export function SubmissionModalPortfolioPicker({
             }}
             className="text-xs font-semibold text-brand-periwinkle hover:underline cursor-pointer"
           >
-            Clear search filter
+            {isVie ? 'Xóa bộ lọc tìm kiếm' : 'Clear search filter'}
           </button>
         </div>
       ) : (
@@ -116,7 +123,9 @@ export function SubmissionModalPortfolioPicker({
           {totalArtworkPages > 1 && (
             <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-white/10 mt-2">
               <span className="text-xs text-[#8A8FA9]">
-                Page {artworksPage} of {totalArtworkPages} ({filteredArtworks.length} artworks, 9 per page)
+                {isVie
+                  ? `Trang ${artworksPage} / ${totalArtworkPages} (${filteredArtworks.length} tác phẩm, 9 mỗi trang)`
+                  : `Page ${artworksPage} of ${totalArtworkPages} (${filteredArtworks.length} artworks, 9 per page)`}
               </span>
 
               <div className="flex items-center gap-1.5">
@@ -127,7 +136,7 @@ export function SubmissionModalPortfolioPicker({
                   className="flex items-center gap-1 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1 text-xs font-medium text-white hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition cursor-pointer"
                 >
                   <ChevronLeft size={14} />
-                  <span>Prev</span>
+                  <span>{isVie ? 'Trước' : 'Prev'}</span>
                 </button>
 
                 <div className="flex items-center gap-1">
@@ -153,7 +162,7 @@ export function SubmissionModalPortfolioPicker({
                   onClick={() => setArtworksPage((p) => Math.min(totalArtworkPages, p + 1))}
                   className="flex items-center gap-1 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1 text-xs font-medium text-white hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition cursor-pointer"
                 >
-                  <span>Next</span>
+                  <span>{isVie ? 'Tiếp' : 'Next'}</span>
                   <ChevronRight size={14} />
                 </button>
               </div>
@@ -173,7 +182,9 @@ export function SubmissionModalPortfolioPicker({
               className="size-8 rounded-lg object-cover border border-white/15 shrink-0"
             />
             <div className="min-w-0">
-              <span className="text-[10px] uppercase font-bold text-brand-periwinkle block">Selected Artwork</span>
+              <span className="text-[10px] uppercase font-bold text-brand-periwinkle block">
+                {isVie ? 'Tác phẩm đã chọn' : 'Selected Artwork'}
+              </span>
               <p className="font-semibold truncate">{selectedArtwork.title}</p>
             </div>
           </div>
@@ -182,7 +193,7 @@ export function SubmissionModalPortfolioPicker({
             onClick={onDeselectArtwork}
             className="text-xs text-[#8A8FA9] hover:text-rose-400 transition ml-2 shrink-0 cursor-pointer"
           >
-            Deselect
+            {isVie ? 'Bỏ chọn' : 'Deselect'}
           </button>
         </div>
       )}

@@ -9,3 +9,4 @@ export default function CreatorEventHeadJuryPage() {
 
   return <EventHeadJuryScreen eventId={eventId} />;
 }
+

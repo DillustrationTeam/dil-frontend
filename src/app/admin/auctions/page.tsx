@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { auctionService, auctionError } from '@/features/auction/services/auction.service';
 import type { AuctionListItemDto } from '@/features/auction/types/auction.types';
+import { useLanguage } from '@/context/language-context';
 
 const statusTabs = [
   { key: 'ALL', label: 'Tất cả' },
@@ -33,7 +34,11 @@ const money = (val?: number) =>
   new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(val ?? 0);
 
 export default function AdminAuctionsPage() {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
   const [auctions, setAuctions] = useState<AuctionListItemDto[]>([]);
+  // Danh sách KHÔNG lọc, chỉ dùng để tính 4 ô KPI (xem `stats` bên dưới).
+  const [allAuctions, setAllAuctions] = useState<AuctionListItemDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<StatusTabKey>('Active');
   const [searchQuery, setSearchQuery] = useState('');
@@ -46,8 +51,13 @@ export default function AdminAuctionsPage() {
     setLoading(true);
     try {
       const filter = statusFilter === 'ALL' ? {} : { status: statusFilter };
-      const res = await auctionService.list(filter);
+      // Trang quản trị cần thấy đủ phiên để chốt/huỷ, không phải 12 dòng của chợ.
+      const [res, allRes] = await Promise.all([
+        auctionService.list(filter, undefined, undefined, 100),
+        auctionService.list({}, undefined, undefined, 100),
+      ]);
       setAuctions(res.items || []);
+      setAllAuctions(allRes.items || []);
     } catch (err) {
       toast.error(auctionError(err));
     } finally {
@@ -58,11 +68,14 @@ export default function AdminAuctionsPage() {
   useEffect(() => {
     let ignore = false;
     const filter = statusFilter === 'ALL' ? {} : { status: statusFilter };
-    auctionService
-      .list(filter)
-      .then((res) => {
+    Promise.all([
+      auctionService.list(filter, undefined, undefined, 100),
+      auctionService.list({}, undefined, undefined, 100),
+    ])
+      .then(([res, allRes]) => {
         if (!ignore) {
           setAuctions(res.items || []);
+          setAllAuctions(allRes.items || []);
         }
       })
       .catch((err) => {
@@ -92,14 +105,19 @@ export default function AdminAuctionsPage() {
     );
   }, [auctions, searchQuery]);
 
+  /**
+   * KPI tính trên TOÀN BỘ phiên, không phải trên danh sách đang lọc theo tab.
+   * Trước đây `stats` đếm từ `auctions` (đã lọc status ở server) nên tab mặc định "Active"
+   * khiến "Sắp diễn ra / Đã chốt / Đã kết thúc & huỷ" luôn bằng 0.
+   */
   const stats = useMemo(() => {
     return {
-      active: auctions.filter((a) => a.auctionStatus === 'Active').length,
-      scheduled: auctions.filter((a) => a.auctionStatus === 'Scheduled').length,
-      settled: auctions.filter((a) => a.auctionStatus === 'Settled').length,
-      ended: auctions.filter((a) => a.auctionStatus === 'Ended' || a.auctionStatus === 'Cancelled').length,
+      active: allAuctions.filter((a) => a.auctionStatus === 'Active').length,
+      scheduled: allAuctions.filter((a) => a.auctionStatus === 'Scheduled').length,
+      settled: allAuctions.filter((a) => a.auctionStatus === 'Settled').length,
+      ended: allAuctions.filter((a) => a.auctionStatus === 'Ended' || a.auctionStatus === 'Cancelled').length,
     };
-  }, [auctions]);
+  }, [allAuctions]);
 
   const handleForceSettle = async () => {
     if (!actionAuction) return;
@@ -223,23 +241,78 @@ export default function AdminAuctionsPage() {
         </button>
       </div>
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <div className="glass-container rounded-2xl p-4">
-          <p className="text-[11px] font-medium uppercase tracking-wider text-[#919099]">Đang diễn ra</p>
-          <p className="mt-1 font-h1 text-2xl font-bold text-emerald-400">{stats.active}</p>
+      {/* Executive Overview KPI Cards (Consistent with System Overview) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-5">
+        {/* Card 1: Active Auctions */}
+        <div className="glass-container rounded-[24px] p-5 space-y-2 shadow-lg border border-white/10">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] text-[#8A8FA9] font-bold uppercase tracking-wider font-h1">
+              {isVie ? 'PHIÊN ĐANG DIỄN RA' : 'ACTIVE SESSIONS'}
+            </span>
+            <div className="p-1.5 rounded-lg bg-emerald-400/10 text-emerald-400">
+              <Gavel className="w-4 h-4" />
+            </div>
+          </div>
+          <h3 className="font-h1 text-2xl font-extrabold text-emerald-400 tracking-tight">
+            {stats.active}
+          </h3>
+          <p className="text-[11px] text-[#8A8FA9]">
+            <span className="font-h1 font-bold text-emerald-400">{isVie ? 'Đang diễn ra' : 'Active'}</span> {isVie ? 'sôi động trên sàn' : 'on the live floor'}
+          </p>
         </div>
-        <div className="glass-container rounded-2xl p-4">
-          <p className="text-[11px] font-medium uppercase tracking-wider text-[#919099]">Sắp diễn ra</p>
-          <p className="mt-1 font-h1 text-2xl font-bold text-blue-400">{stats.scheduled}</p>
+
+        {/* Card 2: Upcoming / Scheduled */}
+        <div className="glass-container rounded-[24px] p-5 space-y-2 shadow-lg border border-white/10">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] text-[#8A8FA9] font-bold uppercase tracking-wider font-h1">
+              {isVie ? 'PHIÊN SẮP BẮT ĐẦU' : 'SCHEDULED SESSIONS'}
+            </span>
+            <div className="p-1.5 rounded-lg bg-blue-400/10 text-blue-400">
+              <Clock className="w-4 h-4" />
+            </div>
+          </div>
+          <h3 className="font-h1 text-2xl font-extrabold text-blue-400 tracking-tight">
+            {stats.scheduled}
+          </h3>
+          <p className="text-[11px] text-[#8A8FA9]">
+            <span className="font-h1 font-bold text-white/90">{isVie ? 'Sắp mở phiên' : 'Opening soon'}</span> {isVie ? 'nhận lượt đặt giá' : 'for incoming bids'}
+          </p>
         </div>
-        <div className="glass-container rounded-2xl p-4">
-          <p className="text-[11px] font-medium uppercase tracking-wider text-[#919099]">Đã chốt phiên</p>
-          <p className="mt-1 font-h1 text-2xl font-bold text-purple-300">{stats.settled}</p>
+
+        {/* Card 3: Settled & Completed */}
+        <div className="glass-container rounded-[24px] p-5 space-y-2 shadow-lg border border-white/10">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] text-[#8A8FA9] font-bold uppercase tracking-wider font-h1">
+              {isVie ? 'ĐÃ CHỐT & BÀN GIAO' : 'SETTLED & DELIVERED'}
+            </span>
+            <div className="p-1.5 rounded-lg bg-purple-400/10 text-purple-300">
+              <CheckCircle2 className="w-4 h-4" />
+            </div>
+          </div>
+          <h3 className="font-h1 text-2xl font-extrabold text-purple-300 tracking-tight">
+            {stats.settled}
+          </h3>
+          <p className="text-[11px] text-[#8A8FA9]">
+            {isVie ? 'Đã xác định Winner & giải ngân' : 'Winner settled & escrow released'}
+          </p>
         </div>
-        <div className="glass-container rounded-2xl p-4">
-          <p className="text-[11px] font-medium uppercase tracking-wider text-[#919099]">Đã kết thúc / Huỷ</p>
-          <p className="mt-1 font-h1 text-2xl font-bold text-slate-300">{stats.ended}</p>
+
+        {/* Card 4: Total Sessions */}
+        <div className="glass-container rounded-[24px] p-5 space-y-2 shadow-lg border border-white/10">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] text-[#8A8FA9] font-bold uppercase tracking-wider font-h1">
+              {isVie ? 'TỔNG CÁC PHIÊN' : 'TOTAL SESSIONS'}
+            </span>
+            <div className="p-1.5 rounded-lg bg-[#C5C9F8]/10 text-[#C5C9F8]">
+              <Layers className="w-4 h-4" />
+            </div>
+          </div>
+          <h3 className="font-h1 text-2xl font-extrabold text-[#C5C9F8] tracking-tight">
+            {auctions.length}
+          </h3>
+          <p className="text-[11px] text-[#8A8FA9]">
+            <span className="font-h1 font-bold text-white/90">{stats.ended}</span> {isVie ? 'Phiên đã kết thúc / huỷ' : 'Sessions ended / cancelled'}
+          </p>
         </div>
       </div>
 

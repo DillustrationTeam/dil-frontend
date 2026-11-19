@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Search, RotateCw, Users, ShieldAlert } from 'lucide-react';
 import { UserAccountStatus } from '@/features/admin/types/user-management.types';
+import { useLanguage } from '@/context/language-context';
 
 export interface UserHeaderProps {
   activeCount: number;
@@ -31,6 +32,8 @@ export function UserHeader({
   onSearchChange,
   onRefresh,
 }: UserHeaderProps) {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
   const [prevSearchQuery, setPrevSearchQuery] = useState(searchQuery);
   const [localSearch, setLocalSearch] = useState(searchQuery);
 
@@ -52,11 +55,13 @@ export function UserHeader({
         <div>
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-black text-white font-h1 tracking-tight">
-              User Account Management & Sanctions
+              {isVie ? 'Quản lý Tài khoản & Xử lý Vi phạm' : 'User Account Management & Sanctions'}
             </h1>
           </div>
           <p className="text-xs text-[#8A8FA9] mt-1">
-            Search registered user accounts, edit permissions, and apply temporary suspensions or permanent bans.
+            {isVie
+              ? 'Tìm kiếm tài khoản người dùng, chỉnh sửa phân quyền và áp dụng tạm khóa hoặc cấm vĩnh viễn.'
+              : 'Search registered user accounts, edit permissions, and apply temporary suspensions or permanent bans.'}
           </p>
         </div>
 
@@ -65,19 +70,19 @@ export function UserHeader({
           <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
             <span className="font-h1 font-bold">{activeCount}</span>
-            <span className="text-emerald-400/80 font-normal">Active</span>
+            <span className="text-emerald-400/80 font-normal">{isVie ? 'Hoạt động' : 'Active'}</span>
           </div>
 
           <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-semibold">
             <ShieldAlert className="w-3.5 h-3.5" />
             <span className="font-h1 font-bold">{lockedCount}</span>
-            <span className="text-red-400/80 font-normal">Locked / Suspended</span>
+            <span className="text-red-400/80 font-normal">{isVie ? 'Tạm khóa / Bị cấm' : 'Locked / Suspended'}</span>
           </div>
 
           <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-white/5 border border-white/10 text-[#C5C9F8] text-xs font-semibold">
             <Users className="w-3.5 h-3.5 text-[#8A8FA9]" />
             <span className="font-h1 font-bold">{totalCount}</span>
-            <span className="text-[#8A8FA9] font-normal">Total</span>
+            <span className="text-[#8A8FA9] font-normal">{isVie ? 'Tổng' : 'Total'}</span>
           </div>
         </div>
       </div>
@@ -91,7 +96,7 @@ export function UserHeader({
           </div>
           <input
             type="text"
-            placeholder="Search by username or email..."
+            placeholder={isVie ? 'Tìm theo username hoặc email...' : 'Search by username or email...'}
             value={localSearch}
             onChange={(e) => setLocalSearch(e.target.value)}
             onKeyDown={handleSearchKeyDown}
@@ -111,12 +116,12 @@ export function UserHeader({
             onChange={(e) => onRoleChange(e.target.value)}
             className="px-3.5 py-2 bg-black/40 border border-white/10 rounded-xl text-white font-semibold text-xs focus:outline-none focus:border-red-400/80 cursor-pointer w-full md:w-auto"
           >
-            <option value="All" className="bg-[#161926] text-white">All Roles</option>
-            <option value="Client" className="bg-[#161926] text-white">Client Only</option>
-            <option value="Creator" className="bg-[#161926] text-white">Creator Only</option>
-            <option value="Dual-Role" className="bg-[#161926] text-white">Dual-Role</option>
-            <option value="Moderator" className="bg-[#161926] text-white">Moderator</option>
-            <option value="Administrator" className="bg-[#161926] text-white">Administrator</option>
+            <option value="All" className="bg-[#161926] text-white">{isVie ? 'Tất cả vai trò' : 'All Roles'}</option>
+            <option value="Client" className="bg-[#161926] text-white">{isVie ? 'Chỉ Client' : 'Client Only'}</option>
+            <option value="Creator" className="bg-[#161926] text-white">{isVie ? 'Chỉ Creator' : 'Creator Only'}</option>
+            <option value="Dual-Role" className="bg-[#161926] text-white">{isVie ? 'Cả hai vai trò' : 'Dual-Role'}</option>
+            <option value="Moderator" className="bg-[#161926] text-white">{isVie ? 'Moderator' : 'Moderator'}</option>
+            <option value="Administrator" className="bg-[#161926] text-white">{isVie ? 'Administrator' : 'Administrator'}</option>
           </select>
 
           {/* Status Filter Dropdown */}
@@ -125,9 +130,9 @@ export function UserHeader({
             onChange={(e) => onStatusChange(e.target.value as UserAccountStatus)}
             className="px-3.5 py-2 bg-black/40 border border-white/10 rounded-xl text-white font-semibold text-xs focus:outline-none focus:border-red-400/80 cursor-pointer w-full md:w-auto"
           >
-            <option value="All" className="bg-[#161926] text-white">All Statuses</option>
-            <option value="Active" className="bg-[#161926] text-white">Active Accounts</option>
-            <option value="LockedOut" className="bg-[#161926] text-white">Suspended / Locked</option>
+            <option value="All" className="bg-[#161926] text-white">{isVie ? 'Tất cả trạng thái' : 'All Statuses'}</option>
+            <option value="Active" className="bg-[#161926] text-white">{isVie ? 'Đang hoạt động' : 'Active Accounts'}</option>
+            <option value="LockedOut" className="bg-[#161926] text-white">{isVie ? 'Tạm khóa / Bị cấm' : 'Suspended / Locked'}</option>
           </select>
 
           {/* Refresh Button */}
@@ -136,7 +141,7 @@ export function UserHeader({
             onClick={onRefresh}
             disabled={isLoading}
             className="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-[#8A8FA9] hover:text-white transition-all duration-200 cursor-pointer shrink-0 disabled:opacity-50"
-            title="Refresh Users"
+            title={isVie ? 'Làm mới danh sách' : 'Refresh Users'}
           >
             <RotateCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-red-400' : ''}`} />
           </button>

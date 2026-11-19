@@ -18,6 +18,7 @@ import {
   resolveEventId,
 } from '../permissions-tab/permissions-tab';
 import { adminDisputeService } from '@/features/admin/services/dispute.service';
+import { useLanguage } from '@/context/language-context';
 import { eventService } from '../../../services/event.service';
 import type { EventListItemDto } from '../../../types/event.types';
 import type {
@@ -26,6 +27,9 @@ import type {
 } from '@/features/admin/types/dispute-arbitration.types';
 
 export function DisputesTab() {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
+
   const [events, setEvents] = useState<EventListItemDto[]>([]);
   // Default to 'all' so admin initially sees the queue-wide disputes
   const [selectedEventId, setSelectedEventId] = useState<string>('all');
@@ -61,8 +65,8 @@ export function DisputesTab() {
   const isJudgingPhaseActive =
     selectedEvent && selectedEvent.id !== 'all'
       ? selectedEvent.status === 'Judging' ||
-        selectedEvent.status === 'Ended' ||
-        (selectedEvent.judgingStartAt ? new Date() >= new Date(selectedEvent.judgingStartAt) : false)
+      selectedEvent.status === 'Ended' ||
+      (selectedEvent.judgingStartAt ? new Date() >= new Date(selectedEvent.judgingStartAt) : false)
       : false;
 
   // 1. Fetch available events for contest selection
@@ -73,8 +77,9 @@ export function DisputesTab() {
         if (res.items && res.items.length > 0) {
           setEvents(res.items);
         }
-      } catch (err) {
+      } catch (err: unknown) {
         console.error('Failed to load events list:', err);
+        toast.error(err instanceof Error ? err.message : 'Không thể tải danh sách sự kiện.');
       }
     }
     void fetchEvents();
@@ -93,11 +98,12 @@ export function DisputesTab() {
           eventId: isGuid && targetEventId !== 'all' ? resolvedGuid : undefined,
           status: statusFilter !== 'All' ? statusFilter : undefined,
           page: 1,
-          pageSize: 50,
+          pageSize: 100,
         });
 
         if (res.items) {
           setDisputes(res.items);
+          window.dispatchEvent(new CustomEvent('dil:disputes-updated'));
         }
       } catch (err: unknown) {
         console.error('Failed to load disputes from backend:', err);
@@ -117,6 +123,21 @@ export function DisputesTab() {
       await loadDisputes(selectedEventId);
     })();
   }, [selectedEventId, statusFilter, loadDisputes]);
+
+  // Reload queue when admin returns to this browser tab/window
+  useEffect(() => {
+    const handleRefreshOnFocus = () => {
+      if (document.visibilityState === 'visible') {
+        void loadDisputes(selectedEventId);
+      }
+    };
+    window.addEventListener('focus', handleRefreshOnFocus);
+    document.addEventListener('visibilitychange', handleRefreshOnFocus);
+    return () => {
+      window.removeEventListener('focus', handleRefreshOnFocus);
+      document.removeEventListener('visibilitychange', handleRefreshOnFocus);
+    };
+  }, [selectedEventId, loadDisputes]);
 
   // 1. Contest-scoped disputes (for KPI stats & filtering)
   const contestDisputes = useMemo(() => {
@@ -140,8 +161,9 @@ export function DisputesTab() {
         const matchTitle = (item.submissionTitle || '').toLowerCase().includes(q);
         const matchEvent = (item.eventTitle || '').toLowerCase().includes(q);
         const matchReason = (item.reason || '').toLowerCase().includes(q);
+        const matchCategory = (item.category || '').toLowerCase().includes(q);
         const matchReporter = (item.raisedByName || '').toLowerCase().includes(q);
-        return matchCode || matchTitle || matchEvent || matchReason || matchReporter;
+        return matchCode || matchTitle || matchEvent || matchReason || matchCategory || matchReporter;
       }
       return true;
     });
@@ -207,7 +229,7 @@ export function DisputesTab() {
   // KPI Statistics - Strictly derived from contestDisputes to ensure 100% sync with table!
   const openCount = contestDisputes.filter((d) => d.status === 'Pending' || d.status === 'UnderReview').length;
   const highPriorityCount = contestDisputes.filter((d) => d.priority === 'High').length;
-  const resolvedCount = contestDisputes.filter((d) => d.status === 'Resolved').length;
+  const resolvedCount = contestDisputes.filter((d) => d.status === 'Resolved' || d.status === 'Rejected').length;
   const overdueCount = 0;
 
   return (
@@ -220,11 +242,13 @@ export function DisputesTab() {
               <Scale className="w-4 h-4" />
             </div>
             <h1 className="font-h1 text-2xl font-extrabold text-white">
-              Contest Dispute Resolution Queue
+              {isVie ? 'Hàng đợi Giải quyết Tranh chấp Sự kiện' : 'Contest Dispute Resolution Queue'}
             </h1>
           </div>
           <p className="text-xs text-[#8A8FA9] mt-1 font-body">
-            Investigate reported contest submissions, score variance appeals, AI artwork flags, and execute arbitrator rulings.
+            {isVie
+              ? 'Kiểm tra các bài dự thi bị báo cáo, khiếu nại chênh lệch điểm, cảnh báo tranh chấp AI và thực thi phán quyết trọng tài.'
+              : 'Investigate reported contest submissions, score variance appeals, AI artwork flags, and execute arbitrator rulings.'}
           </p>
         </div>
 
@@ -232,7 +256,7 @@ export function DisputesTab() {
           {/* Pending Count Pill */}
           <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-amber-500/20 text-amber-300 text-xs font-bold rounded-full border border-amber-500/30 shadow-[0_0_12px_rgba(245,158,11,0.2)]">
             <AlertTriangle className="w-3.5 h-3.5" />
-            <span>{openCount} Cases Under Review</span>
+            <span>{isVie ? `${openCount} Khiếu nại đang chờ xử lý` : `${openCount} Cases Under Review`}</span>
           </span>
 
           {/* Sync Live Queue Button */}
@@ -241,10 +265,10 @@ export function DisputesTab() {
             onClick={() => void loadDisputes(selectedEventId)}
             disabled={isLoading}
             className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/10 hover:bg-white/15 text-white text-xs font-bold transition-all border border-white/10 disabled:opacity-50 cursor-pointer"
-            title="Refresh queue"
+            title={isVie ? 'Làm mới hàng đợi' : 'Refresh queue'}
           >
             <RotateCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin text-brand-periwinkle' : ''}`} />
-            <span className="hidden sm:inline">Sync Live Queue</span>
+            <span className="hidden sm:inline">{isVie ? 'Đồng bộ hàng đợi' : 'Sync Live Queue'}</span>
           </button>
         </div>
       </div>
@@ -253,7 +277,7 @@ export function DisputesTab() {
       <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl border border-white/10 bg-[#161926]/80 backdrop-blur-xl">
         <div className="flex flex-wrap items-center gap-3">
           <label className="text-xs font-semibold text-[#A7ACD9] uppercase tracking-wider shrink-0">
-            Target Contest:
+            {isVie ? 'Cuộc thi mục tiêu:' : 'Target Contest:'}
           </label>
           <ContestSearchSelect
             events={events}
@@ -268,21 +292,20 @@ export function DisputesTab() {
 
         {/* Status Indicator */}
         <div className="flex items-center gap-2">
-          <span className="text-xs text-outline">Judging Phase Status:</span>
+          <span className="text-xs text-outline">{isVie ? 'Trạng thái giai đoạn chấm:' : 'Judging Phase Status:'}</span>
           <span
-            className={`px-3 py-1 rounded-full text-xs font-bold ${
-              selectedEventId === 'all'
+            className={`px-3 py-1 rounded-full text-xs font-bold ${selectedEventId === 'all'
                 ? 'bg-brand-periwinkle/20 text-brand-periwinkle border border-brand-periwinkle/30'
                 : isJudgingPhaseActive
-                ? 'bg-amber-500/20 text-amber-300 border border-amber-400/30'
-                : 'bg-emerald-500/20 text-emerald-300 border border-emerald-400/30'
-            }`}
+                  ? 'bg-amber-500/20 text-amber-300 border border-amber-400/30'
+                  : 'bg-emerald-500/20 text-emerald-300 border border-emerald-400/30'
+              }`}
           >
             {selectedEventId === 'all'
-              ? '🌐 Global Queue Active'
+              ? (isVie ? '🌐 Hàng đợi chung đang kích hoạt' : '🌐 Global Queue Active')
               : isJudgingPhaseActive
-              ? '🔒 Judging Started (Locked)'
-              : '🔓 Open for Jury Assignments'}
+                ? (isVie ? '🔒 Đã bắt đầu chấm (Đã khóa)' : '🔒 Judging Started (Locked)')
+                : (isVie ? '🔓 Mở phân công giám khảo' : '🔓 Open for Jury Assignments')}
           </span>
         </div>
       </div>
@@ -307,7 +330,7 @@ export function DisputesTab() {
               setSearchQuery(e.target.value);
               setPage(1);
             }}
-            placeholder="Search dispute by case ID, title, or reason..."
+            placeholder={isVie ? 'Tìm tranh chấp theo mã đơn, tiêu đề hoặc lý do...' : 'Search dispute by case ID, title, or reason...'}
             className="w-full h-10 pl-10 pr-9 bg-[#090b12]/80 border border-white/10 rounded-xl text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-brand-periwinkle focus:ring-1 focus:ring-brand-periwinkle/30 transition-all font-body"
           />
           {searchQuery && (
@@ -331,11 +354,11 @@ export function DisputesTab() {
             }}
             className="w-full h-10 px-3 pr-8 bg-[#090b12]/80 border border-white/10 rounded-xl text-xs text-white focus:outline-none focus:border-brand-periwinkle focus:ring-1 focus:ring-brand-periwinkle/30 transition-all cursor-pointer font-medium"
           >
-            <option value="All" className="bg-[#161926]">All Statuses</option>
-            <option value="Pending" className="bg-[#161926]">Pending</option>
-            <option value="UnderReview" className="bg-[#161926]">Under Review</option>
-            <option value="Resolved" className="bg-[#161926]">Resolved</option>
-            <option value="Rejected" className="bg-[#161926]">Rejected</option>
+            <option value="All" className="bg-[#161926]">{isVie ? 'Tất cả trạng thái' : 'All Statuses'}</option>
+            <option value="Pending" className="bg-[#161926]">{isVie ? 'Chờ xử lý' : 'Pending'}</option>
+            <option value="UnderReview" className="bg-[#161926]">{isVie ? 'Đang duyệt' : 'Under Review'}</option>
+            <option value="Resolved" className="bg-[#161926]">{isVie ? 'Đã giải quyết' : 'Resolved'}</option>
+            <option value="Rejected" className="bg-[#161926]">{isVie ? 'Đã từ chối' : 'Rejected'}</option>
           </select>
         </div>
       </div>

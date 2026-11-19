@@ -23,7 +23,7 @@ function formatTimestamp(dateStr?: string | null) {
 import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { Package, Sparkles, ChevronLeft, ChevronRight, X, Clock, Star, ArrowUpDown, Gavel } from 'lucide-react';
+import { Package, Sparkles, ChevronLeft, ChevronRight, X, Clock, Star, ArrowUpDown, Gavel, ArrowLeftRight } from 'lucide-react';
 import CreateCommissionModal from '@/components/modals/CreateCommissionModal';
 import { useAuthStore } from '@/store/use-auth-store';
 import { creatorRateCardService, getPackageSlotInfo, type RateCardPackage } from '@/features/creator-studio/services/creator-rate-card.service';
@@ -169,7 +169,40 @@ export function CreatorProfileScreen({ id }: { id: string }) {
       <h1 className="mt-2 break-words font-h1 text-3xl font-bold text-white">{profile.displayName}</h1>
       <p className="mt-2 text-sm text-[#C7C5CF]">{profile.headline || 'Digital artist'}</p>
       <div className="mt-5 flex items-center justify-between text-sm"><span>{profile.followerCount} người theo dõi</span><span>★ {profile.ratingAverage.toFixed(1)}</span></div>
-      {isOwnProfile ? <Link href="/creator/profile/edit" className="mt-5 inline-flex w-full justify-center rounded-xl border border-white/15 px-4 py-2.5 text-sm text-white">Chỉnh sửa hồ sơ</Link> : authenticated ? <button type="button" disabled={busy} aria-pressed={following} onClick={() => void toggleFollow()} className="mt-5 w-full rounded-xl bg-[#A7ACD9] px-4 py-2.5 text-sm font-semibold text-[#1F2335] disabled:opacity-50">{busy ? 'Đang cập nhật…' : following ? 'Đang theo dõi' : 'Theo dõi'}</button> : <Link href="/login" className="mt-5 inline-flex w-full justify-center rounded-xl bg-[#A7ACD9] px-4 py-2.5 text-sm font-semibold text-[#1F2335]">Đăng nhập để theo dõi</Link>}
+      {isOwnProfile ? (
+        <Link href="/creator/profile/edit" className="mt-5 inline-flex w-full justify-center rounded-xl border border-white/15 px-4 py-2.5 text-sm text-white">
+          Chỉnh sửa hồ sơ
+        </Link>
+      ) : (
+        <div className="mt-5 space-y-2">
+          {authenticated ? (
+            <button
+              type="button"
+              disabled={busy}
+              aria-pressed={following}
+              onClick={() => void toggleFollow()}
+              className="w-full rounded-xl bg-[#A7ACD9] px-4 py-2.5 text-sm font-semibold text-[#1F2335] disabled:opacity-50 cursor-pointer transition hover:bg-[#b8bde4]"
+            >
+              {busy ? 'Đang cập nhật…' : following ? 'Đang theo dõi' : 'Theo dõi'}
+            </button>
+          ) : (
+            <Link
+              href="/login"
+              className="inline-flex w-full justify-center rounded-xl bg-[#A7ACD9] px-4 py-2.5 text-sm font-semibold text-[#1F2335]"
+            >
+              Đăng nhập để theo dõi
+            </Link>
+          )}
+
+          <Link
+            href={`/art-trades/create?receiverId=${profile.userId}&name=${encodeURIComponent(profile.displayName)}`}
+            className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-[#A7ACD9]/30 bg-[#A7ACD9]/10 hover:bg-[#A7ACD9]/20 text-[#A7ACD9] hover:text-white px-4 py-2.5 text-xs font-semibold uppercase tracking-wider transition cursor-pointer"
+          >
+            <ArrowLeftRight className="w-3.5 h-3.5" />
+            Đề nghị trao đổi tranh
+          </Link>
+        </div>
+      )}
       {profile.bio && <p className="mt-5 whitespace-pre-line text-sm leading-6 text-[#C7C5CF]">{profile.bio}</p>}
       {profile.specialties && <p className="mt-4 text-xs text-[#919099]">{profile.specialties}</p>}
     </div>}>

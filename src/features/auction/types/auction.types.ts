@@ -59,6 +59,10 @@ export interface AuctionDetailDto extends AuctionListItemDto {
   physicalChoiceDeadline?: string | null;
   delivery?: AuctionDeliveryDto | null;
   receipts?: AuctionReceiptDto[] | null;
+  /** Mức phạt hiện tại của người bán trên thang 5 mức (0 = chưa bị phạt). */
+  sellerPenaltyLevel?: number;
+  /** Giá trần auto-bid của chính người đang xem (null nếu chưa đăng ký). */
+  myAutoBidMax?: number | null;
 }
 
 export interface AuctionDeliveryDto {
@@ -81,6 +85,10 @@ export interface AuctionDeliveryDto {
   confirmedAt?: string | null;
   disputeReason?: string | null;
   disputeEvidenceUrl?: string | null;
+  /** Danh sách ảnh bằng chứng khiếu nại (tối đa 5) — gộp cả ảnh cũ lẫn ảnh tải lên nhiều. */
+  disputeImageUrls?: string[] | null;
+  /** Video bằng chứng khiếu nại (tối đa 1). */
+  disputeVideoUrl?: string | null;
   /** Moc he thong tu dong xac nhan da nhan hang (shippedAt + 48h). */
   autoConfirmAt?: string | null;
   /** Khieu nai gui sau khi ky quy da giai ngan — khong con quy de dong bang/hoan. */
@@ -364,6 +372,116 @@ export interface ArtworkProvenanceDto {
   isCurrentOwnerCollector: boolean;
   exclusiveBadge: string;
   history: ArtworkProvenanceHistoryItemDto[];
+}
+
+/** Payload sửa phiên (AUCT-04) — người bán chỉ sửa được phiên Scheduled chưa có bid. */
+export interface AuctionUpdatePayload {
+  startPrice?: number;
+  bidStep?: number;
+  buyNowPrice?: number | null;
+  startAt?: string;
+  endAt?: string;
+  /** Xoá giá mua ngay (buyNowPrice = null) — cần cờ riêng vì null = "không đổi". */
+  clearBuyNowPrice?: boolean;
+}
+
+/** Kết quả huỷ đăng ký Auto-bid của chính người dùng. */
+export interface CancelAutoBidResult {
+  message: string;
+}
+
+/** Kết quả tải nhiều bằng chứng khiếu nại (tối đa 5 ảnh + 1 video). */
+export interface DisputeMediaUploadResult {
+  images: { fileUrl: string; fileName: string; fileSizeBytes: number; kind: string }[];
+  videoUrl: string | null;
+  imageCount: number;
+  hasVideo: boolean;
+}
+
+/** Một án phạt giao hàng nhìn từ phía Ban quản trị. */
+export interface AuctionPenaltyAdminDto {
+  penaltyId: string;
+  sellerId: string;
+  sellerName: string | null;
+  sellerEmail: string | null;
+  strikeLevel: number;
+  status: 'Active' | 'Revoked' | 'Expired' | string;
+  surchargePercent: number | null;
+  sessionsTotal: number;
+  sessionsUsed: number;
+  banUntil: string | null;
+  escrowReleasedAtStrike: boolean;
+  sourceAuctionId: string;
+  sourceDeliveryId: string | null;
+  reason: string | null;
+  revokedAt: string | null;
+  revokedByAdminName: string | null;
+  revokeReason: string | null;
+  createdAt: string;
+}
+
+export interface AuctionPenaltyRevokeResultDto {
+  penaltyId: string;
+  sellerId: string;
+  strikeLevel: number;
+  status: string;
+  revokedAt: string;
+  revokeReason: string | null;
+}
+
+/** Một lần bị báo cáo / bị phạt, nhìn từ phía chính người bán. */
+export interface MyAuctionPenaltyDto {
+  penaltyId: string;
+  strikeLevel: number;
+  status: 'Active' | 'Consumed' | 'Revoked' | string;
+  surchargePercent: number | null;
+  sessionsTotal: number;
+  sessionsUsed: number;
+  banUntil: string | null;
+  escrowReleasedAtStrike: boolean;
+  /** Kết luận của Ban quản trị cho án phạt này. */
+  reason: string | null;
+  /** Lý do người mua nêu khi gửi khiếu nại. */
+  buyerComplaint: string | null;
+  /** Ghi chú phân xử của Ban quản trị. */
+  adminNote: string | null;
+  /** refund = người mua được hoàn tiền; paid-out = tiền đã về ví người bán. */
+  disputeResolution: 'refund' | 'paid-out' | 'release' | string | null;
+  evidenceImageCount: number;
+  hasEvidenceVideo: boolean;
+  sourceAuctionId: string;
+  sourceDeliveryId: string | null;
+  artworkTitle: string | null;
+  artworkThumbnailUrl: string | null;
+  revokedAt: string | null;
+  revokeReason: string | null;
+  createdAt: string;
+}
+
+/** Tình trạng bán hiện tại của người bán. */
+export interface MyPenaltySummary {
+  currentLevel: number;
+  activeSurchargePercent: number;
+  surchargeSessionsRemaining: number;
+  bannedUntil: string | null;
+  /** Án đang phải chịu ngay lúc này (còn phụ phí hoặc còn khoá bán). */
+  activePenaltyCount: number;
+  /** Án đã trừ hết số phiên phụ phí — không còn hiệu lực nhưng không bị thu hồi. */
+  consumedPenaltyCount: number;
+  revokedPenaltyCount: number;
+}
+
+export interface MyPenaltiesResult {
+  items: MyAuctionPenaltyDto[];
+  nextCursor: string | null;
+  total: number;
+  summary: MyPenaltySummary;
+}
+
+export interface AuctionPenaltyFilters {
+  status?: string;
+  sellerId?: string;
+  minLevel?: number;
 }
 
 export interface CommercialRightsDeedDto {

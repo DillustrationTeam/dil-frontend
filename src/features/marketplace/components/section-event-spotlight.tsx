@@ -3,9 +3,10 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { useLanguage } from '@/context/language-context';
 import { apiClient } from '@/lib/api-client';
 import type { ApiResponse } from '@/types/api.types';
-import type { EventListItemDto } from '@/features/event/types/event.types';
+import { normalizeEventStatus, type EventListItemDto } from '@/features/event/types/event.types';
 import type { MarketplaceArtwork } from '../services/marketplace.service';
 
 interface SpotlightArtwork extends MarketplaceArtwork {
@@ -13,29 +14,37 @@ interface SpotlightArtwork extends MarketplaceArtwork {
   eventTitle?: string;
 }
 
-function EventStatusPill({ status }: { status: string | number }) {
-  const s = String(status).toLowerCase();
-  if (s === 'open' || s === '2')
+function EventStatusPill({ status, isVie }: { status: string | number; isVie: boolean }) {
+  const s = normalizeEventStatus(status);
+  if (s === 'Upcoming')
+    return (
+      <span className="inline-flex items-center gap-1.5 rounded-full border border-sky-400/30 bg-sky-950/70 px-2.5 py-0.5 text-xs font-medium text-sky-300">
+        {isVie ? 'Chờ mở nộp bài' : 'Upcoming'}
+      </span>
+    );
+  if (s === 'Open')
     return (
       <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/30 bg-emerald-950/70 px-2.5 py-0.5 text-xs font-medium text-emerald-300">
         <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" />
-        Đang diễn ra
+        {isVie ? 'Đang diễn ra' : 'Submissions Open'}
       </span>
     );
-  if (s === 'judging' || s === '3')
+  if (s === 'Judging')
     return (
       <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/30 bg-amber-950/70 px-2.5 py-0.5 text-xs font-medium text-amber-300">
-        Chấm điểm
+        {isVie ? 'Chấm điểm' : 'Judging Phase'}
       </span>
     );
   return (
     <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/5 px-2.5 py-0.5 text-xs font-medium text-[#919099]">
-      Đã kết thúc
+      {isVie ? 'Đã kết thúc' : 'Ended'}
     </span>
   );
 }
 
 export function SectionEventSpotlight() {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
   const [events, setEvents] = useState<EventListItemDto[]>([]);
   const [artworks, setArtworks] = useState<SpotlightArtwork[]>([]);
   const [loading, setLoading] = useState(true);
@@ -91,14 +100,16 @@ export function SectionEventSpotlight() {
         <div>
           <p className="text-xs uppercase tracking-[0.2em] text-[#A7ACD9]">Events &amp; Art</p>
           <h2 id="event-spotlight-title" className="mt-1 font-h1 text-2xl font-bold text-white">
-            Sự kiện nổi bật &amp; Tuyển chọn
+            {isVie ? 'Sự kiện nổi bật & Tuyển chọn' : 'Featured Events & Curations'}
           </h2>
           <p className="mt-1 text-sm text-[#C7C5CF]">
-            Những tác phẩm &amp; cuộc thi nghệ thuật đang thu hút cộng đồng.
+            {isVie
+              ? 'Những tác phẩm & cuộc thi nghệ thuật đang thu hút cộng đồng.'
+              : 'Community-spotlighted art competitions and curated illustrations.'}
           </p>
         </div>
         <Link href="/events" className="text-sm text-[#A7ACD9] hover:underline">
-          Tất cả sự kiện →
+          {isVie ? 'Tất cả sự kiện →' : 'All Events →'}
         </Link>
       </div>
 
@@ -107,7 +118,7 @@ export function SectionEventSpotlight() {
         <div className="space-y-4 lg:col-span-2">
           {events.length === 0 && (
             <p className="rounded-2xl border border-dashed border-white/10 p-8 text-center text-sm text-[#919099]">
-              Chưa có sự kiện nào.
+              {isVie ? 'Chưa có sự kiện nào.' : 'No events available.'}
             </p>
           )}
           {events.map((evt) => (
@@ -129,14 +140,14 @@ export function SectionEventSpotlight() {
               )}
               <div className="flex flex-col justify-between gap-2 p-4">
                 <div>
-                  <EventStatusPill status={evt.status} />
+                  <EventStatusPill status={evt.status} isVie={isVie} />
                   <h3 className="mt-2 line-clamp-2 text-sm font-semibold text-white">{evt.title}</h3>
                 </div>
                 <p className="text-xs text-[#919099]">
-                  {evt.submissionCount} bài dự thi ·{' '}
+                  {isVie ? `${evt.submissionCount} bài dự thi` : `${evt.submissionCount} submissions`} ·{' '}
                   {new Date(evt.submissionEndAt) > new Date()
-                    ? `Hết hạn ${new Date(evt.submissionEndAt).toLocaleDateString('vi-VN')}`
-                    : 'Đã kết thúc nhận bài'}
+                    ? `${isVie ? 'Hết hạn' : 'Closes'} ${new Date(evt.submissionEndAt).toLocaleDateString(isVie ? 'vi-VN' : 'en-US')}`
+                    : isVie ? 'Đã kết thúc nhận bài' : 'Submissions closed'}
                 </p>
               </div>
             </Link>
@@ -146,16 +157,18 @@ export function SectionEventSpotlight() {
             href="/events"
             className="flex items-center justify-center gap-2 rounded-2xl border border-dashed border-white/10 py-4 text-sm text-[#A7ACD9] hover:border-[#A7ACD9]/40 hover:bg-white/[.02]"
           >
-            Xem tất cả sự kiện →
+            {isVie ? 'Xem tất cả sự kiện →' : 'Explore all events →'}
           </Link>
         </div>
 
         {/* Featured artworks grid */}
         <div className="lg:col-span-3">
-          <p className="mb-3 text-xs font-medium uppercase tracking-widest text-[#919099]">Tác phẩm tuyển chọn</p>
+          <p className="mb-3 text-xs font-medium uppercase tracking-widest text-[#919099]">
+            {isVie ? 'Tác phẩm tuyển chọn' : 'Featured Artworks'}
+          </p>
           {artworks.length === 0 ? (
             <p className="rounded-2xl border border-dashed border-white/10 p-8 text-center text-sm text-[#919099]">
-              Chưa có tác phẩm.
+              {isVie ? 'Chưa có tác phẩm.' : 'No artworks available.'}
             </p>
           ) : (
             <div className="grid grid-cols-3 gap-3">

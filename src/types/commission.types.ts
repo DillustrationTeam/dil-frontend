@@ -29,7 +29,16 @@ export interface Milestone {
   maxRevisions?: number;
   creatorNote?: string | null;
   revisionFeedback?: string | null;
+  revisionFeedbackImageUrl?: string | null;
+  revisionAnnotationsJson?: string | null;
   price: number;
+}
+
+export interface PinAnnotation {
+  id: number;
+  x: number; // percentage (0 - 100)
+  y: number; // percentage (0 - 100)
+  note?: string;
 }
 
 export interface Commission {
@@ -72,6 +81,7 @@ export interface Commission {
   currentWorkroomTermsVersion?: string;
   creatorTermsSnapshot?: CreatorTermsDto | null;
   milestones?: Milestone[];
+  referenceImages?: string[];
   review?: Review | null;
   dispute?: Dispute | null;
   createdAt: string;
@@ -112,6 +122,7 @@ export interface CreateCommissionPayload {
   title: string;
   description: string;
   deadlineAt?: string;
+  referenceImages?: string[];
 }
 
 export interface Review {

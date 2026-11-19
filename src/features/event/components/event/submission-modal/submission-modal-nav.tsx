@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { FolderHeart, MonitorUp } from 'lucide-react';
+import { useLanguage } from '@/context/language-context';
 
 export type SubmissionMode = 'existing' | 'upload';
 
@@ -11,6 +12,9 @@ interface SubmissionModalNavProps {
 }
 
 export function SubmissionModalNav({ mode, setMode }: SubmissionModalNavProps) {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
+
   return (
     <div className="flex border-b border-white/10 px-6 bg-white/[0.015]">
       <button
@@ -23,7 +27,7 @@ export function SubmissionModalNav({ mode, setMode }: SubmissionModalNavProps) {
         }`}
       >
         <FolderHeart size={15} />
-        <span>Select from My Artworks</span>
+        <span>{isVie ? 'Chọn từ tác phẩm của tôi' : 'Select from My Artworks'}</span>
       </button>
 
       <button
@@ -36,7 +40,7 @@ export function SubmissionModalNav({ mode, setMode }: SubmissionModalNavProps) {
         }`}
       >
         <MonitorUp size={15} />
-        <span>Upload from PC</span>
+        <span>{isVie ? 'Tải lên từ máy tính' : 'Upload from PC'}</span>
       </button>
     </div>
   );

@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { X, ZoomIn, ZoomOut, RotateCcw, ShieldCheck } from 'lucide-react';
+import { useLanguage } from '@/context/language-context';
 
 interface JuryArtworkLightboxProps {
   isOpen: boolean;
@@ -22,6 +23,9 @@ export function JuryArtworkLightbox({
   category,
   aiScanPassed = true,
 }: JuryArtworkLightboxProps) {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
+
   const [scale, setScale] = useState(1);
   const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
 
@@ -71,7 +75,9 @@ export function JuryArtworkLightbox({
                 </span>
               )}
             </div>
-            <p className="text-xs text-[#9695a1] mt-0.5">Anonymous Candidate</p>
+            <p className="text-xs text-[#9695a1] mt-0.5">
+              {isVie ? 'Thí sinh ẩn danh' : 'Anonymous Candidate'}
+            </p>
           </div>
         </div>
 
@@ -80,7 +86,7 @@ export function JuryArtworkLightbox({
           {aiScanPassed && (
             <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs mr-2">
               <ShieldCheck className="w-4 h-4" />
-              <span>AI Scan Passed</span>
+              <span>{isVie ? 'Đạt kiểm tra AI' : 'AI Scan Passed'}</span>
             </div>
           )}
 
@@ -89,7 +95,7 @@ export function JuryArtworkLightbox({
               type="button"
               onClick={() => setScale((s) => Math.max(0.5, s - 0.25))}
               className="p-1.5 text-[#9695a1] hover:text-white hover:bg-white/10 rounded-lg transition-colors"
-              title="Zoom Out (-)"
+              title={isVie ? 'Thu nhỏ (-)' : 'Zoom Out (-)'}
             >
               <ZoomOut className="w-4 h-4" />
             </button>
@@ -100,7 +106,7 @@ export function JuryArtworkLightbox({
               type="button"
               onClick={() => setScale((s) => Math.min(3, s + 0.25))}
               className="p-1.5 text-[#9695a1] hover:text-white hover:bg-white/10 rounded-lg transition-colors"
-              title="Zoom In (+)"
+              title={isVie ? 'Phóng to (+)' : 'Zoom In (+)'}
             >
               <ZoomIn className="w-4 h-4" />
             </button>
@@ -108,7 +114,7 @@ export function JuryArtworkLightbox({
               type="button"
               onClick={() => setScale(1)}
               className="p-1.5 text-[#9695a1] hover:text-white hover:bg-white/10 rounded-lg transition-colors border-l border-white/10"
-              title="Reset Zoom (0)"
+              title={isVie ? 'Đặt lại kích thước (0)' : 'Reset Zoom (0)'}
             >
               <RotateCcw className="w-4 h-4" />
             </button>
@@ -118,7 +124,7 @@ export function JuryArtworkLightbox({
             type="button"
             onClick={onClose}
             className="p-2 text-[#9695a1] hover:text-white hover:bg-white/10 rounded-xl transition-colors ml-2"
-            title="Close (Esc)"
+            title={isVie ? 'Đóng (Esc)' : 'Close (Esc)'}
           >
             <X className="w-5 h-5" />
           </button>
@@ -149,7 +155,9 @@ export function JuryArtworkLightbox({
 
       {/* Bottom Hint Bar */}
       <div className="text-center py-2 text-[11px] text-[#9695a1] bg-[#11131d]/60 border-t border-white/5">
-        Click image or use +/- to zoom into brushwork details · Press ESC to close
+        {isVie
+          ? 'Nhấp chuột vào ảnh hoặc nhấn +/- để soi chi tiết nét vẽ · Nhấn ESC để đóng'
+          : 'Click image or use +/- to zoom into brushwork details · Press ESC to close'}
       </div>
     </div>
   );

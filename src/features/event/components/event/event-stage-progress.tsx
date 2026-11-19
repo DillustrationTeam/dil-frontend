@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { CheckCircle2, Clock, Crown, Sparkles, Vote, Award } from 'lucide-react';
 import type { EventDetailDto } from '../../types/event.types';
+import { useLanguage } from '@/context/language-context';
 
 interface EventStageProgressProps {
   event: EventDetailDto;
@@ -17,17 +18,19 @@ interface StageStep {
   icon: React.ReactNode;
 }
 
-function formatShortDate(dateStr: string | null | undefined): string {
-  if (!dateStr) return 'TBD';
+function formatShortDate(dateStr: string | null | undefined, isVie?: boolean): string {
+  if (!dateStr) return isVie ? 'Chưa rõ' : 'TBD';
   const d = new Date(dateStr);
-  if (isNaN(d.getTime())) return 'TBD';
-  return d.toLocaleDateString('en-US', {
+  if (isNaN(d.getTime())) return isVie ? 'Chưa rõ' : 'TBD';
+  return d.toLocaleDateString(isVie ? 'vi-VN' : 'en-US', {
     month: 'short',
     day: 'numeric',
   });
 }
 
 export function EventStageProgress({ event }: EventStageProgressProps) {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
   const [now] = useState(() => Date.now());
 
   const subStart = new Date(event.submissionStartAt).getTime();
@@ -106,34 +109,50 @@ export function EventStageProgress({ event }: EventStageProgressProps) {
   const steps: StageStep[] = [
     {
       id: 'submission',
-      name: 'Submission',
-      rangeText: `(${formatShortDate(event.submissionStartAt)} - ${formatShortDate(event.submissionEndAt)})`,
+      name: isVie ? 'Nộp bài' : 'Submission',
+      rangeText: `(${formatShortDate(event.submissionStartAt, isVie)} - ${formatShortDate(event.submissionEndAt, isVie)})`,
       status: subStatus,
-      statusBadge: subStatus === 'active' ? 'Live Now' : subStatus === 'completed' ? 'Completed' : 'Upcoming',
+      statusBadge: subStatus === 'active'
+        ? (isVie ? 'Đang diễn ra' : 'Live Now')
+        : subStatus === 'completed'
+        ? (isVie ? 'Đã hoàn thành' : 'Completed')
+        : (isVie ? 'Sắp diễn ra' : 'Upcoming'),
       icon: <Sparkles size={14} />,
     },
     {
       id: 'judging',
-      name: 'Judging',
-      rangeText: `(${formatShortDate(event.judgingStartAt)} - ${formatShortDate(event.judgingEndAt)})`,
+      name: isVie ? 'Chấm điểm' : 'Judging',
+      rangeText: `(${formatShortDate(event.judgingStartAt, isVie)} - ${formatShortDate(event.judgingEndAt, isVie)})`,
       status: judgeStatus,
-      statusBadge: judgeStatus === 'active' ? 'In Review' : judgeStatus === 'completed' ? 'Completed' : 'Upcoming',
+      statusBadge: judgeStatus === 'active'
+        ? (isVie ? 'Đang chấm điểm' : 'In Review')
+        : judgeStatus === 'completed'
+        ? (isVie ? 'Đã hoàn thành' : 'Completed')
+        : (isVie ? 'Sắp diễn ra' : 'Upcoming'),
       icon: <Award size={14} />,
     },
     {
       id: 'voting',
-      name: 'Voting',
-      rangeText: `(${formatShortDate(event.votingStartAt)} - ${formatShortDate(event.votingEndAt)})`,
+      name: isVie ? 'Bình chọn' : 'Voting',
+      rangeText: `(${formatShortDate(event.votingStartAt, isVie)} - ${formatShortDate(event.votingEndAt, isVie)})`,
       status: voteStatus,
-      statusBadge: voteStatus === 'active' ? 'Voting Live' : voteStatus === 'completed' ? 'Completed' : 'Upcoming',
+      statusBadge: voteStatus === 'active'
+        ? (isVie ? 'Đang bình chọn' : 'Voting Live')
+        : voteStatus === 'completed'
+        ? (isVie ? 'Đã hoàn thành' : 'Completed')
+        : (isVie ? 'Sắp diễn ra' : 'Upcoming'),
       icon: <Vote size={14} />,
     },
     {
       id: 'announcement',
-      name: 'Announcement',
-      rangeText: `(${formatShortDate(event.resultAnnouncementAt)})`,
+      name: isVie ? 'Công bố' : 'Announcement',
+      rangeText: `(${formatShortDate(event.resultAnnouncementAt, isVie)})`,
       status: announceStatus,
-      statusBadge: announceStatus === 'completed' ? 'Winners Crowned' : announceStatus === 'active' ? 'Deliberating' : 'Upcoming',
+      statusBadge: announceStatus === 'completed'
+        ? (isVie ? 'Đã công bố kết quả' : 'Winners Crowned')
+        : announceStatus === 'active'
+        ? (isVie ? 'Đang tổng hợp' : 'Deliberating')
+        : (isVie ? 'Sắp diễn ra' : 'Upcoming'),
       icon: <Crown size={14} />,
     },
   ];
@@ -147,7 +166,7 @@ export function EventStageProgress({ event }: EventStageProgressProps) {
         <div className="flex items-center gap-2.5">
           <Clock size={18} className="text-brand-periwinkle" />
           <h2 className="font-h1 text-base sm:text-lg font-bold text-white">
-            Contest Timeline & Stages
+            {isVie ? 'Lộ trình & Giai đoạn Cuộc thi' : 'Contest Timeline & Stages'}
           </h2>
         </div>
 
@@ -155,16 +174,19 @@ export function EventStageProgress({ event }: EventStageProgressProps) {
           {activeStage ? (
             <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/40 bg-emerald-950/70 px-3.5 py-1 text-xs font-bold text-emerald-300 shadow-[0_0_15px_rgba(52,211,153,0.2)]">
               <span className="size-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span>Current Stage: {activeStage.name} ({activeStage.statusBadge})</span>
+              <span>
+                {isVie ? 'Giai đoạn hiện tại: ' : 'Current Stage: '}
+                {activeStage.name} ({activeStage.statusBadge})
+              </span>
             </span>
           ) : announceStatus === 'completed' ? (
             <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/40 bg-amber-950/70 px-3.5 py-1 text-xs font-bold text-amber-300">
               <Crown size={13} className="text-amber-400" />
-              <span>Contest Finalized</span>
+              <span>{isVie ? 'Cuộc thi đã kết thúc' : 'Contest Finalized'}</span>
             </span>
           ) : (
             <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/5 px-3.5 py-1 text-xs text-slate-300">
-              <span>Upcoming Contest</span>
+              <span>{isVie ? 'Cuộc thi sắp diễn ra' : 'Upcoming Contest'}</span>
             </span>
           )}
         </div>
@@ -179,7 +201,7 @@ export function EventStageProgress({ event }: EventStageProgressProps) {
           {/* Active Glowing Progress Fill */}
           <div
             style={{ width: `${(overallPercent / 100) * 75}%` }}
-            className="absolute top-4 left-[12.5%] -translate-y-1/2 h-1 bg-gradient-to-r from-brand-periwinkle via-purple-400 to-amber-400 rounded-full z-0 shadow-[0_0_12px_rgba(167,172,217,0.7)] transition-all duration-700"
+            className="absolute top-4 left-[12.5%] -translate-y-1/2 h-1 bg-gradient-to-r from-brand-periwinkle via-[#c2c7f6] to-amber-400 rounded-full z-0 shadow-[0_0_12px_rgba(167,172,217,0.7)] transition-all duration-700"
           />
 
           {/* 4 Equidistant Columns: Each Point and its Content are strictly centered together */}

@@ -8,16 +8,25 @@ import type {
   AuctionFilters,
   AuctionListItemDto,
   AuctionPage,
+  AuctionPenaltyAdminDto,
+  AuctionPenaltyFilters,
+  AuctionPenaltyRevokeResultDto,
   AuctionReceiptDto,
   AuctionRequest,
   AuctionSettlementDto,
+  AuctionUpdatePayload,
   BidDto,
+  CancelAutoBidResult,
   CommercialRightsDeedDto,
   DeliverableDownloadDto,
+  DisputeMediaUploadResult,
   EligibleArtworkDto,
   MyActiveBidDto,
   MyActiveBidsMeta,
   MyCollectionItemDto,
+  MyAuctionPenaltyDto,
+  MyPenaltiesResult,
+  MyPenaltySummary,
   ArtworkProvenanceDto,
   PhysicalDeliveryListItemDto,
   RequestPhysicalDeliveryPayload,
@@ -151,8 +160,12 @@ async function list<T>(url: string, params: object, signal?: AbortSignal): Promi
 }
 
 export const auctionService = {
-  list: (filters: AuctionFilters, cursor?: string, signal?: AbortSignal) =>
-    list<AuctionListItemDto>('/auctions', { ...filters, cursor, limit: 12 }, signal),
+  /**
+   * Danh sách phiên. `limit` cho phép trang quản trị tải nhiều hơn 12 dòng mặc định —
+   * trước đây hardcode 12 nên admin chỉ thấy 12 phiên đầu và không chốt/huỷ được phiên 13+.
+   */
+  list: (filters: AuctionFilters, cursor?: string, signal?: AbortSignal, limit = 12) =>
+    list<AuctionListItemDto>('/auctions', { ...filters, cursor, limit }, signal),
 
   detail: async (id: string, signal?: AbortSignal): Promise<{ auction: AuctionDetailDto; recentBids: BidDto[] }> => {
     const res = await call<{ auction: AuctionDetailDto; recentBids: BidDto[] }>('get', `/auctions/${id}`, undefined, { recentBids: 10 }, signal);
@@ -182,7 +195,7 @@ export const auctionService = {
 
   create: (values: AuctionRequest) => call<{ auctionId: string }>('post', '/auctions', values).then((r) => r.data),
 
-  update: (id: string, values: Partial<AuctionRequest>) => call<{ auctionId: string }>('put', `/auctions/${id}`, values).then((r) => r.data),
+  update: (id: string, values: AuctionUpdatePayload) => call<{ auctionId: string }>('put', `/auctions/${id}`, values).then((r) => r.data),
 
   cancel: (id: string, reason: string) => call<{ message: string }>('delete', `/auctions/${id}`, undefined, { reason }).then((r) => r.data),
 
@@ -312,8 +325,97 @@ export const auctionService = {
   confirmDelivery: (auctionId: string, payload?: { deliveryReceiptUrl?: string }): Promise<AuctionDeliveryDto> =>
     call<AuctionDeliveryDto>('post', `/auctions/${auctionId}/delivery/confirm`, payload).then((r) => r.data),
 
-  disputeDelivery: (auctionId: string, payload: { reason: string; evidenceUrl?: string }): Promise<AuctionDeliveryDto> =>
+  disputeDelivery: (
+    auctionId: string,
+    payload: {
+      reason: string;
+      evidenceUrl?: string;
+      evidenceImageUrls?: string[];
+      evidenceVideoUrl?: string | null;
+    },
+  ): Promise<AuctionDeliveryDto> =>
     call<AuctionDeliveryDto>('post', `/auctions/${auctionId}/delivery/dispute`, payload).then((r) => r.data),
+
+  /**
+   * Tải NHIỀU bằng chứng khiếu nại trong một lần: tối đa 5 ảnh (8MB/ảnh) + 1 video (80MB).
+   * Trả URL để truyền vào `disputeDelivery`.
+   */
+  uploadDisputeMedia: async (
+    auctionId: string,
+    files: { images?: File[]; video?: File | null },
+  ): Promise<DisputeMediaUploadResult> => {
+    const formData = new FormData();
+    for (const image of files.images ?? []) formData.append('files', image);
+    if (files.video) formData.append('files', files.video);
+
+    const res = await apiClient.post<ApiResponse<DisputeMediaUploadResult>>(
+      `/auctions/${auctionId}/delivery/dispute-media`,
+      formData,
+      { headers: { 'Content-Type': 'multipart/form-data' }, timeout: 120000 },
+    );
+    if (!res.data.data) throw new Error(res.data.error?.detail || 'Không tải được bằng chứng khiếu nại.');
+    return res.data.data;
+  },
+
+  /**
+   * Huỷ đăng ký Auto-bid của chính người dùng. Lượt đặt giá đang dẫn đầu vẫn giữ nguyên —
+   * chỉ dừng việc tự động nâng giá khi bị đè.
+   */
+  cancelAutoBid: (auctionId: string): Promise<CancelAutoBidResult> =>
+    call<CancelAutoBidResult>('delete', `/auctions/${auctionId}/auto-bid`).then((r) => r.data),
+
+  /** Danh sách phiên người dùng đang theo dõi ("Phiên tôi đang theo dõi"). */
+  getMyWatched: async (
+    cursor?: string,
+    limit = 12,
+    signal?: AbortSignal,
+  ): Promise<{ items: AuctionListItemDto[]; nextCursor: string | null }> => {
+    const page = await list<AuctionListItemDto>('/auctions/my-watches', { cursor, limit }, signal);
+    return { items: page.items, nextCursor: page.nextCursor };
+  },
+
+  /** Ban quản trị: danh sách án phạt giao hàng của người bán. */
+  getPenalties: async (
+    filters: AuctionPenaltyFilters = {},
+    cursor?: string,
+    limit = 20,
+    signal?: AbortSignal,
+  ): Promise<{ items: AuctionPenaltyAdminDto[]; nextCursor: string | null }> => {
+    const page = await list<AuctionPenaltyAdminDto>('/auctions/penalties', { ...filters, cursor, limit }, signal);
+    return { items: page.items, nextCursor: page.nextCursor };
+  },
+
+  /** Ban quản trị: thu hồi một án phạt (bắt buộc nêu lý do, tối đa 500 ký tự). */
+  revokePenalty: (penaltyId: string, reason: string): Promise<AuctionPenaltyRevokeResultDto> =>
+    call<AuctionPenaltyRevokeResultDto>('post', `/auctions/penalties/${penaltyId}/revoke`, { reason }).then((r) => r.data),
+
+  /**
+   * Người bán tự đọc lịch sử bị báo cáo: lý do người mua nêu, kết luận của Ban quản trị,
+   * mức phạt, số phiên còn bị trừ và tình trạng khoá bán.
+   */
+  getMyPenalties: async (
+    cursor?: string,
+    limit = 10,
+    signal?: AbortSignal,
+  ): Promise<MyPenaltiesResult> => {
+    const res = await call<MyAuctionPenaltyDto[]>('get', '/auctions/my-penalties', undefined, { cursor, limit }, signal);
+    const meta = res.meta ?? {};
+    const rawSummary = (meta.summary ?? null) as Partial<MyPenaltySummary> | null;
+    return {
+      items: res.data ?? [],
+      nextCursor: typeof meta.nextCursor === 'string' ? meta.nextCursor : null,
+      total: typeof meta.total === 'number' ? meta.total : (res.data ?? []).length,
+      summary: {
+        currentLevel: rawSummary?.currentLevel ?? 0,
+        activeSurchargePercent: rawSummary?.activeSurchargePercent ?? 0,
+        surchargeSessionsRemaining: rawSummary?.surchargeSessionsRemaining ?? 0,
+        bannedUntil: rawSummary?.bannedUntil ?? null,
+        activePenaltyCount: rawSummary?.activePenaltyCount ?? 0,
+        consumedPenaltyCount: rawSummary?.consumedPenaltyCount ?? 0,
+        revokedPenaltyCount: rawSummary?.revokedPenaltyCount ?? 0,
+      },
+    };
+  },
 
   getReceipts: (auctionId: string, signal?: AbortSignal): Promise<AuctionReceiptDto[]> =>
     call<AuctionReceiptDto[]>('get', `/auctions/${auctionId}/receipts`, undefined, undefined, signal).then((r) => r.data),

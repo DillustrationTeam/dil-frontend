@@ -4,14 +4,14 @@ import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Copy, Download, FolderOpen, Pencil, Plus, Trash2, X } from 'lucide-react';
+import { Copy, Download, ExternalLink, FileText, FolderOpen, Pencil, Plus, Trash2, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { getApiErrorMessage } from '@/lib/api-error';
 import { creatorProfileService } from '../services/creator-profile.service';
 import type { CreatorAssetDto } from '../types/creator-profile.types';
 import { assetDetails, assetMessage, assetSchema, type AssetDraft } from '../utils/creator-assets';
 
-const types = [['Pose', 'Pose mẫu'], ['Palette', 'Bảng màu'], ['Preset', 'Presets']] as const;
+const types = [['Pose', 'Pose mẫu'], ['Palette', 'Bảng màu'], ['Preset', 'Presets'], ['Ref', 'Tài liệu tham khảo']] as const;
 const fieldClass = 'w-full rounded-xl border border-white/15 bg-[#171b2a] p-3 text-sm text-white';
 
 function AssetPreview({ asset }: { asset: CreatorAssetDto }) {
@@ -21,9 +21,21 @@ function AssetPreview({ asset }: { asset: CreatorAssetDto }) {
       title={`Sao chép ${color}`} aria-label={`Sao chép ${color}`} className="min-w-0 flex-1"
       onClick={() => void copyText(color)} />) : <span className="m-auto text-xs text-[#C7C5CF]">Chưa có màu — chọn sửa để bổ sung</span>}
   </div>;
-  if (asset.assetUrl) return <a href={asset.assetUrl} target="_blank" rel="noopener noreferrer" className="relative block h-36 overflow-hidden rounded-xl bg-white/5">
-    <Image src={asset.assetUrl} alt={asset.name} fill unoptimized className="object-contain" />
-  </a>;
+  if (asset.assetUrl) {
+    const url = asset.assetUrl;
+    const isPdf = /\.pdf(\?|$)/i.test(url);
+    const isImg = !isPdf && (/\.(png|jpe?g|webp|gif|avif|bmp)(\?|$)/i.test(url) || url.includes('res.cloudinary.com') || url.includes('commissions/references'));
+    if (isImg) {
+      return <a href={url} target="_blank" rel="noopener noreferrer" className="relative block h-36 overflow-hidden rounded-xl bg-white/5">
+        <Image src={url} alt={asset.name} fill unoptimized className="object-contain" />
+      </a>;
+    }
+    return <a href={url} target="_blank" rel="noopener noreferrer" className="flex h-36 flex-col items-center justify-center gap-1.5 overflow-hidden rounded-xl bg-white/5 p-3 text-center text-xs text-slate-300 hover:bg-white/10 hover:text-white">
+      {isPdf ? <FileText size={26} className="text-rose-400" /> : <ExternalLink size={26} className="text-[#A7ACD9]" />}
+      <span className="font-bold text-white">{isPdf ? 'Tài liệu PDF' : url.includes('drive.google.com') ? 'Google Drive' : url.includes('pinterest.com') ? 'Pinterest' : 'Liên kết ngoài'}</span>
+      <span className="w-full truncate text-[11px] text-slate-400">{url.replace(/^https?:\/\/(www\.)?/, '')}</span>
+    </a>;
+  }
   return <p className="h-36 overflow-auto whitespace-pre-wrap rounded-xl bg-white/5 p-4 text-sm text-[#C7C5CF]">{notes || 'Chưa có nội dung — chọn sửa để bổ sung'}</p>;
 }
 
@@ -101,7 +113,7 @@ function AssetEditor({ asset, type, onClose, onSaved }: {
   </dialog>;
 }
 
-export function CreatorAssetLibrary({ onSelect }: { onSelect?: (body: string) => void }) {
+export function CreatorAssetLibrary({ onSelect, commissionId }: { onSelect?: (body: string) => void; commissionId?: string | null }) {
   const [type, setType] = useState<AssetDraft['assetType']>('Pose');
   const [assets, setAssets] = useState<CreatorAssetDto[]>([]);
   const [loading, setLoading] = useState(true);
@@ -117,7 +129,15 @@ export function CreatorAssetLibrary({ onSelect }: { onSelect?: (body: string) =>
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
   }, [reload]);
-  const visible = assets.filter(a => a.assetType === type);
+  const matchesScope = (a: CreatorAssetDto, t: string) => {
+    if (a.assetType !== t) return false;
+    if (t === 'Ref' && commissionId) {
+      const { commissionId: assetCommId } = assetDetails(a);
+      return assetCommId?.toLowerCase() === commissionId.toLowerCase();
+    }
+    return true;
+  };
+  const visible = assets.filter(a => matchesScope(a, type));
 
   function download(asset: CreatorAssetDto) {
     const { colors, notes } = assetDetails(asset);
@@ -130,7 +150,7 @@ export function CreatorAssetLibrary({ onSelect }: { onSelect?: (body: string) =>
   return <div className="space-y-5">
     <p className="text-sm text-[#C7C5CF]">Lưu pose tham chiếu, bảng màu và công thức preset để dùng lại. {onSelect ? 'Chọn tài nguyên để chèn vào tin nhắn; bấm Gửi khi bạn sẵn sàng.' : 'Trong Workroom, chọn Thư viện tài nguyên để chia sẻ với khách.'}</p>
     <div className="flex flex-wrap gap-2" role="tablist" aria-label="Loại tài nguyên">{types.map(([value, label]) => <button role="tab" aria-selected={type === value} key={value} onClick={() => { setType(value); setConfirmDelete(null); }} type="button"
-      className={`rounded-full px-4 py-2 text-sm ${type === value ? 'bg-[#A7ACD9] text-[#1F2335]' : 'bg-white/5 text-[#C7C5CF]'}`}>{label} ({assets.filter(a => a.assetType === value).length})</button>)}</div>
+      className={`rounded-full px-4 py-2 text-sm ${type === value ? 'bg-[#A7ACD9] text-[#1F2335]' : 'bg-white/5 text-[#C7C5CF]'}`}>{label} ({assets.filter(a => matchesScope(a, value)).length})</button>)}</div>
     {loading ? <p role="status" className="text-[#C7C5CF]">Đang tải thư viện…</p> : error ? <div role="alert" className="text-rose-300">{error} <button onClick={() => { setLoading(true); setReload(n => n + 1); }} className="underline">Thử lại</button></div> : <>
       {!onSelect && <button onClick={() => setEditor({ asset: null, type })} type="button" className="flex items-center gap-2 rounded-xl border border-[#A7ACD9]/40 px-4 py-3 text-[#A7ACD9]"><Plus size={18} />Thêm {types.find(t => t[0] === type)?.[1]}</button>}
       {!visible.length && <p className="rounded-2xl border border-dashed border-white/15 p-8 text-center text-sm text-[#C7C5CF]">Chưa có tài nguyên trong mục này. {onSelect ? 'Thêm tài nguyên trong Creator Studio.' : 'Tạo tài nguyên đầu tiên để sử dụng lại.'}</p>}
@@ -164,11 +184,11 @@ export function CreatorAssetLibrary({ onSelect }: { onSelect?: (body: string) =>
   </div>;
 }
 
-export function CreatorAssetPicker({ onSelect, onClose }: { onSelect: (body: string) => void; onClose: () => void }) {
+export function CreatorAssetPicker({ onSelect, onClose, commissionId }: { onSelect: (body: string) => void; onClose: () => void; commissionId?: string | null }) {
   const dialog = useRef<HTMLDialogElement>(null);
   useEffect(() => { dialog.current?.showModal(); }, []);
   return <dialog ref={dialog} onCancel={onClose} aria-labelledby="asset-picker-title" className="m-auto max-h-[85vh] w-[min(95vw,850px)] overflow-y-auto rounded-3xl border border-white/15 bg-[#1F2335] p-6 text-white backdrop:bg-black/70">
     <div className="mb-5 flex justify-between"><h2 id="asset-picker-title" className="font-h1 text-lg">Thư viện tài nguyên</h2><button onClick={onClose} aria-label="Đóng thư viện"><X size={20} /></button></div>
-    <CreatorAssetLibrary onSelect={onSelect} />
+    <CreatorAssetLibrary onSelect={onSelect} commissionId={commissionId} />
   </dialog>;
 }

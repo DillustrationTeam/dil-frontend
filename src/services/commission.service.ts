@@ -20,6 +20,22 @@ async function getAll(role: 'Client' | 'Creator', status?: string): Promise<Comm
 }
 
 export const commissionService = {
+  uploadAttachment: async (file: File): Promise<{ url: string; fileName: string; fileSize: number }> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const res = await apiClient.post<ApiResponse<{ url: string; fileName: string; fileSize: number }>>(
+      '/commissions/attachments',
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
+    if (!res.data.data?.url) throw new Error('Không thể tải tệp đính kèm lên.');
+    return res.data.data;
+  },
+
   create: async (data: CreateCommissionPayload) => {
     const res = await apiClient.post<ApiResponse<Commission>>('/commissions', data);
     return res.data.data as Commission;
@@ -66,8 +82,9 @@ export const commissionService = {
     return res.data.data;
   },
   approveMilestone: async (id: string, milestoneId: string) => apiClient.patch(`/commissions/${id}/milestones/${milestoneId}/approve`),
-  requestRevision: async (id: string, milestoneId: string, feedbackComment: string) =>
-    apiClient.post(`/commissions/${id}/milestones/${milestoneId}/request-revision`, { feedbackComment }),
+  requestRevision: async (id: string, milestoneId: string, feedbackComment: string, revisionFeedbackImageUrl?: string, revisionAnnotationsJson?: string) =>
+    apiClient.post(`/commissions/${id}/milestones/${milestoneId}/request-revision`, { feedbackComment, revisionFeedbackImageUrl, revisionAnnotationsJson }),
+
   deliverFinal: async (id: string, files: File | File[]) => {
     const list = Array.isArray(files) ? files : [files];
     const body = new FormData();

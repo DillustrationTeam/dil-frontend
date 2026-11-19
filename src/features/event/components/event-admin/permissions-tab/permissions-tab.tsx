@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useEffect, useState, useRef, useSyncExternalStore } from 'react';
+import React, { useCallback, useEffect, useState, useRef, useSyncExternalStore } from 'react';
 import { createPortal } from 'react-dom';
 import { Search, ChevronDown, Check } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useLanguage } from '@/context/language-context';
 import { PermissionsStats } from './permissions-stats';
 import { PermissionsTable, JuryPermissionMember } from './permissions-table';
 import { InviteJuryCard } from './invite-jury-card';
@@ -58,6 +59,8 @@ export function ContestSearchSelect({
   onSelectEvent,
   showAllOption = false,
 }: ContestSearchSelectProps) {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
   const mounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState('');
@@ -67,7 +70,7 @@ export function ContestSearchSelect({
 
   const ALL_CONTESTS_ITEM: EventListItemDto = {
     id: 'all',
-    title: 'All Contests (Queue-wide)',
+    title: isVie ? 'Tất cả cuộc thi (Toàn hàng đợi)' : 'All Contests (Queue-wide)',
     status: 'All',
   } as EventListItemDto;
 
@@ -149,7 +152,7 @@ export function ContestSearchSelect({
             if (!isOpen) setIsOpen(true);
             updateCoords();
           }}
-          placeholder={selectedEvent ? selectedEvent.title : 'Type to search contest...'}
+          placeholder={selectedEvent ? selectedEvent.title : (isVie ? 'Nhập để tìm cuộc thi...' : 'Type to search contest...')}
           className="w-full h-10 pl-9 pr-24 bg-[#090b12] border border-white/20 rounded-xl text-xs text-white font-medium placeholder:text-slate-400 focus:outline-none focus:border-brand-periwinkle focus:ring-1 focus:ring-brand-periwinkle/30 transition-all cursor-text"
         />
 
@@ -186,7 +189,11 @@ export function ContestSearchSelect({
         >
           {filteredEvents.length === 0 ? (
             <div className="p-3 text-center text-xs text-slate-400">
-              No contests found matching &ldquo;<span className="text-white">{query}</span>&rdquo;
+              {isVie ? (
+                <>Không tìm thấy cuộc thi phù hợp &ldquo;<span className="text-white">{query}</span>&rdquo;</>
+              ) : (
+                <>No contests found matching &ldquo;<span className="text-white">{query}</span>&rdquo;</>
+              )}
             </div>
           ) : (
             filteredEvents.map((evt) => {
@@ -234,10 +241,14 @@ export function ContestSearchSelect({
 }
 
 export function PermissionsTab() {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
+
   const [events, setEvents] = useState<EventListItemDto[]>([]);
   const [selectedEventId, setSelectedEventId] = useState<string>('');
   const [members, setMembers] = useState<JuryPermissionMember[]>([]);
   const [, setLoading] = useState(false);
+  const [candidateRefreshKey, setCandidateRefreshKey] = useState(0);
 
   // Real backend events
   const allEvents = events;
@@ -263,102 +274,117 @@ export function PermissionsTab() {
             return prev;
           });
         }
-      } catch (err) {
+      } catch (err: unknown) {
         console.error('Failed to load events in permissions tab:', err);
+        toast.error(err instanceof Error ? err.message : 'Không thể tải danh sách sự kiện.');
       }
     }
     void fetchEvents();
   }, []);
 
-  useEffect(() => {
-    async function loadEventJuries() {
-      if (!selectedEventId) {
-        setMembers([]);
-        return;
-      }
-      setLoading(true);
-      try {
-        const juries = await juryService.getEventJuries(selectedEventId);
-        if (juries && juries.length > 0) {
-          const mapped: JuryPermissionMember[] = juries.map((j) => ({
-            id: j.id,
-            name: j.creatorDisplayName || j.creatorName || 'Jury Member',
-            email: j.creatorEmail || 'jury@dillustration.vn',
-            role: j.isHeadJury ? 'Head Jury' : 'Jury',
-            status: 'Confirmed',
-          }));
-          setMembers(mapped);
-        } else {
-          setMembers([]);
-        }
-      } catch {
-        setMembers([]);
-      } finally {
-        setLoading(false);
-      }
-    }
-    void loadEventJuries();
-  }, [selectedEventId]);
-
-  const handleInviteSent = async (email: string) => {
-    if (isJudgingPhaseActive) {
-      toast.error('Cannot send jury invitation once the judging phase has started.');
+  const loadEventMembers = useCallback(async (eventId: string) => {
+    if (!eventId) {
+      setMembers([]);
       return;
+    }
+    setLoading(true);
+    try {
+      const [juries, pendingInvites] = await Promise.all([
+        juryService.getEventJuries(eventId),
+        juryService.getInvitations(eventId, 'Pending'),
+      ]);
+
+      const confirmedMembers: JuryPermissionMember[] = (juries || []).map((j) => ({
+        id: j.id,
+        name: j.creatorDisplayName || j.creatorName || 'Jury Member',
+        email: j.creatorEmail || '',
+        role: j.isHeadJury ? 'Head Jury' : 'Jury',
+        status: 'Confirmed',
+      }));
+
+      const pendingMembers: JuryPermissionMember[] = (pendingInvites || []).map((inv) => ({
+        id: inv.id,
+        name: inv.sentToCreatorName || inv.sentToCreatorEmail || 'Invited Creator',
+        email: inv.sentToCreatorEmail || '',
+        role: inv.isHeadJury ? 'Head Jury' : 'Jury',
+        status: 'Pending',
+      }));
+
+      setMembers([...confirmedMembers, ...pendingMembers]);
+    } catch {
+      setMembers([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadEventMembers(selectedEventId);
+  }, [selectedEventId, loadEventMembers]);
+
+  const handleInviteSent = async (email: string, isHeadJury = false): Promise<boolean> => {
+    if (isJudgingPhaseActive) {
+      toast.error(isVie ? 'Không thể gửi lời mời khi giai đoạn chấm thi đã bắt đầu.' : 'Cannot send jury invitation once the judging phase has started.');
+      return false;
     }
 
     try {
-      await juryService.sendInvitation(selectedEventId, email);
-      toast.success(`Invitation sent to ${email} successfully!`);
-      const newMember: JuryPermissionMember = {
-        id: `invite-${Date.now()}`,
-        name: email.split('@')[0],
-        email,
-        role: 'Jury',
-        status: 'Pending',
-      };
-      setMembers((prev) => [newMember, ...prev]);
+      await juryService.sendInvitation(selectedEventId, email, isHeadJury);
+      toast.success(isVie ? `Đã gửi lời mời tới ${email} thành công!` : `Invitation sent to ${email} successfully!`);
+      await loadEventMembers(selectedEventId);
+      setCandidateRefreshKey((k) => k + 1);
+      return true;
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Failed to send invitation.';
+      const msg = err instanceof Error ? err.message : (isVie ? 'Gửi lời mời thất bại.' : 'Failed to send invitation.');
       toast.error(msg);
+      return false;
     }
   };
 
   const handleUpdateRole = async (memberId: string, newRole: 'Head Jury' | 'Jury') => {
     if (isJudgingPhaseActive) {
-      toast.error('Cannot edit jury role once the judging phase has started.');
+      toast.error(isVie ? 'Không thể đổi vai trò khi giai đoạn chấm thi đã bắt đầu.' : 'Cannot edit jury role once the judging phase has started.');
       return;
     }
 
     try {
       await juryService.updateJuryRole(selectedEventId, memberId, newRole);
-      toast.success(`Updated role for member to ${newRole}.`);
-    } catch {
-      toast.success(`Updated role to ${newRole}.`);
+      toast.success(isVie ? `Đã cập nhật vai trò thành viên thành ${newRole === 'Head Jury' ? 'Trưởng ban' : 'Giám khảo'}.` : `Updated role for member to ${newRole}.`);
+      await loadEventMembers(selectedEventId);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : (isVie ? 'Cập nhật vai trò thất bại.' : 'Failed to update jury role.');
+      toast.error(msg);
     }
-
-    setMembers((prev) =>
-      prev.map((m) => (m.id === memberId ? { ...m, role: newRole } : m))
-    );
   };
 
   const handleRemoveMember = async (memberId: string) => {
     if (isJudgingPhaseActive) {
-      toast.error('Cannot remove jury member once the judging phase has started.');
+      toast.error(isVie ? 'Không thể xóa thành viên khi giai đoạn chấm thi đã bắt đầu.' : 'Cannot remove jury member once the judging phase has started.');
       return;
     }
 
+    const target = members.find((m) => m.id === memberId);
+
     try {
-      await juryService.removeJury(memberId);
-      toast.success('Jury member removed successfully.');
-    } catch {
-      toast.success('Jury member removed successfully.');
+      if (target?.status === 'Pending') {
+        await juryService.cancelInvitation(memberId);
+        toast.success(isVie ? 'Đã hủy lời mời giám khảo đang chờ.' : 'Pending jury invitation canceled.');
+      } else {
+        await juryService.removeJury(memberId);
+        toast.success(isVie ? 'Đã xóa thành viên ban giám khảo thành công.' : 'Jury member removed successfully.');
+      }
+      await loadEventMembers(selectedEventId);
+      setCandidateRefreshKey((k) => k + 1);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : (isVie ? 'Xóa thành viên thất bại.' : 'Failed to remove jury member.');
+      toast.error(msg);
     }
-    setMembers((prev) => prev.filter((m) => m.id !== memberId));
   };
 
   const headJuryCount = members.filter((m) => m.role === 'Head Jury').length;
   const juryCount = members.filter((m) => m.role === 'Jury').length;
   const pendingInvitesCount = members.filter((m) => m.status === 'Pending').length;
+  const assignedSubmissionsCount = selectedEvent?.submissionCount ?? 0;
 
   return (
     <div>
@@ -366,7 +392,7 @@ export function PermissionsTab() {
       <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl border border-white/10 bg-[#161926]/80 backdrop-blur-xl mb-6">
         <div className="flex flex-wrap items-center gap-3">
           <label className="text-xs font-semibold text-[#A7ACD9] uppercase tracking-wider shrink-0">
-            Target Contest:
+            {isVie ? 'Cuộc thi mục tiêu:' : 'Target Contest:'}
           </label>
           <ContestSearchSelect
             events={events}
@@ -377,7 +403,7 @@ export function PermissionsTab() {
 
         {/* Status Indicator */}
         <div className="flex items-center gap-2">
-          <span className="text-xs text-outline">Judging Phase Status:</span>
+          <span className="text-xs text-outline">{isVie ? 'Trạng thái giai đoạn chấm:' : 'Judging Phase Status:'}</span>
           <span
             className={`px-3 py-1 rounded-full text-xs font-bold ${
               isJudgingPhaseActive
@@ -385,7 +411,9 @@ export function PermissionsTab() {
                 : 'bg-emerald-500/20 text-emerald-300 border border-emerald-400/30'
             }`}
           >
-            {isJudgingPhaseActive ? '🔒 Judging Started (Locked)' : '🔓 Open for Jury Assignments'}
+            {isJudgingPhaseActive
+              ? (isVie ? '🔒 Đã bắt đầu chấm (Đã khóa)' : '🔒 Judging Started (Locked)')
+              : (isVie ? '🔓 Mở phân công giám khảo' : '🔓 Open for Jury Assignments')}
           </span>
         </div>
       </div>
@@ -394,7 +422,7 @@ export function PermissionsTab() {
         headJuryCount={headJuryCount}
         juryCount={juryCount}
         pendingInvitesCount={pendingInvitesCount}
-        assignedCount={248}
+        assignedCount={assignedSubmissionsCount}
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
@@ -408,8 +436,11 @@ export function PermissionsTab() {
         </div>
         <div className="lg:col-span-4">
           <InviteJuryCard
+            eventId={selectedEventId}
             onInviteSent={handleInviteSent}
             isJudgingPhaseActive={isJudgingPhaseActive}
+            refreshKey={candidateRefreshKey}
+            hasHeadJury={headJuryCount > 0}
           />
         </div>
       </div>

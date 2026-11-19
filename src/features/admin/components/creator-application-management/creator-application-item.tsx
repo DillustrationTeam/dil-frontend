@@ -1,5 +1,6 @@
 'use client';
 
+import { useLanguage } from '@/context/language-context';
 import { CreatorApplicationDto } from '@/features/admin/types/admin.types';
 
 export interface CreatorApplicationItemProps {
@@ -8,6 +9,24 @@ export interface CreatorApplicationItemProps {
 }
 
 export function CreatorApplicationItem({ application, onClick }: CreatorApplicationItemProps) {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
+
+  const formatStatus = (status?: string | null) => {
+    switch (status) {
+      case 'Pending':
+        return isVie ? 'Chờ duyệt' : 'Pending';
+      case 'Approved':
+        return isVie ? 'Đã duyệt' : 'Approved';
+      case 'Rejected':
+        return isVie ? 'Đã từ chối' : 'Rejected';
+      case 'AdditionalProofRequested':
+        return isVie ? 'Cần bổ sung' : 'Additional Proof';
+      default:
+        return status || (isVie ? 'Chờ duyệt' : 'Pending');
+    }
+  };
+
   return (
     <div
       role={onClick ? 'button' : undefined}
@@ -29,7 +48,7 @@ export function CreatorApplicationItem({ application, onClick }: CreatorApplicat
             <span className="text-xs font-mono text-[#A7ACD9]">(@{application.username})</span>
           </div>
           <p className="text-xs text-[#919099]">
-            Applied at {application.submittedAt || '—'}
+            {isVie ? 'Gửi lúc' : 'Applied at'} {application.submittedAt || '—'}
             <span className="mx-2">•</span>
             {application.email}
           </p>
@@ -37,7 +56,7 @@ export function CreatorApplicationItem({ application, onClick }: CreatorApplicat
 
         <div>
           <span className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-xs font-medium text-[#A7ACD9]">
-            {application.applicationStatus || 'Pending'}
+            {formatStatus(application.applicationStatus)}
           </span>
         </div>
       </div>

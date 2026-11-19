@@ -65,6 +65,8 @@ export function useAdminDashboard() {
     actionRequiredQueue: state.overview.data?.actionRequiredQueue,
     revenueTrend: state.overview.data?.revenueTrend || [],
     recentTransactions: state.overview.data?.recentTransactions || [],
+    auctionMetrics: state.overview.data?.auctionMetrics,
+    tradeMetrics: state.overview.data?.tradeMetrics,
     days: state.filters.days,
     loading: state.overview.loading,
     kpisLoading: state.financialKpis.loading,

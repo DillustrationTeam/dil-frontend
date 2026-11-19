@@ -129,6 +129,21 @@ export const creatorProfileService = {
     return response.data.data;
   },
 
+  async updateFaq(id: string, data: UpsertCreatorFaqRequest): Promise<CreatorFaqDto> {
+    const response = await apiClient.put<ApiResponse<CreatorFaqDto>>(`/creator/workstation/faqs/${id}`, data);
+    if (response.data.error || !response.data.data) {
+      throw new Error(response.data.error?.details?.join(', ') || 'Failed to update FAQ.');
+    }
+    return response.data.data;
+  },
+
+  async deleteFaq(id: string): Promise<void> {
+    const response = await apiClient.delete<ApiResponse<void>>(`/creator/workstation/faqs/${id}`);
+    if (response.data.error) {
+      throw new Error(response.data.error?.details?.join(', ') || 'Failed to delete FAQ.');
+    }
+  },
+
   async saveWorkItem(data: CreateWorkItemRequest): Promise<CreatorWorkItemDto> {
     const response = await apiClient.post<ApiResponse<CreatorWorkItemDto>>('/creator/workstation/work-items', data);
     if (response.data.error || !response.data.data) {

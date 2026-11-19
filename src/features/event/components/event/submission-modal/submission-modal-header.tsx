@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Sparkles, X } from 'lucide-react';
+import { useLanguage } from '@/context/language-context';
 
 interface SubmissionModalHeaderProps {
   isEditing: boolean;
@@ -10,6 +11,9 @@ interface SubmissionModalHeaderProps {
 }
 
 export function SubmissionModalHeader({ isEditing, eventTitle, onClose }: SubmissionModalHeaderProps) {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
+
   return (
     <div className="flex items-center justify-between border-b border-white/10 px-6 py-5">
       <div className="flex items-center gap-2.5">
@@ -18,7 +22,9 @@ export function SubmissionModalHeader({ isEditing, eventTitle, onClose }: Submis
         </div>
         <div>
           <h3 className="font-h1 text-lg font-bold text-white">
-            {isEditing ? 'Edit Contest Entry' : 'Submit Contest Artwork'}
+            {isEditing
+              ? (isVie ? 'Chỉnh sửa bài dự thi' : 'Edit Contest Entry')
+              : (isVie ? 'Nộp tác phẩm dự thi' : 'Submit Contest Artwork')}
           </h3>
           <p className="text-xs text-[#8A8FA9] line-clamp-1">{eventTitle}</p>
         </div>

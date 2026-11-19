@@ -148,11 +148,12 @@ export interface SubmissionDisputeDto {
   id: string;
   eventId: string;
   eventTitle?: string | null;
-  submissionId: string;
+  submissionId?: string | null;
   submissionTitle?: string | null;
   artworkImageUrl?: string | null;
   raisedById: string;
   raisedByName?: string | null;
+  category?: string | null;
   priority: SubmissionDisputePriority;
   reason: string;
   evidenceUrls?: string | null;
@@ -173,6 +174,7 @@ export interface SubmissionDisputeQueueFilters {
   eventId?: string;
   submissionId?: string;
   status?: string;
+  category?: string;
   page: number;
   pageSize: number;
 }

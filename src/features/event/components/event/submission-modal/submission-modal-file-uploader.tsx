@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { MonitorUp } from 'lucide-react';
+import { useLanguage } from '@/context/language-context';
 
 interface SubmissionModalFileUploaderProps {
   localPreviewUrl: string | null;
@@ -16,11 +17,17 @@ export function SubmissionModalFileUploader({
   onFileChange,
   onRemoveFile,
 }: SubmissionModalFileUploaderProps) {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
+
   return (
     <div className="space-y-4">
       <div>
         <label className="block text-xs font-semibold uppercase tracking-wider text-[#A7ACD9] mb-2">
-          Select Artwork File from Your PC (Local Storage) <span className="text-rose-400">*</span>
+          {isVie
+            ? 'Chọn tệp hình ảnh từ máy tính của bạn'
+            : 'Select Artwork File from Your PC (Local Storage)'}{' '}
+          <span className="text-rose-400">*</span>
         </label>
 
         <input
@@ -41,14 +48,14 @@ export function SubmissionModalFileUploader({
                 onClick={() => fileInputRef.current?.click()}
                 className="rounded-xl bg-brand-periwinkle px-4 py-2 text-xs font-bold text-brand-navy shadow-md cursor-pointer hover:brightness-110 transition"
               >
-                Change Image
+                {isVie ? 'Đổi hình ảnh' : 'Change Image'}
               </button>
               <button
                 type="button"
                 onClick={onRemoveFile}
                 className="rounded-xl bg-rose-500/80 px-4 py-2 text-xs font-bold text-white shadow-md cursor-pointer hover:bg-rose-600 transition"
               >
-                Remove
+                {isVie ? 'Gỡ bỏ' : 'Remove'}
               </button>
             </div>
           </div>
@@ -60,8 +67,16 @@ export function SubmissionModalFileUploader({
             <div className="flex size-14 items-center justify-center rounded-2xl bg-brand-periwinkle/15 text-brand-periwinkle mb-3">
               <MonitorUp size={28} />
             </div>
-            <p className="font-h1 text-sm font-bold text-white">Click or drag & drop artwork from your PC</p>
-            <p className="text-xs text-[#8A8FA9] mt-1">Supports PNG, JPG, JPEG, WEBP (Max 25MB)</p>
+            <p className="font-h1 text-sm font-bold text-white">
+              {isVie
+                ? 'Nhấp hoặc kéo thả tác phẩm từ máy tính của bạn'
+                : 'Click or drag & drop artwork from your PC'}
+            </p>
+            <p className="text-xs text-[#8A8FA9] mt-1">
+              {isVie
+                ? 'Hỗ trợ PNG, JPG, JPEG, WEBP (Tối đa 25MB)'
+                : 'Supports PNG, JPG, JPEG, WEBP (Max 25MB)'}
+            </p>
           </div>
         )}
       </div>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { BarChart3, CircleAlert, DollarSign, Layers, RefreshCw, TrendingUp } from 'lucide-react';
+import { BarChart3, CircleAlert, DollarSign, Layers, RefreshCw, ShieldCheck, TrendingUp } from 'lucide-react';
 import { paymentService } from '../services/payment.service';
 import type { RevenueBreakdownDto, RevenuePointDto, RevenueSnapshotDto, RevenueSummaryDto } from '../types/payment.types';
 import { RevenueChart } from './revenue-chart';
@@ -104,8 +104,8 @@ export function RevenueScreen({ userId }: { userId: string | null }) {
         </div>
       )}
 
-      {/* 4 Thẻ chỉ số tổng quan */}
-      <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {/* 5 Thẻ chỉ số tổng quan */}
+      <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         <div className="glass-container rounded-3xl border border-brand-periwinkle/30 bg-brand-periwinkle/10 p-5">
           <div className="mb-2 flex items-center justify-between text-xs text-brand-periwinkle">
             <span className="font-semibold">Thu nhập thực nhận</span>
@@ -125,7 +125,29 @@ export function RevenueScreen({ userId }: { userId: string | null }) {
           <p className="font-h1 text-2xl font-bold text-on-surface">
             {formatVnd(summary?.grossAmount ?? 0)}
           </p>
-          <span className="mt-1 block text-xs text-outline">Tổng giá trị đơn hàng</span>
+          <span className="mt-1 block text-xs text-outline">
+            Tổng giá trị đơn hàng
+            {(summary?.penaltyFeeAmount ?? 0) > 0
+              ? ` · phụ phí vi phạm ${formatVnd(summary!.penaltyFeeAmount!)}`
+              : ''}
+          </span>
+        </div>
+
+        {/* Tiền sàn đang giữ: KHÔNG phải doanh thu, nhưng người bán cần biết tiền đang ở đâu
+            (phiên đã chốt nhưng đang chờ giao tranh vật lý hoặc đang khiếu nại). */}
+        <div className="glass-container rounded-3xl border border-amber-400/25 bg-amber-400/5 p-5">
+          <div className="mb-2 flex items-center justify-between text-xs text-amber-300">
+            <span className="font-semibold">Đang giữ ở sàn</span>
+            <ShieldCheck size={16} />
+          </div>
+          <p className="font-h1 text-2xl font-bold text-amber-200">
+            {formatVnd(summary?.escrowHeldAmount ?? 0)}
+          </p>
+          <span className="mt-1 block text-xs text-outline">
+            {(summary?.escrowDisputedAmount ?? 0) > 0
+              ? `Trong đó đóng băng do khiếu nại: ${formatVnd(summary!.escrowDisputedAmount!)}`
+              : 'Chưa phải doanh thu — chờ giao hàng / hết khiếu nại'}
+          </span>
         </div>
 
         <div className="glass-container rounded-3xl border border-white/10 p-5">
@@ -202,6 +224,8 @@ export function RevenueScreen({ userId }: { userId: string | null }) {
                   <th className="pb-3">Ngày kết toán</th>
                   <th className="pb-3">Phạm vi</th>
                   <th className="pb-3 text-right">Doanh thu gộp</th>
+                  <th className="pb-3 text-right">Từ đấu giá</th>
+                  <th className="pb-3 text-right">Từ đơn đặt vẽ</th>
                   <th className="pb-3 text-right">Phí sàn</th>
                   <th className="pb-3 text-right">Thực nhận</th>
                   <th className="pb-3 text-right">Số đơn</th>
@@ -213,6 +237,8 @@ export function RevenueScreen({ userId }: { userId: string | null }) {
                     <td className="py-3 text-on-surface">{new Date(s.snapshotDate).toLocaleDateString('vi-VN')}</td>
                     <td className="py-3 text-on-surface-variant">{s.scope}</td>
                     <td className="py-3 text-right text-on-surface">{formatVnd(s.grossAmount)}</td>
+                    <td className="py-3 text-right text-on-surface-variant">{formatVnd(s.auctionGrossAmount ?? 0)}</td>
+                    <td className="py-3 text-right text-on-surface-variant">{formatVnd(s.commissionGrossAmount ?? 0)}</td>
                     <td className="py-3 text-right text-outline">{formatVnd(s.feeAmount)}</td>
                     <td className="py-3 text-right font-bold text-brand-periwinkle">{formatVnd(s.netAmount)}</td>
                     <td className="py-3 text-right text-on-surface">{s.completedOrderCount}</td>

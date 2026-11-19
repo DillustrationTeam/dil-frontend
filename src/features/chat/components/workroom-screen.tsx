@@ -2,26 +2,37 @@
 
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
+import toast from 'react-hot-toast';
 import { z } from 'zod';
 import {
   ArrowLeft,
   BookOpen,
+  BookmarkPlus,
   Check,
   CheckCheck,
   CheckCircle2,
   CircleAlert,
   Clock,
+  Columns2,
+  Copy,
   Download,
+  ExternalLink,
   Eye,
   FileArchive,
   FolderOpen,
   FileText,
   Globe,
+  Image as ImageIcon,
   Lock,
   Maximize2,
+  Minimize2,
+  PanelLeftClose,
+  PanelRightClose,
   Paperclip,
   Pencil,
+  Pin,
   RefreshCw,
+  RotateCcw,
   Send,
   Scale,
   ShieldAlert,
@@ -29,6 +40,8 @@ import {
   TrendingUp,
   UploadCloud,
   X,
+  ZoomIn,
+  ZoomOut,
 } from 'lucide-react';
 
 import { chatService } from '../services/chat.service';
@@ -36,9 +49,13 @@ import { WorkroomProgressPanel } from './workroom-progress-panel';
 import { useChatHub } from '../hooks/use-chat-hub';
 import { useAutoTranslate } from '../hooks/use-auto-translate';
 import { WorkroomAddons } from './workroom-addons';
+import { WorkroomStickyNotes } from './workroom-sticky-notes';
 import type { ChatMessageDto, ChatRoomDto } from '../types/chat.types';
 import { CreatorAssetPicker } from '@/features/creator-studio';
+import { creatorProfileService } from '@/features/creator-studio/services/creator-profile.service';
+import { isPortfolioImageUrl } from '@/lib/portfolio-link';
 import { PageLoader } from '@/features/navigation';
+import { useNotificationHub } from '@/features/notification/hooks/use-notification-hub';
 import { commissionService } from '@/services/commission.service';
 import { extractErrorMessage } from '@/lib/api-client';
 import type { Commission, CommissionStatus, Milestone } from '@/types/commission.types';
@@ -111,7 +128,9 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
 
   // States cho Atelier Binder UI Right Page View & Zoom & Milestone Switcher
   const [rightPageView, setRightPageView] = useState<'canvas' | 'brief' | 'milestones'>('canvas');
-  const [zoomScale] = useState<number>(1);
+  const [zoomScale, setZoomScale] = useState<number>(1);
+  const [collapsedPanel, setCollapsedPanel] = useState<'none' | 'left' | 'right'>('none');
+  const wipCanvasContainerRef = useRef<HTMLDivElement>(null);
   const [selectedMilestoneId, setSelectedMilestoneId] = useState<string | null>(null);
 
   // States cho các Modal Hợp đồng & Cột mốc
@@ -127,6 +146,9 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
   const [showDisputeDetailsModal, setShowDisputeDetailsModal] = useState(false);
   const [acceptingTerms, setAcceptingTerms] = useState(false);
   const [termsError, setTermsError] = useState<string | null>(null);
+  const cancelToastShownRef = useRef(false);
+  const [activeLightboxUrl, setActiveLightboxUrl] = useState<string | null>(null);
+  const [showQuickRefDrawer, setShowQuickRefDrawer] = useState(false);
 
   // States & handlers cho tính năng đổi tên dự án (Workroom title)
   const [isEditingTitle, setIsEditingTitle] = useState(false);
@@ -537,6 +559,25 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
     });
   }, [roomId, userId, loadData]);
 
+  useNotificationHub((incoming) => {
+    if (!room?.commissionId || incoming.refType !== 'Commission' || incoming.refId !== room.commissionId) {
+      return;
+    }
+    const titleLower = (incoming.notificationTitle || '').toLowerCase();
+    if (incoming.notificationType === 'CommissionStatusChanged' && titleLower.includes('hủy')) {
+      if (!cancelToastShownRef.current) {
+        cancelToastShownRef.current = true;
+        toast(incoming.body || incoming.notificationTitle, { icon: '🚫', duration: 6000 });
+      }
+      refresh();
+      return;
+    }
+    if (incoming.notificationType === 'DisputeStatusChanged' && titleLower.includes('yêu cầu hủy')) {
+      toast(incoming.body || incoming.notificationTitle, { icon: '⏳', duration: 5000 });
+      refresh();
+    }
+  });
+
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, pending, partnerTyping]);
@@ -620,12 +661,19 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
     const stageParam = params.get('depositedStage');
     if (!stageParam) return;
     checkoutNoticeSentRef.current = true;
+    window.history.replaceState(null, '', window.location.pathname);
+
     const stage = Number(stageParam) || commission.currentStage || 1;
     const isStaged = params.get('staged') === '1';
     const amount = Number(params.get('depositAmount')) || 0;
+    const dedupeKey = `workroom_escrow_notice_${commission.id}_${stage}`;
+    const alreadyAnnounced = typeof window !== 'undefined' && sessionStorage.getItem(dedupeKey) === '1';
+    const stageAlreadyDone = sortedMilestones.some((m) => m.sequence <= stage && m.status === 'Approved');
+    if (alreadyAnnounced || stageAlreadyDone) return;
+
+    if (typeof window !== 'undefined') sessionStorage.setItem(dedupeKey, '1');
     const milestoneTitle = sortedMilestones.find((m) => m.sequence === stage)?.title;
     void chat.sendMessage(formatEscrowDepositNotice(stage, isStaged, milestoneTitle, amount), 'SystemEvent').catch(() => null);
-    window.history.replaceState(null, '', window.location.pathname);
   }, [chat, commission, sortedMilestones]);
 
   async function handleDepositEscrow() {
@@ -849,37 +897,37 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                 )}
               </button>
 
-              {/* Tab 2: Kho file gốc */}
+              {/* Tab 2: Tài liệu & Ảnh Ref */}
               <button
                 type="button"
-                onClick={() => setShowDeliveryModal(true)}
+                onClick={() => setShowQuickRefDrawer(true)}
                 className={`group relative h-[44px] bg-[#1C202D] hover:bg-[#232838] border border-l-0 rounded-r-lg flex items-center pl-3.5 shadow-xl [clip-path:polygon(0_0,calc(100%-10px)_0,100%_10px,100%_100%,0_100%)] [transition:width_0.3s_cubic-bezier(0.34,1.3,0.64,1),background-color_0.2s_ease,border-color_0.25s_ease] cursor-pointer ${!hasRightSpace
-                    ? showDeliveryModal
+                    ? showQuickRefDrawer
                       ? 'w-[46px] border-sky-400 bg-[#232838] shadow-[0_0_12px_rgba(56,189,248,0.35)]'
                       : 'w-[46px] border-[#2F364A] hover:border-sky-400'
-                    : showDeliveryModal
+                    : showQuickRefDrawer
                       ? 'w-[135px] border-sky-400 bg-[#232838] shadow-[0_0_12px_rgba(56,189,248,0.35)] overflow-hidden'
                       : 'w-[46px] hover:w-[135px] border-[#2F364A] hover:border-sky-400 overflow-hidden'
                   }`}
               >
                 <div className="flex items-center justify-center shrink-0 w-5">
-                  <FileArchive size={18} className="text-sky-400" />
+                  <ImageIcon size={18} className="text-sky-400" />
                 </div>
                 <span
                   className={`text-xs font-bold text-sky-300 ml-3 pr-3 transition-opacity duration-200 pointer-events-none select-none whitespace-nowrap ${hasRightSpace
-                      ? showDeliveryModal
+                      ? showQuickRefDrawer
                         ? 'opacity-100'
                         : 'opacity-0 group-hover:opacity-100'
                       : 'hidden'
                     }`}
                 >
-                  Kho file
+                  Tài liệu mẫu
                 </span>
 
                 {/* Smart Tooltip khi ở dạng thu gọn (khi bị khuất/hẹp lề) */}
                 {!hasRightSpace && (
                   <div className="absolute right-full mr-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none bg-[#161926]/95 border border-sky-500/40 text-sky-300 text-xs font-bold px-2.5 py-1 rounded-lg shadow-2xl backdrop-blur-md whitespace-nowrap z-50">
-                    Bàn giao & Tải file HD
+                    Ảnh &amp; Tài liệu tham khảo ({commission?.referenceImages?.length ?? 0})
                   </div>
                 )}
               </button>
@@ -889,7 +937,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
             <div className="relative w-full bg-[#1F2335] border border-white/10 shadow-2xl flex flex-col lg:flex-row z-10 min-h-[720px] lg:h-[calc(100vh-8.5rem)] rounded-tl-3xl rounded-bl-3xl rounded-br-3xl [clip-path:polygon(0_0,calc(100%-24px)_0,100%_24px,100%_100%,0_100%)]">
 
               {/* GÁY SỔ LÒ XO KIM LOẠI Ở GIỮA */}
-              <div className="hidden lg:flex absolute left-1/2 top-0 bottom-0 -translate-x-1/2 w-8 z-30 flex-col justify-between py-6 pointer-events-none items-center">
+              <div className={`hidden lg:flex absolute left-1/2 top-0 bottom-0 -translate-x-1/2 w-8 z-30 flex-col justify-between py-6 pointer-events-none items-center transition-opacity duration-300 ease-in-out ${collapsedPanel === 'none' ? 'opacity-100' : 'opacity-0'}`}>
                 {Array.from({ length: 14 }).map((_, idx) => (
                   <div
                     key={idx}
@@ -901,7 +949,40 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
               {/* ========================================================================= */}
               {/* TRANG TRÁI (LEFT PAGE): LOGBOOK SKETCH & SIGNALR LIVE CHAT */}
               {/* ========================================================================= */}
-              <div className="flex-1 bg-[#1F1F22] border-b lg:border-b-0 lg:border-r border-white/10 p-4 lg:p-6 flex flex-col justify-between relative rounded-tl-3xl rounded-bl-3xl">
+              <div
+                className={`transition-[width,flex] duration-300 ease-in-out relative flex flex-col overflow-hidden rounded-tl-3xl rounded-bl-3xl ${
+                  collapsedPanel === 'left'
+                    ? 'w-full lg:w-14 shrink-0'
+                    : collapsedPanel === 'right'
+                      ? 'flex-1 w-full'
+                      : 'flex-1 w-full lg:w-1/2'
+                }`}
+              >
+                {collapsedPanel === 'left' ? (
+                  <button
+                    type="button"
+                    onClick={() => setCollapsedPanel('none')}
+                    title="Nhấn vào tờ ghim để khôi phục chia đôi hai trang (50/50)"
+                    className="w-full h-full py-3 lg:py-6 px-3 lg:px-1 bg-[#181A24] border-b lg:border-b-0 lg:border-r border-white/10 hover:border-white/20 transition-all duration-200 flex flex-row lg:flex-col items-center justify-between cursor-pointer group shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] select-none"
+                  >
+                    <div className="flex flex-row lg:flex-col items-center gap-1.5">
+                      <div className="size-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center shadow-md group-hover:scale-105 group-hover:bg-white/10 group-hover:border-white/20 transition-all">
+                        <Pin size={16} className="text-slate-300 group-hover:text-white transition-colors" />
+                      </div>
+                    </div>
+                    <div className="my-auto flex items-center justify-center lg:[writing-mode:vertical-rl] lg:rotate-180">
+                      <span className="text-xs font-bold tracking-widest text-slate-300 group-hover:text-white uppercase transition-colors whitespace-nowrap">
+                        TRAO ĐỔI &amp; CHAT
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1 text-[11px] font-semibold text-slate-400 group-hover:text-slate-200">
+                      <Columns2 size={14} className="group-hover:scale-110 transition-transform" />
+                      <span className="text-[10px] font-bold tracking-wider lg:hidden">MỞ LẠI (50/50)</span>
+                      <span className="hidden lg:block text-[9px] font-mono [writing-mode:vertical-rl] lg:rotate-180">50/50</span>
+                    </div>
+                  </button>
+                ) : (
+                  <div className="w-full h-full bg-[#1F1F22] border-b lg:border-b-0 lg:border-r border-white/10 p-4 lg:p-6 flex flex-col justify-between relative overflow-hidden">
 
                 {/* Nền Hoạ tiết Lưới Chấm Dot-Grid Paper Texture */}
                 <div
@@ -982,12 +1063,20 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                         )}
                       </div>
                       <p className="text-[11px] text-on-surface-variant mt-0.5">
-                        Thành viên: {room.members.map((m) => m.fullName || 'Người dùng').join(', ')}
+                        Thành viên: {room.members.map((m) => (m.userId === userId ? ("Bạn (" + (m.fullName || "You") + ")") : (m.fullName || "Người dùng"))).join(", ")}
                       </p>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setCollapsedPanel((prev) => (prev === 'left' ? 'none' : 'left'))}
+                      className="size-8 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white transition flex items-center justify-center shadow cursor-pointer"
+                      title="Thu gọn khung chat (Phóng to khung tranh)"
+                    >
+                      <PanelLeftClose size={15} />
+                    </button>
                     {/* Thẻ Trạng Thái Kênh Trực Tiếp (100% dữ liệu thực SignalR, không giả lập Online) */}
                     <div
                       title={
@@ -1157,12 +1246,58 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                           </div>
 
                           <div
-                            className={`max-w-[88%] p-3 text-xs leading-relaxed shadow-md ${isMe
+                            className={`max-w-[88%] min-w-0 overflow-hidden p-3 text-xs leading-relaxed shadow-md ${isMe
                               ? 'bg-brand-periwinkle text-brand-navy font-semibold rounded-2xl rounded-tr-none'
                               : 'border border-white/10 bg-white/5 text-on-surface rounded-2xl rounded-tl-none'
                               }`}
                           >
-                            <p className="whitespace-pre-wrap">{msg.body}</p>
+                            {(() => {
+                              const urlRegex = /(https?:\/\/[^\s]+)/gi;
+                              const parts = msg.body.split(urlRegex);
+                              const urls = msg.body.match(urlRegex) || [];
+                              const textOnly = parts.filter((p) => !/^https?:\/\//i.test(p)).join('').trim();
+                              return (
+                                <div className="space-y-2">
+                                  {textOnly && (
+                                    <p className="whitespace-pre-wrap break-words">{textOnly}</p>
+                                  )}
+                                  {urls.map((rawUrl, i) => {
+                                    const isPdf = /\.pdf(\?|$)/i.test(rawUrl);
+                                    const isImg = !isPdf && (isPortfolioImageUrl(rawUrl) || /\.(png|jpe?g|webp|gif|avif)(\?|$)/i.test(rawUrl) || rawUrl.includes('commissions/references'));
+                                    if (isImg) {
+                                      const fullImg = resolveAttachmentUrl(rawUrl);
+                                      return (
+                                        <button
+                                          key={i}
+                                          type="button"
+                                          onClick={() => setActiveLightboxUrl(fullImg)}
+                                          className="block overflow-hidden rounded-xl border border-black/15 bg-black/20 cursor-pointer hover:opacity-95 transition"
+                                          title="Bấm để xem ảnh gốc"
+                                        >
+                                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                                          <img src={fullImg} alt="Ảnh đính kèm" className="max-h-48 w-full object-cover" />
+                                        </button>
+                                      );
+                                    }
+                                    return (
+                                      <a
+                                        key={i}
+                                        href={isPdf ? resolveAttachmentUrl(rawUrl) : rawUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-[11px] font-medium break-all transition ${isMe
+                                          ? 'border-brand-navy/20 bg-brand-navy/10 text-brand-navy hover:bg-brand-navy/20'
+                                          : 'border-white/15 bg-white/10 text-slate-200 hover:bg-white/20'
+                                          }`}
+                                      >
+                                        {isPdf ? <FileText size={13} className="shrink-0" /> : <ExternalLink size={13} className="shrink-0" />}
+                                        <span className="truncate">{rawUrl.replace(/^https?:\/\/(www\.)?/, '')}</span>
+                                      </a>
+                                    );
+                                  })}
+                                </div>
+                              );
+                            })()}
 
                             {msg.translatedBody && msg.translatedBody.trim() !== msg.body.trim() && (
                               <div className="mt-2 border-t border-black/15 pt-2 text-[11px] italic opacity-90">
@@ -1182,11 +1317,10 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                                   return (
                                     <div key={att.messageAttachmentId} className="overflow-hidden rounded-xl border border-black/10 bg-black/20">
                                       {isImg ? (
-                                        <a
-                                          href={fullAttUrl}
-                                          target="_blank"
-                                          rel="noopener noreferrer"
-                                          className="group relative block overflow-hidden rounded-xl bg-black/40"
+                                        <button
+                                          type="button"
+                                          onClick={() => setActiveLightboxUrl(fullAttUrl)}
+                                          className="group relative block w-full overflow-hidden rounded-xl bg-black/40 cursor-pointer"
                                         >
                                           {/* eslint-disable-next-line @next/next/no-img-element */}
                                           <img
@@ -1197,7 +1331,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                                           <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition duration-200 group-hover:opacity-100 text-white text-xs font-semibold gap-1.5">
                                             <Eye size={16} /> Xem ảnh gốc
                                           </div>
-                                        </a>
+                                        </button>
                                       ) : (
                                         <div className="flex items-center justify-between p-2 text-[11px]">
                                           <span className="inline-flex items-center gap-1.5 truncate text-on-surface font-medium">
@@ -1334,7 +1468,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                     }}
                   />
 
-                  {showAssetPicker && isCreator && !isChatDisabled && <CreatorAssetPicker onClose={() => setShowAssetPicker(false)} onSelect={body => {
+                  {showAssetPicker && isCreator && !isChatDisabled && <CreatorAssetPicker commissionId={room.commissionId} onClose={() => setShowAssetPicker(false)} onSelect={body => {
                     const combined = [inputBody, body].filter(Boolean).join('\n\n');
                     const parsed = workroomMessageSchema.safeParse(combined);
                     if (!parsed.success) { setError('Nội dung tài nguyên và tin nhắn vượt 4000 ký tự. Hãy rút gọn ghi chú trước khi chèn.'); setShowAssetPicker(false); return; }
@@ -1395,12 +1529,69 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                   </form>
                   <p className="mt-1 text-right text-[10px] text-outline">Enter để gửi · Shift+Enter để xuống dòng</p>
                 </div>
+                  </div>
+                )}
               </div>
 
               {/* ========================================================================= */}
               {/* TRANG PHẢI (RIGHT PAGE): DYNAMIC TABBED VIEW (CANVAS / BRIEF / MILESTONES) */}
               {/* ========================================================================= */}
-              <div className="flex-1 bg-[#1F2335] p-4 lg:p-6 flex flex-col justify-between relative rounded-tr-3xl rounded-br-3xl">
+              <div
+                className={`transition-[width,flex] duration-300 ease-in-out relative flex flex-col overflow-hidden rounded-tr-3xl rounded-br-3xl ${
+                  collapsedPanel === 'right'
+                    ? 'w-full lg:w-14 shrink-0'
+                    : collapsedPanel === 'left'
+                      ? 'flex-1 w-full'
+                      : 'flex-1 w-full lg:w-1/2'
+                }`}
+              >
+                {collapsedPanel === 'right' ? (
+                  <button
+                    type="button"
+                    onClick={() => setCollapsedPanel('none')}
+                    title="Nhấn vào tờ ghim để khôi phục chia đôi hai trang (50/50)"
+                    className="w-full h-full py-3 lg:py-6 px-3 lg:px-1 bg-[#1A1D2B] border-t lg:border-t-0 lg:border-l border-white/10 hover:border-white/20 transition-all duration-200 flex flex-row lg:flex-col items-center justify-between cursor-pointer group shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] select-none"
+                  >
+                    <div className="flex flex-row lg:flex-col items-center gap-1.5">
+                      <div className="size-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center shadow-md group-hover:scale-105 group-hover:bg-white/10 group-hover:border-white/20 transition-all">
+                        <Pin size={16} className="text-slate-300 group-hover:text-white transition-colors" />
+                      </div>
+                    </div>
+                    <div className="my-auto flex items-center justify-center lg:[writing-mode:vertical-rl] lg:rotate-180">
+                      <span className="text-xs font-bold tracking-widest text-slate-300 group-hover:text-white uppercase transition-colors whitespace-nowrap">
+                        TRANH MINH HỌA &amp; MỐC
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1 text-[11px] font-semibold text-slate-400 group-hover:text-slate-200">
+                      <Columns2 size={14} className="group-hover:scale-110 transition-transform" />
+                      <span className="text-[10px] font-bold tracking-wider lg:hidden">MỞ LẠI (50/50)</span>
+                      <span className="hidden lg:block text-[9px] font-mono [writing-mode:vertical-rl] lg:rotate-180">50/50</span>
+                    </div>
+                  </button>
+                ) : (
+                  <div className="w-full h-full bg-[#1F2335] p-4 lg:p-6 flex flex-col justify-between relative overflow-hidden">
+                    <div className="absolute top-3.5 sm:top-4 lg:top-5 right-3.5 sm:right-[130px] z-40 flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => setCollapsedPanel((prev) => (prev === 'right' ? 'none' : 'right'))}
+                        className="size-8 sm:size-9 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white transition flex items-center justify-center shadow-md backdrop-blur-sm cursor-pointer"
+                        title="Thu gọn khung tranh (Mở rộng chat)"
+                      >
+                        <PanelRightClose size={16} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setCollapsedPanel((prev) => (prev === 'left' ? 'none' : 'left'))}
+                        className={`size-8 sm:size-9 rounded-lg border transition flex items-center justify-center shadow-md backdrop-blur-sm cursor-pointer ${
+                          collapsedPanel === 'left'
+                            ? 'bg-white/15 border-white/25 text-white'
+                            : 'bg-white/5 hover:bg-white/10 border-white/10 text-slate-300 hover:text-white'
+                        }`}
+                        title={collapsedPanel === 'left' ? 'Thu nhỏ về chia đôi (50/50)' : 'Phóng to khung tranh (Ẩn chat)'}
+                      >
+                        {collapsedPanel === 'left' ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+                      </button>
+                    </div>
 
                 {/* CỤM THẺ RUY-BĂNG THẢ RỦ TỪ TRÊN XUỐNG (BRIEF & TIẾN ĐỘ TABS) */}
                 <div className="hidden sm:flex absolute top-0 right-6 sm:right-8 items-start gap-2.5 z-40">
@@ -1589,13 +1780,28 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                       </div>
                     )}
 
-                    <div className="flex-1 flex flex-col justify-center items-center my-3 relative overflow-hidden border border-white/10 bg-[#1F1F22] p-4 min-h-[320px] [clip-path:polygon(14px_0,calc(100%-14px)_0,100%_14px,100%_calc(100%-14px),calc(100%-14px)_100%,14px_100%,0_calc(100%-14px),0_14px)]">
+                    <div
+                      ref={wipCanvasContainerRef}
+                      className="flex-1 flex flex-col justify-center items-center my-3 relative overflow-hidden border border-white/10 bg-[#1F1F22] p-4 min-h-[320px] [clip-path:polygon(14px_0,calc(100%-14px)_0,100%_14px,100%_calc(100%-14px),calc(100%-14px)_100%,14px_100%,0_calc(100%-14px),0_14px)]"
+                    >
+                      {/* Floating Cute Sticky Notes on Canvas WIP */}
+                      {commission && (
+                        <WorkroomStickyNotes
+                          commissionId={commission.id}
+                          displayedMilestone={displayedMilestone}
+                          isCreator={isCreator}
+                          containerRef={wipCanvasContainerRef}
+                          onOpenApprovalModal={() => setShowApprovalModal(true)}
+                        />
+                      )}
                       {currentWipPreviewUrl ? (
                         <div className="w-full h-full flex flex-col items-center justify-center relative space-y-3">
-                          <div
-                            onClick={() => setShowApprovalModal(true)}
-                            className="group relative cursor-pointer flex items-center justify-center max-h-[380px] w-full overflow-hidden rounded-xl border border-white/10 bg-[#141620] p-2 transition duration-300"
-                          >
+                          <div className="relative flex items-center justify-center max-h-[380px] w-full overflow-auto rounded-xl border border-white/10 bg-[#141620] p-2">
+                            <div
+                              onClick={() => setShowApprovalModal(true)}
+                              style={{ transform: `scale(${zoomScale})`, transformOrigin: 'center center' }}
+                              className="group relative cursor-pointer flex items-center justify-center w-full transition-transform duration-150"
+                            >
                             <ProtectedArtworkViewer
                               artworkId={displayedMilestone?.id || commission?.id || roomId}
                               fallbackImageUrl={currentWipPreviewUrl}
@@ -1615,6 +1821,45 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                               <span className="commission-primary inline-flex items-center gap-2 px-4 py-2 text-xs font-bold shadow-lg [clip-path:polygon(0_0,calc(100%-8px)_0,100%_8px,100%_100%,8px_100%,0_calc(100%-8px))]">
                                 <Maximize2 size={16} /> Xem chi tiết &amp; Phản hồi Mốc #{displayedMilestone?.sequence}
                               </span>
+                            </div>
+                          </div>
+
+                            {/* Zoom controls */}
+                            <div
+                              onClick={(e) => e.stopPropagation()}
+                              className="absolute bottom-3 left-3 z-30 flex items-center gap-1 rounded-lg border border-white/15 bg-black/80 p-1 backdrop-blur-md shadow-lg"
+                            >
+                              <button
+                                type="button"
+                                onClick={() => setZoomScale((prev) => Math.max(1, Math.round((prev - 0.25) * 100) / 100))}
+                                disabled={zoomScale <= 1}
+                                className="p-1 rounded text-slate-300 hover:text-white hover:bg-white/10 transition disabled:opacity-30"
+                                title="Thu nhỏ"
+                              >
+                                <ZoomOut size={14} />
+                              </button>
+                              <span className="px-1.5 text-[10px] font-mono font-bold text-slate-200 min-w-[38px] text-center">
+                                {Math.round(zoomScale * 100)}%
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => setZoomScale((prev) => Math.min(2.5, Math.round((prev + 0.25) * 100) / 100))}
+                                disabled={zoomScale >= 2.5}
+                                className="p-1 rounded text-slate-300 hover:text-white hover:bg-white/10 transition disabled:opacity-30"
+                                title="Phóng to tranh"
+                              >
+                                <ZoomIn size={14} />
+                              </button>
+                              {zoomScale > 1 && (
+                                <button
+                                  type="button"
+                                  onClick={() => setZoomScale(1)}
+                                  className="p-1 rounded text-slate-300 hover:text-white hover:bg-white/10 transition"
+                                  title="Đặt lại 100%"
+                                >
+                                  <RotateCcw size={14} />
+                                </button>
+                              )}
                             </div>
                           </div>
 
@@ -1835,6 +2080,146 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                         </p>
                       </div>
 
+                      {/* ========================================================================= */}
+                      {/* MỤC THAM CHIẾU & TÀI LIỆU REF (REFERENCE BOARD) */}
+                      {/* ========================================================================= */}
+                      <div className="glass-container p-4 space-y-3 [clip-path:polygon(10px_0,calc(100%-10px)_0,100%_10px,100%_calc(100%-10px),calc(100%-10px)_100%,10px_100%,0_calc(100%-10px),0_10px)]">
+                        <div className="flex items-center justify-between border-b border-white/10 pb-2">
+                          <div className="flex items-center gap-2">
+                            <ImageIcon size={16} className="text-brand-periwinkle" />
+                            <h4 className="font-h1 text-xs font-bold text-brand-periwinkle">
+                              Tài Liệu &amp; Hình Ảnh Tham Khảo
+                            </h4>
+                          </div>
+                          <span className="text-[10px] font-mono text-outline">
+                            {(commission?.referenceImages?.length ?? 0)} tài liệu
+                          </span>
+                        </div>
+
+                        {(commission?.referenceImages?.length ?? 0) > 0 ? (
+                          <div className="space-y-3">
+                            <p className="text-[11px] text-on-surface-variant">
+                              Ảnh mẫu &amp; tài liệu tham khảo đính kèm cho dự án.
+                            </p>
+
+                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                              {commission?.referenceImages?.map((url, idx) => {
+                                const isImg = isPortfolioImageUrl(url) || /\.(png|jpe?g|webp|gif|avif)(\?|$)/i.test(url);
+                                const isPdf = /\.pdf(\?|$)/i.test(url);
+                                const isDrive = url.includes('drive.google.com') || url.includes('docs.google.com');
+                                const isPinterest = url.includes('pinterest.com') || url.includes('pin.it');
+
+                                return (
+                                  <div
+                                    key={idx}
+                                    className="group relative rounded-xl border border-white/10 bg-[#161926] p-2 flex flex-col justify-between hover:border-brand-periwinkle/40 transition-all shadow-md"
+                                  >
+                                    {isImg ? (
+                                      <div
+                                        onClick={() => setActiveLightboxUrl(resolveAttachmentUrl(url))}
+                                        className="relative h-28 w-full rounded-lg bg-black/40 overflow-hidden cursor-pointer group-hover:scale-[1.02] transition-transform"
+                                      >
+                                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                                        <img
+                                          src={resolveAttachmentUrl(url)}
+                                          alt={`Ref #${idx + 1}`}
+                                          className="w-full h-full object-cover"
+                                        />
+                                        <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity text-white text-xs font-bold gap-1">
+                                          <Maximize2 size={14} /> Phóng to
+                                        </div>
+                                      </div>
+                                    ) : (
+                                      <a
+                                        href={isPdf ? resolveAttachmentUrl(url) : url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="h-28 w-full overflow-hidden rounded-lg bg-white/5 border border-white/10 flex flex-col items-center justify-center p-3 text-center hover:bg-white/10 transition text-slate-300 hover:text-white"
+                                      >
+                                        {isPdf ? (
+                                          <FileText size={28} className="text-rose-400 mb-1" />
+                                        ) : isDrive ? (
+                                          <FolderOpen size={28} className="text-amber-400 mb-1" />
+                                        ) : isPinterest ? (
+                                          <Pin size={28} className="text-rose-400 mb-1" />
+                                        ) : (
+                                          <ExternalLink size={28} className="text-brand-periwinkle mb-1" />
+                                        )}
+                                        <span className="text-[11px] font-bold truncate w-full">
+                                          {isPdf ? 'Tài liệu PDF' : isDrive ? 'Google Drive' : isPinterest ? 'Pinterest' : 'Tài liệu ngoài'}
+                                        </span>
+                                        <span className="text-[10px] text-outline mt-0.5 truncate w-full">
+                                          {url.replace(/^https?:\/\/(www\.)?/, '')}
+                                        </span>
+                                      </a>
+                                    )}
+
+                                    <div className="flex items-center justify-between mt-2 pt-1 border-t border-white/5 text-[10px]">
+                                      <span className="font-mono text-outline font-bold">#{idx + 1}</span>
+                                      <div className="flex items-center gap-1">
+                                        <button
+                                          type="button"
+                                          onClick={() => {
+                                            void navigator.clipboard.writeText(url);
+                                            toast.success('Đã sao chép liên kết.');
+                                          }}
+                                          title="Sao chép liên kết"
+                                          className="p-1 rounded text-slate-400 hover:text-white hover:bg-white/10 transition"
+                                        >
+                                          <Copy size={12} />
+                                        </button>
+
+                                        {(isImg || isPdf) && (
+                                          <a
+                                            href={resolveAttachmentUrl(url)}
+                                            download
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            title="Mở tệp gốc / Tải về"
+                                            className="p-1 rounded text-slate-400 hover:text-white hover:bg-white/10 transition"
+                                          >
+                                            <Download size={12} />
+                                          </a>
+                                        )}
+
+                                        {isCreator && isImg && (
+                                          <button
+                                            type="button"
+                                            onClick={async () => {
+                                              try {
+                                                await creatorProfileService.saveAsset({
+                                                  assetType: 'Ref',
+                                                  name: `Ref đơn ${commission?.title || ''} (#${idx + 1})`,
+                                                  assetUrl: url,
+                                                  metadataJson: JSON.stringify({ notes: `Lưu từ đơn hàng commission #${roomId}`, commissionId: room?.commissionId }),
+                                                });
+                                                toast.success('Đã lưu ảnh vào Thư viện tài nguyên của bạn!');
+                                              } catch (e: unknown) {
+                                                toast.error(extractErrorMessage(e, 'Không thể lưu vào thư viện.'));
+                                              }
+                                            }}
+                                            title="Lưu vào Thư viện tài nguyên"
+                                            className="p-1 rounded text-brand-periwinkle hover:bg-brand-periwinkle/20 transition"
+                                          >
+                                            <BookmarkPlus size={12} />
+                                          </button>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="p-3 text-center rounded-xl bg-white/[0.02] border border-white/5">
+                            <p className="text-xs text-outline">
+                              Khách hàng không đính kèm tệp tham khảo khi tạo yêu cầu.
+                            </p>
+                          </div>
+                        )}
+                      </div>
+
                       <div className="glass-container p-4 space-y-2 [clip-path:polygon(10px_0,calc(100%-10px)_0,100%_10px,100%_calc(100%-10px),calc(100%-10px)_100%,10px_100%,0_calc(100%-10px),0_10px)]">
                         <h4 className="font-h1 text-xs font-bold text-brand-periwinkle">Tóm tắt các mốc thanh toán Escrow</h4>
                         <div className="space-y-1.5 pt-1">
@@ -1945,10 +2330,11 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                   </div>
                 )}
 
+                  </div>
+                )}
               </div>
             </div>
           </div>
-
       {/* MODALS NGHIỆP VỤ HỢP ĐỒNG (CÁC MODAL HIỆN CÓ KHÔNG SỬA ĐỔI PROTOCOL) */}
       {room.commissionId && (
         <>
@@ -1982,6 +2368,8 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
             milestoneSequence={displayedMilestone?.sequence ?? 1}
             isCreator={isCreator}
             revisionFeedback={displayedMilestone?.revisionFeedback}
+            revisionFeedbackImageUrl={displayedMilestone?.revisionFeedbackImageUrl}
+            revisionAnnotationsJson={displayedMilestone?.revisionAnnotationsJson}
             milestoneStatus={displayedMilestone?.status}
             onOpenSubmitModal={() => setShowSubmitModal(true)}
             onSuccess={({ action, feedback }) => {
@@ -2056,6 +2444,17 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                 cancel_approved: '✅ Yêu cầu hủy đơn đã được chấp thuận — đơn hàng đã hủy và hoàn trả phần Escrow còn lại.',
                 cancel_rejected: '↩️ Yêu cầu hủy đơn đã bị từ chối — đơn hàng tiếp tục được thực hiện.',
               } as const;
+              if (action === 'cancelled_immediately' || action === 'cancel_approved') {
+                cancelToastShownRef.current = true;
+                toast('Đơn hàng đã được hủy và hoàn phần Escrow còn lại. Phòng làm việc sẽ khóa lưu trữ.', {
+                  icon: '🚫',
+                  duration: 6000,
+                });
+              } else if (action === 'cancel_requested') {
+                toast('Đã gửi yêu cầu hủy đơn. Đối tác có 48 giờ để phản hồi.', { icon: '⏳', duration: 5000 });
+              } else if (action === 'cancel_rejected') {
+                toast('Yêu cầu hủy đơn đã bị từ chối — đơn hàng tiếp tục được thực hiện.', { icon: '↩️', duration: 5000 });
+              }
               void chat.sendMessage(msgMap[action], 'SystemEvent').catch(() => null);
             }}
           />
@@ -2080,7 +2479,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
               </section>
             ) : null
           )}
-          {showDisputeDetailsModal && <DisputeDetailsModal key={room.commissionId} isOpen commissionId={room.commissionId} initialDispute={commission?.dispute} onClose={() => setShowDisputeDetailsModal(false)} />}
+          {showDisputeDetailsModal && <DisputeDetailsModal key={room.commissionId} isOpen commissionId={room.commissionId} initialDispute={commission?.dispute} commission={commission} onClose={() => setShowDisputeDetailsModal(false)} />}
           {showReplyModal && <CreatorReplyModal isOpen commissionId={room.commissionId} reviewComment={commission?.review?.comment} reviewRating={commission?.review?.rating} onClose={() => setShowReplyModal(false)} onSuccess={() => { setShowReplyModal(false); refresh(); }} />}
           {commission && (currentMemberRole === 'client' || currentMemberRole === 'creator') && (
             <WorkroomTermsModal
@@ -2091,6 +2490,163 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
               error={termsError}
               onConfirm={handleAcceptWorkroomTerms}
             />
+          )}
+
+          {/* QUICK REF DRAWER / MODAL */}
+          {showQuickRefDrawer && (
+            <div
+              className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-3 sm:p-4 backdrop-blur-sm"
+              onClick={() => setShowQuickRefDrawer(false)}
+            >
+              <div
+                className="relative flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#161925] p-5 shadow-2xl"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                  <div className="flex items-center gap-2">
+                    <ImageIcon className="h-5 w-5 text-brand-periwinkle" />
+                    <h3 className="font-h1 text-sm font-bold text-white">
+                      Tài Liệu Tham Khảo Của Khách Hàng
+                    </h3>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowQuickRefDrawer(false)}
+                    className="rounded-full p-1 text-slate-400 hover:bg-white/10 hover:text-white"
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
+                </div>
+
+                <div className="mt-4 flex-1 overflow-y-auto pr-1">
+                  {(commission?.referenceImages?.length ?? 0) === 0 ? (
+                    <div className="flex flex-col items-center justify-center rounded-xl border border-white/10 bg-white/[0.02] p-8 text-center">
+                      <ImageIcon className="mb-2 h-8 w-8 text-slate-500" />
+                      <p className="text-xs font-semibold text-slate-300">
+                        Đơn hàng này chưa có ảnh hoặc tài liệu tham khảo.
+                      </p>
+                    </div>
+                  ) : (
+                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                    {commission?.referenceImages?.map((url, idx) => {
+                      const isPdf = /\.pdf(\?|$)/i.test(url);
+                      const isImg = !isPdf && (isPortfolioImageUrl(url) || /\.(png|jpe?g|webp|gif|avif)(\?|$)/i.test(url));
+                      return (
+                        <div
+                          key={idx}
+                          className="group relative flex flex-col justify-between overflow-hidden rounded-xl border border-white/10 bg-black/40 p-2"
+                        >
+                          {isImg ? (
+                            <div
+                              onClick={() => {
+                                setShowQuickRefDrawer(false);
+                                setActiveLightboxUrl(resolveAttachmentUrl(url));
+                              }}
+                              className="relative h-32 w-full cursor-pointer overflow-hidden rounded-lg"
+                            >
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img
+                                src={resolveAttachmentUrl(url)}
+                                alt={`Ref #${idx + 1}`}
+                                className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                              />
+                              <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
+                                <Maximize2 className="h-4 w-4 text-white" />
+                              </div>
+                            </div>
+                          ) : (
+                            <a
+                              href={isPdf ? resolveAttachmentUrl(url) : url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex h-32 w-full flex-col items-center justify-center overflow-hidden rounded-lg bg-white/5 p-3 text-center text-xs text-slate-300 hover:text-white"
+                            >
+                              {isPdf ? (
+                                <FileText className="mb-1.5 h-6 w-6 shrink-0 text-rose-400" />
+                              ) : (
+                                <ExternalLink className="mb-1.5 h-6 w-6 shrink-0 text-brand-periwinkle" />
+                              )}
+                              <span className="w-full line-clamp-2 break-all text-[11px] font-bold">
+                                {isPdf ? 'Tài liệu PDF' : url.replace(/^https?:\/\/(www\.)?/, '')}
+                              </span>
+                            </a>
+                          )}
+                          <div className="mt-2 flex items-center justify-between text-[10px]">
+                            <span className="font-mono font-bold text-outline">#{idx + 1}</span>
+                            <div className="flex gap-1">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  void navigator.clipboard.writeText(url);
+                                  toast.success('Đã sao chép liên kết.');
+                                }}
+                                className="p-1 text-slate-400 hover:text-white"
+                                title="Sao chép liên kết"
+                              >
+                                <Copy className="h-3 w-3" />
+                              </button>
+                              {(isImg || isPdf) && (
+                                <a
+                                  href={resolveAttachmentUrl(url)}
+                                  download
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="p-1 text-slate-400 hover:text-white"
+                                  title="Tải tệp"
+                                >
+                                  <Download className="h-3 w-3" />
+                                </a>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* LIGHTBOX PREVIEW MODAL */}
+          {activeLightboxUrl && (
+            <div
+              className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4 backdrop-blur-md"
+              onClick={() => setActiveLightboxUrl(null)}
+            >
+              <div
+                className="relative flex max-h-[92vh] max-w-[92vw] flex-col items-center justify-center"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="absolute right-0 top-0 -mt-10 flex items-center gap-3">
+                  <a
+                    href={activeLightboxUrl}
+                    download
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1.5 rounded-lg bg-white/10 px-3 py-1.5 text-xs font-semibold text-white hover:bg-white/20 transition"
+                  >
+                    <Download className="h-3.5 w-3.5" />
+                    <span>Tải ảnh gốc</span>
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => setActiveLightboxUrl(null)}
+                    className="rounded-full bg-white/10 p-1.5 text-white hover:bg-white/20 transition"
+                    title="Đóng (Esc)"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={activeLightboxUrl}
+                  alt="Ảnh tham khảo phóng to"
+                  className="max-h-[85vh] max-w-full rounded-xl object-contain shadow-2xl border border-white/10"
+                />
+              </div>
+            </div>
           )}
 
         </>

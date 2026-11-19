@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Palette, UserCheck, Crown, Lock } from 'lucide-react';
+import { useLanguage } from '@/context/language-context';
 
 export type TabType = 'artworks' | 'my-submission' | 'wall-of-fame';
 
@@ -24,6 +25,9 @@ export function EventDetailTabNav({
   leaderboardCount,
   isAdmin = false,
 }: EventDetailTabNavProps) {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
+
   return (
     <div className="mt-12 flex border-b border-white/10 gap-2 sm:gap-4 overflow-x-auto">
       <button
@@ -36,7 +40,7 @@ export function EventDetailTabNav({
         }`}
       >
         <Palette size={17} />
-        <span>Event Artworks ({submissionsCount})</span>
+        <span>{isVie ? `Tác phẩm dự thi (${submissionsCount})` : `Event Artworks (${submissionsCount})`}</span>
       </button>
 
       {!isAdmin && (
@@ -50,7 +54,7 @@ export function EventDetailTabNav({
           }`}
         >
           <UserCheck size={17} />
-          <span>My Submission</span>
+          <span>{isVie ? 'Bài dự thi của tôi' : 'My Submission'}</span>
           {hasMySubmission && (
             <span className="size-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
           )}
@@ -69,14 +73,14 @@ export function EventDetailTabNav({
         }`}
       >
         {isAnnounced ? <Crown size={17} /> : <Lock size={15} className="text-[#8A8FA9]" />}
-        <span>Wall Of Fame</span>
+        <span>{isVie ? 'Bảng vinh danh' : 'Wall Of Fame'}</span>
         {isAnnounced ? (
           <span className="rounded-full bg-amber-400/20 px-2 py-0.5 text-[11px] font-extrabold text-amber-300">
             Top {leaderboardCount}
           </span>
         ) : (
           <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-semibold text-[#A7ACD9]">
-            Pending Announcement
+            {isVie ? 'Chờ công bố' : 'Pending Announcement'}
           </span>
         )}
       </button>

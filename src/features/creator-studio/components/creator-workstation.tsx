@@ -46,13 +46,13 @@ export type WorkstationView = 'artworks' | 'services' | 'terms' | 'ai-rules' | '
 
 type Service = { id: number; name: string; price: string; days: string; active: boolean };
 
-type FaqDraft = { q: string; a: string };
+type FaqDraft = { id?: string; q: string; a: string };
 
 const titles: Record<WorkstationView, [string, string]> = {
   artworks: ['Đăng tải & quản lý tác phẩm', 'Xây dựng portfolio với thiết lập AI hỗ trợ.'],
   services: ['Bảng giá & dịch vụ', 'Thiết lập gói commission và số slot nhận đơn.'],
   terms: ['Điều khoản & bản quyền', 'Thiết lập phụ phí thương mại, phạm vi vẽ và điều khoản riêng.'],
-  'ai-rules': ['AI Auto-reply & rules', 'Tự động phản hồi brief và câu hỏi thường gặp.'],
+  'ai-rules': ['Auto-reply & FAQ', 'Tự động phản hồi tin nhắn và câu hỏi thường gặp trong chat.'],
   waitlist: ['Quản lý hàng chờ', 'Theo dõi mọi commission theo từng giai đoạn.'],
   assets: ['Thư viện asset & presets', 'Tổ chức pose mẫu, palette và preset cá nhân.'],
 };
@@ -521,7 +521,7 @@ function Artworks() {
   );
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars -- legacy editor retained until rate-card migration is complete
+ 
 function Services() {
   const [slots, setSlots] = useState(3);
   const [services, setServices] = useState<Service[]>([
@@ -1160,7 +1160,7 @@ function Terms() {
 }
 
 function AiRules() {
-  const [enabled, setEnabled] = useState(true);
+  const [enabled, setEnabled] = useState(false);
   const [template, setTemplate] = useState('Cảm ơn bạn đã gửi brief! Mình đã nhận được thông tin và sẽ phản hồi trong vòng 24 giờ.');
   const [faqs, setFaqs] = useState<FaqDraft[]>([
     { q: 'Bạn nhận commission không?', a: 'Mình đang nhận commission theo số slot hiển thị trên profile.' },
@@ -1173,9 +1173,11 @@ function AiRules() {
         const state = await creatorProfileService.getWorkstationState();
         setEnabled(state.autoReply.isEnabled);
         setTemplate(state.autoReply.briefTemplate || defaultState.autoReply.briefTemplate);
-        setFaqs((state.faqs ?? []).map((faq) => ({ q: faq.question, a: faq.answer })) || [
-          { q: 'Bạn nhận commission không?', a: 'Mình đang nhận commission theo số slot hiển thị trên profile.' },
-        ]);
+        setFaqs(
+          state.faqs?.length
+            ? state.faqs.map((faq) => ({ id: faq.id, q: faq.question, a: faq.answer }))
+            : [{ q: 'Bạn nhận commission không?', a: 'Mình đang nhận commission theo số slot hiển thị trên profile.' }],
+        );
       } catch {
         // keep defaults
       }
@@ -1183,6 +1185,19 @@ function AiRules() {
 
     void loadState();
   }, []);
+
+  const toggleAutoReply = async () => {
+    const nextEnabled = !enabled;
+    setEnabled(nextEnabled);
+    try {
+      await creatorProfileService.saveAutoReply({ isEnabled: nextEnabled, briefTemplate: template });
+      toast.success(nextEnabled ? 'Đã bật auto-reply.' : 'Đã tắt auto-reply.');
+    } catch (error) {
+      setEnabled(!nextEnabled);
+      const message = error instanceof Error ? error.message : 'Không thể cập nhật trạng thái auto-reply.';
+      toast.error(message);
+    }
+  };
 
   const saveAutoReply = async () => {
     try {
@@ -1203,10 +1218,32 @@ function AiRules() {
     if (!faq) return;
 
     try {
-      await creatorProfileService.saveFaq({ question: faq.q, answer: faq.a, displayOrder: index + 1 });
+      const payload = { question: faq.q, answer: faq.a, displayOrder: index + 1 };
+      const saved = faq.id
+        ? await creatorProfileService.updateFaq(faq.id, payload)
+        : await creatorProfileService.saveFaq(payload);
+      setFaqs((current) =>
+        current.map((item, itemIndex) => (itemIndex === index ? { id: saved.id, q: saved.question, a: saved.answer } : item)),
+      );
       toast.success('Đã lưu FAQ.');
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Không thể lưu FAQ.';
+      toast.error(message);
+    }
+  };
+
+  const deleteFaq = async (index: number) => {
+    const faq = faqs[index];
+    if (!faq) return;
+
+    try {
+      if (faq.id) {
+        await creatorProfileService.deleteFaq(faq.id);
+      }
+      setFaqs((current) => current.filter((_, itemIndex) => itemIndex !== index));
+      toast.success('Đã xóa FAQ.');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Không thể xóa FAQ.';
       toast.error(message);
     }
   };
@@ -1218,10 +1255,30 @@ function AiRules() {
           <div className="flex items-start justify-between gap-4">
             <div>
               <Bot className="h-6 w-6 text-[#A7ACD9]" />
-              <h2 className="mt-4 font-h1 text-lg font-bold text-white">Auto-reply cho brief</h2>
-              <p className="mt-2 text-sm text-[#C7C5CF]">AI trả lời ngay khi client gửi brief mới.</p>
+              <h2 className="mt-4 font-h1 text-lg font-bold text-white">Auto-reply cho chat</h2>
+              <p className="mt-2 text-sm text-[#C7C5CF]">Tự động trả lời ngay khi client gửi tin nhắn đầu tiên.</p>
             </div>
-            <input checked={enabled} onChange={(event) => setEnabled(event.target.checked)} type="checkbox" className="h-5 w-9 accent-[#A7ACD9]" />
+            <div className="flex items-center gap-2">
+              <span className={`text-xs font-medium ${enabled ? 'text-[#A7ACD9]' : 'text-[#C7C5CF]/60'}`}>
+                {enabled ? 'Đang bật' : 'Đang tắt'}
+              </span>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={enabled}
+                onClick={toggleAutoReply}
+                className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer items-center rounded-full border transition-colors ${
+                  enabled ? 'border-[#A7ACD9] bg-[#A7ACD9]' : 'border-white/20 bg-white/10'
+                }`}
+                aria-label="Bật tắt Auto-reply"
+              >
+                <span
+                  className={`inline-block h-5 w-5 transform rounded-full transition-transform ${
+                    enabled ? 'translate-x-6 bg-[#1F2335]' : 'translate-x-1 bg-white/70'
+                  }`}
+                />
+              </button>
+            </div>
           </div>
 
           <label className="mt-6 block text-sm text-[#C7C5CF]">
@@ -1237,7 +1294,7 @@ function AiRules() {
           <div className="mb-4 flex items-center justify-between">
             <div>
               <h2 className="font-h1 text-lg font-bold text-white">FAQ tự động</h2>
-              <p className="mt-1 text-sm text-[#C7C5CF]">Câu trả lời AI có thể gửi ngay cho khách.</p>
+              <p className="mt-1 text-sm text-[#C7C5CF]">Câu trả lời tự động gửi ngay khi khách hỏi câu tương ứng.</p>
             </div>
             <button type="button" onClick={addFaq} className="rounded-xl bg-white/10 p-2 text-[#A7ACD9]" aria-label="Thêm FAQ">
               <Plus className="h-4 w-4" />
@@ -1246,12 +1303,23 @@ function AiRules() {
 
           <div className="space-y-3">
             {faqs.map((faq, index) => (
-              <article key={`${faq.q}-${index}`} className="rounded-3xl border border-white/10 bg-white/[.035] p-4">
+              <article key={faq.id ?? `draft-${index}`} className="rounded-3xl border border-white/10 bg-white/[.035] p-4">
                 <input value={faq.q} onChange={(event) => setFaqs((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, q: event.target.value } : item))} className="w-full bg-transparent text-sm font-medium text-white outline-none" />
                 <textarea value={faq.a} onChange={(event) => setFaqs((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, a: event.target.value } : item))} className="mt-3 min-h-20 w-full rounded-2xl border border-white/10 bg-[#171a2a] p-3 text-sm text-white outline-none focus:border-[#A7ACD9]" />
-                <button type="button" onClick={() => saveFaq(index)} className="mt-3 rounded-xl bg-white/10 px-3 py-2 text-xs text-[#A7ACD9]">
-                  Lưu FAQ
-                </button>
+                <div className="mt-3 flex items-center gap-2">
+                  <button type="button" onClick={() => saveFaq(index)} className="rounded-xl bg-white/10 px-3 py-2 text-xs text-[#A7ACD9]">
+                    Lưu FAQ
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => deleteFaq(index)}
+                    className="inline-flex items-center gap-1 rounded-xl bg-red-500/15 px-3 py-2 text-xs text-red-300 hover:bg-red-500/25"
+                    aria-label="Xóa FAQ"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                    Xóa
+                  </button>
+                </div>
               </article>
             ))}
           </div>

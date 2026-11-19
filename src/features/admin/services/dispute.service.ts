@@ -143,6 +143,7 @@ export const adminDisputeService = {
     filters?: Partial<SubmissionDisputeQueueFilters>
   ): Promise<SubmissionDisputeQueueResponse> {
     const status = filters?.status && filters.status !== 'All' ? filters.status : undefined;
+    const category = filters?.category && filters.category !== 'All' ? filters.category : undefined;
     const eventId = filters?.eventId || undefined;
     const submissionId = filters?.submissionId || undefined;
     const page = filters?.page || 1;
@@ -155,6 +156,7 @@ export const adminDisputeService = {
           eventId,
           submissionId,
           status,
+          category,
           page,
           pageSize,
         },

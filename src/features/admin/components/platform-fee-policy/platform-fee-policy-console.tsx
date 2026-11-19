@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { SlidersHorizontal, AlertCircle } from 'lucide-react';
+import { useLanguage } from '@/context/language-context';
 import { usePlatformFee } from '@/features/admin/hooks/use-platform-fee';
 import {
   PolicyHeader,
@@ -11,6 +12,9 @@ import {
 } from './components';
 
 export function PlatformFeePolicyConsole() {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
+
   const {
     policy,
     formValues,
@@ -35,8 +39,12 @@ export function PlatformFeePolicyConsole() {
           <SlidersHorizontal className="w-5 h-5 text-red-400" />
         </div>
         <div>
-          <h3 className="text-white font-h1 font-bold text-lg">Loading Platform Fee & Policy</h3>
-          <p className="text-xs text-[#8A8FA9] mt-1 font-body">Fetching live system parameters from server...</p>
+          <h3 className="text-white font-h1 font-bold text-lg">
+            {isVie ? 'Đang tải Biểu phí & Chính sách Nền tảng' : 'Loading Platform Fee & Policy'}
+          </h3>
+          <p className="text-xs text-[#8A8FA9] mt-1 font-body">
+            {isVie ? 'Đang truy xuất thông số hệ thống từ máy chủ...' : 'Fetching live system parameters from server...'}
+          </p>
         </div>
       </div>
     );
@@ -61,7 +69,7 @@ export function PlatformFeePolicyConsole() {
             onClick={() => void loadPolicy()}
             className="px-3 py-1.5 rounded-lg bg-red-500/20 hover:bg-red-500/30 text-red-200 font-bold underline cursor-pointer"
           >
-            Retry
+            {isVie ? 'Thử lại' : 'Retry'}
           </button>
         </div>
       )}

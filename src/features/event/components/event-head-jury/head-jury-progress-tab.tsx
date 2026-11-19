@@ -4,9 +4,13 @@ import React from 'react';
 import { Check, Clock } from 'lucide-react';
 import type { JuryProgressItem } from '../../types/jury.types';
 import { EventSearchFilterBar } from '../event/event-search-filter-bar';
+import { useLanguage } from '@/context/language-context';
 
 interface HeadJuryProgressTabProps {
   overallJuryProgress: { completed: number; total: number; percent: number };
+  totalSubmissions?: number;
+  fullyGradedCount?: number;
+  anomalyFlagsCount?: number;
   juryList: JuryProgressItem[];
   filteredJuryList: JuryProgressItem[];
   selectedJuryId: string | null;
@@ -24,6 +28,9 @@ interface HeadJuryProgressTabProps {
 
 export function HeadJuryProgressTab({
   overallJuryProgress,
+  totalSubmissions = 0,
+  fullyGradedCount = 0,
+  anomalyFlagsCount = 0,
   juryList,
   filteredJuryList,
   selectedJury,
@@ -37,70 +44,94 @@ export function HeadJuryProgressTab({
   selectedJuryAssignments,
   filteredJuryAssignments,
 }: HeadJuryProgressTabProps) {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
+
+  const completedJuries = juryList.filter((j) => j.isCompleted).length;
+  const totalJuries = juryList.length;
+
   return (
     <section className="space-y-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <article className="p-5 rounded-2xl bg-white/[0.03] border border-white/10 backdrop-blur-xl relative overflow-hidden">
           <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#A7ACD9] via-[#7FD5E8] to-transparent opacity-75" />
-          <span className="text-[11px] uppercase tracking-wider text-[#9695a1]">Total Submissions</span>
-          <strong className="block mt-1 font-sora text-2xl sm:text-3xl font-bold text-white">248</strong>
+          <span className="text-[11px] uppercase tracking-wider text-[#9695a1]">
+            {isVie ? 'Tổng bài dự thi' : 'Total Submissions'}
+          </span>
+          <strong className="block mt-1 font-sora text-2xl sm:text-3xl font-bold text-white">
+            {totalSubmissions}
+          </strong>
         </article>
         <article className="p-5 rounded-2xl bg-white/[0.03] border border-white/10 backdrop-blur-xl relative overflow-hidden">
           <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-emerald-400 via-teal-300 to-transparent opacity-75" />
-          <span className="text-[11px] uppercase tracking-wider text-[#9695a1]">Fully Graded</span>
-          <strong className="block mt-1 font-sora text-2xl sm:text-3xl font-bold text-emerald-400">231</strong>
+          <span className="text-[11px] uppercase tracking-wider text-[#9695a1]">
+            {isVie ? 'Đã chấm đầy đủ' : 'Fully Graded'}
+          </span>
+          <strong className="block mt-1 font-sora text-2xl sm:text-3xl font-bold text-emerald-400">
+            {fullyGradedCount}
+          </strong>
         </article>
         <article className="p-5 rounded-2xl bg-white/[0.03] border border-white/10 backdrop-blur-xl relative overflow-hidden">
           <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-amber-400 via-orange-300 to-transparent opacity-75" />
-          <span className="text-[11px] uppercase tracking-wider text-[#9695a1]">Juries Completed</span>
-          <strong className="block mt-1 font-sora text-2xl sm:text-3xl font-bold text-amber-300">5 / 7</strong>
+          <span className="text-[11px] uppercase tracking-wider text-[#9695a1]">
+            {isVie ? 'Giám khảo hoàn tất' : 'Juries Completed'}
+          </span>
+          <strong className="block mt-1 font-sora text-2xl sm:text-3xl font-bold text-amber-300">
+            {completedJuries} / {totalJuries}
+          </strong>
         </article>
         <article className="p-5 rounded-2xl bg-white/[0.03] border border-white/10 backdrop-blur-xl relative overflow-hidden">
           <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-rose-400 via-pink-300 to-transparent opacity-75" />
-          <span className="text-[11px] uppercase tracking-wider text-[#9695a1]">Dispute Flags</span>
-          <strong className="block mt-1 font-sora text-2xl sm:text-3xl font-bold text-rose-400">7</strong>
+          <span className="text-[11px] uppercase tracking-wider text-[#9695a1]">
+            {isVie ? 'Cờ tranh chấp / Lệch điểm' : 'Dispute Flags'}
+          </span>
+          <strong className="block mt-1 font-sora text-2xl sm:text-3xl font-bold text-rose-400">
+            {anomalyFlagsCount}
+          </strong>
         </article>
       </div>
 
       <section className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-xl font-bold font-sora text-white">Jury Panel Individual Progress</h2>
+          <h2 className="text-xl font-bold font-sora text-white">
+            {isVie ? 'Tiến độ từng Giám khảo' : 'Jury Panel Individual Progress'}
+          </h2>
           <span className="w-fit rounded-full border border-[#A7ACD9]/30 bg-[#A7ACD9]/15 px-3 py-1 text-xs font-bold text-[#A7ACD9]">
-            {juryList.filter((j) => j.isCompleted).length} / {juryList.length} Juries Completed
+            {juryList.filter((j) => j.isCompleted).length} / {juryList.length} {isVie ? 'Giám khảo hoàn tất' : 'Juries Completed'}
           </span>
         </div>
 
         <div className="grid gap-6 lg:grid-cols-12 items-start">
           {/* Left: Jury table + overall progress */}
-          <div className="rounded-2xl border border-white/10 bg-[#151926]/90 backdrop-blur-xl p-4 lg:col-span-5 flex flex-col space-y-3">
+          <div className="glass-container rounded-2xl p-4 lg:col-span-5 flex flex-col space-y-3">
             {/* Searchbar & Status Filter on the same line */}
             <EventSearchFilterBar
               variant="inline"
               searchQuery={juryMemberSearch}
               onSearchChange={setJuryMemberSearch}
-              searchPlaceholder="Search name..."
+              searchPlaceholder={isVie ? 'Tìm tên giám khảo...' : 'Search name...'}
               statusValue={juryStatusFilter}
               onStatusChange={(val: string) => setJuryStatusFilter(val as 'all' | 'in_progress' | 'completed')}
               statusOptions={[
-                { value: 'all', label: `All (${juryList.length})` },
-                { value: 'in_progress', label: `In Progress (${juryList.filter((j) => !j.isCompleted).length})` },
-                { value: 'completed', label: `Completed (${juryList.filter((j) => j.isCompleted).length})` },
+                { value: 'all', label: isVie ? `Tất cả (${juryList.length})` : `All (${juryList.length})` },
+                { value: 'in_progress', label: isVie ? `Đang chấm (${juryList.filter((j) => !j.isCompleted).length})` : `In Progress (${juryList.filter((j) => !j.isCompleted).length})` },
+                { value: 'completed', label: isVie ? `Đã hoàn tất (${juryList.filter((j) => j.isCompleted).length})` : `Completed (${juryList.filter((j) => j.isCompleted).length})` },
               ]}
             />
 
             <div className="overflow-y-auto max-h-[380px] sm:max-h-[410px] pr-1 custom-scrollbar">
               <table className="w-full border-collapse text-left text-xs">
-                <thead className="sticky top-0 z-10 bg-[#151926] shadow-sm">
+                <thead className="sticky top-0 z-10 bg-[#161926] shadow-sm">
                   <tr className="border-b border-white/10 text-[#858694] uppercase font-semibold text-[10px]">
-                    <th className="py-2.5 px-3">Jury</th>
-                    <th className="py-2.5 px-3 w-[55%]">Progress</th>
+                    <th className="py-2.5 px-3">{isVie ? 'Giám khảo' : 'Jury'}</th>
+                    <th className="py-2.5 px-3 w-[55%]">{isVie ? 'Tiến độ' : 'Progress'}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/5">
                   {filteredJuryList.length === 0 ? (
                     <tr>
                       <td colSpan={2} className="py-8 text-center text-[#9695a1]">
-                        No jury members found matching criteria.
+                        {isVie ? 'Không tìm thấy giám khảo phù hợp tiêu chí.' : 'No jury members found matching criteria.'}
                       </td>
                     </tr>
                   ) : (
@@ -153,7 +184,9 @@ export function HeadJuryProgressTab({
             {/* Overall judging progress */}
             <div className="mt-4 pt-4 border-t border-white/10 space-y-2">
               <div className="flex items-center justify-between text-xs">
-                <span className="font-sora font-semibold text-white">Overall Judging Progress</span>
+                <span className="font-sora font-semibold text-white">
+                  {isVie ? 'Tiến độ toàn bộ hội đồng' : 'Overall Judging Progress'}
+                </span>
                 <span className="font-mono text-[#9695a1]">
                   {overallJuryProgress.completed} / {overallJuryProgress.total} ·{' '}
                   <strong className="text-[#A7ACD9]">{overallJuryProgress.percent}%</strong>
@@ -161,7 +194,7 @@ export function HeadJuryProgressTab({
               </div>
               <div className="w-full bg-white/10 h-2.5 rounded-full overflow-hidden">
                 <div
-                  className="h-full rounded-full bg-gradient-to-r from-purple-500 via-[#A7ACD9] to-[#7FD5E8] transition-all"
+                  className="h-full rounded-full bg-gradient-to-r from-[#A7ACD9] to-[#c2c7f6] transition-all"
                   style={{ width: `${overallJuryProgress.percent}%` }}
                 />
               </div>
@@ -169,16 +202,19 @@ export function HeadJuryProgressTab({
           </div>
 
           {/* Right: Selected jury's scoring list */}
-          <div className="rounded-2xl border border-white/10 bg-[#151926]/90 backdrop-blur-xl p-5 lg:col-span-7">
+          <div className="glass-container rounded-2xl p-5 lg:col-span-7">
             {!selectedJury ? (
-              <p className="py-16 text-center text-sm text-[#9695a1]">Select a jury member to view their scoring.</p>
+              <p className="py-16 text-center text-sm text-[#9695a1]">
+                {isVie ? 'Chọn một thành viên giám khảo để xem các bài chấm của họ.' : 'Select a jury member to view their scoring.'}
+              </p>
             ) : (
               <div className="space-y-4">
                 <div className="flex flex-col gap-2 border-b border-white/10 pb-4 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <h3 className="font-sora text-lg font-bold text-white">{selectedJury.name}</h3>
                     <p className="text-xs text-[#9695a1]">
-                      {selectedJury.completedCount} of {selectedJury.totalAssigned} assigned entries scored
+                      {selectedJury.completedCount} / {selectedJury.totalAssigned}{' '}
+                      {isVie ? 'bài dự thi được phân công đã chấm' : 'assigned entries scored'}
                     </p>
                   </div>
                   <span
@@ -188,7 +224,7 @@ export function HeadJuryProgressTab({
                         : 'bg-amber-500/15 text-amber-300 border-amber-500/30'
                     }`}
                   >
-                    {selectedJury.isCompleted ? 'Completed' : 'In Progress'}
+                    {selectedJury.isCompleted ? (isVie ? 'Đã hoàn tất' : 'Completed') : (isVie ? 'Đang thực hiện' : 'In Progress')}
                   </span>
                 </div>
 
@@ -198,16 +234,18 @@ export function HeadJuryProgressTab({
                   statusValue={juryScoreFilter}
                   onStatusChange={(val: string) => setJuryScoreFilter(val as 'all' | 'completed' | 'pending')}
                   statusOptions={[
-                    { value: 'all', label: `All Entries (${selectedJuryAssignments.length})` },
-                    { value: 'completed', label: `Completed (${selectedJury.completedCount})` },
-                    { value: 'pending', label: `Not Completed (${selectedJury.totalAssigned - selectedJury.completedCount})` },
+                    { value: 'all', label: isVie ? `Tất cả bài thi (${selectedJuryAssignments.length})` : `All Entries (${selectedJuryAssignments.length})` },
+                    { value: 'completed', label: isVie ? `Đã chấm (${selectedJury.completedCount})` : `Completed (${selectedJury.completedCount})` },
+                    { value: 'pending', label: isVie ? `Chưa chấm (${selectedJury.totalAssigned - selectedJury.completedCount})` : `Not Completed (${selectedJury.totalAssigned - selectedJury.completedCount})` },
                   ]}
                 />
 
                 {/* List */}
                 <ul className="space-y-2 overflow-y-auto max-h-[460px] pr-1.5 custom-scrollbar">
                   {filteredJuryAssignments.length === 0 ? (
-                    <li className="py-8 text-center text-xs text-[#9695a1]">No entries in this filter.</li>
+                    <li className="py-8 text-center text-xs text-[#9695a1]">
+                      {isVie ? 'Không có bài thi nào trong bộ lọc này.' : 'No entries in this filter.'}
+                    </li>
                   ) : (
                     filteredJuryAssignments.map((item) => (
                       <li
@@ -225,12 +263,12 @@ export function HeadJuryProgressTab({
                         {item.isCompleted ? (
                           <span className="shrink-0 flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-[10px] font-semibold">
                             <Check className="w-3 h-3" />
-                            Completed
+                            {isVie ? 'Đã chấm' : 'Completed'}
                           </span>
                         ) : (
                           <span className="shrink-0 flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[10px] font-semibold">
                             <Clock className="w-3 h-3" />
-                            Not Completed
+                            {isVie ? 'Chưa chấm' : 'Not Completed'}
                           </span>
                         )}
                       </li>

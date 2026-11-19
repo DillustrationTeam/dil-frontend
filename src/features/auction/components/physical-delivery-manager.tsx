@@ -78,10 +78,54 @@ const statusBadgeConfig: Record<
     text: 'text-purple-300',
     border: 'border-purple-500/30',
   },
+  // Hai trạng thái còn thiếu trước đây nên badge rơi về nhánh mặc định và in raw enum.
+  Resolved: {
+    label: 'Khiếu nại đã đóng',
+    bg: 'bg-slate-500/10',
+    text: 'text-slate-300',
+    border: 'border-slate-500/30',
+  },
+  Cancelled: {
+    label: 'Đã huỷ',
+    bg: 'bg-slate-500/10',
+    text: 'text-slate-300',
+    border: 'border-slate-500/30',
+  },
+  Settled: {
+    label: 'Đã chốt — chờ chọn hình thức',
+    bg: 'bg-amber-500/10',
+    text: 'text-amber-300',
+    border: 'border-amber-500/30',
+  },
+  Expired: {
+    label: 'Quá hạn',
+    bg: 'bg-slate-500/10',
+    text: 'text-slate-300',
+    border: 'border-slate-500/30',
+  },
 };
 
-export function PhysicalDeliveryManager() {
-  const currentUserId = useAuthStore((s) => s.user?.id);
+/** Nhãn tiếng Việt cho trạng thái ký quỹ của phiên (backend trả enum dạng chuỗi). */
+function escrowLabel(status?: string | null) {
+  switch (status) {
+    case 'Deposited':
+      return 'Đang giữ tiền chờ giao hàng';
+    case 'Released':
+      return 'Đã chuyển cho người bán';
+    case 'Refunded':
+      return 'Đã hoàn cho người mua';
+    case 'Disputed':
+      return 'Đang đóng băng do khiếu nại';
+    case 'Split':
+      return 'Đã chia theo phân xử';
+    case 'Pending':
+      return 'Chưa nạp';
+    default:
+      return status ?? '—';
+  }
+}
+
+export function PhysicalDeliveryManager() {  const currentUserId = useAuthStore((s) => s.user?.id);
   const [items, setItems] = useState<PhysicalDeliveryListItemDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -107,34 +151,12 @@ export function PhysicalDeliveryManager() {
     }
   }, [roleFilter, statusFilter]);
 
+  // Một nguồn tải duy nhất: effect gọi lại `fetchDeliveries` (đã bật loading) thay vì tự
+  // gọi API lần thứ hai. Trước đây effect tự fetch song song với fetchDeliveries nên mỗi lần
+  // đổi bộ lọc có 2 request trùng và danh sách cũ đứng yên không có spinner.
   useEffect(() => {
-    let ignore = false;
-    auctionService
-      .getPhysicalDeliveries({
-        role: roleFilter === 'all' ? undefined : roleFilter,
-        status: statusFilter === 'ALL' ? undefined : statusFilter,
-      })
-      .then((data) => {
-        if (!ignore) {
-          setItems(data);
-          setError(null);
-        }
-      })
-      .catch((err) => {
-        if (!ignore) {
-          setError(auctionError(err) || 'Không thể tải danh sách đơn giao nhận.');
-        }
-      })
-      .finally(() => {
-        if (!ignore) {
-          setLoading(false);
-        }
-      });
-
-    return () => {
-      ignore = true;
-    };
-  }, [roleFilter, statusFilter]);
+    void fetchDeliveries();
+  }, [fetchDeliveries]);
 
   const filteredItems = items.filter((item) => {
     if (!searchQuery.trim()) return true;
@@ -382,11 +404,11 @@ export function PhysicalDeliveryManager() {
                       </div>
                     )}
 
-                    {/* Escrow badge */}
+                    {/* Escrow badge — map sang tiếng Việt, trước đây in raw enum (Deposited/Released) */}
                     <div className="flex items-center gap-1.5 text-[11px] text-outline pt-1">
                       <ShieldCheck size={13} className="text-emerald-400" />
                       <span>Ký quỹ sàn: </span>
-                      <strong className="text-white font-mono">{item.escrowStatus}</strong>
+                      <strong className="text-white">{escrowLabel(item.escrowStatus)}</strong>
                     </div>
                   </div>
                 </div>

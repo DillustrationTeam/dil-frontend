@@ -65,7 +65,9 @@ export const notificationTypeLabels: Record<string, string> = {
   ArtTradeCompleted: 'Giao dịch trao đổi hoàn tất',
   TradeDisputeCreated: 'Khiếu nại trao đổi tác phẩm',
   TradeDisputeResolved: 'Phân xử khiếu nại trao đổi',
+  SubmissionDisputeCreated: 'Khiếu nại bài dự thi mới',
   BugReportReplied: 'Phản hồi báo cáo sự cố',
+  WorkroomMessage: 'Tin nhắn Workroom',
 };
 
 export const notificationTypeLabelsEn: Record<string, string> = {
@@ -94,7 +96,9 @@ export const notificationTypeLabelsEn: Record<string, string> = {
   ArtTradeCompleted: 'Art Trade Completed',
   TradeDisputeCreated: 'Art Trade Dispute Filed',
   TradeDisputeResolved: 'Art Trade Dispute Resolved',
+  SubmissionDisputeCreated: 'New Event Submission Dispute',
   BugReportReplied: 'Bug Report Reply',
+  WorkroomMessage: 'Workroom Message',
 };
 
 /** Danh sách loại hợp lệ, dùng cho bộ lọc và kiểm tra dữ liệu. */

@@ -1,6 +1,6 @@
-﻿'use client';
+'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useLanguage } from '@/context/language-context';
@@ -30,6 +30,7 @@ import {
   Settings,
   ArrowLeftRight,
   Sparkles,
+  Send,
 } from 'lucide-react';
 
 interface SidebarItem {
@@ -55,6 +56,7 @@ const CLIENT_NAV_SECTIONS: SidebarSection[] = [
     items: [
       { label: 'Tác phẩm đã sở hữu', href: '/client/owned-artworks', icon: Sparkles },
       { label: 'My Commissions', href: '/client/commissions', icon: FolderKanban },
+      { label: 'Sent Requests', href: '/client/requests', icon: Send },
       { label: 'My Vouchers', href: '/vouchers', icon: Ticket },
       { label: 'My Auctions', href: '/my-auctions', icon: Gavel },
       { label: 'Workroom Chat', href: '/workroom', icon: MessageSquare },
@@ -113,7 +115,7 @@ const CREATOR_NAV_SECTIONS: SidebarSection[] = [
       { label: 'My Vouchers', href: '/creator/vouchers', icon: Ticket },
       { label: 'Terms & Licensing', href: '/creator/terms', icon: ShieldCheck },
       { label: 'Forensic Watermark', href: '/forensic', icon: ShieldCheck },
-      { label: 'AI Auto-reply', href: '/creator/ai-rules', icon: Bot },
+      { label: 'Auto-reply', href: '/creator/ai-rules', icon: Bot },
       { label: 'Asset & Presets', href: '/creator/assets', icon: Palette },
     ],
   },
@@ -134,6 +136,55 @@ export default function CollapsibleSidebar({
   const pathname = usePathname();
   const { t } = useLanguage();
   const sections = role === 'client' ? CLIENT_NAV_SECTIONS : CREATOR_NAV_SECTIONS;
+
+  const allNavHrefs = useMemo(() => {
+    return sections.flatMap((section) => section.items.map((item) => item.href));
+  }, [sections]);
+
+  const isItemActive = (itemHref: string) => {
+    if (!pathname) return false;
+
+    const currentPath = pathname;
+    const baseItemHref = itemHref.split('#')[0];
+
+    // If itemHref has hash, only exact match if hash matches or treat as base
+    if (currentPath === itemHref || currentPath === baseItemHref) {
+      // Check if there is another item that matches more specifically (longer base href)
+      const hasMoreSpecificMatch = allNavHrefs.some((otherHref) => {
+        if (otherHref === itemHref) return false;
+        const otherBase = otherHref.split('#')[0];
+        return (
+          otherBase.length > baseItemHref.length &&
+          (currentPath === otherBase || currentPath.startsWith(`${otherBase}/`))
+        );
+      });
+
+      if (hasMoreSpecificMatch) return false;
+
+      // If this item has a hash, don't activate on the bare path if the bare path item exists
+      if (itemHref.includes('#') && allNavHrefs.includes(baseItemHref)) {
+        return false;
+      }
+
+      return true;
+    }
+
+    // Prefix match (for sub-routes like /art-trades/[id] under /art-trades)
+    if (baseItemHref !== '/' && currentPath.startsWith(`${baseItemHref}/`)) {
+      const hasMoreSpecificMatch = allNavHrefs.some((otherHref) => {
+        if (otherHref === itemHref) return false;
+        const otherBase = otherHref.split('#')[0];
+        return (
+          otherBase.length > baseItemHref.length &&
+          (currentPath === otherBase || currentPath.startsWith(`${otherBase}/`))
+        );
+      });
+
+      return !hasMoreSpecificMatch;
+    }
+
+    return false;
+  };
 
   return (
     <aside
@@ -175,7 +226,7 @@ export default function CollapsibleSidebar({
             <nav className="space-y-1">
               {section.items.map((item) => {
                 const Icon = item.icon;
-                const isActive = pathname === item.href || (item.href !== '/' && pathname?.startsWith(item.href));
+                const isActive = isItemActive(item.href);
 
                 return (
                   <Link

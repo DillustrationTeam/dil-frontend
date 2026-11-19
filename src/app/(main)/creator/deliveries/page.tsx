@@ -1,11 +1,10 @@
-'use client';
+import { redirect } from 'next/navigation';
 
-import { PhysicalDeliveryManager } from '@/features/auction';
-
+/**
+ * "Quản lý Giao nhận Tranh vật lý" đã chuyển sang `/my-auctions/deliveries` — đây là nghiệp vụ
+ * đấu giá (vận đơn + ký quỹ của một phiên), không phải nghiệp vụ studio của Creator.
+ * Giữ redirect để link cũ và bookmark không chết.
+ */
 export default function CreatorDeliveriesPage() {
-  return (
-    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-      <PhysicalDeliveryManager />
-    </div>
-  );
+  redirect('/my-auctions/deliveries');
 }

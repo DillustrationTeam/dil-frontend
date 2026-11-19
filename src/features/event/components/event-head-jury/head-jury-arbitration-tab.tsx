@@ -1,15 +1,11 @@
 'use client';
 
-import React from 'react';
-import {
-  Scale,
-  Lock,
-  UserCheck,
-  Award,
-  Check,
-} from 'lucide-react';
+import React, { useEffect } from 'react';
 import type { ArbitrationCase } from '../../types/jury.types';
 import { EventSearchFilterBar } from '../event/event-search-filter-bar';
+import { useLanguage } from '@/context/language-context';
+import { ComplianceArbitrationForm } from './arbitration/compliance-arbitration-form';
+import { ScoreArbitrationForm } from './arbitration/score-arbitration-form';
 
 interface HeadJuryArbitrationTabProps {
   arbitrationCasesState: ArbitrationCase[];
@@ -48,61 +44,100 @@ export function HeadJuryArbitrationTab({
   setTieBreakerWinnerId,
   handleConfirmArbitration,
 }: HeadJuryArbitrationTabProps) {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
+
   const currentCases = arbitrationCasesState.length > 0 ? arbitrationCasesState : arbitrationCasesList;
+
+  const category = (selectedArbitrationCase?.category || '').toLowerCase();
+  const isRuleOrAiDispute =
+    category === 'aiart' ||
+    category === 'copyright' ||
+    category === 'roleviolation' ||
+    category === 'ruleviolation' ||
+    category === 'votefraud';
+
+  useEffect(() => {
+    if (!selectedArbitrationCase) return;
+    if (isRuleOrAiDispute) {
+      if (
+        arbitrationDecision !== 'Disqualify' &&
+        arbitrationDecision !== 'Dismiss' &&
+        arbitrationDecision !== 'Request Panel Re-evaluation'
+      ) {
+        setArbitrationDecision('Disqualify');
+      }
+    } else {
+      if (
+        arbitrationDecision === 'Disqualify' ||
+        arbitrationDecision === 'Dismiss'
+      ) {
+        setArbitrationDecision('Maintain Current Median Score');
+      }
+    }
+  }, [selectedArbitrationCase?.id, isRuleOrAiDispute]);
 
   return (
     <section className="space-y-6">
       <section className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-xl font-bold font-sora text-white">Submissions Requiring Arbitration</h2>
+          <h2 className="text-xl font-bold font-sora text-white">
+            {isVie ? 'Các bài dự thi cần Tái thẩm định' : 'Submissions Requiring Arbitration'}
+          </h2>
           <span className="w-fit rounded-full border border-amber-400/30 bg-amber-500/15 px-3 py-1 text-xs font-bold text-amber-300">
-            {currentCases.filter((c) => c.status.toLowerCase() === 'pending').length} / {currentCases.length} Disputes Pending
+            {currentCases.filter((c) => c.status.toLowerCase() !== 'resolved' && c.status.toLowerCase() !== 'rejected').length} / {currentCases.length}{' '}
+            {isVie ? 'Tranh chấp chờ giải quyết' : 'Disputes Pending'}
           </span>
         </div>
 
         <div className="grid gap-6 lg:grid-cols-12 items-start">
           {/* Left: Arbitration Cases table + overall resolution progress */}
-          <div className="rounded-2xl border border-white/10 bg-[#151926]/90 backdrop-blur-xl p-4 lg:col-span-5 flex flex-col space-y-3">
+          <div className="glass-container rounded-2xl p-4 lg:col-span-5 flex flex-col space-y-3">
             {/* Searchbar & Status Filter for Arbitration Cases */}
             <EventSearchFilterBar
               variant="inline"
               searchQuery={arbitrationSearch}
               onSearchChange={setArbitrationSearch}
-              searchPlaceholder="Search entry code or title..."
+              searchPlaceholder={isVie ? 'Tìm mã hoặc tiêu đề bài thi...' : 'Search entry code or title...'}
               statusValue={arbitrationStatusFilter}
               onStatusChange={(val: string) => setArbitrationStatusFilter(val as 'all' | 'pending' | 'resolved')}
               statusOptions={[
-                { value: 'all', label: `All (${currentCases.length})` },
+                { value: 'all', label: isVie ? `Tất cả (${currentCases.length})` : `All (${currentCases.length})` },
                 {
                   value: 'pending',
-                  label: `Pending (${currentCases.filter((c) => c.status.toLowerCase() === 'pending').length})`,
+                  label: isVie
+                    ? `Chờ xử lý (${currentCases.filter((c) => c.status.toLowerCase() !== 'resolved' && c.status.toLowerCase() !== 'rejected').length})`
+                    : `Pending (${currentCases.filter((c) => c.status.toLowerCase() !== 'resolved' && c.status.toLowerCase() !== 'rejected').length})`,
                 },
                 {
                   value: 'resolved',
-                  label: `Resolved (${currentCases.filter((c) => c.status.toLowerCase() === 'resolved').length})`,
+                  label: isVie
+                    ? `Đã giải quyết (${currentCases.filter((c) => c.status.toLowerCase() === 'resolved' || c.status.toLowerCase() === 'rejected').length})`
+                    : `Resolved (${currentCases.filter((c) => c.status.toLowerCase() === 'resolved' || c.status.toLowerCase() === 'rejected').length})`,
                 },
               ]}
             />
 
             <div className="overflow-y-auto max-h-[380px] sm:max-h-[410px] pr-1 custom-scrollbar">
               <table className="w-full border-collapse text-left text-xs">
-                <thead className="sticky top-0 z-10 bg-[#151926] shadow-sm">
+                <thead className="sticky top-0 z-10 bg-[#161926] shadow-sm">
                   <tr className="border-b border-white/10 text-[#858694] uppercase font-semibold text-[10px]">
-                    <th className="py-2.5 px-3">Entry</th>
-                    <th className="py-2.5 px-3 text-right">Status</th>
+                    <th className="py-2.5 px-3">{isVie ? 'Bài dự thi' : 'Entry'}</th>
+                    <th className="py-2.5 px-3 text-right">{isVie ? 'Trạng thái' : 'Status'}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/5">
                   {filteredArbitrationCases.length === 0 ? (
                     <tr>
                       <td colSpan={2} className="py-8 text-center text-[#9695a1]">
-                        No arbitration cases match criteria.
+                        {isVie ? 'Không có trường hợp tái thẩm định nào phù hợp.' : 'No arbitration cases match criteria.'}
                       </td>
                     </tr>
                   ) : (
                     filteredArbitrationCases.map((c) => {
                       const isActive = selectedArbitrationCase?.id === c.id;
-                      const isResolved = c.status.toLowerCase() === 'resolved';
+                      const isClosed = c.status.toLowerCase() === 'resolved' || c.status.toLowerCase() === 'rejected';
+                      const isDismissed = c.status.toLowerCase() === 'rejected';
                       return (
                         <tr
                           key={c.id}
@@ -118,12 +153,16 @@ export function HeadJuryArbitrationTab({
                           <td className="py-3 px-3 text-right">
                             <span
                               className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
-                                isResolved
+                                isClosed
                                   ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400'
                                   : 'bg-amber-500/15 border-amber-500/30 text-amber-300'
                               }`}
                             >
-                              {isResolved ? 'Resolved' : 'Pending'}
+                              {isClosed
+                                ? (isDismissed
+                                    ? (isVie ? 'Đã bác bỏ' : 'Dismissed')
+                                    : (isVie ? 'Đã giải quyết' : 'Resolved'))
+                                : (isVie ? 'Chờ xử lý' : 'Pending')}
                             </span>
                           </td>
                         </tr>
@@ -137,13 +176,15 @@ export function HeadJuryArbitrationTab({
             {/* Resolution Progress Bar */}
             <div className="mt-4 pt-4 border-t border-white/10 space-y-2">
               <div className="flex items-center justify-between text-xs">
-                <span className="font-sora font-semibold text-white">Dispute Resolution Progress</span>
+                <span className="font-sora font-semibold text-white">
+                  {isVie ? 'Tiến độ xử lý tranh chấp' : 'Dispute Resolution Progress'}
+                </span>
                 <span className="font-mono text-[#9695a1]">
-                  {currentCases.filter((c) => c.status.toLowerCase() === 'resolved').length} / {currentCases.length} ·{' '}
+                  {currentCases.filter((c) => c.status.toLowerCase() === 'resolved' || c.status.toLowerCase() === 'rejected').length} / {currentCases.length} ·{' '}
                   <strong className="text-[#A7ACD9]">
                     {currentCases.length > 0
                       ? Math.round(
-                          (currentCases.filter((c) => c.status.toLowerCase() === 'resolved').length /
+                          (currentCases.filter((c) => c.status.toLowerCase() === 'resolved' || c.status.toLowerCase() === 'rejected').length /
                             currentCases.length) *
                             100
                         )
@@ -159,7 +200,7 @@ export function HeadJuryArbitrationTab({
                     width: `${
                       currentCases.length > 0
                         ? Math.round(
-                            (currentCases.filter((c) => c.status.toLowerCase() === 'resolved').length /
+                            (currentCases.filter((c) => c.status.toLowerCase() === 'resolved' || c.status.toLowerCase() === 'rejected').length /
                               currentCases.length) *
                               100
                           )
@@ -172,9 +213,11 @@ export function HeadJuryArbitrationTab({
           </div>
 
           {/* Right: Detailed Master View & Arbitration Action Panel */}
-          <div className="rounded-2xl border border-white/10 bg-[#151926]/90 backdrop-blur-xl p-5 lg:col-span-7">
+          <div className="glass-container rounded-2xl p-5 lg:col-span-7">
             {!selectedArbitrationCase ? (
-              <p className="py-16 text-center text-sm text-[#9695a1]">Select an entry to view arbitration details.</p>
+              <p className="py-16 text-center text-sm text-[#9695a1]">
+                {isVie ? 'Chọn một bài dự thi để xem chi tiết tái thẩm định.' : 'Select an entry to view arbitration details.'}
+              </p>
             ) : (
               <div className="space-y-5">
                 {/* Header info */}
@@ -188,270 +231,57 @@ export function HeadJuryArbitrationTab({
                     </div>
                     <p className="text-xs text-[#9695a1] mt-1">{selectedArbitrationCase.notes}</p>
                   </div>
-                  <span
-                    className={`w-fit shrink-0 rounded-full border px-3 py-1 text-xs font-bold ${
-                      selectedArbitrationCase.status.toLowerCase() === 'resolved'
-                        ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
-                        : 'bg-amber-500/15 text-amber-300 border-amber-500/30'
-                    }`}
-                  >
-                    {selectedArbitrationCase.status}
-                  </span>
+                  {(() => {
+                    const isClosed = selectedArbitrationCase.status.toLowerCase() === 'resolved' || selectedArbitrationCase.status.toLowerCase() === 'rejected';
+                    const isDismissed = selectedArbitrationCase.status.toLowerCase() === 'rejected';
+                    return (
+                      <span
+                        className={`w-fit shrink-0 rounded-full border px-3 py-1 text-xs font-bold ${
+                          isClosed
+                            ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
+                            : 'bg-amber-500/15 text-amber-300 border-amber-500/30'
+                        }`}
+                      >
+                        {isClosed
+                          ? (isDismissed
+                              ? (isVie ? 'Đã bác bỏ' : 'Dismissed')
+                              : (isVie ? 'Đã giải quyết' : 'Resolved'))
+                          : (isVie ? 'Chờ xử lý' : 'Pending')}
+                      </span>
+                    );
+                  })()}
                 </div>
 
-                {/* Select Resolution Action */}
+                {/* Select Resolution Action Form (Separated into specialized forms) */}
                 <div className="space-y-3">
                   <label className="text-xs font-semibold text-[#A7ACD9] block uppercase tracking-wider">
-                    Select Arbitration Action:
+                    {isVie ? 'Chọn hành động tái thẩm định:' : 'Select Arbitration Action:'}
                   </label>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <button
-                      type="button"
-                      onClick={() => setArbitrationDecision('Maintain Current Median Score')}
-                      className={`p-3.5 rounded-xl border text-left transition-all flex flex-col justify-between cursor-pointer ${
-                        arbitrationDecision === 'Maintain Current Median Score'
-                          ? 'border-[#A7ACD9] bg-[#A7ACD9]/20 text-white shadow-lg shadow-[#A7ACD9]/10'
-                          : 'border-white/10 bg-white/5 text-[#c7c5cf] hover:bg-white/10 hover:border-white/20'
-                      }`}
-                    >
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-1.5 font-sora text-xs font-bold">
-                          <Scale className="w-4 h-4 text-[#7FD5E8] shrink-0" />
-                          <span>Maintain Median</span>
-                        </div>
-                        <p className="text-[11px] text-[#9695a1] leading-normal">
-                          Lock current median score. Suppress outlier variance.
-                        </p>
-                      </div>
-                      <span
-                        className={`mt-2 text-[10px] font-bold ${
-                          arbitrationDecision === 'Maintain Current Median Score' ? 'text-[#7FD5E8]' : 'text-[#858694]'
-                        }`}
-                      >
-                        {arbitrationDecision === 'Maintain Current Median Score' ? '✓ Selected' : 'Click to select'}
-                      </span>
-                    </button>
 
-                    <button
-                      type="button"
-                      onClick={() => setArbitrationDecision('Request Panel Re-evaluation')}
-                      className={`p-3.5 rounded-xl border text-left transition-all flex flex-col justify-between cursor-pointer ${
-                        arbitrationDecision === 'Request Panel Re-evaluation'
-                          ? 'border-amber-400 bg-amber-500/20 text-white shadow-lg shadow-amber-500/10'
-                          : 'border-white/10 bg-white/5 text-[#c7c5cf] hover:bg-white/10 hover:border-white/20'
-                      }`}
-                    >
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-1.5 font-sora text-xs font-bold text-amber-300">
-                          <UserCheck className="w-4 h-4 text-amber-400 shrink-0" />
-                          <span>Request Re-evaluation</span>
-                        </div>
-                        <p className="text-[11px] text-[#9695a1] leading-normal">
-                          Unlock scoresheet for specific jury members to re-review.
-                        </p>
-                      </div>
-                      <span
-                        className={`mt-2 text-[10px] font-bold ${
-                          arbitrationDecision === 'Request Panel Re-evaluation' ? 'text-amber-300' : 'text-[#858694]'
-                        }`}
-                      >
-                        {arbitrationDecision === 'Request Panel Re-evaluation' ? '✓ Selected' : 'Click to select'}
-                      </span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => setArbitrationDecision('Cast Head Jury Tie-Breaker')}
-                      className={`p-3.5 rounded-xl border text-left transition-all flex flex-col justify-between cursor-pointer ${
-                        arbitrationDecision === 'Cast Head Jury Tie-Breaker'
-                          ? 'border-purple-400 bg-purple-500/20 text-white shadow-lg shadow-purple-500/10'
-                          : 'border-white/10 bg-white/5 text-[#c7c5cf] hover:bg-white/10 hover:border-white/20'
-                      }`}
-                    >
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-1.5 font-sora text-xs font-bold text-purple-300">
-                          <Award className="w-4 h-4 text-purple-400 shrink-0" />
-                          <span>Tie-Breaker Vote</span>
-                        </div>
-                        <p className="text-[11px] text-[#9695a1] leading-normal">
-                          Cast decisive Head Jury vote for tied placements.
-                        </p>
-                      </div>
-                      <span
-                        className={`mt-2 text-[10px] font-bold ${
-                          arbitrationDecision === 'Cast Head Jury Tie-Breaker' ? 'text-purple-300' : 'text-[#858694]'
-                        }`}
-                      >
-                        {arbitrationDecision === 'Cast Head Jury Tie-Breaker' ? '✓ Selected' : 'Click to select'}
-                      </span>
-                    </button>
-                  </div>
+                  {isRuleOrAiDispute ? (
+                    <ComplianceArbitrationForm
+                      decision={arbitrationDecision}
+                      onDecisionChange={setArbitrationDecision}
+                    />
+                  ) : (
+                    <ScoreArbitrationForm
+                      decision={arbitrationDecision}
+                      onDecisionChange={setArbitrationDecision}
+                      selectedCase={selectedArbitrationCase}
+                      tieBreakerWinnerId={tieBreakerWinnerId}
+                      onTieBreakerWinnerChange={setTieBreakerWinnerId}
+                    />
+                  )}
                 </div>
 
-                {/* Sub-Panel 1: Maintain Median Score */}
-                {arbitrationDecision === 'Maintain Current Median Score' && (
-                  <div className="p-4 rounded-xl border border-[#7FD5E8]/30 bg-[#7FD5E8]/10 space-y-2 text-xs">
-                    <div className="flex items-center gap-2 font-sora font-bold text-white">
-                      <Lock className="w-4 h-4 text-[#7FD5E8]" />
-                      <span>Lock Median Score Confirmation</span>
-                    </div>
-                    <p className="text-[#c7c5cf] leading-relaxed">
-                      Maintaining the panel median score will automatically disregard extreme score outliers without unlocking scoresheets. The calculated median score of <strong className="text-white">88.5 pts</strong> will be locked as the final baseline.
-                    </p>
-                  </div>
-                )}
-
-                {/* Sub-Panel 2: Request Panel Re-evaluation */}
-                {arbitrationDecision === 'Request Panel Re-evaluation' && (
-                  <div className="p-4 rounded-xl border border-amber-400/30 bg-amber-500/10 space-y-3 text-xs">
-                    <div className="flex items-center gap-2 font-sora font-bold text-amber-300">
-                      <UserCheck className="w-4 h-4 text-amber-400" />
-                      <span>Select Target Outlier Jury Members for Re-evaluation</span>
-                    </div>
-                    <p className="text-[#c7c5cf] leading-relaxed">
-                      Scoresheets for the selected jury members will be unlocked for a 24-hour window with audit notes attached:
-                    </p>
-                    <div className="space-y-2">
-                      <label className="flex items-center gap-2.5 p-2.5 rounded-lg bg-black/40 border border-white/10 text-white cursor-pointer">
-                        <input type="checkbox" defaultChecked className="rounded accent-amber-400" />
-                        <div className="flex-1 flex items-center justify-between">
-                          <span className="font-semibold">Alex Rivers (Jury #2)</span>
-                          <span className="font-mono text-xs text-amber-400 font-bold">Rated 98/100 (+18.4% variance)</span>
-                        </div>
-                      </label>
-                      <label className="flex items-center gap-2.5 p-2.5 rounded-lg bg-black/40 border border-white/10 text-white cursor-pointer">
-                        <input type="checkbox" defaultChecked className="rounded accent-amber-400" />
-                        <div className="flex-1 flex items-center justify-between">
-                          <span className="font-semibold">Elena Rostova (Jury #4)</span>
-                          <span className="font-mono text-xs text-rose-400 font-bold">Rated 65/100 (-14.6% variance)</span>
-                        </div>
-                      </label>
-                    </div>
-                  </div>
-                )}
-
-                {/* Sub-Panel 3: Cast Head Jury Tie-Breaker */}
-                {arbitrationDecision === 'Cast Head Jury Tie-Breaker' && (
-                  <div className="p-4 rounded-xl border border-purple-400/30 bg-purple-500/10 space-y-4 text-xs">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2 font-sora font-bold text-purple-200">
-                        <Award className="w-4 h-4 text-purple-400" />
-                        <span>Interactive Head-to-Head Comparison</span>
-                      </div>
-                      <span className="px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 text-[10px] font-bold">
-                        Tied at 89.6 pts
-                      </span>
-                    </div>
-
-                    {/* Comparison Table */}
-                    <div className="overflow-x-auto rounded-lg border border-white/10 bg-black/40">
-                      <table className="w-full border-collapse text-left text-xs">
-                        <thead>
-                          <tr className="border-b border-white/10 bg-white/5 text-[#9695a1] uppercase font-semibold text-[10px]">
-                            <th className="py-2 px-3">Metric / Candidate</th>
-                            <th className="py-2 px-3 text-center border-l border-white/10 text-white font-bold">
-                              {selectedArbitrationCase.title} ({selectedArbitrationCase.code})
-                            </th>
-                            <th className="py-2 px-3 text-center border-l border-white/10 text-white font-bold">
-                              Thành phố ký ức (#AUR-0184)
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-white/10 text-[#c7c5cf]">
-                          <tr>
-                            <td className="py-2 px-3 text-[#9695a1] font-medium">Panel Avg Score</td>
-                            <td className="py-2 px-3 text-center font-mono font-bold text-[#A7ACD9] border-l border-white/10">
-                              89.6 / 100
-                            </td>
-                            <td className="py-2 px-3 text-center font-mono font-bold text-[#A7ACD9] border-l border-white/10">
-                              89.6 / 100
-                            </td>
-                          </tr>
-                          <tr>
-                            <td className="py-2 px-3 text-[#9695a1] font-medium">Head Jury Score</td>
-                            <td className="py-2 px-3 text-center font-mono font-bold text-amber-300 border-l border-white/10">
-                              92 / 100
-                            </td>
-                            <td className="py-2 px-3 text-center font-mono font-bold text-amber-300 border-l border-white/10">
-                              90 / 100
-                            </td>
-                          </tr>
-                          <tr>
-                            <td className="py-2 px-3 text-[#9695a1] font-medium">Creativity & Concept</td>
-                            <td className="py-2 px-3 text-center font-mono text-emerald-400 border-l border-white/10">
-                              28 / 30
-                            </td>
-                            <td className="py-2 px-3 text-center font-mono text-emerald-400 border-l border-white/10">
-                              29 / 30
-                            </td>
-                          </tr>
-                          <tr>
-                            <td className="py-2 px-3 text-[#9695a1] font-medium">Technical Execution</td>
-                            <td className="py-2 px-3 text-center font-mono text-purple-300 border-l border-white/10">
-                              27 / 30
-                            </td>
-                            <td className="py-2 px-3 text-center font-mono text-purple-300 border-l border-white/10">
-                              27 / 30
-                            </td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-
-                    {/* Interactive Winner Selector Buttons */}
-                    <div className="space-y-2 pt-1">
-                      <label className="text-xs font-semibold text-purple-200 block">
-                        Declare Official Tie-Breaker Winner:
-                      </label>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        <button
-                          type="button"
-                          onClick={() => setTieBreakerWinnerId(selectedArbitrationCase.submissionId)}
-                          className={`p-3 rounded-xl border text-left transition-all flex items-center justify-between cursor-pointer ${
-                            tieBreakerWinnerId === selectedArbitrationCase.submissionId
-                              ? 'border-emerald-400 bg-emerald-500/20 text-white shadow-md shadow-emerald-500/10'
-                              : 'border-white/10 bg-white/5 text-[#c7c5cf] hover:bg-white/10'
-                          }`}
-                        >
-                          <div>
-                            <span className="block text-xs font-bold">{selectedArbitrationCase.title}</span>
-                            <span className="block text-[10px] text-[#9695a1] font-mono">
-                              {selectedArbitrationCase.code}
-                            </span>
-                          </div>
-                          {tieBreakerWinnerId === selectedArbitrationCase.submissionId && (
-                            <Check className="w-4 h-4 text-emerald-400 shrink-0" />
-                          )}
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() => setTieBreakerWinnerId('aur-0184')}
-                          className={`p-3 rounded-xl border text-left transition-all flex items-center justify-between cursor-pointer ${
-                            tieBreakerWinnerId === 'aur-0184'
-                              ? 'border-emerald-400 bg-emerald-500/20 text-white shadow-md shadow-emerald-500/10'
-                              : 'border-white/10 bg-white/5 text-[#c7c5cf] hover:bg-white/10'
-                          }`}
-                        >
-                          <div>
-                            <span className="block text-xs font-bold">Thành phố ký ức</span>
-                            <span className="block text-[10px] text-[#9695a1] font-mono">#AUR-0184</span>
-                          </div>
-                          {tieBreakerWinnerId === 'aur-0184' && (
-                            <Check className="w-4 h-4 text-emerald-400 shrink-0" />
-                          )}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-[#A7ACD9] block">Head Jury Audit Rationale Notes:</label>
+                  <label className="text-xs font-semibold text-[#A7ACD9] block">
+                    {isVie ? 'Ghi chú lý do kiểm toán của Trưởng ban GK:' : 'Head Jury Audit Rationale Notes:'}
+                  </label>
                   <textarea
                     value={arbitrationNotes}
                     onChange={(e) => setArbitrationNotes(e.target.value)}
-                    placeholder="Provide formal audit rationale for this decision..."
+                    placeholder={isVie ? 'Nêu rõ căn cứ và lý do quyết định kiểm toán...' : 'Provide formal audit rationale for this decision...'}
                     className="w-full min-h-[88px] p-3 rounded-xl bg-[#090b12]/80 border border-white/10 text-xs text-white placeholder-[#9695a1] focus:outline-none focus:border-[#A7ACD9]"
                   />
                 </div>
@@ -461,11 +291,13 @@ export function HeadJuryArbitrationTab({
                   onClick={handleConfirmArbitration}
                   className="w-full py-2.5 rounded-xl bg-gradient-to-r from-[#A7ACD9] to-[#7FD5E8] text-[#1F2335] font-sora font-extrabold text-xs shadow-lg hover:brightness-110 transition-all cursor-pointer"
                 >
-                  Confirm Arbitration Decision
+                  {isVie ? 'Xác nhận Quyết định Tái thẩm định' : 'Confirm Arbitration Decision'}
                 </button>
 
                 <div className="p-3 rounded-xl border-l-4 border-[#A7ACD9] bg-[#A7ACD9]/10 text-xs text-[#c7c5cf] leading-relaxed">
-                  All arbitration actions are permanently logged in the audit trail. Head Jury cannot directly override raw individual jury scores.
+                  {isVie
+                    ? 'Tất cả các hành động tái thẩm định được ghi nhận vĩnh viễn vào nhật ký kiểm toán. Trưởng ban GK không thể trực tiếp ghi đè điểm số thô của từng giám khảo.'
+                    : 'All arbitration actions are permanently logged in the audit trail. Head Jury cannot directly override raw individual jury scores.'}
                 </div>
               </div>
             )}
