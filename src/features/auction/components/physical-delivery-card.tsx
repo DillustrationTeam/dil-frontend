@@ -14,6 +14,7 @@ import {
   Star,
   Trash2,
   Truck,
+  Video,
   X,
 } from 'lucide-react';
 import type { AuctionDetailDto } from '../types/auction.types';
@@ -68,11 +69,12 @@ export function PhysicalDeliveryCard({ auction, userId, onReload }: PhysicalDeli
 
   const [showDisputeForm, setShowDisputeForm] = useState(false);
   const [disputeReason, setDisputeReason] = useState('');
-  const [disputeEvidenceUrl, setDisputeEvidenceUrl] = useState('');
-  const [evidencePreview, setEvidencePreview] = useState<string | null>(null);
-  const [evidenceName, setEvidenceName] = useState<string | null>(null);
+  // Bằng chứng khiếu nại: tối đa 5 ảnh + 1 video (khớp giới hạn backend).
+  const [disputeImages, setDisputeImages] = useState<{ url: string; name: string; preview: string }[]>([]);
+  const [disputeVideo, setDisputeVideo] = useState<{ url: string; name: string } | null>(null);
   const [uploadingEvidence, setUploadingEvidence] = useState(false);
   const evidenceInputRef = useRef<HTMLInputElement>(null);
+  const videoInputRef = useRef<HTMLInputElement>(null);
 
   // Modal xác nhận "đã nhận hàng" (tránh bấm nhầm làm giải ngân ký quỹ)
   const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -231,41 +233,101 @@ export function PhysicalDeliveryCard({ auction, userId, onReload }: PhysicalDeli
     }
   };
 
-  // 5. Người mua tải ảnh bằng chứng trực tiếp từ máy
+  // 5. Người mua tải nhiều ảnh / 1 video bằng chứng trực tiếp từ máy (tối đa 5 ảnh + 1 video)
+  const MAX_DISPUTE_IMAGES = 5;
+  const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
+  const MAX_VIDEO_BYTES = 80 * 1024 * 1024;
+
   const handleEvidencePicked = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const picked = Array.from(e.target.files ?? []);
+    if (picked.length === 0) return;
+
+    const room = MAX_DISPUTE_IMAGES - disputeImages.length;
+    if (room <= 0) {
+      setError(`Chỉ được đính kèm tối đa ${MAX_DISPUTE_IMAGES} ảnh bằng chứng.`);
+      e.target.value = '';
+      return;
+    }
+
+    const accepted = picked.slice(0, room);
+    if (picked.length > room) {
+      setError(`Chỉ nhận thêm ${room} ảnh nữa (tối đa ${MAX_DISPUTE_IMAGES} ảnh).`);
+    }
+
+    for (const file of accepted) {
+      if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+        setError('Chỉ nhận ảnh JPG, PNG hoặc WebP.');
+        e.target.value = '';
+        return;
+      }
+      if (file.size > MAX_IMAGE_BYTES) {
+        setError('Mỗi ảnh bằng chứng tối đa 8MB.');
+        e.target.value = '';
+        return;
+      }
+    }
+
+    try {
+      setUploadingEvidence(true);
+      setError(null);
+      const res = await auctionService.uploadDisputeMedia(auction.auctionId, { images: accepted });
+      setDisputeImages((prev) => [
+        ...prev,
+        ...res.images.map((img, index) => ({
+          url: img.fileUrl,
+          name: img.fileName,
+          preview: URL.createObjectURL(accepted[index] ?? accepted[0]),
+        })),
+      ]);
+    } catch (err) {
+      setError(auctionError(err) || 'Không tải được ảnh bằng chứng.');
+    } finally {
+      setUploadingEvidence(false);
+      e.target.value = '';
+    }
+  };
+
+  const handleVideoPicked = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
-      setError('Chỉ nhận ảnh JPG, PNG hoặc WebP.');
+    if (disputeVideo) {
+      setError('Chỉ đính kèm được 1 video bằng chứng.');
+      e.target.value = '';
       return;
     }
-    if (file.size > 8 * 1024 * 1024) {
-      setError('Ảnh bằng chứng tối đa 8MB.');
+    if (file.size > MAX_VIDEO_BYTES) {
+      setError('Video bằng chứng tối đa 80MB.');
+      e.target.value = '';
       return;
     }
 
     try {
       setUploadingEvidence(true);
       setError(null);
-      const res = await auctionService.uploadDisputeEvidence(auction.auctionId, file);
-      setDisputeEvidenceUrl(res.fileUrl);
-      setEvidencePreview(URL.createObjectURL(file));
-      setEvidenceName(res.fileName);
+      const res = await auctionService.uploadDisputeMedia(auction.auctionId, { video: file });
+      if (!res.videoUrl) {
+        setError('Không tải được video bằng chứng.');
+        return;
+      }
+      setDisputeVideo({ url: res.videoUrl, name: file.name });
     } catch (err) {
-      setError(auctionError(err) || 'Không tải được ảnh bằng chứng.');
+      setError(auctionError(err) || 'Không tải được video bằng chứng.');
     } finally {
       setUploadingEvidence(false);
+      e.target.value = '';
     }
   };
 
-  const handleRemoveEvidence = () => {
-    setDisputeEvidenceUrl('');
-    setEvidencePreview(null);
-    setEvidenceName(null);
-    if (evidenceInputRef.current) {
-      evidenceInputRef.current.value = '';
+  const handleRemoveEvidence = (url?: string) => {
+    if (url) {
+      setDisputeImages((prev) => prev.filter((img) => img.url !== url));
+      return;
     }
+    setDisputeImages([]);
+    setDisputeVideo(null);
+    if (evidenceInputRef.current) evidenceInputRef.current.value = '';
+    if (videoInputRef.current) videoInputRef.current.value = '';
   };
 
   // 5. Người mua gửi khiếu nại
@@ -275,8 +337,8 @@ export function PhysicalDeliveryCard({ auction, userId, onReload }: PhysicalDeli
       setError('Vui lòng cung cấp lý do khiếu nại.');
       return;
     }
-    if (!disputeEvidenceUrl) {
-      setError('Vui lòng tải lên ít nhất một ảnh bằng chứng (ảnh bưu kiện hư hại / biên bản bưu cục).');
+    if (disputeImages.length === 0 && !disputeVideo) {
+      setError('Vui lòng tải lên ít nhất một ảnh hoặc một video bằng chứng (ảnh bưu kiện hư hại / biên bản bưu cục).');
       return;
     }
 
@@ -285,7 +347,9 @@ export function PhysicalDeliveryCard({ auction, userId, onReload }: PhysicalDeli
       setError(null);
       await auctionService.disputeDelivery(auction.auctionId, {
         reason: disputeReason,
-        evidenceUrl: disputeEvidenceUrl,
+        evidenceUrl: disputeImages[0]?.url,
+        evidenceImageUrls: disputeImages.map((img) => img.url),
+        evidenceVideoUrl: disputeVideo?.url ?? null,
       });
       setSuccessMsg('Đã gửi khiếu nại. Khoản tiền ký quỹ đã được tạm đóng băng để đối soát cùng bưu cục.');
       setShowDisputeForm(false);
@@ -735,71 +799,107 @@ export function PhysicalDeliveryCard({ auction, userId, onReload }: PhysicalDeli
                     className="w-full rounded-xl border border-white/15 bg-black/40 p-2 text-xs text-white focus:outline-none"
                   />
 
-                  {/* Ảnh bằng chứng: bắt buộc, tải trực tiếp từ máy */}
+                  {/* Bằng chứng khiếu nại: tối đa 5 ảnh + 1 video, tải trực tiếp từ máy */}
                   <div className="rounded-xl border border-rose-500/25 bg-black/30 p-2.5 space-y-2">
                     <p className="text-[11px] font-semibold text-rose-200">
-                      Ảnh bằng chứng <span className="text-rose-400">*</span>
-                      <span className="ml-1 font-normal text-outline">(ảnh bưu kiện hư hại, biên bản bưu cục — JPG/PNG/WebP, tối đa 8MB)</span>
+                      Ảnh / video bằng chứng <span className="text-rose-400">*</span>
+                      <span className="ml-1 font-normal text-outline">
+                        ({disputeImages.length}/{MAX_DISPUTE_IMAGES} ảnh · {disputeVideo ? '1/1' : '0/1'} video — JPG/PNG/WebP ≤8MB mỗi ảnh, MP4/MOV/WebM ≤80MB)
+                      </span>
                     </p>
 
                     <input
                       ref={evidenceInputRef}
                       type="file"
                       accept="image/jpeg,image/png,image/webp"
+                      multiple
                       onChange={handleEvidencePicked}
                       className="hidden"
                       id="disputeEvidenceInput"
                     />
+                    <input
+                      ref={videoInputRef}
+                      type="file"
+                      accept="video/mp4,video/quicktime,video/webm"
+                      onChange={handleVideoPicked}
+                      className="hidden"
+                      id="disputeEvidenceVideoInput"
+                    />
 
-                    {disputeEvidenceUrl ? (
-                      <div className="flex items-center gap-2.5">
-                        {evidencePreview && (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={evidencePreview}
-                            alt="Ảnh bằng chứng"
-                            className="h-16 w-16 rounded-lg object-cover border border-white/15"
-                          />
-                        )}
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate text-[11px] font-semibold text-white">
-                            {evidenceName || 'Ảnh bằng chứng'}
-                          </p>
-                          <a
-                            href={disputeEvidenceUrl}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="inline-flex items-center gap-1 text-[10px] text-brand-periwinkle underline"
-                          >
-                            Xem ảnh đã tải <ExternalLink size={10} />
-                          </a>
-                        </div>
+                    {disputeImages.length > 0 && (
+                      <div className="flex flex-wrap gap-2">
+                        {disputeImages.map((img, index) => (
+                          <div key={img.url} className="relative">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={img.preview}
+                              alt={`Bằng chứng ${index + 1}`}
+                              className="h-16 w-16 rounded-lg border border-white/15 object-cover"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveEvidence(img.url)}
+                              className="absolute -right-1.5 -top-1.5 rounded-full border border-rose-500/40 bg-rose-500 p-0.5 text-white hover:brightness-110"
+                              title="Xoá ảnh này"
+                            >
+                              <X size={11} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {disputeVideo && (
+                      <div className="space-y-1.5 rounded-lg border border-white/10 bg-black/40 p-2">
+                        <p className="truncate text-[11px] font-semibold text-white">{disputeVideo.name}</p>
+                        { }
+                        <video src={disputeVideo.url} controls className="max-h-40 w-full rounded-lg" />
                         <button
                           type="button"
-                          onClick={handleRemoveEvidence}
-                          className="rounded-lg border border-rose-500/30 bg-rose-500/10 p-1.5 text-rose-300 hover:bg-rose-500/20"
-                          title="Xoá ảnh bằng chứng"
+                          onClick={() => setDisputeVideo(null)}
+                          className="inline-flex items-center gap-1 rounded-lg border border-rose-500/30 bg-rose-500/10 px-2 py-1 text-[10px] text-rose-300 hover:bg-rose-500/20"
                         >
-                          <Trash2 size={14} />
+                          <Trash2 size={11} /> Xoá video
                         </button>
                       </div>
-                    ) : (
+                    )}
+
+                    <div className="flex flex-wrap gap-2">
                       <button
                         type="button"
                         onClick={() => evidenceInputRef.current?.click()}
-                        disabled={uploadingEvidence}
-                        className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-dashed border-rose-400/40 bg-rose-500/5 px-3 py-2.5 text-[11px] font-semibold text-rose-200 hover:bg-rose-500/10 disabled:opacity-50"
+                        disabled={uploadingEvidence || disputeImages.length >= MAX_DISPUTE_IMAGES}
+                        className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg border border-dashed border-rose-400/40 bg-rose-500/5 px-3 py-2.5 text-[11px] font-semibold text-rose-200 hover:bg-rose-500/10 disabled:opacity-50"
                       >
                         <ImagePlus size={14} />
-                        {uploadingEvidence ? 'Đang tải ảnh lên...' : 'Chọn ảnh từ máy tính'}
+                        {uploadingEvidence ? 'Đang tải lên...' : `Thêm ảnh (${disputeImages.length}/${MAX_DISPUTE_IMAGES})`}
                       </button>
+                      <button
+                        type="button"
+                        onClick={() => videoInputRef.current?.click()}
+                        disabled={uploadingEvidence || Boolean(disputeVideo)}
+                        className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg border border-dashed border-amber-400/40 bg-amber-500/5 px-3 py-2.5 text-[11px] font-semibold text-amber-200 hover:bg-amber-500/10 disabled:opacity-50"
+                      >
+                        <Video size={14} />
+                        {disputeVideo ? 'Đã có video' : 'Thêm 1 video'}
+                      </button>
+                    </div>
+                    {disputeImages[0] && (
+                      <a
+                        href={disputeImages[0].url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1 text-[10px] text-brand-periwinkle underline"
+                      >
+                        Mở ảnh đầu tiên ở tab mới <ExternalLink size={10} />
+                      </a>
                     )}
                   </div>
 
                   <div className="flex gap-2">
                     <button
                       type="submit"
-                      disabled={loading || uploadingEvidence || !disputeEvidenceUrl}
+                      disabled={loading || uploadingEvidence || (disputeImages.length === 0 && !disputeVideo)}
                       className="rounded-xl bg-rose-500 px-4 py-1.5 text-xs font-bold text-white hover:brightness-110 disabled:opacity-50"
                     >
                       {loading ? 'Đang gửi...' : 'Gửi khiếu nại ngay'}
