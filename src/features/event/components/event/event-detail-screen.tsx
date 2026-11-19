@@ -271,8 +271,7 @@ export function EventDetailScreen({ id, userId, isAdmin }: EventDetailScreenProp
   }, [event, countdown.phase]);
 
   const maxRubricScore = useMemo(() => {
-    if (!event) return 100;
-    const rawCriteria = event.criteria || event.eventCriteria || [];
+    const rawCriteria = event?.criteria || event?.eventCriteria || [];
     const sum = rawCriteria.reduce((acc, c) => acc + (Number(c.maxScore) || 0), 0);
     return sum > 0 ? sum : 100;
   }, [event]);
