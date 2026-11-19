@@ -42,11 +42,11 @@ export function DangerZoneForm() {
     setIsSubmitting(true);
     try {
       await securitySettingsService.deactivateAccount(password);
-      toast.success('Tài khoản đã được vô hiệu hóa.');
+      toast.success('Tài khoản đã được xóa.');
       clearAuth();
       router.push('/login');
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Không thể vô hiệu hóa tài khoản.');
+      toast.error(error instanceof Error ? error.message : 'Không thể xóa tài khoản.');
     } finally {
       setIsSubmitting(false);
     }
@@ -55,27 +55,28 @@ export function DangerZoneForm() {
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <section className="glass-container space-y-4 rounded-[32px] border border-red-500/20 p-6 md:p-8">
-        <p className="text-xs uppercase tracking-wider text-red-400">Vô hiệu hóa tài khoản</p>
+        <p className="text-xs uppercase tracking-wider text-red-400">Xóa tài khoản</p>
         <p className="text-sm text-[#C7C5CF]">
-          Hành động này sẽ vô hiệu hóa tài khoản của bạn và đăng xuất khỏi mọi thiết bị. Không thể thực hiện nếu bạn
-          còn đơn commission đang chạy, còn tiền trong ví, hoặc đang có tranh chấp chưa giải quyết.
+          Hành động này sẽ xóa vĩnh viễn tài khoản của bạn và đăng xuất khỏi mọi thiết bị. Email đăng nhập sẽ được
+          giải phóng để bạn có thể đăng ký lại sau này. Không thể thực hiện nếu bạn còn đơn commission đang chạy,
+          còn tiền trong ví, hoặc đang có tranh chấp chưa giải quyết.
         </p>
         <button
           type="button"
           onClick={() => setIsModalOpen(true)}
           className="rounded-xl border border-red-500/40 px-4 py-2.5 text-sm font-semibold text-red-400 transition hover:bg-red-500/10"
         >
-          Vô hiệu hóa tài khoản
+          Xóa tài khoản
         </button>
       </section>
 
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-4">
           <div className="w-full max-w-md rounded-3xl border border-red-500/20 bg-[#1F2335] p-6">
-            <p className="text-sm font-bold text-white">Xác nhận vô hiệu hóa tài khoản</p>
+            <p className="text-sm font-bold text-white">Xác nhận xóa tài khoản</p>
             <p className="mt-2 text-xs text-[#C7C5CF]">
               Nhập mật khẩu và gõ chữ <span className="font-bold text-white">DELETE</span> để xác nhận. Hành động
-              này không thể tự hoàn tác.
+              này không thể hoàn tác.
             </p>
 
             <div className="mt-4 space-y-3">
