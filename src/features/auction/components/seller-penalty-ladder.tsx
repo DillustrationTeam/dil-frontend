@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { AlertTriangle, ChevronDown, MapPin, ShieldCheck } from 'lucide-react';
+import Link from 'next/link';
+import { AlertTriangle, ArrowRight, ChevronDown, MapPin, ShieldCheck } from 'lucide-react';
 
 /**
  * Thang cảnh báo 5 mức cho người bán — câu chữ viết cho NGƯỜI BÁN đọc, không dùng
@@ -57,10 +58,12 @@ const LEVELS: { step: number; title: string; consequence: string; when: string }
 interface SellerPenaltyLadderProps {
   /** Mức phạt hiện tại của người bán (0 = chưa bị phạt). */
   level: number;
+  /** Mở sẵn bảng — dùng ở trang "Tôi bị báo cáo", nơi người bán chủ động tìm hiểu. */
+  defaultOpen?: boolean;
 }
 
-export function SellerPenaltyLadder({ level }: SellerPenaltyLadderProps) {
-  const [open, setOpen] = useState(false);
+export function SellerPenaltyLadder({ level, defaultOpen = false }: SellerPenaltyLadderProps) {
+  const [open, setOpen] = useState(defaultOpen);
   const current = Math.min(Math.max(level, 0), 5);
 
   return (
@@ -157,6 +160,15 @@ export function SellerPenaltyLadder({ level }: SellerPenaltyLadderProps) {
               ? 'Bạn chưa bị mức phạt nào.'
               : 'Giao hàng đúng mô tả và giữ biên lai bưu cục để không bị nâng mức.'}
           </p>
+
+          {/* Người bán cần đọc được chính hồ sơ của mình: bị báo cáo ở phiên nào, lý do gì,
+              Ban quản trị kết luận ra sao — không chỉ con số mức phạt. */}
+          <Link
+            href="/my-auctions/penalties"
+            className="inline-flex items-center gap-1 rounded-lg border border-brand-periwinkle/30 bg-brand-periwinkle/10 px-2.5 py-1.5 text-[10px] font-semibold text-brand-periwinkle hover:bg-brand-periwinkle hover:text-brand-navy"
+          >
+            Xem hồ sơ bị báo cáo của tôi <ArrowRight size={11} />
+          </Link>
         </div>
       )}
     </div>
