@@ -270,6 +270,23 @@ export function EventDetailScreen({ id, userId, isAdmin }: EventDetailScreenProp
     return countdown.phase === 'Ended';
   }, [event, countdown.phase]);
 
+  const maxRubricScore = useMemo(() => {
+    if (!event) return 100;
+    const rawCriteria = event.criteria || event.eventCriteria || [];
+    const sum = rawCriteria.reduce((acc, c) => acc + (Number(c.maxScore) || 0), 0);
+    return sum > 0 ? sum : 100;
+  }, [event]);
+
+  const formatScore = useCallback(
+    (val?: number | null): string | null => {
+      if (val === null || val === undefined) return null;
+      const num = typeof val === 'number' ? val : parseFloat(String(val));
+      if (isNaN(num) || num <= 0) return null;
+      return `${num.toFixed(1)} / ${maxRubricScore}`;
+    },
+    [maxRubricScore]
+  );
+
   if (loading && !event) {
     return (
       <div className="mx-auto flex min-h-[60vh] max-w-7xl items-center justify-center">
@@ -300,22 +317,6 @@ export function EventDetailScreen({ id, userId, isAdmin }: EventDetailScreenProp
   const statusStr = normalizeEventStatus(event.status);
   const statusColor = eventStatusBadgeStyles[statusStr] || 'border-white/10 bg-white/5 text-outline';
   const statusLabel = getEventStatusLabel(statusStr, isVie);
-
-  const maxRubricScore = useMemo(() => {
-    const rawCriteria = event.criteria || event.eventCriteria || [];
-    const sum = rawCriteria.reduce((acc, c) => acc + (Number(c.maxScore) || 0), 0);
-    return sum > 0 ? sum : 100;
-  }, [event]);
-
-  const formatScore = useCallback(
-    (val?: number | null): string | null => {
-      if (val === null || val === undefined) return null;
-      const num = typeof val === 'number' ? val : parseFloat(String(val));
-      if (isNaN(num) || num <= 0) return null;
-      return `${num.toFixed(1)} / ${maxRubricScore}`;
-    },
-    [maxRubricScore]
-  );
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 pb-28 pt-6 sm:px-6 lg:pt-8 text-[#e4e1e5]">
