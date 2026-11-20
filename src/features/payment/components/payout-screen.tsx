@@ -17,8 +17,15 @@ const bankSchema = z.object({
   isDefault: z.boolean(),
 });
 
+// Ngưỡng CHẶN khi gửi: backend (CreatePayoutRequestCommand.MinPayoutAmount) chấp nhận từ
+// 2.000 ₫, nên form phải cho bấm rút từ mốc đó — trước đây form chặn cứng 50.000 ₫ nên
+// người dùng nhập 2.000 ₫ vẫn không bấm được nút.
+const MIN_PAYOUT_AMOUNT = 2_000;
+// Nhãn hiển thị vẫn giữ 50.000 ₫ theo yêu cầu sản phẩm: chỉ là chữ gợi ý, KHÔNG dùng để chặn.
+const MIN_PAYOUT_HINT = 'Tối thiểu 50.000 ₫';
+
 const payoutSchema = z.object({
-  amount: z.number().min(50000, 'Số tiền rút tối thiểu là 50.000 ₫.'),
+  amount: z.number().min(MIN_PAYOUT_AMOUNT, 'Số tiền rút phải từ 2.000 ₫ trở lên.'),
   bankAccountId: z.string().uuid('Vui lòng chọn tài khoản nhận tiền.'),
   note: z.string().max(500, 'Ghi chú tối đa 500 ký tự.'),
 });
@@ -259,11 +266,11 @@ export function PayoutScreen({ userId }: { userId: string | null }) {
                   <input
                     id="payout-amount"
                     type="number"
-                    min="50000"
+                    min={MIN_PAYOUT_AMOUNT}
                     step="1000"
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
-                    placeholder="Tối thiểu 50.000 ₫"
+                    placeholder={MIN_PAYOUT_HINT}
                     className="w-full rounded-xl border border-white/15 bg-brand-navy/60 px-4 py-3 font-h1 text-lg font-semibold text-on-surface placeholder:text-outline focus:border-brand-periwinkle focus:outline-none"
                   />
                 </div>
@@ -287,7 +294,7 @@ export function PayoutScreen({ userId }: { userId: string | null }) {
 
                 <button
                   type="submit"
-                  disabled={submitting || !amount || Number(amount) < 50000}
+                  disabled={submitting || !amount || Number(amount) < MIN_PAYOUT_AMOUNT}
                   className="w-full rounded-full bg-brand-periwinkle py-3 text-center font-h1 text-sm font-bold text-brand-navy shadow-lg transition hover:brightness-110 disabled:opacity-50"
                 >
                   {submitting ? 'Đang gửi yêu cầu...' : 'Gửi yêu cầu rút tiền'}
