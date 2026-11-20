@@ -13,27 +13,77 @@ import { splitPortfolioLinks } from '@/lib/portfolio-link';
 import { EmptyFieldNote } from '@/components/empty-field-note';
 import { ImageLightbox, LightboxImage } from '@/components/image-lightbox';
 
+// Banner trạng thái đơn: nền kính của hệ thống + một icon trạng thái. Pending dùng periwinkle
+// (màu nhấn duy nhất của Digital Etherealism) thay cho tím; các màu trạng thái khác chỉ tô icon/viền.
 const statusBanner: Record<
   MyCreatorApplicationDto['status'],
-  { className: string; title: string }
+  { className: string; iconClassName: string; icon: string; title: string }
 > = {
   Pending: {
-    className: 'border-purple-500/30 bg-purple-500/10 text-purple-200',
+    className: 'border-[#A7ACD9]/30 bg-[#A7ACD9]/[0.06]',
+    iconClassName: 'bg-[#A7ACD9]/15 text-[#A7ACD9]',
+    icon: 'hourglass_top',
     title: 'Đơn của bạn đang chờ duyệt',
   },
   AdditionalProofRequested: {
-    className: 'border-amber-500/30 bg-amber-500/10 text-amber-200',
+    className: 'border-amber-400/30 bg-amber-400/[0.06]',
+    iconClassName: 'bg-amber-400/15 text-amber-300',
+    icon: 'assignment_late',
     title: 'Moderator yêu cầu bổ sung hồ sơ',
   },
   Rejected: {
-    className: 'border-red-500/30 bg-red-500/10 text-red-200',
+    className: 'border-red-400/30 bg-red-400/[0.06]',
+    iconClassName: 'bg-red-400/15 text-red-300',
+    icon: 'cancel',
     title: 'Đơn của bạn đã bị từ chối',
   },
   Approved: {
-    className: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-200',
+    className:
+      'border-emerald-400/30 bg-emerald-400/[0.06] shadow-[0_15px_35px_rgba(0,0,0,0.35),0_0_25px_rgba(167,172,217,0.12)]',
+    iconClassName: 'bg-emerald-400/15 text-emerald-300 shadow-[0_0_18px_rgba(52,211,153,0.25)]',
+    icon: 'verified',
     title: 'Bạn đã là Creator!',
   },
 };
+
+// Link ngoài hiển thị dạng chip: icon + tên miền nổi bật + phần đường dẫn mờ, cắt gọn trên một dòng.
+// Toàn bộ URL vẫn nằm trong href và title nên không mất thông tin.
+function LinkChip({ href, icon }: { href: string; icon: string }) {
+  let host = href;
+  let rest = '';
+  try {
+    const parsed = new URL(href);
+    host = parsed.hostname.replace(/^www\./, '');
+    rest = `${parsed.pathname}${parsed.search}`.replace(/\/$/, '');
+  } catch {
+    // URL không hợp lệ: hiển thị nguyên chuỗi.
+  }
+
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      title={href}
+      className="group inline-flex min-h-11 max-w-full items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-3 text-sm transition-colors hover:border-[#A7ACD9]/40 hover:bg-[#A7ACD9]/[0.08] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#A7ACD9]"
+    >
+      <span aria-hidden="true" data-no-translate="true" className="material-symbols-outlined shrink-0 text-lg text-[#A7ACD9]">
+        {icon}
+      </span>
+      <span className="min-w-0 truncate" data-no-translate="true">
+        <span className="font-semibold text-white">{host}</span>
+        {rest && <span className="text-[#8A8FA9]">{rest}</span>}
+      </span>
+      <span
+        aria-hidden="true"
+        data-no-translate="true"
+        className="material-symbols-outlined shrink-0 text-base text-[#8A8FA9] transition-colors group-hover:text-[#A7ACD9]"
+      >
+        open_in_new
+      </span>
+    </a>
+  );
+}
 
 const isImageUrl = (url: string) => /\.(png|jpe?g|gif|webp|avif)(\?|$)/i.test(url) || url.includes('res.cloudinary.com');
 
@@ -83,7 +133,7 @@ function ApplicationSummaryCard({
           <button
             type="button"
             onClick={onEdit}
-            className="rounded-xl border border-white/10 px-4 py-2 text-sm font-semibold text-[#A7ACD9] hover:bg-white/5"
+            className="min-h-11 rounded-xl border border-white/10 px-4 py-2 text-sm font-semibold text-[#A7ACD9] transition-colors hover:border-[#A7ACD9]/40 hover:bg-white/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#A7ACD9]"
           >
             Sửa đơn
           </button>
@@ -91,13 +141,22 @@ function ApplicationSummaryCard({
             type="button"
             onClick={handleWithdrawClick}
             disabled={isWithdrawing}
-            className={`rounded-xl border px-4 py-2 text-sm font-semibold transition-colors disabled:opacity-50 ${
+            className={`relative min-h-11 overflow-hidden rounded-xl border px-4 py-2 text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-300 disabled:opacity-50 ${
               confirmingWithdraw
                 ? 'border-red-400 bg-red-500/20 text-red-300'
                 : 'border-white/10 text-red-400 hover:bg-red-500/10'
             }`}
           >
             {isWithdrawing ? 'Đang thu hồi...' : confirmingWithdraw ? 'Bấm lần nữa để xác nhận' : 'Thu hồi đơn'}
+            {/* Thanh co dần trong 4 giây cho thấy còn bao lâu trước khi lời xác nhận tự huỷ
+                (dùng lại keyframe carouselProgress trong globals.css, chạy ngược). */}
+            {confirmingWithdraw && !isWithdrawing && (
+              <span
+                aria-hidden="true"
+                className="absolute bottom-0 left-0 h-0.5 bg-red-400 motion-reduce:hidden"
+                style={{ animation: 'carouselProgress 4s linear reverse forwards' }}
+              />
+            )}
           </button>
         </div>
       </div>
@@ -114,12 +173,10 @@ function ApplicationSummaryCard({
         <div>
           <p className="text-xs uppercase tracking-wider text-[#C7C5CF] mb-1">Video speedpaint</p>
           {application.speedpaintVideoUrls && application.speedpaintVideoUrls.length > 0 ? (
-            <ul className="space-y-1">
+            <ul className="space-y-2">
               {application.speedpaintVideoUrls.map((link) => (
                 <li key={link}>
-                  <a href={link} target="_blank" rel="noopener noreferrer" className="block truncate text-[#A7ACD9] underline">
-                    {link}
-                  </a>
+                  <LinkChip href={link} icon="play_circle" />
                 </li>
               ))}
             </ul>
@@ -132,12 +189,10 @@ function ApplicationSummaryCard({
       <div>
         <p className="text-xs uppercase tracking-wider text-[#C7C5CF] mb-2">Portfolio links</p>
         {sampleLinks.length > 0 ? (
-          <ul className="space-y-1 text-sm">
+          <ul className="flex flex-wrap gap-2">
             {sampleLinks.map((link) => (
-              <li key={link}>
-                <a href={link} target="_blank" rel="noopener noreferrer" className="text-[#A7ACD9] underline truncate block">
-                  {link}
-                </a>
+              <li key={link} className="min-w-0 max-w-full">
+                <LinkChip href={link} icon="link" />
               </li>
             ))}
           </ul>
@@ -155,7 +210,7 @@ function ApplicationSummaryCard({
                 key={url}
                 type="button"
                 onClick={() => setLightboxIndex(2 + sampleIndex)}
-                className="relative aspect-square overflow-hidden rounded-xl border border-white/10 transition hover:opacity-90"
+                className="relative aspect-square overflow-hidden rounded-xl border border-white/10 transition hover:border-[#A7ACD9]/40 hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#A7ACD9]"
               >
                 <Image src={url} alt="Portfolio sample" fill unoptimized className="object-cover" />
               </button>
@@ -170,14 +225,14 @@ function ApplicationSummaryCard({
           <button
             type="button"
             onClick={() => setLightboxIndex(0)}
-            className="relative aspect-[16/10] overflow-hidden rounded-xl border border-white/10 transition hover:opacity-90"
+            className="relative aspect-[16/10] overflow-hidden rounded-xl border border-white/10 transition hover:border-[#A7ACD9]/40 hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#A7ACD9]"
           >
             <Image src={application.idProofUrl} alt="Mặt trước" fill unoptimized className="object-cover" />
           </button>
           <button
             type="button"
             onClick={() => setLightboxIndex(1)}
-            className="relative aspect-[16/10] overflow-hidden rounded-xl border border-white/10 transition hover:opacity-90"
+            className="relative aspect-[16/10] overflow-hidden rounded-xl border border-white/10 transition hover:border-[#A7ACD9]/40 hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#A7ACD9]"
           >
             <Image src={application.idProofBackUrl} alt="Mặt sau" fill unoptimized className="object-cover" />
           </button>
@@ -260,34 +315,100 @@ export default function BecomeCreatorPage() {
   const canResubmit = !application || application.status === 'Rejected';
 
   return (
-    <div className="px-4 py-6 sm:px-6 sm:py-10">
+    // pb-56 trên mobile: chừa chỗ để cuộn nút hành động lên trên cụm nút nổi (AI, ngôn ngữ, báo lỗi) ở góc phải dưới.
+    <div className="px-4 pb-56 pt-6 sm:px-6 sm:py-10">
       <div className="mx-auto max-w-5xl">
 
         {isCheckingStatus ? (
-          <p className="text-center text-sm text-[#C7C5CF]">Đang kiểm tra trạng thái đơn của bạn...</p>
+          // Skeleton cùng khung với card kính thật để trang không nhảy bố cục khi dữ liệu về.
+          <div
+            role="status"
+            aria-busy="true"
+            className="glass-container mx-auto max-w-3xl space-y-6 rounded-[32px] p-6 md:p-8"
+          >
+            <div className="space-y-3 motion-safe:animate-pulse" aria-hidden="true">
+              <div className="h-8 w-2/3 rounded-xl bg-white/[0.06]" />
+              <div className="h-4 w-full rounded-lg bg-white/[0.04]" />
+              <div className="h-4 w-4/5 rounded-lg bg-white/[0.04]" />
+            </div>
+            <div className="flex gap-2 sm:gap-3 motion-safe:animate-pulse" aria-hidden="true">
+              {[0, 1, 2].map((item) => (
+                <div key={item} className="h-1 flex-1 rounded-full bg-white/10" />
+              ))}
+            </div>
+            <div className="grid gap-6 md:grid-cols-2 motion-safe:animate-pulse" aria-hidden="true">
+              <div className="aspect-[16/10] rounded-xl bg-white/[0.04]" />
+              <div className="aspect-[16/10] rounded-xl bg-white/[0.04]" />
+            </div>
+            <p className="text-center text-sm text-[#C7C5CF]">Đang kiểm tra trạng thái đơn của bạn...</p>
+          </div>
         ) : (
           <>
             {application && (
-              <div className={`mb-8 rounded-2xl border p-5 ${statusBanner[application.status].className}`}>
-                <p className="text-sm font-bold">{statusBanner[application.status].title}</p>
-                {application.reviewNote && (
-                  <p className="mt-2 text-sm">
-                    {application.status === 'Rejected' ? 'Lý do: ' : 'Ghi chú từ moderator: '}
-                    {application.reviewNote}
-                  </p>
-                )}
-                {application.status === 'Pending' && (
-                  <p className="mt-2 text-sm">Vui lòng chờ Moderator xét duyệt, chúng tôi sẽ thông báo khi có kết quả.</p>
-                )}
-                {application.status === 'Approved' && (
-                  <p className="mt-2 text-sm">
-                    Bạn có thể bắt đầu thiết lập gian hàng của mình tại{' '}
-                    <Link href="/creator-setup" className="underline hover:text-white">
-                      Creator Setup
-                    </Link>
-                    .
-                  </p>
-                )}
+              <div
+                role="status"
+                className={`relative mx-auto mb-8 flex max-w-3xl items-start gap-4 overflow-hidden rounded-3xl border border-t-white/20 p-5 backdrop-blur-xl sm:p-6 ${
+                  statusBanner[application.status].className
+                } ${application.status === 'Approved' ? 'sm:p-8' : ''}`}
+              >
+                <span
+                  aria-hidden="true"
+                  className={`flex shrink-0 items-center justify-center rounded-full ${
+                    application.status === 'Approved' ? 'h-14 w-14' : 'h-11 w-11'
+                  } ${statusBanner[application.status].iconClassName}`}
+                >
+                  {/* data-no-translate: tên icon (verified, cancel…) là ligature, không được để lớp dịch đổi chữ. */}
+                  <span
+                    data-no-translate="true"
+                    className={`material-symbols-outlined ${application.status === 'Approved' ? 'text-3xl' : 'text-2xl'}`}
+                  >
+                    {statusBanner[application.status].icon}
+                  </span>
+                </span>
+                <div className="min-w-0 flex-1 pt-0.5">
+                  {/* Khi đơn bị từ chối, wizard bên dưới đã có h1 riêng; các trạng thái khác thì
+                      tiêu đề banner chính là tiêu đề trang. */}
+                  {(() => {
+                    const TitleTag = application.status === 'Rejected' ? 'p' : 'h1';
+                    return (
+                      <TitleTag
+                        className={`font-h1 font-bold text-white ${
+                          application.status === 'Approved' ? 'text-xl sm:text-2xl' : 'text-base'
+                        }`}
+                      >
+                        {statusBanner[application.status].title}
+                      </TitleTag>
+                    );
+                  })()}
+                  {application.reviewNote && (
+                    <p className="mt-2 text-sm text-[#C7C5CF]">
+                      <span className="font-semibold text-white">
+                        {application.status === 'Rejected' ? 'Lý do: ' : 'Ghi chú từ moderator: '}
+                      </span>
+                      {application.reviewNote}
+                    </p>
+                  )}
+                  {application.status === 'Pending' && (
+                    <p className="mt-2 text-sm text-[#C7C5CF]">
+                      Vui lòng chờ Moderator xét duyệt, chúng tôi sẽ thông báo khi có kết quả.
+                    </p>
+                  )}
+                  {application.status === 'Approved' && (
+                    <p className="mt-3 text-sm leading-relaxed text-[#C7C5CF]">
+                      Bạn có thể bắt đầu thiết lập gian hàng của mình tại{' '}
+                      <Link
+                        href="/creator-setup"
+                        className="mx-0.5 inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-[#A7ACD9] px-4 align-middle text-sm font-bold text-[#1F2335] transition-[background-color,box-shadow] duration-150 hover:bg-[#C2C7F6] hover:shadow-[0_0_18px_rgba(167,172,217,0.25)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                      >
+                        Creator Setup
+                        <span aria-hidden="true" data-no-translate="true" className="material-symbols-outlined text-lg">
+                          arrow_forward
+                        </span>
+                      </Link>
+                      .
+                    </p>
+                  )}
+                </div>
               </div>
             )}
 
@@ -321,7 +442,15 @@ export default function BecomeCreatorPage() {
               />
             )}
 
-            {canResubmit && <CreatorApplicationWizard />}
+            {/* Nộp xong ở lại trang: tải lại trạng thái đơn để hiện banner "đang chờ duyệt" và thẻ tóm tắt. */}
+            {canResubmit && (
+              <CreatorApplicationWizard
+                onDone={() => {
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                  setReloadKey((k) => k + 1);
+                }}
+              />
+            )}
           </>
         )}
       </div>

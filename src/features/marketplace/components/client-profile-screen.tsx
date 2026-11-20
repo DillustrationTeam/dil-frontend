@@ -33,7 +33,7 @@ export function ClientProfile({ id }: { id: string }) {
         <div className="relative h-44 bg-[#292d44]">{profile.coverUrl && <Image src={profile.coverUrl} alt="Ảnh bìa" fill unoptimized className="object-cover" />}</div>
         <div className="p-6 sm:p-8">
           <div className="flex items-center gap-4">{profile.avatarUrl ? <span className="relative h-16 w-16 overflow-hidden rounded-xl"><Image src={profile.avatarUrl} alt={profile.fullName} fill unoptimized className="object-cover" /></span> : null}<div><h1 className="font-h1 text-2xl font-bold text-white">{profile.fullName}</h1><p className="mt-1 text-xs text-[#919099]">Tham gia {new Date(profile.joinedAt).toLocaleDateString('vi-VN')}</p></div></div>
-          {profile.bio && <p className="mt-5 whitespace-pre-line text-sm leading-6 text-[#C7C5CF]">{profile.bio}</p>}
+          {profile.bio && <p className="mt-5 whitespace-pre-line break-words text-sm leading-6 text-[#C7C5CF]">{profile.bio}</p>}
           <div className="mt-6 grid grid-cols-2 gap-3"><Metric label="Commission hoàn thành" value={statistics?.completedCommissionCount ?? 0} /><Metric label="Tranh chấp" value={statistics?.disputeCount ?? 0} /></div>
           {!!profile.interestTags.length && <div className="mt-5 flex flex-wrap gap-2">{profile.interestTags.map((tag) => <span key={tag} className="rounded-full border border-white/10 px-3 py-1 text-xs text-[#C7C5CF]">{tag}</span>)}</div>}
         </div>

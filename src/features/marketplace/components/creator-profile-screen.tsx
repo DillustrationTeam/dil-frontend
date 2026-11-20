@@ -203,7 +203,7 @@ export function CreatorProfileScreen({ id }: { id: string }) {
           </Link>
         </div>
       )}
-      {profile.bio && <p className="mt-5 whitespace-pre-line text-sm leading-6 text-[#C7C5CF]">{profile.bio}</p>}
+      {profile.bio && <p className="mt-5 whitespace-pre-line break-words text-sm leading-6 text-[#C7C5CF]">{profile.bio}</p>}
       {profile.specialties && <p className="mt-4 text-xs text-[#919099]">{profile.specialties}</p>}
     </div>}>
       <ProfileTabs tabs={tabs} value={tab} onChange={setTab} />
@@ -748,7 +748,7 @@ export function CreatorProfileScreen({ id }: { id: string }) {
 
                         {/* Creator Response */}
                         {review.reviewerReply ? (
-                          <div className="mt-2 rounded-xl bg-white/[0.02] border-l-2 border-[#A7ACD9] pl-3.5 py-2.5 pr-3 space-y-1">
+                          <div className="mt-2 rounded-xl border border-white/10 bg-white/[0.02] px-3.5 py-2.5 space-y-1">
                             <p className="text-[11px] font-bold text-[#A7ACD9]">Phản hồi từ Creator:</p>
                             <p className="text-xs text-slate-300 leading-relaxed whitespace-pre-wrap">
                               {review.reviewerReply}

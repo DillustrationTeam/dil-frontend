@@ -875,6 +875,7 @@ const translationMap: Record<string, string> = {
   'Lưu thay đổi': 'Save Changes',
 
   // Security tab — Username
+  'Đổi Username': 'Change Username',
   'Vui lòng nhập username.': 'Please enter a username.',
   'Username chỉ gồm chữ, số, "." và "_", từ 3-30 ký tự.': 'Username can only contain letters, numbers, "." and "_", 3-30 characters.',
   'Đã lưu username.': 'Username saved.',
@@ -884,7 +885,7 @@ const translationMap: Record<string, string> = {
   'Lưu username': 'Save Username',
 
   // Security tab — Email
-  'Email đăng nhập': 'Login Email',
+  'Đổi Email': 'Change Email',
   'Email hiện tại:': 'Current email:',
   'Vui lòng nhập email mới.': 'Please enter a new email.',
   'Email không đúng định dạng.': 'Invalid email format.',
