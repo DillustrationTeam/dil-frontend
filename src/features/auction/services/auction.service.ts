@@ -322,6 +322,36 @@ export const auctionService = {
   updateShipping: (auctionId: string, payload: UpdateShippingPayload): Promise<AuctionDeliveryDto> =>
     call<AuctionDeliveryDto>('post', `/auctions/${auctionId}/delivery/ship`, payload).then((r) => r.data),
 
+  /**
+   * Người bán báo bưu phẩm đã đến nơi. KHÔNG giải ngân, KHÔNG đổi trạng thái đơn —
+   * chỉ ghi nhận để người mua / Admin đối soát. Đơn phải đang InTransit; nếu lúc gửi hàng
+   * không khai link tra cứu hành trình thì backend bắt buộc `arrivalProofUrl`.
+   */
+  reportDeliveryArrival: (
+    auctionId: string,
+    payload?: { arrivalProofUrl?: string | null },
+  ): Promise<AuctionDeliveryDto> =>
+    call<AuctionDeliveryDto>('post', `/auctions/${auctionId}/delivery/report-arrival`, payload ?? {})
+      .then((r) => r.data),
+
+  /** Tải ảnh bưu kiện đã đến nơi (dùng chung endpoint ship-evidence với `kind=arrival`). */
+  uploadArrivalProof: async (
+    auctionId: string,
+    file: File,
+  ): Promise<{ fileUrl: string; fileName: string; fileSizeBytes: number }> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const res = await apiClient.post<
+      ApiResponse<{ fileUrl: string; fileName: string; fileSizeBytes: number }>
+    >(`/auctions/${auctionId}/delivery/ship-evidence?kind=arrival`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    if (!res.data.data) {
+      throw new Error(res.data.error?.detail || 'Không tải được ảnh.');
+    }
+    return res.data.data;
+  },
+
   confirmDelivery: (auctionId: string, payload?: { deliveryReceiptUrl?: string }): Promise<AuctionDeliveryDto> =>
     call<AuctionDeliveryDto>('post', `/auctions/${auctionId}/delivery/confirm`, payload).then((r) => r.data),
 
