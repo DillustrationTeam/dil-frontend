@@ -8,6 +8,7 @@ import {
   ClientReviewDto,
   ClientStatisticsDto,
   FollowedCreatorDto,
+  FollowerUserDto,
   UpdateClientProfileRequest,
 } from '@/features/marketplace/types/client-profile.types';
 
@@ -52,6 +53,15 @@ export const clientProfileService = {
       return getData(response, 'Không thể tải danh sách đang theo dõi.');
     } catch (err) {
       throw new Error(getApiErrorMessage(err, 'Không thể tải danh sách đang theo dõi.'));
+    }
+  },
+
+  async getClientFollowers(id: string): Promise<FollowerUserDto[]> {
+    try {
+      const response = await apiClient.get<ApiResponse<FollowerUserDto[]>>(`/clients/${id}/followers`);
+      return getData(response, 'Không thể tải danh sách người theo dõi.');
+    } catch (err) {
+      throw new Error(getApiErrorMessage(err, 'Không thể tải danh sách người theo dõi.'));
     }
   },
 

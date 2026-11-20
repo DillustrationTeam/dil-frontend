@@ -6,13 +6,19 @@ import Link from 'next/link';
 import { useAuthStore } from '@/store/use-auth-store';
 import { ProfileSettingsForm } from '@/features/profile-settings/components/profile-settings-form';
 import { SecuritySettingsForm } from '@/features/profile-settings/components/security-settings-form';
+import { ProfileTabsSettingsForm } from '@/features/profile-settings/components/profile-tabs-settings-form';
 import { DangerZoneForm } from '@/features/profile-settings/components/danger-zone-form';
 
-type SettingsTab = 'profile' | 'security' | 'danger';
+type SettingsTab = 'profile' | 'security' | 'display' | 'danger';
+
+// Tạm ẩn — chờ hoàn thiện migration DB (PublicVisibleTabs) và trang hồ sơ công khai
+// trước khi bật lại cho user chỉnh sửa.
+const SHOW_PROFILE_TABS_SETTINGS = false;
 
 const tabs: Array<{ value: SettingsTab; label: string }> = [
   { value: 'profile', label: 'Hồ sơ' },
   { value: 'security', label: 'Tài khoản & Bảo mật' },
+  ...(SHOW_PROFILE_TABS_SETTINGS ? [{ value: 'display' as const, label: 'Danh mục hồ sơ' }] : []),
   { value: 'danger', label: 'Xóa tài khoản' },
 ];
 
@@ -69,6 +75,7 @@ export default function SettingsPage() {
 
         {tab === 'profile' && <ProfileSettingsForm />}
         {tab === 'security' && <SecuritySettingsForm />}
+        {tab === 'display' && <ProfileTabsSettingsForm />}
         {tab === 'danger' && <DangerZoneForm />}
       </div>
     </main>

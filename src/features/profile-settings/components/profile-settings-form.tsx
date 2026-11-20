@@ -104,17 +104,21 @@ function ChipToggleGroup({
 
 function ImageUploadSlot({
   label,
+  hideLabel,
   value,
   isUploading,
-  aspectClassName,
+  sizeClassName,
+  rounded = 'rounded-xl',
   onSelectNewFile,
   onEditExisting,
   onRemove,
 }: {
   label: string;
+  hideLabel?: boolean;
   value: string;
   isUploading: boolean;
-  aspectClassName: string;
+  sizeClassName: string;
+  rounded?: string;
   onSelectNewFile: (file: File) => void;
   onEditExisting: () => void;
   onRemove: () => void;
@@ -123,9 +127,9 @@ function ImageUploadSlot({
 
   return (
     <div className="space-y-2">
-      <label className="text-xs uppercase tracking-wider text-[#C7C5CF]">{label}</label>
+      {!hideLabel && <label className="text-xs uppercase tracking-wider text-[#C7C5CF]">{label}</label>}
       <div
-        className={`relative flex ${aspectClassName} w-full items-center justify-center overflow-hidden rounded-xl border border-dashed border-white/20 bg-white/5 transition ${
+        className={`relative flex ${sizeClassName} w-full items-center justify-center overflow-hidden ${rounded} border border-dashed border-white/20 bg-white/5 transition ${
           !value ? 'hover:border-[#A7ACD9]' : ''
         }`}
       >
@@ -184,6 +188,77 @@ function ImageUploadSlot({
   );
 }
 
+function AvatarUploadSlot({
+  value,
+  isUploading,
+  onSelectNewFile,
+  onEditExisting,
+  onRemove,
+}: {
+  value: string;
+  isUploading: boolean;
+  onSelectNewFile: (file: File) => void;
+  onEditExisting: () => void;
+  onRemove: () => void;
+}) {
+  const inputId = 'profile-upload-avatar-circle';
+
+  return (
+    <div className="relative h-24 w-24 sm:h-32 sm:w-32">
+      <div
+        className={`relative h-full w-full overflow-hidden rounded-full border-4 border-[#1F2335] bg-white/10 transition ${
+          !value ? 'hover:border-[#A7ACD9]' : ''
+        }`}
+      >
+        {value ? (
+          <Image src={value} alt="Ảnh đại diện" fill unoptimized className="object-cover" />
+        ) : (
+          <label
+            htmlFor={inputId}
+            className="flex h-full w-full cursor-pointer flex-col items-center justify-center text-[#C7C5CF]"
+          >
+            <span className="material-symbols-outlined text-2xl">
+              {isUploading ? 'progress_activity' : 'upload'}
+            </span>
+          </label>
+        )}
+        <input
+          id={inputId}
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          className="hidden"
+          disabled={isUploading}
+          onChange={(event) => {
+            const file = event.target.files?.[0];
+            if (file) onSelectNewFile(file);
+            event.target.value = '';
+          }}
+        />
+      </div>
+      {value && !isUploading && (
+        <>
+          <button
+            type="button"
+            title="Chỉnh sửa vùng cắt"
+            onClick={onEditExisting}
+            className="absolute bottom-0 right-0 flex h-8 w-8 items-center justify-center rounded-full border-2 border-[#1F2335] bg-[#A7ACD9] text-[#1F2335] transition hover:bg-white"
+          >
+            <Pencil className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            title="Xóa ảnh, quay về mặc định"
+            onClick={onRemove}
+            className="absolute -right-1 -top-1 flex h-6 w-6 items-center justify-center rounded-full bg-black/60 text-white/80 opacity-80 backdrop-blur-sm transition hover:bg-red-500/80 hover:opacity-100"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+          </button>
+        </>
+      )}
+    </div>
+  );
+}
+
 export function ProfileSettingsForm() {
   const user = useAuthStore((state) => state.user);
   const roles = useAuthStore((state) => state.roles);
@@ -230,6 +305,7 @@ export function ProfileSettingsForm() {
   const [cropTarget, setCropTargetKind] = useState<'avatar' | 'cover' | null>(null);
 
   const [customTagInput, setCustomTagInput] = useState('');
+  const [customLanguageInput, setCustomLanguageInput] = useState('');
 
   useEffect(() => {
     if (!user?.id) return;
@@ -366,6 +442,15 @@ export function ProfileSettingsForm() {
     );
   };
 
+  const addCustomLanguage = () => {
+    const lang = customLanguageInput.trim();
+    if (!lang) return;
+    if (!preferredLanguages.includes(lang)) {
+      setValue('preferredLanguages', [...preferredLanguages, lang], { shouldDirty: true });
+    }
+    setCustomLanguageInput('');
+  };
+
   const onSubmit = async (values: ProfileFormValues) => {
     const cleanedSocialLinks = values.socialLinks.map((link) => link.trim()).filter((link) => link.length > 0);
 
@@ -396,31 +481,36 @@ export function ProfileSettingsForm() {
   return (
     <>
       <form onSubmit={handleSubmit(onSubmit)} className="glass-container rounded-[32px] p-6 md:p-8 max-w-3xl mx-auto space-y-8">
-        <div className="grid gap-6 sm:grid-cols-2">
-          <ImageUploadSlot
-            label="Ảnh đại diện (Avatar)"
-            value={avatarUrl}
-            isUploading={avatarUpload.isUploading}
-            aspectClassName="aspect-square"
-            onSelectNewFile={(file) => handleSelectNewFile('avatar', file)}
-            onEditExisting={() => handleEditExisting('avatar')}
-            onRemove={() => {
-              setValue('avatarUrl', '', { shouldDirty: true });
-              setCropSessions((previous) => ({ ...previous, avatar: null }));
-            }}
-          />
-          <ImageUploadSlot
-            label="Ảnh bìa (Cover Art)"
-            value={coverUrl}
-            isUploading={coverUpload.isUploading}
-            aspectClassName="aspect-[16/9]"
-            onSelectNewFile={(file) => handleSelectNewFile('cover', file)}
-            onEditExisting={() => handleEditExisting('cover')}
-            onRemove={() => {
-              setValue('coverUrl', '', { shouldDirty: true });
-              setCropSessions((previous) => ({ ...previous, cover: null }));
-            }}
-          />
+        <div className="space-y-2">
+          <label className="text-xs uppercase tracking-wider text-[#C7C5CF]">Ảnh đại diện & ảnh bìa</label>
+          <div className="relative mb-12 sm:mb-16">
+            <ImageUploadSlot
+              label="Ảnh bìa (Cover Art)"
+              hideLabel
+              rounded="rounded-2xl"
+              value={coverUrl}
+              isUploading={coverUpload.isUploading}
+              sizeClassName="h-40 sm:h-56"
+              onSelectNewFile={(file) => handleSelectNewFile('cover', file)}
+              onEditExisting={() => handleEditExisting('cover')}
+              onRemove={() => {
+                setValue('coverUrl', '', { shouldDirty: true });
+                setCropSessions((previous) => ({ ...previous, cover: null }));
+              }}
+            />
+            <div className="absolute -bottom-10 left-5 sm:-bottom-14 sm:left-7">
+              <AvatarUploadSlot
+                value={avatarUrl}
+                isUploading={avatarUpload.isUploading}
+                onSelectNewFile={(file) => handleSelectNewFile('avatar', file)}
+                onEditExisting={() => handleEditExisting('avatar')}
+                onRemove={() => {
+                  setValue('avatarUrl', '', { shouldDirty: true });
+                  setCropSessions((previous) => ({ ...previous, avatar: null }));
+                }}
+              />
+            </div>
+          </div>
         </div>
 
         <div className="space-y-2">
@@ -545,6 +635,44 @@ export function ProfileSettingsForm() {
               Ngôn ngữ giao tiếp <span className="normal-case text-[#78767A]">(để trống nếu không muốn hiển thị)</span>
             </label>
             <ChipToggleGroup options={languageOptions} selected={preferredLanguages} onToggle={toggleLanguage} />
+            {preferredLanguages.filter((lang) => !languageOptions.includes(lang)).length > 0 && (
+              <div className="flex flex-wrap gap-2 pt-1">
+                {preferredLanguages
+                  .filter((lang) => !languageOptions.includes(lang))
+                  .map((lang) => (
+                    <span
+                      key={lang}
+                      className="flex items-center gap-1.5 rounded-full border border-[#A7ACD9] bg-[#A7ACD9]/15 px-3 py-1.5 text-xs font-medium text-white"
+                    >
+                      {lang}
+                      <button type="button" onClick={() => toggleLanguage(lang)} aria-label={`Xóa ngôn ngữ ${lang}`}>
+                        <X className="h-3 w-3" />
+                      </button>
+                    </span>
+                  ))}
+              </div>
+            )}
+            <div className="flex gap-2 pt-1">
+              <input
+                value={customLanguageInput}
+                onChange={(event) => setCustomLanguageInput(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter') {
+                    event.preventDefault();
+                    addCustomLanguage();
+                  }
+                }}
+                className={inputClass}
+                placeholder="Tự thêm ngôn ngữ khác..."
+              />
+              <button
+                type="button"
+                onClick={addCustomLanguage}
+                className="shrink-0 rounded-xl border border-white/10 px-4 text-xs font-semibold text-[#A7ACD9] hover:border-[#A7ACD9]"
+              >
+                Thêm
+              </button>
+            </div>
           </div>
         </div>
 

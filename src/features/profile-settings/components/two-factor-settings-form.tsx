@@ -7,7 +7,7 @@ import { Check, Copy, ShieldCheck } from 'lucide-react';
 import { securitySettingsService } from '@/features/profile-settings/services/security-settings.service';
 
 const inputClass =
-  'w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none focus:border-[#A7ACD9]';
+  'w-full border-0 border-b-2 border-white/30 bg-transparent px-1 py-3 text-white outline-none transition focus:border-brand-periwinkle';
 
 type Stage = 'idle' | 'setup' | 'recovery';
 
@@ -126,7 +126,7 @@ export function TwoFactorSettingsForm() {
   return (
     <section className="glass-container space-y-4 rounded-[32px] p-6 md:p-8">
       <div className="flex items-center justify-between">
-        <p className="text-xs uppercase tracking-wider text-[#A7ACD9]">Xác minh 2 bước (2FA)</p>
+        <p className="text-2xl font-extrabold uppercase tracking-wide text-brand-periwinkle">Xác minh 2 bước (2FA)</p>
         {enabled && stage === 'idle' && (
           <span className="flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-3 py-1 text-xs text-emerald-400">
             <ShieldCheck className="h-3.5 w-3.5" />
@@ -137,7 +137,7 @@ export function TwoFactorSettingsForm() {
 
       {stage === 'idle' && !enabled && (
         <>
-          <p className="text-sm text-[#78767A]">
+          <p className="text-sm text-outline">
             Bật xác minh 2 bước để tăng bảo mật — mỗi lần đăng nhập sẽ cần thêm mã từ ứng dụng xác thực (Google
             Authenticator, Authy...).
           </p>
@@ -145,7 +145,7 @@ export function TwoFactorSettingsForm() {
             type="button"
             onClick={handleStartSetup}
             disabled={isLoading}
-            className="rounded-xl bg-[#A7ACD9] px-5 py-3 text-sm font-bold text-[#1F2335] transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
+            className="rounded-xl border border-brand-periwinkle/30 bg-brand-periwinkle/15 px-5 py-3 text-sm font-bold text-brand-periwinkle transition hover:bg-brand-periwinkle/25 disabled:cursor-not-allowed disabled:opacity-60"
           >
             Bật 2FA
           </button>
@@ -154,7 +154,7 @@ export function TwoFactorSettingsForm() {
 
       {stage === 'setup' && (
         <div className="space-y-4">
-          <p className="text-sm text-[#78767A]">
+          <p className="text-sm text-outline">
             Quét mã QR bằng ứng dụng xác thực, hoặc nhập khóa bí mật bên dưới nếu không quét được.
           </p>
           {qrDataUrl && (
@@ -162,7 +162,7 @@ export function TwoFactorSettingsForm() {
             <img src={qrDataUrl} alt="QR xác thực 2FA" className="h-48 w-48 rounded-xl bg-white p-2" />
           )}
           <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-3">
-            <p className="text-xs text-[#78767A]">Khóa bí mật</p>
+            <p className="text-xs text-outline">Khóa bí mật</p>
             <p className="break-all font-mono text-sm text-white">{sharedKey}</p>
           </div>
           <div>
@@ -181,7 +181,7 @@ export function TwoFactorSettingsForm() {
               type="button"
               onClick={handleVerifyAndEnable}
               disabled={isLoading}
-              className="flex-1 rounded-xl bg-[#A7ACD9] py-3 text-sm font-bold text-[#1F2335] transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
+              className="flex-1 rounded-xl border border-brand-periwinkle/30 bg-brand-periwinkle/15 py-3 text-sm font-bold text-brand-periwinkle transition hover:bg-brand-periwinkle/25 disabled:cursor-not-allowed disabled:opacity-60"
             >
               Xác nhận
             </button>
@@ -192,7 +192,7 @@ export function TwoFactorSettingsForm() {
                 setVerifyCode('');
                 setVerifyCodeTouched(false);
               }}
-              className="rounded-xl border border-white/10 px-4 text-sm text-[#78767A] hover:text-white"
+              className="rounded-xl border border-white/10 px-4 text-sm text-outline hover:text-white"
             >
               Hủy
             </button>
@@ -217,9 +217,9 @@ export function TwoFactorSettingsForm() {
               >
                 <span>{code}</span>
                 {copiedCode === code ? (
-                  <Check className="h-3.5 w-3.5 shrink-0 text-green-400" />
+                  <Check className="h-3.5 w-3.5 shrink-0 text-emerald-400" />
                 ) : (
-                  <Copy className="h-3.5 w-3.5 shrink-0 text-[#919099]" />
+                  <Copy className="h-3.5 w-3.5 shrink-0 text-outline" />
                 )}
               </button>
             ))}
@@ -227,15 +227,15 @@ export function TwoFactorSettingsForm() {
           <button
             type="button"
             onClick={handleCopyAllCodes}
-            className="flex w-full items-center justify-center gap-2 rounded-xl border border-white/10 py-2.5 text-sm text-[#C7C5CF] transition hover:border-[#A7ACD9] hover:text-white"
+            className="flex w-full items-center justify-center gap-2 rounded-xl border border-white/10 py-2.5 text-sm text-on-surface-variant transition hover:border-brand-periwinkle hover:text-white"
           >
-            {copiedCode === '__all__' ? <Check className="h-4 w-4 text-green-400" /> : <Copy className="h-4 w-4" />}
+            {copiedCode === '__all__' ? <Check className="h-4 w-4 text-emerald-400" /> : <Copy className="h-4 w-4" />}
             Copy tất cả
           </button>
           <button
             type="button"
             onClick={handleConfirmSavedRecoveryCodes}
-            className="w-full rounded-xl bg-[#A7ACD9] py-3 text-sm font-bold text-[#1F2335] transition hover:bg-white"
+            className="w-full rounded-xl bg-brand-periwinkle py-3 text-sm font-bold text-brand-navy transition hover:bg-white"
           >
             Tôi đã lưu lại
           </button>
@@ -281,7 +281,7 @@ export function TwoFactorSettingsForm() {
                     setDisablePassword('');
                     setDisablePasswordTouched(false);
                   }}
-                  className="rounded-xl border border-white/10 px-4 text-sm text-[#78767A] hover:text-white"
+                  className="rounded-xl border border-white/10 px-4 text-sm text-outline hover:text-white"
                 >
                   Hủy
                 </button>

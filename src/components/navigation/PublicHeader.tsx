@@ -1,31 +1,28 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { Search, X } from 'lucide-react';
-import toast from 'react-hot-toast';
 import { useLanguage } from '@/context/language-context';
 import { useAuthStore } from '@/store/use-auth-store';
-import { authService } from '@/services/auth.service';
 import { NotificationBell } from '@/features/notification';
 import {
   categoriesService,
   type SearchSuggestionsDto,
 } from '@/features/marketplace/services/categories.service';
 import TradeAuthRequiredModal from '@/components/modals/TradeAuthRequiredModal';
+import { AccountMenu } from '@/components/navigation/account-menu';
 
 /**
  * Thanh điều hướng dùng chung cho các trang công khai `(public)` và trang độc lập `(workspace)`
  * (ví dụ: `/notifications`, `/ai`, `/checkout`) để giao diện và các liên kết luôn đồng nhất.
  */
 export function PublicHeader() {
-  const { user, roles, refreshToken, isAuthenticated, clearAuth } = useAuthStore();
+  const { user, roles, isAuthenticated } = useAuthStore();
   const { t } = useLanguage();
   const pathname = usePathname() ?? '';
   const router = useRouter();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -48,14 +45,6 @@ export function PublicHeader() {
       window.clearTimeout(timer);
     };
   }, [searchQuery, isSearchOpen, searchFocused]);
-
-  const handleLogout = async () => {
-    if (refreshToken) {
-      await authService.revokeToken(refreshToken);
-    }
-    clearAuth();
-    toast.success(t('Signed out successfully.'));
-  };
 
   const handleSearchSubmit = (event: React.FormEvent) => {
     event.preventDefault();
@@ -217,7 +206,7 @@ export function PublicHeader() {
             onClick={() => setIsSearchOpen((prev) => !prev)}
             aria-expanded={isSearchOpen}
             aria-label={isSearchOpen ? t('Đóng tìm kiếm') : t('Mở tìm kiếm')}
-            className="hidden h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-[#c2c7f6] transition hover:border-[#A7ACD9] hover:bg-[#c2c7f6]/10 lg:flex 2xl:hidden"
+            className="hidden h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-[#c2c7f6] transition hover:border-[#A7ACD9] hover:bg-[#c2c7f6]/10 lg:flex 2xl:hidden"
           >
             {isSearchOpen ? <X className="h-4 w-4" aria-hidden /> : <Search className="h-4 w-4" aria-hidden />}
           </button>
@@ -228,12 +217,12 @@ export function PublicHeader() {
                 <NotificationBell
                   userId={user.id}
                   iconSet="material"
-                  triggerClassName="rounded-full p-2 text-[#c2c7f6] transition-all hover:bg-[#c2c7f6]/10 active:scale-95"
+                  triggerClassName="relative flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-[#c2c7f6] transition-all hover:border-[#A7ACD9] hover:bg-[#c2c7f6]/10 active:scale-95"
                 />
 
                 <Link
                   href={isAdmin ? '/admin' : '/client/commissions'}
-                  className="hidden items-center gap-1.5 rounded-full bg-[#A7ACD9] px-3 py-1.5 text-xs font-semibold text-[#1F2335] transition-all hover:opacity-90 active:scale-95 sm:flex min-[1400px]:gap-2 min-[1400px]:px-4 min-[1400px]:py-2"
+                  className="hidden items-center gap-1.5 rounded-xl bg-[#A7ACD9] px-3 py-1.5 text-xs font-semibold text-[#1F2335] transition-all hover:opacity-90 active:scale-95 sm:flex min-[1400px]:gap-2 min-[1400px]:px-4 min-[1400px]:py-2"
                 >
                   <span className="material-symbols-outlined text-base">
                     {isAdmin ? 'admin_panel_settings' : 'dashboard'}
@@ -241,105 +230,7 @@ export function PublicHeader() {
                   {isAdmin ? t('Admin Center') : t('Studio')}
                 </Link>
 
-                <div className="relative">
-                  <button
-                    type="button"
-                    onClick={() => setIsMenuOpen(!isMenuOpen)}
-                    className="flex cursor-pointer items-center space-x-2 rounded-full border border-white/10 bg-white/5 px-2.5 py-1.5 transition-all hover:border-[#A7ACD9] min-[1400px]:space-x-3 min-[1400px]:px-3.5"
-                  >
-                    {user.avatarUrl ? (
-                      <Image
-                        src={user.avatarUrl}
-                        alt={user.fullName}
-                        width={32}
-                        height={32}
-                        unoptimized
-                        className="h-7 w-7 rounded-lg object-cover min-[1400px]:h-8 min-[1400px]:w-8"
-                      />
-                    ) : (
-                      <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#A7ACD9] text-xs font-bold text-[#1F2335] min-[1400px]:h-8 min-[1400px]:w-8">
-                        {user.fullName.charAt(0).toUpperCase()}
-                      </div>
-                    )}
-                    <div className="hidden text-left sm:block">
-                      <p className="max-w-[110px] truncate whitespace-nowrap text-xs font-bold leading-tight text-white min-[1400px]:max-w-[140px] 2xl:max-w-[170px]">
-                        {user.fullName}
-                      </p>
-                      <p className="max-w-[110px] truncate text-[10px] uppercase tracking-wider text-[#A7ACD9] min-[1400px]:max-w-[140px] 2xl:max-w-[170px]">
-                        {roles.join(', ') || 'CLIENT'}
-                      </p>
-                    </div>
-                    <span className="material-symbols-outlined text-sm text-[#919099]">expand_more</span>
-                  </button>
-
-                  {isMenuOpen && (
-                    <div className="absolute right-0 z-50 mt-2 w-48 rounded-2xl border border-white/10 bg-[#1F2335] p-2 shadow-2xl">
-                      <div className="mb-1 border-b border-white/10 px-3 py-2 sm:hidden">
-                        <p className="text-xs font-bold text-white">{user.fullName}</p>
-                        <p className="text-[10px] text-[#A7ACD9]">{user.email}</p>
-                      </div>
-                      <Link
-                        href={isAdmin ? '/admin' : roles.includes('Creator') ? '/creator/commissions' : '/client/commissions'}
-                        className="flex items-center gap-2 rounded-xl px-3 py-2 text-xs text-[#e4e1e5] transition-colors hover:bg-white/10"
-                        onClick={() => setIsMenuOpen(false)}
-                      >
-                        <span className="material-symbols-outlined text-sm text-[#A7ACD9]">
-                          {isAdmin ? 'admin_panel_settings' : 'dashboard'}
-                        </span>
-                        {isAdmin ? t('Admin Center') : roles.includes('Creator') ? t('Creator Studio') : t('My Studio')}
-                      </Link>
-                      {roles.includes('Creator') && (
-                        <Link
-                          href="/creator/profile/edit"
-                          onClick={() => setIsMenuOpen(false)}
-                          className="flex items-center gap-2 rounded-xl px-3 py-2 text-xs text-[#e4e1e5] transition-colors hover:bg-white/10"
-                        >
-                          <span className="material-symbols-outlined text-sm text-[#A7ACD9]">brush</span>
-                          {t('Hồ sơ họa sĩ')}
-                        </Link>
-                      )}
-                      <Link
-                        href={`/clients/${user.id}`}
-                        onClick={() => setIsMenuOpen(false)}
-                        className="flex items-center gap-2 rounded-xl px-3 py-2 text-xs text-[#e4e1e5] transition-colors hover:bg-white/10"
-                      >
-                        <span className="material-symbols-outlined text-sm text-[#A7ACD9]">person</span>
-                        {t('Hồ sơ của tôi')}
-                      </Link>
-                      {!roles.includes('Creator') && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setIsMenuOpen(false);
-                            router.push('/become-creator');
-                          }}
-                          className="flex w-full cursor-pointer items-center space-x-2 rounded-xl px-3 py-2 text-xs text-[#A7ACD9] transition-colors hover:bg-white/10"
-                        >
-                          <span className="material-symbols-outlined text-sm">palette</span>
-                          <span>{t('Trở thành Creator')}</span>
-                        </button>
-                      )}
-                      {isAdmin && (
-                        <Link
-                          href="/admin/creator-verifications"
-                          onClick={() => setIsMenuOpen(false)}
-                          className="flex items-center space-x-2 rounded-xl px-3 py-2 text-xs text-red-300 transition-colors hover:bg-white/10"
-                        >
-                          <span className="material-symbols-outlined text-sm">how_to_reg</span>
-                          <span>{t('Duyệt đơn Creator')}</span>
-                        </Link>
-                      )}
-                      <button
-                        type="button"
-                        onClick={handleLogout}
-                        className="flex w-full cursor-pointer items-center gap-2 rounded-xl px-3 py-2 text-left text-xs text-red-400 transition-colors hover:bg-white/10"
-                      >
-                        <span className="material-symbols-outlined text-sm">logout</span>
-                        {t('Sign Out')}
-                      </button>
-                    </div>
-                  )}
-                </div>
+                <AccountMenu variant="public" />
               </>
             ) : (
               <div className="flex items-center space-x-3">

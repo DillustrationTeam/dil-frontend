@@ -145,7 +145,7 @@ export function ClientProfile({ id }: { id: string }) {
             <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
               <p className="text-xs uppercase tracking-wider text-[#919099]">Thông tin cơ bản</p>
               <ul className="mt-3 space-y-2.5 text-sm text-[#C7C5CF]">
-                {profile.bio && <li>{profile.bio}</li>}
+                {profile.bio && <li className="whitespace-pre-line break-words">{profile.bio}</li>}
                 {profile.interestTags.length > 0 && (
                   <li className="flex flex-wrap gap-1.5">
                     {profile.interestTags.map((tag) => (
