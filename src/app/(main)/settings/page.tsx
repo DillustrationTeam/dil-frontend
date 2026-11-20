@@ -13,7 +13,7 @@ type SettingsTab = 'profile' | 'security' | 'danger';
 const tabs: Array<{ value: SettingsTab; label: string }> = [
   { value: 'profile', label: 'Hồ sơ' },
   { value: 'security', label: 'Tài khoản & Bảo mật' },
-  { value: 'danger', label: 'Vô hiệu hóa tài khoản' },
+  { value: 'danger', label: 'Xóa tài khoản' },
 ];
 
 export default function SettingsPage() {

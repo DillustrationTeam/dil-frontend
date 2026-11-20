@@ -833,7 +833,7 @@ const translationMap: Record<string, string> = {
   'Bảng điều khiển Creator': 'Creator Dashboard',
   'Cài đặt tài khoản': 'Account Settings',
 
-  // Profile Settings page (Settings → Profile / Security / Deactivate Account)
+  // Profile Settings page (Settings → Profile / Security / Delete Account)
   'Cài đặt hồ sơ': 'Profile Settings',
   'Xem hồ sơ công khai': 'View Public Profile',
   'Hồ sơ': 'Profile',
@@ -968,16 +968,15 @@ const translationMap: Record<string, string> = {
   // Danger Zone tab
   'Vui lòng gõ "DELETE" để xác nhận.': 'Please type "DELETE" to confirm.',
   'Vui lòng gõ chính xác chữ "DELETE".': 'Please type "DELETE" exactly.',
-  'Tài khoản đã được vô hiệu hóa.': 'Account has been deactivated.',
-  'Không thể vô hiệu hóa tài khoản.': 'Failed to deactivate account.',
-  'Vô hiệu hóa tài khoản': 'Deactivate Account',
-  'Hành động này sẽ vô hiệu hóa tài khoản của bạn và đăng xuất khỏi mọi thiết bị. Không thể thực hiện nếu bạn còn đơn commission đang chạy, còn tiền trong ví, hoặc đang có tranh chấp chưa giải quyết.':
-    'This action will deactivate your account and sign you out of all devices. It cannot be done if you still have an active commission, funds in your wallet, or an unresolved dispute.',
-  'Xác nhận vô hiệu hóa tài khoản': 'Confirm Account Deactivation',
-  'Nhập mật khẩu và gõ chữ': 'Enter your password and type',
-  'để xác nhận. Hành động này không thể tự hoàn tác.': 'to confirm. This action cannot be undone.',
-  'Gõ "DELETE" để xác nhận': 'Type "DELETE" to confirm',
+  'Tài khoản đã được xóa.': 'Account has been deleted.',
+  'Không thể xóa tài khoản.': 'Failed to delete account.',
   'Xóa tài khoản': 'Delete Account',
+  'Hành động này sẽ xóa vĩnh viễn tài khoản của bạn và đăng xuất khỏi mọi thiết bị. Email đăng nhập sẽ được giải phóng để bạn có thể đăng ký lại sau này. Không thể thực hiện nếu bạn còn đơn commission đang chạy, còn tiền trong ví, hoặc đang có tranh chấp chưa giải quyết.':
+    'This action will permanently delete your account and sign you out of all devices. Your login email will be freed up so you can register again later. It cannot be done if you still have an active commission, funds in your wallet, or an unresolved dispute.',
+  'Xác nhận xóa tài khoản': 'Confirm Account Deletion',
+  'Nhập mật khẩu và gõ chữ': 'Enter your password and type',
+  'để xác nhận. Hành động này không thể hoàn tác.': 'to confirm. This action cannot be undone.',
+  'Gõ "DELETE" để xác nhận': 'Type "DELETE" to confirm',
 
   // Security tab — Change email re-authentication (password/2FA/reauth-code)
   'Tài khoản của bạn đăng nhập bằng Google, chưa có mật khẩu. Để đổi email, cần xác thực lại qua email hiện tại trước.':
