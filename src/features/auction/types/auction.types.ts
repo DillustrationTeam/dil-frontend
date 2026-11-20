@@ -101,6 +101,10 @@ export interface AuctionDeliveryDto {
   canRateSeller?: boolean;
   /** Nguoi mua da danh gia nguoi ban cho phien nay roi. */
   hasRatedSeller?: boolean;
+  /** Nguoi ban bao buu pham da den noi (chi doi soat — khong giai ngan). */
+  sellerReportedDeliveredAt?: string | null;
+  /** Anh buu kien da den noi — bat buoc khi don gui hang khong co link tra cuu hanh trinh. */
+  arrivalProofUrl?: string | null;
 }
 
 /** Kết quả đánh giá người bán sau khi giao dịch đấu giá khép lại. */

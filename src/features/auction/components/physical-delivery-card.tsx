@@ -93,6 +93,17 @@ export function PhysicalDeliveryCard({ auction, userId, onReload }: PhysicalDeli
   const [uploadingShipEvidence, setUploadingShipEvidence] = useState<'receipt' | 'package' | null>(null);
   const [shipEvidencePreview, setShipEvidencePreview] = useState<{ receipt?: string; package?: string }>({});
 
+  // Ảnh bưu kiện ĐÃ ĐẾN NƠI — người bán chụp lúc giao tới, bắt buộc khi đơn không có link hành trình
+  const [arrivalProofUrl, setArrivalProofUrl] = useState('');
+  const [arrivalProofPreview, setArrivalProofPreview] = useState<string | null>(null);
+  const [uploadingArrivalProof, setUploadingArrivalProof] = useState(false);
+
+  // Người bán đã điền thông tin gửi hàng chưa: hãng + mã vận đơn (backend bắt buộc cả hai).
+  // Chưa có thì người mua chưa thấy 2 lựa chọn "Đã nhận hàng" / "Khiếu nại bưu phẩm".
+  const hasShippingInfo = Boolean(delivery?.carrierName?.trim() && delivery?.trackingCode?.trim());
+  // Đơn có link tra cứu hành trình thì link đó là bằng chứng đến nơi → không bắt gửi ảnh.
+  const hasTrackingJourney = Boolean(delivery?.trackingUrl?.trim());
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
@@ -214,6 +225,60 @@ export function PhysicalDeliveryCard({ auction, userId, onReload }: PhysicalDeli
         : { ...prev, packageImageUrl: '' },
     );
     setShipEvidencePreview((prev) => ({ ...prev, [kind]: undefined }));
+  };
+
+  // 3c. Người bán chọn ảnh bưu kiện ĐÃ ĐẾN NƠI từ máy
+  const arrivalProofInputRef = useRef<HTMLInputElement>(null);
+
+  const handleArrivalProofPicked = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+      setError('Chỉ nhận ảnh JPG, PNG hoặc WebP.');
+      return;
+    }
+    if (file.size > 8 * 1024 * 1024) {
+      setError('Ảnh tối đa 8MB.');
+      return;
+    }
+
+    try {
+      setUploadingArrivalProof(true);
+      setError(null);
+      const res = await auctionService.uploadArrivalProof(auction.auctionId, file);
+      setArrivalProofUrl(res.fileUrl);
+      setArrivalProofPreview(URL.createObjectURL(file));
+    } catch (err) {
+      setError(auctionError(err) || 'Không tải được ảnh bưu kiện.');
+    } finally {
+      setUploadingArrivalProof(false);
+    }
+  };
+
+  // 3d. Người bán báo bưu phẩm đã đến nơi. Không có link hành trình thì bắt buộc kèm ảnh.
+  const handleReportArrival = async () => {
+    const proof = arrivalProofUrl.trim();
+    if (!hasTrackingJourney && !proof) {
+      setError('Đơn gửi hàng không có link tra cứu hành trình, nên phải gửi kèm ảnh bưu kiện đã đến nơi.');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError(null);
+      await auctionService.reportDeliveryArrival(auction.auctionId, {
+        arrivalProofUrl: proof || null,
+      });
+      setSuccessMsg(
+        'Đã báo bưu phẩm tới nơi. Người mua sẽ nhận thông báo và tự bấm “Đã nhận hàng” để hoàn tất đơn (tiền chỉ giải ngân khi người mua xác nhận hoặc sau 48 giờ).',
+      );
+      onReload();
+    } catch (err) {
+      setError(auctionError(err));
+    } finally {
+      setLoading(false);
+    }
   };
 
   // 4. Người mua xác nhận nhận tranh & hài lòng
@@ -598,6 +663,25 @@ export function PhysicalDeliveryCard({ auction, userId, onReload }: PhysicalDeli
                   <ExternalLink size={11} />
                 </a>
               )}
+              {/* Ảnh bưu kiện ĐÃ ĐẾN NƠI: người mua và Admin đều xem được để đối soát */}
+              {delivery.arrivalProofUrl && (
+                <button
+                  type="button"
+                  onClick={() => setSelectedReceiptImage(delivery.arrivalProofUrl || null)}
+                  className="inline-flex items-center gap-1 text-[11px] text-amber-300 hover:underline"
+                >
+                  <ImagePlus size={12} className="shrink-0" /> Ảnh bưu kiện đã đến nơi (người bán gửi)
+                  <ExternalLink size={11} />
+                </button>
+              )}
+              {delivery.sellerReportedDeliveredAt && (
+                <p className="text-[11px] text-amber-200">
+                  • Người bán báo đã giao tới nơi lúc{' '}
+                  <span className="font-mono">
+                    {new Date(delivery.sellerReportedDeliveredAt).toLocaleString('vi-VN')}
+                  </span>
+                </p>
+              )}
             </div>
           </div>
 
@@ -746,20 +830,120 @@ export function PhysicalDeliveryCard({ auction, userId, onReload }: PhysicalDeli
             </div>
           )}
 
+          {/* Hành động của Người bán: Báo bưu phẩm đã đến nơi (chỉ đối soát, không giải ngân) */}
+          {isSeller && delivery.status === 'InTransit' && isDeliveryActive && (
+            <div className="pt-3 border-t border-white/10 space-y-2">
+              <div className="rounded-xl border border-amber-400/25 bg-amber-400/10 px-3 py-2 text-[11px] text-amber-200">
+                {hasTrackingJourney ? (
+                  <span>
+                    Đơn đã có <strong>link tra cứu hành trình</strong> nên không cần ảnh: chỉ cần báo bưu phẩm đã tới nơi.
+                    Tiền <strong>chưa</strong> giải ngân — người mua vẫn phải bấm “Đã nhận hàng”.
+                  </span>
+                ) : (
+                  <span>
+                    Đơn chỉ có ảnh biên lai / ảnh kiện hàng, <strong>không có link tra cứu hành trình</strong> — nên
+                    bắt buộc gửi kèm <strong>ảnh bưu kiện đã đến nơi</strong>. Ảnh này người mua và Ban quản trị đều xem được.
+                  </span>
+                )}
+              </div>
+
+              {!hasTrackingJourney && (
+                <div className="rounded-xl border border-white/15 bg-black/25 p-2.5 space-y-1.5">
+                  <p className="text-[11px] font-semibold text-white flex items-center gap-1.5">
+                    <ImagePlus size={13} className="shrink-0 text-amber-300" />
+                    Ảnh bưu kiện đã đến nơi
+                    <span className="font-normal text-outline">(JPG/PNG/WebP ≤ 8MB)</span>
+                  </p>
+
+                  <input
+                    ref={arrivalProofInputRef}
+                    id="arrival-proof-input"
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    className="hidden"
+                    onChange={handleArrivalProofPicked}
+                  />
+
+                  {arrivalProofUrl ? (
+                    <div className="flex items-center gap-2">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={arrivalProofPreview || arrivalProofUrl}
+                        alt="Ảnh bưu kiện đã đến nơi"
+                        className="h-12 w-12 rounded-lg object-cover border border-white/15"
+                      />
+                      <a
+                        href={arrivalProofUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-[10px] text-brand-periwinkle underline"
+                      >
+                        Xem ảnh
+                      </a>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setArrivalProofUrl('');
+                          setArrivalProofPreview(null);
+                          if (arrivalProofInputRef.current) arrivalProofInputRef.current.value = '';
+                        }}
+                        className="ml-auto rounded-lg border border-rose-500/30 bg-rose-500/10 p-1 text-rose-300 hover:bg-rose-500/20"
+                        title="Xoá ảnh"
+                      >
+                        <Trash2 size={12} />
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      disabled={uploadingArrivalProof}
+                      onClick={() => arrivalProofInputRef.current?.click()}
+                      className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-white/25 px-2 py-2 text-[11px] font-semibold text-white hover:bg-white/5 disabled:opacity-50"
+                    >
+                      <ImagePlus size={13} />
+                      {uploadingArrivalProof ? 'Đang tải...' : 'Chọn ảnh bưu kiện từ máy'}
+                    </button>
+                  )}
+                </div>
+              )}
+
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleReportArrival}
+                  disabled={loading || uploadingArrivalProof || (!hasTrackingJourney && !arrivalProofUrl)}
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-400 px-4 py-2 text-xs font-bold text-brand-navy hover:brightness-110 disabled:opacity-50"
+                >
+                  <Package size={14} />
+                  {delivery.sellerReportedDeliveredAt ? 'Cập nhật báo đã đến nơi' : 'Báo hàng đã đến nơi'}
+                </button>
+                {delivery.sellerReportedDeliveredAt && (
+                  <span className="text-[11px] text-emerald-300">
+                    Đã báo lúc {new Date(delivery.sellerReportedDeliveredAt).toLocaleString('vi-VN')}
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Hành động của Người mua: Xác nhận nhận tranh hoặc khiếu nại */}
           {isWinner && isDeliveryActive && (
             <div className="pt-3 border-t border-white/10 space-y-3">
-              {delivery.status === 'AwaitingShipment' && (
-                <p className="rounded-xl border border-amber-400/25 bg-amber-400/10 px-3 py-2 text-[11px] text-amber-200">
-                  Người bán chưa cập nhật vận đơn. Nếu bạn đã nhận được tranh, hãy bấm “Đã nhận hàng”. Nếu quá hạn gửi hoặc không liên hệ được với người bán, hãy gửi khiếu nại kèm ảnh bằng chứng.
+              {!hasShippingInfo && (
+                <p className="rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-[11px] text-outline">
+                  Người bán chưa điền thông tin gửi hàng (hãng vận chuyển, mã vận đơn, bằng chứng gửi).
+                  Hai lựa chọn <strong>“Đã nhận hàng”</strong> và <strong>“Khiếu nại bưu phẩm”</strong> sẽ xuất hiện
+                  ngay khi người bán cập nhật xong.
                 </p>
               )}
-              {delivery.status === 'InTransit' && delivery.autoConfirmAt && (
+              {hasShippingInfo && delivery.status === 'InTransit' && delivery.autoConfirmAt && (
                 <p className="rounded-xl border border-emerald-400/25 bg-emerald-400/10 px-3 py-2 text-[11px] text-emerald-200">
                   Nếu bạn không xác nhận, đơn sẽ <strong>tự động hoàn tất sau 48 giờ</strong> kể từ lúc người bán gửi hàng
                   ({new Date(delivery.autoConfirmAt).toLocaleString('vi-VN')}).
                 </p>
               )}
+              {hasShippingInfo && (
+              <>
               <div className="flex flex-wrap gap-2.5">
                 <button
                   type="button"
@@ -913,6 +1097,8 @@ export function PhysicalDeliveryCard({ auction, userId, onReload }: PhysicalDeli
                     </button>
                   </div>
                 </form>
+              )}
+              </>
               )}
             </div>
           )}

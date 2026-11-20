@@ -453,7 +453,28 @@ export function AdminDeliveryDashboard() {
                             <Eye size={11} /> Ảnh kiện
                           </button>
                         )}
+
+                        {/* Ảnh bưu kiện ĐÃ ĐẾN NƠI do người bán báo — dùng để đối soát khiếu nại */}
+                        {delivery?.arrivalProofUrl && (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setPreviewImage({
+                                url: delivery.arrivalProofUrl!,
+                                title: `Ảnh bưu kiện đã đến nơi — ${item.artworkTitle}`,
+                              })
+                            }
+                            className="inline-flex items-center gap-1 rounded-lg border border-emerald-400/30 bg-emerald-400/10 px-2 py-1 text-[11px] font-semibold text-emerald-300 hover:bg-emerald-400/20 transition"
+                          >
+                            <Eye size={11} /> Ảnh đến nơi
+                          </button>
+                        )}
                       </div>
+                      {delivery?.sellerReportedDeliveredAt && (
+                        <p className="mt-1 text-[10px] text-emerald-300/80">
+                          Người bán báo tới nơi: {new Date(delivery.sellerReportedDeliveredAt).toLocaleString('vi-VN')}
+                        </p>
+                      )}
                     </td>
 
                     {/* Thao tác */}
