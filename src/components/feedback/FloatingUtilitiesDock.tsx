@@ -68,9 +68,9 @@ export function FloatingUtilitiesDock({ children }: { children: ReactNode }) {
           onClick={toggleHidden}
           aria-label={isEng ? 'Hide floating tools' : 'Ẩn 3 nút tiện ích (Ngôn ngữ, Báo lỗi, AI)'}
           title={isEng ? 'Hide floating tools' : 'Ẩn công cụ nổi'}
-          className="fixed bottom-[184px] right-6 z-40 flex size-8 cursor-pointer items-center justify-center rounded-full border border-[var(--hair-2)] bg-[var(--ink-2)] text-[#919099] shadow-md backdrop-blur-xl transition-all hover:scale-105 hover:border-[var(--lumen)] hover:bg-[var(--ink-3)] hover:text-[var(--lumen)] active:scale-95 sm:right-8"
+          className="fixed bottom-[180px] right-5 z-40 flex size-10 cursor-pointer items-center justify-center rounded-full border border-[var(--hair-2)] bg-[var(--ink-2)] text-[var(--ivory)] shadow-md backdrop-blur-xl transition-all hover:scale-105 hover:border-[var(--lumen)] hover:bg-[var(--ink-3)] active:scale-95 sm:right-6"
         >
-          <EyeOff className="h-3.5 w-3.5" aria-hidden />
+          <EyeOff className="h-4 w-4 text-[var(--ivory)]" aria-hidden />
         </button>
       )}
     </>

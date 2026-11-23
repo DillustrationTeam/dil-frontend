@@ -141,17 +141,17 @@ export function AiFloatingWidget({ userId }: { userId: string | null }) {
           ref={panelRef}
           role="dialog"
           aria-label="Cửa sổ trợ lý AI"
-          className="fixed bottom-6 right-[68px] z-50 flex h-[30rem] w-[24rem] max-w-[calc(100vw-5rem)] flex-col overflow-hidden rounded-2xl border border-[var(--hair-2)] bg-[var(--ink-2)] text-[var(--ivory)] shadow-2xl sm:right-[76px]"
+          className="fixed bottom-6 right-[68px] z-50 flex h-[32rem] w-[24rem] max-w-[calc(100vw-5rem)] flex-col overflow-hidden rounded-2xl border border-[var(--hair-2)] bg-[var(--ink-2)] p-2 text-[var(--ivory)] shadow-2xl backdrop-blur-2xl sm:right-[72px]"
         >
           {/* Đầu cửa sổ */}
-          <div className="flex items-center justify-between border-b border-[var(--hair)] px-4 py-3">
+          <div className="flex items-center justify-between border-b border-[var(--hair)] px-3 py-2.5">
             <div className="flex items-center gap-2">
-              <span className="flex size-8 items-center justify-center rounded-xl bg-[var(--ink-3)] text-[var(--lumen)]">
-                <Bot size={16} aria-hidden />
+              <span className="flex size-7 items-center justify-center rounded-xl bg-[var(--ink-3)] text-[var(--lumen)]">
+                <Bot size={15} aria-hidden />
               </span>
               <div>
-                <p className="font-[family-name:var(--font-display)] text-sm font-medium text-[var(--ivory)]">{isEng ? 'Dillustration AI Assistant' : 'Trợ lý AI Dillustration'}</p>
-                <p className="text-[10px] uppercase tracking-wider text-[var(--lumen)]">
+                <p className="font-[family-name:var(--font-display)] text-xs font-semibold text-[var(--ivory)]">{isEng ? 'Dillustration AI Assistant' : 'Trợ lý AI Dillustration'}</p>
+                <p className="text-[9px] uppercase tracking-wider text-[var(--lumen)] font-medium">
                   {userId ? (isEng ? 'Ready to help' : 'Sẵn sàng giải đáp') : (isEng ? 'Sign in required' : 'Cần đăng nhập')}
                 </p>
               </div>
@@ -162,47 +162,47 @@ export function AiFloatingWidget({ userId }: { userId: string | null }) {
                 href="/ai"
                 onClick={() => setOpen(false)}
                 title="Mở trang trợ lý đầy đủ"
-                className="rounded-full p-1.5 text-[var(--ash)] transition hover:bg-[var(--ink-3)] hover:text-[var(--lumen)]"
+                className="rounded-lg p-1.5 text-[var(--ivory)] transition hover:bg-[var(--ink-3)] hover:text-[var(--lumen)]"
               >
-                <Maximize2 size={14} aria-hidden />
+                <Maximize2 size={13} aria-hidden />
               </Link>
               <button
                 type="button"
                 onClick={loadConversation}
                 disabled={loading}
                 title="Tải lại hội thoại"
-                className="rounded-full p-1.5 text-[var(--ash)] transition hover:bg-[var(--ink-3)] hover:text-[var(--lumen)] disabled:opacity-50"
+                className="rounded-lg p-1.5 text-[var(--ivory)] transition hover:bg-[var(--ink-3)] hover:text-[var(--lumen)] disabled:opacity-50"
               >
-                <RefreshCw size={14} className={loading ? 'animate-spin' : ''} aria-hidden />
+                <RefreshCw size={13} className={loading ? 'animate-spin' : ''} aria-hidden />
               </button>
               <button
                 type="button"
                 onClick={() => setOpen(false)}
                 title="Đóng"
-                className="rounded-full p-1.5 text-[var(--ash)] transition hover:bg-[var(--ink-3)] hover:text-[var(--lumen)]"
+                className="rounded-lg p-1.5 text-[var(--ivory)] transition hover:bg-[var(--ink-3)] hover:text-[var(--lumen)]"
               >
-                <X size={14} aria-hidden />
+                <X size={13} aria-hidden />
               </button>
             </div>
           </div>
 
           {error && (
-            <div role="alert" className="flex items-start gap-2 border-b border-red-400/20 bg-red-500/10 px-4 py-2 text-[11px] text-red-200">
+            <div role="alert" className="flex items-start gap-2 rounded-xl border border-red-400/20 bg-red-500/10 px-3 py-2 text-[11px] text-red-200 mt-2">
               <CircleAlert size={13} className="mt-0.5 shrink-0" aria-hidden />
               <span>{error}</span>
             </div>
           )}
 
           {/* Thân: lịch sử tin nhắn hoặc gợi ý */}
-          <div className="flex-1 space-y-3 overflow-y-auto px-4 py-3">
+          <div className="flex-1 space-y-2.5 overflow-y-auto px-3 py-2.5">
             {!userId ? (
               <div className="flex h-full flex-col items-center justify-center text-center">
-                <Bot size={26} className="mb-2 text-[var(--ash)]" aria-hidden />
+                <Bot size={24} className="mb-2 text-[var(--ash)]" aria-hidden />
                 <p className="text-xs text-[var(--ash)]">{isEng ? 'Please sign in to chat with the AI assistant.' : 'Vui lòng đăng nhập để trò chuyện với trợ lý.'}</p>
                 <Link
                   href="/login"
                   onClick={() => setOpen(false)}
-                  className="mt-4 rounded-full bg-[var(--lumen)] px-5 py-2 text-xs font-semibold text-white hover:bg-[var(--lumen-hi)]"
+                  className="mt-3 rounded-full bg-[var(--lumen)] px-4 py-1.5 text-xs font-semibold text-white transition-all hover:bg-[var(--lumen-hi)] shadow-sm"
                 >
                   {isEng ? 'Sign In' : 'Đăng nhập'}
                 </Link>
@@ -210,20 +210,21 @@ export function AiFloatingWidget({ userId }: { userId: string | null }) {
             ) : loading && messages.length === 0 ? (
               <div className="space-y-2">
                 {[1, 2, 3].map((i) => (
-                  <div key={i} className="h-12 animate-pulse rounded-xl bg-[var(--ink-3)]" />
+                  <div key={i} className="h-10 animate-pulse rounded-xl bg-[var(--ink-3)]" />
                 ))}
               </div>
             ) : messages.length === 0 ? (
-              <div className="space-y-2">
-                <p className="text-[11px] text-[var(--ash)]">{isEng ? 'What would you like to ask first?' : 'Bạn muốn hỏi gì trước?'}</p>
+              <div className="space-y-1.5">
+                <p className="px-1 text-[10px] font-semibold uppercase tracking-wider text-[var(--ash)]">{isEng ? 'Suggested Questions' : 'Câu hỏi gợi ý'}</p>
                 {quickQuestions.map((question) => (
                   <button
                     key={question}
                     type="button"
                     onClick={() => handleSend(question)}
-                    className="w-full rounded-xl border border-[var(--hair)] px-3 py-2 text-left text-xs font-medium text-[var(--ivory)] transition-colors hover:bg-[var(--ink-3)] hover:text-[var(--lumen)]"
+                    className="group flex w-full cursor-pointer items-center justify-between rounded-xl border border-[var(--hair)] bg-[var(--ink-3)]/40 px-3 py-2 text-left text-xs font-medium text-[var(--ivory)] transition-colors hover:border-[var(--lumen)]/40 hover:bg-[var(--ink-3)] hover:text-[var(--lumen)]"
                   >
-                    {question}
+                    <span>{question}</span>
+                    <span className="material-symbols-outlined text-sm text-[var(--lumen)] opacity-0 transition-opacity group-hover:opacity-100">arrow_forward</span>
                   </button>
                 ))}
               </div>
@@ -233,9 +234,9 @@ export function AiFloatingWidget({ userId }: { userId: string | null }) {
                 return (
                   <div key={message.aiMessageId} className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
                     <div
-                      className={`max-w-[88%] rounded-2xl px-3 py-2 text-[11px] leading-relaxed ${
+                      className={`max-w-[88%] rounded-2xl px-3 py-2 text-xs leading-relaxed ${
                         isUser
-                          ? 'rounded-tr-none bg-[var(--lumen)] text-white'
+                          ? 'rounded-tr-none bg-[var(--lumen)] text-white shadow-sm'
                           : 'rounded-tl-none border border-[var(--hair)] bg-[var(--ink-3)] text-[var(--ivory)]'
                       }`}
                     >
@@ -246,7 +247,7 @@ export function AiFloatingWidget({ userId }: { userId: string | null }) {
               })
             )}
             {sending && (
-              <p className="flex items-center gap-1.5 text-[11px] text-[var(--lumen)]">
+              <p className="flex items-center gap-1.5 text-xs text-[var(--lumen)] px-1">
                 <RefreshCw size={11} className="animate-spin" aria-hidden /> {isEng ? 'Assistant is replying...' : 'Trợ lý đang trả lời...'}
               </p>
             )}
@@ -254,13 +255,13 @@ export function AiFloatingWidget({ userId }: { userId: string | null }) {
           </div>
 
           {/* Chân: nhập câu hỏi + lối vào trang đầy đủ */}
-          <div className="border-t border-[var(--hair)] p-3">
+          <div className="border-t border-[var(--hair)] p-2">
             <form
               onSubmit={(event) => {
                 event.preventDefault();
                 handleSend();
               }}
-              className="flex items-center gap-2"
+              className="flex items-center gap-1.5"
             >
               <input
                 type="text"
@@ -268,7 +269,7 @@ export function AiFloatingWidget({ userId }: { userId: string | null }) {
                 disabled={!userId}
                 onChange={(event) => setInput(event.target.value)}
                 placeholder={userId ? (isEng ? 'Ask a question...' : 'Nhập câu hỏi...') : (isEng ? 'Sign in required' : 'Cần đăng nhập')}
-                className="min-w-0 flex-1 rounded-xl border border-[var(--hair-2)] bg-[var(--ink)] px-3 py-2 text-xs text-[var(--ivory)] placeholder:text-[var(--ash)] focus:border-[var(--lumen)] focus:outline-none disabled:opacity-50"
+                className="min-w-0 flex-1 rounded-xl border border-[var(--hair-2)] bg-[var(--ink-3)] px-3 py-2 text-xs text-[var(--ivory)] placeholder:text-[var(--ash)] focus:border-[var(--lumen)] focus:outline-none disabled:opacity-50"
               />
               <button
                 type="submit"
@@ -276,14 +277,14 @@ export function AiFloatingWidget({ userId }: { userId: string | null }) {
                 title="Gửi câu hỏi"
                 className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-[var(--lumen)] text-white transition hover:bg-[var(--lumen-hi)] disabled:opacity-50"
               >
-                <Send size={13} aria-hidden />
+                <Send size={13} className="text-white" aria-hidden />
               </button>
             </form>
 
             <Link
               href="/ai"
               onClick={() => setOpen(false)}
-              className="mt-2 flex items-center justify-center gap-1 text-[11px] font-semibold text-[var(--lumen)] hover:underline"
+              className="mt-2 flex items-center justify-center gap-1 rounded-xl py-1 text-xs font-medium text-[var(--lumen)] transition-colors hover:bg-[var(--ink-3)] hover:underline"
             >
               {isEng ? 'Open full assistant page' : 'Mở trang trợ lý đầy đủ'} <ArrowUpRight size={12} aria-hidden />
             </Link>
@@ -297,9 +298,12 @@ export function AiFloatingWidget({ userId }: { userId: string | null }) {
         onClick={() => setOpen((prev) => !prev)}
         aria-expanded={open}
         aria-label={open ? (isEng ? 'Close AI assistant' : 'Đóng trợ lý AI') : (isEng ? 'Open AI assistant' : 'Mở trợ lý AI')}
-        className="fixed bottom-6 right-5 z-40 flex size-10 cursor-pointer items-center justify-center rounded-full border border-[var(--hair-2)] bg-[var(--ink-2)] text-[var(--ivory)] shadow-md backdrop-blur-xl transition-all hover:scale-105 hover:border-[var(--lumen)] hover:bg-[var(--ink-3)] active:scale-95 sm:right-7"
+        className="fixed bottom-6 right-5 z-40 flex size-10 cursor-pointer flex-col items-center justify-center gap-0.5 rounded-full border border-[var(--hair-2)] bg-[var(--ink-2)] text-[var(--ivory)] shadow-md backdrop-blur-xl transition-all hover:scale-105 hover:border-[var(--lumen)] hover:bg-[var(--ink-3)] active:scale-95 sm:right-6"
       >
-        {open ? <X size={16} aria-hidden /> : <Sparkles size={16} aria-hidden />}
+        {open ? <Bot size={16} className="text-[var(--ivory)]" aria-hidden /> : <Bot size={16} className="text-[var(--ivory)]" aria-hidden />}
+        <span className="text-[8px] font-extrabold leading-none tracking-wider text-[var(--ivory)] font-[family-name:var(--font-ui)]">
+          AI
+        </span>
         {!open && (
           <span className="absolute -right-0.5 -top-0.5 size-2.5 rounded-full bg-emerald-400" />
         )}
