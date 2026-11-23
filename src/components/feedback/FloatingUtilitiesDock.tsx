@@ -57,7 +57,7 @@ export function FloatingUtilitiesDock({ children }: { children: ReactNode }) {
           onClick={toggleHidden}
           aria-label={isEng ? 'Show floating tools' : 'Hiện 3 nút tiện ích (Ngôn ngữ, Báo lỗi, AI)'}
           title={isEng ? 'Show floating tools' : 'Hiện công cụ nổi'}
-          className="fixed bottom-4 right-0 z-40 flex h-9 cursor-pointer items-center gap-1 rounded-l-full border border-r-0 border-white/15 border-t-white/25 bg-[#181b29]/85 pl-2.5 pr-1.5 text-[11px] font-semibold text-[#A7ACD9] shadow-[0_8px_24px_rgba(0,0,0,0.35)] backdrop-blur-xl transition-all hover:bg-[#1F2335] hover:pr-2.5 hover:text-white active:scale-95"
+          className="fixed bottom-4 right-0 z-40 flex h-9 cursor-pointer items-center gap-1 rounded-l-full border border-r-0 border-[var(--hair-2)] bg-[var(--ink-2)] pl-2.5 pr-1.5 text-[11px] font-semibold text-[#919099] shadow-md backdrop-blur-xl transition-all hover:bg-[var(--ink-3)] hover:pr-2.5 hover:text-[var(--lumen)] active:scale-95"
         >
           <ChevronLeft className="h-3.5 w-3.5 opacity-75" aria-hidden />
           <Eye className="h-3.5 w-3.5" aria-hidden />
@@ -68,7 +68,7 @@ export function FloatingUtilitiesDock({ children }: { children: ReactNode }) {
           onClick={toggleHidden}
           aria-label={isEng ? 'Hide floating tools' : 'Ẩn 3 nút tiện ích (Ngôn ngữ, Báo lỗi, AI)'}
           title={isEng ? 'Hide floating tools' : 'Ẩn công cụ nổi'}
-          className="fixed bottom-[216px] right-7 z-40 flex size-8 cursor-pointer items-center justify-center rounded-full border border-white/15 border-t-white/25 bg-[#181b29]/85 text-[#919099] shadow-[0_6px_18px_rgba(0,0,0,0.3)] backdrop-blur-xl transition-all hover:scale-105 hover:border-[#A7ACD9]/45 hover:bg-[#1F2335] hover:text-[#A7ACD9] active:scale-95 sm:right-9"
+          className="fixed bottom-[184px] right-6 z-40 flex size-8 cursor-pointer items-center justify-center rounded-full border border-[var(--hair-2)] bg-[var(--ink-2)] text-[#919099] shadow-md backdrop-blur-xl transition-all hover:scale-105 hover:border-[var(--lumen)] hover:bg-[var(--ink-3)] hover:text-[var(--lumen)] active:scale-95 sm:right-8"
         >
           <EyeOff className="h-3.5 w-3.5" aria-hidden />
         </button>

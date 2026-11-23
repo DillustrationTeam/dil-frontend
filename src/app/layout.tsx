@@ -7,6 +7,7 @@ import { LanguageProvider } from "@/context/language-context";
 import { AiAssistantLauncher } from "@/features/navigation";
 import { AppToaster } from "@/components/hover-fade-toast";
 import "./globals.css";
+import "./globals-redesign.css";
 
 const GOOGLE_CLIENT_ID =
   process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "1234567890-dummyid.apps.googleusercontent.com";
@@ -47,18 +48,19 @@ export default function RootLayout({
   return (
     <html
       lang="vi"
-      className={`dark h-full antialiased ${headingFont.variable} ${bodyFont.variable}`}
+      data-theme="paper"
+      className={`h-full antialiased ${headingFont.variable} ${bodyFont.variable}`}
     >
       <head>
-        {/* eslint-disable-next-line @next/next/no-page-custom-font -- rule này viết cho Pages Router
-            (`pages/_document.js`). Ở App Router, `layout.tsx` bọc MỌI trang nên font chỉ tải một lần;
-            Material Symbols là font biến thiên có trục FILL/GRAD nên `next/font/google` không hỗ trợ. */}
+        { }
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
           rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=Karla:ital,wght@0,300..700;1,400&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap"
         />
       </head>
-      <body className="min-h-full flex flex-col text-[#E4E1E5]">
+      <body className="min-h-full flex flex-col bg-[var(--ink)] text-[var(--ivory)] font-[family-name:var(--font-ui)]">
         <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
           <LanguageProvider>
             {children}

@@ -320,7 +320,7 @@ export function NotificationBell({
         )}
 
         {unreadCount > 0 && (
-          <span className="absolute -right-0.5 -top-0.5 flex min-w-[18px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold leading-[18px] text-white ring-2 ring-[#1F2335]">
+          <span className="absolute -right-0.5 -top-0.5 flex min-w-[18px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold leading-[18px] text-white">
             {badge}
           </span>
         )}

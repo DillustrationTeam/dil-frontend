@@ -69,18 +69,18 @@ export function SectionRecommendedByLikes() {
     return (
       <section className="py-14" aria-labelledby="recs-title">
         <div className="mb-6">
-          <p className="text-xs uppercase tracking-[0.2em] text-[#A7ACD9]">For You</p>
-          <h2 id="recs-title" className="mt-1 flex items-center gap-2 font-h1 text-2xl font-bold text-white">
-            <Sparkles className="h-5 w-5 text-[#A7ACD9]" />
+          <p className="eyebrow">For You</p>
+          <h2 id="recs-title" className="mt-1 flex items-center gap-2 font-[family-name:var(--font-display)] text-2xl md:text-3xl font-medium text-[var(--ivory)]">
+            <Sparkles className="h-5 w-5 text-[var(--lumen)]" />
             Gợi ý theo tranh đã thích
           </h2>
         </div>
-        <div className="flex flex-col items-center gap-4 rounded-3xl border border-dashed border-white/15 py-14 text-center">
-          <Lock className="h-10 w-10 text-[#A7ACD9]/60" />
-          <p className="text-[#C7C5CF]">Đăng nhập để nhận gợi ý cá nhân hoá dựa trên tranh bạn đã thích.</p>
+        <div className="flex flex-col items-center gap-4 rounded-3xl border border-dashed border-[var(--hair-2)] bg-[var(--ink-2)] py-14 text-center">
+          <Lock className="h-10 w-10 text-[var(--lumen)]" />
+          <p className="text-[var(--ash)]">Đăng nhập để nhận gợi ý cá nhân hoá dựa trên tranh bạn đã thích.</p>
           <Link
             href="/login"
-            className="inline-flex rounded-full bg-[#A7ACD9] px-6 py-2.5 text-sm font-semibold text-[#1F2335] hover:opacity-90"
+            className="inline-flex rounded-full bg-[var(--ivory)] px-6 py-2.5 text-sm font-semibold text-[var(--ink)] hover:opacity-90 shadow-md transition"
           >
             Đăng nhập ngay
           </Link>
@@ -93,16 +93,16 @@ export function SectionRecommendedByLikes() {
     <section className="py-14" aria-labelledby="recs-title">
       <div className="mb-6 flex items-end justify-between">
         <div>
-          <p className="text-xs uppercase tracking-[0.2em] text-[#A7ACD9]">For You</p>
-          <h2 id="recs-title" className="mt-1 flex items-center gap-2 font-h1 text-2xl font-bold text-white">
-            <Sparkles className="h-5 w-5 text-[#A7ACD9]" />
+          <p className="eyebrow">For You</p>
+          <h2 id="recs-title" className="mt-1 flex items-center gap-2 font-[family-name:var(--font-display)] text-2xl md:text-3xl font-medium text-[var(--ivory)]">
+            <Sparkles className="h-5 w-5 text-[var(--lumen)]" />
             Gợi ý theo tranh đã thích
           </h2>
-          <p className="mt-1 text-sm text-[#C7C5CF]">
-            {isEmpty ? 'Hãy thích thêm tranh để nhận gợi ý tốt hơn — tạm thời hiển thị tranh phổ biến.' : 'Dựa trên phong cách &amp; tag của tranh bạn đã ❤️'}
+          <p className="mt-1 text-sm text-[var(--ash)] font-[family-name:var(--font-ui)]">
+            {isEmpty ? 'Hãy thích thêm tranh để nhận gợi ý tốt hơn — tạm thời hiển thị tranh phổ biến.' : 'Dựa trên phong cách & tag của tranh bạn đã lưu'}
           </p>
         </div>
-        <Link href="/explore" className="text-sm text-[#A7ACD9] hover:underline">
+        <Link href="/explore" className="text-sm font-medium text-[var(--lumen)] hover:underline">
           Khám phá thêm →
         </Link>
       </div>
@@ -110,7 +110,7 @@ export function SectionRecommendedByLikes() {
       {loading ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="h-52 animate-pulse rounded-2xl bg-white/5" />
+            <div key={i} className="h-52 animate-pulse rounded-2xl bg-[var(--ink-2)] border border-[var(--hair)]" />
           ))}
         </div>
       ) : (
@@ -120,9 +120,9 @@ export function SectionRecommendedByLikes() {
               key={artwork.id}
               href={`/artworks/${artwork.id}`}
               scroll={false}
-              className="group relative overflow-hidden rounded-2xl border border-white/10 bg-[#131624] transition hover:border-[#A7ACD9]/50"
+              className="group relative overflow-hidden rounded-2xl border border-[var(--hair)] bg-[var(--ink-2)] transition hover:border-[var(--hair-2)] hover:shadow-lg"
             >
-              <div className="relative aspect-[3/4]">
+              <div className="relative aspect-[3/4] bg-[var(--ink-3)]">
                 <Image
                   src={artwork.thumbnailUrl || artwork.imageUrl}
                   alt={artwork.title}
@@ -130,15 +130,15 @@ export function SectionRecommendedByLikes() {
                   unoptimized
                   className="object-cover transition-transform group-hover:scale-[1.03]"
                 />
-                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 to-transparent p-4">
-                  <p className="line-clamp-1 text-sm font-semibold text-white">{artwork.title}</p>
+                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent p-4">
+                  <p className="line-clamp-1 text-sm font-medium text-white">{artwork.title}</p>
                   <p className="text-xs text-white/70">{artwork.creatorName || 'Creator'}</p>
                   {artwork.tags && artwork.tags.length > 0 && (
                     <div className="mt-1.5 flex flex-wrap gap-1">
                       {artwork.tags.slice(0, 2).map((tag) => (
                         <span
                           key={tag}
-                          className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] text-white/70"
+                          className="rounded-full bg-white/20 px-2 py-0.5 text-[10px] text-white/90"
                         >
                           {tag}
                         </span>

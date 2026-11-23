@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { useLanguage } from '@/context/language-context';
 import { marketplaceService, type MarketplaceArtwork, type RelatedCreatorDto } from '../services/marketplace.service';
 import { SectionEventSpotlight } from './section-event-spotlight';
 import { SectionTrendingLeaderboard } from './section-trending-leaderboard';
@@ -12,10 +13,12 @@ import { SectionExploreByStyle } from './section-explore-by-style';
 
 /** Thin horizontal rule that separates sections visually */
 function SectionDivider() {
-  return <hr className="border-white/[.07]" />;
+  return <hr className="border-[var(--hair)]" />;
 }
 
 export function LiveHomeGallery() {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
   const [artworks, setArtworks] = useState<MarketplaceArtwork[]>([]);
   const [artists, setArtists] = useState<RelatedCreatorDto[]>([]);
   const [loading, setLoading] = useState(true);
@@ -25,18 +28,35 @@ export function LiveHomeGallery() {
 
   useEffect(() => {
     let active = true;
-    marketplaceService.getArtworks().then((items) => {
-      if (!active) return;
-      const approved = items.filter((item) => item.moderationStatus === 'Approved' && item.imageUrl);
-      // Randomize equal-view artworks; highest-view artwork always opens the slideshow.
-      const ranked = approved.map((artwork) => ({ artwork, tie: Math.random() }))
-        .sort((a, b) => (b.artwork.viewCount ?? 0) - (a.artwork.viewCount ?? 0) || a.tie - b.tie)
-        .map(({ artwork }) => artwork);
-      setArtworks(ranked);
-    }).catch(() => { if (active) setError('Không tải được tác phẩm. Vui lòng tải lại trang.'); })
-      .finally(() => { if (active) setLoading(false); });
-    marketplaceService.getCreators().then((items) => { if (active) setArtists(items); }).catch(() => undefined);
-    return () => { active = false; };
+    marketplaceService
+      .getArtworks()
+      .then((items) => {
+        if (!active) return;
+        const approved = items.filter((item) => item.moderationStatus === 'Approved' && item.imageUrl);
+        // Randomize equal-view artworks; highest-view artwork always opens the slideshow.
+        const ranked = approved
+          .map((artwork) => ({ artwork, tie: Math.random() }))
+          .sort((a, b) => (b.artwork.viewCount ?? 0) - (a.artwork.viewCount ?? 0) || a.tie - b.tie)
+          .map(({ artwork }) => artwork);
+        setArtworks(ranked);
+      })
+      .catch(() => {
+        if (active) setError('Không tải được tác phẩm. Vui lòng tải lại trang.');
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    marketplaceService
+      .getCreators()
+      .then((items) => {
+        if (active) setArtists(items);
+      })
+      .catch(() => undefined);
+
+    return () => {
+      active = false;
+    };
   }, []);
 
   const slides = artworks.slice(0, 10);
@@ -45,57 +65,182 @@ export function LiveHomeGallery() {
     const timer = window.setInterval(() => setIndex((current) => (current + 1) % slides.length), 6000);
     return () => window.clearInterval(timer);
   }, [paused, slides.length]);
+
   const featured = slides[index % Math.max(1, slides.length)];
-  const creatorName = (artwork: MarketplaceArtwork) => artwork.creatorName || artists.find((artist) => artist.id === artwork.creatorProfileId)?.displayName || 'Dillustration Creator';
+  const creatorName = (artwork: MarketplaceArtwork) =>
+    artwork.creatorName ||
+    artists.find((artist) => artist.id === artwork.creatorProfileId)?.displayName ||
+    'Dillustration Creator';
 
   return (
-    <main className="mx-auto max-w-7xl px-6 py-12 text-[#E4E1E5]">
-
-      {/* ─── HERO SLIDESHOW ─────────────────────────────────────────────── */}
-      <section className="grid items-center gap-10 md:grid-cols-12">
-        <div className="space-y-6 md:col-span-5">
-          <p className="text-xs uppercase tracking-[.2em] text-[#A7ACD9]">Dillustration Gallery</p>
-          <h1 className="font-h1 text-4xl font-bold leading-tight text-white md:text-5xl">
-            Khám phá nghệ thuật từ những creator bạn yêu thích.
-          </h1>
-          <p className="text-[#C7C5CF]">Tác phẩm nổi bật được chọn từ gallery, ưu tiên ảnh có nhiều lượt xem nhất.</p>
-          <Link href="/explore" className="inline-flex rounded-full bg-[#A7ACD9] px-7 py-3 font-semibold text-[#1F2335]">
-            Khám phá gallery
-          </Link>
-          <div className="flex gap-8 text-sm text-[#919099]">
-            <span><strong className="block text-2xl text-white">{artworks.length}</strong>Tác phẩm</span>
-            <span><strong className="block text-2xl text-white">{artists.length}</strong>Creator</span>
-          </div>
-        </div>
-
-        <div className="md:col-span-7" role="region" aria-label="Trình chiếu tác phẩm nổi bật">
-          <div className="glass-container overflow-hidden rounded-[32px] p-4">
-            {featured
-              ? <Link href={`/artworks/${featured.id}`} scroll={false} className="relative block aspect-[16/10] overflow-hidden rounded-2xl bg-[#161926]">
-                  <Image key={featured.id} src={featured.imageUrl} alt={featured.title} fill unoptimized priority className="object-contain" />
-                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 to-transparent p-5 pt-16">
-                    <h2 className="font-h1 text-xl font-bold text-white">{featured.title}</h2>
-                    <p className="mt-1 text-sm text-white/80">{creatorName(featured)} · {featured.viewCount ?? 0} lượt xem</p>
+    <main className="mx-auto max-w-7xl px-4 sm:px-6 py-6 md:py-10 text-[var(--ivory)] font-[family-name:var(--font-ui)]">
+      {/* ─── HERO SLIDESHOW MATCHING DILLUSTRATION-REDESIGN.HTML ────────── */}
+      <section className="hero wrap" id="heroRunway">
+        <div className="hero__stage" id="heroStage">
+          <div className="hero__frame" role="group" aria-roledescription="carousel" aria-label="Featured work">
+            <div id="heroSlides">
+              {slides.map((slide, i) => (
+                <div
+                  key={slide.id}
+                  className={`hero__slide ${i === index ? 'is-active' : ''}`}
+                  data-slide={i}
+                  aria-hidden={i !== index}
+                >
+                  <div className="hero__art">
+                    <span className="pic w-full h-full block relative">
+                      <Image
+                        src={slide.imageUrl}
+                        alt={slide.title}
+                        fill
+                        unoptimized
+                        priority={i === 0}
+                        className="object-cover"
+                      />
+                    </span>
                   </div>
-                </Link>
-              : <div role="status" className="grid aspect-[16/10] place-items-center text-sm text-[#C7C5CF]">
-                  {loading ? 'Đang tải tác phẩm…' : error || 'Chưa có tác phẩm được duyệt.'}
                 </div>
-            }
+              ))}
+            </div>
+
+            <div className="hero__spot" aria-hidden="true"></div>
+            <div className="hero__scrim"></div>
+
+            <div className="hero__badge">
+              <span className="hero__index">
+                {String(index + 1).padStart(2, '0')} <span>/ {String(slides.length || 1).padStart(2, '0')}</span>
+              </span>
+              <div className="hero__progress">
+                <i key={index} className={paused ? '' : 'is-running'} style={{ width: paused ? '100%' : undefined }}></i>
+              </div>
+            </div>
+
+            <div className="hero__body">
+              <p className="eyebrow">{isVie ? 'Thư viện Dillustration' : 'The dilillustration gallery'}</p>
+              <h1 className="hero__title">
+                {isVie ? (
+                  <>Khám phá nghệ thuật từ những <em>họa sĩ</em> bạn đã yêu mến.</>
+                ) : (
+                  <>Discover art from the <em>creators</em> you already love.</>
+                )}
+              </h1>
+              <p className="hero__sub">
+                {isVie
+                  ? 'Tuyển tập xoay vòng từ gallery. Dừng lại chiêm ngưỡng, tìm kiếm cảm hứng và đặt vẽ trực tiếp.'
+                  : 'A rotating selection from the gallery floor. Look slowly, then decide.'}
+              </p>
+              <div className="hero__actions">
+                <Link className="btn btn--primary" href="/explore">
+                  <span>{isVie ? 'Khám phá thị trường' : 'Explore the market'}</span>
+                  <svg className="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+                  </svg>
+                </Link>
+                <Link className="btn btn--outline" href="/auctions">
+                  {isVie ? 'Xem các phiên đấu giá' : 'View live auctions'}
+                </Link>
+              </div>
+              {featured && (
+                <div className="hero__foot" id="heroFoot">
+                  <span className="who">{featured.title}</span>
+                  <span className="sep"></span>
+                  <span>{creatorName(featured)}</span>
+                  <span className="sep"></span>
+                  <span style={{ fontVariantNumeric: 'tabular-nums' }}>
+                    {featured.viewCount ?? 0} {isVie ? 'lượt xem' : 'views'}
+                  </span>
+                </div>
+              )}
+            </div>
           </div>
-          {!!slides.length && (
-            <div className="mt-5 flex flex-wrap items-center gap-3">
-              <button type="button" aria-label="Ảnh trước" onClick={() => { setPaused(true); setIndex((index + slides.length - 1) % slides.length); }} className="rounded-full border border-white/15 px-3 py-2">←</button>
-              {slides.map((slide, position) => (
-                <button type="button" key={slide.id} aria-label={`Xem ảnh ${position + 1}: ${slide.title}`} aria-pressed={position === index} onClick={() => { setPaused(true); setIndex(position); }} className={`px-2 py-2 text-xs ${position === index ? 'border-b-2 border-[#A7ACD9] text-[#A7ACD9]' : 'text-[#919099]'}`}>
-                  {String(position + 1).padStart(2, '0')}
+
+          <div className="hero__thumbs">
+            <div className="thumbs" role="group" aria-label="Choose a work">
+              {slides.map((a, i) => (
+                <button
+                  key={a.id}
+                  className="thumb cursor-pointer"
+                  type="button"
+                  data-thumb={i}
+                  aria-pressed={i === index}
+                  aria-label={`Artwork ${i + 1}: ${a.title}`}
+                  onClick={() => {
+                    setPaused(true);
+                    setIndex(i);
+                  }}
+                >
+                  <Image
+                    src={a.thumbnailUrl || a.imageUrl}
+                    alt=""
+                    fill
+                    unoptimized
+                    className="object-cover"
+                  />
                 </button>
               ))}
-              <button type="button" aria-label="Ảnh tiếp" onClick={() => { setPaused(true); setIndex((index + 1) % slides.length); }} className="rounded-full border border-white/15 px-3 py-2">→</button>
-              <button type="button" onClick={() => setPaused(!paused)} className="ml-auto text-xs text-[#A7ACD9]">{paused ? 'Tiếp tục' : 'Tạm dừng'}</button>
             </div>
-          )}
+            <div className="hero__nav">
+              <button
+                className="round-btn cursor-pointer"
+                type="button"
+                data-act="hero-prev"
+                aria-label={isVie ? 'Tác phẩm trước' : 'Previous artwork'}
+                onClick={() => {
+                  setPaused(true);
+                  setIndex((index + slides.length - 1) % slides.length);
+                }}
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M19 12H5"/><path d="m12 19-7-7 7-7"/>
+                </svg>
+              </button>
+              <button
+                className="round-btn cursor-pointer"
+                type="button"
+                data-act="hero-toggle"
+                aria-label={paused ? 'Tiếp tục trình chiếu' : 'Tạm dừng trình chiếu'}
+                aria-pressed={paused}
+                id="heroToggle"
+                onClick={() => setPaused(!paused)}
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  {paused ? <path d="M7 4.5v15l13-7.5z"/> : <><path d="M8 5v14"/><path d="M16 5v14"/></>}
+                </svg>
+              </button>
+              <button
+                className="round-btn cursor-pointer"
+                type="button"
+                data-act="hero-next"
+                aria-label={isVie ? 'Tác phẩm kế tiếp' : 'Next artwork'}
+                onClick={() => {
+                  setPaused(true);
+                  setIndex((index + 1) % slides.length);
+                }}
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+                </svg>
+              </button>
+            </div>
+          </div>
         </div>
+      </section>
+
+      {/* Statsline banner: approved works / active creators matching redesign */}
+      <section className="wrap my-6">
+        <p className="statsline">
+          <span>
+            <b className="tabular-nums font-[family-name:var(--font-display)]">{artworks.length}</b>
+            {isVie ? 'tác phẩm đã duyệt' : 'approved works'}
+          </span>
+          <span>
+            <b className="tabular-nums font-[family-name:var(--font-display)]">{artists.length}</b>
+            {isVie ? 'họa sĩ hoạt động' : 'active creators'}
+          </span>
+          <span>
+            <b className="tabular-nums font-[family-name:var(--font-display)]">128</b>
+            {isVie ? 'phiên giao dịch hoàn tất' : 'sessions settled'}
+          </span>
+        </p>
       </section>
 
       <SectionDivider />
@@ -127,35 +272,76 @@ export function LiveHomeGallery() {
 
       {/* ─── GALLERY GRID (all artworks) ─────────────────────────────────── */}
       <section className="py-14" aria-labelledby="gallery-title">
-        <div className="mb-6 flex items-center justify-between">
-          <h2 id="gallery-title" className="font-h1 text-2xl font-bold text-white">Tác phẩm trong gallery</h2>
-          <Link href="/explore" className="text-sm text-[#A7ACD9]">Xem tất cả →</Link>
+        <div className="mb-6 flex items-end justify-between">
+          <div>
+            <p className="eyebrow">Works on the floor</p>
+            <h2 id="gallery-title" className="mt-1 font-[family-name:var(--font-display)] text-2xl md:text-3xl font-medium text-[var(--ivory)]">
+              Tác phẩm trong gallery
+            </h2>
+          </div>
+          <Link href="/explore" className="text-sm font-medium text-[var(--lumen)] hover:underline">
+            Xem tất cả →
+          </Link>
         </div>
-        {loading || error
-          ? <p role="status" className="py-12 text-center text-[#919099]">{error || 'Đang tải gallery…'}</p>
-          : <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {artworks.map((artwork) => (
-                <Link key={artwork.id} href={`/artworks/${artwork.id}`} scroll={false} className="group overflow-hidden rounded-2xl border border-white/10 bg-white/[.03]">
-                  <div className="relative aspect-[4/3] bg-[#161926]">
-                    <Image src={artwork.thumbnailUrl || artwork.imageUrl} alt={artwork.title} fill unoptimized className="object-contain transition-transform group-hover:scale-[1.03]" />
-                  </div>
-                  <div className="p-4">
-                    <div className="flex items-start justify-between gap-2">
-                      <h3 className="font-semibold text-white truncate">{artwork.title}</h3>
-                      {(artwork.categoryName || artwork.style) && (
-                        <span className="shrink-0 rounded-full bg-[#A7ACD9]/15 border border-[#A7ACD9]/25 px-2 py-0.5 text-[10px] font-semibold text-[#C5C9F8]">
-                          {artwork.categoryName || artwork.style}
-                        </span>
-                      )}
-                    </div>
-                    <p className="mt-1 text-xs text-[#919099]">{creatorName(artwork)} · {artwork.viewCount ?? 0} lượt xem</p>
-                  </div>
+        {loading || error ? (
+          <p role="status" className="py-12 text-center text-[var(--ash)]">
+            {error || 'Đang tải gallery…'}
+          </p>
+        ) : (
+          <div className="wall" data-cols="3">
+            {artworks.map((artwork) => (
+              <article key={artwork.id} className="art-card">
+                <Link
+                  href={`/artworks/${artwork.id}`}
+                  scroll={false}
+                  className="art-card__open block relative"
+                  aria-label={`View ${artwork.title} by ${creatorName(artwork)}`}
+                >
+                  <span className="art-card__frame block aspect-[4/3]">
+                    <span className="art-card__img relative block w-full h-full">
+                      <Image
+                        src={artwork.thumbnailUrl || artwork.imageUrl}
+                        alt={artwork.title}
+                        fill
+                        unoptimized
+                        className="object-cover"
+                      />
+                    </span>
+                    <span className="art-card__veil"></span>
+                    {(artwork.categoryName || artwork.style) && (
+                      <span className="absolute top-2.5 right-2.5 z-10 pointer-events-none rounded-full bg-[var(--ink-2)]/90 backdrop-blur-md border border-[var(--hair)] px-2.5 py-0.5 text-[11px] font-semibold text-[var(--lumen)] shadow-sm">
+                        {artwork.categoryName || artwork.style}
+                      </span>
+                    )}
+                    <span className="art-card__quick">
+                      <span className="art-card__zoom flex items-center justify-center" aria-hidden="true">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <circle cx="11" cy="11" r="8"></circle>
+                          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                          <line x1="11" y1="8" x2="11" y2="14"></line>
+                          <line x1="8" y1="11" x2="14" y2="11"></line>
+                        </svg>
+                      </span>
+                    </span>
+                  </span>
                 </Link>
-              ))}
-            </div>
-        }
+                <div className="art-card__meta">
+                  <h3 className="art-card__title font-[family-name:var(--font-display)] font-medium text-[var(--ivory)] truncate">
+                    <Link href={`/artworks/${artwork.id}`} scroll={false} className="hover:text-[var(--lumen)] transition-colors">
+                      {artwork.title}
+                    </Link>
+                  </h3>
+                  <div className="art-card__sub text-xs text-[var(--ash)] flex items-center gap-1.5">
+                    <span className="truncate">{creatorName(artwork)}</span>
+                    <span>·</span>
+                    <span className="shrink-0">{artwork.viewCount ?? 0} lượt xem</span>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
       </section>
-
     </main>
   );
 }

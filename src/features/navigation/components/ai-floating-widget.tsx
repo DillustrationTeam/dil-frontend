@@ -141,17 +141,17 @@ export function AiFloatingWidget({ userId }: { userId: string | null }) {
           ref={panelRef}
           role="dialog"
           aria-label="Cửa sổ trợ lý AI"
-          className="fixed bottom-24 right-4 z-50 flex h-[30rem] w-[24rem] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-3xl border border-white/12 bg-[#1F2335] shadow-2xl sm:right-6"
+          className="fixed bottom-6 right-[68px] z-50 flex h-[30rem] w-[24rem] max-w-[calc(100vw-5rem)] flex-col overflow-hidden rounded-2xl border border-[var(--hair-2)] bg-[var(--ink-2)] text-[var(--ivory)] shadow-2xl sm:right-[76px]"
         >
           {/* Đầu cửa sổ */}
-          <div className="flex items-center justify-between border-b border-white/10 bg-white/[0.03] px-4 py-3">
+          <div className="flex items-center justify-between border-b border-[var(--hair)] px-4 py-3">
             <div className="flex items-center gap-2">
-              <span className="flex size-8 items-center justify-center rounded-xl bg-brand-periwinkle/15 text-brand-periwinkle">
+              <span className="flex size-8 items-center justify-center rounded-xl bg-[var(--ink-3)] text-[var(--lumen)]">
                 <Bot size={16} aria-hidden />
               </span>
               <div>
-                <p className="font-h1 text-xs font-bold text-on-surface">{isEng ? 'Dillustration AI Assistant' : 'Trợ lý AI Dillustration'}</p>
-                <p className="text-[10px] text-outline">
+                <p className="font-[family-name:var(--font-display)] text-sm font-medium text-[var(--ivory)]">{isEng ? 'Dillustration AI Assistant' : 'Trợ lý AI Dillustration'}</p>
+                <p className="text-[10px] uppercase tracking-wider text-[var(--lumen)]">
                   {userId ? (isEng ? 'Ready to help' : 'Sẵn sàng giải đáp') : (isEng ? 'Sign in required' : 'Cần đăng nhập')}
                 </p>
               </div>
@@ -162,7 +162,7 @@ export function AiFloatingWidget({ userId }: { userId: string | null }) {
                 href="/ai"
                 onClick={() => setOpen(false)}
                 title="Mở trang trợ lý đầy đủ"
-                className="rounded-full p-1.5 text-outline transition hover:bg-white/10 hover:text-brand-periwinkle"
+                className="rounded-full p-1.5 text-[var(--ash)] transition hover:bg-[var(--ink-3)] hover:text-[var(--lumen)]"
               >
                 <Maximize2 size={14} aria-hidden />
               </Link>
@@ -171,7 +171,7 @@ export function AiFloatingWidget({ userId }: { userId: string | null }) {
                 onClick={loadConversation}
                 disabled={loading}
                 title="Tải lại hội thoại"
-                className="rounded-full p-1.5 text-outline transition hover:bg-white/10 hover:text-white disabled:opacity-50"
+                className="rounded-full p-1.5 text-[var(--ash)] transition hover:bg-[var(--ink-3)] hover:text-[var(--lumen)] disabled:opacity-50"
               >
                 <RefreshCw size={14} className={loading ? 'animate-spin' : ''} aria-hidden />
               </button>
@@ -179,7 +179,7 @@ export function AiFloatingWidget({ userId }: { userId: string | null }) {
                 type="button"
                 onClick={() => setOpen(false)}
                 title="Đóng"
-                className="rounded-full p-1.5 text-outline transition hover:bg-white/10 hover:text-white"
+                className="rounded-full p-1.5 text-[var(--ash)] transition hover:bg-[var(--ink-3)] hover:text-[var(--lumen)]"
               >
                 <X size={14} aria-hidden />
               </button>
@@ -197,12 +197,12 @@ export function AiFloatingWidget({ userId }: { userId: string | null }) {
           <div className="flex-1 space-y-3 overflow-y-auto px-4 py-3">
             {!userId ? (
               <div className="flex h-full flex-col items-center justify-center text-center">
-                <Bot size={26} className="mb-2 text-outline" aria-hidden />
-                <p className="text-xs text-on-surface-variant">{isEng ? 'Please sign in to chat with the AI assistant.' : 'Vui lòng đăng nhập để trò chuyện với trợ lý.'}</p>
+                <Bot size={26} className="mb-2 text-[var(--ash)]" aria-hidden />
+                <p className="text-xs text-[var(--ash)]">{isEng ? 'Please sign in to chat with the AI assistant.' : 'Vui lòng đăng nhập để trò chuyện với trợ lý.'}</p>
                 <Link
                   href="/login"
                   onClick={() => setOpen(false)}
-                  className="mt-4 rounded-full bg-brand-periwinkle px-5 py-2 text-xs font-bold text-brand-navy"
+                  className="mt-4 rounded-full bg-[var(--lumen)] px-5 py-2 text-xs font-semibold text-white hover:bg-[var(--lumen-hi)]"
                 >
                   {isEng ? 'Sign In' : 'Đăng nhập'}
                 </Link>
@@ -210,18 +210,18 @@ export function AiFloatingWidget({ userId }: { userId: string | null }) {
             ) : loading && messages.length === 0 ? (
               <div className="space-y-2">
                 {[1, 2, 3].map((i) => (
-                  <div key={i} className="h-12 animate-pulse rounded-2xl bg-white/[0.03]" />
+                  <div key={i} className="h-12 animate-pulse rounded-xl bg-[var(--ink-3)]" />
                 ))}
               </div>
             ) : messages.length === 0 ? (
               <div className="space-y-2">
-                <p className="text-[11px] text-outline">{isEng ? 'What would you like to ask first?' : 'Bạn muốn hỏi gì trước?'}</p>
+                <p className="text-[11px] text-[var(--ash)]">{isEng ? 'What would you like to ask first?' : 'Bạn muốn hỏi gì trước?'}</p>
                 {quickQuestions.map((question) => (
                   <button
                     key={question}
                     type="button"
                     onClick={() => handleSend(question)}
-                    className="w-full rounded-2xl border border-white/10 bg-white/[0.02] p-2.5 text-left text-[11px] text-on-surface-variant transition hover:border-brand-periwinkle/30 hover:text-brand-periwinkle"
+                    className="w-full rounded-xl border border-[var(--hair)] px-3 py-2 text-left text-xs font-medium text-[var(--ivory)] transition-colors hover:bg-[var(--ink-3)] hover:text-[var(--lumen)]"
                   >
                     {question}
                   </button>
@@ -235,8 +235,8 @@ export function AiFloatingWidget({ userId }: { userId: string | null }) {
                     <div
                       className={`max-w-[88%] rounded-2xl px-3 py-2 text-[11px] leading-relaxed ${
                         isUser
-                          ? 'rounded-tr-none bg-brand-periwinkle text-brand-navy'
-                          : 'rounded-tl-none border border-white/10 bg-white/5 text-on-surface'
+                          ? 'rounded-tr-none bg-[var(--lumen)] text-white'
+                          : 'rounded-tl-none border border-[var(--hair)] bg-[var(--ink-3)] text-[var(--ivory)]'
                       }`}
                     >
                       {isUser ? <p className="whitespace-pre-wrap">{message.content}</p> : <AiMarkdown content={message.content} />}
@@ -246,7 +246,7 @@ export function AiFloatingWidget({ userId }: { userId: string | null }) {
               })
             )}
             {sending && (
-              <p className="flex items-center gap-1.5 text-[11px] text-brand-periwinkle">
+              <p className="flex items-center gap-1.5 text-[11px] text-[var(--lumen)]">
                 <RefreshCw size={11} className="animate-spin" aria-hidden /> {isEng ? 'Assistant is replying...' : 'Trợ lý đang trả lời...'}
               </p>
             )}
@@ -254,7 +254,7 @@ export function AiFloatingWidget({ userId }: { userId: string | null }) {
           </div>
 
           {/* Chân: nhập câu hỏi + lối vào trang đầy đủ */}
-          <div className="border-t border-white/10 p-3">
+          <div className="border-t border-[var(--hair)] p-3">
             <form
               onSubmit={(event) => {
                 event.preventDefault();
@@ -268,13 +268,13 @@ export function AiFloatingWidget({ userId }: { userId: string | null }) {
                 disabled={!userId}
                 onChange={(event) => setInput(event.target.value)}
                 placeholder={userId ? (isEng ? 'Ask a question...' : 'Nhập câu hỏi...') : (isEng ? 'Sign in required' : 'Cần đăng nhập')}
-                className="min-w-0 flex-1 rounded-2xl border border-white/15 bg-brand-navy/80 px-3 py-2 text-[11px] text-on-surface placeholder:text-outline focus:border-brand-periwinkle focus:outline-none disabled:opacity-50"
+                className="min-w-0 flex-1 rounded-xl border border-[var(--hair-2)] bg-[var(--ink)] px-3 py-2 text-xs text-[var(--ivory)] placeholder:text-[var(--ash)] focus:border-[var(--lumen)] focus:outline-none disabled:opacity-50"
               />
               <button
                 type="submit"
                 disabled={!input.trim() || sending || !userId}
                 title="Gửi câu hỏi"
-                className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-brand-periwinkle text-brand-navy transition hover:brightness-110 disabled:opacity-50"
+                className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-[var(--lumen)] text-white transition hover:bg-[var(--lumen-hi)] disabled:opacity-50"
               >
                 <Send size={13} aria-hidden />
               </button>
@@ -283,7 +283,7 @@ export function AiFloatingWidget({ userId }: { userId: string | null }) {
             <Link
               href="/ai"
               onClick={() => setOpen(false)}
-              className="mt-2 flex items-center justify-center gap-1 text-[11px] font-semibold text-brand-periwinkle hover:underline"
+              className="mt-2 flex items-center justify-center gap-1 text-[11px] font-semibold text-[var(--lumen)] hover:underline"
             >
               {isEng ? 'Open full assistant page' : 'Mở trang trợ lý đầy đủ'} <ArrowUpRight size={12} aria-hidden />
             </Link>
@@ -297,11 +297,11 @@ export function AiFloatingWidget({ userId }: { userId: string | null }) {
         onClick={() => setOpen((prev) => !prev)}
         aria-expanded={open}
         aria-label={open ? (isEng ? 'Close AI assistant' : 'Đóng trợ lý AI') : (isEng ? 'Open AI assistant' : 'Mở trợ lý AI')}
-        className="fixed bottom-6 right-4 z-50 flex size-14 items-center justify-center rounded-full bg-brand-periwinkle text-brand-navy shadow-[0_8px_30px_rgba(167,172,217,0.45)] transition hover:brightness-110 active:scale-95 sm:right-6"
+        className="fixed bottom-6 right-5 z-40 flex size-10 cursor-pointer items-center justify-center rounded-full border border-[var(--hair-2)] bg-[var(--ink-2)] text-[var(--ivory)] shadow-md backdrop-blur-xl transition-all hover:scale-105 hover:border-[var(--lumen)] hover:bg-[var(--ink-3)] active:scale-95 sm:right-7"
       >
-        {open ? <X size={22} aria-hidden /> : <Sparkles size={22} aria-hidden />}
+        {open ? <X size={16} aria-hidden /> : <Sparkles size={16} aria-hidden />}
         {!open && (
-          <span className="absolute -right-0.5 -top-0.5 size-3 rounded-full border-2 border-[#1F2335] bg-emerald-400" />
+          <span className="absolute -right-0.5 -top-0.5 size-2.5 rounded-full bg-emerald-400" />
         )}
       </button>
     </>
