@@ -1,6 +1,7 @@
 'use client';
 
 import { createPortal } from 'react-dom';
+import { localizeStyle } from '../utils/style-labels';
 
 import Image from 'next/image';
 import Link from 'next/link';
@@ -447,7 +448,7 @@ function ArtworkDetailContent({
               className="inline-flex items-center gap-1.5 rounded-full border border-[#8C3718]/30 bg-[#8C3718]/15 px-2.5 py-1 font-semibold text-[#8C3718] transition hover:bg-[#8C3718]/25"
             >
               <Palette className="h-3.5 w-3.5" />
-              <span>{artwork.categoryName || artwork.style || 'Digital art'}</span>
+              <span>{localizeStyle(artwork.categoryName || artwork.style) || 'Tranh kỹ thuật số'}</span>
             </Link>
             <span className="inline-flex items-center gap-1.5">
               <Calendar className="h-3.5 w-3.5" />

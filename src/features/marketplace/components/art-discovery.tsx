@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { ChangeEvent, DragEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { ImagePlus, Palette, Search, SlidersHorizontal, Sparkles, Tag, Upload, X } from 'lucide-react';
 import { marketplaceService, MarketplaceArtwork } from '../services/marketplace.service';
+import { localizeStyle } from '../utils/style-labels';
 import {
   categoriesService,
   type CategoryDto,
@@ -466,7 +467,7 @@ export function ArtDiscovery({
     return () => {
       active = false;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [page, serverQuery, activeCategoryObj?.id, isFollowingTab]);
 
   const clearAllFilters = () => {
@@ -529,7 +530,7 @@ export function ArtDiscovery({
                       : 'border-[#221E1A]/10 bg-[#FFFCF6] text-[#6E6459] hover:border-[#B24A26]/40 hover:text-[#241F1A]'
                   }`}
                 >
-                  <span>{cat.name}</span>
+                  <span>{localizeStyle(cat.name)}</span>
                   {cat.artworkCount > 0 && (
                     <span
                       className={`rounded-full px-1.5 py-0.5 text-[10px] ${
@@ -627,7 +628,7 @@ export function ArtDiscovery({
                             }}
                             className="rounded-full border border-[#B24A26]/35 bg-[#B24A26]/15 px-3 py-1 text-xs font-semibold text-[#E1E4FF] hover:bg-[#B24A26]/25 cursor-pointer"
                           >
-                            {cat.name}
+                            {localizeStyle(cat.name)}
                           </button>
                         ))}
                       </div>

@@ -158,8 +158,8 @@ export function CreatorProfileScreen({ id }: { id: string }) {
 
   const isOwnProfile = currentUserId === profile.userId;
   const tabs: Array<{ id: Tab; label: string }> = [
-    { id: 'portfolio', label: `Portfolio · ${artworks.length}` },
-    { id: 'rates', label: `Commission · ${rates.length}` },
+    { id: 'portfolio', label: `Tác phẩm · ${artworks.length}` },
+    { id: 'rates', label: `Đặt vẽ · ${rates.length}` },
     { id: 'reviews', label: `Đánh giá · ${reviews.length}` },
   ];
 

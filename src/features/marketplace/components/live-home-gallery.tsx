@@ -516,11 +516,11 @@ export function LiveHomeGallery() {
             <div className="hero__spot" aria-hidden="true" />
             <div className="hero__scrim" aria-hidden="true" />
 
-            {/* data-no-translate: LanguageProvider có auto-translator chạy trên mọi
-                text node; câu chữ thương hiệu của hero phải giữ nguyên văn. */}
-            <div className="hero__body" data-no-translate="true">
+            {/* Hero để translator xử lý: câu chữ đã có cặp VI->EN trong
+                context/translations/vie-to-eng.ts, nên tab tiếng Anh không còn tiếng Việt. */}
+            <div className="hero__body">
               <p className="eyebrow rise">Phòng tranh dilillustration</p>
-              <h1 className="hero__title rise"> Khám phá tranh từ <em>creator</em> bạn yêu thích. </h1>
+              <h1 className="hero__title rise"> Khám phá tranh từ <em>họa sĩ</em> bạn yêu thích. </h1>
               <p className="hero__sub"> Một vòng tuyển chọn từ sàn tranh: tác phẩm được duyệt, họa sĩ đang nhận đơn, và những
  phiên đấu giá đang mở. </p>
               <div className="hero__actions">
@@ -861,7 +861,7 @@ export function LiveHomeGallery() {
               <Link href="/explore" className="btn btn--primary btn--sm">
                 <Eye size={14} aria-hidden /> Mở sàn tranh </Link>
               <Link href="/creators" className="btn btn--outline btn--sm">
-                Xem creator
+                Xem họa sĩ
               </Link>
             </div>
           </div>

@@ -8,7 +8,7 @@ export const engToVieMap: Record<string, string> = {
   // Navigation & Shared UI
   'Guide': 'Hướng dẫn',
   'Admin Center': 'Quản trị',
-  'Studio': 'Studio',
+  'Studio': 'Xưởng vẽ',
   'Creator Studio': 'Xưởng vẽ Họa sĩ',
   'My Studio': 'Xưởng vẽ của tôi',
   'Client Mode': 'Chế độ khách hàng',
@@ -1018,7 +1018,7 @@ export const engToVieMap: Record<string, string> = {
   'Clean record. No prior sanctions or warnings on this account.': 'Hồ sơ sạch. Tài khoản chưa có cảnh cáo hoặc xử phạt nào.',
   'Issued by:': 'Người xử lý:',
   'Expires:': 'Hết hạn:',
-  'Video speedpaint': 'Video speedpaint',
+  'Video speedpaint': 'Video vẽ nhanh',
   'Portfolio links': 'Liên kết hồ sơ tác phẩm',
   'Creator Setup': 'Thiết lập họa sĩ',
   'Counter-offers awaiting Client': 'Đề xuất lại đang chờ Khách hàng',

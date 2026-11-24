@@ -4,6 +4,126 @@
  * Creator Studio, Modals, Marketplace, Workroom/Chat, Payment, Forensic, AI Assistant, and Terms.
  */
 export const extraVieToEngMap: Record<string, string> = {
+  // ---- Đợt 5: điều hướng, giải thưởng, nhãn nhỏ ----
+  'Bộ sưu tập': 'Collection',
+  'Đấu giá': 'Auctions',
+  'Sự kiện': 'Events',
+  'Hướng dẫn': 'Guide',
+  'Xếp hạng': 'Ranking',
+  'Giải Nhất': 'First prize',
+  'Giải Nhì': 'Second prize',
+  'Giải Ba': 'Third prize',
+  'theo dõi': 'followers',
+  '· Ký quỹ': '· Escrow',
+  '· Tổng': '· Total',
+  'Đang bận': 'Busy',
+  'Phí nền tảng': 'Platform fee',
+  // ---- Bổ sung: trang chủ, /explore, /creators, ví ----
+  'Xem sự kiện': 'View event',
+  'họa sĩ': 'artists',
+  'bạn yêu thích.': 'you love.',
+  'tác phẩm đã duyệt': 'approved artworks',
+  'Tất cả danh mục': 'All categories',
+  'Tất cả họa sĩ': 'All artists',
+  'cùng bảng màu': 'in the same palette',
+  'Chọn theo gu': 'Browse by taste',
+  'Chỉnh gu của bạn': 'Tune your taste',
+  'Giá khởi điểm': 'Starting price',
+  'Lượt nhận đơn': 'Open slots',
+  'Nhận thanh toán': 'Receive payment',
+  'Hồ sơ họa sĩ': 'Artist profile',
+  // ---- Giao diện public: trang chủ, /explore, /creators, /events, /wallet ----
+  'Phòng tranh dilillustration': 'dillustration Gallery',
+  'Khám phá tranh từ': 'Discover art from',
+  'Một vòng tuyển chọn từ sàn tranh: tác phẩm được duyệt, họa sĩ đang nhận đơn, và những phiên đấu giá đang mở.':
+    'A curated round of the marketplace: approved artworks, artists open for commissions, and live auction sessions.',
+  'Khám phá sàn tranh': 'Explore the marketplace',
+  'Thịnh hành tuần này': 'Trending this week',
+  'Xếp theo lượt xem thật trên toàn sàn.': 'Ranked by real views across the marketplace.',
+  'Họa sĩ đang nhận đơn': 'Artists open for commissions',
+  'Tác phẩm trên sàn': 'Artworks on the marketplace',
+  'dòng tranh trên sàn': 'art styles on the marketplace',
+  '7 lối vào bộ sưu tập': '7 collection entryways',
+  'Chọn một dòng tranh — chỉ tác phẩm đã kiểm duyệt mới xuất hiện.':
+    'Pick an art style — only approved artworks appear.',
+  'Mở bất kỳ tác phẩm nào để xem toàn màn hình.': 'Open any artwork to view it full screen.',
+  'Cùng một tay nghề, cùng một ánh sáng': 'The same craft, the same light',
+  'Hồ sơ đã xác thực, phản hồi trong 24 giờ.': 'Verified profile, replies within 24 hours.',
+  'Xem họa sĩ': 'View artist',
+  'Khám phá tác phẩm': 'Explore artworks',
+  'Mở toàn bộ bộ lọc': 'Open all filters',
+  'tác phẩm phù hợp · trang': 'matching artworks · page',
+  'Khám phá tác phẩm và những nghệ sĩ phù hợp với gu thẩm mỹ của bạn — chỉ tác phẩm đã kiểm duyệt.':
+    'Explore artworks and artists that match your taste — approved works only.',
+  'Họa sĩ nhận đặt vẽ': 'Artists open for commissions',
+  'Tìm họa sĩ phù hợp yêu cầu đặt vẽ': 'Find an artist for your commission',
+  'Lọc theo danh mục chuyên môn từ bảng giá dịch vụ và hồ sơ tác phẩm để chọn đúng họa sĩ cho dự án của bạn.':
+    'Filter artists by specialty from their rate cards and portfolios to pick the right one for your project.',
+  'Chỉ hiện họa sĩ còn lượt nhận đơn': 'Only artists with open slots',
+  'Xem hồ sơ & Đặt vẽ': 'View profile & commission',
+  'Chưa có tác phẩm nào được duyệt.': 'No approved artworks yet.',
+  'Giải Nhất + hợp đồng độc quyền 6 tháng': 'First prize + 6-month exclusive contract',
+  '5 giải Khuyến khích mỗi giải': '5 consolation prizes each',
+
+  // ---- Artwork detail ----
+  'Giấy phép cá nhân': 'Personal licence',
+  'Giấy phép thương mại': 'Commercial licence',
+  'Chứng nhận bản gốc': 'Original certificate',
+  'Mức thấp nhất để bắt đầu một đơn vẽ; họa sĩ có thể báo thêm nếu yêu cầu phức tạp hơn.':
+    'The lowest price to start a commission; artists may quote higher for more complex requests.',
+  'Số đơn tối đa họa sĩ nhận thêm trong tháng; 0 nghĩa là đang kín lịch.':
+    'Maximum extra orders the artist takes this month; 0 means fully booked.',
+  'Dùng cho mục đích phi thương mại: in treo nhà, quà tặng, avatar, dự án học tập. Không bán lại, không dùng cho quảng cáo.':
+    'For non-commercial use: home prints, gifts, avatars, study projects. No resale, no advertising.',
+  'Được dùng trong sản phẩm/dịch vụ có thu tiền (bìa sách, game, nhãn hàng, quảng cáo) theo phạm vi hai bên thỏa thuận.':
+    'Usable in paid products/services (book covers, games, brand work, ads) within the agreed scope.',
+  'Nửa người (Half-body)': 'Half-body',
+
+  // ---- Ví ----
+  'Ví & lịch sử giao dịch': 'Wallet & transaction history',
+  'Trạng thái ví: Đang hoạt động': 'Wallet status: Active',
+  'Thu nhập ròng · 30 ngày': 'Net income · 30 days',
+  'Đang giữ trong ký quỹ': 'Held in escrow',
+  'Xem tất cả đơn hàng →': 'View all orders →',
+
+  // ---- Studio / vận hành ----
+  'Tranh chấp & phòng làm việc': 'Dispute & workroom',
+  'Chờ khách hàng nạp ký quỹ': 'Awaiting client escrow',
+
+  // ---- Vai trò ----
+  'Khách hàng': 'Client',
+  'Trung tâm quản trị': 'Admin Center',
+
+  // ---- Nhãn danh mục / phong cách (đã Việt hoá khi xem tiếng Việt) ----
+  'Anime / Truyện tranh': 'Anime / Manga',
+  'Ý tưởng thiết kế': 'Concept Art',
+  'Chibi / Dễ thương': 'Chibi / Cute',
+  'Bán thực tế': 'Semi-Realistic',
+  'Thực tế / Chân dung': 'Realistic / Portrait',
+  'Máy móc / Viễn tưởng': 'Mecha / Sci-Fi',
+  'Phong cảnh / Bối cảnh': 'Landscape / Background',
+  'Điểm ảnh': 'Pixel Art',
+  'Giả tưởng': 'Fantasy',
+  'Giả tưởng tối': 'Dark Fantasy',
+  'Viễn tưởng': 'Sci-Fi',
+  'Ý tưởng viễn tưởng': 'Sci-Fi Concept',
+  'Anime viễn tưởng': 'Sci-Fi Anime',
+  'Thế giới viễn tưởng': 'Sci-Fi World',
+  'Máy móc': 'Mecha',
+  'Ý tưởng máy móc': 'Mecha Concept',
+  'Bề mặt cứng': 'Hard-surface',
+  'Ý tưởng vũ khí': 'Weapon Concept',
+  'Thiết kế nhân vật': 'Character Design',
+  'Minh hoạ nhân vật': 'Character Illustration',
+  'Bối cảnh giả tưởng': 'Fantasy Environment',
+  'Bối cảnh hoành tráng': 'Epic Environments',
+  'Đời thường lo-fi': 'Lo-Fi Slice of Life',
+  'Đời thường': 'Slice of Life',
+  'Màu nước': 'Watercolor',
+  'Huyền ảo': 'Ethereal',
+  'Nhân vật thần thoại': 'Mythic characters',
+  'Chân dung': 'Portrait',
+
   // Admin Deliveries & Physical Auctions
   'Chờ người mua chọn': 'Awaiting Buyer Choice',
   'Chờ gửi hàng': 'Awaiting Shipment',
@@ -1866,6 +1986,12 @@ export const extraVieToEngMap: Record<string, string> = {
 };
 
 export const extraVieToEngRegex: Array<{ pattern: RegExp; replacement: string }> = [
+  { pattern: /^([\d.,]+)đ$/i, replacement: ' VND' },
+  { pattern: /^Còn (\d+) slot$/i, replacement: '$1 slots left' },
+  { pattern: /^(\d+) giao dịch đang hiển thị · (\d+) giao dịch$/i, replacement: '$1 transactions shown · $2 in total' },
+  { pattern: /^Vì bạn đang xem “(.+)”\.$/i, replacement: 'Because you are viewing “$1”.' },
+  { pattern: /^([\d.,]+\+?) đ$/i, replacement: '$1 VND' },
+  { pattern: /^From ([\d.,]+)đ$/i, replacement: 'From $1 VND' },
   { pattern: /^(\d+)\/500 ký tự$/i, replacement: '$1/500 characters' },
   { pattern: /^Đánh giá \((\d+)\)$/i, replacement: 'Reviews ($1)' },
   { pattern: /^Lịch sử đặt giá \((\d+)\)$/i, replacement: 'Bid History ($1)' },

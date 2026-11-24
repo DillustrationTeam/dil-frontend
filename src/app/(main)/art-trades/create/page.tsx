@@ -305,10 +305,10 @@ function CreateArtTradeContent() {
   };
 
   const deadlineOptions = [
-    { days: 7, label: '7 Days', desc: 'Fast exchange' },
-    { days: 14, label: '14 Days', desc: 'Standard turnaround' },
-    { days: 21, label: '21 Days', desc: 'Relaxed schedule' },
-    { days: 30, label: '30 Days', desc: 'Complex pieces' },
+    { days: 7, label: '7 Days', desc: 'Trao đổi nhanh' },
+    { days: 14, label: '14 Days', desc: 'Tiến độ tiêu chuẩn' },
+    { days: 21, label: '21 Days', desc: 'Tiến độ thư thả' },
+    { days: 30, label: '30 Days', desc: 'Tác phẩm phức tạp' },
   ];
 
   return (

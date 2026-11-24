@@ -27,7 +27,19 @@ export function AccountMenu({ variant = 'app' }: { variant?: 'app' | 'public' })
   const isAdmin = roles.some((r) => ['administrator', 'admin', 'moderator'].includes(r.toLowerCase()));
 
   const studioHref = isAdmin ? '/admin' : isCreator ? '/creator/commissions' : '/client/commissions';
-  const studioLabel = isAdmin ? t('Admin Center') : isCreator ? t('Creator Studio') : t('My Studio');
+  const studioLabel = isAdmin ? t('Trung tâm quản trị') : isCreator ? t('Creator Studio') : t('My Studio');
+
+  // Nhãn vai trò hiển thị tiếng Việt; vai trò lạ thì giữ nguyên giá trị gốc.
+  const roleLabel =
+    roles
+      .map((role) => {
+        const key = role.toLowerCase();
+        if (key === 'creator') return t('Họa sĩ');
+        if (key === 'client') return t('Khách hàng');
+        if (['administrator', 'admin', 'moderator'].includes(key)) return t('Quản trị viên');
+        return role;
+      })
+      .join(', ') || '';
 
   const close = () => setIsOpen(false);
 
@@ -72,7 +84,7 @@ export function AccountMenu({ variant = 'app' }: { variant?: 'app' | 'public' })
               {user?.fullName}
             </p>
             <p className="max-w-[110px] truncate text-[10px] uppercase tracking-wider text-[#B24A26] min-[1400px]:max-w-[140px] 2xl:max-w-[170px]">
-              {roles.join(', ') || 'CLIENT'}
+              {roleLabel || 'Khách hàng'}
             </p>
           </div>
         )}

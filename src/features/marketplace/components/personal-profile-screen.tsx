@@ -175,7 +175,7 @@ export function PersonalProfileScreen() {
   <ProfileLayout name={user.fullName} bannerUrl={profile?.coverUrl ?? user.coverUrl} avatarUrl={profile?.avatarUrl ?? user.avatarUrl} sidebar={<>
     <Link href="/settings" className="inline-block rounded-xl border border-[#221E1A]/10 px-4 py-2 text-sm text-[#241F1A]">Sửa trang cá nhân</Link>
 
-    <p className="mb-2 mt-5 text-[10px] font-semibold uppercase tracking-[.2em] text-[#B24A26]">Personal profile</p>
+    <p className="mb-2 mt-5 text-[10px] font-semibold uppercase tracking-[.2em] text-[#B24A26]">Hồ sơ cá nhân</p>
     <h1 className="break-words font-h1 text-3xl font-semibold text-[#241F1A]">{user.fullName}</h1>
     <p className="mt-2 text-sm text-[#746A5F]">Thành viên Dillustration</p>
 

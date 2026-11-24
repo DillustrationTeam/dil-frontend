@@ -25,6 +25,7 @@ function initialsOf(name?: string | null) {
   return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
 }
 
+import { localizeStyle } from '../utils/style-labels';
 export function CreatorsDirectory({ initialCategory = '' }: { initialCategory?: string }) {
   const [categories, setCategories] = useState<CategoryDto[]>([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>('');
@@ -118,7 +119,7 @@ export function CreatorsDirectory({ initialCategory = '' }: { initialCategory?: 
         <header className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[.2em] text-[#B24A26]">
-              Commission Directory
+              Họa sĩ nhận đặt vẽ
             </p>
             <h1 className="mt-2 font-h1 text-3xl font-bold text-[#241F1A] sm:text-4xl"> Tìm họa sĩ phù hợp yêu cầu đặt vẽ </h1>
             <p className="mt-2 max-w-2xl text-sm text-[#6E6459]"> Lọc theo danh mục chuyên môn từ bảng giá dịch vụ và hồ sơ tác phẩm để chọn đúng họa sĩ cho dự án của bạn. </p>
@@ -166,7 +167,7 @@ export function CreatorsDirectory({ initialCategory = '' }: { initialCategory?: 
                       : 'border-[#221E1A]/10 bg-[#FFFCF6] text-[#6E6459] hover:border-[#B24A26]/40 hover:text-[#241F1A]'
                   }`}
                 >
-                  {cat.name}
+                  {localizeStyle(cat.name)}
                 </button>
               );
             })}
@@ -260,7 +261,7 @@ export function CreatorsDirectory({ initialCategory = '' }: { initialCategory?: 
                           key={cat.id}
                           className="rounded-full border border-[#B24A26]/30 bg-[#B24A26]/15 px-2.5 py-0.5 text-[11px] font-semibold text-[#A8321C]"
                         >
-                          {cat.name}
+                          {localizeStyle(cat.name)}
                         </span>
                       ))}
                     </div>
