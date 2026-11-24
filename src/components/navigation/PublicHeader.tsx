@@ -347,7 +347,7 @@ export function PublicHeader() {
                   href="/login"
                   className="rounded-full bg-[var(--lumen)] px-5 py-2 text-xs font-semibold text-white transition-all hover:bg-[var(--lumen-hi)] shadow-sm"
                 >
-                  {t('Sign In')}
+                  <span className="text-white">{t('Sign In')}</span>
                 </Link>
                 <Link
                   href="/register"
