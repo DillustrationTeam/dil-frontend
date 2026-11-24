@@ -153,8 +153,8 @@ export function CreatorProfileScreen({ id }: { id: string }) {
     }
   };
 
-  if (loadedId !== id) return <main className="min-h-[70vh] bg-[#F7F2E9] p-12 text-center text-[#6E6459]">Đang tải hồ sơ nghệ sĩ…</main>;
-  if (!profile) return <main className="min-h-[70vh] bg-[#F7F2E9] p-12 text-center text-[#6E6459]">Không tìm thấy hồ sơ nghệ sĩ.</main>;
+  if (loadedId !== id) return <div className="min-h-[70vh] bg-[#F7F2E9] p-12 text-center text-[#6E6459]">Đang tải hồ sơ nghệ sĩ…</div>;
+  if (!profile) return <div className="min-h-[70vh] bg-[#F7F2E9] p-12 text-center text-[#6E6459]">Không tìm thấy hồ sơ nghệ sĩ.</div>;
 
   const isOwnProfile = currentUserId === profile.userId;
   const tabs: Array<{ id: Tab; label: string }> = [

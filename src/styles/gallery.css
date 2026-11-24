@@ -2630,13 +2630,7 @@ html[data-theme="ink"] .skeleton {
 }
 .mnav__theme:hover { color: var(--ivory); }
 .mnav__theme svg { width: 1rem; height: 1rem; flex-shrink: 0; }
-.mnav__theme-state {
-  font-family: ui-monospace, monospace;
-  font-size: 0.6875rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--ash-dim);
-}
+
 
   .section-head { margin-bottom: 1.5rem; gap: 0.75rem; }
   .section-head h2, .page-head h1 { overflow-wrap: anywhere; }
@@ -3272,3 +3266,374 @@ html[data-theme="ink"] .home-banner__scrim {
     rgba(13, 16, 28, 0) 40%
   );
 }
+
+/* Nhãn nhỏ trên cụm tranh cạnh phòng sự kiện (trang chủ) — chiếm cả hàng lưới */
+.evt__side .evt__side-label {
+  grid-column: 1 / -1;
+  margin: 0 0 0.15rem;
+  color: var(--ash);
+}
+/* ============================================================
+   EVENT SPOTLIGHT — thân thẻ đọc như nhãn phòng tranh
+   Nhịp: tiêu đề → mô tả → dữ kiện (chip có icon) → giải thưởng (khối riêng) → CTA.
+   Giải thưởng tách theo dấu "·" thành danh sách, không còn một cục chữ dài.
+   ============================================================ */
+.evt__body {
+  align-content: start;
+  gap: 0.7rem;
+  padding: clamp(1.15rem, 2.2vw, 1.75rem);
+}
+.evt__title {
+  font-size: clamp(1.3rem, 2.1vw, 1.6rem);
+  line-height: 1.18;
+  letter-spacing: -0.015em;
+  margin: 0;
+}
+.evt__desc {
+  margin: 0;
+  color: var(--ash);
+  font-size: 0.9375rem;
+  line-height: 1.62;
+  max-inline-size: 46ch;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.evt__facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0.1rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+.evt__fact {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.28rem 0.6rem;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--hair);
+  background: var(--ink-3);
+  color: var(--ash);
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.evt__fact svg { width: 0.9rem; height: 0.9rem; flex-shrink: 0; color: var(--ash-dim); }
+
+/* Giải thưởng: một khối riêng, mỗi giải một dòng — đọc được ngay */
+.evt__prize {
+  display: grid;
+  gap: 0.4rem;
+  padding: 0.65rem 0.8rem;
+  border-radius: var(--r-md);
+  background: var(--ink-3);
+  border: 1px solid var(--hair);
+}
+.evt__prize-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0;
+  font-family: var(--font-ui);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.evt__prize-label svg { width: 0.85rem; height: 0.85rem; flex-shrink: 0; }
+.evt__prize-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
+  gap: 0.2rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--ivory);
+  font-variant-numeric: tabular-nums;
+}
+.evt__prize-list li { position: relative; padding-inline-start: 0.7rem; }
+.evt__prize-list li::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: 0;
+  inset-block-start: 0.55em;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--gold);
+  opacity: 0.8;
+}
+.evt__cta { justify-self: start; margin-block-start: 0.25rem; }
+
+@media (max-width: 520px) {
+  .evt__prize-list { grid-template-columns: 1fr; }
+}
+
+/* Thẻ sự kiện phụ cạnh phòng sự kiện chính (trang chủ) */
+.evt-mini {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  border-radius: var(--r-md);
+  border: 1px solid var(--hair);
+  background: var(--ink-2);
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color var(--dur-2), box-shadow var(--dur-3);
+}
+.evt-mini:hover { border-color: var(--lumen); box-shadow: var(--shadow-card); }
+.evt-mini:focus-visible { outline: 2px solid var(--lumen); outline-offset: 2px; }
+.evt-mini__art { position: relative; aspect-ratio: 16 / 10; overflow: hidden; background: var(--ink-3); }
+.evt-mini__art img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.evt-mini__badge { position: absolute; left: 0.5rem; top: 0.5rem; }
+.evt-mini__body { padding: 0.7rem 0.8rem 0.85rem; display: grid; gap: 0.25rem; align-content: start; }
+.evt-mini__title {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  line-height: 1.25;
+  color: var(--ivory);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.evt-mini__meta {
+  font-size: 0.8125rem;
+  color: var(--ash);
+  font-variant-numeric: tabular-nums;
+}
+
+
+/* Bảng xếp hạng trang chủ: thanh mức độ TƯƠNG ĐỐI, không in lượt xem tuyệt đối */
+.board__heat {
+  display: block;
+  inline-size: 5rem;
+  block-size: 4px;
+  border-radius: 2px;
+  background: rgba(var(--ink-rgb), 0.12);
+  overflow: hidden;
+}
+.board__heat i {
+  display: block;
+  block-size: 100%;
+  border-radius: inherit;
+  background: var(--lumen);
+  transition: inline-size var(--dur-4) var(--ease-out);
+}
+.board__row:first-child .board__heat i { background: var(--lumen-hi); }
+@media (max-width: 520px) { .board__heat { inline-size: 3rem; } }
+
+
+/* ============================================================
+   CHỨNG NHẬN QUYỀN SỞ HỮU (client/owned-artworks)
+   Chỉ hiển thị trường có thật trong bản ghi — tờ chứng nhận mỏng nhưng đúng.
+   ============================================================ */
+.cert-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 340;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: color-mix(in srgb, var(--ink-rgb) 72%, transparent);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+.cert {
+  inline-size: 100%;
+  max-inline-size: 26rem;
+  max-block-size: 92dvh;
+  overflow-y: auto;
+  border-radius: var(--r-lg);
+  border: 1px solid var(--hair);
+  background: var(--ink-2);
+  box-shadow: var(--shadow-lift);
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+}
+.cert__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1.1rem 1.15rem 0.75rem;
+  border-bottom: 1px solid var(--hair);
+}
+.cert__headtext { min-inline-size: 0; }
+.cert__eyebrow {
+  margin: 0 0 0.3rem;
+  font-family: var(--font-ui);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--lumen);
+}
+.cert__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+  color: var(--ivory);
+  text-wrap: balance;
+}
+.cert__sub { margin: 0.25rem 0 0; font-size: 0.8125rem; color: var(--ash); }
+.cert__close {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  inline-size: 2rem;
+  block-size: 2rem;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--hair);
+  background: var(--ink-3);
+  color: var(--ash);
+  cursor: pointer;
+}
+.cert__close:hover { border-color: var(--lumen); color: var(--ivory); }
+.cert__close svg { inline-size: 0.95rem; block-size: 0.95rem; }
+
+.cert__body { padding: 1.15rem; display: grid; justify-items: center; gap: 0.4rem; }
+.cert__seal {
+  display: grid;
+  place-items: center;
+  inline-size: 2.75rem;
+  block-size: 2.75rem;
+  border-radius: var(--r-pill);
+  border: 1px solid color-mix(in srgb, var(--petrol) 45%, transparent);
+  background: var(--petrol-soft);
+  color: var(--petrol);
+}
+.cert__seal svg { inline-size: 1.35rem; block-size: 1.35rem; }
+.cert__label {
+  margin: 0.35rem 0 0;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ash-dim);
+}
+.cert__code {
+  margin: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.9375rem;
+  letter-spacing: 0.02em;
+  color: var(--ivory);
+  text-align: center;
+  word-break: break-all;
+}
+.cert__copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-block-start: 0.15rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--hair-2);
+  background: transparent;
+  color: var(--ash);
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+.cert__copy:hover { border-color: var(--lumen); color: var(--ivory); }
+.cert__copy svg { inline-size: 0.8rem; block-size: 0.8rem; }
+
+.cert__facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.6rem 0.9rem;
+  inline-size: 100%;
+  margin: 0.85rem 0 0;
+  padding-block-start: 0.85rem;
+  border-top: 1px dashed var(--hair-2);
+}
+.cert__facts div { min-inline-size: 0; }
+.cert__facts dt {
+  font-size: 0.6875rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ash-dim);
+}
+.cert__facts dd {
+  margin: 0.1rem 0 0;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--ivory);
+  overflow-wrap: anywhere;
+}
+.cert__note {
+  margin: 0.9rem 0 0;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--ash-dim);
+  text-align: center;
+}
+.cert__foot {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+  padding: 1rem 1.15rem 1.15rem;
+  border-top: 1px solid var(--hair);
+}
+.cert__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  min-block-size: 2.4rem;
+  padding-inline: 0.75rem;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  background: var(--lumen);
+  color: var(--ink-2);
+  font-family: var(--font-ui);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+}
+.cert__btn:hover { background: var(--lumen-hi); }
+.cert__btn--ghost { background: transparent; border-color: var(--hair-2); color: var(--ivory); }
+.cert__btn--ghost:hover { background: var(--ink-3); }
+.cert__btn svg { inline-size: 0.9rem; block-size: 0.9rem; }
+
+
+/* ============================================================
+   DARK THEME — chuỗi màu dạng `text-[#xxxxxx]/NN` (có độ mờ)
+   Bản đồ ở trên chỉ khớp lớp KHÔNG có `/NN`, nên mọi chỗ dùng độ mờ
+   (68 chỗ trong mã) bị giữ màu mực tối trên nền tối → chữ biến mất.
+   Quy các biến thể có độ mờ về token sáng của theme tối.
+   ============================================================ */
+html[data-theme="ink"] [class*="text-[#241F1A]/"],
+html[data-theme="ink"] [class*="text-[#221E1A]/"] { color: var(--ivory) !important; }
+html[data-theme="ink"] [class*="text-[#6E6459]/"],
+html[data-theme="ink"] [class*="text-[#746A5F]/"],
+html[data-theme="ink"] [class*="text-[#5f574d]/"],
+html[data-theme="ink"] [class*="text-[#635b51]/"] { color: var(--ash) !important; }
+html[data-theme="ink"] [class*="text-[#B24A26]/"],
+html[data-theme="ink"] [class*="text-[#8C3718]/"] { color: var(--lumen-hi) !important; }
+html[data-theme="ink"] [class*="text-[#A8321C]/"] { color: var(--cinnabar-text) !important; }
+html[data-theme="ink"] [class*="text-[#8A6A1F]/"] { color: var(--gold) !important; }
+html[data-theme="ink"] [class*="text-[#2F6B63]/"] { color: var(--petrol) !important; }
+html[data-theme="ink"] [class*="text-[#FFFCF6]/"],
+html[data-theme="ink"] [class*="text-[#F7F2E9]/"] { color: var(--ivory) !important; }
+html[data-theme="ink"] [class*="text-[#4A423A]/"],
+html[data-theme="ink"] [class*="text-[#3F382F]/"] { color: var(--body) !important; }
+
+
+/* Nền periwinkle nhạt + chữ trắng = 2.15:1 (hỏng ở CẢ hai theme).
+   Đây là màu nhấn còn sót từ bảng màu cũ; quy về son của hệ hiện tại. */
+.bg-brand-periwinkle {
+  background-color: var(--lumen) !important;
+  color: var(--ink-2) !important;
+}
+.bg-brand-periwinkle:hover { background-color: var(--lumen-hi) !important; }

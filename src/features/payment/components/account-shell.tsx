@@ -29,9 +29,10 @@ export function AccountShell({
       > Đến nội dung chính </a>
 
       <div className="mx-auto max-w-[1600px] px-2 py-4 sm:px-4 md:px-6">
-        <main id="wallet-content" className="min-w-0 scroll-mt-6">
+        {/* Layout (main) đã có <main>; ở đây chỉ là vùng nội dung để không lặp landmark. */}
+        <div id="wallet-content" className="min-w-0 scroll-mt-6">
           {children}
-        </main>
+        </div>
       </div>
     </div>
   );

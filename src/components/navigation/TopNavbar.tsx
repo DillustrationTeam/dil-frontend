@@ -13,6 +13,7 @@ import { useAuthStore } from '@/store/use-auth-store';
 import { useRouter } from 'next/navigation';
 import { useLanguage } from '@/context/language-context';
 import { NotificationBell } from '@/features/notification';
+import { ThemeToggle } from '@/components/theme/theme-toggle';
 import { AccountMenu } from '@/components/navigation/account-menu';
 import { useScrolled } from '@/components/motion';
 import { Wordmark } from '@/components/brand/wordmark';
@@ -131,6 +132,9 @@ export default function TopNavbar<T extends string = string>({
           {adminBadgeText && (
             <span className="badge badge--live hidden uppercase tracking-[0.12em] sm:inline-flex">{adminBadgeText}</span>
           )}
+
+          {/* Sáng / tối: dùng chung một nguồn theme với header công khai */}
+          <ThemeToggle className="h-9 w-9 sm:h-11 sm:w-11" />
 
           {/* Notifications */}
           <NotificationBell

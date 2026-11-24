@@ -80,13 +80,13 @@ export function ClientProfile({ id }: { id: string }) {
 
   if (notFound) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#F7F2E9] p-16 text-center text-[#6E6459]"> Không tìm thấy hồ sơ người dùng này. </main>
+      <div className="flex min-h-screen items-center justify-center bg-[#F7F2E9] p-16 text-center text-[#6E6459]"> Không tìm thấy hồ sơ người dùng này. </div>
     );
   }
 
   if (!profile) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#F7F2E9] p-16 text-center text-[#6E6459]"> Đang tải hồ sơ... </main>
+      <div className="flex min-h-screen items-center justify-center bg-[#F7F2E9] p-16 text-center text-[#6E6459]"> Đang tải hồ sơ... </div>
     );
   }
 
@@ -97,7 +97,7 @@ export function ClientProfile({ id }: { id: string }) {
   }));
 
   return (
-    <main className="min-h-screen bg-[#F7F2E9] pb-16 text-[#241F1A]">
+    <div className="min-h-screen bg-[#F7F2E9] pb-16 text-[#241F1A]">
       <div className="mx-auto max-w-6xl px-4 pt-10 sm:px-6">
         <div className="grid gap-8 md:grid-cols-[260px_1fr]">
           {/* Sidebar trái: avatar, tên, following, thông tin cơ bản */}
@@ -287,6 +287,6 @@ export function ClientProfile({ id }: { id: string }) {
           onNavigate={setLightboxIndex}
         />
       )}
-    </main>
+    </div>
   );
 }

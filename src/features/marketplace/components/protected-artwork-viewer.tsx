@@ -5,8 +5,14 @@ import { ShieldCheck, RefreshCw, AlertTriangle, X, EyeOff } from 'lucide-react';
 import { apiClient } from '@/lib/api-client';
 import { ApiResponse } from '@/types/api.types';
 
-const DEFAULT_FALLBACK_IMAGE =
-  'https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?auto=format&fit=crop&w=1200&q=85';
+/**
+ * KHÔNG có ảnh thay thế.
+ *
+ * Bản cũ thay bằng một ảnh Unsplash khi tác phẩm thiếu ảnh hoặc ảnh lỗi — người
+ * xem thấy một bức tranh KHÔNG PHẢI của họa sĩ, kèm badge "Ảnh có dấu chìm bảo vệ".
+ * Thiếu ảnh thì phải nói thẳng là thiếu, không mượn ảnh của người khác.
+ */
+const NO_IMAGE = '';
 
 const API_ORIGIN = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5075/api/v1').replace(/\/api\/v1\/?$/, '');
 
@@ -49,15 +55,11 @@ export function ProtectedArtworkViewer({
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [copyWarning, setCopyWarning] = useState<boolean>(false);
-  // Bẫy chống chụp màn hình (kích hoạt khi cửa sổ mất focus do mở Snipping Tool / Zalo / PrtScn)
-  const [captureShieldActive, setCaptureShieldActive] = useState<boolean>(false);
 
   // 1. Tạo phiên xem bảo mật & nhận Biên lai số từ Backend API (hoặc dùng bảo vệ cục bộ cho WIP Workroom)
   useEffect(() => {
-    const validFallback =
-      fallbackImageUrl && !fallbackImageUrl.startsWith('blob:')
-        ? fallbackImageUrl
-        : DEFAULT_FALLBACK_IMAGE;
+    // Ảnh dự phòng duy nhất được phép: chính ảnh của tác phẩm này.
+    const validFallback = fallbackImageUrl || NO_IMAGE;
 
     let isMounted = true;
     if (skipViewSession) {
@@ -121,11 +123,11 @@ export function ProtectedArtworkViewer({
   const isAnimatedGif = isRawGif || isFallbackGif;
 
   const effectiveUrl = React.useMemo(() => {
-    if (isFallbackGif && !isRawGif && fallbackImageUrl && !fallbackImageUrl.startsWith('blob:')) {
+    if (isFallbackGif && !isRawGif && fallbackImageUrl) {
       return fallbackImageUrl;
     }
-    if (!rawUrl || rawUrl.startsWith('blob:')) {
-      return DEFAULT_FALLBACK_IMAGE;
+    if (!rawUrl) {
+      return NO_IMAGE;
     }
     if (rawUrl.startsWith('/api/v1/')) {
       return `${API_ORIGIN}${rawUrl}`;
@@ -227,6 +229,14 @@ export function ProtectedArtworkViewer({
   useEffect(() => {
     let isCancelled = false;
     let retriedWithoutCors = false;
+
+    if (!effectiveUrl) {
+      loadedImageRef.current = null;
+      setLoading(false);
+      setError('');
+      return;
+    }
+
     const img = new window.Image();
     if (effectiveUrl.startsWith(API_ORIGIN)) {
       img.crossOrigin = 'anonymous';
@@ -239,6 +249,7 @@ export function ProtectedArtworkViewer({
       paintCanvas(img);
     };
 
+    // Ảnh lỗi thì báo lỗi — KHÔNG thay bằng ảnh mẫu của người khác.
     img.onerror = () => {
       if (isCancelled) return;
       if (img.crossOrigin && !retriedWithoutCors) {
@@ -248,13 +259,7 @@ export function ProtectedArtworkViewer({
         img.src = effectiveUrl;
         return;
       }
-      if (img.src !== DEFAULT_FALLBACK_IMAGE) {
-        img.removeAttribute('crossOrigin');
-        img.crossOrigin = null;
-        img.src = DEFAULT_FALLBACK_IMAGE;
-      } else {
-        setError('Không thể nạp dữ liệu ảnh bảo mật.');
-      }
+      setError('Không tải được ảnh tác phẩm.');
     };
 
     img.src = effectiveUrl;
@@ -292,74 +297,12 @@ export function ProtectedArtworkViewer({
     e.stopPropagation();
   };
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // Phát hiện phím PrintScreen hoặc tổ hợp chụp màn hình / lưu trang / DevTools
-      if (
-        e.key === 'PrintScreen' ||
-        (e.metaKey && e.shiftKey && (e.key === 's' || e.key === 'S' || e.key === '3' || e.key === '4')) ||
-        (e.ctrlKey && (e.key === 's' || e.key === 'S' || e.key === 'p' || e.key === 'P' || e.key === 'u' || e.key === 'U')) ||
-        e.key === 'F12'
-      ) {
-        e.preventDefault();
-        setCaptureShieldActive(true);
-        triggerWarning();
-        // Xóa clipboard nếu người dùng vừa bấm PrintScreen
-        if (e.key === 'PrintScreen' && navigator.clipboard?.writeText) {
-          navigator.clipboard.writeText('').catch(() => undefined);
-        }
-      }
-    };
-
-    const handleKeyUp = (e: KeyboardEvent) => {
-      if (e.key === 'PrintScreen') {
-        setCaptureShieldActive(true);
-        triggerWarning();
-        if (navigator.clipboard?.writeText) {
-          navigator.clipboard.writeText('').catch(() => undefined);
-        }
-      }
-    };
-
-    // Khi người dùng mở Snipping Tool (Win+Shift+S), Lightshot, Zalo Screenshot...
-    // cửa sổ trình duyệt lập tức mất focus -> bật màn chắn bảo vệ ngay lập tức!
-    const handleWindowBlur = () => {
-      setCaptureShieldActive(true);
-    };
-
-    const handleWindowFocus = () => {
-      setCaptureShieldActive(false);
-    };
-
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'hidden') {
-        setCaptureShieldActive(true);
-      } else {
-        setCaptureShieldActive(false);
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('keyup', handleKeyUp);
-    window.addEventListener('blur', handleWindowBlur);
-    window.addEventListener('focus', handleWindowFocus);
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('keyup', handleKeyUp);
-      window.removeEventListener('blur', handleWindowBlur);
-      window.removeEventListener('focus', handleWindowFocus);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
-  }, [triggerWarning]);
 
   return (
     <div
       ref={containerRef}
       onContextMenu={handleContextMenu}
       onDragStart={handleDragStart}
-      onMouseEnter={() => setCaptureShieldActive(false)}
       className={`relative h-full w-full select-none overflow-hidden bg-[#FFFCF6] ${className}`}
       style={{ userSelect: 'none', WebkitUserSelect: 'none', WebkitTouchCallout: 'none' }}
     >
@@ -369,9 +312,9 @@ export function ProtectedArtworkViewer({
           src={effectiveUrl}
           alt=""
           draggable={false}
-          className={`pointer-events-none absolute inset-0 z-0 h-full w-full select-none transition-all duration-75 ${
+          className={`pointer-events-none absolute inset-0 z-0 h-full w-full select-none ${
             fitMode === 'contain' ? 'object-contain' : 'object-cover'
-          } ${captureShieldActive ? 'blur-2xl brightness-50 scale-105' : ''}`}
+          }`}
         />
       )}
 
@@ -379,20 +322,14 @@ export function ProtectedArtworkViewer({
           Đặt pointer-events-none để trình duyệt và extension (AI Image Tools) KHÔNG thể chạm vào */}
       <canvas
         ref={canvasRef}
-        className={`pointer-events-none relative z-[5] block h-full w-full transition-all duration-75 ${
-          captureShieldActive ? 'blur-2xl brightness-50 scale-105' : ''
-        }`}
+        className="pointer-events-none relative z-[5] block h-full w-full"
       />
 
       {/* LỚP KÍNH CHẮN BẢO VỆ VÔ HÌNH (Glass Shield Overlay):
           Che phủ 100% bề mặt phía trên Canvas. Chuột phải chỉ chạm vào <div> rỗng nên KHÔNG thể lưu ảnh */}
       <div
         onClick={() => {
-          if (captureShieldActive) {
-            setCaptureShieldActive(false);
-          } else if (onOpenLightbox) {
-            onOpenLightbox();
-          }
+          if (onOpenLightbox) onOpenLightbox();
         }}
         onContextMenu={handleContextMenu}
         onDragStart={handleDragStart}
@@ -400,25 +337,14 @@ export function ProtectedArtworkViewer({
         aria-label={alt}
       />
 
-      {/* MÀN CHẮN CHỐNG CHỤP MÀN HÌNH (Chỉ bung ra khi phát hiện Snipping Tool / PrintScreen / Mất focus) */}
-      {captureShieldActive && (
-        <div
-          onClick={() => setCaptureShieldActive(false)}
-          className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-[#FFFCF6]/85 p-6 text-center backdrop-blur-xl cursor-pointer select-none"
-        >
-          <EyeOff className="h-10 w-10 text-[#B24A26] mb-3" />
-          <p className="text-sm font-semibold text-[#241F1A]"> Chế độ chống chụp màn hình đang kích hoạt </p>
-          <p className="mt-1 max-w-xs text-xs text-[#6E6459]"> Tác phẩm được tự động che mờ khi dùng công cụ chụp màn hình hoặc rời cửa sổ. Chạm vào tranh để tiếp tục ngắm. </p>
-        </div>
-      )}
 
-      {/* Badge bảo vệ gọn gàng ở góc dưới (không hiện mã biên lai) */}
-      {showWatermarkBadge && (
+      {/* Badge bảo vệ: chỉ hiện khi THẬT SỰ có ảnh để bảo vệ */}
+      {showWatermarkBadge && effectiveUrl && !error ? (
         <div className="pointer-events-none absolute bottom-4 left-4 z-20 inline-flex items-center gap-2 rounded-full bg-[#FFFCF6]/80 px-3.5 py-1.5 text-xs text-[#241F1A] backdrop-blur-md border border-[#221E1A]/10 shadow-lg">
           <ShieldCheck className="h-3.5 w-3.5 text-[#B24A26] shrink-0" />
           <span>Ảnh có dấu chìm bảo vệ</span>
         </div>
-      )}
+      ) : null}
 
       {/* Cảnh báo khi người dùng cố tình chuột phải hoặc nhấn phím tắt sao chép */}
       {copyWarning && (
@@ -440,11 +366,21 @@ export function ProtectedArtworkViewer({
 
       {/* Trạng thái lỗi */}
       {error && !loading && (
-        <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-[#FFFCF6]/95 text-[#6E6459] p-4 text-center">
-          <AlertTriangle className="h-8 w-8 text-[#8A6A1F] mb-2" />
+        <div className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-2 bg-[#FFFCF6]/95 p-4 text-center text-[#6E6459]">
+          <AlertTriangle className="h-8 w-8 text-[#8A6A1F]" />
           <p className="text-sm font-medium">{error}</p>
+          <p className="text-xs">Hệ thống không thay bằng ảnh khác, để bạn không xem nhầm tác phẩm.</p>
         </div>
       )}
+
+      {/* Không có ảnh: nói thẳng, không mượn ảnh mẫu */}
+      {!effectiveUrl && !loading ? (
+        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-2 bg-[#F0E7D8] p-4 text-center text-[#6E6459]">
+          <ShieldCheck className="h-8 w-8 text-[#746A5F]" aria-hidden />
+          <p className="text-sm font-medium text-[#241F1A]">Tác phẩm chưa có ảnh gốc</p>
+          <p className="text-xs">Họa sĩ chưa tải tệp lên, nên không có gì để hiển thị.</p>
+        </div>
+      ) : null}
     </div>
   );
 }

@@ -24,17 +24,25 @@ import {
   User,
   X,
 } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { useLanguage } from '@/context/language-context';
 import { clientOwnedArtworksService } from '../../services/client-owned-artworks.service';
+import { auctionService } from '@/features/auction/services/auction.service';
+import type { AuctionCertificateDto } from '@/features/auction/types/auction.types';
+import { AuctionCertificateCard } from '@/features/auction/components/auction-certificate-card';
+import { OwnedArtworkCertificate } from './owned-artwork-certificate';
 import type {
   OwnedArtworkDto,
   OwnedArtworkFilterType,
   OwnedArtworkSortType,
   OwnedArtworkSourceType,
 } from '../../types/owned-artwork.types';
-import { auctionService, auctionError } from '@/features/auction/services/auction.service';
-import type { AuctionCertificateDto } from '@/features/auction/types/auction.types';
-import { AuctionCertificateCard } from '@/features/auction/components/auction-certificate-card';
+/**
+ * KHÔNG gọi `GET /auctions/{id}/certificate` từ đây nữa.
+ * Bản ghi owned-artwork trả `sourceId` TRÙNG `id` của tác phẩm, nên endpoint
+ * auction luôn 404 (đã đo: /auctions/dafd4258-…/certificate → 404). Chứng nhận
+ * hiển thị từ chính dữ liệu bản ghi (`certificateNumber`), không cần mạng.
+ */
 
 
 /// Ảnh dự phòng khi API trả về chuỗi rỗng ở thumbnailUrl/imageUrl.
@@ -64,6 +72,44 @@ function formatDate(isoString?: string) {
   }
 }
 
+/** Chữ cái đầu của tên họa sĩ, dùng khi hồ sơ chưa có ảnh đại diện. */
+function initialsOf(name?: string | null) {
+  const parts = (name || '').trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return '?';
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
+}
+
+/**
+ * `exclusiveBadge` là chuỗi tiếng Anh do server trả (`Exclusive Owner`).
+ * Việt hoá ở tầng hiển thị, không sửa dữ liệu — cùng cách với `style-labels.ts`.
+ */
+const EXCLUSIVE_LABELS: Record<string, { vi: string; en: string }> = {
+  'Exclusive Owner': { vi: 'Chủ sở hữu độc bản', en: 'Exclusive owner' },
+  '1/1': { vi: 'Độc bản 1/1', en: 'One of one' },
+};
+
+function exclusiveLabel(raw: string, lang: string) {
+  const entry = EXCLUSIVE_LABELS[raw.trim()];
+  if (!entry) return raw;
+  return lang === 'VIE' ? entry.vi : entry.en;
+}
+
+/** `sourceType` từ server là tiếng Anh (`Auction` / `Commission` / `Trade`). */
+function sourceLabel(type: OwnedArtworkSourceType, lang: string) {
+  if (lang !== 'VIE') return type;
+  switch (type) {
+    case 'Auction':
+      return 'Đấu giá';
+    case 'Commission':
+      return 'Đơn đặt vẽ';
+    case 'Trade':
+      return 'Trao đổi';
+    default:
+      return type;
+  }
+}
+
 export function OwnedArtworksScreen() {
   const { t, lang } = useLanguage();
   const [artworks, setArtworks] = useState<OwnedArtworkDto[]>([]);
@@ -77,10 +123,10 @@ export function OwnedArtworksScreen() {
 
   // Lightbox Preview Modal
   const [lightboxArtwork, setLightboxArtwork] = useState<OwnedArtworkDto | null>(null);
-
-  // Auction Certificate Modal
+  const [certArtwork, setCertArtwork] = useState<OwnedArtworkDto | null>(null);
   const [selectedCert, setSelectedCert] = useState<AuctionCertificateDto | null>(null);
   const [loadingCertId, setLoadingCertId] = useState<string | null>(null);
+
 
   const fetchArtworks = async () => {
     try {
@@ -150,14 +196,33 @@ export function OwnedArtworksScreen() {
       });
   }, [artworks, sourceFilter, searchQuery, sortBy]);
 
+  /**
+   * Mở chứng nhận.
+   *
+   * 1. Tác phẩm mua qua phiên đấu giá → gọi `/auctions/{auctionId}/certificate` để lấy
+   *    tờ chứng nhận đầy đủ (QR tra cứu, chữ ký SHA-256, phạm vi giấy phép). Đây là
+   *    bản đầy đủ duy nhất hệ thống thực sự phát hành.
+   * 2. Không có phiên đấu giá (chuyển nhượng nội bộ / đơn đặt vẽ) → hiện tờ chứng nhận
+   *    mỏng dựng từ chính bản ghi, thay vì báo lỗi 404.
+   */
   const handleOpenCertificate = async (item: OwnedArtworkDto) => {
-    if (item.sourceType !== 'Auction' || !item.sourceId) return;
+    if (!item.certificateNumber) {
+      toast.error('Tác phẩm này chưa có số chứng nhận.');
+      return;
+    }
+    const auctionId = item.sourceType === 'Auction' ? item.sourceId : null;
+    const hasAuction = Boolean(auctionId) && auctionId !== item.id;
+    if (!hasAuction) {
+      setCertArtwork(item);
+      return;
+    }
     try {
       setLoadingCertId(item.id);
-      const cert = await auctionService.getCertificate(item.sourceId);
+      const cert = await auctionService.getCertificate(auctionId as string);
       setSelectedCert(cert);
-    } catch (err) {
-      alert(auctionError(err) || 'Không thể tải chứng nhận quyền sở hữu.');
+    } catch {
+      // Không lấy được bản đầy đủ (không phải chủ sở hữu / chưa phát hành) → bản mỏng.
+      setCertArtwork(item);
     } finally {
       setLoadingCertId(null);
     }
@@ -167,22 +232,22 @@ export function OwnedArtworksScreen() {
     switch (sourceType) {
       case 'Auction':
         return (
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-[#8A6A1F]/40 bg-[#8A6A1F]/20 px-3 py-1 text-[11px] font-bold text-[#8A6A1F] backdrop-blur-md shadow-[0_0_12px_rgba(245,158,11,0.2)]">
-            <Crown size={12} className="text-[#8A6A1F]" />
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-[#8A6A1F]/45 bg-[#FFFCF6] px-2.5 py-1 text-[11px] font-semibold text-[#8A6A1F] shadow-sm">
+            <Crown size={12} aria-hidden />
             {lang === 'VIE' ? 'Đấu giá' : 'Auction Exclusive'}
           </span>
         );
       case 'Commission':
         return (
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-[#2C6A86]/40 bg-[#2C6A86]/20 px-3 py-1 text-[11px] font-bold text-[#2C6A86] backdrop-blur-md shadow-[0_0_12px_rgba(56,189,248,0.2)]">
-            <FolderKanban size={12} className="text-[#2C6A86]" />
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-[#2C6A86]/45 bg-[#FFFCF6] px-2.5 py-1 text-[11px] font-semibold text-[#2C6A86] shadow-sm">
+            <FolderKanban size={12} aria-hidden />
             {lang === 'VIE' ? 'Đơn vẽ hoàn tất' : 'Commission Deliverable'}
           </span>
         );
       case 'Trade':
         return (
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-[#5F3F86]/40 bg-[#5F3F86]/20 px-3 py-1 text-[11px] font-bold text-[#5F3F86] backdrop-blur-md shadow-[0_0_12px_rgba(168,85,247,0.2)]">
-            <ArrowLeftRight size={12} className="text-[#5F3F86]" />
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-[#5F3F86]/45 bg-[#FFFCF6] px-2.5 py-1 text-[11px] font-semibold text-[#5F3F86] shadow-sm">
+            <ArrowLeftRight size={12} aria-hidden />
             {lang === 'VIE' ? 'Trao đổi nghệ thuật' : 'Art Trade Exchange'}
           </span>
         );
@@ -313,70 +378,152 @@ export function OwnedArtworksScreen() {
         </div>
       ) : (
         <div className="wall wall--grid">
-          {filteredArtworks.map((artwork) => (
-            <article key={artwork.id} className="art-card">
-              <button
-                type="button"
-                onClick={() => setLightboxArtwork(artwork)}
-                className="art-card__frame block w-full text-left"
-                aria-label={`Xem ${artwork.title}`}
-              >
-                <div className="art-card__img">
-                  <Image
-                    src={artwork.thumbnailUrl || artwork.imageUrl || FALLBACK_IMAGE}
-                    alt={artwork.title}
-                    fill
-                    unoptimized
-                    sizes="(max-width: 640px) 50vw, (max-width: 1280px) 33vw, 25vw"
-                    className="object-cover object-center"
-                  />
-                </div>
-                <span className="badge badge--info absolute left-3 top-3 z-10">
-                  {artwork.sourceType === 'Auction'
-                    ? lang === 'VIE' ? 'Đấu giá' : 'Auction'
-                    : artwork.sourceType === 'Commission'
-                      ? 'Commission'
-                      : lang === 'VIE' ? 'Trao đổi' : 'Trade'}
-                </span>
-                {artwork.exclusiveBadge ? (
-                  <span className="badge badge--soon absolute right-3 top-3 z-10">
-                    <Crown size={11} aria-hidden /> {artwork.exclusiveBadge}
+          {filteredArtworks.map((artwork) => {
+            const price = formatVnd(artwork.price);
+            return (
+              <article key={artwork.id} className="art-card">
+                <button
+                  type="button"
+                  onClick={() => setLightboxArtwork(artwork)}
+                  className="art-card__frame block w-full text-left"
+                  aria-label={`Xem ${artwork.title}`}
+                >
+                  <div className="art-card__img">
+                    <Image
+                      src={artwork.thumbnailUrl || artwork.imageUrl || FALLBACK_IMAGE}
+                      alt={artwork.title}
+                      fill
+                      unoptimized
+                      sizes="(max-width: 640px) 50vw, (max-width: 1280px) 33vw, 25vw"
+                      className="object-cover object-center"
+                    />
+                  </div>
+                  <span className="absolute left-3 top-3 z-10">{getSourceBadge(artwork.sourceType)}</span>
+                  <span className="art-card__zoom" aria-hidden="true">
+                    <Maximize2 size={16} />
                   </span>
-                ) : null}
-                <span className="art-card__zoom" aria-hidden="true">
-                  <Maximize2 size={16} />
-                </span>
-              </button>
+                </button>
 
-              <div className="art-card__meta">
-                <span className="art-card__title">{artwork.title}</span>
-                <span className="art-card__sub">
-                  <span>{artwork.creatorName}</span>
-                  <span>·</span>
-                  <span>{formatDate(artwork.acquiredAt)}</span>
-                </span>
-                <div className="mt-2 flex items-center justify-between gap-2">
-                  <span className="art-card__reason">
-                    {formatVnd(artwork.price) ?? (lang === 'VIE' ? 'Không có giá' : 'No price')}
-                  </span>
-                  {artwork.downloadUrl ? (
-                    <a
-                      href={artwork.downloadUrl}
-                      className="inline-flex items-center gap-1 text-[0.75rem] font-medium text-[#8C3718] hover:underline"
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      <Download size={12} aria-hidden /> {lang === 'VIE' ? 'Tải' : 'Download'}
-                    </a>
+                <div className="art-card__meta">
+                  <span className="art-card__title">{artwork.title}</span>
+
+                  {/* Họa sĩ */}
+                  <div className="mt-1 flex items-center gap-2">
+                    <span className="grid h-6 w-6 shrink-0 place-items-center overflow-hidden rounded-full border border-[#221E1A]/10 bg-[#F0E7D8] text-[10px] font-semibold text-[#8C3718]">
+                      {artwork.creatorAvatarUrl ? (
+                        <Image
+                          src={artwork.creatorAvatarUrl}
+                          alt=""
+                          width={24}
+                          height={24}
+                          unoptimized
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        initialsOf(artwork.creatorName)
+                      )}
+                    </span>
+                    <span className="truncate text-[0.8125rem] text-[#6E6459]">
+                      {artwork.creatorName || '—'}
+                    </span>
+                  </div>
+
+                  {/* Hai dữ kiện của quyền sở hữu */}
+                  <div className="mt-2 grid grid-cols-2 gap-2 rounded-xl border border-[#221E1A]/10 bg-[#F0E7D8]/60 px-3 py-2">
+                    <div className="min-w-0">
+                      <span className="block text-[10px] uppercase tracking-wide text-[#746A5F]">
+                        {lang === 'VIE' ? 'Giá sở hữu' : 'Price paid'}
+                      </span>
+                      <b className="block truncate text-[0.8125rem] font-bold tabular-nums text-[#241F1A]">
+                        {price ?? '—'}
+                      </b>
+                    </div>
+                    <div className="min-w-0">
+                      <span className="block text-[10px] uppercase tracking-wide text-[#746A5F]">
+                        {lang === 'VIE' ? 'Ngày sở hữu' : 'Acquired'}
+                      </span>
+                      <b className="block truncate text-[0.8125rem] font-bold tabular-nums text-[#241F1A]">
+                        {formatDate(artwork.acquiredAt)}
+                      </b>
+                    </div>
+                  </div>
+
+                  {/* Quyền độc bản: để dưới hộp dữ kiện, không phủ lên nhãn nguồn */}
+                  {artwork.exclusiveBadge ? (
+                    <span className="mt-1.5 inline-flex max-w-full items-center gap-1 truncate rounded-full border border-[#8A6A1F]/40 bg-[#8A6A1F]/10 px-2 py-0.5 text-[10px] font-semibold text-[#8A6A1F]">
+                      <Crown size={10} aria-hidden /> {exclusiveLabel(artwork.exclusiveBadge, lang)}
+                    </span>
                   ) : null}
+
+                  {/* Hành động: tải bản gốc · chứng nhận · nguồn */}
+                  <div className="mt-2 flex items-center gap-2">
+                    {artwork.downloadUrl ? (
+                      <a
+                        href={artwork.downloadUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex min-w-0 flex-1 items-center justify-center gap-1.5 rounded-xl border border-[#2F6B63]/45 bg-[#2F6B63]/10 px-3 py-2 text-[0.75rem] font-semibold text-[#2F6B63] transition hover:bg-[#2F6B63]/20"
+                      >
+                        <Download size={13} aria-hidden />
+                        <span className="whitespace-nowrap">{lang === 'VIE' ? 'Tải gốc' : 'Download'}</span>
+                      </a>
+                    ) : (
+                      <span className="inline-flex min-w-0 flex-1 items-center justify-center gap-1.5 rounded-xl border border-[#221E1A]/10 px-3 py-2 text-[0.75rem] text-[#746A5F]">
+                        <span className="whitespace-nowrap">{lang === 'VIE' ? 'Chưa có tệp' : 'No file yet'}</span>
+                      </span>
+                    )}
+
+                    {artwork.certificateNumber ? (
+                      <button
+                        type="button"
+                        onClick={() => void handleOpenCertificate(artwork)}
+                        disabled={loadingCertId === artwork.id}
+                        title={`Chứng nhận ${artwork.certificateNumber}`}
+                        className="inline-flex min-w-0 flex-1 items-center justify-center gap-1.5 rounded-xl border border-[#8A6A1F]/45 bg-[#8A6A1F]/10 px-3 py-2 text-[0.75rem] font-semibold text-[#8A6A1F] transition hover:bg-[#8A6A1F]/20"
+                      >
+                        {loadingCertId === artwork.id ? (
+                          <RefreshCw size={13} className="animate-spin" aria-hidden />
+                        ) : (
+                          <FileCheck2 size={13} aria-hidden />
+                        )}
+                        <span className="whitespace-nowrap">{lang === 'VIE' ? 'Chứng nhận' : 'Certificate'}</span>
+                      </button>
+                    ) : null}
+
+                    {artwork.sourceDetailUrl ? (
+                      <a
+                        href={artwork.sourceDetailUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        aria-label={`Xem chi tiết nguồn của ${artwork.title}`}
+                        title={lang === 'VIE' ? 'Xem chi tiết nguồn' : 'View source'}
+                        className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-[#221E1A]/15 bg-[#FFFCF6] text-[#6E6459] transition hover:border-[#B24A26]/40 hover:text-[#241F1A]"
+                      >
+                        <ExternalLink size={14} aria-hidden />
+                      </a>
+                    ) : null}
+                  </div>
                 </div>
-              </div>
-            </article>
-          ))}
+              </article>
+            );
+          })}
         </div>
       )}
 
-      {/* ─── LIGHTBOX ───────────────────────────────────────── */}
+            {selectedCert ? (
+        <AuctionCertificateCard certificate={selectedCert} onClose={() => setSelectedCert(null)} />
+      ) : null}
+
+      {certArtwork ? (
+        <OwnedArtworkCertificate
+          artwork={certArtwork}
+          sourceLabel={sourceLabel(certArtwork.sourceType, lang)}
+          lang={lang}
+          onClose={() => setCertArtwork(null)}
+        />
+      ) : null}
+
+{/* ─── LIGHTBOX ───────────────────────────────────────── */}
       {lightboxArtwork ? (
         <div
           className="fixed inset-0 z-[300] grid place-items-center bg-[#221E1A]/70 p-4 backdrop-blur-md"
@@ -386,15 +533,15 @@ export function OwnedArtworksScreen() {
             if (e.target === e.currentTarget) setLightboxArtwork(null);
           }}
         >
-          <div className="relative grid max-h-[92dvh] w-full max-w-[1100px] overflow-hidden rounded-[24px] bg-[#FFFCF6] shadow-[0_44px_90px_-44px_rgba(58,42,26,0.7)] lg:grid-cols-[minmax(0,1fr)_22rem]">
-            <div className="relative min-h-[50vh] bg-[#F0E7D8]">
-              <Image
+          <div className="relative grid max-h-[92dvh] w-full max-w-[1100px] overflow-hidden rounded-[24px] bg-[#FFFCF6] shadow-[0_44px_90px_-44px_rgba(58,42,26,0.7)] lg:grid-cols-[minmax(0,auto)_20rem]">
+            <div className="grid place-items-center bg-[#F0E7D8] p-2">
+              {/* Ảnh tự quyết chiều rộng khung: không còn mảng nền trống khi tranh dọc */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
                 src={lightboxArtwork.imageUrl || lightboxArtwork.thumbnailUrl || FALLBACK_IMAGE}
                 alt={lightboxArtwork.title}
-                fill
-                unoptimized
-                sizes="70vw"
-                className="object-contain object-center"
+                className="max-h-[86dvh] w-auto max-w-full object-contain"
+                draggable={false}
               />
             </div>
             <div className="flex flex-col gap-4 overflow-y-auto p-6">
@@ -418,7 +565,7 @@ export function OwnedArtworksScreen() {
               <div className="kv">
                 <div>
                   <span>{lang === 'VIE' ? 'Nguồn' : 'Source'}</span>
-                  <b>{lightboxArtwork.sourceType}</b>
+                  <b>{sourceLabel(lightboxArtwork.sourceType, lang)}</b>
                 </div>
                 <div>
                   <span>{lang === 'VIE' ? 'Ngày sở hữu' : 'Acquired'}</span>
@@ -437,6 +584,19 @@ export function OwnedArtworksScreen() {
               </div>
 
               <div className="mt-auto grid gap-2">
+                {lightboxArtwork.certificateNumber ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const item = lightboxArtwork;
+                      setLightboxArtwork(null);
+                      void handleOpenCertificate(item);
+                    }}
+                    className="btn btn--outline btn--block btn--sm"
+                  >
+                    <FileCheck2 size={14} aria-hidden /> {lang === 'VIE' ? 'Xem chứng nhận' : 'View certificate'}
+                  </button>
+                ) : null}
                 {lightboxArtwork.downloadUrl ? (
                   <a
                     href={lightboxArtwork.downloadUrl}
@@ -459,9 +619,6 @@ export function OwnedArtworksScreen() {
       ) : null}
 
       {/* ─── CERTIFICATE MODAL ──────────────────────────────── */}
-      {selectedCert ? (
-        <AuctionCertificateCard certificate={selectedCert} onClose={() => setSelectedCert(null)} />
-      ) : null}
     </div>
   );
 }

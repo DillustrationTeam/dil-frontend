@@ -296,7 +296,6 @@ export function PublicHeader() {
               {isDark ? <Sun size={16} aria-hidden /> : <Moon size={16} aria-hidden />}
               {isDark ? t('Nền sáng') : t('Nền tối')}
             </span>
-            <span className="mnav__theme-state">{isDark ? 'Ink' : 'Paper'}</span>
           </button>
 
           {/* Khách: hai CTA tài khoản nằm ở đây thay vì chiếm chỗ trên header mobile */}

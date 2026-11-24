@@ -3,7 +3,19 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { ArrowLeft, ArrowRight, ArrowUpRight, Eye, Gavel, Maximize2, Pause, Play } from 'lucide-react';
+import {
+  ArrowLeft,
+  ArrowRight,
+  ArrowUpRight,
+  Clock,
+  Eye,
+  Gavel,
+  Images,
+  Maximize2,
+  Pause,
+  Play,
+  Trophy,
+} from 'lucide-react';
 
 import { CountUp, Reveal } from '@/components/motion';
 import { heroSession } from './hero-session';
@@ -27,11 +39,63 @@ function fmtNumber(value: number): string {
 
 function fmtDate(iso?: string | null): string {
   if (!iso) return 'Đang cập nhật';
-  return new Date(iso).toLocaleDateString('vi-VN', { day: '2-digit', month: 'short', year: 'numeric' });
+  const time = new Date(iso).getTime();
+  if (!Number.isFinite(time)) return 'Đang cập nhật';
+  return new Date(iso).toLocaleDateString('vi-VN', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  });
 }
 
 function artworkImage(artwork: MarketplaceArtwork): string {
   return artwork.thumbnailUrl || artwork.imageUrl;
+}
+
+/**
+ * Giai đoạn của sự kiện, suy từ các mốc thời gian ban tổ chức đặt (không đoán).
+ * Dùng cho nhãn nhỏ trên ảnh bìa — thay cho chữ "Open call" tiếng Anh cứng trước đây.
+ */
+function eventPhaseOf(event: EventListItemDto, now = Date.now()): string {
+  const at = (iso?: string | null) => (iso ? new Date(iso).getTime() : NaN);
+  const start = at(event.submissionStartAt);
+  const end = at(event.submissionEndAt);
+  const judgingEnd = at(event.judgingEndAt);
+  const votingEnd = at(event.votingEndAt);
+  const announced = at(event.resultAnnouncementAt);
+
+  if (Number.isFinite(start) && now < start) return 'Sắp mở nhận bài';
+  if (Number.isFinite(end) && now <= end) return 'Đang nhận bài';
+  if (Number.isFinite(judgingEnd) && now <= judgingEnd) return 'Hội đồng đang chấm';
+  if (Number.isFinite(votingEnd) && now <= votingEnd) return 'Đang bình chọn';
+  if (Number.isFinite(announced) && now < announced) return 'Sắp công bố kết quả';
+  return 'Đã công bố kết quả';
+}
+
+/**
+ * Tiêu đề mục sự kiện: cùng một khối nhưng câu chữ đổi theo giai đoạn thật, để
+ * người đọc biết chuyện gì đang diễn ra thay vì một câu thơ chung chung.
+ */
+function eventHeadlineOf(event: EventListItemDto, phase: string): string {
+  const count = event.submissionCount ?? 0;
+  switch (phase) {
+    case 'Sắp mở nhận bài':
+      return 'Cuộc thi mới sắp mở nhận bài';
+    case 'Đang nhận bài':
+      return count > 0 ? `${count} bài dự thi đã gửi` : 'Đang mở nhận bài dự thi';
+    case 'Hội đồng đang chấm':
+      return count > 0
+        ? `${count} bài dự thi đang được hội đồng chấm`
+        : 'Hội đồng đang chấm bài';
+    case 'Đang bình chọn':
+      return 'Cộng đồng đang bình chọn';
+    case 'Sắp công bố kết quả':
+      return 'Sắp công bố kết quả cuộc thi';
+    case 'Đã công bố kết quả':
+      return 'Kết quả cuộc thi đã công bố';
+    default:
+      return 'Cuộc thi đang mở trên sàn';
+  }
 }
 
 function initialsOf(name: string): string {
@@ -300,14 +364,17 @@ export function LiveHomeGallery() {
   useEffect(() => {
     let active = true;
 
+    // `getArtworks()` mặc định chỉ trả 12 tác phẩm đầu → bảng xếp hạng và số đếm
+    // danh mục trên trang chủ chỉ phản ánh 12/31 tác phẩm. Lấy một lượt đủ lớn để
+    // mọi con số trên trang chủ là con số của cả sàn.
     marketplaceService
-      .getArtworks()
-      .then((items) => {
+      .getArtworksPage({ page: 1, pageSize: 48 })
+      .then((res) => {
         if (!active) return;
-        const approved = items.filter((item) => item.moderationStatus === 'Approved' && item.imageUrl);
-        setArtworks(
-          [...approved].sort((a, b) => (b.viewCount ?? 0) - (a.viewCount ?? 0)),
+        const approved = res.items.filter(
+          (item) => item.moderationStatus === 'Approved' && item.imageUrl,
         );
+        setArtworks([...approved].sort((a, b) => (b.viewCount ?? 0) - (a.viewCount ?? 0)));
       })
       .catch(() => {
         if (active) setError('Không tải được tác phẩm. Vui lòng tải lại trang.');
@@ -335,10 +402,17 @@ export function LiveHomeGallery() {
       })
       .catch(() => undefined);
 
+    // `GET /events` trả `data` là MẢNG TRẦN (không phải `{ items }`). Đọc cả hai
+    // hình dạng, nếu không phòng sự kiện trên trang chủ luôn rỗng.
     apiClient
-      .get<ApiResponse<{ items: EventListItemDto[] }>>('/events', { params: { page: 1, pageSize: 3 } })
+      .get<ApiResponse<EventListItemDto[] | { items: EventListItemDto[] }>>('/events', {
+        params: { page: 1, pageSize: 3 },
+      })
       .then((response) => {
-        if (active && response.data.data?.items) setEvents(response.data.data.items);
+        if (!active) return;
+        const payload = response.data.data;
+        const list = Array.isArray(payload) ? payload : (payload?.items ?? []);
+        setEvents(list);
       })
       .catch(() => undefined);
 
@@ -424,56 +498,74 @@ export function LiveHomeGallery() {
       });
     }
 
-    return rows.sort((a, b) => b.count - a.count).slice(0, 7);
+    return rows.sort((a, b) => b.count - a.count).slice(0, 8);
   }, [artworks, categories]);
 
+  /**
+   * Gợi ý = tranh khác CÙNG THẺ với tranh đang mở, xếp theo lượt xem.
+   *
+   * Mỗi mục mang theo `sharedTag` thật (chuỗi y như trong DB) để:
+   * - card ghi lý do thật ("cùng #cyberpunk") thay vì "cùng bảng màu" bịa;
+   * - link "xem tất cả" trỏ đúng /explore?tag=<thẻ đó> — cùng nguồn dữ liệu với
+   *   bộ lọc thẻ của trang sàn, nên hai nơi không bao giờ lệch nhau.
+   */
   const reco = useMemo(() => {
     const anchor = slides[0];
-    if (!anchor) return artworks.slice(0, 8);
-    const tags = new Set((anchor.tags ?? []).map((tag) => tag.toLowerCase().trim()));
-    const scored = artworks
+    if (!anchor) return [] as { artwork: MarketplaceArtwork; sharedTag?: string; sameStyle: boolean }[];
+    const anchorTags = (anchor.tags ?? []).map((tag) => tag.trim()).filter(Boolean);
+    const anchorStyle = (anchor.style || '').trim().toLowerCase();
+
+    return artworks
       .filter((artwork) => artwork.id !== anchor.id)
-      .map((artwork) => ({
-        artwork,
-        score: (artwork.tags ?? []).filter((tag) => tags.has(tag.toLowerCase().trim())).length,
-      }))
+      .map((artwork) => {
+        const sharedTag = (artwork.tags ?? []).find((tag) =>
+          anchorTags.some((candidate) => candidate.toLowerCase() === tag.trim().toLowerCase()),
+        );
+        const sameStyle = Boolean(anchorStyle) && (artwork.style || '').trim().toLowerCase() === anchorStyle;
+        return { artwork, sharedTag, sameStyle, score: (sharedTag ? 2 : 0) + (sameStyle ? 1 : 0) };
+      })
       .sort((a, b) => b.score - a.score || (b.artwork.viewCount ?? 0) - (a.artwork.viewCount ?? 0))
-      .map((entry) => entry.artwork);
-    return scored.slice(0, 8);
+      .slice(0, 8)
+      .map(({ artwork, sharedTag, sameStyle }) => ({ artwork, sharedTag, sameStyle }));
   }, [artworks, slides]);
+
+  /** Thẻ xuất hiện nhiều nhất trong tập gợi ý — dùng cho link "xem tất cả". */
+  const recoTopTag = useMemo(() => {
+    const counts = new Map<string, number>();
+    reco.forEach(({ sharedTag }) => {
+      if (!sharedTag) return;
+      const key = sharedTag.trim();
+      counts.set(key, (counts.get(key) ?? 0) + 1);
+    });
+    const sorted = [...counts.entries()].sort((a, b) => b[1] - a[1]);
+    return sorted[0]?.[0] ?? '';
+  }, [reco]);
+
+  const recoAnchor = slides[0];
+  const recoAnchorStyle = (recoAnchor?.style || '').trim();
+  /**
+   * Có bao nhiêu tranh gợi ý THẬT SỰ cùng dòng với tranh đang mở. Dùng để chọn
+   * tiêu đề/link, để phần chữ trên trang không khẳng định một quan hệ không tồn tại
+   * (DB hiện không có thẻ nào, nên phần lớn trường hợp sẽ rơi về "được xem nhiều").
+   */
+  const recoSharesStyle = reco.some((item) => item.sameStyle);
+  const recoHref = recoTopTag
+    ? `/explore?tag=${encodeURIComponent(recoTopTag)}`
+    : recoSharesStyle && recoAnchorStyle
+      ? `/explore?q=${encodeURIComponent(recoAnchorStyle)}`
+      : '/explore?sort=views';
 
   const spotlightEvent = events[0];
   const eventStatus = spotlightEvent ? normalizeEventStatus(spotlightEvent.status) : 'Draft';
 
   const stats = [
     { value: artworks.length, label: 'tác phẩm đã duyệt' },
-    { value: creators.length, label: 'Họa sĩ đang nhận đơn' },
+    { value: creators.length, label: 'Họa sĩ trên sàn' },
     { value: catIndex.length || categories.length, label: 'dòng tranh trên sàn' },
   ];
 
-  // Băng chữ lấy từ dữ liệu thật (danh mục + style + tag). Không đủ chữ thì ẩn hẳn
-  // băng đi — thà không có còn hơn một dải gần như trống.
-  const marqueeWords = useMemo(() => {
-    const set = new Set<string>();
-    catIndex.forEach((row) => set.add(row.name));
-    artworks.forEach((artwork) => {
-      if (artwork.style) set.add(artwork.style);
-      (artwork.tags ?? []).slice(0, 2).forEach((tag) => set.add(tag));
-    });
-    return [...set].filter(Boolean).slice(0, 12);
-  }, [catIndex, artworks]);
-
-  // Mỗi nửa phải dài hơn viewport thì vòng lặp translateX(-50%) mới liền mạch.
-  // Lặp đủ để một nửa có tối thiểu 24 mục — 2 danh mục cũng thành dải kín.
-  const marqueeTrack = useMemo(() => {
-    if (marqueeWords.length < 2) return [];
-    const repeat = Math.max(3, Math.ceil(24 / marqueeWords.length));
-    const half = Array.from({ length: repeat }, () => marqueeWords).flat();
-    return [...half, ...half];
-  }, [marqueeWords]);
-
   return (
-    <main className="shell home-view" id="main">
+    <div className="shell home-view" id="main">
       {/* ═══ HERO — a lit wall, full screen at rest ═══ */}
       <section
         className={`hero is-expanded${slides.length > 1 ? ' hero--with-thumbs' : ''}`}
@@ -521,8 +613,7 @@ export function LiveHomeGallery() {
             <div className="hero__body">
               <p className="eyebrow rise">Phòng tranh dilillustration</p>
               <h1 className="hero__title rise"> Khám phá tranh từ <em>họa sĩ</em> bạn yêu thích. </h1>
-              <p className="hero__sub"> Một vòng tuyển chọn từ sàn tranh: tác phẩm được duyệt, họa sĩ đang nhận đơn, và những
- phiên đấu giá đang mở. </p>
+              <p className="hero__sub">Một vòng tuyển chọn từ sàn tranh: tác phẩm được duyệt, họa sĩ đã xác thực, và những phiên đấu giá đang mở.</p>
               <div className="hero__actions">
                 <Link href="/explore" className="btn btn--primary"> Khám phá sàn tranh <ArrowRight aria-hidden />
                 </Link>
@@ -534,9 +625,7 @@ export function LiveHomeGallery() {
                   <span className="sep" />
                   <span>{featured.creatorName || 'Dillustration Creator'}</span>
                   <span className="sep" />
-                  <span style={{ fontVariantNumeric: 'tabular-nums' }}>
-                    {fmtNumber(featured.viewCount ?? 0)} lượt xem
-                  </span>
+                  <span>{featured.categoryName || featured.style || 'Tranh kỹ thuật số'}</span>
                 </div>
               ) : (
                 <p className="hero__foot">
@@ -585,17 +674,6 @@ export function LiveHomeGallery() {
         </div>
       </section>
 
-      {/* ═══ MARQUEE — the page breathing ═══ */}
-      {marqueeTrack.length > 0 ? (
-        <div className="marquee" aria-hidden="true">
-          <div className="marquee__track">
-            {marqueeTrack.map((word, position) => (
-              <span key={`${word}-${position}`}>{word}</span>
-            ))}
-          </div>
-        </div>
-      ) : null}
-
       {/* ═══ STATS — one quiet line ═══ */}
       <section className="wrap">
         <p className="statsline">
@@ -615,11 +693,11 @@ export function LiveHomeGallery() {
         <section className="section wrap">
           <Reveal>
             <SectionHead
-              eyebrow="Sự kiện &amp; tranh"
-              title="Mỗi lần một căn phòng"
-              sub="Một cuộc thi, một danh sách rút gọn, và những tác phẩm hội đồng đang tranh luận."
+              eyebrow="Sự kiện trên sàn"
+              title="Cuộc thi tranh đang mở"
+              sub={`Nhận bài, chấm điểm, công bố kết quả — cuộc thi gần nhất đóng nhận bài ngày ${fmtDate(spotlightEvent.submissionEndAt)}.`}
               href="/events"
-              linkLabel="Tất cả sự kiện"
+              linkLabel="Xem tất cả sự kiện"
             />
             <div className="evt-grid">
               <article className="evt">
@@ -637,33 +715,78 @@ export function LiveHomeGallery() {
                     <div className="skeleton h-full w-full" aria-hidden="true" />
                   )}
                   <span className={`badge ${eventStatus === 'Open' ? 'badge--live' : 'badge--soon'}`}>
-                    {fmtDate(spotlightEvent.submissionEndAt)}
+                    {eventPhaseOf(spotlightEvent)}
                   </span>
                 </div>
                 <div className="evt__body">
-                  <p className="eyebrow">Open call</p>
-                  <h3>{spotlightEvent.title}</h3>
-                  <p>
+                  <h3 className="evt__title">{spotlightEvent.title}</h3>
+                  <p className="evt__desc">
                     {spotlightEvent.description?.slice(0, 180) ||
                       'Một lời mời mở: gửi tác phẩm, chờ hội đồng chấm, và mở cửa phòng tranh.'}
                   </p>
-                  <div className="evt__facts">
-                    <span className="tag">{spotlightEvent.submissionCount} bài dự thi</span>
-                    <span className="tag">Đóng {fmtDate(spotlightEvent.submissionEndAt)}</span>
-                    {spotlightEvent.prize ? <span className="tag">{spotlightEvent.prize}</span> : null}
-                  </div>
-                  <Link href={`/events/${spotlightEvent.id}`} className="btn btn--outline btn--sm"> Đọc thể lệ <ArrowUpRight aria-hidden />
+
+                  <ul className="evt__facts">
+                    <li className="evt__fact">
+                      <Images aria-hidden /> {`${spotlightEvent.submissionCount} bài dự thi`}
+                    </li>
+                    <li className="evt__fact">
+                      <Clock aria-hidden /> {`Đóng ${fmtDate(spotlightEvent.submissionEndAt)}`}
+                    </li>
+                  </ul>
+
+                  {spotlightEvent.prize ? (
+                    <div className="evt__prize">
+                      <p className="evt__prize-label">
+                        <Trophy aria-hidden /> Giải thưởng
+                      </p>
+                      <ul className="evt__prize-list">
+                        {spotlightEvent.prize
+                          .split('·')
+                          .map((item) => item.trim())
+                          .filter(Boolean)
+                          .map((item) => (
+                            <li key={item}>{item}</li>
+                          ))}
+                      </ul>
+                    </div>
+                  ) : null}
+
+                  <Link href={`/events/${spotlightEvent.id}`} className="btn btn--outline btn--sm evt__cta">
+                    Đọc thể lệ <ArrowUpRight aria-hidden />
                   </Link>
                 </div>
               </article>
+              {/* Hai sự kiện còn lại, không phải tranh — mỗi thẻ dẫn tới /events/{id} */}
               <div className="evt__side">
-                {wall.slice(0, 2).map((artwork, position) => (
-                  <ArtCard
-                    key={artwork.id}
-                    artwork={artwork}
-                    ratio="1 / 1"
-                    reason={position === 0 ? 'hội đồng chọn' : undefined}
-                  />
+                <p className="eyebrow evt__side-label">Sự kiện khác trên sàn</p>
+                {events.slice(1, 3).map((event) => (
+                  <Link key={event.id} href={`/events/${event.id}`} className="evt-mini">
+                    <span className="evt-mini__art">
+                      {event.bannerUrl ? (
+                        <Image
+                          src={event.bannerUrl}
+                          alt=""
+                          fill
+                          unoptimized
+                          sizes="(max-width: 900px) 50vw, 20vw"
+                          className="object-cover"
+                        />
+                      ) : (
+                        <span className="skeleton block h-full w-full" aria-hidden="true" />
+                      )}
+                      <span className="badge badge--soon evt-mini__badge">
+                        {eventPhaseOf(event)}
+                      </span>
+                    </span>
+                    <span className="evt-mini__body">
+                      <span className="evt-mini__title">{event.title}</span>
+                      <span className="evt-mini__meta">
+                        {`${event.submissionCount} bài · ${
+                          new Date(event.submissionEndAt).getTime() < Date.now() ? 'đã đóng' : 'đóng'
+                        } ${fmtDate(event.submissionEndAt)}`}
+                      </span>
+                    </span>
+                  </Link>
                 ))}
               </div>
             </div>
@@ -676,31 +799,44 @@ export function LiveHomeGallery() {
         <Reveal>
           <SectionHead
             eyebrow="Xếp hạng"
-            title="Thịnh hành tuần này"
-            sub="Xếp theo lượt xem thật trên toàn sàn."
-            href="/explore"
-            linkLabel="Xem tất cả"
+            title="Được xem nhiều nhất"
+            sub="Xếp theo tổng lượt xem trên toàn sàn."
+            href="/explore?sort=views"
+            linkLabel="Xếp hạng đầy đủ"
           />
           <div className="board">
             {board.length === 0 ? (
               <p className="py-6 text-sm text-[#6E6459]">{loading ? 'Đang tải bảng xếp hạng…' : 'Chưa có dữ liệu.'}</p>
             ) : (
-              board.map((artwork, position) => (
-                <Link key={artwork.id} href={`/artworks/${artwork.id}`} scroll={false} className="board__row">
-                  <span className="board__rank">{String(position + 1).padStart(2, '0')}</span>
-                  <span className="board__title">
-                    {artwork.title}
-                    <small>
-                      {artwork.creatorName || 'Dillustration Creator'}
-                      {artwork.categoryName ? ` · ${artwork.categoryName}` : ''}
-                    </small>
-                  </span>
-                  <span className="board__score">
-                    {fmtNumber(artwork.viewCount ?? 0)}
-                    <small>lượt xem</small>
-                  </span>
-                </Link>
-              ))
+              board.map((artwork, position) => {
+                /**
+                 * Không in lượt xem tuyệt đối ở bảng xếp hạng. Thứ hạng đã nói lên
+                 * vị trí; thanh dưới đây chỉ là TỈ LỆ so với tác phẩm dẫn đầu của
+                 * chính bảng này (không phải con số thật của sàn).
+                 */
+                const top = Math.max(1, board[0]?.viewCount ?? 1);
+                const heat = Math.max(6, Math.round(((artwork.viewCount ?? 0) / top) * 100));
+                return (
+                  <Link key={artwork.id} href={`/artworks/${artwork.id}`} scroll={false} className="board__row">
+                    <span className="board__rank">{String(position + 1).padStart(2, '0')}</span>
+                    <span className="board__title">
+                      {artwork.title}
+                      <small>
+                        {artwork.creatorName || 'Dillustration Creator'}
+                        {artwork.categoryName ? ` · ${artwork.categoryName}` : ''}
+                      </small>
+                    </span>
+                    <span
+                      className="board__heat"
+                      role="img"
+                      aria-label={position === 0 ? 'Dẫn đầu bảng tuần này' : `Hạng ${position + 1} bảng tuần này`}
+                      title="Mức độ được xem so với tác phẩm dẫn đầu"
+                    >
+                      <i style={{ inlineSize: `${heat}%` }} />
+                    </span>
+                  </Link>
+                );
+              })
             )}
           </div>
         </Reveal>
@@ -710,9 +846,9 @@ export function LiveHomeGallery() {
       <section className="section wrap">
         <Reveal>
           <SectionHead
-            eyebrow="Creator"
-            title="Họa sĩ đang nhận đơn"
-            sub="Hồ sơ đã xác thực, phản hồi trong 24 giờ."
+            eyebrow="Họa sĩ"
+            title="Họa sĩ trên sàn"
+            sub="Hồ sơ đã xác thực trên sàn."
             href="/creators"
             linkLabel="Tất cả họa sĩ"
           />
@@ -779,15 +915,47 @@ export function LiveHomeGallery() {
         <Reveal>
           <SectionHead
             eyebrow="Dành cho bạn"
-            title="Cùng một tay nghề, cùng một ánh sáng"
-            sub={slides[0] ? `Vì bạn đang xem “${slides[0].title}”.` : 'Những tác phẩm được xem nhiều nhất.'}
-            href="/explore"
-            linkLabel="Chỉnh gu của bạn"
+            title={
+              recoTopTag || recoSharesStyle
+                ? 'Cùng một tay nghề, cùng một ánh sáng'
+                : 'Được xem nhiều trên sàn'
+            }
+            sub={
+              recoAnchor
+                ? `Vì bạn đang xem “${recoAnchor.title}”${
+                    recoTopTag
+                      ? ` · cùng thẻ #${recoTopTag}`
+                      : recoSharesStyle && recoAnchorStyle
+                        ? ` · cùng dòng ${recoAnchorStyle}`
+                        : ' · những tác phẩm được xem nhiều khác'
+                  }.`
+                : 'Những tác phẩm được xem nhiều nhất.'
+            }
+            href={recoHref}
+            linkLabel={
+              recoTopTag
+                ? `Xem tất cả #${recoTopTag}`
+                : recoSharesStyle && recoAnchorStyle
+                  ? `Xem dòng ${recoAnchorStyle}`
+                  : 'Xếp hạng đầy đủ'
+            }
           />
           <ScrollRail className="rail">
-            {reco.slice(0, 6).map((artwork) => (
+            {reco.slice(0, 6).map(({ artwork, sharedTag, sameStyle }) => (
               <div key={artwork.id} className="rail__item">
-                <ArtCard artwork={artwork} ratio="3 / 4" reason="cùng bảng màu" />
+                <ArtCard
+                  artwork={artwork}
+                  ratio="3 / 4"
+                  /* Chỉ ghi lý do khi nó ĐÚNG: cùng thẻ, hoặc cùng dòng tranh với tranh
+                     đang mở. Không có điểm chung thì để trống, không bịa "cùng bảng màu". */
+                  reason={
+                    sharedTag
+                      ? `cùng thẻ #${sharedTag}`
+                      : sameStyle && artwork.style
+                        ? `cùng dòng ${artwork.style}`
+                        : undefined
+                  }
+                />
               </div>
             ))}
           </ScrollRail>
@@ -879,6 +1047,6 @@ export function LiveHomeGallery() {
           </div>
         )}
       </section>
-    </main>
+    </div>
   );
 }

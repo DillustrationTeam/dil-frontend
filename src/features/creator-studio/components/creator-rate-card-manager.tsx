@@ -460,7 +460,13 @@ export function CreatorRateCardManager() {
           <Sparkles className="h-3.5 w-3.5" /> Phụ phí Add-ons </button>
       </div>
 
-      {/* Tab: Add-ons */}
+      {/* Tab: Add-ons — nếu chưa có hồ sơ thì phải nói rõ, không để tab trống */}
+      {tab === 'addons' && !hasProfile && (
+        <p className="mt-4 rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-4 py-3 text-xs text-[#6E6459]">
+          Cần tạo hồ sơ họa sĩ trước khi thêm phụ phí. Tab này đang trống vì hồ sơ chưa được
+          khởi tạo.
+        </p>
+      )}
       {tab === 'addons' && hasProfile && <CreatorAddonManager packages={packages} />}
 
       {/* Tab: Packages */}

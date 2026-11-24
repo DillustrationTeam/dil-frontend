@@ -114,7 +114,7 @@ export function CreatorsDirectory({ initialCategory = '' }: { initialCategory?: 
   }, [selectedCategoryId, search, onlyOpenSlots]);
 
   return (
-    <main className="min-h-screen bg-[#F7F2E9] px-4 pb-20 pt-8 text-[#241F1A] sm:px-6 lg:px-10">
+    <div className="min-h-screen bg-[#F7F2E9] px-4 pb-20 pt-8 text-[#241F1A] sm:px-6 lg:px-10">
       <div className="mx-auto max-w-7xl space-y-6">
         <header className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
           <div>
@@ -318,7 +318,9 @@ export function CreatorsDirectory({ initialCategory = '' }: { initialCategory?: 
                     ))}
                   </div>
                 ) : (
-                  <p className="text-[11px] text-[#746A5F]">Chưa có tác phẩm nào được duyệt.</p>
+                  <p className="text-[11px] text-[#746A5F]">
+                    Họa sĩ chưa đăng tác phẩm công khai — hồ sơ vẫn nhận đơn đặt vẽ.
+                  </p>
                 )}
 
                 <Link
@@ -333,6 +335,6 @@ export function CreatorsDirectory({ initialCategory = '' }: { initialCategory?: 
           </div>
         )}
       </div>
-    </main>
+    </div>
   );
 }

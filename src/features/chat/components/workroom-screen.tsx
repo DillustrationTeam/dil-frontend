@@ -2315,7 +2315,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
             onClose={() => setShowApprovalModal(false)}
             commissionId={room.commissionId}
             milestoneId={displayedMilestone?.id || ''}
-            wipPreviewUrl={currentWipPreviewUrl || 'https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?auto=format&fit=crop&w=1200&q=80'}
+            wipPreviewUrl={currentWipPreviewUrl || ''}
             maxRevisions={displayedMilestone?.maxRevisions ?? 3}
             revisionCount={displayedMilestone?.revisionCount ?? 0}
             milestoneSequence={displayedMilestone?.sequence ?? 1}

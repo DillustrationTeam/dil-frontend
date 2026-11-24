@@ -231,14 +231,14 @@ export function CommercialRightsModal({
                     onAgree();
                     onClose();
                   }}
-                  className="rounded-full bg-[#2F6B63]/10 px-5 py-2 text-xs font-bold text-[#F0E7D8] hover:bg-[#2F6B63]/10 transition flex items-center gap-1.5"
+                  className="rounded-full bg-[var(--petrol)] px-5 py-2 text-xs font-bold text-[var(--ink-2)] shadow-sm transition hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--petrol)] active:scale-[0.98] flex items-center gap-1.5"
                 >
                   <CheckCircle2 size={15} /> Tôi đã hiểu và cam kết đồng ý </button>
               ) : (
                 <button
                   type="button"
                   onClick={onClose}
-                  className="rounded-full bg-[#2F6B63]/10 px-5 py-2 text-xs font-bold text-[#F0E7D8] hover:bg-[#2F6B63]/10 transition"
+                  className="rounded-full border border-[var(--petrol)] bg-transparent px-5 py-2 text-xs font-bold text-[var(--petrol)] transition hover:opacity-80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--petrol)]"
                 >
                   Đã hiểu &amp; Đóng   </button>
               )}

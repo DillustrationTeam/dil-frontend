@@ -12,7 +12,6 @@ import {
   ArrowRight,
   Award,
   Calendar,
-  Eye,
   Image as ImageIcon,
   Layers,
   Maximize2,
@@ -48,9 +47,6 @@ import { ProtectedArtworkLightbox, ProtectedArtworkViewer } from './protected-ar
 import { useArtworkComments } from './use-artwork-comments';
 import { useLanguage } from '@/context/language-context';
 import { useAuthStore } from '@/store/use-auth-store';
-
-const DEFAULT_THUMB =
-  'https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?auto=format&fit=crop&w=400&q=80';
 
 const formatVnd = (value: number) =>
   `${new Intl.NumberFormat('vi-VN').format(Math.round(value))}đ`;
@@ -155,6 +151,16 @@ function ArtworkDetailContent({
     };
   }, [activeId]);
 
+  /** Tab trình duyệt mang tên tác phẩm, không phải tên site chung. */
+  useEffect(() => {
+    if (!artwork || typeof document === 'undefined') return;
+    const previous = document.title;
+    document.title = `${artwork.title} — dilillustration`;
+    return () => {
+      document.title = previous;
+    };
+  }, [artwork]);
+
   const { pkg: matchedPkg, isSampleMatch } = useMemo(
     () => matchArtworkPackage(artwork, rates),
     [artwork, rates]
@@ -190,20 +196,42 @@ function ArtworkDetailContent({
   const canCommission =
     !isOwnArtwork && creatorProfile?.isAcceptingOrders !== false && !(pkgSlot?.isFull ?? false);
 
+  /**
+   * Chia sẻ đường dẫn.
+   *
+   * Bản cũ nuốt mọi lỗi trong `catch {}` — nếu `navigator.share` từ chối (không phải
+   * do người dùng huỷ) hoặc clipboard bị chặn thì bấm nút KHÔNG có phản hồi nào, đúng
+   * kiểu "nút chết". Giờ: huỷ thì im, lỗi thật thì sao chép dự phòng, cuối cùng vẫn
+   * phải báo cho người dùng biết chuyện gì xảy ra.
+   */
   const handleShare = async () => {
     const shareUrl =
       typeof window !== 'undefined' ? `${window.location.origin}/artworks/${activeId}` : '';
-    try {
-      if (navigator.share) {
-        await navigator.share({ title: artwork?.title || 'Dillustration Artwork', url: shareUrl });
-        return;
-      }
-      if (navigator.clipboard?.writeText) {
+    if (!shareUrl) return;
+
+    const copy = async () => {
+      if (!navigator.clipboard?.writeText) return false;
+      try {
         await navigator.clipboard.writeText(shareUrl);
         toast.success('Đã sao chép đường dẫn tác phẩm.');
+        return true;
+      } catch {
+        return false;
       }
-    } catch {
-      // User cancelled native share
+    };
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: artwork?.title || 'Dillustration Artwork', url: shareUrl });
+        return;
+      } catch (cause) {
+        // Người dùng tự đóng hộp thoại chia sẻ → không làm phiền.
+        if (cause instanceof Error && cause.name === 'AbortError') return;
+      }
+    }
+
+    if (!(await copy())) {
+      toast.error('Không chia sẻ được. Đường dẫn: ' + shareUrl);
     }
   };
 
@@ -217,12 +245,12 @@ function ArtworkDetailContent({
 
   if (loading && !artwork) {
     return (
-      <div className="p-16 text-center text-sm text-[#746A5F]">Đang tải tác phẩm…</div>
+      <div className="p-16 text-center text-sm text-[#5f574d]">Đang tải tác phẩm…</div>
     );
   }
   if (!artwork) {
     return (
-      <div className="p-16 text-center text-sm text-[#746A5F]">Không tìm thấy tác phẩm.</div>
+      <div className="p-16 text-center text-sm text-[#5f574d]">Không tìm thấy tác phẩm.</div>
     );
   }
 
@@ -242,20 +270,13 @@ function ArtworkDetailContent({
               onOpenLightbox={() => setIsLightboxOpen(true)}
             />
 
-            <div
-              className="pointer-events-none absolute left-3.5 top-3.5 z-20 inline-flex items-center gap-1.5 rounded-full border border-[#221E1A]/10 bg-[#FFFCF6]/80 px-2.5 py-1 text-xs font-medium tabular-nums text-[#746A5F] backdrop-blur-md"
-              title="Lượt xem tác phẩm"
-            >
-              <Eye className="h-3.5 w-3.5" />
-              <span>{artwork.viewCount.toLocaleString('vi-VN')}</span>
-            </div>
 
             <button
               type="button"
               onClick={() => setIsLightboxOpen(true)}
               aria-label="Xem ảnh toàn màn hình"
               title="Xem ảnh toàn màn hình"
-              className="absolute right-3.5 top-3.5 z-20 inline-flex h-8 w-8 items-center justify-center rounded-full border border-[#221E1A]/10 bg-[#FFFCF6]/85 text-[#746A5F] backdrop-blur-md transition hover:bg-[#F0E7D8] hover:text-[#241F1A] lg:opacity-0 lg:group-hover:opacity-100 lg:focus-visible:opacity-100"
+              className="absolute right-3.5 top-3.5 z-20 inline-flex h-8 w-8 items-center justify-center rounded-full border border-[#221E1A]/10 bg-[#FFFCF6]/85 text-[#5f574d] backdrop-blur-md transition hover:bg-[#F0E7D8] hover:text-[#241F1A] lg:opacity-0 lg:group-hover:opacity-100 lg:focus-visible:opacity-100"
             >
               <Maximize2 className="h-3.5 w-3.5" />
             </button>
@@ -281,7 +302,7 @@ function ArtworkDetailContent({
               {!artwork.isAiGenerated ? (
                 <span
                   title="Tác phẩm vẽ tay, không gắn nhãn AI"
-                  className="inline-flex items-center gap-1.5 rounded-full border border-[#221E1A]/10 bg-[#F0E7D8] px-3 py-1.5 font-medium text-[#746A5F]"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-[#221E1A]/10 bg-[#F0E7D8] px-3 py-1.5 font-medium text-[#5f574d]"
                 >
                   <PenTool className="h-3.5 w-3.5 text-[#8C3718]" />
                   <span>100% Vẽ tay</span>
@@ -301,7 +322,7 @@ function ArtworkDetailContent({
                 onClick={() => void handleShare()}
                 aria-label="Chia sẻ đường dẫn tác phẩm"
                 title="Sao chép đường dẫn"
-                className="inline-flex h-10 w-10 items-center justify-center rounded-[10px] border border-[#221E1A]/10 bg-[#F0E7D8] text-[#746A5F] transition hover:bg-[#FFFCF6] hover:text-[#241F1A]"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-[10px] border border-[#221E1A]/10 bg-[#F0E7D8] text-[#5f574d] transition hover:bg-[#FFFCF6] hover:text-[#241F1A]"
               >
                 <Share2 className="h-4 w-4" />
               </button>
@@ -325,7 +346,7 @@ function ArtworkDetailContent({
                 className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 font-semibold transition ${
                   bottomTab === 'reviews'
                     ? 'bg-[#8C3718] text-[#FFFCF6]'
-                    : 'text-[#746A5F] hover:text-[#241F1A]'
+                    : 'text-[#5f574d] hover:text-[#241F1A]'
                 }`}
               >
                 <Star className="h-3.5 w-3.5" />
@@ -337,7 +358,7 @@ function ArtworkDetailContent({
                 className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 font-semibold transition ${
                   bottomTab === 'comments'
                     ? 'bg-[#8C3718] text-[#FFFCF6]'
-                    : 'text-[#746A5F] hover:text-[#241F1A]'
+                    : 'text-[#5f574d] hover:text-[#241F1A]'
                 }`}
               >
                 <MessageCircle className="h-3.5 w-3.5" />
@@ -346,9 +367,9 @@ function ArtworkDetailContent({
             </div>
 
             {bottomTab === 'reviews' && ratingCount > 0 && (
-              <div className="inline-flex items-center gap-1.5 rounded-full border border-[#221E1A]/10 bg-[#F0E7D8] px-3 py-1 text-xs font-semibold tabular-nums text-[#8A6A1F]">
+              <div className="inline-flex items-center gap-1.5 rounded-full border border-[#221E1A]/10 bg-[#FFFCF6] px-3 py-1 text-xs font-semibold tabular-nums text-[#8A6A1F]">
                 <span>★ {ratingAverage.toFixed(1)} / 5.0</span>
-                <span className="font-medium text-[#746A5F]">· {ratingCount} lượt</span>
+                <span className="font-medium text-[#5f574d]">· {ratingCount} lượt</span>
               </div>
             )}
           </div>
@@ -372,20 +393,20 @@ function ArtworkDetailContent({
                             {'★'.repeat(Math.max(1, Math.min(5, item.rating)))}
                           </span>
                           {item.commissionTitle && (
-                            <span className="text-[#746A5F]">· {item.commissionTitle}</span>
+                            <span className="text-[#5f574d]">· {item.commissionTitle}</span>
                           )}
                         </div>
-                        <span className="tabular-nums text-[#746A5F]">
+                        <span className="tabular-nums text-[#5f574d]">
                           {new Date(item.createdAt).toLocaleDateString('vi-VN')}
                         </span>
                       </div>
-                      {text && <p className="text-[13px] leading-relaxed text-[#746A5F]">{text}</p>}
+                      {text && <p className="text-[13px] leading-relaxed text-[#5f574d]">{text}</p>}
                     </article>
                   );
                 })}
               </div>
             ) : (
-              <p className="rounded-xl bg-[#F0E7D8]/40 px-4 py-5 text-center text-xs text-[#746A5F]"> Chưa có đánh giá nào cho gói vẽ này. </p>
+              <p className="rounded-xl bg-[#F0E7D8]/40 px-4 py-5 text-center text-xs text-[#5f574d]"> Chưa có đánh giá nào cho gói vẽ này. </p>
             )
           ) : (
             <div className="space-y-3">
@@ -415,14 +436,14 @@ function ArtworkDetailContent({
                     >
                       <div className="flex items-center justify-between gap-2">
                         <strong className="text-[#241F1A]">{item.name}</strong>
-                        <span className="text-[#746A5F]">{item.time}</span>
+                        <span className="text-[#5f574d]">{item.time}</span>
                       </div>
-                      <p className="mt-1.5 text-[13px] text-[#746A5F]">{item.text}</p>
+                      <p className="mt-1.5 text-[13px] text-[#5f574d]">{item.text}</p>
                     </article>
                   ))}
                 </div>
               ) : (
-                <p className="rounded-xl bg-[#F0E7D8]/40 px-4 py-4 text-center text-xs text-[#746A5F]"> Hãy là người đầu tiên bình luận tác phẩm này. </p>
+                <p className="rounded-xl bg-[#F0E7D8]/40 px-4 py-4 text-center text-xs text-[#5f574d]"> Hãy là người đầu tiên bình luận tác phẩm này. </p>
               )}
             </div>
           )}
@@ -437,7 +458,7 @@ function ArtworkDetailContent({
             {artwork.title}
           </h1>
 
-          <div className="mt-2 flex flex-wrap items-center gap-3 text-xs tabular-nums text-[#746A5F]">
+          <div className="mt-2 flex flex-wrap items-center gap-3 text-xs tabular-nums text-[#5f574d]">
             <Link
               href={
                 artwork.categoryName || artwork.style
@@ -476,7 +497,7 @@ function ArtworkDetailContent({
                   <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-[#8C3718]" />
                 )}
               </div>
-              <div className="mt-0.5 flex items-center gap-3 text-xs tabular-nums text-[#746A5F]">
+              <div className="mt-0.5 flex items-center gap-3 text-xs tabular-nums text-[#5f574d]">
                 <span className="inline-flex items-center gap-1 font-semibold text-[#8A6A1F]">
                   <Star className="h-3 w-3 fill-current" />
                   <span>
@@ -496,7 +517,7 @@ function ArtworkDetailContent({
         {(artwork.description || artwork.tags.length > 0) && (
           <div className="space-y-3 py-4">
             {artwork.description && (
-              <p className="whitespace-pre-line text-[13.5px] leading-relaxed text-[#746A5F]">
+              <p className="whitespace-pre-line text-[13.5px] leading-relaxed text-[#5f574d]">
                 {artwork.description}
               </p>
             )}
@@ -507,7 +528,7 @@ function ArtworkDetailContent({
                     key={tag}
                     href={`/explore?tag=${encodeURIComponent(tag)}`}
                     onClick={onClose}
-                    className="rounded-lg bg-[#F0E7D8] px-2.5 py-1 text-xs text-[#746A5F] transition hover:bg-[#FFFCF6] hover:text-[#241F1A]"
+                    className="rounded-lg bg-[#F0E7D8] px-2.5 py-1 text-xs text-[#5f574d] transition hover:bg-[#FFFCF6] hover:text-[#241F1A]"
                   >
                     #{tag}
                   </Link>
@@ -536,17 +557,17 @@ function ArtworkDetailContent({
                   </span>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 border-t border-[#221E1A]/10 pt-2.5 text-xs tabular-nums text-[#746A5F]">
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 border-t border-[#221E1A]/10 pt-2.5 text-xs tabular-nums text-[#5f574d]">
                   <span className="inline-flex items-center gap-1.5" title={t('Số giai đoạn bàn giao & giải ngân')}>
-                    <Layers className="h-3.5 w-3.5 text-[#746A5F]" />
+                    <Layers className="h-3.5 w-3.5 text-[#5f574d]" />
                     <span>{t(`${matchedPkg.milestones?.length || 1} cột mốc`)}</span>
                   </span>
                   <span className="inline-flex items-center gap-1.5" title={t('Số lần chỉnh sửa miễn phí mỗi mốc')}>
-                    <RotateCcw className="h-3.5 w-3.5 text-[#746A5F]" />
+                    <RotateCcw className="h-3.5 w-3.5 text-[#5f574d]" />
                     <span>{t(`${pkgRevisions} lần sửa`)}</span>
                   </span>
                   <span className="inline-flex items-center gap-1.5" title={t('Định dạng tệp bàn giao theo thỏa thuận')}>
-                    <ImageIcon className="h-3.5 w-3.5 text-[#746A5F]" />
+                    <ImageIcon className="h-3.5 w-3.5 text-[#5f574d]" />
                     <span>{t('Tệp theo yêu cầu')}</span>
                   </span>
                 </div>
@@ -599,12 +620,12 @@ function ArtworkDetailContent({
 
         {/* 4. Làm rõ bản quyền */}
         <div className="flex flex-wrap items-center justify-between gap-2 py-3.5 text-xs">
-          <div className="inline-flex items-center gap-1.5 text-[#746A5F]">
+          <div className="inline-flex items-center gap-1.5 text-[#5f574d]">
             <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-[#2F6B63]" />
             {isExclusive && provenance ? (
               <span>
                 {t('Sáng tác:')} <strong className="text-[#241F1A]">{provenance.creatorName}</strong>
-                <span className="mx-1 text-[#746A5F]">→</span>
+                <span className="mx-1 text-[#5f574d]">→</span>
                 {t('Sở hữu:')} <strong className="text-[#241F1A]">{provenance.currentOwnerName}</strong>
               </span>
             ) : (
@@ -677,13 +698,19 @@ function ArtworkDetailContent({
                         : 'border-[#221E1A]/10'
                     }`}
                   >
-                    <Image
-                      src={item.thumbnailUrl || item.imageUrl || DEFAULT_THUMB}
-                      alt={item.title}
-                      fill
-                      unoptimized
-                      className="object-cover"
-                    />
+                    {item.thumbnailUrl || item.imageUrl ? (
+                      <Image
+                        src={(item.thumbnailUrl || item.imageUrl) as string}
+                        alt={item.title}
+                        fill
+                        unoptimized
+                        className="object-cover"
+                      />
+                    ) : (
+                      <span className="grid h-full w-full place-items-center text-[10px] text-[#5f574d]">
+                        Không có ảnh
+                      </span>
+                    )}
                   </button>
                 );
               })}
@@ -715,12 +742,12 @@ function ArtworkDetailContent({
 
 export function ArtworkDetail({ id }: { id: string }) {
   return (
-    <main className="min-h-screen bg-[#FFFCF6] px-4 py-8 text-[#241F1A] sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-[#FFFCF6] px-4 py-8 text-[#241F1A] sm:px-6 lg:px-8">
       <div className="mx-auto max-w-[1280px]">
         <div className="mb-5">
           <Link
             href="/explore"
-            className="inline-flex items-center gap-2 text-[13px] font-medium text-[#746A5F] transition hover:text-[#241F1A]"
+            className="inline-flex items-center gap-2 text-[13px] font-medium text-[#5f574d] transition hover:text-[#241F1A]"
           >
             <ArrowLeft className="h-4 w-4" />
             <span>Quay lại trang khám phá</span>
@@ -731,7 +758,7 @@ export function ArtworkDetail({ id }: { id: string }) {
           <ArtworkDetailContent key={id} id={id} mode="page" />
         </div>
       </div>
-    </main>
+    </div>
   );
 }
 

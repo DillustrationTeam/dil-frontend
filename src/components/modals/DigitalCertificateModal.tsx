@@ -28,7 +28,9 @@ export default function DigitalCertificateModal({
 
   if (!isOpen || !commission) return null;
 
-  const certCode = `COA-2026-DILL-${commission.id.slice(0, 8).toUpperCase()}`;
+  // Năm trên chứng thư lấy từ chính đơn hàng, không hardcode.
+  const certYear = new Date(commission.createdAt || Date.now()).getFullYear();
+  const certCode = `COA-${certYear}-DILL-${commission.id.slice(0, 8).toUpperCase()}`;
   const orderCode = `CMD-${commission.id.slice(0, 8).toUpperCase()}`;
   const creatorDisplay = commission.creatorName || 'Creator';
   const clientDisplay = commission.clientName || 'Khách hàng';
@@ -43,10 +45,9 @@ export default function DigitalCertificateModal({
     ?.filter((m) => Boolean(m.wipPreviewUrl || m.originalWipUrl))
     .sort((a, b) => b.sequence - a.sequence)[0];
 
-  const artworkUrl =
-    lastMilestoneWithWip?.wipPreviewUrl ||
-    lastMilestoneWithWip?.originalWipUrl ||
-    'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=900&q=80';
+  // Không có ảnh bàn giao thì để trống: in một bức tranh khác lên CHỨNG THƯ
+  // BẢN QUYỀN là nói sai về tác phẩm được chứng nhận.
+  const artworkUrl = lastMilestoneWithWip?.wipPreviewUrl || lastMilestoneWithWip?.originalWipUrl || '';
 
   const handleCopyHash = () => {
     if (!masterSha256) return;
@@ -134,18 +135,31 @@ export default function DigitalCertificateModal({
               {/* Left Column: Final Artwork Clean Preview */}
               <div className="lg:col-span-5 space-y-3">
                 <div className="relative aspect-[3/4] rounded-xl overflow-hidden border border-[#221E1A]/10 bg-[#E5D8C2] shadow-2xl group">
-                  <img
-                    src={artworkUrl}
-                    alt={commission.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                  <div className="absolute top-3 left-3 bg-[#E5D8C2] backdrop-blur-md border border-[#2F6B63]/40 text-[#2F6B63] font-mono text-[10px] px-2.5 py-1 rounded-md flex items-center gap-1 font-bold">
-                    <CheckCircle2 size={12} className="text-[#2F6B63]" />
-                    <span>BẢN GỐC ĐÃ GỠ THỦY VÂN</span>
-                  </div>
-                  <div className="absolute bottom-3 right-3 bg-[#E5D8C2] backdrop-blur-md border border-[#221E1A]/20 text-[#241F1A] font-mono text-[10px] px-2.5 py-1 rounded-md">
-                    4096 × 5464 px • 300 DPI
-                  </div>
+                  {artworkUrl ? (
+                    <>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={artworkUrl}
+                        alt={commission.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                      <div className="absolute top-3 left-3 bg-[#E5D8C2] backdrop-blur-md border border-[#2F6B63]/40 text-[#2F6B63] font-mono text-[10px] px-2.5 py-1 rounded-md flex items-center gap-1 font-bold">
+                        <CheckCircle2 size={12} className="text-[#2F6B63]" />
+                        <span>BẢN GỐC ĐÃ GỠ THỦY VÂN</span>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="flex h-full w-full flex-col items-center justify-center gap-2 p-4 text-center">
+                      <CheckCircle2 size={18} className="text-[#746A5F]" />
+                      <p className="text-xs font-semibold text-[#241F1A]">Chưa có ảnh bàn giao</p>
+                      <p className="text-[11px] text-[#746A5F]">
+                        Đơn hàng hoàn tất nhưng họa sĩ chưa gắn ảnh nghiệm thu, nên chứng thư không
+                        hiển thị ảnh.
+                      </p>
+                    </div>
+                  )}
+                  {/* Bỏ nhãn "4096 × 5464 px • 300 DPI": hệ thống không có dữ liệu kích thước
+                      thật của tệp, nên con số đó chỉ là trang trí — không được in lên chứng thư. */}
                 </div>
                 <p className="text-[11px] text-center text-[#746A5F] italic"> Tác phẩm hoàn thiện chính thức sau nghiệm thu ký quỹ. </p>
               </div>
@@ -241,16 +255,22 @@ export default function DigitalCertificateModal({
             <div className="relative z-10 pt-6 flex flex-col sm:flex-row sm:items-center justify-between gap-6 text-xs">
               <div className="flex items-center gap-4">
                 <div className="h-16 w-16 bg-[#F0E7D8] p-1 rounded-lg shrink-0 flex items-center justify-center">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://dillustration.art/verify/${certCode}`}
-                    alt="QR Verification"
+                    src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(
+                      `${certCode} | ${commission.title} | ${realHash}`,
+                    )}`}
+                    alt="Mã QR chứa mã chứng thư và mã băm tệp gốc"
                     className="h-full w-full object-contain"
                   />
                 </div>
                 <div>
-                  <span className="font-bold text-[#241F1A] block">Quét mã QR để tra cứu công khai:</span>
-                  <span className="font-mono text-[11px] text-brand-periwinkle block">dillustration.art/verify/{certCode}</span>
-                  <span className="text-[10px] text-[#746A5F] block mt-0.5">Xác thực chứng chỉ minh bạch cho các đối tác / nhà in ấn.</span>
+                  <span className="font-bold text-[#241F1A] block">Quét mã QR để đọc mã chứng thư:</span>
+                  {/* Bản cũ in ra `dillustration.art/verify/{code}` — một tên miền và một
+                      trang xác thực KHÔNG tồn tại, quét QR ra 404. Giờ mã QR chứa đúng
+                      dữ liệu thật của chứng thư: mã, tên tác phẩm, mã băm tệp gốc. */}
+                  <span className="font-mono text-[11px] text-brand-periwinkle block">{certCode}</span>
+                  <span className="text-[10px] text-[#746A5F] block mt-0.5">Mã QR chứa mã chứng thư, tên tác phẩm và mã băm tệp gốc để đối chiếu.</span>
                 </div>
               </div>
 

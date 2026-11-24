@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { ChangeEvent, DragEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { ImagePlus, Palette, Search, SlidersHorizontal, Sparkles, Tag, Upload, X } from 'lucide-react';
-import { marketplaceService, MarketplaceArtwork } from '../services/marketplace.service';
+import { marketplaceService, MarketplaceArtwork, type RelatedCreatorDto } from '../services/marketplace.service';
 import { localizeStyle } from '../utils/style-labels';
 import {
   categoriesService,
@@ -14,6 +14,21 @@ import {
 import { ArtworkDetailModal } from './artwork-detail';
 
 type FeedTab = 'recommended' | 'following';
+type SortKey = 'newest' | 'views' | 'price-asc' | 'price-desc';
+
+/** Sắp xếp hiển thị. `views` chính là "xếp hạng tuần" mà trang chủ trỏ tới. */
+const SORTS: { value: SortKey; label: string; en: string }[] = [
+  { value: 'newest', label: 'Mới nhất', en: 'Newest' },
+  { value: 'views', label: 'Xem nhiều nhất', en: 'Most viewed' },
+  { value: 'price-asc', label: 'Giá tăng dần', en: 'Price: low to high' },
+  { value: 'price-desc', label: 'Giá giảm dần', en: 'Price: high to low' },
+];
+
+/**
+ * Server CHƯA có tham số sắp xếp, nên mọi sort khác "mới nhất" đều chạy ở client.
+ * Muốn con số sắp xếp có nghĩa thì phải tải một lượt lớn hơn một trang.
+ */
+const SORTED_PAGE_SIZE = 48;
 type License = 'all' | 'personal' | 'commercial';
 
 function contains(artwork: MarketplaceArtwork, value: string) {
@@ -33,21 +48,17 @@ function contains(artwork: MarketplaceArtwork, value: string) {
   return haystack.includes(normalized);
 }
 
-function ArtworkCard({
-  artwork,
-  index,
-  onSelect,
-}: {
-  artwork: MarketplaceArtwork;
-  index: number;
-  onSelect: (id: string) => void;
-}) {
+/**
+ * Card là <a href> chứ không phải <button onClick>: mở được tab mới, copy link được,
+ * bot đọc được. Route chặn `@artworkModal/(.)artworks/[id]` lo phần mở nhanh.
+ */
+function ArtworkCard({ artwork }: { artwork: MarketplaceArtwork }) {
   const ratio = '4 / 5';
 
   return (
-    <button
-      type="button"
-      onClick={() => onSelect(artwork.id)}
+    <Link
+      href={`/artworks/${artwork.id}`}
+      scroll={false}
       className="art-card text-left"
       aria-label={`Mở tác phẩm ${artwork.title}`}
     >
@@ -77,7 +88,7 @@ function ArtworkCard({
           <span>{artwork.creatorName || 'Dillustration Creator'}</span>
         </span>
       </div>
-    </button>
+    </Link>
   );
 }
 
@@ -228,11 +239,13 @@ export function ArtDiscovery({
   initialQuery = '',
   initialCategory = '',
   initialTag = '',
+  initialSort = 'newest',
 }: {
   initialSearch?: boolean;
   initialQuery?: string;
   initialCategory?: string;
   initialTag?: string;
+  initialSort?: string;
 }) {
   const [artworks, setArtworks] = useState<MarketplaceArtwork[]>([]);
   const [categories, setCategories] = useState<CategoryDto[]>([]);
@@ -242,6 +255,9 @@ export function ArtDiscovery({
   >([]);
   const [loading, setLoading] = useState(true);
   const [feedTab, setFeedTab] = useState<FeedTab>('recommended');
+  const [sort, setSort] = useState<SortKey>(
+    (SORTS.some((option) => option.value === initialSort) ? initialSort : 'newest') as SortKey,
+  );
   const [query, setQuery] = useState(initialQuery);
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
   const [selectedTag, setSelectedTag] = useState(initialTag);
@@ -263,6 +279,11 @@ export function ArtDiscovery({
   const [searchFocused, setSearchFocused] = useState(false);
   const [suggestions, setSuggestions] = useState<SearchSuggestionsDto>({ categories: [], tags: [] });
   const searchBoxRef = useRef<HTMLDivElement>(null);
+  /**
+   * Hồ sơ họa sĩ (rating, lượt nhận đơn) — API danh sách tác phẩm không trả hai
+   * trường này, nên phải ghép thêm thì bộ lọc "đánh giá"/"còn lượt" mới có tác dụng.
+   */
+  const creatorsRef = useRef<Record<string, RelatedCreatorDto>>({});
 
   useEffect(() => {
     const onPointerDown = (event: MouseEvent) => {
@@ -294,26 +315,17 @@ export function ArtDiscovery({
   useEffect(() => {
     const loadHome = async () => {
       try {
-        const [home, allArtworks, creators, categoryList] = await Promise.all([
+        const [home, creators, categoryList] = await Promise.all([
           marketplaceService.getMarketplaceHome(12),
-          marketplaceService.getArtworks(),
           marketplaceService.getCreators(),
           categoriesService.getCategories().catch(() => []),
         ]);
         setFeaturedBanners(home.featuredBanners ?? []);
         setCategories(categoryList);
-        setArtworks(
-          allArtworks.map((artwork) => {
-            const creator = creators.find((item) => item.id === artwork.creatorProfileId);
-            return {
-              ...artwork,
-              creatorName: artwork.creatorName || creator?.displayName,
-              creatorHeadline: artwork.creatorHeadline || creator?.headline,
-              creatorRating: artwork.creatorRating || creator?.ratingAverage || 0,
-              availableSlots: artwork.availableSlots ?? creator?.availableSlots ?? 0,
-            };
-          })
-        );
+        creatorsRef.current = Object.fromEntries(creators.map((creator) => [creator.id, creator]));
+        // KHÔNG `setArtworks` ở đây: effect phân trang bên dưới là nguồn duy nhất của
+        // danh sách. Trước đây cả hai cùng ghi → danh sách 31 tác phẩm bị 12 tác phẩm
+        // của lần gọi mặc định ghi đè, và mọi "sắp xếp" chỉ còn 12 dòng.
         setFollowingArtworks(home.followingArtworks ?? []);
       } catch {
         try {
@@ -325,7 +337,6 @@ export function ArtDiscovery({
           setCategories(categoryList);
           setFollowingArtworks([]);
         } catch {
-          setArtworks([]);
           setFollowingArtworks([]);
         }
       } finally {
@@ -335,6 +346,16 @@ export function ArtDiscovery({
 
     void loadHome();
   }, []);
+
+  /**
+   * Chip danh mục: ẩn danh mục 0 tác phẩm cho gọn. Nhưng nếu TOÀN BỘ danh mục đều 0
+   * (DB chưa gán CategoryId — trạng thái của một máy vừa pull code về) thì hiện đủ,
+   * tránh việc cả thanh lọc biến mất.
+   */
+  const visibleCategories = useMemo(() => {
+    const withWorks = categories.filter((cat) => cat.artworkCount > 0);
+    return withWorks.length > 0 ? withWorks : categories;
+  }, [categories]);
 
   const activeCategoryObj = useMemo(() => {
     if (!selectedCategory) return null;
@@ -353,7 +374,7 @@ export function ArtDiscovery({
     const minP = minPrice ? Number(minPrice) : null;
     const maxP = maxPrice ? Number(maxPrice) : null;
 
-    return artworks.filter((artwork) => {
+    const rows = artworks.filter((artwork) => {
       const matchesQuery = !query || contains(artwork, query);
 
       let matchesCategory = true;
@@ -396,6 +417,17 @@ export function ArtDiscovery({
         matchesRating
       );
     });
+
+    // Sắp xếp ở client (server chưa có tham số sort). Giá null xếp cuối.
+    if (sort === 'views') {
+      rows.sort((a, b) => (b.viewCount ?? 0) - (a.viewCount ?? 0));
+    } else if (sort === 'price-asc') {
+      rows.sort((a, b) => (a.startingPrice ?? Number.POSITIVE_INFINITY) - (b.startingPrice ?? Number.POSITIVE_INFINITY));
+    } else if (sort === 'price-desc') {
+      rows.sort((a, b) => (b.startingPrice ?? -1) - (a.startingPrice ?? -1));
+    }
+
+    return rows;
   }, [
     artworks,
     query,
@@ -407,12 +439,16 @@ export function ArtDiscovery({
     minPrice,
     maxPrice,
     minRating,
+    sort,
   ]);
 
   // ── Phân trang THẬT ─────────────────────────────────────────────────────────
   // Server cắt dữ liệu theo `page/pageSize`; `filtered` chỉ áp cho các filter
   // không hỗ trợ ở API (giá, rating, slot) trên đúng trang đang xem.
   const PAGE_SIZE = 12;
+  /** Sort ở client cần một tập dữ liệu đủ lớn, nếu không "xem nhiều nhất" chỉ là
+      thứ tự của đúng 12 tác phẩm vừa tải về. */
+  const fetchSize = sort === 'newest' ? PAGE_SIZE : SORTED_PAGE_SIZE;
   const isFollowingTab = feedTab === 'following';
   const displayed = isFollowingTab ? followingArtworks : filtered;
   const totalCount = isFollowingTab ? followingArtworks.length : serverTotalCount;
@@ -427,7 +463,14 @@ export function ArtDiscovery({
   // đổi filter/tab → quay về trang 1
   useEffect(() => {
     setPage(1);
-  }, [query, selectedCategory, selectedTag, license, onlyOpenSlots, minPrice, maxPrice, minRating, feedTab]);
+  }, [query, selectedCategory, selectedTag, license, onlyOpenSlots, minPrice, maxPrice, minRating, feedTab, sort]);
+
+  // Tab "Đang theo dõi" bị ẩn khi chưa theo dõi ai → không để màn hình rỗng.
+  useEffect(() => {
+    if (feedTab === 'following' && followingArtworks.length === 0) {
+      setFeedTab('recommended');
+    }
+  }, [feedTab, followingArtworks.length]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => setServerQuery(query.trim()), 300);
@@ -446,12 +489,24 @@ export function ArtDiscovery({
       try {
         const res = await marketplaceService.getArtworksPage({
           page,
-          pageSize: PAGE_SIZE,
+          pageSize: fetchSize,
           search: serverQuery || undefined,
           categoryId: activeCategoryObj?.id,
         });
         if (!active) return;
-        setArtworks(res.items);
+        setArtworks(
+          res.items.map((artwork) => {
+            const creator = creatorsRef.current[artwork.creatorProfileId];
+            if (!creator) return artwork;
+            return {
+              ...artwork,
+              creatorName: artwork.creatorName || creator.displayName,
+              creatorHeadline: artwork.creatorHeadline || creator.headline,
+              creatorRating: artwork.creatorRating || creator.ratingAverage || 0,
+              availableSlots: artwork.availableSlots ?? creator.availableSlots,
+            };
+          }),
+        );
         setServerTotalCount(res.totalCount);
         setServerTotalPages(res.totalPages);
       } catch {
@@ -468,7 +523,7 @@ export function ArtDiscovery({
       active = false;
     };
      
-  }, [page, serverQuery, activeCategoryObj?.id, isFollowingTab]);
+  }, [page, fetchSize, serverQuery, activeCategoryObj?.id, isFollowingTab]);
 
   const clearAllFilters = () => {
     setQuery('');
@@ -482,7 +537,7 @@ export function ArtDiscovery({
   };
 
   return (
-    <main className="wrap page shell text-[#241F1A]">
+    <div className="wrap page shell text-[#241F1A]">
       <div className="mx-auto max-w-7xl">
         <header className="page-head">
           <div>
@@ -515,7 +570,7 @@ export function ArtDiscovery({
                   : 'border-[#221E1A]/10 bg-[#FFFCF6] text-[#6E6459] hover:border-[#B24A26]/40 hover:text-[#241F1A]'
               }`}
             > Tất cả danh mục </button>
-            {categories.map((cat) => {
+            {visibleCategories.map((cat) => {
               const active =
                 activeCategoryObj?.id === cat.id ||
                 selectedCategory.toLowerCase() === cat.slug.toLowerCase();
@@ -673,6 +728,20 @@ export function ArtDiscovery({
             }`}
           >
             <SlidersHorizontal className="h-4 w-4" /> Bộ lọc </button>
+
+          <label className="sr" htmlFor="explore-sort">Sắp xếp tác phẩm</label>
+          <select
+            id="explore-sort"
+            value={sort}
+            onChange={(event) => setSort(event.target.value as SortKey)}
+            className="inline-flex cursor-pointer items-center gap-2 rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] px-4 py-3 text-sm font-medium text-[#6E6459] outline-none transition hover:border-[#B24A26]/60 focus:border-[#B24A26]"
+          >
+            {SORTS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
         </div>
 
         {/* Active tag pill */}
@@ -758,7 +827,9 @@ export function ArtDiscovery({
             {(
               [
                 ['recommended', 'Dành cho bạn'],
-                ['following', 'Đang theo dõi'],
+                ...(followingArtworks.length > 0
+                  ? ([['following', 'Đang theo dõi']] as const)
+                  : []),
               ] as const
             ).map(([tab, label]) => (
               <button
@@ -775,7 +846,17 @@ export function ArtDiscovery({
               </button>
             ))}
           </div>
-          <p className="text-sm text-[#6E6459]">{totalCount} tác phẩm phù hợp · trang {currentPage}/{totalPages}</p>
+          <p className="text-sm text-[#6E6459]">
+            {sort === 'newest' ? (
+              <>{totalCount} tác phẩm phù hợp · trang {currentPage}/{totalPages}</>
+            ) : (
+              <>
+                Sắp theo {SORTS.find((option) => option.value === sort)?.label.toLowerCase()} trong{' '}
+                {displayed.length} tác phẩm đã tải
+                {serverTotalCount > displayed.length ? ` (sàn có ${serverTotalCount})` : ''}
+              </>
+            )}
+          </p>
         </div>
 
         {loading ? (
@@ -784,12 +865,7 @@ export function ArtDiscovery({
           <>
           <div className="wall wall--grid">
             {paged.map((artwork, index) => (
-              <ArtworkCard
-                key={artwork.id}
-                artwork={artwork}
-                index={index}
-                onSelect={setSelectedArtworkId}
-              />
+              <ArtworkCard key={artwork.id} artwork={artwork} />
             ))}
           </div>
 
@@ -830,6 +906,6 @@ export function ArtDiscovery({
       {selectedArtworkId && (
         <ArtworkDetailModal id={selectedArtworkId} onClose={() => setSelectedArtworkId(null)} />
       )}
-    </main>
+    </div>
   );
 }

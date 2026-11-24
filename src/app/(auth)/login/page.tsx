@@ -33,9 +33,17 @@ interface LoginFormValues {
   remember?: boolean;
 }
 
+/**
+ * Tài khoản seed, dùng cho nút "Đăng nhập nhanh (Dev)".
+ *
+ * Danh sách này phải khớp dữ liệu seed thật của backend — thiếu một role nghĩa là
+ * không ai đăng nhập được role đó khi demo. Bốn role đang có trong DB:
+ * client / creator / admin / nghệ sĩ giữ cả hai vai (Linh).
+ */
 const seedAccounts = [
   { label: 'Client', email: 'client.demo@dillustration.test', password: 'Demo@123456' },
   { label: 'Creator', email: 'creator.demo@dillustration.test', password: 'Demo@123456' },
+  { label: 'Client + Creator', email: 'linh.nguyen@dillustration.vn', password: 'Demo@123456' },
   { label: 'Admin', email: 'admin.demo@dillustration.local', password: 'Seed123!' },
 ] as const;
 

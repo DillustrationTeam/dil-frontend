@@ -253,7 +253,7 @@ function SlideItem({ event }: { event: EventListItemDto }) {
           ) : null}
         </div>
 
-        <h1 className="ev-spot__title">{event.title}</h1>
+        <h2 className="ev-spot__title">{event.title}</h2>
 
         {event.description ? <p className="ev-spot__desc">{event.description}</p> : null}
 
