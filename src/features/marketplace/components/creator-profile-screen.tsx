@@ -32,12 +32,14 @@ import { CreatorTermsOverview } from '@/components/terms/CreatorTermsOverview';
 import type { ArtworkDto, CreatorProfileDto, CreatorTermsDto } from '@/features/creator-studio/types/creator-profile.types';
 import { marketplaceService, type CreatorReviewDto } from '@/features/marketplace/services/marketplace.service';
 import { commissionService } from '@/services/commission.service';
+import { useLanguage } from '@/context/language-context';
 import { ProfileLayout, ProfileTabs } from './profile-layout';
 
 type Tab = 'portfolio' | 'rates' | 'reviews' | 'terms';
 
 export function CreatorProfileScreen({ id }: { id: string }) {
-
+  const { lang, t } = useLanguage();
+  const isVie = lang === 'VIE';
   const currentUserId = useAuthStore((state) => state.user?.id);
   const authenticated = useAuthStore((state) => state.isAuthenticated);
   const [profile, setProfile] = useState<CreatorProfileDto | null>(null);
@@ -153,25 +155,28 @@ export function CreatorProfileScreen({ id }: { id: string }) {
     }
   };
 
-  if (loadedId !== id) return <main className="min-h-[70vh] bg-[#1F2335] p-12 text-center text-[#C7C5CF]">Đang tải hồ sơ nghệ sĩ…</main>;
-  if (!profile) return <main className="min-h-[70vh] bg-[#1F2335] p-12 text-center text-[#C7C5CF]">Không tìm thấy hồ sơ nghệ sĩ.</main>;
+  if (loadedId !== id) return <main className="min-h-[70vh] bg-[var(--ink)] p-12 text-center text-[var(--ash)]">{isVie ? 'Đang tải hồ sơ nghệ sĩ…' : 'Loading artist profile…'}</main>;
+  if (!profile) return <main className="min-h-[70vh] bg-[var(--ink)] p-12 text-center text-[var(--ash)]">{isVie ? 'Không tìm thấy hồ sơ nghệ sĩ.' : 'Artist profile not found.'}</main>;
 
   const isOwnProfile = currentUserId === profile.userId;
   const tabs: Array<{ id: Tab; label: string }> = [
     { id: 'portfolio', label: `Portfolio · ${artworks.length}` },
     { id: 'rates', label: `Commission · ${rates.length}` },
-    { id: 'reviews', label: `Đánh giá · ${reviews.length}` },
+    { id: 'reviews', label: isVie ? `Đánh giá · ${reviews.length}` : `Reviews · ${reviews.length}` },
   ];
 
   return (
     <ProfileLayout name={profile.displayName} bannerUrl={profile.bannerUrl} sidebar={<div>
-      <p className="text-xs uppercase tracking-wider text-[#A7ACD9]">Creator profile</p>
-      <h1 className="mt-2 break-words font-h1 text-3xl font-bold text-white">{profile.displayName}</h1>
-      <p className="mt-2 text-sm text-[#C7C5CF]">{profile.headline || 'Digital artist'}</p>
-      <div className="mt-5 flex items-center justify-between text-sm"><span>{profile.followerCount} người theo dõi</span><span>★ {profile.ratingAverage.toFixed(1)}</span></div>
+      <p className="text-xs uppercase tracking-wider text-[var(--lumen)] font-bold">Creator profile</p>
+      <h1 className="mt-2 break-words font-[family-name:var(--font-display)] text-3xl font-medium text-[var(--ivory)]">{profile.displayName}</h1>
+      <p className="mt-2 text-sm text-[var(--ash)]">{profile.headline || 'Digital artist'}</p>
+      <div className="mt-5 flex items-center justify-between text-sm text-[var(--ivory)] font-[family-name:var(--font-ui)] tabular-nums">
+        <span>{profile.followerCount} {isVie ? 'người theo dõi' : 'followers'}</span>
+        <span className="font-bold text-[var(--gold)]">★ {profile.ratingAverage.toFixed(1)}</span>
+      </div>
       {isOwnProfile ? (
-        <Link href="/creator/profile/edit" className="mt-5 inline-flex w-full justify-center rounded-xl border border-white/15 px-4 py-2.5 text-sm text-white">
-          Chỉnh sửa hồ sơ
+        <Link href="/creator/profile/edit" className="mt-5 inline-flex w-full justify-center rounded-full border border-[var(--hair-2)] bg-[var(--ink-2)] px-4 py-2.5 text-sm font-semibold text-[var(--ivory)] hover:border-[var(--lumen)] hover:text-[var(--lumen)] transition">
+          {isVie ? 'Chỉnh sửa hồ sơ' : 'Edit profile'}
         </Link>
       ) : (
         <div className="mt-5 space-y-2">
@@ -181,34 +186,63 @@ export function CreatorProfileScreen({ id }: { id: string }) {
               disabled={busy}
               aria-pressed={following}
               onClick={() => void toggleFollow()}
-              className="w-full rounded-xl bg-[#A7ACD9] px-4 py-2.5 text-sm font-semibold text-[#1F2335] disabled:opacity-50 cursor-pointer transition hover:bg-[#b8bde4]"
+              className={`w-full rounded-full px-4 py-2.5 text-sm font-bold transition disabled:opacity-50 cursor-pointer ${
+                following
+                  ? 'border border-[var(--hair-2)] bg-[var(--ink-2)] text-[var(--ivory)] hover:border-[var(--cinnabar)] hover:text-[var(--cinnabar)]'
+                  : 'bg-[var(--lumen)] text-white hover:bg-[var(--lumen-hi)] shadow-sm'
+              }`}
             >
-              {busy ? 'Đang cập nhật…' : following ? 'Đang theo dõi' : 'Theo dõi'}
+              {busy ? (isVie ? 'Đang cập nhật…' : 'Updating…') : following ? (isVie ? 'Đang theo dõi' : 'Following') : (isVie ? 'Theo dõi' : 'Follow')}
             </button>
           ) : (
             <Link
               href="/login"
-              className="inline-flex w-full justify-center rounded-xl bg-[#A7ACD9] px-4 py-2.5 text-sm font-semibold text-[#1F2335]"
+              className="inline-flex w-full justify-center rounded-full bg-[var(--lumen)] px-4 py-2.5 text-sm font-bold text-white hover:bg-[var(--lumen-hi)] shadow-sm transition"
             >
-              Đăng nhập để theo dõi
+              {isVie ? 'Đăng nhập để theo dõi' : 'Sign in to follow'}
             </Link>
           )}
 
           <Link
             href={`/art-trades/create?receiverId=${profile.userId}&name=${encodeURIComponent(profile.displayName)}`}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-[#A7ACD9]/30 bg-[#A7ACD9]/10 hover:bg-[#A7ACD9]/20 text-[#A7ACD9] hover:text-white px-4 py-2.5 text-xs font-semibold uppercase tracking-wider transition cursor-pointer"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-[var(--hair-2)] bg-[var(--ink-2)] hover:border-[var(--lumen)] text-[var(--ivory)] hover:text-[var(--lumen)] px-4 py-2.5 text-sm font-bold transition cursor-pointer"
           >
-            <ArrowLeftRight className="w-3.5 h-3.5" />
-            Đề nghị trao đổi tranh
+            <ArrowLeftRight className="w-4 h-4 text-[var(--lumen)]" />
+            {isVie ? 'Đề nghị trao đổi tranh' : 'Propose Art Trade'}
           </Link>
         </div>
       )}
-      {profile.bio && <p className="mt-5 whitespace-pre-line text-sm leading-6 text-[#C7C5CF]">{profile.bio}</p>}
-      {profile.specialties && <p className="mt-4 text-xs text-[#919099]">{profile.specialties}</p>}
+      {profile.bio && <p className="mt-5 whitespace-pre-line text-sm leading-6 text-[var(--ash)]">{profile.bio}</p>}
+      {profile.specialties && <p className="mt-4 text-xs text-[var(--ash-dim)] font-medium">{profile.specialties}</p>}
     </div>}>
       <ProfileTabs tabs={tabs} value={tab} onChange={setTab} />
       <div className="mt-6">
-        {tab === 'portfolio' && (artworks.length ? <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">{artworks.map((artwork) => <Link key={artwork.id} href={`/artworks/${artwork.id}`} className="group overflow-hidden rounded-xl border border-white/10 bg-white/[.03]"><div className="relative aspect-[4/5]"><Image src={artwork.thumbnailUrl || artwork.imageUrl} alt={artwork.title} fill unoptimized className="object-cover transition group-hover:scale-[1.02]" /></div><p className="truncate p-3 text-sm text-white">{artwork.title}</p></Link>)}</div> : <EmptyState>Chưa có tác phẩm được đăng.</EmptyState>)}
+        {tab === 'portfolio' && (artworks.length ? (
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+            {artworks.map((artwork) => (
+              <Link
+                key={artwork.id}
+                href={`/artworks/${artwork.id}`}
+                className="group overflow-hidden rounded-2xl border border-[var(--hair)] bg-[var(--ink-2)] transition hover:border-[var(--hair-2)] hover:shadow-md"
+              >
+                <div className="relative aspect-[4/5] bg-[var(--ink-3)]">
+                  <Image
+                    src={artwork.thumbnailUrl || artwork.imageUrl}
+                    alt={artwork.title}
+                    fill
+                    unoptimized
+                    className="object-cover transition duration-500 group-hover:scale-[1.03]"
+                  />
+                </div>
+                <p className="truncate p-3 font-[family-name:var(--font-display)] text-sm font-medium text-[var(--ivory)] transition-colors group-hover:text-[var(--lumen)]">
+                  {artwork.title}
+                </p>
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <EmptyState>{isVie ? 'Chưa có tác phẩm được đăng.' : 'No artworks published yet.'}</EmptyState>
+        ))}
         {tab === 'rates' && (
           rates.length ? (
             <div className="space-y-4">
@@ -241,11 +275,11 @@ export function CreatorProfileScreen({ id }: { id: string }) {
                 return (
                   <article
                     key={rate.id}
-                    className="group overflow-hidden rounded-2xl border border-white/10 bg-[#141724]/90 transition hover:border-[#A7ACD9]/45"
+                    className="group overflow-hidden rounded-3xl border border-[var(--hair)] bg-[var(--ink-2)] shadow-sm transition hover:border-[var(--hair-2)] hover:shadow-md"
                   >
                     <div className={hasSamples ? 'grid grid-cols-1 md:grid-cols-[220px_minmax(0,1fr)]' : 'block'}>
                       {hasSamples && currentImage && (
-                        <div className="relative aspect-[16/10] md:aspect-auto md:min-h-[190px] w-full bg-[#10121d] overflow-hidden select-none border-b md:border-b-0 md:border-r border-white/10">
+                        <div className="relative aspect-[16/10] md:aspect-auto md:min-h-[190px] w-full bg-[var(--ink-3)] overflow-hidden select-none border-b md:border-b-0 md:border-r border-[var(--hair)]">
                           <Image
                             src={currentImage}
                             alt={`${rate.name} - Mẫu ${safeIndex + 1}`}
@@ -260,7 +294,7 @@ export function CreatorProfileScreen({ id }: { id: string }) {
                                 type="button"
                                 onClick={handlePrevSample}
                                 className="absolute left-2 top-1/2 -translate-y-1/2 h-7 w-7 rounded-full bg-black/70 hover:bg-black/90 text-white flex items-center justify-center border border-white/15 opacity-80 group-hover:opacity-100 transition z-10"
-                                title="Xem ảnh mẫu trước"
+                                title={isVie ? 'Xem ảnh mẫu trước' : 'Previous sample'}
                               >
                                 <ChevronLeft className="h-4 w-4" />
                               </button>
@@ -268,11 +302,11 @@ export function CreatorProfileScreen({ id }: { id: string }) {
                                 type="button"
                                 onClick={handleNextSample}
                                 className="absolute right-2 top-1/2 -translate-y-1/2 h-7 w-7 rounded-full bg-black/70 hover:bg-black/90 text-white flex items-center justify-center border border-white/15 opacity-80 group-hover:opacity-100 transition z-10"
-                                title="Xem ảnh mẫu tiếp theo"
+                                title={isVie ? 'Xem ảnh mẫu tiếp theo' : 'Next sample'}
                               >
                                 <ChevronRight className="h-4 w-4" />
                               </button>
-                              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 rounded-full bg-black/75 px-2.5 py-0.5 text-[10px] font-medium tabular-nums text-white/90 border border-white/10 pointer-events-none z-10">
+                              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 rounded-full bg-black/75 px-2.5 py-0.5 text-[10px] font-medium font-[family-name:var(--font-ui)] tabular-nums text-white/90 border border-white/10 pointer-events-none z-10">
                                 {safeIndex + 1}/{sampleList.length}
                               </div>
                             </>
@@ -285,54 +319,54 @@ export function CreatorProfileScreen({ id }: { id: string }) {
                           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                             <div className="min-w-0 space-y-1.5">
                               <div className="flex flex-wrap items-center gap-2">
-                                <h3 className="font-h1 text-base sm:text-lg font-bold text-white leading-snug">
+                                <h3 className="font-[family-name:var(--font-display)] text-base sm:text-lg font-medium text-[var(--ivory)] leading-snug">
                                   {rate.name}
                                 </h3>
                                 {rate.categoryName && (
-                                  <span className="inline-flex items-center rounded-full border border-[#A7ACD9]/35 bg-[#A7ACD9]/15 px-2.5 py-0.5 text-[11px] font-semibold text-[#C5C9F8]">
+                                  <span className="inline-flex items-center rounded-full border border-[var(--hair-2)] bg-[var(--ink-3)] px-2.5 py-0.5 text-[11px] font-semibold text-[var(--ash)]">
                                     {rate.categoryName}
                                   </span>
                                 )}
                                 <span
-                                  className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-medium ${
+                                  className={`inline-flex items-center rounded-full border px-2.5 py-0.5 font-[family-name:var(--font-ui)] text-[11px] font-medium ${
                                     !slot.isLimited
-                                      ? 'border-sky-400/25 bg-sky-500/10 text-sky-200'
+                                      ? 'border-sky-500/25 bg-sky-500/10 text-sky-700 dark:text-sky-300'
                                       : slot.isFull
-                                        ? 'border-rose-400/30 bg-rose-500/10 text-rose-200'
-                                        : 'border-emerald-400/25 bg-emerald-500/10 text-emerald-200'
+                                        ? 'border-[var(--cinnabar)]/30 bg-[var(--cinnabar)]/10 text-[var(--cinnabar-text)]'
+                                        : 'border-emerald-500/25 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300'
                                   }`}
                                 >
                                   {slot.label}
                                 </span>
                                 {orderCount > 0 && (
-                                  <span className="text-[11px] font-medium tabular-nums text-slate-400">
-                                    • Đã có {orderCount} lượt đặt vẽ gói này
+                                  <span className="text-[11px] font-medium font-[family-name:var(--font-ui)] tabular-nums text-[var(--ash)]">
+                                    • {isVie ? `Đã có ${orderCount} lượt đặt vẽ gói này` : `${orderCount} orders completed`}
                                   </span>
                                 )}
                               </div>
 
                               {rate.description ? (
-                                <p className="max-w-[68ch] text-xs sm:text-[13px] text-[#C7C5CF] leading-relaxed whitespace-pre-line">
+                                <p className="max-w-[68ch] text-xs sm:text-[13px] text-[var(--ash)] leading-relaxed whitespace-pre-line">
                                   {rate.description}
                                 </p>
                               ) : (
-                                <p className="text-xs text-slate-400 italic">Không có mô tả chi tiết.</p>
+                                <p className="text-xs text-[var(--ash-dim)] italic">{isVie ? 'Không có mô tả chi tiết.' : 'No detailed description.'}</p>
                               )}
                             </div>
 
                             <div className="shrink-0 sm:text-right flex sm:flex-col items-baseline sm:items-end justify-between gap-1">
-                              <span className="font-h1 text-xl font-bold tabular-nums text-emerald-300">
+                              <span className="font-[family-name:var(--font-display)] text-xl font-medium tabular-nums text-[var(--lumen)]">
                                 {new Intl.NumberFormat('vi-VN').format(rate.price)} ₫
                               </span>
-                              <span className="text-[11px] tabular-nums text-slate-400">
-                                Sửa thêm: {new Intl.NumberFormat('vi-VN').format(rate.extraRevisionPrice ?? 0)} ₫/lần
+                              <span className="text-[11px] font-[family-name:var(--font-ui)] tabular-nums text-[var(--ash)]">
+                                {isVie ? `Sửa thêm: ${new Intl.NumberFormat('vi-VN').format(rate.extraRevisionPrice ?? 0)} ₫/lần` : `Extra revision: ${new Intl.NumberFormat('vi-VN').format(rate.extraRevisionPrice ?? 0)} ₫`}
                               </span>
                             </div>
                           </div>
 
                           {milestones.length > 0 && (
-                            <div className="pt-3 border-t border-white/10">
-                              <div className={`grid grid-cols-1 divide-y divide-white/10 sm:divide-y-0 sm:divide-x ${
+                            <div className="pt-3 border-t border-[var(--hair)]">
+                              <div className={`grid grid-cols-1 divide-y divide-[var(--hair)] sm:divide-y-0 sm:divide-x ${
                                 milestones.length === 2
                                   ? 'sm:grid-cols-2'
                                   : milestones.length >= 3
@@ -345,19 +379,19 @@ export function CreatorProfileScreen({ id }: { id: string }) {
                                     className="flex flex-col justify-between gap-1.5 py-2 first:pt-0 last:pb-0 sm:py-0 sm:px-3.5 sm:first:pl-0 sm:last:pr-0"
                                   >
                                     <div className="text-xs leading-snug">
-                                      <span className="font-semibold text-[#C5C9F8] tabular-nums">
-                                        Mốc {m.sequence}
+                                      <span className="font-semibold text-[var(--lumen)] tabular-nums">
+                                        {isVie ? `Mốc ${m.sequence}` : `Step ${m.sequence}`}
                                       </span>
-                                      <span className="text-slate-500"> · </span>
-                                      <span className="font-medium text-white">{m.title}</span>
+                                      <span className="text-[var(--ash-dim)]"> · </span>
+                                      <span className="font-medium text-[var(--ivory)]">{m.title}</span>
                                     </div>
-                                    <div className="flex items-center gap-2 text-[11px] tabular-nums text-slate-300">
-                                      <span className="font-semibold text-slate-200">
+                                    <div className="flex items-center gap-2 text-[11px] font-[family-name:var(--font-ui)] tabular-nums text-[var(--ash)]">
+                                      <span className="font-semibold text-[var(--ivory)]">
                                         {new Intl.NumberFormat('vi-VN').format(m.price)} ₫
                                       </span>
-                                      <span className="text-slate-500">·</span>
-                                      <span className="text-slate-400">
-                                        {m.maxRevisions ?? rate.maxRevisions ?? 3} lần sửa
+                                      <span className="text-[var(--ash-dim)]">·</span>
+                                      <span>
+                                        {isVie ? `${m.maxRevisions ?? rate.maxRevisions ?? 3} lần sửa` : `${m.maxRevisions ?? rate.maxRevisions ?? 3} revisions`}
                                       </span>
                                     </div>
                                   </div>
@@ -367,13 +401,13 @@ export function CreatorProfileScreen({ id }: { id: string }) {
                           )}
                         </div>
 
-                        <div className="flex flex-wrap items-center justify-end gap-3 pt-2 border-t border-white/5">
+                        <div className="flex flex-wrap items-center justify-end gap-3 pt-2 border-t border-[var(--hair)]">
                           {isOwnProfile ? (
                             <Link
                               href="/creator/services"
-                              className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-white/15 bg-white/5 px-5 py-2 text-xs font-semibold text-slate-200 hover:text-white hover:bg-white/10 transition"
+                              className="inline-flex items-center justify-center gap-1.5 rounded-full border border-[var(--hair-2)] bg-[var(--ink-3)] px-5 py-2 text-xs font-semibold text-[var(--ivory)] hover:border-[var(--lumen)] hover:text-[var(--lumen)] transition"
                             >
-                              Chỉnh sửa gói
+                              {isVie ? 'Chỉnh sửa gói' : 'Edit package'}
                             </Link>
                           ) : (
                             <button
@@ -383,10 +417,10 @@ export function CreatorProfileScreen({ id }: { id: string }) {
                                 setSelectedCommissionPackageId(rate.id);
                                 setShowCommissionModal(true);
                               }}
-                              className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#A7ACD9] px-5 py-2.5 text-xs font-bold text-[#1F2335] hover:bg-[#b8bde4] transition disabled:opacity-45 disabled:cursor-not-allowed"
+                              className="inline-flex items-center justify-center gap-1.5 rounded-full bg-[var(--lumen)] px-5 py-2.5 text-xs font-bold text-white hover:bg-[var(--lumen-hi)] shadow-sm transition disabled:opacity-45 disabled:cursor-not-allowed cursor-pointer"
                             >
                               <Sparkles className="h-3.5 w-3.5" />
-                              {slot.isFull ? 'Gói đã hết slot' : 'Đặt vẽ gói này'}
+                              {slot.isFull ? (isVie ? 'Gói đã hết slot' : 'No slots open') : (isVie ? 'Đặt vẽ gói này' : 'Commission this')}
                             </button>
                           )}
                         </div>
@@ -397,23 +431,23 @@ export function CreatorProfileScreen({ id }: { id: string }) {
               })}
             </div>
           ) : (
-            <EmptyState>Creator chưa đăng gói commission.</EmptyState>
+            <EmptyState>{isVie ? 'Creator chưa đăng gói commission.' : 'No commission packages published yet.'}</EmptyState>
           )
         )}
         {tab === 'terms' && (
-          <div className="rounded-2xl border border-white/10 bg-[#141724]/90 p-5 sm:p-6 space-y-4">
+          <div className="rounded-3xl border border-[var(--hair)] bg-[var(--ink-2)] p-5 sm:p-6 space-y-4 shadow-sm">
             <CreatorTermsOverview terms={terms} creatorName={profile.displayName} />
             {isOwnProfile && (
-              <div className="flex justify-end border-t border-white/10 pt-3">
-                <Link href="/creator/terms" className="inline-flex items-center rounded-xl border border-white/15 bg-white/5 px-4 py-2 text-xs font-semibold text-white hover:bg-white/10 transition">
-                  Chỉnh sửa điều khoản &amp; bản quyền
+              <div className="flex justify-end border-t border-[var(--hair)] pt-3">
+                <Link href="/creator/terms" className="inline-flex items-center rounded-full border border-[var(--hair-2)] bg-[var(--ink-3)] px-4 py-2 text-xs font-semibold text-[var(--ivory)] hover:border-[var(--lumen)] hover:text-[var(--lumen)] transition">
+                  {isVie ? 'Chỉnh sửa điều khoản & bản quyền' : 'Edit terms & copyright'}
                 </Link>
               </div>
             )}
           </div>
         )}
         {tab === 'reviews' && (() => {
-          if (!reviews.length) return <EmptyState>Chưa có đánh giá nào cho Creator này.</EmptyState>;
+          if (!reviews.length) return <EmptyState>{isVie ? 'Chưa có đánh giá nào cho Creator này.' : 'No reviews for this creator yet.'}</EmptyState>;
 
           const totalReviewCount = reviews.length;
           const starCounts: Record<number, number> = {
@@ -503,26 +537,27 @@ export function CreatorProfileScreen({ id }: { id: string }) {
           return (
             <div className="space-y-4">
               {/* COMPREHENSIVE RATING BREAKDOWN & DASHBOARD */}
-              <div className="rounded-2xl border border-white/10 bg-[#161928]/80 p-5 sm:p-6 space-y-5 shadow-lg">
+              <div className="rounded-3xl border border-[var(--hair)] bg-[var(--ink-2)] p-5 sm:p-6 space-y-5 shadow-sm">
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
                   {/* Left Column: Overall Score & Stars */}
-                  <div className="md:col-span-4 flex flex-col items-center justify-center text-center p-3 sm:border-r border-white/10">
-                    <span className="text-4xl sm:text-5xl font-black text-white tracking-tight">{avgRating}</span>
-                    <div className="flex items-center gap-1 text-amber-400 my-2">
+                  <div className="md:col-span-4 flex flex-col items-center justify-center text-center p-3 sm:border-r border-[var(--hair)]">
+                    <span className="text-4xl sm:text-5xl font-[family-name:var(--font-display)] font-bold text-[var(--ivory)] tracking-tight">{avgRating}</span>
+                    <div className="flex items-center gap-1 text-[var(--gold)] my-2">
                       {[1, 2, 3, 4, 5].map((s) => (
                         <Star
                           key={s}
                           size={18}
-                          className={s <= Math.round(Number(avgRating)) ? 'fill-amber-400 text-amber-400' : 'text-slate-600'}
+                          className={s <= Math.round(Number(avgRating)) ? 'fill-[var(--gold)] text-[var(--gold)]' : 'text-[var(--hair-2)]'}
                         />
                       ))}
                     </div>
-                    <p className="text-xs text-slate-400">
-                      Tổng số <strong className="text-white font-bold">{totalReviewCount}</strong> đánh giá
+                    <p className="text-xs text-[var(--ash)] font-[family-name:var(--font-ui)] tabular-nums">
+                      {isVie ? 'Tổng số ' : 'Total '}
+                      <strong className="text-[var(--ivory)] font-bold">{totalReviewCount}</strong> {isVie ? 'đánh giá' : 'reviews'}
                     </p>
                   </div>
 
-                  {/* Middle Column: Interactive Star Distribution Bars (E-Commerce style) */}
+                  {/* Middle Column: Interactive Star Distribution Bars */}
                   <div className="md:col-span-8 space-y-1.5">
                     {[5, 4, 3, 2, 1].map((starLevel) => {
                       const count = starCounts[starLevel] || 0;
@@ -534,23 +569,23 @@ export function CreatorProfileScreen({ id }: { id: string }) {
                           key={starLevel}
                           type="button"
                           onClick={() => handleFilterChange(isSelected ? 'all' : (String(starLevel) as ReviewFilter))}
-                          className={`w-full flex items-center gap-3 text-xs py-1 px-2 rounded-lg transition-colors group ${
-                            isSelected ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white hover:bg-white/5'
+                          className={`w-full flex items-center gap-3 text-xs py-1.5 px-2.5 rounded-xl transition-colors cursor-pointer group ${
+                            isSelected ? 'bg-[var(--ink-3)] text-[var(--ivory)] font-semibold' : 'text-[var(--ash)] hover:text-[var(--ivory)] hover:bg-[var(--ink-3)]/60'
                           }`}
                         >
                           <span className="w-12 font-semibold text-right flex items-center justify-end gap-1 shrink-0">
                             <span>{starLevel}</span>
-                            <Star size={11} className="fill-amber-400 text-amber-400" />
+                            <Star size={11} className="fill-[var(--gold)] text-[var(--gold)]" />
                           </span>
 
-                          <div className="flex-1 h-2 rounded-full bg-black/40 overflow-hidden relative">
+                          <div className="flex-1 h-2 rounded-full bg-[var(--ink-3)] overflow-hidden relative border border-[var(--hair)]">
                             <div
-                              className="h-full rounded-full bg-amber-400 transition-all duration-500 ease-out"
+                              className="h-full rounded-full bg-[var(--gold)] transition-all duration-500 ease-out"
                               style={{ width: `${percent}%` }}
                             />
                           </div>
 
-                          <span className="w-14 text-left font-mono text-[11px] text-slate-400 group-hover:text-slate-200 shrink-0">
+                          <span className="w-16 text-left font-[family-name:var(--font-ui)] tabular-nums text-[11px] text-[var(--ash)] group-hover:text-[var(--ivory)] shrink-0">
                             {count} ({percent}%)
                           </span>
                         </button>
@@ -560,17 +595,17 @@ export function CreatorProfileScreen({ id }: { id: string }) {
                 </div>
 
                 {/* Filter and Sorting Controls Toolbar */}
-                <div className="pt-4 border-t border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="pt-4 border-t border-[var(--hair)] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   {/* Filter Pills */}
                   <div className="flex flex-wrap items-center gap-1.5">
                     {[
-                      { key: 'all', label: `Tất cả (${totalReviewCount})` },
+                      { key: 'all', label: isVie ? `Tất cả (${totalReviewCount})` : `All (${totalReviewCount})` },
                       { key: '5', label: `5★ (${starCounts[5]})` },
                       { key: '4', label: `4★ (${starCounts[4]})` },
                       { key: '3', label: `3★ (${starCounts[3]})` },
                       { key: '2', label: `2★ (${starCounts[2]})` },
                       { key: '1', label: `1★ (${starCounts[1]})` },
-                      { key: 'with-reply', label: `💬 Phản hồi (${countWithReply})` },
+                      { key: 'with-reply', label: isVie ? `💬 Phản hồi (${countWithReply})` : `💬 Replied (${countWithReply})` },
                     ].map(({ key, label }) => {
                       const isActive = reviewFilter === key;
                       return (
@@ -578,10 +613,10 @@ export function CreatorProfileScreen({ id }: { id: string }) {
                           key={key}
                           type="button"
                           onClick={() => handleFilterChange(key as ReviewFilter)}
-                          className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
+                          className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all cursor-pointer ${
                             isActive
-                              ? 'bg-[#A7ACD9] text-[#1F2335] border-[#A7ACD9] shadow-sm font-bold'
-                              : 'bg-white/5 border-white/10 text-slate-300 hover:border-white/20 hover:text-white'
+                              ? 'bg-[var(--lumen)] text-white border-[var(--lumen)] shadow-sm font-bold'
+                              : 'bg-[var(--ink-3)] border-[var(--hair-2)] text-[var(--ivory)] hover:border-[var(--lumen)] hover:text-[var(--lumen)]'
                           }`}
                         >
                           {label}
@@ -592,53 +627,53 @@ export function CreatorProfileScreen({ id }: { id: string }) {
 
                   {/* Sorting Dropdown */}
                   <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
-                    <span className="text-[11px] text-slate-400 flex items-center gap-1">
-                      <ArrowUpDown size={12} className="text-[#A7ACD9]" /> Sắp xếp:
+                    <span className="text-[11px] text-[var(--ash)] flex items-center gap-1 font-medium">
+                      <ArrowUpDown size={12} className="text-[var(--lumen)]" /> {isVie ? 'Sắp xếp:' : 'Sort:'}
                     </span>
                     <select
                       value={reviewSort}
                       onChange={(e) => handleSortChange(e.target.value as ReviewSort)}
-                      className="bg-black/40 border border-white/10 rounded-xl px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-[#A7ACD9] cursor-pointer"
+                      className="bg-[var(--ink-3)] border border-[var(--hair-2)] rounded-full px-3 py-1.5 text-xs text-[var(--ivory)] focus:outline-none focus:border-[var(--lumen)] cursor-pointer"
                     >
-                      <option value="newest" className="bg-[#161928] text-white">Mới nhất</option>
-                      <option value="oldest" className="bg-[#161928] text-white">Cũ nhất</option>
-                      <option value="rating-desc" className="bg-[#161928] text-white">Đánh giá cao nhất</option>
-                      <option value="rating-asc" className="bg-[#161928] text-white">Đánh giá thấp nhất</option>
+                      <option value="newest" className="bg-[var(--ink-2)] text-[var(--ivory)]">{isVie ? 'Mới nhất' : 'Newest'}</option>
+                      <option value="oldest" className="bg-[var(--ink-2)] text-[var(--ivory)]">{isVie ? 'Cũ nhất' : 'Oldest'}</option>
+                      <option value="rating-desc" className="bg-[var(--ink-2)] text-[var(--ivory)]">{isVie ? 'Đánh giá cao nhất' : 'Highest rating'}</option>
+                      <option value="rating-asc" className="bg-[var(--ink-2)] text-[var(--ivory)]">{isVie ? 'Đánh giá thấp nhất' : 'Lowest rating'}</option>
                     </select>
                   </div>
                 </div>
 
                 {/* Review source filter */}
                 {(availablePackages.length > 0 || auctionReviewCount > 0) && (
-                  <div className="pt-3 border-t border-white/10 flex flex-wrap items-center gap-2">
-                    <span className="text-xs text-slate-400 font-semibold flex items-center gap-1.5 mr-1">
-                      <Package size={13} className="text-[#A7ACD9]" />
-                      Nguồn:
+                  <div className="pt-3 border-t border-[var(--hair)] flex flex-wrap items-center gap-2">
+                    <span className="text-xs text-[var(--ash)] font-medium flex items-center gap-1.5 mr-1">
+                      <Package size={13} className="text-[var(--lumen)]" />
+                      {isVie ? 'Nguồn:' : 'Source:'}
                     </span>
 
                     <button
                       type="button"
                       onClick={() => handlePackageChange('all')}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
+                      className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all cursor-pointer ${
                         packageFilter === 'all'
-                          ? 'bg-[#A7ACD9] text-[#1F2335] border-[#A7ACD9] shadow-sm font-bold'
-                          : 'bg-white/5 border-white/10 text-slate-300 hover:border-white/20 hover:text-white'
+                          ? 'bg-[var(--lumen)] text-white border-[var(--lumen)] shadow-sm font-bold'
+                          : 'bg-[var(--ink-3)] border-[var(--hair-2)] text-[var(--ivory)] hover:border-[var(--lumen)] hover:text-[var(--lumen)]'
                       }`}
                     >
-                      Tất cả đánh giá (${totalReviewCount})
+                      {isVie ? `Tất cả đánh giá (${totalReviewCount})` : `All reviews (${totalReviewCount})`}
                     </button>
 
                     {auctionReviewCount > 0 && (
                       <button
                         type="button"
                         onClick={() => handlePackageChange('auction')}
-                        className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all flex items-center gap-1 ${
+                        className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all flex items-center gap-1 cursor-pointer ${
                           packageFilter === 'auction'
-                            ? 'bg-[#A7ACD9] text-[#1F2335] border-[#A7ACD9] shadow-sm font-bold'
-                            : 'bg-white/5 border-white/10 text-slate-300 hover:border-white/20 hover:text-white'
+                            ? 'bg-[var(--lumen)] text-white border-[var(--lumen)] shadow-sm font-bold'
+                            : 'bg-[var(--ink-3)] border-[var(--hair-2)] text-[var(--ivory)] hover:border-[var(--lumen)] hover:text-[var(--lumen)]'
                         }`}
                       >
-                        <Gavel size={11} /> Đấu giá ({auctionReviewCount})
+                        <Gavel size={11} className="text-[var(--gold)]" /> {isVie ? `Đấu giá (${auctionReviewCount})` : `Auctions (${auctionReviewCount})`}
                       </button>
                     )}
 
@@ -650,14 +685,14 @@ export function CreatorProfileScreen({ id }: { id: string }) {
                           key={pkg}
                           type="button"
                           onClick={() => handlePackageChange(pkg)}
-                          className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all flex items-center gap-1 ${
+                          className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all flex items-center gap-1 cursor-pointer ${
                             isActive
-                              ? 'bg-[#A7ACD9] text-[#1F2335] border-[#A7ACD9] shadow-sm font-bold'
-                              : 'bg-white/5 border-white/10 text-slate-300 hover:border-white/20 hover:text-white'
+                              ? 'bg-[var(--lumen)] text-white border-[var(--lumen)] shadow-sm font-bold'
+                              : 'bg-[var(--ink-3)] border-[var(--hair-2)] text-[var(--ivory)] hover:border-[var(--lumen)] hover:text-[var(--lumen)]'
                           }`}
                         >
                           <span>{pkg}</span>
-                          <span className={isActive ? 'text-[#1F2335]/80' : 'text-slate-400 font-normal'}>({count})</span>
+                          <span className={isActive ? 'text-white/80' : 'text-[var(--ash)] font-normal'}>({count})</span>
                         </button>
                       );
                     })}
@@ -667,56 +702,56 @@ export function CreatorProfileScreen({ id }: { id: string }) {
 
               {/* REVIEW CARDS LIST */}
               {paginatedReviews.length === 0 ? (
-                <div className="p-8 text-center rounded-2xl border border-white/10 bg-white/[0.02] text-xs text-slate-400">
-                  Không tìm thấy đánh giá nào cho tiêu chí đã chọn.
+                <div className="p-8 text-center rounded-3xl border border-[var(--hair)] bg-[var(--ink-2)] text-xs text-[var(--ash)]">
+                  {isVie ? 'Không tìm thấy đánh giá nào cho tiêu chí đã chọn.' : 'No reviews match your selected filter.'}
                 </div>
               ) : (
                 <div className="space-y-3">
                   {paginatedReviews.map((review) => {
                     const { userComment, tags } = parseReviewComment(review.comment);
-                    const reviewerName = review.reviewerName || 'Khách hàng';
-                    const packageName = review.commissionTitle || 'Đơn vẽ theo yêu cầu';
+                    const reviewerName = review.reviewerName || (isVie ? 'Khách hàng' : 'Client');
+                    const packageName = review.commissionTitle || (isVie ? 'Đơn vẽ theo yêu cầu' : 'Custom Commission');
                     const isAuctionReview = review.source === 'auction';
                     const timestamp = formatTimestamp(review.createdAt);
 
                     return (
                       <article
                         key={review.id}
-                        className="rounded-2xl border border-white/10 bg-[#161928]/60 p-4 sm:p-5 space-y-3 transition-colors hover:border-white/20"
+                        className="rounded-3xl border border-[var(--hair)] bg-[var(--ink-2)] p-4 sm:p-5 space-y-3 transition-colors hover:border-[var(--hair-2)] shadow-sm"
                       >
                         {/* Header Row: Reviewer info, Stars, Timestamp, Package badge */}
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
                           <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-[#A7ACD9]/20 text-[#A7ACD9] flex items-center justify-center font-bold text-xs uppercase border border-[#A7ACD9]/30 shrink-0">
+                            <div className="w-8 h-8 rounded-full bg-[var(--ink-3)] text-[var(--lumen)] flex items-center justify-center font-bold text-xs uppercase border border-[var(--hair)] shrink-0">
                               {reviewerName.charAt(0) || 'K'}
                             </div>
                             <div>
                               <div className="flex items-center gap-2">
-                                <span className="font-bold text-xs text-white">{reviewerName}</span>
-                                <div className="flex items-center gap-0.5 text-amber-400">
+                                <span className="font-semibold text-xs text-[var(--ivory)]">{reviewerName}</span>
+                                <div className="flex items-center gap-0.5 text-[var(--gold)]">
                                   {[1, 2, 3, 4, 5].map((s) => (
                                     <Star
                                       key={s}
                                       size={12}
-                                      className={s <= review.rating ? 'fill-amber-400 text-amber-400' : 'text-slate-600'}
+                                      className={s <= review.rating ? 'fill-[var(--gold)] text-[var(--gold)]' : 'text-[var(--hair-2)]'}
                                     />
                                   ))}
                                 </div>
                               </div>
-                              <div className="flex flex-wrap items-center gap-2 mt-1 text-[11px] text-slate-400">
+                              <div className="flex flex-wrap items-center gap-2 mt-1 text-[11px] text-[var(--ash)]">
                                 {isAuctionReview ? (
-                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-400/10 border border-amber-400/20 text-amber-300 font-medium">
-                                    <Gavel size={11} /> Đấu giá
+                                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[var(--gold-soft)] border border-[var(--gold)]/30 text-[var(--gold)] font-medium">
+                                    <Gavel size={11} /> {isVie ? 'Đấu giá' : 'Auction'}
                                   </span>
                                 ) : (
-                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-[#C5C9F8] font-medium">
-                                    <Package size={11} className="text-[#A7ACD9]" />
-                                    Gói: <strong className="text-white">{packageName}</strong>
+                                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[var(--ink-3)] border border-[var(--hair-2)] text-[var(--ash)] font-medium">
+                                    <Package size={11} className="text-[var(--lumen)]" />
+                                    {isVie ? 'Gói: ' : 'Package: '}<strong className="text-[var(--ivory)]">{packageName}</strong>
                                   </span>
                                 )}
                                 {timestamp && (
-                                  <span className="inline-flex items-center gap-1 text-slate-400">
-                                    <Clock size={11} className="text-slate-500" />
+                                  <span className="inline-flex items-center gap-1 text-[var(--ash-dim)] font-[family-name:var(--font-ui)] tabular-nums">
+                                    <Clock size={11} className="text-[var(--ash)]" />
                                     {timestamp}
                                   </span>
                                 )}
@@ -731,7 +766,7 @@ export function CreatorProfileScreen({ id }: { id: string }) {
                             {tags.map((tag, idx) => (
                               <span
                                 key={idx}
-                                className="inline-flex items-center px-2.5 py-0.5 rounded-lg bg-[#A7ACD9]/15 border border-[#A7ACD9]/25 text-[11px] font-medium text-[#C5C9F8]"
+                                className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-[var(--ink-3)] border border-[var(--hair-2)] text-[11px] font-medium text-[var(--ivory)]"
                               >
                                 {tag}
                               </span>
@@ -741,44 +776,44 @@ export function CreatorProfileScreen({ id }: { id: string }) {
 
                         {/* User Comment */}
                         {userComment && (
-                          <p className="text-xs sm:text-sm text-slate-200 leading-relaxed bg-black/25 p-3 rounded-xl border border-white/5">
+                          <p className="text-xs sm:text-sm text-[var(--ivory)] leading-relaxed bg-[var(--ink-3)]/60 p-3.5 rounded-2xl border border-[var(--hair)]">
                             &ldquo;{userComment}&rdquo;
                           </p>
                         )}
 
                         {/* Creator Response */}
                         {review.reviewerReply ? (
-                          <div className="mt-2 rounded-xl bg-white/[0.02] border-l-2 border-[#A7ACD9] pl-3.5 py-2.5 pr-3 space-y-1">
-                            <p className="text-[11px] font-bold text-[#A7ACD9]">Phản hồi từ Creator:</p>
-                            <p className="text-xs text-slate-300 leading-relaxed whitespace-pre-wrap">
+                          <div className="mt-2 rounded-2xl bg-[var(--ink-3)]/80 border-l-2 border-[var(--lumen)] pl-3.5 py-2.5 pr-3 space-y-1">
+                            <p className="text-[11px] font-bold text-[var(--lumen)]">{isVie ? 'Phản hồi từ Creator:' : 'Reply from Creator:'}</p>
+                            <p className="text-xs text-[var(--ivory)] leading-relaxed whitespace-pre-wrap">
                               {review.reviewerReply}
                             </p>
                           </div>
                         ) : isOwnProfile && (
                           replyingReviewId === review.id ? (
-                            <div className="mt-3 space-y-2 pt-2 border-t border-white/10">
+                            <div className="mt-3 space-y-2 pt-2 border-t border-[var(--hair)]">
                               <textarea
                                 value={replyText}
                                 onChange={(e) => setReplyText(e.target.value)}
-                                placeholder="Nhập nội dung phản hồi cho đánh giá này..."
+                                placeholder={isVie ? 'Nhập nội dung phản hồi cho đánh giá này...' : 'Write your response to this review...'}
                                 rows={2}
-                                className="w-full rounded-xl border border-white/10 bg-black/40 p-2.5 text-xs text-white placeholder-[#8A8FA9] focus:outline-none focus:border-[#A7ACD9]"
+                                className="w-full rounded-2xl border border-[var(--hair-2)] bg-[var(--ink-3)] p-3 text-xs text-[var(--ivory)] placeholder-[var(--ash)] focus:outline-none focus:border-[var(--lumen)]"
                               />
                               <div className="flex justify-end gap-2">
                                 <button
                                   type="button"
                                   onClick={() => { setReplyingReviewId(null); setReplyText(''); }}
-                                  className="rounded-lg border border-white/10 px-3 py-1 text-xs text-[#8A8FA9] hover:text-white"
+                                  className="rounded-full border border-[var(--hair-2)] px-3 py-1 text-xs text-[var(--ash)] hover:text-[var(--ivory)] transition cursor-pointer"
                                 >
-                                  Hủy
+                                  {isVie ? 'Hủy' : 'Cancel'}
                                 </button>
                                 <button
                                   type="button"
                                   disabled={replySubmitting || !replyText.trim()}
                                   onClick={() => void handleReplyReview(review)}
-                                  className="rounded-lg bg-[#A7ACD9] px-3.5 py-1 text-xs font-semibold text-[#1F2335] disabled:opacity-50"
+                                  className="rounded-full bg-[var(--lumen)] px-4 py-1 text-xs font-bold text-white hover:bg-[var(--lumen-hi)] transition disabled:opacity-50 cursor-pointer"
                                 >
-                                  {replySubmitting ? 'Đang gửi...' : 'Gửi phản hồi'}
+                                  {replySubmitting ? (isVie ? 'Đang gửi...' : 'Sending...') : (isVie ? 'Gửi phản hồi' : 'Send reply')}
                                 </button>
                               </div>
                             </div>
@@ -786,9 +821,9 @@ export function CreatorProfileScreen({ id }: { id: string }) {
                             <button
                               type="button"
                               onClick={() => { setReplyingReviewId(review.id); setReplyText(''); }}
-                              className="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold text-[#A7ACD9] hover:underline"
+                              className="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--lumen)] hover:underline cursor-pointer"
                             >
-                              💬 Phản hồi đánh giá
+                              💬 {isVie ? 'Phản hồi đánh giá' : 'Reply to review'}
                             </button>
                           )
                         )}
@@ -798,11 +833,13 @@ export function CreatorProfileScreen({ id }: { id: string }) {
                 </div>
               )}
 
-              {/* PAGINATION CONTROLS (Active when multiple reviews) */}
+              {/* PAGINATION CONTROLS */}
               {totalPages > 1 && (
-                <div className="pt-3 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400">
-                  <p>
-                    Hiển thị <strong className="text-white">{startIndex + 1}</strong> - <strong className="text-white">{Math.min(startIndex + REVIEWS_PER_PAGE, sorted.length)}</strong> trong tổng số <strong className="text-white">{sorted.length}</strong> đánh giá
+                <div className="pt-3 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[var(--ash)]">
+                  <p className="font-[family-name:var(--font-ui)] tabular-nums">
+                    {isVie ? 'Hiển thị ' : 'Showing '}
+                    <strong className="text-[var(--ivory)]">{startIndex + 1}</strong> - <strong className="text-[var(--ivory)]">{Math.min(startIndex + REVIEWS_PER_PAGE, sorted.length)}</strong> {isVie ? 'trong tổng số ' : 'of '}
+                    <strong className="text-[var(--ivory)]">{sorted.length}</strong> {isVie ? 'đánh giá' : 'reviews'}
                   </p>
 
                   <div className="flex items-center gap-1">
@@ -810,17 +847,16 @@ export function CreatorProfileScreen({ id }: { id: string }) {
                       type="button"
                       disabled={safePage <= 1}
                       onClick={() => setReviewPage((p) => Math.max(1, p - 1))}
-                      className="px-3 py-1.5 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-white disabled:opacity-30 disabled:cursor-not-allowed transition"
+                      className="px-3.5 py-1.5 rounded-full border border-[var(--hair-2)] bg-[var(--ink-2)] hover:border-[var(--lumen)] hover:text-[var(--lumen)] text-[var(--ivory)] disabled:opacity-30 disabled:cursor-not-allowed transition cursor-pointer"
                     >
-                      Trước
+                      {isVie ? 'Trước' : 'Prev'}
                     </button>
 
                     {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => {
-                      // show window of pages if totalPages is large
                       if (totalPages > 7) {
                         if (p !== 1 && p !== totalPages && Math.abs(p - safePage) > 2) {
                           if (p === 2 || p === totalPages - 1) {
-                            return <span key={p} className="px-1 text-slate-600">...</span>;
+                            return <span key={p} className="px-1 text-[var(--ash-dim)]">...</span>;
                           }
                           return null;
                         }
@@ -831,10 +867,10 @@ export function CreatorProfileScreen({ id }: { id: string }) {
                           key={p}
                           type="button"
                           onClick={() => setReviewPage(p)}
-                          className={`w-8 h-8 rounded-xl font-bold transition flex items-center justify-center ${
+                          className={`w-8 h-8 rounded-full font-[family-name:var(--font-ui)] font-bold transition flex items-center justify-center cursor-pointer ${
                             isCur
-                              ? 'bg-[#A7ACD9] text-[#1F2335] shadow-sm'
-                              : 'border border-white/10 bg-white/5 text-slate-300 hover:text-white hover:bg-white/10'
+                              ? 'bg-[var(--lumen)] text-white shadow-sm'
+                              : 'border border-[var(--hair-2)] bg-[var(--ink-2)] text-[var(--ivory)] hover:border-[var(--lumen)] hover:text-[var(--lumen)]'
                           }`}
                         >
                           {p}
@@ -846,9 +882,9 @@ export function CreatorProfileScreen({ id }: { id: string }) {
                       type="button"
                       disabled={safePage >= totalPages}
                       onClick={() => setReviewPage((p) => Math.min(totalPages, p + 1))}
-                      className="px-3 py-1.5 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-white disabled:opacity-30 disabled:cursor-not-allowed transition"
+                      className="px-3.5 py-1.5 rounded-full border border-[var(--hair-2)] bg-[var(--ink-2)] hover:border-[var(--lumen)] hover:text-[var(--lumen)] text-[var(--ivory)] disabled:opacity-30 disabled:cursor-not-allowed transition cursor-pointer"
                     >
-                      Sau
+                      {isVie ? 'Sau' : 'Next'}
                     </button>
                   </div>
                 </div>
@@ -952,5 +988,5 @@ export function CreatorProfileScreen({ id }: { id: string }) {
 }
 
 function EmptyState({ children }: { children: string }) {
-  return <p className="rounded-xl border border-dashed border-white/10 p-10 text-center text-sm text-[#919099]">{children}</p>;
+  return <p className="rounded-3xl border border-dashed border-[var(--hair-2)] bg-[var(--ink-2)]/60 p-12 text-center text-xs text-[var(--ash)] font-medium">{children}</p>;
 }
