@@ -128,7 +128,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
         {/* Dynamic Page Content */}
         <main className="min-w-0 flex-1 overflow-x-hidden p-3 pb-24 sm:p-5 sm:pb-16 lg:p-8 lg:pb-10">
-          <div className="page">{children}</div>
+          <div className="page page--flush">{children}</div>
         </main>
       </div>
     </div>

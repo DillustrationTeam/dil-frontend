@@ -450,8 +450,9 @@ export function OwnedArtworksScreen() {
 
                   {/* Quyền độc bản: để dưới hộp dữ kiện, không phủ lên nhãn nguồn */}
                   {artwork.exclusiveBadge ? (
-                    <span className="mt-1.5 inline-flex max-w-full items-center gap-1 truncate rounded-full border border-[#8A6A1F]/40 bg-[#8A6A1F]/10 px-2 py-0.5 text-[10px] font-semibold text-[#8A6A1F]">
-                      <Crown size={10} aria-hidden /> {exclusiveLabel(artwork.exclusiveBadge, lang)}
+                    <span className="mt-1.5 inline-flex max-w-full items-center gap-1 rounded-full border border-[#8A6A1F]/40 bg-[#8A6A1F]/10 px-2 py-0.5 text-[10px] font-semibold text-[#8A6A1F]">
+                      <Crown size={10} className="shrink-0" aria-hidden />
+                      <span className="min-w-0 truncate">{exclusiveLabel(artwork.exclusiveBadge, lang)}</span>
                     </span>
                   ) : null}
 
