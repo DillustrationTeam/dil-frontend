@@ -178,38 +178,53 @@ export function WorkroomProgressPanel({
         needsAttention ? 'border-[#A8321C]/40 bg-[#A8321C]/5' : 'border-[#221E1A]/10'
       }`}
     >
-      <div className="flex flex-wrap items-center gap-3">
-        <span className="inline-flex items-center gap-1.5 font-semibold text-on-surface">
-          <Activity size={14} className="text-brand-periwinkle" /> Tiến độ &amp; hạn chót
-        </span>
+      {/* KHỐI ĐẦU: kết luận dự đoán phải đọc được trong 1 giây */}
+      <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2">
+        <div className="min-w-0">
+          <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-outline">
+            <Activity size={13} className="text-brand-periwinkle" /> Dự đoán tiến độ
+          </p>
 
-        <span className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${style.badge}`}>
-          <RiskIcon size={11} /> Rủi ro trễ hạn: {isEnded ? 'An toàn (Đã kết thúc)' : `${style.label} · ${percent}%`}
-        </span>
+          {/* Con số chính: còn bao lâu / quá hạn bao lâu */}
+          <p className={`mt-1 font-h1 text-2xl font-bold leading-none tabular-nums ${countdown?.overdue ? 'text-[#A8321C]' : 'text-on-surface'}`}>
+            {isEnded
+              ? 'Đã xong'
+              : countdown
+                ? `${countdown.overdue ? 'Quá hạn ' : 'Còn '}${countdown.text}`
+                : 'Chưa có hạn chót'}
+          </p>
 
+          <p className="mt-1 text-[11px] text-on-surface-variant">
+            {risk.deadline ? `Hạn chót ${formatDateTime(risk.deadline)}` : 'Chưa đặt hạn chót'}
+            {' · '}
+            {allApproved || (totalMilestones && risk.currentStage > totalMilestones)
+              ? `Hoàn tất ${totalMilestones ?? risk.currentStage}/${totalMilestones ?? risk.currentStage} mốc`
+              : `Đang ở mốc #${risk.currentStage}${totalMilestones ? `/${totalMilestones}` : ''}`}
+          </p>
+        </div>
+
+        {/* Mức rủi ro: số lớn + nhãn + thanh */}
+        <div className="min-w-[8.5rem] text-right">
+          <p className={`font-h1 text-3xl font-bold leading-none tabular-nums ${needsAttention ? 'text-[#A8321C]' : 'text-on-surface'}`}>
+            {isEnded ? '—' : `${percent}%`}
+          </p>
+          <p className={`mt-1 inline-flex items-center gap-1 text-[11px] font-semibold ${needsAttention ? 'text-[#A8321C]' : 'text-on-surface-variant'}`}>
+            <RiskIcon size={12} /> {isEnded ? 'Đã kết thúc' : `Rủi ro trễ hạn · ${style.label}`}
+          </p>
+        </div>
+      </div>
+
+      {/* Thanh rủi ro: dày hơn, đặt ngay dưới con số */}
+      <div className="mt-2.5 h-2 overflow-hidden rounded-full bg-[#FFFCF6]">
+        <div className={`h-full rounded-full transition-all ${style.bar}`} style={{ width: `${Math.max(4, percent)}%` }} />
+      </div>
+
+      {/* Hàng phụ: mốc / trạng thái / hành động */}
+      <div className="mt-3 flex flex-wrap items-center gap-2">
         {isCancelled ? (
           <span className="inline-flex items-center gap-1 rounded-full border border-[#A8321C]/40 bg-[#A8321C]/15 px-2.5 py-0.5 text-[11px] font-semibold text-[#A8321C]">
-            <CircleAlert size={11} /> Đã hủy đơn & Hoàn tiền </span>
-        ) : allApproved || (totalMilestones && risk.currentStage > totalMilestones) ? (
-          <span className="inline-flex items-center gap-1 rounded-full border border-[#2F6B63]/40 bg-[#2F6B63]/10 px-2.5 py-0.5 text-[11px] font-semibold text-[#2F6B63]">
-            <CheckCircle2 size={11} /> Hoàn tất {totalMilestones ? `${totalMilestones}/${totalMilestones}` : 'các'} mốc
-          </span>
-        ) : (
-          <span className="inline-flex items-center gap-1 rounded-full border border-[#221E1A]/10 px-2.5 py-0.5 text-[11px] text-on-surface-variant">
-            <CalendarClock size={11} /> Mốc #{risk.currentStage}
-          </span>
-        )}
-
-        {!isEnded && countdown && (
-          <span
-            className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${
-              countdown.overdue ? 'border-[#A8321C]/40 bg-[#A8321C]/10 text-[#A8321C]' : 'border-[#221E1A]/10 text-on-surface-variant'
-            }`}
-          >
-            <CalendarClock size={11} />
-            {countdown.overdue ? `Quá hạn ${countdown.text}` : `Còn ${countdown.text}`}
-          </span>
-        )}
+            <CircleAlert size={11} /> Đã hủy đơn &amp; Hoàn tiền </span>
+        ) : null}
 
         <div className="ml-auto flex items-center gap-2">
           <button
@@ -241,11 +256,6 @@ export function WorkroomProgressPanel({
               <CircleAlert size={12} /> Hủy đơn / Khiếu nại </button>
           )}
         </div>
-      </div>
-
-      {/* Thanh rủi ro trực quan */}
-      <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-[#FFFCF6]">
-        <div className={`h-full rounded-full transition-all ${style.bar}`} style={{ width: `${Math.max(4, percent)}%` }} />
       </div>
 
       {/* Cảnh báo nổi khi mức rủi ro cao */}

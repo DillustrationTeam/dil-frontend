@@ -20,7 +20,7 @@ import type { WorkroomUnreadCountDto } from '../types/chat.types';
 import { useNotificationHub } from '@/features/notification/hooks/use-notification-hub';
 import { commissionService } from '@/services/commission.service';
 import type { Commission, CommissionStatus } from '@/types/commission.types';
-import { CountUp, Reveal } from '@/components/motion';
+import { Reveal } from '@/components/motion';
 
 import { extractErrorMessage } from '@/lib/api-client';
 
@@ -331,15 +331,15 @@ export function WorkroomListScreen({ userId }: { userId: string | null }) {
       <div className="statsline">
         <span>
           <b>
-            <CountUp value={metrics.active} />
+            {metrics.active.toLocaleString('vi-VN')}
           </b> phòng đang hoạt động </span>
         <span>
           <b>
-            <CountUp value={metrics.escrow} format={(v) => money(v)} />
+            {money(metrics.escrow)}
           </b> đang ký quỹ </span>
         <span>
           <b>
-            <CountUp value={metrics.completed} />
+            {metrics.completed.toLocaleString('vi-VN')}
           </b> đơn đã hoàn tất </span>
       </div>
 
@@ -515,7 +515,10 @@ function WorkroomCard({ row }: { row: WorkroomRow }) {
       </div>
 
       <div className="wcard__action">
-        <span className="wcard__when">{money(commission.price)}</span>
+        {/* `commission.price` không tồn tại trong DTO commission nên luôn = 0. */}
+        <span className="wcard__when" title="Giá chốt của đơn">
+          {money(commission.finalPrice ?? commission.totalPrice ?? 0)}
+        </span>
         <Link href={`/workroom/${commission.id}`} className="btn btn--primary btn--sm">
           Mở phòng
           {hasUnread && <span className="rounded-full bg-[#FFFCF6]/25 px-1.5 text-[11px] font-bold">{unreadCount}</span>}
