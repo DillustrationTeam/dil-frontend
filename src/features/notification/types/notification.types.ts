@@ -51,7 +51,7 @@ export const notificationTypeLabels: Record<string, string> = {
   CommissionStatusChanged: 'Trạng thái đặt vẽ',
   EscrowStatusChanged: 'Trạng thái ký quỹ',
   DisputeStatusChanged: 'Trạng thái tranh chấp',
-  CreatorApplicationStatusChanged: 'Đơn đăng ký Creator',
+  CreatorApplicationStatusChanged: 'Đơn đăng ký họa sĩ',
   InvitationReceived: 'Lời mời sự kiện',
   InvitationAccepted: 'Chấp nhận lời mời sự kiện',
   InvitationDeclined: 'Từ chối lời mời sự kiện',
@@ -67,7 +67,7 @@ export const notificationTypeLabels: Record<string, string> = {
   TradeDisputeResolved: 'Phân xử khiếu nại trao đổi',
   SubmissionDisputeCreated: 'Khiếu nại bài dự thi mới',
   BugReportReplied: 'Phản hồi báo cáo sự cố',
-  WorkroomMessage: 'Tin nhắn Workroom',
+  WorkroomMessage: 'Tin nhắn phòng làm việc',
 };
 
 export const notificationTypeLabelsEn: Record<string, string> = {

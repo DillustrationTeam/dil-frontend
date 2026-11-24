@@ -16,14 +16,14 @@ export function SubmissionModalNav({ mode, setMode }: SubmissionModalNavProps) {
   const isVie = lang === 'VIE';
 
   return (
-    <div className="flex border-b border-white/10 px-6 bg-white/[0.015]">
+    <div className="flex border-b border-[#221E1A]/10 px-6 bg-[#FFFCF6]">
       <button
         type="button"
         onClick={() => setMode('existing')}
         className={`flex items-center gap-2 border-b-2 py-3.5 px-4 text-xs font-bold transition cursor-pointer ${
           mode === 'existing'
             ? 'border-brand-periwinkle text-brand-periwinkle'
-            : 'border-transparent text-[#8A8FA9] hover:text-white'
+            : 'border-transparent text-[#6E6459] hover:text-[#241F1A]'
         }`}
       >
         <FolderHeart size={15} />
@@ -36,7 +36,7 @@ export function SubmissionModalNav({ mode, setMode }: SubmissionModalNavProps) {
         className={`flex items-center gap-2 border-b-2 py-3.5 px-4 text-xs font-bold transition cursor-pointer ${
           mode === 'upload'
             ? 'border-brand-periwinkle text-brand-periwinkle'
-            : 'border-transparent text-[#8A8FA9] hover:text-white'
+            : 'border-transparent text-[#6E6459] hover:text-[#241F1A]'
         }`}
       >
         <MonitorUp size={15} />

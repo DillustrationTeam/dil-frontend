@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import { ArrowLeftRight, Brush, ChevronDown, LayoutDashboard, LogOut, Palette, Settings, ShieldCheck, User, UserCheck, Wallet } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -47,8 +48,8 @@ export function AccountMenu({ variant = 'app' }: { variant?: 'app' | 'public' })
         onClick={() => setIsOpen((prev) => !prev)}
         className={
           variant === 'public'
-            ? 'flex cursor-pointer items-center space-x-2 rounded-xl border border-white/10 bg-white/5 px-2.5 py-1.5 transition-all hover:border-[#A7ACD9] min-[1400px]:space-x-3 min-[1400px]:px-3.5'
-            : 'flex items-center gap-2 p-1 bg-white/5 border border-white/10 rounded-xl hover:border-[#A7ACD9] transition-colors'
+            ? 'flex cursor-pointer items-center space-x-2 rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-2.5 py-1.5 transition-all hover:border-[#B24A26] min-[1400px]:space-x-3 min-[1400px]:px-3.5'
+            : 'flex items-center gap-2 p-1 bg-[#FFFCF6] border border-[#221E1A]/10 rounded-xl hover:border-[#B24A26] transition-colors'
         }
       >
         {user?.avatarUrl ? (
@@ -61,55 +62,45 @@ export function AccountMenu({ variant = 'app' }: { variant?: 'app' | 'public' })
             className={`${avatarSizeClass} rounded-lg object-cover`}
           />
         ) : (
-          <div className={`flex ${avatarSizeClass} items-center justify-center rounded-lg bg-[#A7ACD9] text-xs font-bold text-[#1F2335]`}>
+          <div className={`flex ${avatarSizeClass} items-center justify-center rounded-lg bg-[#B24A26] text-xs font-bold text-[#F7F2E9]`}>
             {user?.fullName ? user.fullName.charAt(0).toUpperCase() : '?'}
           </div>
         )}
         {variant === 'public' && (
           <div className="hidden text-left sm:block">
-            <p className="max-w-[110px] truncate whitespace-nowrap text-xs font-bold leading-tight text-white min-[1400px]:max-w-[140px] 2xl:max-w-[170px]">
+            <p className="max-w-[110px] truncate whitespace-nowrap text-xs font-bold leading-tight text-[#241F1A] min-[1400px]:max-w-[140px] 2xl:max-w-[170px]">
               {user?.fullName}
             </p>
-            <p className="max-w-[110px] truncate text-[10px] uppercase tracking-wider text-[#A7ACD9] min-[1400px]:max-w-[140px] 2xl:max-w-[170px]">
+            <p className="max-w-[110px] truncate text-[10px] uppercase tracking-wider text-[#B24A26] min-[1400px]:max-w-[140px] 2xl:max-w-[170px]">
               {roles.join(', ') || 'CLIENT'}
             </p>
           </div>
         )}
-        <span className="material-symbols-outlined text-sm text-[#919099]">expand_more</span>
+        <ChevronDown size={14} className="text-[#746A5F]" aria-hidden />
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 z-50 mt-2 w-52 rounded-2xl border border-white/10 bg-[#1F2335] p-1.5 shadow-2xl">
-          <div className="px-2.5 py-2 border-b border-white/10 mb-1">
-            <p className="text-xs font-bold text-white">{user?.fullName || t('Guest')}</p>
-            <p className="text-[10px] text-slate-400 truncate">{user?.email || t('No email')}</p>
-            <span className={`inline-flex items-center gap-1 mt-1 px-1.5 py-0.5 rounded-full text-[9px] font-medium border ${
-              isAdmin
-                ? 'bg-purple-500/20 text-purple-300 border-purple-500/30'
-                : 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
-            }`}>
-              <span className="material-symbols-outlined text-xs text-[#A7ACD9]">verified_user</span>
-              {isAdmin ? t('System Admin') : t('Escrow Verified')}
-            </span>
+        <div className="absolute right-0 z-50 mt-2 w-60 rounded-2xl border border-[#221E1A]/10 bg-[#F7F2E9] p-2 shadow-[0_24px_48px_-24px_rgba(34,30,26,0.45)] backdrop-blur-xl">
+          <div className="mb-1.5 border-b border-[#221E1A]/10 px-2.5 pb-2.5 pt-1.5">
+            <p className="text-xs font-bold text-[#241F1A]">{user?.fullName || t('Guest')}</p>
+            <p className="text-[10px] text-[#746A5F] truncate">{user?.email || t('No email')}</p>
           </div>
 
           <Link
             href="/wallet"
             onClick={close}
-            className="flex items-center gap-2 rounded-xl px-2.5 py-1.5 text-xs text-[#e4e1e5] transition-colors hover:bg-white/10"
+            className="flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-[13px] font-medium text-[#241F1A] transition-colors hover:bg-[#F0E7D8] focus-visible:bg-[#F0E7D8] focus-visible:outline-none"
           >
-            <span className="material-symbols-outlined text-sm text-[#A7ACD9]">account_balance_wallet</span>
+            <Wallet size={14} className="text-[#B24A26]" aria-hidden />
             {t('Ví của tôi')}
           </Link>
 
           <Link
             href={studioHref}
             onClick={close}
-            className="flex items-center gap-2 rounded-xl px-2.5 py-1.5 text-xs text-[#e4e1e5] transition-colors hover:bg-white/10"
+            className="flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-[13px] font-medium text-[#241F1A] transition-colors hover:bg-[#F0E7D8] focus-visible:bg-[#F0E7D8] focus-visible:outline-none"
           >
-            <span className="material-symbols-outlined text-sm text-[#A7ACD9]">
-              {isAdmin ? 'admin_panel_settings' : 'dashboard'}
-            </span>
+            {isAdmin ? <ShieldCheck size={14} aria-hidden /> : <LayoutDashboard size={14} aria-hidden />}
             {studioLabel}
           </Link>
 
@@ -118,17 +109,17 @@ export function AccountMenu({ variant = 'app' }: { variant?: 'app' | 'public' })
               <Link
                 href="/art-trades"
                 onClick={close}
-                className="flex items-center gap-2 rounded-xl px-2.5 py-1.5 text-xs text-[#e4e1e5] transition-colors hover:bg-white/10"
+                className="flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-[13px] font-medium text-[#241F1A] transition-colors hover:bg-[#F0E7D8] focus-visible:bg-[#F0E7D8] focus-visible:outline-none"
               >
-                <span className="material-symbols-outlined text-sm text-[#A7ACD9]">swap_horiz</span>
+                <ArrowLeftRight size={14} className="text-[#B24A26]" aria-hidden />
                 {t('My Trades')}
               </Link>
               <Link
                 href="/creator/commissions"
                 onClick={close}
-                className="flex items-center gap-2 rounded-xl px-2.5 py-1.5 text-xs text-[#e4e1e5] transition-colors hover:bg-white/10"
+                className="flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-[13px] font-medium text-[#241F1A] transition-colors hover:bg-[#F0E7D8] focus-visible:bg-[#F0E7D8] focus-visible:outline-none"
               >
-                <span className="material-symbols-outlined text-sm text-[#A7ACD9]">palette</span>
+                <Palette size={14} className="text-[#B24A26]" aria-hidden />
                 {t('Creator Dashboard')}
               </Link>
             </>
@@ -138,9 +129,9 @@ export function AccountMenu({ variant = 'app' }: { variant?: 'app' | 'public' })
             <Link
               href="/creator/profile/edit"
               onClick={close}
-              className="flex items-center gap-2 rounded-xl px-2.5 py-1.5 text-xs text-[#e4e1e5] transition-colors hover:bg-white/10"
+              className="flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-[13px] font-medium text-[#241F1A] transition-colors hover:bg-[#F0E7D8] focus-visible:bg-[#F0E7D8] focus-visible:outline-none"
             >
-              <span className="material-symbols-outlined text-sm text-[#A7ACD9]">brush</span>
+              <Brush size={14} className="text-[#B24A26]" aria-hidden />
               {t('Hồ sơ họa sĩ')}
             </Link>
           )}
@@ -148,18 +139,18 @@ export function AccountMenu({ variant = 'app' }: { variant?: 'app' | 'public' })
           <Link
             href="/profile"
             onClick={close}
-            className="flex items-center gap-2 rounded-xl px-2.5 py-1.5 text-xs text-[#e4e1e5] transition-colors hover:bg-white/10"
+            className="flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-[13px] font-medium text-[#241F1A] transition-colors hover:bg-[#F0E7D8] focus-visible:bg-[#F0E7D8] focus-visible:outline-none"
           >
-            <span className="material-symbols-outlined text-sm text-[#A7ACD9]">person</span>
+            <User size={14} className="text-[#B24A26]" aria-hidden />
             {t('Hồ sơ của tôi')}
           </Link>
 
           <Link
             href="/settings"
             onClick={close}
-            className="flex items-center gap-2 rounded-xl px-2.5 py-1.5 text-xs text-[#e4e1e5] transition-colors hover:bg-white/10"
+            className="flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-[13px] font-medium text-[#241F1A] transition-colors hover:bg-[#F0E7D8] focus-visible:bg-[#F0E7D8] focus-visible:outline-none"
           >
-            <span className="material-symbols-outlined text-sm text-[#A7ACD9]">settings</span>
+            <Settings size={14} className="text-[#B24A26]" aria-hidden />
             {t('Cài đặt')}
           </Link>
 
@@ -170,10 +161,10 @@ export function AccountMenu({ variant = 'app' }: { variant?: 'app' | 'public' })
                 close();
                 router.push('/become-creator');
               }}
-              className="flex w-full cursor-pointer items-center gap-2 rounded-xl px-2.5 py-1.5 text-xs text-[#A7ACD9] transition-colors hover:bg-white/10"
+              className="flex w-full cursor-pointer items-center gap-2.5 rounded-xl px-2.5 py-2 text-[13px] font-semibold text-[#B24A26] transition-colors hover:bg-[#F0E7D8] focus-visible:bg-[#F0E7D8] focus-visible:outline-none"
             >
-              <span className="material-symbols-outlined text-sm">palette</span>
-              {t('Trở thành Creator')}
+              <Palette size={14} aria-hidden />
+              {t('Trở thành họa sĩ')}
             </button>
           )}
 
@@ -181,20 +172,20 @@ export function AccountMenu({ variant = 'app' }: { variant?: 'app' | 'public' })
             <Link
               href="/admin/creator-verifications"
               onClick={close}
-              className="flex items-center gap-2 rounded-xl px-2.5 py-1.5 text-xs text-red-300 transition-colors hover:bg-white/10"
+              className="flex w-full items-center gap-2.5 rounded-xl px-2.5 py-2 text-[13px] font-semibold text-[#A8321C] transition-colors hover:bg-[#F0E7D8] focus-visible:bg-[#F0E7D8] focus-visible:outline-none"
             >
-              <span className="material-symbols-outlined text-sm">how_to_reg</span>
-              {t('Duyệt đơn Creator')}
+              <UserCheck size={14} aria-hidden />
+              {t('Duyệt đơn họa sĩ')}
             </Link>
           )}
 
-          <div className="border-t border-white/10 my-1" />
+          <div className="border-t border-[#221E1A]/10 my-1" />
           <button
             type="button"
             onClick={handleSignOut}
-            className="flex w-full cursor-pointer items-center gap-2 rounded-xl px-2.5 py-1.5 text-left text-xs text-red-400 transition-colors hover:bg-white/10"
+            className="flex w-full cursor-pointer items-center gap-2 rounded-xl px-2.5 py-1.5 text-left text-xs text-[#A8321C] transition-colors hover:bg-[#F0E7D8]"
           >
-            <span className="material-symbols-outlined text-sm">logout</span>
+            <LogOut size={14} aria-hidden />
             {t('Sign Out')}
           </button>
         </div>

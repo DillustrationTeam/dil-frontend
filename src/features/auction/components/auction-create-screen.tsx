@@ -138,37 +138,30 @@ export function AuctionCreateScreen({ userId }: { userId: string | null }) {
     <div className="mx-auto w-full max-w-3xl px-4 py-8 text-on-surface">
       <div className="mb-6 flex items-center justify-between">
         <Link href="/auctions" className="inline-flex items-center gap-2 text-sm text-brand-periwinkle hover:underline">
-          <ArrowLeft size={16} /> Quay lại sàn đấu giá
-        </Link>
+          <ArrowLeft size={16} /> Quay lại sàn đấu giá </Link>
         <span className="flex items-center gap-1.5 text-xs text-outline">
-          <ShieldCheck size={16} className="text-brand-periwinkle" />
-          Hợp đồng đấu giá an toàn qua ký quỹ
-        </span>
+          <ShieldCheck size={16} className="text-brand-periwinkle" /> Hợp đồng đấu giá an toàn qua ký quỹ </span>
       </div>
 
-      <div className="glass-container rounded-3xl border border-white/10 p-6 md:p-8">
+      <div className="glass-container rounded-3xl border border-[#221E1A]/10 p-6 md:p-8">
         <div className="mb-6">
           <h1 className="font-h1 text-2xl font-bold">Mở phiên đấu giá tác phẩm mới</h1>
-          <p className="mt-1 text-sm text-on-surface-variant">
-            Thiết lập mức giá và quy tắc trả giá để đưa tác phẩm độc bản của bạn ra công chúng.
-          </p>
+          <p className="mt-1 text-sm text-on-surface-variant"> Thiết lập mức giá và quy tắc trả giá để đưa tác phẩm độc bản của bạn ra công chúng. </p>
         </div>
 
         {error && (
-          <div role="alert" className="mb-6 flex items-center gap-2 rounded-2xl border border-red-400/30 bg-red-500/10 p-4 text-sm text-red-200">
+          <div role="alert" className="mb-6 flex items-center gap-2 rounded-2xl border border-[#A8321C]/40 bg-[#A8321C]/10 p-4 text-sm text-[#A8321C]">
             <CircleAlert size={18} className="shrink-0" />
             <span>{error}</span>
           </div>
         )}
 
         {isResellMode && (
-          <div className="mb-6 rounded-2xl border border-amber-400/30 bg-amber-400/10 p-4 text-xs text-amber-200 flex items-start gap-3">
-            <RefreshCw size={18} className="text-amber-400 shrink-0 mt-0.5" />
+          <div className="mb-6 rounded-2xl border border-[#8A6A1F]/40 bg-[#8A6A1F]/10 p-4 text-xs text-[#8A6A1F] flex items-start gap-3">
+            <RefreshCw size={18} className="text-[#8A6A1F] shrink-0 mt-0.5" />
             <div>
-              <p className="font-bold text-amber-300">Niêm yết bán lại trên thị trường thứ cấp (Secondary Market / Resell)</p>
-              <p className="mt-0.5 text-amber-200/80">
-                Bạn đang thực hiện quyền tài sản độc bản để mở phiên đấu giá cho tác phẩm thuộc sở hữu của bạn. Khi phiên chốt, quyền sở hữu và chứng chỉ số mới sẽ được chuyển giao toàn bộ cho người thắng tiếp theo.
-              </p>
+              <p className="font-bold text-[#8A6A1F]">Niêm yết bán lại trên thị trường thứ cấp</p>
+              <p className="mt-0.5 text-[#8A6A1F]"> Bạn đang thực hiện quyền tài sản độc bản để mở phiên đấu giá cho tác phẩm thuộc sở hữu của bạn. Khi phiên chốt, quyền sở hữu và chứng chỉ số mới sẽ được chuyển giao toàn bộ cho người thắng tiếp theo. </p>
             </div>
           </div>
         )}
@@ -187,7 +180,7 @@ export function AuctionCreateScreen({ userId }: { userId: string | null }) {
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <label htmlFor="startPrice" className="mb-1.5 block text-xs font-semibold text-on-surface-variant">
-                Giá khởi điểm (₫) <span className="text-red-400">*</span>
+                Giá khởi điểm (₫) <span className="text-[#A8321C]">*</span>
               </label>
               <input
                 id="startPrice"
@@ -197,7 +190,7 @@ export function AuctionCreateScreen({ userId }: { userId: string | null }) {
                 required
                 value={form.startPrice}
                 onChange={(e) => setForm({ ...form, startPrice: Number(e.target.value) || 0 })}
-                className="w-full rounded-xl border border-white/15 bg-brand-navy/60 px-4 py-2.5 font-bold text-on-surface focus:border-brand-periwinkle focus:outline-none"
+                className="w-full rounded-xl border border-[#221E1A]/10 bg-brand-navy/60 px-4 py-2.5 font-bold text-on-surface focus:border-brand-periwinkle focus:outline-none"
               />
               <span className="mt-1 block text-[11px] text-outline">
                 Hiển thị: {formatVnd(form.startPrice)}
@@ -206,7 +199,7 @@ export function AuctionCreateScreen({ userId }: { userId: string | null }) {
 
             <div>
               <label htmlFor="bidStep" className="mb-1.5 block text-xs font-semibold text-on-surface-variant">
-                Bước giá tối thiểu (₫) <span className="text-red-400">*</span>
+                Bước giá tối thiểu (₫) <span className="text-[#A8321C]">*</span>
               </label>
               <input
                 id="bidStep"
@@ -216,7 +209,7 @@ export function AuctionCreateScreen({ userId }: { userId: string | null }) {
                 required
                 value={form.bidStep}
                 onChange={(e) => setForm({ ...form, bidStep: Number(e.target.value) || 0 })}
-                className="w-full rounded-xl border border-white/15 bg-brand-navy/60 px-4 py-2.5 font-bold text-on-surface focus:border-brand-periwinkle focus:outline-none"
+                className="w-full rounded-xl border border-[#221E1A]/10 bg-brand-navy/60 px-4 py-2.5 font-bold text-on-surface focus:border-brand-periwinkle focus:outline-none"
               />
               <span className="mt-1 block text-[11px] text-outline">
                 Mỗi lần nâng giá tối thiểu: +{formatVnd(form.bidStep)}
@@ -237,19 +230,16 @@ export function AuctionCreateScreen({ userId }: { userId: string | null }) {
                 value={form.buyNowPrice ?? ''}
                 onChange={(e) => setForm({ ...form, buyNowPrice: e.target.value ? Number(e.target.value) : null })}
                 placeholder="Để trống nếu không áp dụng"
-                className="w-full rounded-xl border border-white/15 bg-brand-navy/60 px-4 py-2.5 text-sm text-on-surface focus:border-brand-periwinkle focus:outline-none"
+                className="w-full rounded-xl border border-[#221E1A]/10 bg-brand-navy/60 px-4 py-2.5 text-sm text-on-surface focus:border-brand-periwinkle focus:outline-none"
               />
-              <span className="mt-1 block text-[11px] text-outline">
-                Người mua có thể mua ngay lập tức với mức giá này để kết thúc sớm phiên.
-              </span>
+              <span className="mt-1 block text-[11px] text-outline"> Người mua có thể mua ngay lập tức với mức giá này để kết thúc sớm phiên. </span>
             </div>
 
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label htmlFor="startAt" className="mb-1.5 block text-xs font-semibold text-on-surface-variant">
-                Thời gian mở phiên <span className="text-red-400">*</span>
+              <label htmlFor="startAt" className="mb-1.5 block text-xs font-semibold text-on-surface-variant"> Thời gian mở phiên <span className="text-[#A8321C]">*</span>
               </label>
               <input
                 id="startAt"
@@ -260,13 +250,12 @@ export function AuctionCreateScreen({ userId }: { userId: string | null }) {
                     setStartAtTouched(true);
                     setForm({ ...form, startAt: e.target.value });
                   }}
-                className="w-full rounded-xl border border-white/15 bg-brand-navy/60 px-4 py-2.5 text-sm text-on-surface focus:border-brand-periwinkle focus:outline-none"
+                className="w-full rounded-xl border border-[#221E1A]/10 bg-brand-navy/60 px-4 py-2.5 text-sm text-on-surface focus:border-brand-periwinkle focus:outline-none"
               />
             </div>
 
             <div>
-              <label htmlFor="endAt" className="mb-1.5 block text-xs font-semibold text-on-surface-variant">
-                Thời gian kết thúc <span className="text-red-400">*</span>
+              <label htmlFor="endAt" className="mb-1.5 block text-xs font-semibold text-on-surface-variant"> Thời gian kết thúc <span className="text-[#A8321C]">*</span>
               </label>
               <input
                 id="endAt"
@@ -274,45 +263,39 @@ export function AuctionCreateScreen({ userId }: { userId: string | null }) {
                 required
                 value={form.endAt}
                 onChange={(e) => setForm({ ...form, endAt: e.target.value })}
-                className="w-full rounded-xl border border-white/15 bg-brand-navy/60 px-4 py-2.5 text-sm text-on-surface focus:border-brand-periwinkle focus:outline-none"
+                className="w-full rounded-xl border border-[#221E1A]/10 bg-brand-navy/60 px-4 py-2.5 text-sm text-on-surface focus:border-brand-periwinkle focus:outline-none"
               />
             </div>
           </div>
 
           {/* Bàn giao tranh vật lý (Tùy chọn) */}
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-4 space-y-3">
+          <div className="rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] p-4 space-y-3">
             <div className="flex items-start gap-3">
               <input
                 id="hasPhysicalCopy"
                 type="checkbox"
                 checked={form.hasPhysicalCopy || false}
                 onChange={(e) => setForm((prev) => ({ ...prev, hasPhysicalCopy: e.target.checked }))}
-                className="mt-1 h-4 w-4 rounded border-white/20 bg-white/5 text-brand-periwinkle focus:ring-brand-periwinkle/30"
+                className="mt-1 h-4 w-4 rounded border-[#221E1A]/20 bg-[#FFFCF6] text-brand-periwinkle focus:ring-brand-periwinkle/30"
               />
               <div className="space-y-1">
-                <label htmlFor="hasPhysicalCopy" className="text-sm font-semibold text-white flex items-center gap-2 cursor-pointer">
-                  <Package size={16} className="text-amber-400" />
-                  Có thể cung cấp bản tranh vật lý cho người thắng cuộc
-                </label>
-                <p className="text-xs text-outline">
-                  Người xem sẽ thấy huy hiệu <span className="inline-flex items-center gap-1 align-middle text-amber-300 font-semibold"><Frame size={11} aria-hidden /> Có bản vật lý</span> để quyết định đấu giá.
-                  Nếu người thắng yêu cầu nhận tranh thật, tiền sẽ được sàn tạm giữ ký quỹ cho đến khi người mua ký nhận PoD từ bưu cục.
-                </p>
+                <label htmlFor="hasPhysicalCopy" className="text-sm font-semibold text-[#241F1A] flex items-center gap-2 cursor-pointer">
+                  <Package size={16} className="text-[#8A6A1F]" /> Có thể cung cấp bản tranh vật lý cho người thắng cuộc </label>
+                <p className="text-xs text-outline"> Người xem sẽ thấy huy hiệu <span className="inline-flex items-center gap-1 align-middle text-[#8A6A1F] font-semibold"><Frame size={11} aria-hidden /> Có bản vật lý</span> để quyết định đấu giá.
+ Nếu người thắng yêu cầu nhận tranh thật, tiền sẽ được sàn tạm giữ ký quỹ cho đến khi người mua ký nhận PoD từ bưu cục. </p>
               </div>
             </div>
 
             {form.hasPhysicalCopy && (
-              <div className="pt-2 border-t border-white/10 space-y-2">
-                <label className="text-xs font-medium text-white block">
-                  Mô tả bản tranh vật lý (kích thước, chất liệu khung, tình trạng, phương thức đóng gói):
-                </label>
+              <div className="pt-2 border-t border-[#221E1A]/10 space-y-2">
+                <label className="text-xs font-medium text-[#241F1A] block"> Mô tả bản tranh vật lý (kích thước, chất liệu khung, tình trạng, phương thức đóng gói): </label>
                 <textarea
                   value={form.physicalDescription || ''}
                   onChange={(e) => setForm((prev) => ({ ...prev, physicalDescription: e.target.value }))}
                   maxLength={500}
                   rows={3}
                   placeholder="Ví dụ: Tranh sơn dầu trên toan hạt mịn 60x80cm, có đóng khung gỗ sồi kèm lót màng xốp khí chống va đập khi gửi bưu điện..."
-                  className="w-full rounded-xl border border-white/10 bg-white/5 p-3 text-xs text-white placeholder-white/30 focus:border-brand-periwinkle focus:outline-none"
+                  className="w-full rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] p-3 text-xs text-[#241F1A] placeholder-white/30 focus:border-brand-periwinkle focus:outline-none"
                 />
                 <p className="text-[11px] text-outline text-right">
                   {(form.physicalDescription || '').length}/500 ký tự
@@ -321,13 +304,13 @@ export function AuctionCreateScreen({ userId }: { userId: string | null }) {
             )}
           </div>
 
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-xs text-on-surface-variant">
+          <div className="rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] p-4 text-xs text-on-surface-variant">
             <p className="font-semibold text-brand-periwinkle">Quy chế sàn đấu giá:</p>
             <ul className="mt-2 list-inside list-disc space-y-1 text-outline">
               <li>Khi người mua đặt giá, số tiền cọc tương ứng sẽ được tự động phong tỏa an toàn trong ví của họ.</li>
               <li>Nếu có người trả giá cao hơn, tiền cọc phong tỏa của người trả giá trước sẽ lập tức được hoàn trả 100% vào ví.</li>
               <li>Sau khi phiên kết thúc thành công, người thắng cuộc nhận toàn bộ quyền tài sản, quyền sở hữu độc bản và quyền khai thác thương mại tác phẩm.</li>
-              <li><strong className="text-amber-300">Bảo hộ Quyền nhân thân:</strong> Quyền tác giả gốc vĩnh viễn thuộc về Họa sĩ sáng tác; người mua không được mạo danh tác giả của tác phẩm.</li>
+              <li><strong className="text-[#8A6A1F]">Bảo hộ Quyền nhân thân:</strong> Quyền tác giả gốc vĩnh viễn thuộc về Họa sĩ sáng tác; người mua không được mạo danh tác giả của tác phẩm.</li>
             </ul>
           </div>
 
@@ -335,8 +318,8 @@ export function AuctionCreateScreen({ userId }: { userId: string | null }) {
           <div
             className={`rounded-2xl border p-4 transition-colors ${
               agreedCommercialRights
-                ? 'border-emerald-500/40 bg-emerald-500/10'
-                : 'border-amber-400/40 bg-amber-400/5'
+                ? 'border-[#2F6B63]/40 bg-[#2F6B63]/10'
+                : 'border-[#8A6A1F]/40 bg-[#8A6A1F]/5'
             }`}
           >
             <div className="flex items-start gap-3">
@@ -350,7 +333,7 @@ export function AuctionCreateScreen({ userId }: { userId: string | null }) {
                     setError(null);
                   }
                 }}
-                className="mt-0.5 size-4.5 rounded border-white/20 bg-black/40 text-emerald-500 accent-emerald-500 focus:ring-emerald-400 cursor-pointer shrink-0"
+                className="mt-0.5 size-4.5 rounded border-[#221E1A]/20 bg-[#F0E7D8] text-[#2F6B63] accent-[#2F6B63] focus:ring-[#2F6B63]/30 cursor-pointer shrink-0"
               />
               <div className="flex-1 space-y-2">
                 <label
@@ -358,9 +341,7 @@ export function AuctionCreateScreen({ userId }: { userId: string | null }) {
                   className="block cursor-pointer text-xs leading-relaxed text-on-surface select-none"
                 >
                   Tôi cam kết bàn giao 100% quyền tài sản &amp; quyền khai thác thương mại cho người thắng phiên, đồng thời giữ nguyên vĩnh viễn quyền tác giả sáng tạo gốc (Quyền nhân thân không thể chuyển nhượng) theo quy định trong{' '}
-                  <strong className="text-emerald-300 font-semibold underline decoration-emerald-400/40 underline-offset-2">
-                    Văn bản bàn giao quyền khai thác thương mại
-                  </strong>{' '}
+                  <strong className="text-[#2F6B63] font-semibold underline decoration-[#2F6B63] underline-offset-2"> Văn bản bàn giao quyền khai thác thương mại </strong>{' '}
                   (người mua toàn quyền sử dụng thương mại nhưng không được mạo danh tác giả).
                 </label>
 
@@ -368,17 +349,15 @@ export function AuctionCreateScreen({ userId }: { userId: string | null }) {
                   <button
                     type="button"
                     onClick={() => setShowCommercialRightsModal(true)}
-                    className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-500/40 bg-emerald-500/15 px-3 py-1.5 text-xs font-bold text-emerald-300 hover:bg-emerald-500/25 hover:text-white transition cursor-pointer"
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-[#2F6B63]/40 bg-[#2F6B63]/15 px-3 py-1.5 text-xs font-bold text-[#2F6B63] hover:bg-[#2F6B63]/20 hover:text-[#241F1A] transition cursor-pointer"
                   >
-                    <FileText size={14} /> Xem điều lệ bàn giao quyền thương mại
-                  </button>
+                    <FileText size={14} /> Xem điều lệ bàn giao quyền thương mại </button>
 
                   {agreedCommercialRights ? (
-                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-400">
-                      <CheckCircle2 size={13} /> Đã đồng ý điều lệ
-                    </span>
+                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#2F6B63]">
+                      <CheckCircle2 size={13} /> Đã đồng ý điều lệ </span>
                   ) : (
-                    <span className="text-[11px] text-amber-300/80">
+                    <span className="text-[11px] text-[#8A6A1F]">
                       * Bắt buộc đồng ý trước khi tạo phiên
                     </span>
                   )}
@@ -390,14 +369,12 @@ export function AuctionCreateScreen({ userId }: { userId: string | null }) {
           <div className="flex items-center justify-end gap-3 pt-2">
             <Link
               href="/auctions"
-              className="rounded-full px-5 py-2.5 text-xs font-semibold text-outline hover:text-white"
-            >
-              Hủy
-            </Link>
+              className="rounded-full px-5 py-2.5 text-xs font-semibold text-outline hover:text-[#241F1A]"
+            > Hủy </Link>
             <button
               type="submit"
               disabled={submitting || !agreedCommercialRights}
-              className="inline-flex items-center gap-2 rounded-full bg-brand-periwinkle px-8 py-3 font-h1 text-xs font-bold text-brand-navy shadow-lg transition hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-2 rounded-full bg-brand-periwinkle px-8 py-3 font-h1 text-xs font-bold text-[#FFFCF6] shadow-lg transition hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Gavel size={16} /> {submitting ? 'Đang tạo phiên...' : 'Phát hành phiên đấu giá'}
             </button>
@@ -409,7 +386,7 @@ export function AuctionCreateScreen({ userId }: { userId: string | null }) {
       {showCommercialRightsModal && (
         <CommercialRightsModal
           artworkTitle={selectedArtworkTitle}
-          creatorName={user?.fullName || 'Tác giả (Creator)'}
+          creatorName={user?.fullName || 'Tác giả'}
           onAgree={() => {
             setAgreedCommercialRights(true);
             if (error?.includes('Văn bản bàn giao')) {

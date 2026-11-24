@@ -54,14 +54,12 @@ export function SectionExploreByStyle({ artworks, loading }: Props) {
     <section className="py-14" aria-labelledby="style-explore-title">
       <div className="mb-6 flex items-end justify-between">
         <div>
-          <p className="text-xs uppercase tracking-[0.2em] text-[#A7ACD9]">Browse by Category</p>
-          <h2 id="style-explore-title" className="mt-1 flex items-center gap-2 font-h1 text-2xl font-bold text-white">
-            <Palette className="h-5 w-5 text-[#A7ACD9]" />
-            Khám phá theo danh mục lớn
-          </h2>
-          <p className="mt-1 text-sm text-[#C7C5CF]">Lọc nhanh theo gu tranh và thể loại nghệ thuật bạn yêu thích.</p>
+          <p className="text-xs uppercase tracking-[0.2em] text-[#B24A26]">Browse by Category</p>
+          <h2 id="style-explore-title" className="mt-1 flex items-center gap-2 font-h1 text-2xl font-bold text-[#241F1A]">
+            <Palette className="h-5 w-5 text-[#B24A26]" /> Khám phá theo danh mục lớn </h2>
+          <p className="mt-1 text-sm text-[#6E6459]">Lọc nhanh theo gu tranh và thể loại nghệ thuật bạn yêu thích.</p>
         </div>
-        <Link href="/explore" className="text-sm text-[#A7ACD9] hover:underline">
+        <Link href="/explore" className="text-sm text-[#B24A26] hover:underline">
           Xem tất cả →
         </Link>
       </div>
@@ -69,11 +67,11 @@ export function SectionExploreByStyle({ artworks, loading }: Props) {
       {loading ? (
         <div className="flex gap-2">
           {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="h-9 w-24 animate-pulse rounded-full bg-white/10" />
+            <div key={i} className="h-9 w-24 animate-pulse rounded-full bg-[#F0E7D8]" />
           ))}
         </div>
       ) : categoryBuckets.length === 0 ? (
-        <p className="text-sm text-[#919099]">Chưa đủ dữ liệu để phân loại theo danh mục.</p>
+        <p className="text-sm text-[#746A5F]">Chưa đủ dữ liệu để phân loại theo danh mục.</p>
       ) : (
         <>
           <div
@@ -92,14 +90,14 @@ export function SectionExploreByStyle({ artworks, loading }: Props) {
                   onClick={() => setActiveSlug(category.slug)}
                   className={`flex items-center gap-2 rounded-full border px-4 py-2 text-sm transition cursor-pointer ${
                     isActive
-                      ? 'border-[#A7ACD9] bg-[#A7ACD9] font-semibold text-[#1F2335]'
-                      : 'border-white/10 text-[#C7C5CF] hover:border-[#A7ACD9]/30 hover:bg-white/5'
+                      ? 'border-[#B24A26] bg-[#B24A26] font-semibold text-[#F7F2E9]'
+                      : 'border-[#221E1A]/10 text-[#6E6459] hover:border-[#B24A26]/30 hover:bg-[#FFFCF6]'
                   }`}
                 >
                   {category.name}
                   <span
                     className={`rounded-full px-1.5 py-0.5 text-[10px] font-medium ${
-                      isActive ? 'bg-[#1F2335]/30' : 'bg-white/10'
+                      isActive ? 'bg-[#F7F2E9]/30' : 'bg-[#F0E7D8]'
                     }`}
                   >
                     {catArtworks.length}
@@ -110,9 +108,7 @@ export function SectionExploreByStyle({ artworks, loading }: Props) {
           </div>
 
           {displayed.length === 0 ? (
-            <p className="rounded-2xl border border-dashed border-white/10 p-8 text-center text-sm text-[#919099]">
-              Chưa có tranh trong danh mục này.
-            </p>
+            <p className="rounded-2xl border border-dashed border-[#221E1A]/10 p-8 text-center text-sm text-[#746A5F]"> Chưa có tranh trong danh mục này. </p>
           ) : (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {displayed.map((artwork) => (
@@ -120,7 +116,7 @@ export function SectionExploreByStyle({ artworks, loading }: Props) {
                   key={artwork.id}
                   href={`/artworks/${artwork.id}`}
                   scroll={false}
-                  className="group relative overflow-hidden rounded-2xl border border-white/10 bg-[#131624] transition hover:border-[#A7ACD9]/50"
+                  className="group relative overflow-hidden rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] transition hover:border-[#B24A26]/50"
                 >
                   <div className="relative aspect-square">
                     <Image
@@ -132,10 +128,10 @@ export function SectionExploreByStyle({ artworks, loading }: Props) {
                     />
                   </div>
                   <div className="p-3">
-                    <p className="line-clamp-1 text-sm font-semibold text-white">{artwork.title}</p>
-                    <p className="mt-0.5 text-xs text-[#919099]">{artwork.creatorName || 'Creator'}</p>
+                    <p className="line-clamp-1 text-sm font-semibold text-[#241F1A]">{artwork.title}</p>
+                    <p className="mt-0.5 text-xs text-[#746A5F]">{artwork.creatorName || 'Creator'}</p>
                     {(artwork.categoryName || artwork.style) && (
-                      <span className="mt-2 inline-block rounded-full bg-[#A7ACD9]/15 px-2 py-0.5 text-[10px] font-semibold text-[#A7ACD9]">
+                      <span className="mt-2 inline-block rounded-full bg-[#B24A26]/15 px-2 py-0.5 text-[10px] font-semibold text-[#B24A26]">
                         {artwork.categoryName || artwork.style}
                       </span>
                     )}
@@ -149,7 +145,7 @@ export function SectionExploreByStyle({ artworks, loading }: Props) {
             <div className="mt-6 text-center">
               <Link
                 href={`/explore?category=${encodeURIComponent(selectedBucket.category.slug)}`}
-                className="inline-flex rounded-full border border-white/15 px-6 py-2.5 text-sm text-[#C7C5CF] hover:border-[#A7ACD9]/40 hover:text-[#A7ACD9]"
+                className="inline-flex rounded-full border border-[#221E1A]/10 px-6 py-2.5 text-sm text-[#6E6459] hover:border-[#B24A26]/40 hover:text-[#B24A26]"
               >
                 Xem tất cả tranh {selectedBucket.category.name} →
               </Link>

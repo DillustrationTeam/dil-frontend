@@ -13,7 +13,7 @@ import { eventVoteService } from '../../services/event-vote.service';
 import { juryService } from '../../services/jury.service';
 import { creatorProfileService } from '@/features/creator-studio/services/creator-profile.service';
 import { useEventCountdown } from '../../hooks/use-event-countdown';
-import { eventStatusBadgeStyles, getEventStatusLabel, normalizeEventStatus } from '../../types/event.types';
+import { getEventStatusLabel, normalizeEventStatus } from '../../types/event.types';
 import { EventSubmissionModal } from './event-submission-modal';
 import { useAuthStore } from '@/store/use-auth-store';
 import { useLanguage } from '@/context/language-context';
@@ -83,6 +83,9 @@ export function EventDetailScreen({ id, userId, isAdmin }: EventDetailScreenProp
     (isCreator || isClient || (!effectiveIsAdmin && roles.length === 0));
 
   useEffect(() => {
+    // Rời trang / đổi id → huỷ: không setState, không báo lỗi cho request đã cũ
+    let cancelled = false;
+
     async function loadDetail() {
       setLoading(true);
       setLoadError(null);
@@ -94,21 +97,27 @@ export function EventDetailScreen({ id, userId, isAdmin }: EventDetailScreenProp
           juryService.getEventJuries(id).catch(() => []),
           effectiveUserId ? creatorProfileService.getMyProfile().catch(() => null) : Promise.resolve(null),
         ]);
+        if (cancelled) return;
         setEvent(eventData);
         setSubmissions(subData.items || []);
         setLeaderboard(leadData || []);
         setJuries(juriesData || []);
         setMyCreatorProfile(profileData);
       } catch (err: unknown) {
+        if (cancelled) return;
         const message = err instanceof Error ? err.message : 'Failed to load contest details.';
         setEvent(null);
         setLoadError(message);
         toast.error(message);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     }
     void loadDetail();
+
+    return () => {
+      cancelled = true;
+    };
   }, [id, wallSort, effectiveUserId]);
 
   const currentJury = useMemo(() => {
@@ -148,7 +157,7 @@ export function EventDetailScreen({ id, userId, isAdmin }: EventDetailScreenProp
     if (!isCreator) {
       toast.error(
         isVie
-          ? 'Chỉ có họa sĩ (creator) mới có thể tham gia cuộc thi. Vui lòng thiết lập hồ sơ Creator của bạn.'
+          ? 'Chỉ có họa sĩ mới có thể tham gia cuộc thi. Vui lòng thiết lập hồ sơ họa sĩ của bạn.'
           : 'Only creators can participate in this contest. Please set up your creator profile.'
       );
       return;
@@ -297,15 +306,15 @@ export function EventDetailScreen({ id, userId, isAdmin }: EventDetailScreenProp
   if (!event) {
     return (
       <div className="mx-auto max-w-4xl py-24 text-center px-4">
-        <h2 className="font-h1 text-2xl font-bold text-white">
+        <h2 className="font-h1 text-2xl font-bold text-[#241F1A]">
           {loadError ? (isVie ? 'Không thể tải cuộc thi' : 'Unable to Load Contest') : (isVie ? 'Không tìm thấy cuộc thi' : 'Contest Not Found')}
         </h2>
-        <p className="mt-2 text-sm text-[#8A8FA9]">
+        <p className="mt-2 text-sm text-[#6E6459]">
           {loadError || (isVie ? 'Sự kiện này có thể đã bị xóa hoặc không còn khả dụng.' : 'This event may have been removed or is no longer available.')}
         </p>
         <Link
           href="/events"
-          className="mt-6 inline-flex rounded-2xl bg-brand-periwinkle px-6 py-2.5 text-xs font-bold text-brand-navy cursor-pointer"
+          className="mt-6 inline-flex rounded-2xl bg-brand-periwinkle px-6 py-2.5 text-xs font-bold text-[#FFFCF6] cursor-pointer"
         >
           {isVie ? 'Quay lại danh sách cuộc thi' : 'Back to Contests'}
         </Link>
@@ -314,15 +323,13 @@ export function EventDetailScreen({ id, userId, isAdmin }: EventDetailScreenProp
   }
 
   const statusStr = normalizeEventStatus(event.status);
-  const statusColor = eventStatusBadgeStyles[statusStr] || 'border-white/10 bg-white/5 text-outline';
   const statusLabel = getEventStatusLabel(statusStr, isVie);
 
   return (
-    <div className="mx-auto w-full max-w-7xl px-4 pb-28 pt-6 sm:px-6 lg:pt-8 text-[#e4e1e5]">
+    <div className="wrap page w-full text-[#241F1A]">
       {/* Hero Header & Metrics */}
       <EventDetailHero
         event={event}
-        statusColor={statusColor}
         statusLabel={statusLabel}
         statusStr={statusStr}
         countdown={countdown}
@@ -334,24 +341,24 @@ export function EventDetailScreen({ id, userId, isAdmin }: EventDetailScreenProp
 
       {/* Demo Period Testing Bar for Admins */}
       {effectiveIsAdmin && (
-        <div className="mb-6 p-4 rounded-2xl border border-purple-500/35 bg-purple-500/10 backdrop-blur-md flex flex-wrap items-center justify-between gap-3 shadow-[0_0_25px_rgba(168,85,247,0.15)]">
+        <div className="mb-6 p-4 rounded-2xl border border-[#5F3F86]/40 bg-[#5F3F86]/10 backdrop-blur-md flex flex-wrap items-center justify-between gap-3 shadow-[0_0_25px_rgba(168,85,247,0.15)]">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-purple-500/20 text-purple-300">
+            <div className="p-2 rounded-xl bg-[#5F3F86]/20 text-[#5F3F86]">
               <FastForward className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-mono uppercase font-bold tracking-wider text-purple-300 bg-purple-500/20 px-2 py-0.5 rounded-full border border-purple-500/30">
+                <span className="text-[10px] font-mono uppercase font-bold tracking-wider text-[#5F3F86] bg-[#5F3F86]/20 px-2 py-0.5 rounded-full border border-[#5F3F86]/40">
                   DEMO CONTROLS
                 </span>
-                <span className="text-[11px] text-purple-200/80">
+                <span className="text-[11px] text-[#5F3F86]">
                   {isVie ? 'Công cụ kiểm thử từng giai đoạn sự kiện' : 'Event Period Testing Tool'}
                 </span>
               </div>
-              <p className="text-xs font-semibold text-white mt-0.5">
+              <p className="text-xs font-semibold text-[#241F1A] mt-0.5">
                 {isVie ? 'Giai đoạn hiện tại:' : 'Current Period:'}{' '}
-                <span className="text-purple-300 font-bold">{isVie ? countdown.phaseLabelVie : countdown.phaseLabel}</span>
-                <span className="ml-2 font-mono text-[11px] text-purple-200 bg-purple-950/60 px-2 py-0.5 rounded border border-purple-500/20">
+                <span className="text-[#5F3F86] font-bold">{isVie ? countdown.phaseLabelVie : countdown.phaseLabel}</span>
+                <span className="ml-2 font-mono text-[11px] text-[#5F3F86] bg-[#5F3F86]/20 px-2 py-0.5 rounded border border-[#5F3F86]/30">
                   {isVie ? countdown.formattedVie : countdown.formatted}
                 </span>
               </p>
@@ -361,7 +368,7 @@ export function EventDetailScreen({ id, userId, isAdmin }: EventDetailScreenProp
           <button
             type="button"
             onClick={() => setIsAdvanceModalOpen(true)}
-            className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs shadow-md shadow-purple-950/50 transition-all flex items-center gap-2 cursor-pointer active:scale-95"
+            className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#5F3F86] to-[#3B4C86] hover:from-[#5F3F86] hover:to-[#3B4C86] text-[#241F1A] font-bold text-xs shadow-md shadow-[#5F3F86] transition-all flex items-center gap-2 cursor-pointer active:scale-95"
           >
             <FastForward className="w-3.5 h-3.5" />
             <span>{isVie ? 'Kết thúc / Chuyển giai đoạn' : 'End / Advance Period'}</span>

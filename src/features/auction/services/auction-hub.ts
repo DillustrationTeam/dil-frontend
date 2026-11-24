@@ -1,10 +1,6 @@
-import { apiClient } from '@/lib/api-client';
+import { hubUrl } from '@/lib/realtime-url';
 
-/**
- * Trả về URL hub SignalR cho Auction Module (`/hubs/auctions`).
- * Suy ra từ `apiClient` để đồng bộ URL máy chủ backend.
- */
+/** URL hub SignalR của Auction Module (`/hubs/auctions`). */
 export function auctionHubUrl(): string {
-  const baseUrl = String(apiClient.defaults.baseURL ?? '');
-  return `${baseUrl.replace(/\/api\/v1\/?$/, '')}/hubs/auctions`;
+  return hubUrl('/hubs/auctions');
 }

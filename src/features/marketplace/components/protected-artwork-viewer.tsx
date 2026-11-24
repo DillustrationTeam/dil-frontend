@@ -360,7 +360,7 @@ export function ProtectedArtworkViewer({
       onContextMenu={handleContextMenu}
       onDragStart={handleDragStart}
       onMouseEnter={() => setCaptureShieldActive(false)}
-      className={`relative h-full w-full select-none overflow-hidden bg-[#131624] ${className}`}
+      className={`relative h-full w-full select-none overflow-hidden bg-[#FFFCF6] ${className}`}
       style={{ userSelect: 'none', WebkitUserSelect: 'none', WebkitTouchCallout: 'none' }}
     >
       {/* Nếu là ảnh động GIF, hiển thị lớp <img> khóa tương tác nằm dưới Canvas thuỷ vân & Kính chắn để giữ nguyên chuyển động */}
@@ -404,50 +404,44 @@ export function ProtectedArtworkViewer({
       {captureShieldActive && (
         <div
           onClick={() => setCaptureShieldActive(false)}
-          className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-[#0d101b]/85 p-6 text-center backdrop-blur-xl cursor-pointer select-none"
+          className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-[#FFFCF6]/85 p-6 text-center backdrop-blur-xl cursor-pointer select-none"
         >
-          <EyeOff className="h-10 w-10 text-[#A7ACD9] mb-3" />
-          <p className="text-sm font-semibold text-white">
-            Chế độ chống chụp màn hình đang kích hoạt
-          </p>
-          <p className="mt-1 max-w-xs text-xs text-[#C7C5CF]">
-            Tác phẩm được tự động che mờ khi dùng công cụ chụp màn hình hoặc rời cửa sổ. Chạm vào tranh để tiếp tục ngắm.
-          </p>
+          <EyeOff className="h-10 w-10 text-[#B24A26] mb-3" />
+          <p className="text-sm font-semibold text-[#241F1A]"> Chế độ chống chụp màn hình đang kích hoạt </p>
+          <p className="mt-1 max-w-xs text-xs text-[#6E6459]"> Tác phẩm được tự động che mờ khi dùng công cụ chụp màn hình hoặc rời cửa sổ. Chạm vào tranh để tiếp tục ngắm. </p>
         </div>
       )}
 
       {/* Badge bảo vệ gọn gàng ở góc dưới (không hiện mã biên lai) */}
       {showWatermarkBadge && (
-        <div className="pointer-events-none absolute bottom-4 left-4 z-20 inline-flex items-center gap-2 rounded-full bg-[#111424]/80 px-3.5 py-1.5 text-xs text-[#E4E1E5] backdrop-blur-md border border-white/10 shadow-lg">
-          <ShieldCheck className="h-3.5 w-3.5 text-[#A7ACD9] shrink-0" />
-          <span>Ảnh có watermark bảo vệ</span>
+        <div className="pointer-events-none absolute bottom-4 left-4 z-20 inline-flex items-center gap-2 rounded-full bg-[#FFFCF6]/80 px-3.5 py-1.5 text-xs text-[#241F1A] backdrop-blur-md border border-[#221E1A]/10 shadow-lg">
+          <ShieldCheck className="h-3.5 w-3.5 text-[#B24A26] shrink-0" />
+          <span>Ảnh có dấu chìm bảo vệ</span>
         </div>
       )}
 
       {/* Cảnh báo khi người dùng cố tình chuột phải hoặc nhấn phím tắt sao chép */}
       {copyWarning && (
         <div className="pointer-events-none absolute inset-x-4 top-14 z-50 flex items-center justify-center animate-fade-in">
-          <div className="flex items-center gap-2 rounded-xl bg-red-950/95 border border-red-700/80 px-4 py-2.5 text-xs font-medium text-red-100 shadow-2xl backdrop-blur-md">
-            <AlertTriangle className="h-4 w-4 text-red-400 shrink-0" />
-            <span>
-              Tác phẩm được bảo vệ bản quyền số. Không thể tải hoặc sao chép trực tiếp.
-            </span>
+          <div className="flex items-center gap-2 rounded-xl bg-[#A8321C]/20 border border-[#A8321C]/40 px-4 py-2.5 text-xs font-medium text-[#A8321C] shadow-2xl backdrop-blur-md">
+            <AlertTriangle className="h-4 w-4 text-[#A8321C] shrink-0" />
+            <span> Tác phẩm được bảo vệ bản quyền số. Không thể tải hoặc sao chép trực tiếp. </span>
           </div>
         </div>
       )}
 
       {/* Trạng thái đang tải */}
       {loading && (
-        <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-[#131624]/70 backdrop-blur-sm text-[#C7C5CF] gap-2">
-          <RefreshCw className="h-6 w-6 animate-spin text-[#A7ACD9]" />
+        <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-[#FFFCF6]/70 backdrop-blur-sm text-[#6E6459] gap-2">
+          <RefreshCw className="h-6 w-6 animate-spin text-[#B24A26]" />
           <span className="text-xs">Đang khởi tạo biên lai thuỷ vân ẩn...</span>
         </div>
       )}
 
       {/* Trạng thái lỗi */}
       {error && !loading && (
-        <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-[#131624]/95 text-[#C7C5CF] p-4 text-center">
-          <AlertTriangle className="h-8 w-8 text-amber-400 mb-2" />
+        <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-[#FFFCF6]/95 text-[#6E6459] p-4 text-center">
+          <AlertTriangle className="h-8 w-8 text-[#8A6A1F] mb-2" />
           <p className="text-sm font-medium">{error}</p>
         </div>
       )}
@@ -479,7 +473,7 @@ export function ProtectedArtworkLightbox({
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/92 p-4 sm:p-8 backdrop-blur-md select-none"
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-[#F0E7D8]/92 p-4 sm:p-8 backdrop-blur-md select-none"
       onClick={onClose}
       onContextMenu={(e) => e.preventDefault()}
       role="dialog"
@@ -489,13 +483,13 @@ export function ProtectedArtworkLightbox({
         type="button"
         onClick={onClose}
         aria-label="Đóng"
-        className="absolute right-5 top-5 z-[110] flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-white transition hover:bg-white/25 border border-white/15"
+        className="absolute right-5 top-5 z-[110] flex h-11 w-11 items-center justify-center rounded-full bg-[#F0E7D8] text-[#241F1A] transition hover:bg-[#F0E7D8] border border-[#221E1A]/10"
       >
         <X className="h-5 w-5" />
       </button>
 
       <div
-        className="relative h-[86vh] w-full max-w-5xl overflow-hidden rounded-2xl border border-white/10 bg-[#0d101b] shadow-2xl"
+        className="relative h-[86vh] w-full max-w-5xl overflow-hidden rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] shadow-2xl"
         onClick={(e) => e.stopPropagation()}
         onContextMenu={(e) => e.preventDefault()}
       >

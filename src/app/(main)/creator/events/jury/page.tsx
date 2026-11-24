@@ -16,7 +16,7 @@ import {
   ShieldCheck,
   AlertTriangle,
 } from 'lucide-react';
-import { eventService, juryService, eventStatusBadgeStyles, eventStatusLabels, normalizeEventStatus, EventSearchFilterBar, getEventStatusLabel } from '@/features/event';
+import { eventService, juryService, eventStatusLabels, normalizeEventStatus, EventSearchFilterBar, getEventStatusLabel } from '@/features/event';
 import type { EventListItemDto } from '@/features/event';
 import { useAuthStore } from '@/store/use-auth-store';
 import { useLanguage } from '@/context/language-context';
@@ -186,22 +186,22 @@ export default function CreatorJuryEventsListPage() {
   return (
     <div className="mx-auto w-full max-w-7xl pb-16 space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-white/10">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[#221E1A]/10">
         <div>
-          <div className="flex items-center gap-2 text-xs text-[#9695a1] mb-1">
-            <Link href="/creator/commissions" className="hover:text-white transition-colors">
+          <div className="flex items-center gap-2 text-xs text-[#746A5F] mb-1">
+            <Link href="/creator/commissions" className="hover:text-[#241F1A] transition-colors">
               Creator Studio
             </Link>
             <span>/</span>
-            <span className="text-[#A7ACD9]">
+            <span className="text-[#B24A26]">
               {isVie ? 'Không gian Giám khảo' : 'Jury Workspace'}
             </span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-white font-sora flex items-center gap-3">
-            <Gavel className="w-7 h-7 text-[#A7ACD9]" />
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#241F1A] font-sora flex items-center gap-3">
+            <Gavel className="w-7 h-7 text-[#B24A26]" />
             <span>{isVie ? 'Không gian Giám khảo Sự kiện' : 'Event Jury Workspace'}</span>
           </h1>
-          <p className="text-sm text-[#9695a1] mt-1">
+          <p className="text-sm text-[#746A5F] mt-1">
             {isVie
               ? 'Danh sách các cuộc thi và sự kiện mỹ thuật bạn được mời hoặc phân công làm Thành viên Ban Giám khảo.'
               : 'List of art contests and events where you are invited or assigned as a Jury Member.'}
@@ -212,9 +212,9 @@ export default function CreatorJuryEventsListPage() {
           type="button"
           onClick={() => void loadEvents()}
           disabled={loading}
-          className="inline-flex items-center gap-2 self-start sm:self-auto rounded-xl border border-white/10 bg-white/5 px-3.5 py-2 text-xs font-semibold text-white hover:bg-white/10 transition cursor-pointer disabled:opacity-50"
+          className="inline-flex items-center gap-2 self-start sm:self-auto rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-3.5 py-2 text-xs font-semibold text-[#241F1A] hover:bg-[#F0E7D8] transition cursor-pointer disabled:opacity-50"
         >
-          <RefreshCw size={14} className={loading ? 'animate-spin text-[#A7ACD9]' : 'text-[#A7ACD9]'} />
+          <RefreshCw size={14} className={loading ? 'animate-spin text-[#B24A26]' : 'text-[#B24A26]'} />
           <span>{isVie ? 'Làm mới' : 'Refresh'}</span>
         </button>
       </div>
@@ -233,25 +233,25 @@ export default function CreatorJuryEventsListPage() {
       )}
 
       {loading ? (
-        <div className="flex flex-col items-center justify-center py-20 gap-3 text-[#9695a1]">
-          <RefreshCw className="w-8 h-8 text-[#A7ACD9] animate-spin" />
+        <div className="flex flex-col items-center justify-center py-20 gap-3 text-[#746A5F]">
+          <RefreshCw className="w-8 h-8 text-[#B24A26] animate-spin" />
           <p className="text-sm">{isVie ? 'Đang tải danh sách sự kiện giám khảo...' : 'Loading jury events...'}</p>
         </div>
       ) : loadError ? (
         <div
           role="alert"
-          className="text-center py-14 px-6 rounded-2xl bg-red-500/10 border border-red-500/30 space-y-3"
+          className="text-center py-14 px-6 rounded-2xl bg-[#A8321C]/10 border border-[#A8321C]/40 space-y-3"
         >
-          <AlertTriangle className="w-11 h-11 text-red-400 mx-auto" />
-          <h3 className="text-lg font-bold text-white font-sora">
+          <AlertTriangle className="w-11 h-11 text-[#A8321C] mx-auto" />
+          <h3 className="text-lg font-bold text-[#241F1A] font-sora">
             {isVie ? 'Không thể tải danh sách sự kiện Jury' : 'Unable to load Jury events'}
           </h3>
-          <p className="text-sm text-red-200 max-w-lg mx-auto">{loadError}</p>
+          <p className="text-sm text-[#A8321C] max-w-lg mx-auto">{loadError}</p>
           <div className="pt-2">
             <button
               type="button"
               onClick={() => void loadEvents()}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-red-500/25 hover:bg-red-500/35 border border-red-400/40 text-xs font-bold text-white transition-colors cursor-pointer"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#A8321C]/20 hover:bg-[#A8321C]/20 border border-[#A8321C]/40 text-xs font-bold text-[#241F1A] transition-colors cursor-pointer"
             >
               <RefreshCw className="w-4 h-4" />
               <span>{isVie ? 'Thử tải lại' : 'Retry'}</span>
@@ -259,12 +259,12 @@ export default function CreatorJuryEventsListPage() {
           </div>
         </div>
       ) : filteredEvents.length === 0 ? (
-        <div className="text-center py-20 rounded-2xl bg-white/[0.02] border border-white/10 space-y-3">
-          <Gavel className="w-12 h-12 text-[#9695a1] mx-auto opacity-50" />
-          <h3 className="text-lg font-semibold text-white font-sora">
+        <div className="text-center py-20 rounded-2xl bg-[#FFFCF6] border border-[#221E1A]/10 space-y-3">
+          <Gavel className="w-12 h-12 text-[#746A5F] mx-auto opacity-50" />
+          <h3 className="text-lg font-semibold text-[#241F1A] font-sora">
             {isVie ? 'Không tìm thấy sự kiện phù hợp' : 'No Matching Events Found'}
           </h3>
-          <p className="text-sm text-[#9695a1] max-w-md mx-auto">
+          <p className="text-sm text-[#746A5F] max-w-md mx-auto">
             {events.length === 0
               ? (isVie
                   ? 'Hiện tại bạn chưa được phân công làm giám khảo cho cuộc thi nào đang trong giai đoạn chấm điểm.'
@@ -277,7 +277,7 @@ export default function CreatorJuryEventsListPage() {
             {events.length === 0 ? (
               <Link
                 href="/events"
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-white transition-colors"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#FFFCF6] hover:bg-[#F0E7D8] border border-[#221E1A]/10 text-xs font-semibold text-[#241F1A] transition-colors"
               >
                 <span>{isVie ? 'Khám phá các cuộc thi' : 'Explore Public Contests'}</span>
                 <ChevronRight className="w-4 h-4" />
@@ -289,7 +289,7 @@ export default function CreatorJuryEventsListPage() {
                   setSearchQuery('');
                   setStatusFilter('');
                 }}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-white transition-colors cursor-pointer"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#FFFCF6] hover:bg-[#F0E7D8] border border-[#221E1A]/10 text-xs font-semibold text-[#241F1A] transition-colors cursor-pointer"
               >
                 <span>{isVie ? 'Đặt lại tìm kiếm & Bộ lọc' : 'Reset Search & Filters'}</span>
               </button>
@@ -303,7 +303,6 @@ export default function CreatorJuryEventsListPage() {
             const targetUrl = isHeadJury ? `/creator/events/${evt.id}/head-jury` : `/creator/events/${evt.id}/jury`;
             const isJudging = String(evt.status).toLowerCase().includes('judging') || String(evt.status) === '3';
             const statusStr = normalizeEventStatus(evt.status);
-            const statusColor = eventStatusBadgeStyles[statusStr] || 'border-white/10 bg-white/5 text-[#9695a1]';
             const statusLabel = getEventStatusLabel(statusStr, isVie);
 
             return (
@@ -315,7 +314,7 @@ export default function CreatorJuryEventsListPage() {
                   {/* Event Banner Container */}
                   <Link
                     href={targetUrl}
-                    className="relative block aspect-[16/9] w-full overflow-hidden bg-black/40 cursor-pointer"
+                    className="relative block aspect-[16/9] w-full overflow-hidden bg-[#F0E7D8] cursor-pointer"
                   >
                     {evt.bannerUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
@@ -325,52 +324,49 @@ export default function CreatorJuryEventsListPage() {
                         className="size-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                       />
                     ) : (
-                      <div className="flex size-full items-center justify-center bg-gradient-to-br from-[#1F2335] to-[#161926] text-xs text-[#9695a1]">
-                        <Sparkles size={28} className="text-[#A7ACD9]/40" />
+                      <div className="flex size-full items-center justify-center bg-gradient-to-br from-[#F7F2E9] to-[#FFFCF6] text-xs text-[#746A5F]">
+                        <Sparkles size={28} className="text-[#B24A26]/40" />
                       </div>
                     )}
 
                     {/* Gradient Scrim */}
                     <div
-                      className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#151926] via-[#151926]/60 to-transparent"
+                      className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#FFFCF6] via-[#FFFCF6]/60 to-transparent"
                       aria-hidden="true"
                     />
 
                     {/* Badges Overlay on Banner */}
                     <div className="absolute inset-x-3.5 top-3.5 flex items-center justify-between gap-2">
                       <div className="flex items-center gap-1.5 flex-wrap">
-                        {isHeadJury ? (
-                          <span className="flex items-center gap-1 rounded-full border border-amber-400/50 bg-amber-500/20 px-2.5 py-0.5 text-[10px] font-bold text-amber-200 backdrop-blur-md shadow-md">
-                            <Crown size={12} className="text-amber-400" />
-                            Head Jury
-                          </span>
-                        ) : (
-                          <span className="flex items-center gap-1 rounded-full border border-brand-periwinkle/40 bg-brand-navy/85 px-2.5 py-0.5 text-[10px] font-semibold text-brand-periwinkle backdrop-blur-md shadow-md">
-                            <ShieldCheck size={12} className="text-brand-periwinkle" />
-                            Jury
-                          </span>
-                        )}
-
-                        <span
-                          className={`rounded-full border px-2.5 py-0.5 text-[10px] font-semibold backdrop-blur-md transition-all shadow-md ${
-                            isJudging
-                              ? 'border-amber-400/40 bg-amber-500/20 text-amber-300'
-                              : statusColor
-                          }`}
-                        >
-                          {isJudging ? (isVie ? 'Giai đoạn chấm điểm' : 'Judging Phase') : statusLabel}
+                        <span className="badge">
+                          {isHeadJury ? (
+                            <>
+                              <Crown size={11} aria-hidden />
+                              {isVie ? 'Trưởng ban' : 'Head jury'}
+                            </>
+                          ) : (
+                            <>
+                              <ShieldCheck size={11} aria-hidden />
+                              {isVie ? 'Giám khảo' : 'Jury'}
+                            </>
+                          )}
                         </span>
+
+                        <span className={isJudging ? 'badge badge--soon' : 'badge'}>
+                          {isJudging ? (isVie ? 'Giai đoạn chấm điểm' : 'Judging phase') : statusLabel}
+                        </span>
+
                         {evt.isFeatured && (
-                          <span className="flex items-center gap-1 rounded-full border border-amber-400/40 bg-amber-500/20 px-2 py-0.5 text-[10px] font-bold text-amber-300 backdrop-blur-md">
-                            <Flame size={11} className="text-amber-400" />
+                          <span className="badge badge--soon">
+                            <Flame size={11} aria-hidden />
                             {isVie ? 'Nổi bật' : 'Featured'}
                           </span>
                         )}
                       </div>
 
-                      <span className="flex items-center gap-1 rounded-full border border-white/15 bg-[#11131d]/85 px-2.5 py-0.5 font-mono text-[11px] text-white shadow-md backdrop-blur-md">
-                        <Users className="w-3 h-3 text-[#A7ACD9]" />
-                        <span>{evt.submissionCount || 0}</span>
+                      <span className="badge">
+                        <Users size={11} aria-hidden />
+                        {evt.submissionCount || 0}
                       </span>
                     </div>
                   </Link>
@@ -378,21 +374,21 @@ export default function CreatorJuryEventsListPage() {
                   {/* Body Content */}
                   <div className="p-5">
                     <Link href={targetUrl} className="block">
-                      <h3 className="font-sora font-bold text-lg text-white group-hover:text-[#A7ACD9] transition-colors line-clamp-1">
+                      <h3 className="font-sora font-bold text-lg text-[#241F1A] group-hover:text-[#B24A26] transition-colors line-clamp-1">
                         {evt.title}
                       </h3>
                     </Link>
 
-                    <p className="text-xs text-[#9695a1] mt-2 line-clamp-2 leading-relaxed">
+                    <p className="text-xs text-[#746A5F] mt-2 line-clamp-2 leading-relaxed">
                       {evt.description}
                     </p>
 
-                    <div className="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-xs text-[#c7c5cf]">
-                      <span className="flex items-center gap-1.5 text-amber-400 font-medium">
+                    <div className="mt-4 pt-3 border-t border-[#221E1A]/10 flex items-center justify-between text-xs text-[#6E6459]">
+                      <span className="flex items-center gap-1.5 text-[#8A6A1F] font-medium">
                         <Trophy className="w-3.5 h-3.5" />
                         <span className="truncate max-w-[130px]">{evt.prize || (isVie ? 'Cơ cấu giải thưởng hấp dẫn' : 'Attractive Prize Pool')}</span>
                       </span>
-                      <span className="flex items-center gap-1 text-[#9695a1] shrink-0">
+                      <span className="flex items-center gap-1 text-[#746A5F] shrink-0">
                         <Clock className="w-3.5 h-3.5" />
                         <span>
                           {isVie ? 'Hạn chót: ' : 'Due: '}{new Date(evt.judgingEndAt || evt.submissionEndAt).toLocaleDateString(isVie ? 'vi-VN' : 'en-US', {
@@ -411,7 +407,7 @@ export default function CreatorJuryEventsListPage() {
                     href={targetUrl}
                     className="commission-primary w-full py-2.5 rounded-xl text-xs font-sora flex items-center justify-center gap-2 transition-all shadow-md cursor-pointer"
                   >
-                    {isHeadJury ? <Crown className="w-4 h-4 text-brand-navy" /> : <Gavel className="w-4 h-4" />}
+                    {isHeadJury ? <Crown className="w-4 h-4 text-[#241F1A]" /> : <Gavel className="w-4 h-4" />}
                     <span>
                       {isHeadJury
                         ? (isVie ? 'Vào phòng điều hành Trưởng BGK' : 'Enter Head Jury Control Room')

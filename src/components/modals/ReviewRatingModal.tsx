@@ -167,26 +167,25 @@ export default function ReviewRatingModal({
   const isAlreadyReviewed = Boolean(existingReview);
 
   return (
-    <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
-      <div className="relative w-full max-w-lg bg-[#111420] border border-white/10 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
+    <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-[#E5D8C2] backdrop-blur-md animate-fadeIn">
+      <div className="relative w-full max-w-lg bg-[#FFFCF6] border border-[#221E1A]/10 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between bg-[#161928] shrink-0">
+        <div className="px-6 py-4 border-b border-[#221E1A]/10 flex items-center justify-between bg-[#FFFCF6] shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[#A7ACD9]/15 text-[#A7ACD9] flex items-center justify-center border border-[#A7ACD9]/30">
-              {isAlreadyReviewed ? <Gift className="w-5 h-5 text-amber-400" /> : <Award className="w-5 h-5" />}
+            <div className="w-10 h-10 rounded-xl bg-[#B24A26]/15 text-[#B24A26] flex items-center justify-center border border-[#B24A26]/30">
+              {isAlreadyReviewed ? <Gift className="w-5 h-5 text-[#8A6A1F]" /> : <Award className="w-5 h-5" />}
             </div>
             <div>
-              <h3 className="text-sm font-bold text-white flex items-center gap-1.5">
-                {isAlreadyReviewed ? 'Gửi Tip cho Họa sĩ' : 'Đánh giá & Tip Creator'}
+              <h3 className="text-sm font-bold text-[#241F1A] flex items-center gap-1.5">
+                {isAlreadyReviewed ? 'Gửi Tip cho Họa sĩ' : 'Đánh giá & Tip họa sĩ'}
               </h3>
-              <p className="text-[11px] text-slate-400">
-                Họa sĩ: <strong className="text-slate-200">{creatorName}</strong>
+              <p className="text-[11px] text-[#746A5F]"> Họa sĩ: <strong className="text-[#6E6459]">{creatorName}</strong>
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-white/5 border border-white/10 text-slate-400 hover:text-white flex items-center justify-center transition-colors"
+            className="w-8 h-8 rounded-full bg-[#FFFCF6] border border-[#221E1A]/10 text-[#746A5F] hover:text-[#241F1A] flex items-center justify-center transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
@@ -198,27 +197,26 @@ export default function ReviewRatingModal({
             <form onSubmit={handleSubmit} className="space-y-5">
               {isAlreadyReviewed ? (
                 /* READONLY REVIEW SUMMARY */
-                <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/10 space-y-2.5 text-xs">
+                <div className="p-4 rounded-2xl bg-[#FFFCF6] border border-[#221E1A]/10 space-y-2.5 text-xs">
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-400 flex items-center gap-1.5 font-medium">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-400" /> Đánh giá trước đó của bạn
-                    </span>
+                    <span className="text-[#746A5F] flex items-center gap-1.5 font-medium">
+                      <CheckCircle2 className="w-4 h-4 text-[#2F6B63]" /> Đánh giá trước đó của bạn </span>
                     <div className="flex items-center gap-1">
                       {[1, 2, 3, 4, 5].map((s) => (
                         <Star
                           key={s}
                           className={`w-3.5 h-3.5 ${
                             s <= (existingReview?.rating || 5)
-                              ? 'fill-amber-400 text-amber-400'
-                              : 'text-slate-600'
+                              ? 'fill-[#8A6A1F] text-[#8A6A1F]'
+                              : 'text-[#241F1A]'
                           }`}
                         />
                       ))}
-                      <span className="ml-1 text-amber-300 font-bold">{existingReview?.rating}/5</span>
+                      <span className="ml-1 text-[#8A6A1F] font-bold">{existingReview?.rating}/5</span>
                     </div>
                   </div>
                   {existingReview?.comment && (
-                    <p className="text-white/80 italic bg-black/30 p-2.5 rounded-xl border border-white/5 text-[11px]">
+                    <p className="text-[#241F1A]/80 italic bg-[#F0E7D8] p-2.5 rounded-xl border border-[#221E1A]/10 text-[11px]">
                       &ldquo;{existingReview.comment}&rdquo;
                     </p>
                   )}
@@ -227,8 +225,8 @@ export default function ReviewRatingModal({
                 /* ACTIVE REVIEW FORM */
                 <>
                   {/* Star Rating Section */}
-                  <div className="text-center space-y-2.5 bg-white/[0.02] border border-white/10 p-4 rounded-2xl">
-                    <p className="text-xs font-semibold text-slate-300">
+                  <div className="text-center space-y-2.5 bg-[#FFFCF6] border border-[#221E1A]/10 p-4 rounded-2xl">
+                    <p className="text-xs font-semibold text-[#746A5F]">
                       Bạn cảm thấy thế nào về tác phẩm &amp; dịch vụ?
                     </p>
                     <div className="flex items-center justify-center gap-2 py-1">
@@ -244,23 +242,21 @@ export default function ReviewRatingModal({
                           <Star
                             className={`w-8 h-8 transition-colors ${
                               activeRating >= star
-                                ? 'fill-amber-400 text-amber-400 drop-shadow-[0_0_12px_rgba(251,191,36,0.6)]'
-                                : 'text-slate-600 hover:text-slate-400'
+                                ? 'fill-[#8A6A1F] text-[#8A6A1F] drop-shadow-[0_0_12px_rgba(251,191,36,0.6)]'
+                                : 'text-[#241F1A] hover:text-[#746A5F]'
                             }`}
                           />
                         </button>
                       ))}
                     </div>
-                    <p className="text-xs font-medium text-amber-300/90 h-4">
+                    <p className="text-xs font-medium text-[#8A6A1F] h-4">
                       {RATING_LABELS[activeRating] || ''}
                     </p>
                   </div>
 
                   {/* Quick Compliment Tags (Visual only, does NOT touch textarea) */}
                   <div className="space-y-2">
-                    <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                      Điểm bạn hài lòng nhất:
-                    </label>
+                    <label className="block text-[11px] font-bold text-[#746A5F] uppercase tracking-wider"> Điểm bạn hài lòng nhất: </label>
                     <div className="flex flex-wrap gap-2">
                       {QUICK_TAGS.map((tag) => {
                         const isSelected = selectedTags.includes(tag);
@@ -271,8 +267,8 @@ export default function ReviewRatingModal({
                             onClick={() => handleToggleTag(tag)}
                             className={`px-3 py-1.5 rounded-xl text-xs font-medium border transition-all ${
                               isSelected
-                                ? 'bg-[#A7ACD9]/25 border-[#A7ACD9] text-white shadow-sm'
-                                : 'bg-white/5 border-white/10 text-slate-400 hover:border-white/20 hover:text-slate-200'
+                                ? 'bg-[#B24A26]/25 border-[#B24A26] text-[#241F1A] shadow-sm'
+                                : 'bg-[#FFFCF6] border-[#221E1A]/10 text-[#746A5F] hover:border-[#221E1A]/20 hover:text-[#6E6459]'
                             }`}
                           >
                             {tag}
@@ -284,46 +280,42 @@ export default function ReviewRatingModal({
 
                   {/* Feedback Text Input (Clean, user types here) */}
                   <div className="space-y-1.5">
-                    <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                      <MessageSquare className="w-3.5 h-3.5 text-[#A7ACD9]" />
-                      Lời nhận xét công khai cho Creator:
-                    </label>
+                    <label className="block text-[11px] font-bold text-[#746A5F] uppercase tracking-wider flex items-center gap-1.5">
+                      <MessageSquare className="w-3.5 h-3.5 text-[#B24A26]" /> Lời nhận xét công khai cho họa sĩ: </label>
                     <textarea
                       rows={3}
                       value={reviewText}
                       onChange={(e) => setReviewText(e.target.value)}
                       placeholder="Chia sẻ trải nghiệm về tiến độ, giao tiếp, chất lượng nét vẽ..."
-                      className="w-full p-3 bg-white/5 border border-white/10 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-[#A7ACD9] transition-colors leading-relaxed"
+                      className="w-full p-3 bg-[#FFFCF6] border border-[#221E1A]/10 rounded-xl text-xs text-[#241F1A] text-[#746A5F] focus:outline-none focus:border-[#B24A26] transition-colors leading-relaxed"
                     />
                   </div>
                 </>
               )}
 
               {/* REAL TIP SECTION */}
-              <div className="p-4 rounded-2xl bg-amber-500/[0.04] border border-amber-500/20 space-y-3">
+              <div className="p-4 rounded-2xl bg-[#8A6A1F]/12/[0.04] border border-[#8A6A1F]/30 space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center">
-                      <Heart className="w-3.5 h-3.5 fill-amber-400" />
+                    <div className="w-6 h-6 rounded-lg bg-[#8A6A1F]/20 text-[#8A6A1F] flex items-center justify-center">
+                      <Heart className="w-3.5 h-3.5 fill-[#8A6A1F]" />
                     </div>
-                    <span className="text-xs font-bold text-amber-300">
+                    <span className="text-xs font-bold text-[#8A6A1F]">
                       Gửi Tip động viên Họa sĩ {isAlreadyReviewed ? '' : '(Tùy chọn)'}
                     </span>
                   </div>
 
                   {/* Live Wallet Balance */}
-                  <div className="flex items-center gap-1.5 text-[11px] text-slate-400 bg-white/5 px-2.5 py-1 rounded-lg border border-white/5">
-                    <Wallet className="w-3 h-3 text-[#A7ACD9]" />
+                  <div className="flex items-center gap-1.5 text-[11px] text-[#746A5F] bg-[#FFFCF6] px-2.5 py-1 rounded-lg border border-[#221E1A]/10">
+                    <Wallet className="w-3 h-3 text-[#B24A26]" />
                     <span>Số dư ví:</span>
-                    <strong className="text-white font-semibold">
+                    <strong className="text-[#241F1A] font-semibold">
                       {walletBalance !== null ? formatVND(walletBalance) : (isLoadingWallet ? '...' : '0 đ')}
                     </strong>
                   </div>
                 </div>
 
-                <p className="text-[11px] text-slate-400">
-                  Tiền tip được trừ trực tiếp từ số dư ví sàn và gửi ngay đến tài khoản của họa sĩ.
-                </p>
+                <p className="text-[11px] text-[#746A5F]"> Tiền tip được trừ trực tiếp từ số dư ví sàn và gửi ngay đến tài khoản của họa sĩ. </p>
 
                 {/* Tip Preset Pills */}
                 <div className="grid grid-cols-3 sm:grid-cols-6 gap-1.5">
@@ -336,12 +328,10 @@ export default function ReviewRatingModal({
                       }}
                       className={`px-2 py-2 rounded-xl text-xs font-semibold border transition-all text-center ${
                         selectedTip === 0 && !isCustomTip
-                          ? 'bg-white/20 border-white text-white'
-                          : 'bg-white/5 border-white/10 text-slate-400 hover:text-white hover:border-white/20'
+                          ? 'bg-[#F0E7D8] border-[#221E1A]/15 text-[#241F1A]'
+                          : 'bg-[#FFFCF6] border-[#221E1A]/10 text-[#746A5F] hover:text-[#241F1A] hover:border-[#221E1A]/20'
                       }`}
-                    >
-                      Không tip
-                    </button>
+                    > Không tip </button>
                   )}
 
                   {[20000, 50000, 100000, 200000].map((amount) => {
@@ -356,8 +346,8 @@ export default function ReviewRatingModal({
                         }}
                         className={`px-2 py-2 rounded-xl text-xs font-semibold border transition-all text-center ${
                           isSelected
-                            ? 'bg-amber-400 text-slate-950 font-bold border-amber-300 shadow-md shadow-amber-500/20'
-                            : 'bg-white/5 border-white/10 text-slate-300 hover:text-white hover:border-white/20'
+                            ? 'bg-[#8A6A1F]/10 text-[#241F1A] font-bold border-[#8A6A1F]/30 shadow-md shadow-[#8A6A1F]'
+                            : 'bg-[#FFFCF6] border-[#221E1A]/10 text-[#746A5F] hover:text-[#241F1A] hover:border-[#221E1A]/20'
                         }`}
                       >
                         +{amount >= 1000 ? `${amount / 1000}k` : amount}
@@ -373,12 +363,10 @@ export default function ReviewRatingModal({
                     }}
                     className={`px-2 py-2 rounded-xl text-xs font-semibold border transition-all text-center ${
                       isCustomTip
-                        ? 'bg-amber-400 text-slate-950 font-bold border-amber-300 shadow-md shadow-amber-500/20'
-                        : 'bg-white/5 border-white/10 text-slate-400 hover:text-white hover:border-white/20'
+                        ? 'bg-[#8A6A1F]/10 text-[#241F1A] font-bold border-[#8A6A1F]/30 shadow-md shadow-[#8A6A1F]'
+                        : 'bg-[#FFFCF6] border-[#221E1A]/10 text-[#746A5F] hover:text-[#241F1A] hover:border-[#221E1A]/20'
                     }`}
-                  >
-                    Khác
-                  </button>
+                  > Khác </button>
                 </div>
 
                 {/* Custom Tip Input */}
@@ -393,9 +381,9 @@ export default function ReviewRatingModal({
                           setCustomTipInput(raw ? Number(raw).toLocaleString('vi-VN') : '');
                         }}
                         placeholder="Nhập số tiền muốn tip (tối thiểu 1.000 đ)"
-                        className="w-full px-3 py-2 bg-black/40 border border-amber-500/40 rounded-xl text-xs text-amber-200 placeholder-slate-500 focus:outline-none focus:border-amber-400 pr-12"
+                        className="w-full px-3 py-2 bg-[#F0E7D8] border border-[#8A6A1F]/40 rounded-xl text-xs text-[#8A6A1F] text-[#746A5F] focus:outline-none focus:border-[#8A6A1F]/30 pr-12"
                       />
-                      <span className="absolute right-3 top-2 text-xs text-amber-400 font-bold">VND</span>
+                      <span className="absolute right-3 top-2 text-xs text-[#8A6A1F] font-bold">VND</span>
                     </div>
                   </div>
                 )}
@@ -409,15 +397,15 @@ export default function ReviewRatingModal({
                       value={tipMessage}
                       onChange={(e) => setTipMessage(e.target.value)}
                       placeholder="Lời nhắn kèm tiền tip (vd: Cảm ơn vì tác phẩm tuyệt vời!)..."
-                      className="w-full px-3 py-2 bg-black/30 border border-white/10 rounded-xl text-[11px] text-white placeholder-slate-500 focus:outline-none focus:border-amber-400/50"
+                      className="w-full px-3 py-2 bg-[#F0E7D8] border border-[#221E1A]/10 rounded-xl text-[11px] text-[#241F1A] text-[#746A5F] focus:outline-none focus:border-[#8A6A1F]/40"
                     />
                   </div>
                 )}
 
                 {/* Balance Insufficient Warning */}
                 {isBalanceInsufficient && (
-                  <div className="p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/25 flex items-center gap-2 text-xs text-rose-300">
-                    <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
+                  <div className="p-2.5 rounded-xl bg-[#A8321C]/10 border border-[#A8321C]/35 flex items-center gap-2 text-xs text-[#A8321C]">
+                    <AlertCircle className="w-4 h-4 shrink-0 text-[#A8321C]" />
                     <span>
                       Số dư ví hiện tại ({formatVND(walletBalance || 0)}) không đủ để gửi {formatVND(effectiveTip)}. Vui lòng nạp thêm ví.
                     </span>
@@ -426,7 +414,7 @@ export default function ReviewRatingModal({
               </div>
 
               {errorMessage && (
-                <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-xs text-rose-300">
+                <div className="p-3 rounded-xl bg-[#A8321C]/10 border border-[#A8321C]/30 text-xs text-[#A8321C]">
                   {errorMessage}
                 </div>
               )}
@@ -436,17 +424,15 @@ export default function ReviewRatingModal({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-4 py-2.5 rounded-xl text-xs font-semibold border border-white/10 text-slate-300 hover:bg-white/5 transition-colors"
-                >
-                  Đóng
-                </button>
+                  className="px-4 py-2.5 rounded-xl text-xs font-semibold border border-[#221E1A]/10 text-[#746A5F] hover:bg-[#FFFCF6] transition-colors"
+                > Đóng </button>
                 <button
                   type="submit"
                   disabled={isSubmitting || isBalanceInsufficient || (isAlreadyReviewed && effectiveTip <= 0)}
                   className={`px-6 py-2.5 rounded-xl text-xs font-bold shadow-lg transition-all flex items-center gap-1.5 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed ${
                     effectiveTip > 0
-                      ? 'bg-amber-400 hover:bg-amber-300 text-slate-950 shadow-amber-500/20'
-                      : 'bg-[#A7ACD9] hover:bg-[#B8BCDF] text-[#1F2335]'
+                      ? 'bg-[#8A6A1F]/10 hover:bg-[#8A6A1F]/10 text-[#241F1A] shadow-[#8A6A1F]'
+                      : 'bg-[#B24A26] hover:bg-[#8C3718] text-[#F7F2E9]'
                   }`}
                 >
                   {isSubmitting ? (
@@ -460,9 +446,7 @@ export default function ReviewRatingModal({
                     </>
                   ) : (
                     <>
-                      <CheckCircle2 className="w-4 h-4" />
-                      Gửi đánh giá ngay
-                    </>
+                      <CheckCircle2 className="w-4 h-4" /> Gửi đánh giá ngay </>
                   )}
                 </button>
               </div>
@@ -470,16 +454,15 @@ export default function ReviewRatingModal({
           ) : (
             /* SUBMISSION SUCCESS */
             <div className="py-8 text-center space-y-3 animate-fadeIn">
-              <div className="w-14 h-14 mx-auto rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center border border-emerald-500/30">
+              <div className="w-14 h-14 mx-auto rounded-full bg-[#2F6B63]/20 text-[#2F6B63] flex items-center justify-center border border-[#2F6B63]/40">
                 <CheckCircle2 className="w-7 h-7" />
               </div>
-              <h4 className="text-base font-bold text-white">
+              <h4 className="text-base font-bold text-[#241F1A]">
                 {tipSuccessInfo ? 'Gửi đánh giá & Tip thành công!' : 'Cảm ơn bạn đã gửi đánh giá!'}
               </h4>
-              <p className="text-xs text-slate-300 max-w-sm mx-auto">
+              <p className="text-xs text-[#746A5F] max-w-sm mx-auto">
                 {tipSuccessInfo ? (
-                  <>
-                    Đã chuyển <strong className="text-amber-300">{formatVND(tipSuccessInfo.amount)}</strong> tiền tip tới ví của họa sĩ <strong>{creatorName}</strong>. Số dư ví còn lại: <span className="text-emerald-400">{formatVND(tipSuccessInfo.remaining)}</span>.
+                  <> Đã chuyển <strong className="text-[#8A6A1F]">{formatVND(tipSuccessInfo.amount)}</strong> tiền tip tới ví của họa sĩ <strong>{creatorName}</strong>. Số dư ví còn lại: <span className="text-[#2F6B63]">{formatVND(tipSuccessInfo.remaining)}</span>.
                   </>
                 ) : (
                   <>Đánh giá {rating} sao của bạn đã được ghi nhận vào hồ sơ uy tín của họa sĩ {creatorName}.</>

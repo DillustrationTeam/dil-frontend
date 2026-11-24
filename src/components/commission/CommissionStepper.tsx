@@ -42,7 +42,7 @@ export default function CommissionStepper({
           <path
             d="M0 10 C11 7 22 15 33.33 13.5 C44.44 13.5 55.55 5 66.66 6.5 C77.77 8 88.88 13.5 100 12.5"
             fill="none"
-            stroke="#A7ACD9"
+            stroke="#B24A26"
             strokeOpacity="0.3"
             strokeWidth="2"
             vectorEffect="non-scaling-stroke"
@@ -50,7 +50,7 @@ export default function CommissionStepper({
           <path
             d="M0 10 C11 7 22 15 33.33 13.5 C44.44 13.5 55.55 5 66.66 6.5 C77.77 8 88.88 13.5 100 12.5"
             fill="none"
-            stroke="#A7ACD9"
+            stroke="#B24A26"
             strokeWidth="2"
             vectorEffect="non-scaling-stroke"
             pathLength="100"
@@ -81,10 +81,10 @@ export default function CommissionStepper({
               <div
                 className={`absolute ${STEP_NODE_OFFSETS[step.id - 1]} w-10 h-10 rounded-full flex items-center justify-center transition-colors duration-200 ${
                   isActive
-                    ? 'step-node-active bg-[#A7ACD9] text-[#1F2335]'
+                    ? 'step-node-active bg-[#B24A26] text-[#F7F2E9]'
                     : isCompleted
-                    ? 'bg-[#A7ACD9]/15 text-[#A7ACD9]'
-                    : 'bg-white/[0.04] text-slate-500'
+                    ? 'bg-[#B24A26]/15 text-[#B24A26]'
+                    : 'bg-[#FFFCF6] text-[#746A5F]'
                 }`}
               >
                 {isCompleted ? (
@@ -99,10 +99,10 @@ export default function CommissionStepper({
                 <span
                   className={`text-[11px] font-space-grotesk tracking-wider uppercase font-semibold transition-colors duration-200 block ${
                     isActive
-                    ? 'text-[#A7ACD9]'
+                    ? 'text-[#B24A26]'
                     : isCompleted
-                    ? 'text-[#A7ACD9]'
-                      : 'text-slate-500'
+                    ? 'text-[#B24A26]'
+                      : 'text-[#746A5F]'
                   }`}
                 >
                   STEP {step.id}
@@ -110,10 +110,10 @@ export default function CommissionStepper({
                 <span
                   className={`text-xs font-sora font-medium transition-colors duration-200 block ${
                     isActive
-                      ? 'text-white font-bold'
+                      ? 'text-[#241F1A] font-bold'
                       : isCompleted
-                      ? 'text-slate-300'
-                      : 'text-slate-500'
+                      ? 'text-[#746A5F]'
+                      : 'text-[#746A5F]'
                   }`}
                 >
                   {step.label}

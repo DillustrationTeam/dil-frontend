@@ -1,7 +1,7 @@
 'use client';
 
 import { useSyncExternalStore } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, usePathname } from 'next/navigation';
 import { EventDetailScreen } from '@/features/event';
 import { useAuthStore } from '@/store/use-auth-store';
 
@@ -16,6 +16,7 @@ function subscribeHydration(listener: () => void) {
 
 export default function EventDetailPage() {
   const params = useParams<{ id: string }>();
+  const pathname = usePathname();
   const ready = useSyncExternalStore(
     subscribeHydration,
     () => useAuthStore.persist.hasHydrated(),
@@ -32,5 +33,12 @@ export default function EventDetailPage() {
       r.toLowerCase() === 'moderator'
   );
 
-  return <EventDetailScreen id={params.id} userId={userId} isAdmin={isAdmin} />;
+  const id = params?.id ?? '';
+  // `useParams()` đọc từ router nên khi điều hướng sang route khác (vd. /artworks/{id}),
+  // đoạn trang này còn render một nhịp với id MỚI. Không chặn thì nó gọi
+  // GET /events/{artworkId} → 404 "Không tìm thấy sự kiện…" ngay khi rời trang.
+  const isThisRoute = Boolean(id) && pathname === `/events/${id}`;
+  if (!isThisRoute) return null;
+
+  return <EventDetailScreen id={id} userId={userId} isAdmin={isAdmin} />;
 }

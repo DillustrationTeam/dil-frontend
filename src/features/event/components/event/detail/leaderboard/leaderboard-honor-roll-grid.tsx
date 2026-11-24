@@ -24,12 +24,12 @@ export function LeaderboardHonorRollGrid({
 
   return (
     <div className="space-y-4 pt-4">
-      <div className="flex items-center justify-between border-b border-white/10 pb-3">
-        <h3 className="font-h1 text-sm sm:text-base font-bold text-white flex items-center gap-2">
-          <Medal size={18} className="text-slate-400" />
+      <div className="flex items-center justify-between border-b border-[#221E1A]/10 pb-3">
+        <h3 className="font-h1 text-sm sm:text-base font-bold text-[#241F1A] flex items-center gap-2">
+          <Medal size={18} className="text-[#746A5F]" />
           <span>{isVie ? 'Danh sách Danh dự' : 'Honor Roll Contenders'}</span>
         </h3>
-        <span className="text-xs text-[#8A8FA9]">
+        <span className="text-xs text-[#6E6459]">
           {isVie ? 'Hạng' : 'Ranks'} #{restLeaderboard[0]?.rank || 4} - #{restLeaderboard[restLeaderboard.length - 1]?.rank || (restLeaderboard.length + 3)}
         </span>
       </div>
@@ -42,11 +42,11 @@ export function LeaderboardHonorRollGrid({
           return (
             <article
               key={item.submissionId}
-              className="group relative overflow-hidden rounded-3xl border border-white/10 bg-[#161926] p-5 shadow-lg transition duration-200 hover:-translate-y-1 hover:border-brand-periwinkle/40 space-y-4"
+              className="group relative overflow-hidden rounded-3xl border border-[#221E1A]/10 bg-[#FFFCF6] p-5 shadow-lg transition duration-200 hover:-translate-y-1 hover:border-brand-periwinkle/40 space-y-4"
             >
               <Link
                 href={artworkLink}
-                className="group/img relative aspect-video w-full block overflow-hidden rounded-2xl border border-white/10 bg-black/40 group-hover:border-brand-periwinkle/30 transition cursor-pointer"
+                className="group/img relative aspect-video w-full block overflow-hidden rounded-2xl border border-[#221E1A]/10 bg-[#F0E7D8] group-hover:border-brand-periwinkle/30 transition cursor-pointer"
               >
                 {item.artworkImageUrl || item.artworkThumbnailUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -61,7 +61,7 @@ export function LeaderboardHonorRollGrid({
                   </div>
                 )}
 
-                <div className="absolute left-3 top-3 flex items-center gap-1.5 rounded-full border border-white/20 bg-black/70 px-3 py-1 text-xs font-extrabold text-white backdrop-blur-md">
+                <div className="absolute left-3 top-3 flex items-center gap-1.5 rounded-full border border-[#221E1A]/20 bg-[#E5D8C2] px-3 py-1 text-xs font-extrabold text-[#241F1A] backdrop-blur-md">
                   <span>#{item.rank || idx + 4}</span>
                 </div>
               </Link>
@@ -69,29 +69,29 @@ export function LeaderboardHonorRollGrid({
               <div>
                 <Link
                   href={artworkLink}
-                  className="block font-h1 text-sm font-bold text-white line-clamp-1 hover:text-brand-periwinkle transition cursor-pointer"
+                  className="block font-h1 text-sm font-bold text-[#241F1A] line-clamp-1 hover:text-brand-periwinkle transition cursor-pointer"
                 >
                   {item.title}
                 </Link>
-                <p className="text-xs text-[#8A8FA9] mt-0.5">@{item.submitterName}</p>
+                <p className="text-xs text-[#6E6459] mt-0.5">@{item.submitterName}</p>
               </div>
 
-              <div className="border-t border-white/10 pt-3 flex items-center justify-between text-xs">
+              <div className="border-t border-[#221E1A]/10 pt-3 flex items-center justify-between text-xs">
                 {wallSort === 'score' ? (
                   <>
                     <div>
                       <span className="text-brand-periwinkle block text-[10px] font-bold uppercase tracking-wider">
                         {isVie ? 'Điểm Giám khảo' : 'Jury Score'}
                       </span>
-                      <span className="font-h1 font-extrabold text-white text-base">
+                      <span className="font-h1 font-extrabold text-[#241F1A] text-base">
                         {scoreDisplay ?? (isVie ? 'Chờ chấm' : 'Pending')}
                       </span>
                     </div>
                     <div className="text-right">
-                      <span className="text-[#8A8FA9] block text-[10px] uppercase">
+                      <span className="text-[#6E6459] block text-[10px] uppercase">
                         {isVie ? 'Lượt bình chọn' : 'Votes'}
                       </span>
-                      <span className="text-xs text-[#A7ACD9] font-medium">
+                      <span className="text-xs text-[#B24A26] font-medium">
                         {item.voteCount} {isVie ? 'lượt bình chọn' : 'votes'}
                       </span>
                     </div>
@@ -99,7 +99,7 @@ export function LeaderboardHonorRollGrid({
                 ) : (
                   <>
                     <div>
-                      <span className="text-[#8A8FA9] block text-[10px] uppercase font-bold tracking-wider">
+                      <span className="text-[#6E6459] block text-[10px] uppercase font-bold tracking-wider">
                         {isVie ? 'Lượt bình chọn' : 'Votes'}
                       </span>
                       <span className="font-h1 font-extrabold text-brand-periwinkle text-base">
@@ -108,10 +108,10 @@ export function LeaderboardHonorRollGrid({
                     </div>
                     {scoreDisplay && (
                       <div className="text-right">
-                        <span className="text-[#8A8FA9] block text-[10px] uppercase">
+                        <span className="text-[#6E6459] block text-[10px] uppercase">
                           {isVie ? 'Điểm GK' : 'Jury'}
                         </span>
-                        <span className="text-xs text-slate-300 font-semibold">
+                        <span className="text-xs text-[#746A5F] font-semibold">
                           {scoreDisplay}
                         </span>
                       </div>

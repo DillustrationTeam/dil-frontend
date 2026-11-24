@@ -307,16 +307,16 @@ export function PublishTab() {
   return (
     <div className="space-y-6">
       {/* Contest Selector Bar */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 rounded-2xl border border-white/10 bg-[#161926] p-4">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] p-4">
         <div className="flex items-center gap-3 w-full sm:w-auto">
           <div className="flex size-10 items-center justify-center rounded-xl bg-brand-periwinkle/15 text-brand-periwinkle shrink-0">
             <Trophy size={20} />
           </div>
           <div>
-            <h3 className="font-sora text-sm font-bold text-white">
+            <h3 className="font-sora text-sm font-bold text-[#241F1A]">
               {isVie ? 'Chọn cuộc thi để công bố' : 'Select Contest to Publish'}
             </h3>
-            <p className="text-[11px] text-[#8A8FA9]">
+            <p className="text-[11px] text-[#6E6459]">
               {isVie ? 'Xem xét các tiêu chí kiểm toán và công bố người chiến thắng chính thức' : 'Review audit criteria and publish official winners'}
             </p>
           </div>
@@ -341,7 +341,7 @@ export function PublishTab() {
               setIsLoading(true);
               void loadEventData(selectedEventId);
             }}
-            className="flex size-9 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-[#A7ACD9] hover:bg-white/10 hover:text-white transition cursor-pointer shrink-0"
+            className="flex size-9 items-center justify-center rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] text-[#B24A26] hover:bg-[#F0E7D8] hover:text-[#241F1A] transition cursor-pointer shrink-0"
             title={isVie ? 'Làm mới dữ liệu cuộc thi' : 'Refresh contest data'}
           >
             <RotateCw size={15} className={isLoading ? 'animate-spin' : ''} />
@@ -351,10 +351,10 @@ export function PublishTab() {
 
       {/* Main Grid: Left = Results Table, Right = Audit Checklist */}
       {!selectedEventId ? (
-        <div className="rounded-2xl border border-white/10 bg-[#161926] p-12 text-center text-slate-400">
-          <AlertCircle size={32} className="mx-auto text-[#A7ACD9] mb-3" />
-          <p className="font-semibold text-white">{isVie ? 'Chưa chọn cuộc thi' : 'No contest selected'}</p>
-          <p className="text-xs text-[#8A8FA9] mt-1">
+        <div className="rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] p-12 text-center text-[#746A5F]">
+          <AlertCircle size={32} className="mx-auto text-[#B24A26] mb-3" />
+          <p className="font-semibold text-[#241F1A]">{isVie ? 'Chưa chọn cuộc thi' : 'No contest selected'}</p>
+          <p className="text-xs text-[#6E6459] mt-1">
             {isVie ? 'Vui lòng chọn sự kiện từ danh sách bên trên để xem kết quả.' : 'Please select an event from the dropdown above to view results.'}
           </p>
         </div>

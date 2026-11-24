@@ -49,10 +49,32 @@ export function HoverFadeToast({ toast: t }: { toast: Toast }) {
 /**
  * Bọc `<Toaster>` cùng render-prop `children` trong 1 Client Component — `layout.tsx` (Server
  * Component) không được phép truyền thẳng 1 hàm (closure) làm prop xuống Client Component.
+ *
+ * Giao diện toast thuộc hệ "INK & VERMILION": nền mực, chữ giấy, viền hairline ấm —
+ * một khối mực nổi trên giấy thay vì một thẻ kính phát sáng.
  */
 export function AppToaster() {
   return (
-    <Toaster position="top-right" toastOptions={{ duration: 4000 }}>
+    <Toaster
+      position="top-right"
+      toastOptions={{
+        duration: 4000,
+        className: 'toast',
+        style: {
+          background: '#241F1A',
+          color: '#FFFCF6',
+          borderRadius: '14px',
+          border: '1px solid rgba(34,30,26,0.12)',
+          fontFamily: 'var(--font-body-grotesk), Inter, system-ui, sans-serif',
+          fontSize: '0.875rem',
+          padding: '0.7rem 0.9rem',
+          boxShadow: '0 24px 44px -24px rgba(36,31,26,0.8)',
+        },
+        success: { iconTheme: { primary: '#4E8F82', secondary: '#FFFCF6' } },
+        error: { iconTheme: { primary: '#C6603C', secondary: '#FFFCF6' } },
+        loading: { iconTheme: { primary: '#8A6A1F', secondary: '#FFFCF6' } },
+      }}
+    >
       {(t) => <HoverFadeToast toast={t} />}
     </Toaster>
   );

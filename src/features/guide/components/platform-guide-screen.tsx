@@ -80,28 +80,28 @@ interface GuideCopy {
 
 const GUIDE_COPY: Record<'VIE' | 'ENG', GuideCopy> = {
   VIE: {
-    heroTitle: 'DILLUSTRATION — Sàn Commission & Đấu giá tranh số',
+    heroTitle: 'DILLUSTRATION — Sàn đặt vẽ & Đấu giá tranh số',
     heroSub:
       'Nơi bạn kết nối trực tiếp với các họa sĩ vẽ tranh kỹ thuật số (2D Illustration, Anime, Chibi, VTuber) và giao dịch an toàn theo từng chặng minh bạch.',
-    escrowTitle: 'Cơ chế Ký quỹ từng chặng (Milestone Escrow qua payOS)',
+    escrowTitle: 'Cơ chế ký quỹ từng chặng qua payOS',
     escrowTag: 'Lời nhắn bảo chứng',
     escrowDesc:
-      'Tiền cọc được hệ thống lưu giữ trung gian an toàn. Bạn kiểm tra phác thảo (sketch), nét viền (lineart) và lên màu trong Workroom, bấm duyệt từng chặng thì hệ thống mới giải ngân tiền cho họa sĩ.',
+      'Tiền cọc được hệ thống lưu giữ trung gian an toàn. Bạn kiểm tra phác thảo, nét viền và lên màu trong phòng làm việc, bấm duyệt từng chặng thì hệ thống mới giải ngân tiền cho họa sĩ.',
     trustPills: [
       '100% Ký quỹ qua payOS (VietQR)',
-      'Workroom bảo vệ bản quyền & file gốc',
+      'Phòng làm việc bảo vệ bản quyền & tệp gốc',
       'Thỏa thuận thương mại rõ ràng',
     ],
     ctaDiscover: 'Khám phá họa sĩ',
     ctaAuctions: 'Xem các phiên đấu giá',
-    ctaFaq: 'Quy chế hoạt động & Escrow →',
+    ctaFaq: 'Quy chế hoạt động & ký quỹ →',
     opsTitle: 'Những thao tác bạn có thể thực hiện trên DILLUSTRATION',
     opsSub:
       'Sáu luồng nghiệp vụ cốt lõi giúp người mua tranh, khách hàng đặt vẽ và họa sĩ cộng tác, tham gia sự kiện và trao đổi tác phẩm minh bạch từ bước đầu tiên.',
     milestones: [
-      { order: 1, label: 'Phác thảo (Sketch)', pct: '30%' },
-      { order: 2, label: 'Nét viền (Lineart)', pct: '30%' },
-      { order: 3, label: 'Lên màu (Color)', pct: '40%' },
+      { order: 1, label: 'Phác thảo', pct: '30%' },
+      { order: 2, label: 'Nét viền', pct: '30%' },
+      { order: 3, label: 'Lên màu', pct: '40%' },
     ],
     operations: [
       {
@@ -111,8 +111,8 @@ const GUIDE_COPY: Record<'VIE' | 'ENG', GuideCopy> = {
         subLabel: 'Khám phá & Mua sẵn',
         title: 'Thư viện tranh',
         description:
-          'Tìm kiếm hàng trăm tác phẩm kỹ thuật số theo phong cách (2D Illustration, Anime, Chibi, VTuber) hoặc tải ảnh mẫu tương đồng. Thanh toán minh bạch để nhận gói quyền sử dụng và tải ngay file gốc PSD/PNG/CLIP độ phân giải cao.',
-        footerCheck: 'Bản quyền số & File gốc',
+          'Tìm kiếm hàng trăm tác phẩm kỹ thuật số theo phong cách (2D Illustration, Anime, Chibi, VTuber) hoặc tải ảnh mẫu tương đồng. Thanh toán minh bạch để nhận gói quyền sử dụng và tải ngay tệp gốc PSD/PNG/CLIP độ phân giải cao.',
+        footerCheck: 'Bản quyền số & tệp gốc',
         footerChip: 'Instant Download',
       },
       {
@@ -122,9 +122,9 @@ const GUIDE_COPY: Record<'VIE' | 'ENG', GuideCopy> = {
         subLabel: 'Đặt vẽ & Ký quỹ',
         title: 'Quy trình đặt vẽ',
         description:
-          'Gửi Brief chi tiết, chốt bảng giá và đặt cọc qua cổng payOS trung gian. Theo dõi tiến độ trực tiếp trong Workroom theo 3 chặng minh bạch; tiền chỉ được giải ngân sau khi bạn bấm xác nhận nghiệm thu từng chặng:',
+          'Gửi đề bài chi tiết, chốt bảng giá và đặt cọc qua cổng payOS trung gian. Theo dõi tiến độ trực tiếp trong phòng làm việc theo 3 chặng minh bạch; tiền chỉ được giải ngân sau khi bạn bấm xác nhận nghiệm thu từng chặng:',
         showMilestones: true,
-        footerCheck: 'Hoàn tiền nếu trễ deadline',
+        footerCheck: 'Hoàn tiền nếu trễ hạn chót',
         footerChip: 'Escrow 30-30-40',
       },
       {
@@ -154,10 +154,10 @@ const GUIDE_COPY: Record<'VIE' | 'ENG', GuideCopy> = {
         align: 'left',
         tag: 'THAO TÁC 05 • ART TRADE',
         subLabel: 'Trao đổi 1-1 cho Họa sĩ',
-        title: 'Trao đổi tranh (Art Trade)',
+        title: 'Trao đổi tranh',
         description:
           'Các họa sĩ gửi đề nghị trao đổi tranh trực tiếp 1–1 kèm ảnh mẫu, thỏa thuận deadline và trao đổi trong phòng chat riêng. Hệ thống gắn watermark bản xem trước khi nộp bài; file gốc chỉ mở khóa đồng thời khi cả hai bên xác nhận nghiệm thu, kèm Admin phân xử nếu phát sinh tranh chấp.',
-        footerCheck: 'Mở khóa file gốc đồng thời',
+        footerCheck: 'Mở khóa tệp gốc đồng thời',
         footerChip: 'Watermark Protected',
       },
       {
@@ -167,19 +167,19 @@ const GUIDE_COPY: Record<'VIE' | 'ENG', GuideCopy> = {
         subLabel: 'Mở gian hàng & Nhận đơn',
         title: 'Trở thành họa sĩ',
         description:
-          'Xây dựng hồ sơ họa sĩ chứng thực, thiết lập bảng giá commission theo từng hạng mục (Rate Card) và chủ động kiểm soát slot nhận đơn. Hệ thống bảo đảm 100% thù lao qua quỹ giữ tạm và hỗ trợ rút tiền 24/7 qua VietQR.',
+          'Xây dựng hồ sơ họa sĩ chứng thực, thiết lập bảng giá đặt vẽ theo từng hạng mục (Rate Card) và chủ động kiểm soát lượt nhận đơn. Hệ thống bảo đảm 100% thù lao qua quỹ giữ tạm và hỗ trợ rút tiền 24/7 qua VietQR.',
         footerCheck: 'Bảo hộ thu nhập & Tác quyền',
         footerChip: 'Payout VietQR 24/7',
       },
     ],
     faqTitle: 'Câu hỏi thường gặp & Bảo hộ pháp lý (FAQs)',
     faqSubtitle:
-      'Tổng hợp quy chế vận hành Workroom và các căn cứ pháp luật Việt Nam về sở hữu trí tuệ, bảo vệ người tiêu dùng, giao dịch điện tử, thương mại điện tử, dữ liệu cá nhân và minh bạch AI (thông tin tham khảo, đối chiếu hiệu lực văn bản chính thức khi cần thiết).',
+      'Tổng hợp quy chế vận hành phòng làm việc và các căn cứ pháp luật Việt Nam về sở hữu trí tuệ, bảo vệ người tiêu dùng, giao dịch điện tử, thương mại điện tử, dữ liệu cá nhân và minh bạch AI (thông tin tham khảo, đối chiếu hiệu lực văn bản chính thức khi cần thiết).',
     faqs: [
       {
         tag: 'Luật SHTT 2022',
-        question: 'Quyền tác giả và quyền sử dụng thương mại của tranh Commission được tính thế nào?',
-        lead: 'Theo Luật Sở hữu trí tuệ sửa đổi 2022 và điều khoản Creator trên DILLUSTRATION:',
+        question: 'Quyền tác giả và quyền sử dụng thương mại của tranh đặt vẽ được tính thế nào?',
+        lead: 'Theo Luật Sở hữu trí tuệ sửa đổi 2022 và điều khoản họa sĩ trên DILLUSTRATION:',
         bullets: [
           {
             title: 'Quyền nhân thân (Quyền đứng tên):',
@@ -189,23 +189,23 @@ const GUIDE_COPY: Record<'VIE' | 'ENG', GuideCopy> = {
           {
             title: 'Quyền tài sản & Phạm vi sử dụng:',
             detail:
-              'Khách hàng được cấp phép sử dụng đúng phạm vi Cá nhân hoặc Thương mại đã chọn trên đơn hàng (livestream, YouTube, ấn phẩm thương hiệu). Nghiêm cấm tự ý bán lại file hoặc chuyển nhượng cho bên thứ ba nếu chưa có thỏa thuận.',
+              'Khách hàng được cấp phép sử dụng đúng phạm vi Cá nhân hoặc Thương mại đã chọn trên đơn hàng (livestream, YouTube, ấn phẩm thương hiệu). Nghiêm cấm tự ý bán lại tệp hoặc chuyển nhượng cho bên thứ ba nếu chưa có thỏa thuận.',
           },
         ],
         defaultOpen: true,
       },
       {
         tag: 'Luật BVNTD 19/2023',
-        question: 'Tiền ký quỹ, khiếu nại và quy chế hủy đơn Workroom hoạt động thế nào?',
-        lead: 'Kết hợp nghĩa vụ theo Luật Bảo vệ quyền lợi người tiêu dùng số 19/2023/QH15 và Quy chế Workroom do hai bên xác nhận:',
+        question: 'Tiền ký quỹ, khiếu nại và quy chế hủy đơn phòng làm việc hoạt động thế nào?',
+        lead: 'Kết hợp nghĩa vụ theo Luật Bảo vệ quyền lợi người tiêu dùng số 19/2023/QH15 và Quy chế phòng làm việc do hai bên xác nhận:',
         bullets: [
           {
             title: 'Minh bạch giá & Tiếp nhận khiếu nại (Luật 19/2023/QH15):',
             detail:
-              'Hiển thị rõ tổng giá trị đơn và phần ký quỹ trước khi thanh toán (Điều 21). Hệ thống thông báo đã tiếp nhận phản ánh, khiếu nại trong 03 ngày làm việc (Điều 31 khoản 2) và hoàn phần Escrow chưa giải ngân khi có căn cứ vi phạm.',
+              'Hiển thị rõ tổng giá trị đơn và phần ký quỹ trước khi thanh toán (Điều 21). Hệ thống thông báo đã tiếp nhận phản ánh, khiếu nại trong 03 ngày làm việc (Điều 31 khoản 2) và hoàn phần ký quỹ chưa giải ngân khi có căn cứ vi phạm.',
           },
           {
-            title: 'Quy chế vận hành riêng của Workroom (thỏa thuận trước thanh toán):',
+            title: 'Quy chế vận hành riêng của phòng làm việc (thỏa thuận trước thanh toán):',
             detail:
               'Đơn dưới 2.000.000đ ký quỹ 100%; từ 2.000.000đ trở lên ký quỹ theo từng mốc. Mỗi mốc hỗ trợ tối đa 3 lần chỉnh sửa miễn phí; quá 72 giờ sau khi nộp WIP nếu Khách hàng không phản hồi, hệ thống tự nghiệm thu theo quy chế hai bên đã đồng ý (hủy đơn phản hồi trong 48 giờ; quá hạn gia hạn 24 giờ).',
           },
@@ -213,16 +213,16 @@ const GUIDE_COPY: Record<'VIE' | 'ENG', GuideCopy> = {
       },
       {
         tag: 'Luật GDĐT 20/2023',
-        question: 'Biên bản bàn giao file gốc và dữ liệu Workroom có giá trị đối soát không?',
+        question: 'Biên bản bàn giao tệp gốc và dữ liệu phòng làm việc có giá trị đối soát không?',
         lead: 'Áp dụng Luật Giao dịch điện tử số 20/2023/QH15 (Điều 8–12, 34–38) về thông điệp dữ liệu & hợp đồng điện tử:',
         bullets: [
           {
             title: 'Giá trị chứng cứ điện tử:',
             detail:
-              'Brief, điều khoản họa sĩ đóng băng tại thời điểm đặt đơn (snapshot), bước tự tích xác nhận điều khoản, lịch sử trò chuyện và WIP đều được ghi nhận kèm dấu thời gian (timestamp) cố định làm căn cứ khi Admin phân xử tranh chấp.',
+              'Đề bài, điều khoản họa sĩ đóng băng tại thời điểm đặt đơn (snapshot), bước tự tích xác nhận điều khoản, lịch sử trò chuyện và WIP đều được ghi nhận kèm dấu thời gian (timestamp) cố định làm căn cứ khi quản trị viên phân xử tranh chấp.',
           },
           {
-            title: 'Bàn giao & Bảo vệ file gốc:',
+            title: 'Bàn giao & Bảo vệ tệp gốc:',
             detail:
               'Tệp gửi qua khung chat chỉ để trao đổi; sản phẩm chính thức phải nộp qua chức năng bàn giao từng chặng. Khi hoàn tất 100%, liên kết tải file gốc có hiệu lực 15 phút (có thể tạo lại nhiều lần) và được bảo vệ bằng Forensic Watermark.',
           },
@@ -230,7 +230,7 @@ const GUIDE_COPY: Record<'VIE' | 'ENG', GuideCopy> = {
       },
       {
         tag: 'Luật TMĐT 122/2025',
-        question: 'Quy chế Đấu giá, Trao đổi tranh (Art Trade) & Sự kiện tuân thủ Luật Thương mại điện tử thế nào?',
+        question: 'Quy chế Đấu giá, Trao đổi tranh & Sự kiện tuân thủ Luật Thương mại điện tử thế nào?',
         lead: 'Đối chiếu Luật Thương mại điện tử số 122/2025/QH15 (Điều 11, Điều 17 khoản 4) và Nghị định 248/2026/NĐ-CP:',
         bullets: [
           {
@@ -239,9 +239,9 @@ const GUIDE_COPY: Record<'VIE' | 'ENG', GuideCopy> = {
               'Họa sĩ mở gian hàng được kiểm duyệt hồ sơ; người dùng có kênh gửi báo cáo sự cố và khiếu nại trực tuyến cho đơn hàng Workroom, Art Trade và Sự kiện để Admin giám sát xử lý (Điều 17 khoản 4). Thông tin chủ quản & chính sách bảo vệ dữ liệu được công bố công khai khi vận hành thương mại chính thức.',
           },
           {
-            title: 'Minh bạch Đấu giá, Art Trade & Sự kiện:',
+            title: 'Minh bạch Đấu giá, trao đổi tranh & Sự kiện:',
             detail:
-              'Trong Đấu giá SignalR, tiền cọc được hoàn tức thì nếu bị vượt giá (outbid). Trong Art Trade, bản xem trước gắn watermark và file gốc chỉ mở khóa đồng thời khi cả hai họa sĩ cùng xác nhận. Trong Sự kiện sáng tác, điểm chấm Ban giám khảo được niêm phong cho tới ngày công bố.',
+              'Trong Đấu giá SignalR, tiền cọc được hoàn tức thì nếu bị vượt giá (outbid). Trong trao đổi tranh, bản xem trước gắn dấu chìm và tệp gốc chỉ mở khóa đồng thời khi cả hai họa sĩ cùng xác nhận. Trong Sự kiện sáng tác, điểm chấm Ban giám khảo được niêm phong cho tới ngày công bố.',
           },
         ],
       },
@@ -273,9 +273,9 @@ const GUIDE_COPY: Record<'VIE' | 'ENG', GuideCopy> = {
               'Tác phẩm đăng tải được kiểm duyệt quét nhận diện AI và gắn cờ minh bạch; khung chat trợ lý ghi rõ tên "Trợ lý AI Dillustration" để người dùng phân biệt với nhân viên/Admin thật.',
           },
           {
-            title: 'Điều khoản hợp đồng riêng chống huấn luyện AI (Creator Terms):',
+            title: 'Điều khoản hợp đồng riêng chống huấn luyện AI (họa sĩ Terms):',
             detail:
-              'Theo điều khoản dân sự mặc định của Họa sĩ (prohibitAiTraining), Khách hàng và bên thứ ba không được đưa tác phẩm commission, bản phác thảo WIP hoặc tệp gốc vào tập dữ liệu huấn luyện AI khi chưa có sự đồng ý bằng văn bản của Họa sĩ.',
+              'Theo điều khoản dân sự mặc định của Họa sĩ (prohibitAiTraining), Khách hàng và bên thứ ba không được đưa tác phẩm đặt vẽ, bản phác thảo WIP hoặc tệp gốc vào tập dữ liệu huấn luyện AI khi chưa có sự đồng ý bằng văn bản của Họa sĩ.',
           },
         ],
       },
@@ -292,7 +292,7 @@ const GUIDE_COPY: Record<'VIE' | 'ENG', GuideCopy> = {
       { label: 'Logo:', value: 'Buniré' },
     ],
     artistQuestion: 'Bạn là họa sĩ?',
-    artistCta: 'Mở slot tại đây →',
+    artistCta: 'Mở lượt tại đây →',
   },
   ENG: {
     heroTitle: 'DILLUSTRATION — Digital Art Commission & Auction Platform',
@@ -550,7 +550,7 @@ function DeskPropsUnderlay() {
         <path d="M2 10 L18 5 L18 15 Z" fill="#98A2D8" />
         <rect x="18" y="4" width="160" height="12" rx="4" fill="var(--guide-pen-body)" />
         <rect x="70" y="6" width="32" height="3" rx="1.5" fill="var(--guide-pen-accent)" />
-        <rect x="178" y="5" width="38" height="10" rx="5" fill="#4A548E" />
+        <rect x="178" y="5" width="38" height="10" rx="5" fill="#F0E7D8" />
       </svg>
     </>
   );

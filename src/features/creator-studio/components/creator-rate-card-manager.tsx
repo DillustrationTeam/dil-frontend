@@ -63,8 +63,8 @@ const money = (value: number) =>
   new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
 
 const inputBase =
-  'w-full rounded-xl border border-white/10 bg-[#141724] px-3.5 py-2.5 text-xs text-white placeholder-slate-500 outline-none focus:border-[#A7ACD9] transition';
-const labelBase = 'block text-[11px] font-medium text-slate-300 mb-1';
+  'w-full rounded-xl border border-[#221E1A]/10 bg-[#F0E7D8] px-3.5 py-2.5 text-xs text-[#241F1A] text-[#746A5F] outline-none focus:border-[#B24A26] transition';
+const labelBase = 'block text-[11px] font-medium text-[#746A5F] mb-1';
 
 export function CreatorRateCardManager() {
   const [tab, setTab] = useState<'packages' | 'addons'>('packages');
@@ -100,7 +100,7 @@ export function CreatorRateCardManager() {
     if (!file || !activeUploadPkgId) return;
 
     if (!file.type.startsWith('image/')) {
-      toast.error('Vui lòng chọn file hình ảnh (PNG, JPG, WEBP).');
+      toast.error('Vui lòng chọn tệp hình ảnh (PNG, JPG, WEBP).');
       return;
     }
     if (file.size > 10 * 1024 * 1024) {
@@ -194,7 +194,7 @@ export function CreatorRateCardManager() {
         setSlotLimitEnabled(cardPackages.some((pkg) => pkg.maxSlots !== null && pkg.maxSlots !== undefined));
       } catch (cause) {
         if (axios.isAxiosError(cause) && cause.response?.status === 400) {
-          setError('Tài khoản này chưa có hồ sơ Creator. Hãy tạo hồ sơ trước khi lưu bảng giá.');
+          setError('Tài khoản này chưa có hồ sơ họa sĩ. Hãy tạo hồ sơ trước khi lưu bảng giá.');
         } else {
           setError('Không tải được bảng giá. Vui lòng tải lại trang.');
         }
@@ -230,13 +230,13 @@ export function CreatorRateCardManager() {
     setPackages(updatedPackages);
 
     if (!hasProfile || updatedPackages.length === 0) {
-      toast.success(nextEnabled ? 'Đã bật giới hạn số slot nhận đơn.' : 'Đã tắt giới hạn số slot nhận đơn.');
+      toast.success(nextEnabled ? 'Đã bật giới hạn số lượt nhận đơn.' : 'Đã tắt giới hạn số lượt nhận đơn.');
       return;
     }
 
     const validation = rateCardSchema.safeParse(updatedPackages);
     if (!validation.success) {
-      toast.success(nextEnabled ? 'Đã bật giới hạn slot — bấm Lưu bảng giá sau khi hoàn tất chỉnh sửa.' : 'Đã tắt giới hạn slot — bấm Lưu bảng giá để áp dụng.');
+      toast.success(nextEnabled ? 'Đã bật giới hạn lượt — bấm Lưu bảng giá sau khi hoàn tất chỉnh sửa.' : 'Đã tắt giới hạn lượt — bấm Lưu bảng giá để áp dụng.');
       return;
     }
 
@@ -244,9 +244,9 @@ export function CreatorRateCardManager() {
     try {
       const saved = await creatorRateCardService.save(updatedPackages);
       setPackages(saved);
-      toast.success(nextEnabled ? 'Đã bật giới hạn số slot nhận đơn.' : 'Đã chuyển toàn bộ gói sang Không giới hạn slot.');
+      toast.success(nextEnabled ? 'Đã bật giới hạn số lượt nhận đơn.' : 'Đã chuyển toàn bộ gói sang Không giới hạn lượt.');
     } catch {
-      toast.error('Không thể lưu trạng thái giới hạn slot. Vui lòng thử bấm Lưu bảng giá.');
+      toast.error('Không thể lưu trạng thái giới hạn lượt. Vui lòng thử bấm Lưu bảng giá.');
     } finally {
       setTogglingSlotLimit(false);
     }
@@ -292,8 +292,8 @@ export function CreatorRateCardManager() {
         maxRevisions: 2,
         extraRevisionPrice: 50000,
         milestones: [
-          { sequence: 1, title: 'Phác thảo (Sketch)', price: 100000, maxRevisions: 2 },
-          { sequence: 2, title: 'Hoàn thiện (Final)', price: 200000, maxRevisions: 2 },
+          { sequence: 1, title: 'Phác thảo', price: 100000, maxRevisions: 2 },
+          { sequence: 2, title: 'Hoàn thiện', price: 200000, maxRevisions: 2 },
         ],
       },
     ]);
@@ -386,18 +386,16 @@ export function CreatorRateCardManager() {
   };
 
   if (loading) {
-    return <div className="p-12 text-center text-xs text-slate-400">Đang tải bảng giá...</div>;
+    return <div className="p-12 text-center text-xs text-[#746A5F]">Đang tải bảng giá...</div>;
   }
 
   return (
-    <div className="w-full space-y-6 text-[#E4E1E5]">
+    <div className="w-full space-y-6 text-[#241F1A]">
       {/* Top Header & Slot Controls */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#221E1A]/10 pb-5">
         <div>
-          <h1 className="font-h1 text-2xl font-bold text-white">Bảng giá & Dịch vụ</h1>
-          <p className="mt-1 text-xs text-slate-400">
-            Thiết lập gói commission, số lần sửa, và phụ phí nhận đơn.
-          </p>
+          <h1 className="font-h1 text-2xl font-bold text-[#241F1A]">Bảng giá & Dịch vụ</h1>
+          <p className="mt-1 text-xs text-[#746A5F]"> Thiết lập gói đặt vẽ, số lần sửa, và phụ phí nhận đơn. </p>
         </div>
 
         <div className="flex items-center gap-3">
@@ -407,21 +405,21 @@ export function CreatorRateCardManager() {
             aria-checked={slotLimitEnabled}
             disabled={togglingSlotLimit}
             onClick={toggleSlotLimit}
-            className="flex items-center gap-3 rounded-xl border border-white/10 bg-[#141724] px-3.5 py-2 text-xs hover:border-[#A7ACD9]/40 transition disabled:opacity-50"
+            className="flex items-center gap-3 rounded-xl border border-[#221E1A]/10 bg-[#F0E7D8] px-3.5 py-2 text-xs hover:border-[#B24A26]/40 transition disabled:opacity-50"
           >
-            <span className="text-slate-300 font-medium">Giới hạn số slot nhận đơn</span>
+            <span className="text-[#746A5F] font-medium">Giới hạn số lượt nhận đơn</span>
             <span
               className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors ${
-                slotLimitEnabled ? 'bg-[#A7ACD9]' : 'bg-white/15'
+                slotLimitEnabled ? 'bg-[#B24A26]' : 'bg-[#F0E7D8]'
               }`}
             >
               <span
-                className={`inline-block h-3.5 w-3.5 transform rounded-full bg-[#111420] transition-transform ${
+                className={`inline-block h-3.5 w-3.5 transform rounded-full bg-[#FFFCF6] transition-transform ${
                   slotLimitEnabled ? 'translate-x-4.5' : 'translate-x-1'
                 }`}
               />
             </span>
-            <span className={`text-[11px] font-semibold ${slotLimitEnabled ? 'text-[#C5C9F8]' : 'text-sky-300'}`}>
+            <span className={`text-[11px] font-semibold ${slotLimitEnabled ? 'text-[#8C3718]' : 'text-[#2C6A86]'}`}>
               {slotLimitEnabled ? 'Đang bật' : 'Không giới hạn'}
             </span>
           </button>
@@ -429,24 +427,22 @@ export function CreatorRateCardManager() {
       </div>
 
       {!hasProfile && (
-        <div className="rounded-xl border border-yellow-500/30 bg-yellow-500/10 p-3.5 text-xs text-yellow-200">
-          Chưa có hồ sơ Creator. Hãy{' '}
-          <Link href="/creator-setup" className="font-bold underline text-white">
-            tạo hồ sơ
-          </Link>{' '}
+        <div className="rounded-xl border border-[#8A6A1F]/40 bg-[#8A6A1F]/10 p-3.5 text-xs text-[#8A6A1F]">
+          Chưa có hồ sơ họa sĩ. Hãy{' '}
+          <Link href="/creator-setup" className="font-bold underline text-[#241F1A]"> tạo hồ sơ </Link>{' '}
           trước khi thiết lập bảng giá.
         </div>
       )}
 
       {/* Tabs */}
-      <div className="flex items-center gap-2 border-b border-white/10 pb-3">
+      <div className="flex items-center gap-2 border-b border-[#221E1A]/10 pb-3">
         <button
           type="button"
           onClick={() => setTab('packages')}
           className={`flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-semibold transition ${
             tab === 'packages'
-              ? 'bg-[#A7ACD9] text-[#1F2335] shadow'
-              : 'text-slate-400 hover:text-white hover:bg-white/5'
+              ? 'bg-[#B24A26] text-[#F7F2E9] shadow'
+              : 'text-[#746A5F] hover:text-[#241F1A] hover:bg-[#FFFCF6]'
           }`}
         >
           <Package className="h-3.5 w-3.5" />
@@ -457,13 +453,11 @@ export function CreatorRateCardManager() {
           onClick={() => setTab('addons')}
           className={`flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-semibold transition ${
             tab === 'addons'
-              ? 'bg-[#A7ACD9] text-[#1F2335] shadow'
-              : 'text-slate-400 hover:text-white hover:bg-white/5'
+              ? 'bg-[#B24A26] text-[#F7F2E9] shadow'
+              : 'text-[#746A5F] hover:text-[#241F1A] hover:bg-[#FFFCF6]'
           }`}
         >
-          <Sparkles className="h-3.5 w-3.5" />
-          Phụ phí Add-ons
-        </button>
+          <Sparkles className="h-3.5 w-3.5" /> Phụ phí Add-ons </button>
       </div>
 
       {/* Tab: Add-ons */}
@@ -472,13 +466,13 @@ export function CreatorRateCardManager() {
       {/* Tab: Packages */}
       {tab === 'packages' && (
         <div className="space-y-6">
-          <div className="flex items-center justify-between text-xs text-slate-400">
+          <div className="flex items-center justify-between text-xs text-[#746A5F]">
             <span>Danh sách gói ({packages.length})</span>
             {packages.length > 1 && (
               <button
                 type="button"
                 onClick={toggleAllCollapse}
-                className="text-xs text-[#A7ACD9] hover:underline transition"
+                className="text-xs text-[#B24A26] hover:underline transition"
               >
                 {allCollapsed ? 'Mở rộng tất cả' : 'Thu gọn tất cả'}
               </button>
@@ -493,46 +487,46 @@ export function CreatorRateCardManager() {
               return (
                 <div
                   key={item.id}
-                  className="rounded-2xl border border-white/10 bg-[#141724]/60 p-4 sm:p-5 space-y-4 transition"
+                  className="rounded-2xl border border-[#221E1A]/10 bg-[#F0E7D8]/60 p-4 sm:p-5 space-y-4 transition"
                 >
                   {/* Card Header (Collapsible) */}
-                  <div className="flex items-center justify-between border-b border-white/5 pb-3">
+                  <div className="flex items-center justify-between border-b border-[#221E1A]/10 pb-3">
                     <button
                       type="button"
                       onClick={() => toggleCollapse(item.id)}
                       className="flex items-center gap-3 text-left flex-1 group min-w-0"
                     >
-                      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#A7ACD9]/15 text-xs font-bold text-[#A7ACD9] group-hover:bg-[#A7ACD9]/25 transition">
+                      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#B24A26]/15 text-xs font-bold text-[#B24A26] group-hover:bg-[#B24A26]/25 transition">
                         #{index + 1}
                       </span>
                       <div className="flex items-center gap-2 flex-wrap min-w-0">
-                        <h2 className="font-semibold text-sm text-white group-hover:text-[#A7ACD9] transition truncate">
+                        <h2 className="font-semibold text-sm text-[#241F1A] group-hover:text-[#B24A26] transition truncate">
                           {item.name || `Gói dịch vụ ${index + 1}`}
                         </h2>
                         {(item.categoryName || categories.find((c) => c.id === item.categoryId)?.name) && (
-                          <span className="rounded-lg bg-[#A7ACD9]/15 border border-[#A7ACD9]/30 px-2 py-0.5 text-[10px] font-semibold text-[#C5C9F8] shrink-0">
+                          <span className="rounded-lg bg-[#B24A26]/15 border border-[#B24A26]/30 px-2 py-0.5 text-[10px] font-semibold text-[#8C3718] shrink-0">
                             {item.categoryName || categories.find((c) => c.id === item.categoryId)?.name}
                           </span>
                         )}
-                        <span className="rounded-lg bg-white/5 border border-white/10 px-2.5 py-0.5 text-xs font-mono font-bold text-[#A7ACD9] shrink-0">
+                        <span className="rounded-lg bg-[#FFFCF6] border border-[#221E1A]/10 px-2.5 py-0.5 text-xs font-mono font-bold text-[#B24A26] shrink-0">
                           {money(packageTotal)}
                         </span>
                         <span className={`rounded-lg border px-2 py-0.5 text-[10px] font-semibold shrink-0 ${
                           !slotInfo.isLimited
-                            ? 'border-sky-400/25 bg-sky-500/10 text-sky-300'
+                            ? 'border-[#2C6A86]/35 bg-[#2C6A86]/10 text-[#2C6A86]'
                             : slotInfo.isFull
-                              ? 'border-rose-400/30 bg-rose-500/10 text-rose-300'
-                              : 'border-emerald-400/25 bg-emerald-500/10 text-emerald-300'
+                              ? 'border-[#A8321C]/40 bg-[#A8321C]/10 text-[#A8321C]'
+                              : 'border-[#2F6B63]/35 bg-[#2F6B63]/10 text-[#2F6B63]'
                         }`}>
                           {slotInfo.isLimited ? slotInfo.label : '∞ Không giới hạn'}
                         </span>
                         {isCollapsed && (
-                          <span className="text-[11px] text-slate-400">
+                          <span className="text-[11px] text-[#746A5F]">
                             · {item.milestones?.length ?? 0} mốc · {item.maxRevisions ?? 2} lần sửa
                           </span>
                         )}
                       </div>
-                      <span className="ml-auto mr-3 text-slate-400 group-hover:text-white transition shrink-0">
+                      <span className="ml-auto mr-3 text-[#746A5F] group-hover:text-[#241F1A] transition shrink-0">
                         {isCollapsed ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
                       </span>
                     </button>
@@ -540,10 +534,9 @@ export function CreatorRateCardManager() {
                     <button
                       type="button"
                       onClick={() => removePackage(item.id)}
-                      className="flex items-center gap-1 text-xs text-rose-400 hover:text-rose-300 transition shrink-0"
+                      className="flex items-center gap-1 text-xs text-[#A8321C] hover:text-[#A8321C] transition shrink-0"
                     >
-                      <Trash2 className="h-3.5 w-3.5" /> Xóa gói
-                    </button>
+                      <Trash2 className="h-3.5 w-3.5" /> Xóa gói </button>
                   </div>
 
                   {!isCollapsed && (
@@ -552,22 +545,18 @@ export function CreatorRateCardManager() {
                   {/* Main Info */}
                   <div className="grid gap-3 sm:grid-cols-2">
                     <div>
-                      <label className={labelBase} htmlFor={`pkg-name-${item.id}`}>
-                        Tên gói
-                      </label>
+                      <label className={labelBase} htmlFor={`pkg-name-${item.id}`}> Tên gói </label>
                       <input
                         id={`pkg-name-${item.id}`}
                         className={inputBase}
                         value={item.name}
                         onChange={(e) => updatePackage(item.id, { name: e.target.value })}
-                        placeholder="Ví dụ: Chân dung (Headshot)"
+                        placeholder="Ví dụ: Chân dung"
                       />
                     </div>
 
                     <div>
-                      <label className={labelBase} htmlFor={`pkg-desc-${item.id}`}>
-                        Mô tả phạm vi
-                      </label>
+                      <label className={labelBase} htmlFor={`pkg-desc-${item.id}`}> Mô tả phạm vi </label>
                       <input
                         id={`pkg-desc-${item.id}`}
                         className={inputBase}
@@ -578,9 +567,7 @@ export function CreatorRateCardManager() {
                     </div>
 
                     <div className="sm:col-span-2">
-                      <label className={labelBase} htmlFor={`pkg-cat-${item.id}`}>
-                        Danh mục lớn chuyên môn của gói (Category)
-                      </label>
+                      <label className={labelBase} htmlFor={`pkg-cat-${item.id}`}> Danh mục lớn chuyên môn của gói (Category) </label>
                       <select
                         id={`pkg-cat-${item.id}`}
                         className={inputBase}
@@ -604,9 +591,7 @@ export function CreatorRateCardManager() {
                     </div>
 
                     <div>
-                      <label className={labelBase} htmlFor={`pkg-rev-${item.id}`}>
-                        Số lần sửa miễn phí / mốc
-                      </label>
+                      <label className={labelBase} htmlFor={`pkg-rev-${item.id}`}> Số lần sửa miễn phí / mốc </label>
                       <div className="relative">
                         <input
                           id={`pkg-rev-${item.id}`}
@@ -622,16 +607,12 @@ export function CreatorRateCardManager() {
                           }
                           placeholder="2"
                         />
-                        <span className="absolute right-3.5 top-2.5 text-[11px] text-slate-500">
-                          lần/mốc
-                        </span>
+                        <span className="absolute right-3.5 top-2.5 text-[11px] text-[#746A5F]"> lần/mốc </span>
                       </div>
                     </div>
 
                     <div>
-                      <label className={labelBase} htmlFor={`pkg-extra-${item.id}`}>
-                        Phí sửa thêm khi vượt quá
-                      </label>
+                      <label className={labelBase} htmlFor={`pkg-extra-${item.id}`}> Phí sửa thêm khi vượt quá </label>
                       <div className="relative">
                         <input
                           id={`pkg-extra-${item.id}`}
@@ -647,55 +628,45 @@ export function CreatorRateCardManager() {
                           }
                           placeholder="50000"
                         />
-                        <span className="absolute right-3.5 top-2.5 text-[11px] text-slate-500">
-                          đ/lần
-                        </span>
+                        <span className="absolute right-3.5 top-2.5 text-[11px] text-[#746A5F]"> đ/lần </span>
                       </div>
                     </div>
 
-                    <div className="sm:col-span-2 rounded-xl border border-white/10 bg-black/25 p-3.5 space-y-2.5">
+                    <div className="sm:col-span-2 rounded-xl border border-[#221E1A]/10 bg-[#F0E7D8]/25 p-3.5 space-y-2.5">
                       <div className="flex flex-wrap items-center justify-between gap-2">
-                        <span className="text-[11px] font-semibold text-slate-300">
-                          Tùy biến Slot nhận đơn cho riêng gói này
-                        </span>
-                        <div className="inline-flex rounded-lg border border-white/10 bg-black/40 p-0.5 text-[11px]">
+                        <span className="text-[11px] font-semibold text-[#746A5F]"> Tùy biến lượt nhận đơn cho riêng gói này </span>
+                        <div className="inline-flex rounded-lg border border-[#221E1A]/10 bg-[#F0E7D8] p-0.5 text-[11px]">
                           <button
                             type="button"
                             onClick={() => updatePackage(item.id, { maxSlots: null })}
                             className={`rounded-md px-2.5 py-1 font-semibold transition ${
                               !slotInfo.isLimited
-                                ? 'bg-[#A7ACD9] text-[#1F2335]'
-                                : 'text-slate-400 hover:text-white'
+                                ? 'bg-[#B24A26] text-[#F7F2E9]'
+                                : 'text-[#746A5F] hover:text-[#241F1A]'
                             }`}
-                          >
-                            Không giới hạn slot
-                          </button>
+                          > Không giới hạn lượt </button>
                           <button
                             type="button"
                             onClick={() => updatePackage(item.id, { maxSlots: slotInfo.maxSlots ?? 3 })}
                             className={`rounded-md px-2.5 py-1 font-semibold transition ${
                               slotInfo.isLimited
-                                ? 'bg-[#A7ACD9] text-[#1F2335]'
-                                : 'text-slate-400 hover:text-white'
+                                ? 'bg-[#B24A26] text-[#F7F2E9]'
+                                : 'text-[#746A5F] hover:text-[#241F1A]'
                             }`}
-                          >
-                            Giới hạn theo gói
-                          </button>
+                          > Giới hạn theo gói </button>
                         </div>
                       </div>
 
                       {slotInfo.isLimited ? (
                         <div className="flex flex-wrap items-center gap-3">
                           <div className="flex items-center gap-2">
-                            <label className="text-[11px] text-slate-400" htmlFor={`pkg-slots-${item.id}`}>
-                              Số đơn tối đa đang mở:
-                            </label>
+                            <label className="text-[11px] text-[#746A5F]" htmlFor={`pkg-slots-${item.id}`}> Số đơn tối đa đang mở: </label>
                             <input
                               id={`pkg-slots-${item.id}`}
                               type="number"
                               min={0}
                               max={100}
-                              className="w-20 rounded-lg border border-white/15 bg-black/50 px-2.5 py-1.5 text-xs text-white focus:border-[#A7ACD9] focus:outline-none"
+                              className="w-20 rounded-lg border border-[#221E1A]/10 bg-[#E5D8C2] px-2.5 py-1.5 text-xs text-[#241F1A] focus:border-[#B24A26] focus:outline-none"
                               value={slotInfo.maxSlots ?? 0}
                               onChange={(e) =>
                                 updatePackage(item.id, {
@@ -704,23 +675,21 @@ export function CreatorRateCardManager() {
                               }
                             />
                           </div>
-                          <span className={`text-[11px] font-medium ${slotInfo.isFull ? 'text-rose-300' : 'text-emerald-300'}`}>
+                          <span className={`text-[11px] font-medium ${slotInfo.isFull ? 'text-[#A8321C]' : 'text-[#2F6B63]'}`}>
                             Đang thực hiện: {slotInfo.activeCount} đơn • {slotInfo.label} (tự hoàn lại khi xong hoặc hủy đơn)
                           </span>
                         </div>
                       ) : (
-                        <p className="text-[11px] text-slate-400">
-                          Gói này không giới hạn số lượng đơn đồng thời (chỉ tắt khi bạn tắt nhận đơn toàn studio).
-                        </p>
+                        <p className="text-[11px] text-[#746A5F]"> Gói này không giới hạn số lượng đơn đồng thời (chỉ tắt khi bạn tắt nhận đơn toàn xưởng vẽ). </p>
                       )}
                     </div>
                   </div>
 
                   {/* Milestones Breakdown */}
-                  <div className="space-y-2.5 pt-3 border-t border-white/5">
+                  <div className="space-y-2.5 pt-3 border-t border-[#221E1A]/10">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="font-semibold text-slate-300">Cột mốc thanh toán</span>
-                      <span className="text-slate-500 text-[11px]">
+                      <span className="font-semibold text-[#746A5F]">Cột mốc thanh toán</span>
+                      <span className="text-[#746A5F] text-[11px]">
                         Giá chia theo mốc (tổng = giá gói)
                       </span>
                     </div>
@@ -729,19 +698,19 @@ export function CreatorRateCardManager() {
                       {(item.milestones ?? []).map((stage, mIndex) => (
                         <div
                           key={mIndex}
-                          className="flex flex-wrap sm:flex-nowrap items-center gap-2.5 rounded-xl bg-white/[0.02] border border-white/5 p-2"
+                          className="flex flex-wrap sm:flex-nowrap items-center gap-2.5 rounded-xl bg-[#FFFCF6] border border-[#221E1A]/10 p-2"
                         >
-                          <span className="min-w-[48px] text-center text-xs font-bold text-slate-400">
+                          <span className="min-w-[48px] text-center text-xs font-bold text-[#746A5F]">
                             Mốc {mIndex + 1}
                           </span>
                           <input
                             aria-label={`Tên mốc ${mIndex + 1}`}
-                            className="flex-1 rounded-lg border border-white/10 bg-[#171a2a] px-3 py-1.5 text-xs text-white outline-none focus:border-[#A7ACD9]"
+                            className="flex-1 rounded-lg border border-[#221E1A]/10 bg-[#FFFCF6] px-3 py-1.5 text-xs text-[#241F1A] outline-none focus:border-[#B24A26]"
                             value={stage.title}
                             onChange={(e) =>
                               updateMilestone(item.id, mIndex, { title: e.target.value })
                             }
-                            placeholder="Tên mốc (Sketch, Lineart...)"
+                            placeholder="Tên mốc"
                           />
                           <div className="flex items-center gap-1.5 w-36">
                             <input
@@ -749,19 +718,19 @@ export function CreatorRateCardManager() {
                               type="number"
                               min={1}
                               step={1000}
-                              className="w-full rounded-lg border border-white/10 bg-[#171a2a] px-3 py-1.5 text-xs text-white outline-none focus:border-[#A7ACD9]"
+                              className="w-full rounded-lg border border-[#221E1A]/10 bg-[#FFFCF6] px-3 py-1.5 text-xs text-[#241F1A] outline-none focus:border-[#B24A26]"
                               value={stage.price}
                               onChange={(e) =>
                                 updateMilestone(item.id, mIndex, { price: Number(e.target.value) })
                               }
                             />
-                            <span className="text-[11px] text-slate-500">đ</span>
+                            <span className="text-[11px] text-[#746A5F]">đ</span>
                           </div>
                           <button
                             type="button"
                             disabled={(item.milestones?.length ?? 0) <= 1}
                             onClick={() => removeMilestone(item.id, mIndex)}
-                            className="rounded-lg p-1.5 text-slate-400 hover:text-rose-400 disabled:opacity-30 transition"
+                            className="rounded-lg p-1.5 text-[#746A5F] hover:text-[#A8321C] disabled:opacity-30 transition"
                           >
                             <Trash2 className="h-3.5 w-3.5" />
                           </button>
@@ -773,31 +742,28 @@ export function CreatorRateCardManager() {
                       type="button"
                       disabled={(item.milestones?.length ?? 0) >= 10}
                       onClick={() => addMilestone(item.id)}
-                      className="inline-flex items-center gap-1 text-xs text-[#A7ACD9] hover:underline pt-1"
+                      className="inline-flex items-center gap-1 text-xs text-[#B24A26] hover:underline pt-1"
                     >
-                      <Plus className="h-3.5 w-3.5" /> Thêm cột mốc
-                    </button>
+                      <Plus className="h-3.5 w-3.5" /> Thêm cột mốc </button>
                   </div>
 
                   {/* Sample Artworks Section */}
-                  <div className="space-y-2.5 pt-3 border-t border-white/5">
+                  <div className="space-y-2.5 pt-3 border-t border-[#221E1A]/10">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-xs">
                       <div className="flex items-center gap-2">
-                        <ImageIcon className="h-4 w-4 text-[#A7ACD9]" />
-                        <span className="font-semibold text-slate-300">
+                        <ImageIcon className="h-4 w-4 text-[#B24A26]" />
+                        <span className="font-semibold text-[#746A5F]">
                           Ảnh mẫu minh họa ({item.sampleUrls?.length || 0}/10)
                         </span>
                       </div>
-                      <span className="text-slate-400 text-[11px]">
-                        Ảnh mẫu giúp khách hàng hình dung rõ phong cách của gói này
-                      </span>
+                      <span className="text-[#746A5F] text-[11px]"> Ảnh mẫu giúp khách hàng hình dung rõ phong cách của gói này </span>
                     </div>
 
                     <div className="flex flex-wrap items-center gap-2.5 pt-1">
                       {item.sampleUrls?.map((url, sIdx) => (
                         <div
                           key={sIdx}
-                          className="relative group h-20 w-20 rounded-xl overflow-hidden border border-white/10 bg-black/40 shrink-0"
+                          className="relative group h-20 w-20 rounded-xl overflow-hidden border border-[#221E1A]/10 bg-[#F0E7D8] shrink-0"
                         >
                           <Image
                             src={url}
@@ -809,7 +775,7 @@ export function CreatorRateCardManager() {
                           <button
                             type="button"
                             onClick={() => removeSample(item.id, sIdx)}
-                            className="absolute top-1 right-1 h-5 w-5 rounded-full bg-black/80 text-rose-400 hover:text-white hover:bg-rose-600 flex items-center justify-center opacity-0 group-hover:opacity-100 transition shadow"
+                            className="absolute top-1 right-1 h-5 w-5 rounded-full bg-[#E5D8C2] text-[#A8321C] hover:text-[#241F1A] hover:bg-[#A8321C]/12 flex items-center justify-center opacity-0 group-hover:opacity-100 transition shadow"
                             title="Xóa ảnh mẫu này"
                           >
                             <X className="h-3 w-3" />
@@ -823,12 +789,12 @@ export function CreatorRateCardManager() {
                             type="button"
                             onClick={() => handleTriggerUpload(item.id)}
                             disabled={uploadingPkgId === item.id}
-                            className="h-20 px-3.5 rounded-xl border border-dashed border-white/20 bg-white/[0.02] hover:bg-white/[0.06] hover:border-[#A7ACD9] flex flex-col items-center justify-center gap-1.5 text-[11px] text-slate-300 transition"
+                            className="h-20 px-3.5 rounded-xl border border-dashed border-[#221E1A]/20 bg-[#FFFCF6] hover:bg-[#FFFCF6] hover:border-[#B24A26] flex flex-col items-center justify-center gap-1.5 text-[11px] text-[#746A5F] transition"
                           >
                             {uploadingPkgId === item.id ? (
-                              <Loader2 className="h-4 w-4 animate-spin text-[#A7ACD9]" />
+                              <Loader2 className="h-4 w-4 animate-spin text-[#B24A26]" />
                             ) : (
-                              <Upload className="h-4 w-4 text-[#A7ACD9]" />
+                              <Upload className="h-4 w-4 text-[#B24A26]" />
                             )}
                             <span>{uploadingPkgId === item.id ? 'Đang tải…' : '+ Tải ảnh'}</span>
                           </button>
@@ -836,10 +802,10 @@ export function CreatorRateCardManager() {
                           <button
                             type="button"
                             onClick={() => openPortfolioPicker(item.id)}
-                            className="h-20 px-3.5 rounded-xl border border-dashed border-white/20 bg-white/[0.02] hover:bg-white/[0.06] hover:border-[#A7ACD9] flex flex-col items-center justify-center gap-1.5 text-[11px] text-slate-300 transition"
+                            className="h-20 px-3.5 rounded-xl border border-dashed border-[#221E1A]/20 bg-[#FFFCF6] hover:bg-[#FFFCF6] hover:border-[#B24A26] flex flex-col items-center justify-center gap-1.5 text-[11px] text-[#746A5F] transition"
                           >
-                            <Layers className="h-4 w-4 text-[#A7ACD9]" />
-                            <span>+ Từ Portfolio</span>
+                            <Layers className="h-4 w-4 text-[#B24A26]" />
+                            <span>+ Từ hồ sơ tác phẩm</span>
                           </button>
                         </div>
                       )}
@@ -858,23 +824,22 @@ export function CreatorRateCardManager() {
               type="button"
               disabled={!hasProfile || packages.length >= 10}
               onClick={addPackage}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-xs font-semibold text-white hover:bg-white/10 disabled:opacity-40 transition"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-4 py-2.5 text-xs font-semibold text-[#241F1A] hover:bg-[#F0E7D8] disabled:opacity-40 transition"
             >
-              <Plus className="h-4 w-4" /> Thêm gói mới
-            </button>
+              <Plus className="h-4 w-4" /> Thêm gói mới </button>
 
             <button
               type="button"
               disabled={!hasProfile || saving}
               onClick={save}
-              className="rounded-xl bg-[#A7ACD9] px-7 py-2.5 text-xs font-bold text-[#1F2335] shadow-lg hover:bg-[#b8bde4] disabled:opacity-50 transition"
+              className="rounded-xl bg-[#B24A26] px-7 py-2.5 text-xs font-bold text-[#F7F2E9] shadow-lg hover:bg-[#8C3718] disabled:opacity-50 transition"
             >
               {saving ? 'Đang lưu…' : 'Lưu bảng giá'}
             </button>
           </div>
 
           {error && (
-            <p role="alert" className="rounded-xl border border-red-400/30 bg-red-400/10 p-3 text-xs text-red-200">
+            <p role="alert" className="rounded-xl border border-[#A8321C]/40 bg-[#A8321C]/10 p-3 text-xs text-[#A8321C]">
               {error}
             </p>
           )}
@@ -892,36 +857,34 @@ export function CreatorRateCardManager() {
 
       {/* Portfolio Artwork Picker Modal */}
       {pickerPkgId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-          <div className="relative w-full max-w-2xl rounded-2xl border border-white/10 bg-[#141724] p-5 space-y-4 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-white/10 pb-3">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#E5D8C2] backdrop-blur-sm p-4">
+          <div className="relative w-full max-w-2xl rounded-2xl border border-[#221E1A]/10 bg-[#F0E7D8] p-5 space-y-4 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-[#221E1A]/10 pb-3">
               <div className="flex items-center gap-2">
-                <Layers className="h-5 w-5 text-[#A7ACD9]" />
+                <Layers className="h-5 w-5 text-[#B24A26]" />
                 <div>
-                  <h3 className="font-bold text-sm text-white">Chọn tranh mẫu từ Portfolio</h3>
-                  <p className="text-[11px] text-slate-400">
-                    Chọn các tác phẩm bạn đã đăng để gắn làm ảnh mẫu cho gói dịch vụ
-                  </p>
+                  <h3 className="font-bold text-sm text-[#241F1A]">Chọn tranh mẫu từ hồ sơ tác phẩm</h3>
+                  <p className="text-[11px] text-[#746A5F]"> Chọn các tác phẩm bạn đã đăng để gắn làm ảnh mẫu cho gói dịch vụ </p>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => setPickerPkgId(null)}
-                className="rounded-lg p-1.5 text-slate-400 hover:text-white hover:bg-white/5 transition"
+                className="rounded-lg p-1.5 text-[#746A5F] hover:text-[#241F1A] hover:bg-[#FFFCF6] transition"
               >
                 <X className="h-4 w-4" />
               </button>
             </div>
 
             {loadingPortfolio ? (
-              <div className="p-12 text-center text-xs text-slate-400 flex flex-col items-center gap-2">
-                <Loader2 className="h-6 w-6 animate-spin text-[#A7ACD9]" />
+              <div className="p-12 text-center text-xs text-[#746A5F] flex flex-col items-center gap-2">
+                <Loader2 className="h-6 w-6 animate-spin text-[#B24A26]" />
                 <span>Đang tải danh sách tác phẩm của bạn...</span>
               </div>
             ) : portfolioArtworks.length === 0 ? (
-              <div className="p-8 text-center text-xs text-slate-400 space-y-2">
-                <p>Bạn chưa đăng tác phẩm nào lên portfolio.</p>
-                <p className="text-[11px] text-slate-500">
+              <div className="p-8 text-center text-xs text-[#746A5F] space-y-2">
+                <p>Bạn chưa đăng tác phẩm nào lên hồ sơ tác phẩm.</p>
+                <p className="text-[11px] text-[#746A5F]">
                   Bạn có thể dùng nút &quot;+ Tải ảnh&quot; để tải trực tiếp từ máy tính.
                 </p>
               </div>
@@ -942,28 +905,26 @@ export function CreatorRateCardManager() {
                         onClick={() => toggleSelectArtwork(url)}
                         className={`group relative aspect-square rounded-xl overflow-hidden border transition text-left ${
                           alreadyAttached
-                            ? 'border-white/5 opacity-40 cursor-not-allowed'
+                            ? 'border-[#221E1A]/10 opacity-40 cursor-not-allowed'
                             : isSelected
-                            ? 'border-[#A7ACD9] ring-2 ring-[#A7ACD9]'
-                            : 'border-white/10 hover:border-white/30'
+                            ? 'border-[#B24A26] ring-2 ring-[#B24A26]'
+                            : 'border-[#221E1A]/10 hover:border-[#221E1A]/20'
                         }`}
                       >
                         <Image src={url} alt={art.title} fill unoptimized className="object-cover" />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end p-2">
-                          <span className="text-[10px] text-white font-medium truncate w-full">
+                        <div className="absolute inset-0 bg-gradient-to-t from-[#F7F2E9]/80 via-transparent to-transparent flex items-end p-2">
+                          <span className="text-[10px] text-[#241F1A] font-medium truncate w-full">
                             {art.title}
                           </span>
                         </div>
                         {isSelected && (
-                          <div className="absolute top-1.5 right-1.5 h-5 w-5 rounded-full bg-[#A7ACD9] text-[#1F2335] flex items-center justify-center font-bold shadow">
+                          <div className="absolute top-1.5 right-1.5 h-5 w-5 rounded-full bg-[#B24A26] text-[#F7F2E9] flex items-center justify-center font-bold shadow">
                             <Check className="h-3 w-3 stroke-[3]" />
                           </div>
                         )}
                         {alreadyAttached && (
-                          <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                            <span className="text-[9px] font-bold text-slate-300 px-1.5 py-0.5 rounded bg-black/70">
-                              Đã gắn
-                            </span>
+                          <div className="absolute inset-0 bg-[#E5D8C2] flex items-center justify-center">
+                            <span className="text-[9px] font-bold text-[#746A5F] px-1.5 py-0.5 rounded bg-[#E5D8C2]"> Đã gắn </span>
                           </div>
                         )}
                       </button>
@@ -973,23 +934,19 @@ export function CreatorRateCardManager() {
               </div>
             )}
 
-            <div className="flex items-center justify-between border-t border-white/10 pt-3">
-              <span className="text-xs text-slate-400">
-                Đã chọn: <strong className="text-white">{selectedArtworkUrls.length}</strong> ảnh
-              </span>
+            <div className="flex items-center justify-between border-t border-[#221E1A]/10 pt-3">
+              <span className="text-xs text-[#746A5F]"> Đã chọn: <strong className="text-[#241F1A]">{selectedArtworkUrls.length}</strong> ảnh </span>
               <div className="flex items-center gap-2">
                 <button
                   type="button"
                   onClick={() => setPickerPkgId(null)}
-                  className="rounded-xl border border-white/10 px-4 py-2 text-xs font-semibold text-slate-300 hover:text-white hover:bg-white/5 transition"
-                >
-                  Hủy
-                </button>
+                  className="rounded-xl border border-[#221E1A]/10 px-4 py-2 text-xs font-semibold text-[#746A5F] hover:text-[#241F1A] hover:bg-[#FFFCF6] transition"
+                > Hủy </button>
                 <button
                   type="button"
                   disabled={selectedArtworkUrls.length === 0}
                   onClick={confirmPortfolioSelection}
-                  className="rounded-xl bg-[#A7ACD9] px-5 py-2 text-xs font-bold text-[#1F2335] shadow hover:bg-[#b8bde4] disabled:opacity-50 transition"
+                  className="rounded-xl bg-[#B24A26] px-5 py-2 text-xs font-bold text-[#F7F2E9] shadow hover:bg-[#8C3718] disabled:opacity-50 transition"
                 >
                   Gắn vào gói ({selectedArtworkUrls.length})
                 </button>

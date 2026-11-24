@@ -2,7 +2,7 @@ import { ProfileSetupWizard } from '@/features/creator-studio/components/profile
 
 export default function CreatorSetupPage() {
   return (
-    <main className="min-h-screen bg-[#1F2335] px-6 py-12">
+    <main className="min-h-screen bg-[#F7F2E9] px-6 py-12">
       <div className="mx-auto max-w-5xl">
         <ProfileSetupWizard />
       </div>

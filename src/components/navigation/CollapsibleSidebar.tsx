@@ -11,7 +11,6 @@ import {
   ChevronLeft,
   ChevronRight,
   Clock,
-  CheckCircle,
   ListChecks,
   MessageSquare,
   Ticket,
@@ -31,6 +30,7 @@ import {
   ArrowLeftRight,
   Sparkles,
   Send,
+  X,
 } from 'lucide-react';
 
 interface SidebarItem {
@@ -48,6 +48,15 @@ interface CollapsibleSidebarProps {
   isCollapsed: boolean;
   onToggleCollapse: () => void;
   role?: 'client' | 'creator';
+  /**
+   * `static`: cột cố định từ lg trở lên (được thu gọn còn icon).
+   * `drawer`: bản trượt toàn màn hình cho dưới lg — luôn mở rộng, có nút đóng,
+   * bấm link thì tự đóng qua `onNavigate`.
+   */
+  variant?: 'static' | 'drawer';
+  onNavigate?: () => void;
+  onClose?: () => void;
+  className?: string;
 }
 
 const CLIENT_NAV_SECTIONS: SidebarSection[] = [
@@ -132,7 +141,14 @@ export default function CollapsibleSidebar({
   isCollapsed,
   onToggleCollapse,
   role = 'client',
+  variant = 'static',
+  onNavigate,
+  onClose,
+  className = '',
 }: CollapsibleSidebarProps) {
+  const isDrawer = variant === 'drawer';
+  // Trong drawer không bao giờ thu gọn: người dùng cần nhãn chữ để chọn mục.
+  const collapsed = isDrawer ? false : isCollapsed;
   const pathname = usePathname();
   const { t } = useLanguage();
   const sections = role === 'client' ? CLIENT_NAV_SECTIONS : CREATOR_NAV_SECTIONS;
@@ -188,36 +204,52 @@ export default function CollapsibleSidebar({
 
   return (
     <aside
-      className={`relative sticky top-16 h-[calc(100vh-4rem)] bg-[#1F2335]/90 backdrop-blur-[20px] border-r border-white/10 transition-all duration-300 hidden md:flex flex-col justify-between z-30 shrink-0 ${
-        isCollapsed ? 'w-20' : 'w-64'
-      }`}
+      className={
+        isDrawer
+          ? `side flex h-full w-full flex-col bg-[#F7F2E9] ${className}`
+          : `side relative sticky top-[var(--header-h)] hidden h-[calc(100vh-var(--header-h))] shrink-0 flex-col transition-[width] duration-300 lg:flex z-30 ${
+              isCollapsed ? 'w-20' : 'w-64'
+            } ${className}`
+      }
     >
-      {/* Toggle Collapse Button */}
-      <button
-        onClick={onToggleCollapse}
-        className="absolute -right-3.5 top-6 w-7 h-7 rounded-full bg-[#1b1b1e] border border-white/20 text-slate-300 hover:text-white hover:border-[#A7ACD9]/50 flex items-center justify-center shadow-lg transition-all z-40"
-        title={isCollapsed ? t('Expand Sidebar') : t('Collapse Sidebar')}
-      >
-        {isCollapsed ? (
-          <ChevronRight className="w-4 h-4" />
-        ) : (
-          <ChevronLeft className="w-4 h-4" />
-        )}
-      </button>
+      {isDrawer ? (
+        <div className="flex items-center justify-between border-b border-[#221E1A]/10 px-4 py-3">
+          <span className="side__label">{t('Điều hướng')}</span>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label={t('Đóng menu')}
+            className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-[#221E1A]/15 text-[#746A5F] transition-colors hover:border-[#B24A26] hover:text-[#8C3718]"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      ) : (
+        /* Nút thu gọn — chỉ dành cho cột cố định (>= lg) */
+        <button
+          onClick={onToggleCollapse}
+          className="absolute -right-3.5 top-6 z-40 grid h-7 w-7 place-items-center rounded-full border border-[#221E1A]/20 bg-[#FFFCF6] text-[#746A5F] shadow-[0_6px_16px_-10px_rgba(74,52,30,0.9)] transition-all hover:border-[#B24A26] hover:text-[#8C3718]"
+          title={isCollapsed ? t('Expand Sidebar') : t('Collapse Sidebar')}
+        >
+          {isCollapsed ? (
+            <ChevronRight className="w-4 h-4" />
+          ) : (
+            <ChevronLeft className="w-4 h-4" />
+          )}
+        </button>
+      )}
 
       {/* Top Section: Navigation Links */}
-      <div className="p-3 space-y-4 overflow-y-auto">
+      <div className="flex-1 space-y-4 overflow-y-auto overscroll-contain p-3">
         {sections.map((section, sectionIdx) => (
-          <div key={section.title || sectionIdx} className="space-y-1">
+          <div key={section.title || sectionIdx} className="side__group space-y-1">
             {/* Section Header */}
             {section.title && (
-              <div className="px-3 pt-2 pb-1">
-                {!isCollapsed ? (
-                  <p className="text-[10px] font-space-grotesk tracking-widest uppercase font-bold text-[#919099]">
-                    {t(section.title)}
-                  </p>
+              <div className="px-3 pb-1 pt-2">
+                {!collapsed ? (
+                  <p className="side__label">{t(section.title)}</p>
                 ) : (
-                  sectionIdx > 0 && <div className="h-[1px] bg-white/10 w-full my-2" />
+                  sectionIdx > 0 && <div className="my-2 h-px w-full bg-[#221E1A]/10" />
                 )}
               </div>
             )}
@@ -232,47 +264,20 @@ export default function CollapsibleSidebar({
                   <Link
                     key={item.href}
                     href={item.href}
-                    className={`relative flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-sora font-medium transition-all group ${
-                      isActive
-                        ? 'bg-[#A7ACD9]/20 text-white border border-[#A7ACD9]/40 shadow-[0_0_15px_rgba(167,172,217,0.2)]'
-                        : 'text-[#919099] hover:text-white hover:bg-white/5'
-                    } ${isCollapsed ? 'justify-center px-0' : ''}`}
-                    title={isCollapsed ? t(item.label) : undefined}
+                    aria-current={isActive ? 'page' : undefined}
+                    className={collapsed ? 'justify-center px-0' : ''}
+                    title={collapsed ? t(item.label) : undefined}
+                    onClick={onNavigate}
                   >
-                    <Icon
-                      className={`w-4 h-4 shrink-0 transition-colors ${
-                        isActive ? 'text-[#A7ACD9]' : 'text-[#919099] group-hover:text-white'
-                      }`}
-                    />
+                    <Icon className="h-4 w-4 shrink-0" />
 
-                    {!isCollapsed && (
-                      <span className="truncate flex-1">{t(item.label)}</span>
-                    )}
+                    {!collapsed && <span className="flex-1 truncate">{t(item.label)}</span>}
                   </Link>
                 );
               })}
             </nav>
           </div>
         ))}
-      </div>
-
-      {/* Bottom Footer Section */}
-      <div className="p-3 border-t border-white/10">
-        <div
-          className={`p-3 rounded-2xl bg-white/5 border border-white/10 flex items-center gap-3 ${
-            isCollapsed ? 'justify-center p-2' : ''
-          }`}
-        >
-          <div className="w-8 h-8 rounded-xl bg-[#A7ACD9]/20 text-[#A7ACD9] flex items-center justify-center shrink-0 border border-[#A7ACD9]/30">
-            <CheckCircle className="w-4 h-4 text-emerald-400" />
-          </div>
-          {!isCollapsed && (
-            <div className="overflow-hidden">
-              <p className="text-[11px] font-bold text-white truncate">{t('Wallet escrow')}</p>
-              <p className="text-[10px] text-emerald-400 truncate">{t('Released per milestone')}</p>
-            </div>
-          )}
-        </div>
       </div>
     </aside>
   );

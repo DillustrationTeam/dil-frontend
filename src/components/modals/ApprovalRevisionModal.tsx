@@ -309,40 +309,40 @@ export default function ApprovalRevisionModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-fadeIn">
-      <div className="relative w-full max-w-5xl bg-[#131522]/95 border border-white/10 rounded-[32px] shadow-2xl overflow-hidden flex flex-col md:flex-row max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#F0E7D8]/90 backdrop-blur-md animate-fadeIn">
+      <div className="relative w-full max-w-5xl bg-[#FFFCF6]/95 border border-[#221E1A]/10 rounded-[32px] shadow-2xl overflow-hidden flex flex-col md:flex-row max-h-[90vh]">
 
         {/* Left Side: Protected Image Viewer + Zoom + Redline Canvas */}
-        <div className="w-full md:w-3/5 bg-black/50 border-r border-white/10 p-6 flex flex-col justify-center items-center relative min-h-[360px] overflow-hidden select-none">
+        <div className="w-full md:w-3/5 bg-[#E5D8C2] border-r border-[#221E1A]/10 p-6 flex flex-col justify-center items-center relative min-h-[360px] overflow-hidden select-none">
           {/* Top-Left Badge */}
           <div className="absolute top-4 left-4 z-30 flex items-center gap-2">
-            <div className="bg-black/70 px-3 py-1.5 rounded-xl border border-white/10 backdrop-blur-md flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-emerald-400" />
-              <span className="text-[10px] text-emerald-300 font-semibold tracking-wide uppercase">
+            <div className="bg-[#E5D8C2] px-3 py-1.5 rounded-xl border border-[#221E1A]/10 backdrop-blur-md flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-[#2F6B63]" />
+              <span className="text-[10px] text-[#2F6B63] font-semibold tracking-wide uppercase">
                 Watermarked Preview
               </span>
             </div>
           </div>
 
           {/* Top-Right Zoom Controls */}
-          <div className="absolute top-4 right-4 z-30 flex items-center gap-1 bg-black/75 border border-white/10 rounded-xl p-1 backdrop-blur-md shadow-lg">
+          <div className="absolute top-4 right-4 z-30 flex items-center gap-1 bg-[#F0E7D8]/75 border border-[#221E1A]/10 rounded-xl p-1 backdrop-blur-md shadow-lg">
             <button
               type="button"
               onClick={() => setZoomScale((prev) => Math.max(1, Math.round((prev - 0.25) * 100) / 100))}
               disabled={zoomScale <= 1}
-              className="p-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 transition disabled:opacity-30"
+              className="p-1.5 rounded-lg text-[#746A5F] hover:text-[#241F1A] hover:bg-[#F0E7D8] transition disabled:opacity-30"
               title="Thu nhỏ"
             >
               <ZoomOut className="w-3.5 h-3.5" />
             </button>
-            <span className="px-2 text-[11px] font-mono font-bold text-slate-200 min-w-[44px] text-center">
+            <span className="px-2 text-[11px] font-mono font-bold text-[#6E6459] min-w-[44px] text-center">
               {Math.round(zoomScale * 100)}%
             </span>
             <button
               type="button"
               onClick={() => setZoomScale((prev) => Math.min(2.5, Math.round((prev + 0.25) * 100) / 100))}
               disabled={zoomScale >= 2.5}
-              className="p-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 transition disabled:opacity-30"
+              className="p-1.5 rounded-lg text-[#746A5F] hover:text-[#241F1A] hover:bg-[#F0E7D8] transition disabled:opacity-30"
               title="Phóng to tranh"
             >
               <ZoomIn className="w-3.5 h-3.5" />
@@ -351,7 +351,7 @@ export default function ApprovalRevisionModal({
               <button
                 type="button"
                 onClick={() => setZoomScale(1)}
-                className="p-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 transition"
+                className="p-1.5 rounded-lg text-[#746A5F] hover:text-[#241F1A] hover:bg-[#F0E7D8] transition"
                 title="Đặt lại 100%"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
@@ -378,11 +378,11 @@ export default function ApprovalRevisionModal({
                     fitMode="contain"
                     skipViewSession
                     showWatermarkBadge={false}
-                    className="h-full w-full rounded-xl bg-[#0d101b]"
+                    className="h-full w-full rounded-xl bg-[#FFFCF6]"
                   />
                 </div>
               ) : (
-                <p className="text-slate-500 text-sm">Chưa có bản xem trước.</p>
+                <p className="text-[#746A5F] text-sm">Chưa có bản xem trước.</p>
               )}
 
               {/* Saved Redline Image Layer (for Creator or Historical view) */}
@@ -416,11 +416,11 @@ export default function ApprovalRevisionModal({
                       if (mode === 'revise') removePin(pin.id);
                     }}
                     title={mode === 'revise' ? `Điểm ${pin.id} (Bấm để xóa điểm)` : `Điểm ${pin.id}`}
-                    className="absolute -translate-x-1/2 -translate-y-1/2 z-30 flex items-center justify-center w-6 h-6 rounded-full bg-rose-600 text-white font-bold text-xs shadow-lg border-2 border-white select-none cursor-pointer group hover:scale-125 transition-transform"
+                    className="absolute -translate-x-1/2 -translate-y-1/2 z-30 flex items-center justify-center w-6 h-6 rounded-full bg-[#A8321C]/12 text-[#241F1A] font-bold text-xs shadow-lg border-2 border-[#221E1A]/15 select-none cursor-pointer group hover:scale-125 transition-transform"
                   >
                     <span>{pin.id}</span>
                     {mode === 'revise' && (
-                      <span className="absolute -top-1 -right-1 hidden group-hover:flex w-3.5 h-3.5 bg-black rounded-full items-center justify-center text-[9px] text-rose-300">
+                      <span className="absolute -top-1 -right-1 hidden group-hover:flex w-3.5 h-3.5 bg-[#F0E7D8] rounded-full items-center justify-center text-[9px] text-[#A8321C]">
                         ×
                       </span>
                     )}
@@ -440,8 +440,8 @@ export default function ApprovalRevisionModal({
               title={showRedlineLayer ? 'Ẩn nét vẽ Redline' : 'Hiện nét vẽ Redline'}
               className={`absolute bottom-4 right-4 z-30 w-8 h-8 rounded-xl border backdrop-blur-md flex items-center justify-center transition-all shadow-lg ${
                 showRedlineLayer
-                  ? 'bg-rose-500/25 text-rose-300 border-rose-500/40 hover:bg-rose-500/35'
-                  : 'bg-black/70 text-slate-400 border-white/15 hover:text-white hover:bg-black/90'
+                  ? 'bg-[#A8321C]/20 text-[#A8321C] border-[#A8321C]/40 hover:bg-[#A8321C]/20'
+                  : 'bg-[#E5D8C2] text-[#746A5F] border-[#221E1A]/10 hover:text-[#241F1A] hover:bg-[#F0E7D8]/90'
               }`}
             >
               {showRedlineLayer ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
@@ -450,14 +450,14 @@ export default function ApprovalRevisionModal({
 
           {/* Floating Toolbar when in Revise Mode */}
           {mode === 'revise' && (
-            <div className="absolute bottom-4 z-30 flex items-center gap-1.5 p-1.5 bg-black/80 border border-white/10 rounded-2xl backdrop-blur-md shadow-xl">
+            <div className="absolute bottom-4 z-30 flex items-center gap-1.5 p-1.5 bg-[#E5D8C2] border border-[#221E1A]/10 rounded-2xl backdrop-blur-md shadow-xl">
               <button
                 type="button"
                 onClick={() => setActiveTool('pin')}
                 className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all ${
                   activeTool === 'pin'
-                    ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/30'
-                    : 'text-slate-300 hover:text-white hover:bg-white/5'
+                    ? 'bg-[#A8321C]/12 text-[#241F1A] shadow-lg shadow-[#A8321C]'
+                    : 'text-[#746A5F] hover:text-[#241F1A] hover:bg-[#FFFCF6]'
                 }`}
                 title="Bấm lên tranh để đánh dấu điểm cần chỉnh sửa"
               >
@@ -470,8 +470,8 @@ export default function ApprovalRevisionModal({
                 onClick={() => setActiveTool('draw')}
                 className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all ${
                   activeTool === 'draw'
-                    ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/30'
-                    : 'text-slate-300 hover:text-white hover:bg-white/5'
+                    ? 'bg-[#A8321C]/12 text-[#241F1A] shadow-lg shadow-[#A8321C]'
+                    : 'text-[#746A5F] hover:text-[#241F1A] hover:bg-[#FFFCF6]'
                 }`}
                 title="Vẽ nét đỏ khoanh vùng lên tranh"
               >
@@ -479,12 +479,12 @@ export default function ApprovalRevisionModal({
                 <span>Bút đỏ</span>
               </button>
 
-              <div className="w-[1px] h-4 bg-white/10 mx-1" />
+              <div className="w-[1px] h-4 bg-[#F0E7D8] mx-1" />
 
               <button
                 type="button"
                 onClick={handleUndo}
-                className="p-1.5 rounded-xl text-slate-300 hover:text-white hover:bg-white/10 transition"
+                className="p-1.5 rounded-xl text-[#746A5F] hover:text-[#241F1A] hover:bg-[#F0E7D8] transition"
                 title="Hoàn tác nét vẽ / ghim gần nhất"
               >
                 <Undo2 className="w-4 h-4" />
@@ -493,7 +493,7 @@ export default function ApprovalRevisionModal({
               <button
                 type="button"
                 onClick={handleClearAll}
-                className="p-1.5 rounded-xl text-slate-300 hover:text-rose-400 hover:bg-white/10 transition"
+                className="p-1.5 rounded-xl text-[#746A5F] hover:text-[#A8321C] hover:bg-[#F0E7D8] transition"
                 title="Xóa tất cả nét vẽ & ghim"
               >
                 <Trash2 className="w-4 h-4" />
@@ -504,11 +504,11 @@ export default function ApprovalRevisionModal({
 
         {/* Right Side: Actions & Feedback */}
         <div className="w-full md:w-2/5 flex flex-col justify-between overflow-y-auto">
-          <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between">
-            <h3 className="text-sm font-space-grotesk font-bold text-white">Review Milestone</h3>
+          <div className="px-6 py-4 border-b border-[#221E1A]/10 flex items-center justify-between">
+            <h3 className="text-sm font-space-grotesk font-bold text-[#241F1A]">Review Milestone</h3>
             <button
               onClick={onClose}
-              className="w-8 h-8 rounded-full bg-white/5 border border-white/10 text-slate-400 hover:text-white flex items-center justify-center transition-colors"
+              className="w-8 h-8 rounded-full bg-[#FFFCF6] border border-[#221E1A]/10 text-[#746A5F] hover:text-[#241F1A] flex items-center justify-center transition-colors"
             >
               <X className="w-4 h-4" />
             </button>
@@ -516,19 +516,18 @@ export default function ApprovalRevisionModal({
 
           <div className="p-6 flex-1 space-y-6">
             {isCreator ? (
-              <div className="space-y-4 text-sm text-slate-300">
-                <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl space-y-2">
-                  <div className="flex items-center gap-2 text-amber-300 font-bold text-xs uppercase">
-                    <MessageSquare className="w-4 h-4 text-amber-400" />
+              <div className="space-y-4 text-sm text-[#746A5F]">
+                <div className="p-4 bg-[#8A6A1F]/10 border border-[#8A6A1F]/30 rounded-2xl space-y-2">
+                  <div className="flex items-center gap-2 text-[#8A6A1F] font-bold text-xs uppercase">
+                    <MessageSquare className="w-4 h-4 text-[#8A6A1F]" />
                     <span>Góp ý chỉnh sửa từ khách hàng:</span>
                   </div>
-                  <p className="whitespace-pre-wrap text-sm text-amber-100 font-body leading-relaxed">
+                  <p className="whitespace-pre-wrap text-sm text-[#8A6A1F] font-body leading-relaxed">
                     {revisionFeedback || 'Đang chờ khách hàng duyệt bản vẽ.'}
                   </p>
                   {pins.length > 0 && (
-                    <p className="text-[11px] text-amber-300/80 pt-1 border-t border-amber-500/20">
-                      * Khách có ghim <strong>{pins.length} vị trí</strong> trên tranh. Bấm nút Redline ở góc dưới để bật/tắt xem điểm ghim.
-                    </p>
+                    <p className="text-[11px] text-[#8A6A1F] pt-1 border-t border-[#8A6A1F]/30">
+                      * Khách có ghim <strong>{pins.length} vị trí</strong> trên tranh. Bấm nút Redline ở góc dưới để bật/tắt xem điểm ghim. </p>
                   )}
                 </div>
                 {milestoneStatus === 'RevisionRequested' ? (
@@ -537,48 +536,41 @@ export default function ApprovalRevisionModal({
                       onClose();
                       onOpenSubmitModal?.();
                     }}
-                    className="w-full rounded-xl bg-[#A7ACD9] px-4 py-3 font-semibold text-[#1F2335] hover:bg-white transition"
-                  >
-                    Nộp bản chỉnh sửa mới
-                  </button>
+                    className="w-full rounded-xl bg-[#B24A26] px-4 py-3 font-semibold text-[#F7F2E9] hover:bg-[#F0E7D8] transition"
+                  > Nộp bản chỉnh sửa mới </button>
                 ) : null}
               </div>
             ) : milestoneStatus && milestoneStatus !== 'Submitted' ? (
-              <p className="text-sm text-slate-300">
-                Chỉ có thể duyệt hoặc yêu cầu chỉnh sửa khi bản vẽ đang chờ duyệt.
-              </p>
+              <p className="text-sm text-[#746A5F]"> Chỉ có thể duyệt hoặc yêu cầu chỉnh sửa khi bản vẽ đang chờ duyệt. </p>
             ) : mode === 'view' ? (
               <div className="space-y-4">
-                <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl">
-                  <h4 className="text-sm font-semibold text-emerald-400 flex items-center gap-2 mb-2">
+                <div className="p-4 bg-[#2F6B63]/10 border border-[#2F6B63]/30 rounded-2xl">
+                  <h4 className="text-sm font-semibold text-[#2F6B63] flex items-center gap-2 mb-2">
                     <CheckCircle2 className="w-4 h-4" /> Approve this draft
                   </h4>
-                  <p className="text-xs text-emerald-300/70 mb-4">
+                  <p className="text-xs text-[#2F6B63] mb-4">
                     If you are satisfied with this work, approve it to release funds for this milestone and allow the creator to proceed to the next stage.
                   </p>
                   <button
                     onClick={handleApprove}
                     disabled={isSubmitting}
-                    className="w-full py-2.5 rounded-xl text-xs font-bold bg-emerald-500 text-black shadow-lg shadow-emerald-500/25 hover:bg-emerald-400 transition-colors disabled:opacity-50"
+                    className="w-full py-2.5 rounded-xl text-xs font-bold bg-[#2F6B63]/12 text-[#F7F2E9] shadow-lg shadow-[#2F6B63] hover:bg-[#2F6B63]/10 transition-colors disabled:opacity-50"
                   >
                     {isSubmitting ? 'Approving...' : 'Approve & Release Funds'}
                   </button>
                 </div>
 
-                <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl">
-                  <h4 className="text-sm font-semibold text-amber-400 flex items-center gap-2 mb-2">
-                    <MessageSquare className="w-4 h-4" /> Yêu cầu chỉnh sửa (Có Redline)
-                  </h4>
-                  <p className="text-xs text-amber-300/70 mb-2">
-                    Chưa ưng ý? Bạn có thể khoanh vùng, ghim điểm trực tiếp lên tranh và yêu cầu Creator chỉnh sửa.
-                  </p>
-                  <p className="text-[11px] text-amber-400/70 mb-4 font-mono">
+                <div className="p-4 bg-[#8A6A1F]/10 border border-[#8A6A1F]/30 rounded-2xl">
+                  <h4 className="text-sm font-semibold text-[#8A6A1F] flex items-center gap-2 mb-2">
+                    <MessageSquare className="w-4 h-4" /> Yêu cầu chỉnh sửa (Có Redline) </h4>
+                  <p className="text-xs text-[#8A6A1F] mb-2"> Chưa ưng ý? Bạn có thể khoanh vùng, ghim điểm trực tiếp lên tranh và yêu cầu họa sĩ chỉnh sửa. </p>
+                  <p className="text-[11px] text-[#8A6A1F] mb-4 font-mono">
                     Số lần sửa còn lại: {revisionsLeft} / {maxRevisions}
                   </p>
                   <button
                     onClick={() => setMode('revise')}
                     disabled={revisionsLeft <= 0}
-                    className="w-full py-2.5 rounded-xl text-xs font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30 hover:bg-amber-500/30 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                    className="w-full py-2.5 rounded-xl text-xs font-bold bg-[#8A6A1F]/20 text-[#8A6A1F] border border-[#8A6A1F]/40 hover:bg-[#8A6A1F]/20 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                   >
                     {revisionsLeft > 0 ? 'Mở Redline Canvas & Góp ý' : 'Đã hết lượt sửa miễn phí'}
                   </button>
@@ -586,28 +578,26 @@ export default function ApprovalRevisionModal({
               </div>
             ) : (
               <div className="space-y-4 animate-fadeIn">
-                <div className="p-3 bg-rose-500/10 border border-rose-500/20 rounded-xl text-xs text-rose-200/90 leading-relaxed">
-                  <strong>Mẹo:</strong> Dùng tool <strong>Ghim vị trí</strong> hoặc <strong>Bút đỏ</strong> bên khung tranh để đánh dấu trực tiếp chỗ cần sửa.
-                </div>
+                <div className="p-3 bg-[#A8321C]/10 border border-[#A8321C]/30 rounded-xl text-xs text-[#A8321C] leading-relaxed">
+                  <strong>Mẹo:</strong> Dùng tool <strong>Ghim vị trí</strong> hoặc <strong>Bút đỏ</strong> bên khung tranh để đánh dấu trực tiếp chỗ cần sửa. </div>
 
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <label className="text-[11px] font-space-grotesk font-bold text-amber-400 uppercase tracking-wider flex items-center gap-2">
-                      <AlertTriangle className="w-3.5 h-3.5" /> Chi tiết cần sửa đổi
-                    </label>
+                    <label className="text-[11px] font-space-grotesk font-bold text-[#8A6A1F] uppercase tracking-wider flex items-center gap-2">
+                      <AlertTriangle className="w-3.5 h-3.5" /> Chi tiết cần sửa đổi </label>
                     <button
                       type="button"
                       disabled={isStandardizing || !feedback.trim()}
                       onClick={handleStandardizeFeedback}
                       className="inline-flex items-center gap-1.5 rounded-xl border border-brand-periwinkle/30 bg-brand-periwinkle/10 hover:bg-brand-periwinkle/20 text-brand-periwinkle px-3 py-1 text-[11px] font-bold transition-all hover:border-brand-periwinkle/60 shadow-sm active:scale-95 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
-                      title="AI chuyển đổi phản hồi của bạn thành checklist kỹ thuật rõ ràng cho artist"
+                      title="AI chuyển đổi phản hồi của bạn thành danh mục cần kiểm kỹ thuật rõ ràng cho họa sĩ"
                     >
                       {isStandardizing ? (
                         <Loader2 className="w-3.5 h-3.5 animate-spin text-brand-periwinkle" />
                       ) : (
                         <Sparkles className="w-3.5 h-3.5 text-brand-periwinkle" />
                       )}
-                      <span>{isStandardizing ? 'Đang chuẩn hóa…' : 'AI Chuẩn hóa Checklist'}</span>
+                      <span>{isStandardizing ? 'Đang chuẩn hóa…' : 'AI Chuẩn hóa danh mục cần kiểm'}</span>
                     </button>
                   </div>
                   <textarea
@@ -615,20 +605,18 @@ export default function ApprovalRevisionModal({
                     value={feedback}
                     onChange={(e) => setFeedback(e.target.value)}
                     placeholder="Ví dụ: [Điểm 1]: Chỉnh lại ánh sáng phần tóc cho mềm hơn..."
-                    className="w-full p-4 bg-black/40 border border-amber-500/30 rounded-xl text-sm text-amber-100 placeholder-amber-500/40 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400"
+                    className="w-full p-4 bg-[#F0E7D8] border border-[#8A6A1F]/40 rounded-xl text-sm text-[#8A6A1F] text-[#8A6A1F] focus:outline-none focus:border-[#8A6A1F]/30 focus:ring-1 focus:ring-[#8A6A1F]/30"
                   />
                 </div>
                 <div className="flex gap-2">
                   <button
                     onClick={() => setMode('view')}
-                    className="flex-1 py-2.5 rounded-xl text-xs font-bold bg-white/5 text-slate-300 hover:bg-white/10 transition-colors"
-                  >
-                    Quay lại
-                  </button>
+                    className="flex-1 py-2.5 rounded-xl text-xs font-bold bg-[#FFFCF6] text-[#746A5F] hover:bg-[#F0E7D8] transition-colors"
+                  > Quay lại </button>
                   <button
                     onClick={handleRequestRevision}
                     disabled={isSubmitting || !feedback.trim()}
-                    className="flex-1 py-2.5 rounded-xl text-xs font-bold bg-amber-500 text-black shadow-lg shadow-amber-500/25 hover:bg-amber-400 transition-colors disabled:opacity-50"
+                    className="flex-1 py-2.5 rounded-xl text-xs font-bold bg-[#8A6A1F]/12 text-[#F7F2E9] shadow-lg shadow-[#8A6A1F] hover:bg-[#8A6A1F]/10 transition-colors disabled:opacity-50"
                   >
                     {isSubmitting ? 'Đang gửi...' : 'Gửi yêu cầu sửa'}
                   </button>

@@ -115,18 +115,16 @@ export function RevenueTrendChart({ revenueTrend }: RevenueTrendChartProps) {
   };
 
   return (
-    <div className="glass-container bg-[#161926]/85 border border-white/10 rounded-[28px] p-6 space-y-5 shadow-xl">
+    <div className="glass-container bg-[#FFFCF6]/85 border border-[#221E1A]/10 rounded-[28px] p-6 space-y-5 shadow-xl">
       {/* Header with Title and Period Navigation */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#221E1A]/10 pb-4">
         <div>
           <div className="flex items-center gap-2">
-            <h3 className="font-h1 font-bold text-white text-base">
-              Xu hướng doanh thu sàn
-            </h3>
+            <h3 className="font-h1 font-bold text-[#241F1A] text-base"> Xu hướng doanh thu sàn </h3>
           </div>
-          <p className="text-[11px] text-[#8A8FA9] mt-0.5">
+          <p className="text-[11px] text-[#6E6459] mt-0.5">
             Tổng thu giai đoạn:{' '}
-            <strong className="text-emerald-400 font-h1 font-bold">
+            <strong className="text-[#2F6B63] font-h1 font-bold">
               {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(totalPeriodRevenue)}
             </strong>
           </p>
@@ -139,24 +137,24 @@ export function RevenueTrendChart({ revenueTrend }: RevenueTrendChartProps) {
               type="button"
               onClick={handleResetLatest}
               title="Về giai đoạn gần nhất"
-              className="p-1.5 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-[#C7C5CF] hover:text-white transition cursor-pointer text-xs"
+              className="p-1.5 rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] hover:bg-[#F0E7D8] text-[#6E6459] hover:text-[#241F1A] transition cursor-pointer text-xs"
             >
               <RotateCcw className="w-3.5 h-3.5" />
             </button>
           )}
 
-          <div className="flex items-center rounded-xl border border-white/10 bg-white/5 p-1 gap-1">
+          <div className="flex items-center rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] p-1 gap-1">
             <button
               type="button"
               onClick={handlePrevPeriod}
               title="Lùi 1 tháng"
-              className="p-1 rounded-lg hover:bg-white/10 text-[#C7C5CF] hover:text-white transition cursor-pointer active:scale-95"
+              className="p-1 rounded-lg hover:bg-[#F0E7D8] text-[#6E6459] hover:text-[#241F1A] transition cursor-pointer active:scale-95"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
 
-            <span className="px-2 text-xs font-h1 font-bold text-white select-none whitespace-nowrap min-w-[110px] text-center flex items-center justify-center gap-1">
-              <Calendar className="w-3 h-3 text-[#A7ACD9]" />
+            <span className="px-2 text-xs font-h1 font-bold text-[#241F1A] select-none whitespace-nowrap min-w-[110px] text-center flex items-center justify-center gap-1">
+              <Calendar className="w-3 h-3 text-[#B24A26]" />
               {periodLabel}
             </span>
 
@@ -165,7 +163,7 @@ export function RevenueTrendChart({ revenueTrend }: RevenueTrendChartProps) {
               onClick={handleNextPeriod}
               disabled={offsetMonths <= 0}
               title="Tiến 1 tháng"
-              className="p-1 rounded-lg hover:bg-white/10 text-[#C7C5CF] hover:text-white transition cursor-pointer active:scale-95 disabled:opacity-30 disabled:pointer-events-none"
+              className="p-1 rounded-lg hover:bg-[#F0E7D8] text-[#6E6459] hover:text-[#241F1A] transition cursor-pointer active:scale-95 disabled:opacity-30 disabled:pointer-events-none"
             >
               <ChevronRight className="w-4 h-4" />
             </button>
@@ -184,8 +182,8 @@ export function RevenueTrendChart({ revenueTrend }: RevenueTrendChartProps) {
             <span
               className={`text-[11px] font-h1 transition-colors ${
                 bar.active
-                  ? 'text-emerald-400 font-extrabold'
-                  : 'text-[#8A8FA9] font-bold group-hover:text-white'
+                  ? 'text-[#2F6B63] font-extrabold'
+                  : 'text-[#6E6459] font-bold group-hover:text-[#241F1A]'
               }`}
             >
               {bar.value}
@@ -196,8 +194,8 @@ export function RevenueTrendChart({ revenueTrend }: RevenueTrendChartProps) {
               style={{ height: `${bar.heightPx}px` }}
               className={`w-10 sm:w-11 max-w-[46px] rounded-t-xl transition-all duration-300 ${
                 bar.active
-                  ? 'bg-gradient-to-t from-emerald-500 to-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.4)]'
-                  : 'bg-[#C5C9F8]/35 group-hover:bg-[#C5C9F8]'
+                  ? 'bg-gradient-to-t from-[#2F6B63] to-[#2F6B63] shadow-[0_0_15px_rgba(16,185,129,0.4)]'
+                  : 'bg-[#8C3718]/35 group-hover:bg-[#8C3718]'
               }`}
             />
 
@@ -205,12 +203,12 @@ export function RevenueTrendChart({ revenueTrend }: RevenueTrendChartProps) {
             <div className="text-center">
               <p
                 className={`text-xs font-h1 font-bold transition-colors leading-tight ${
-                  bar.active ? 'text-white font-extrabold' : 'text-[#8A8FA9] group-hover:text-white'
+                  bar.active ? 'text-[#241F1A] font-extrabold' : 'text-[#6E6459] group-hover:text-[#241F1A]'
                 }`}
               >
                 {bar.month}
               </p>
-              <span className="text-[10px] text-[#696D85] font-mono">
+              <span className="text-[10px] text-[#E5D8C2] font-mono">
                 {bar.year}
               </span>
             </div>

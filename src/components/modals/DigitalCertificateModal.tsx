@@ -1,5 +1,6 @@
 'use client';
 
+import { Wordmark } from '@/components/brand/wordmark';
 import React, { useState } from 'react';
 import {
   X,
@@ -55,18 +56,18 @@ export default function DigitalCertificateModal({
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-6 bg-black/90 backdrop-blur-md overflow-y-auto">
-      <div className="relative w-full max-w-5xl my-auto bg-[#070A12] border border-white/10 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[95vh]">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-6 bg-[#F0E7D8]/90 backdrop-blur-md overflow-y-auto">
+      <div className="relative w-full max-w-5xl my-auto bg-[#FFFCF6] border border-[#221E1A]/10 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[95vh]">
         
         {/* Top Sticky Header */}
-        <div className="shrink-0 px-6 py-4 bg-[#111624] border-b border-white/10 flex items-center justify-between gap-4">
+        <div className="shrink-0 px-6 py-4 bg-[#FFFCF6] border-b border-[#221E1A]/10 flex items-center justify-between gap-4">
           <div className="flex items-center gap-2.5">
-            <span className="h-2.5 w-2.5 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="h-2.5 w-2.5 rounded-full bg-[#2F6B63]/10 animate-pulse" />
             <div>
-              <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest block">
+              <span className="text-[10px] font-bold text-[#2F6B63] uppercase tracking-widest block">
                 ĐƠN HÀNG ĐÃ HOÀN TẤT &amp; NGHIỆM THU 100%
               </span>
-              <h2 className="font-h1 text-base sm:text-lg font-bold text-white">
+              <h2 className="font-h1 text-base sm:text-lg font-bold text-[#241F1A]">
                 Chứng thư Bản quyền Số &amp; Kho Tệp Gốc
               </h2>
             </div>
@@ -76,7 +77,7 @@ export default function DigitalCertificateModal({
             <button
               type="button"
               onClick={() => window.print()}
-              className="px-3.5 py-1.5 rounded-xl bg-brand-periwinkle text-brand-navy font-bold text-xs hover:bg-[#B8BCDF] transition flex items-center gap-1.5 shadow"
+              className="px-3.5 py-1.5 rounded-xl bg-brand-periwinkle text-[#FFFCF6] font-bold text-xs hover:bg-[#8C3718] transition flex items-center gap-1.5 shadow"
             >
               <Printer size={14} />
               <span>In chứng nhận PDF</span>
@@ -84,7 +85,7 @@ export default function DigitalCertificateModal({
             <button
               type="button"
               onClick={onClose}
-              className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white border border-white/10 transition"
+              className="p-1.5 rounded-xl bg-[#FFFCF6] hover:bg-[#F0E7D8] text-[#746A5F] hover:text-[#241F1A] border border-[#221E1A]/10 transition"
               title="Đóng"
             >
               <X size={16} />
@@ -93,68 +94,60 @@ export default function DigitalCertificateModal({
         </div>
 
         {/* Scrollable Certificate View */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-8 space-y-8 bg-[#060911]">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-8 space-y-8 bg-[#FFFCF6]">
           
           {/* TẤM CHỨNG THƯ BẢN QUYỀN CAO CẤP (CERTIFICATE FRAME) */}
-          <div className="relative rounded-2xl p-6 sm:p-10 text-white overflow-hidden bg-gradient-to-br from-[#171D2D]/95 to-[#0E121C]/98 border border-brand-periwinkle/30 shadow-[0_20px_50px_-10px_rgba(0,0,0,0.7),0_0_30px_rgba(167,172,217,0.1)]">
+          <div className="relative rounded-2xl p-6 sm:p-10 text-[#241F1A] overflow-hidden bg-gradient-to-br from-[#FFFCF6]/95 to-[#FFFCF6]/98 border border-brand-periwinkle/30 shadow-[0_20px_50px_-10px_rgba(0,0,0,0.7),0_0_30px_rgba(167,172,217,0.1)]">
             
             {/* Dashed Inner Border */}
             <div className="absolute inset-2 sm:inset-3 border border-dashed border-brand-periwinkle/25 rounded-xl pointer-events-none" />
 
             {/* Certificate Top Header */}
-            <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6 border-b border-white/10 pb-6">
+            <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6 border-b border-[#221E1A]/10 pb-6">
               <div className="flex items-center gap-3.5">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/weblogo.png" alt="DILLUSTRATION" className="h-10 w-auto object-contain" />
+                <Wordmark size="sm" href={null} />
                 <div>
                   <div className="text-[10px] font-mono tracking-widest uppercase text-brand-periwinkle">
                     DIGITAL CERTIFICATE OF AUTHENTICITY
                   </div>
-                  <div className="text-xs font-bold text-white tracking-wide">
-                    CHỨNG NHẬN BẢN QUYỀN SỐ ĐỘC BẢN
-                  </div>
+                  <div className="text-xs font-bold text-[#241F1A] tracking-wide"> CHỨNG NHẬN BẢN QUYỀN SỐ ĐỘC BẢN </div>
                 </div>
               </div>
 
               {/* Gold Seal Badge */}
               <div className="flex items-center gap-3">
-                <div className="h-11 w-11 rounded-full flex items-center justify-center text-slate-950 font-black text-lg shadow-md shrink-0 bg-gradient-to-tr from-[#9B7023] via-[#E5B358] to-[#FFE4A0]">
+                <div className="h-11 w-11 rounded-full flex items-center justify-center text-[#241F1A] font-black text-lg shadow-md shrink-0 bg-gradient-to-tr from-[#E5D8C2] via-[#E5B358] to-[#FFE4A0]">
                   ✦
                 </div>
                 <div>
                   <div className="text-xs font-bold text-[#E5B358] uppercase tracking-wide">
                     VERIFIED ASSET
                   </div>
-                  <div className="text-[10px] font-mono text-slate-400">
-                    CHỨNG THỰC BẢO HỘ 100%
-                  </div>
+                  <div className="text-[10px] font-mono text-[#746A5F]"> CHỨNG THỰC BẢO HỘ 100% </div>
                 </div>
               </div>
             </div>
 
             {/* Certificate Body (Split: Image & Legal Ownership) */}
-            <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 py-8 border-b border-white/10">
+            <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 py-8 border-b border-[#221E1A]/10">
               
               {/* Left Column: Final Artwork Clean Preview */}
               <div className="lg:col-span-5 space-y-3">
-                <div className="relative aspect-[3/4] rounded-xl overflow-hidden border border-white/15 bg-black/60 shadow-2xl group">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                <div className="relative aspect-[3/4] rounded-xl overflow-hidden border border-[#221E1A]/10 bg-[#E5D8C2] shadow-2xl group">
                   <img
                     src={artworkUrl}
                     alt={commission.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
-                  <div className="absolute top-3 left-3 bg-black/80 backdrop-blur-md border border-emerald-400/30 text-emerald-300 font-mono text-[10px] px-2.5 py-1 rounded-md flex items-center gap-1 font-bold">
-                    <CheckCircle2 size={12} className="text-emerald-400" />
+                  <div className="absolute top-3 left-3 bg-[#E5D8C2] backdrop-blur-md border border-[#2F6B63]/40 text-[#2F6B63] font-mono text-[10px] px-2.5 py-1 rounded-md flex items-center gap-1 font-bold">
+                    <CheckCircle2 size={12} className="text-[#2F6B63]" />
                     <span>BẢN GỐC ĐÃ GỠ THỦY VÂN</span>
                   </div>
-                  <div className="absolute bottom-3 right-3 bg-black/80 backdrop-blur-md border border-white/20 text-white font-mono text-[10px] px-2.5 py-1 rounded-md">
+                  <div className="absolute bottom-3 right-3 bg-[#E5D8C2] backdrop-blur-md border border-[#221E1A]/20 text-[#241F1A] font-mono text-[10px] px-2.5 py-1 rounded-md">
                     4096 × 5464 px • 300 DPI
                   </div>
                 </div>
-                <p className="text-[11px] text-center text-slate-400 italic">
-                  Tác phẩm hoàn thiện chính thức sau nghiệm thu ký quỹ Escrow.
-                </p>
+                <p className="text-[11px] text-center text-[#746A5F] italic"> Tác phẩm hoàn thiện chính thức sau nghiệm thu ký quỹ. </p>
               </div>
 
               {/* Right Column: Ownership & Rights */}
@@ -163,29 +156,26 @@ export default function DigitalCertificateModal({
                   <span className="text-xs font-mono font-bold text-brand-periwinkle bg-brand-periwinkle/10 px-2.5 py-0.5 rounded border border-brand-periwinkle/20">
                     MÃ CHỨNG THƯ: {certCode}
                   </span>
-                  <h3 className="text-xl sm:text-2xl font-bold font-h1 text-white mt-2">
+                  <h3 className="text-xl sm:text-2xl font-bold font-h1 text-[#241F1A] mt-2">
                     {commission.title}
                   </h3>
-                  <p className="text-xs text-slate-300 mt-1">
-                    Dự án đơn vẽ theo yêu cầu: <code className="text-white font-mono font-bold">#{orderCode}</code>
+                  <p className="text-xs text-[#746A5F] mt-1"> Dự án đơn vẽ theo yêu cầu: <code className="text-[#241F1A] font-mono font-bold">#{orderCode}</code>
                   </p>
                 </div>
 
                 {/* Parties Grid */}
-                <div className="grid grid-cols-2 gap-4 rounded-xl bg-white/[0.03] border border-white/10 p-4 text-xs">
+                <div className="grid grid-cols-2 gap-4 rounded-xl bg-[#FFFCF6] border border-[#221E1A]/10 p-4 text-xs">
                   <div>
-                    <span className="text-[10px] font-mono text-slate-400 uppercase block">Tác giả sáng tạo gốc</span>
-                    <strong className="text-white text-sm block mt-0.5">{creatorDisplay}</strong>
+                    <span className="text-[10px] font-mono text-[#746A5F] uppercase block">Tác giả sáng tạo gốc</span>
+                    <strong className="text-[#241F1A] text-sm block mt-0.5">{creatorDisplay}</strong>
                     <span className="text-xs text-brand-periwinkle block">@{creatorDisplay.toLowerCase().replace(/\s+/g, '')}</span>
-                    <span className="text-[10px] text-slate-400 mt-1 block italic">
-                      Giữ vĩnh viễn quyền nhân thân (Đ.19 Luật SHTT)
-                    </span>
+                    <span className="text-[10px] text-[#746A5F] mt-1 block italic"> Giữ vĩnh viễn quyền nhân thân (Đ.19 Luật SHTT) </span>
                   </div>
-                  <div className="border-l border-white/10 pl-4">
-                    <span className="text-[10px] font-mono text-slate-400 uppercase block">Chủ sở hữu khai thác</span>
-                    <strong className="text-white text-sm block mt-0.5">{clientDisplay}</strong>
-                    <span className="text-xs text-emerald-400 block">@{clientDisplay.toLowerCase().replace(/\s+/g, '')}</span>
-                    <span className="text-[10px] text-emerald-300/80 mt-1 block">
+                  <div className="border-l border-[#221E1A]/10 pl-4">
+                    <span className="text-[10px] font-mono text-[#746A5F] uppercase block">Chủ sở hữu khai thác</span>
+                    <strong className="text-[#241F1A] text-sm block mt-0.5">{clientDisplay}</strong>
+                    <span className="text-xs text-[#2F6B63] block">@{clientDisplay.toLowerCase().replace(/\s+/g, '')}</span>
+                    <span className="text-[10px] text-[#2F6B63] mt-1 block">
                       {isCommercial ? 'Toàn quyền thương mại (Đ.20 Luật SHTT)' : 'Quyền sử dụng cá nhân phi thương mại'}
                     </span>
                   </div>
@@ -194,9 +184,9 @@ export default function DigitalCertificateModal({
                 {/* License Terms Scope */}
                 <div className="space-y-2 text-xs">
                   <h4 className="font-bold text-xs uppercase tracking-wider text-brand-periwinkle">
-                    Phạm vi Quyền Khai thác {isCommercial ? 'Thương mại (Commercial License Scope)' : 'Cá nhân (Personal License Scope)'}
+                    Phạm vi Quyền Khai thác {isCommercial ? 'Thương mại (Commercial giấy phép Scope)' : 'Cá nhân (Personal giấy phép Scope)'}
                   </h4>
-                  <ul className="space-y-1.5 text-slate-300 text-xs list-disc list-inside">
+                  <ul className="space-y-1.5 text-[#746A5F] text-xs list-disc list-inside">
                     {isCommercial ? (
                       <>
                         <li>{extTerms?.commercialScope || 'Toàn quyền sử dụng cho mục đích thương mại: livestream, ấn phẩm truyền thông, hoặc merchandise.'}</li>
@@ -212,7 +202,7 @@ export default function DigitalCertificateModal({
                     )}
                     {extTerms && (
                       <>
-                        <li>Ghi nguồn tác giả (Credit): <strong>{extTerms.requireCredit ? 'Bắt buộc ghi nguồn Creator' : 'Không bắt buộc'}</strong> • Đăng Portfolio: <strong>{extTerms.allowPortfolioDisplay ? 'Creator được phép đăng mẫu' : 'Giữ kín riêng tư'}</strong>.</li>
+                        <li>Ghi nguồn tác giả: <strong>{extTerms.requireCredit ? 'Bắt buộc ghi nguồn họa sĩ' : 'Không bắt buộc'}</strong> • Đăng hồ sơ tác phẩm: <strong>{extTerms.allowPortfolioDisplay ? 'Họa sĩ được phép đăng mẫu' : 'Giữ kín riêng tư'}</strong>.</li>
                         {extTerms.prohibitAiTraining && <li><strong>Cấm sử dụng tác phẩm để huấn luyện AI (AI Training) hoặc phát hành NFT.</strong></li>}
                         {extTerms.usageRestrictions && <li>Ghi chú bổ sung: {extTerms.usageRestrictions}</li>}
                       </>
@@ -221,25 +211,25 @@ export default function DigitalCertificateModal({
                 </div>
 
                 {/* Cryptographic Hash Verification Box */}
-                <div className="rounded-xl border border-white/10 bg-[#0E121E] p-3.5 space-y-2 text-xs">
+                <div className="rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] p-3.5 space-y-2 text-xs">
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-mono font-bold text-slate-300 uppercase flex items-center gap-1.5">
-                      🔒 Mã Băm Tệp Gốc (SHA-256 Master File Hash)
+                    <span className="text-[11px] font-mono font-bold text-[#746A5F] uppercase flex items-center gap-1.5">
+                      🔒 Mã Băm Tệp Gốc (SHA-256 Master tệp Hash)
                     </span>
                     <button
                       type="button"
                       onClick={handleCopyHash}
                       className="text-[11px] text-brand-periwinkle hover:underline font-medium flex items-center gap-1"
                     >
-                      {copiedHash ? <Check size={11} className="text-emerald-400" /> : <Copy size={11} />}
+                      {copiedHash ? <Check size={11} className="text-[#2F6B63]" /> : <Copy size={11} />}
                       <span>{copiedHash ? 'Đã sao chép' : 'Sao chép mã'}</span>
                     </button>
                   </div>
-                  <div className="font-mono text-[11px] text-brand-periwinkle bg-black/40 p-2.5 rounded border border-white/5 break-all select-all">
+                  <div className="font-mono text-[11px] text-brand-periwinkle bg-[#F0E7D8] p-2.5 rounded border border-[#221E1A]/10 break-all select-all">
                     {realHash}
                   </div>
-                  <p className="text-[10px] text-slate-400">
-                    * Mã băm mật mã độc bản này chứng minh tệp tin tải về là tệp gốc chính xác do tác giả bàn giao, chống mọi hành vi sửa đổi hoặc tráo file giả mạo.
+                  <p className="text-[10px] text-[#746A5F]">
+                    * Mã băm mật mã độc bản này chứng minh tệp tin tải về là tệp gốc chính xác do tác giả bàn giao, chống mọi hành vi sửa đổi hoặc tráo tệp giả mạo.
                   </p>
                 </div>
 
@@ -250,8 +240,7 @@ export default function DigitalCertificateModal({
             {/* Certificate Footer (QR Verification & Platform Stamp) */}
             <div className="relative z-10 pt-6 flex flex-col sm:flex-row sm:items-center justify-between gap-6 text-xs">
               <div className="flex items-center gap-4">
-                <div className="h-16 w-16 bg-white p-1 rounded-lg shrink-0 flex items-center justify-center">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                <div className="h-16 w-16 bg-[#F0E7D8] p-1 rounded-lg shrink-0 flex items-center justify-center">
                   <img
                     src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://dillustration.art/verify/${certCode}`}
                     alt="QR Verification"
@@ -259,16 +248,16 @@ export default function DigitalCertificateModal({
                   />
                 </div>
                 <div>
-                  <span className="font-bold text-white block">Quét mã QR để tra cứu công khai:</span>
+                  <span className="font-bold text-[#241F1A] block">Quét mã QR để tra cứu công khai:</span>
                   <span className="font-mono text-[11px] text-brand-periwinkle block">dillustration.art/verify/{certCode}</span>
-                  <span className="text-[10px] text-slate-400 block mt-0.5">Xác thực chứng chỉ minh bạch cho các đối tác / nhà in ấn.</span>
+                  <span className="text-[10px] text-[#746A5F] block mt-0.5">Xác thực chứng chỉ minh bạch cho các đối tác / nhà in ấn.</span>
                 </div>
               </div>
 
-              <div className="text-left sm:text-right sm:border-l sm:border-white/10 sm:pl-6 space-y-1">
-                <span className="text-[10px] font-mono text-slate-400 uppercase block">ĐƠN VỊ CẤP CHỨNG THỰC</span>
-                <strong className="text-white text-xs font-h1">DILLUSTRATION Escrow &amp; Trust Authority</strong>
-                <span className="text-[10px] text-slate-400 block">Ký điện tử bởi Hệ thống SEP490 • FPT University HCM</span>
+              <div className="text-left sm:text-right sm:border-l sm:border-[#221E1A]/10 sm:pl-6 space-y-1">
+                <span className="text-[10px] font-mono text-[#746A5F] uppercase block">ĐƠN VỊ CẤP CHỨNG THỰC</span>
+                <strong className="text-[#241F1A] text-xs font-h1">DILLUSTRATION Escrow &amp; Trust Authority</strong>
+                <span className="text-[10px] text-[#746A5F] block">Ký điện tử bởi Hệ thống SEP490 • FPT University HCM</span>
               </div>
             </div>
 

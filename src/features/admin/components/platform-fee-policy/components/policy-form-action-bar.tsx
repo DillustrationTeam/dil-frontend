@@ -37,15 +37,15 @@ export function PolicyFormActionBar({
   };
 
   return (
-    <div className="pt-4 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
-      <div className="flex items-center gap-3 text-xs text-[#8A8FA9] w-full sm:w-auto">
-        <Clock className="w-3.5 h-3.5 text-[#8A8FA9]" />
+    <div className="pt-4 border-t border-[#221E1A]/10 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div className="flex items-center gap-3 text-xs text-[#6E6459] w-full sm:w-auto">
+        <Clock className="w-3.5 h-3.5 text-[#6E6459]" />
         <span>
           {isVie ? 'Sửa đổi lần cuối:' : 'Last Modified:'}{' '}
-          <span className="text-white font-medium">{formatLastUpdated(lastUpdated)}</span>
+          <span className="text-[#241F1A] font-medium">{formatLastUpdated(lastUpdated)}</span>
         </span>
         {isDirty && (
-          <span className="px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 text-[10px] font-bold border border-amber-500/30">
+          <span className="px-2 py-0.5 rounded-md bg-[#8A6A1F]/20 text-[#8A6A1F] text-[10px] font-bold border border-[#8A6A1F]/40">
             {isVie ? 'Thay đổi chưa lưu' : 'Unsaved Changes'}
           </span>
         )}
@@ -56,16 +56,16 @@ export function PolicyFormActionBar({
         <button
           type="submit"
           disabled={updating || (!isDirty && policyExists)}
-          className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-3 bg-white hover:bg-[#C5C9F8] text-[#0f1017] font-extrabold rounded-xl text-xs transition-all shadow-xl disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer active:scale-[0.98]"
+          className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-3 bg-[#F0E7D8] hover:bg-[#8C3718] text-[#FFFCF6] font-extrabold rounded-xl text-xs transition-all shadow-xl disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer active:scale-[0.98]"
         >
           {updating ? (
             <>
-              <RefreshCw className="w-4 h-4 animate-spin text-[#0f1017]" />
+              <RefreshCw className="w-4 h-4 animate-spin text-[#FFFCF6]" />
               <span>{isVie ? 'Đang lưu...' : 'Saving Changes...'}</span>
             </>
           ) : (
             <>
-              <Save className="w-4 h-4 text-[#0f1017]" />
+              <Save className="w-4 h-4 text-[#FFFCF6]" />
               <span>{isVie ? 'Lưu thay đổi' : 'Save Changes'}</span>
             </>
           )}

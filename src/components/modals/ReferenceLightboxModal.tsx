@@ -33,7 +33,7 @@ export default function ReferenceLightboxModal({
       role="dialog"
       aria-modal="true"
       aria-label={title}
-      className="fixed inset-0 z-[70] flex items-center justify-center bg-black/90 p-4 backdrop-blur-md"
+      className="fixed inset-0 z-[70] flex items-center justify-center bg-[#F0E7D8]/90 p-4 backdrop-blur-md"
       onClick={onClose}
     >
       <div
@@ -41,14 +41,14 @@ export default function ReferenceLightboxModal({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-3 flex w-full items-center justify-between gap-4">
-          <span className="truncate text-xs font-semibold text-slate-300">{title}</span>
+          <span className="truncate text-xs font-semibold text-[#746A5F]">{title}</span>
           <div className="flex shrink-0 items-center gap-2">
             <a
               href={url}
               download
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1.5 rounded-lg bg-white/10 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-white/20"
+              className="flex items-center gap-1.5 rounded-lg bg-[#F0E7D8] px-3 py-1.5 text-xs font-semibold text-[#241F1A] transition hover:bg-[#F0E7D8]"
             >
               <Download className="h-3.5 w-3.5" />
               <span>Tải ảnh gốc</span>
@@ -58,7 +58,7 @@ export default function ReferenceLightboxModal({
               onClick={onClose}
               aria-label="Đóng xem ảnh"
               title="Đóng (Esc)"
-              className="rounded-full bg-white/10 p-1.5 text-white transition hover:bg-white/20"
+              className="rounded-full bg-[#F0E7D8] p-1.5 text-[#241F1A] transition hover:bg-[#F0E7D8]"
             >
               <X className="h-4 w-4" />
             </button>
@@ -68,7 +68,7 @@ export default function ReferenceLightboxModal({
         <img
           src={url}
           alt={title}
-          className="max-h-[82vh] max-w-full rounded-xl border border-white/10 object-contain shadow-2xl"
+          className="max-h-[82vh] max-w-full rounded-xl border border-[#221E1A]/10 object-contain shadow-2xl"
         />
       </div>
     </div>

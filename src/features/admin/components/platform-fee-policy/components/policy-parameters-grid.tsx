@@ -55,25 +55,25 @@ export function PolicyParametersGrid({
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-2">
-        <Shield className="w-4 h-4 text-red-400" />
-        <h3 className="font-h1 text-sm font-bold text-white uppercase tracking-wider">
+        <Shield className="w-4 h-4 text-[#A8321C]" />
+        <h3 className="font-h1 text-sm font-bold text-[#241F1A] uppercase tracking-wider">
           {isVie ? 'Chính sách vận hành & Bảo vệ' : 'Operational & Protection Policies'}
         </h3>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
         {/* 1. Milestone Auto-Approval Timeline */}
-        <div className="space-y-2 bg-black/40 p-5 rounded-2xl border border-white/10 flex flex-col justify-between">
+        <div className="space-y-2 bg-[#F0E7D8] p-5 rounded-2xl border border-[#221E1A]/10 flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-1.5">
               <label
                 htmlFor="auto-approval-timeline"
-                className="block font-bold text-white text-xs font-h1"
+                className="block font-bold text-[#241F1A] text-xs font-h1"
               >
                 {isVie ? 'Tự động duyệt giai đoạn' : 'Milestone Auto-Approval'}
               </label>
             </div>
-            <p className="text-[10px] text-[#8A8FA9] mb-3 leading-relaxed">
+            <p className="text-[10px] text-[#6E6459] mb-3 leading-relaxed">
               {isVie
                 ? 'Thời hạn tự động giải ngân ký quỹ nếu Khách hàng không phản hồi sau khi Tác giả bàn giao sản phẩm.'
                 : 'Automatic escrow release timeline if Client remains inactive after Creator delivers milestone work.'}
@@ -85,7 +85,7 @@ export function PolicyParametersGrid({
               id="auto-approval-timeline"
               value={milestoneDays}
               onChange={(e) => onMilestoneDaysChange(parseInt(e.target.value, 10))}
-              className="w-full px-4 py-3 rounded-xl bg-[#0f1017] border border-white/15 text-white font-bold text-xs focus:border-red-400 focus:outline-none transition-colors"
+              className="w-full px-4 py-3 rounded-xl bg-[#FFFCF6] border border-[#221E1A]/10 text-[#241F1A] font-bold text-xs focus:border-[#A8321C]/30 focus:outline-none transition-colors"
             >
               {milestoneTimelineOptions.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -97,20 +97,20 @@ export function PolicyParametersGrid({
         </div>
 
         {/* 2. Default Free Revision Limit */}
-        <div className="space-y-2 bg-black/40 p-5 rounded-2xl border border-white/10 flex flex-col justify-between">
+        <div className="space-y-2 bg-[#F0E7D8] p-5 rounded-2xl border border-[#221E1A]/10 flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-1.5">
               <label
                 htmlFor="revision-limit-input"
-                className="block font-bold text-white text-xs font-h1"
+                className="block font-bold text-[#241F1A] text-xs font-h1"
               >
                 {isVie ? 'Chỉnh sửa miễn phí' : 'Free Revision Limit'}
               </label>
-              <span className="px-1.5 py-0.5 rounded text-[9px] font-mono bg-amber-500/20 text-amber-300 border border-amber-500/30">
+              <span className="px-1.5 py-0.5 rounded text-[9px] font-mono bg-[#8A6A1F]/20 text-[#8A6A1F] border border-[#8A6A1F]/40">
                 {isVie ? 'Quy tắc hoa hồng' : 'Commission Rule'}
               </span>
             </div>
-            <p className="text-[10px] text-[#8A8FA9] mb-3 leading-relaxed">
+            <p className="text-[10px] text-[#6E6459] mb-3 leading-relaxed">
               {isVie
                 ? 'Số lần yêu cầu chỉnh sửa miễn phí tiêu chuẩn cho mỗi giai đoạn bàn giao trước khi tính phí phụ thu.'
                 : 'Standard free revision requests included per deliverable milestone before fee surcharge is requested.'}
@@ -122,7 +122,7 @@ export function PolicyParametersGrid({
               type="button"
               onClick={handleRevisionDecrement}
               disabled={revisionLimit <= 0}
-              className="w-10 h-11 rounded-xl bg-[#0f1017] border border-white/15 text-white font-bold hover:bg-white/10 flex items-center justify-center transition-colors disabled:opacity-40 cursor-pointer"
+              className="w-10 h-11 rounded-xl bg-[#FFFCF6] border border-[#221E1A]/10 text-[#241F1A] font-bold hover:bg-[#F0E7D8] flex items-center justify-center transition-colors disabled:opacity-40 cursor-pointer"
             >
               -
             </button>
@@ -138,14 +138,14 @@ export function PolicyParametersGrid({
                   Math.max(0, Math.min(20, parseInt(e.target.value, 10) || 0))
                 )
               }
-              className="flex-1 px-4 py-3 rounded-xl bg-[#0f1017] border border-white/15 text-white text-center font-mono font-bold text-sm focus:border-red-400 focus:outline-none"
+              className="flex-1 px-4 py-3 rounded-xl bg-[#FFFCF6] border border-[#221E1A]/10 text-[#241F1A] text-center font-mono font-bold text-sm focus:border-[#A8321C]/30 focus:outline-none"
             />
 
             <button
               type="button"
               onClick={handleRevisionIncrement}
               disabled={revisionLimit >= 20}
-              className="w-10 h-11 rounded-xl bg-[#0f1017] border border-white/15 text-white font-bold hover:bg-white/10 flex items-center justify-center transition-colors disabled:opacity-40 cursor-pointer"
+              className="w-10 h-11 rounded-xl bg-[#FFFCF6] border border-[#221E1A]/10 text-[#241F1A] font-bold hover:bg-[#F0E7D8] flex items-center justify-center transition-colors disabled:opacity-40 cursor-pointer"
             >
               +
             </button>
@@ -153,22 +153,22 @@ export function PolicyParametersGrid({
         </div>
 
         {/* 3. AWS S3 Presigned URL Expiration */}
-        <div className="space-y-2 bg-black/40 p-5 rounded-2xl border border-white/10 flex flex-col justify-between">
+        <div className="space-y-2 bg-[#F0E7D8] p-5 rounded-2xl border border-[#221E1A]/10 flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-1.5">
               <label
                 htmlFor="presigned-url-expiration"
-                className="block font-bold text-white text-xs font-h1"
+                className="block font-bold text-[#241F1A] text-xs font-h1"
               >
                 {isVie ? 'Hạn liên kết tải an toàn' : 'Presigned URL Expiry'}
               </label>
-              <span className="px-1.5 py-0.5 rounded text-[9px] font-mono bg-purple-500/20 text-purple-300 border border-purple-500/30">
+              <span className="px-1.5 py-0.5 rounded text-[9px] font-mono bg-[#5F3F86]/20 text-[#5F3F86] border border-[#5F3F86]/40">
                 BR-39
               </span>
             </div>
-            <p className="text-[10px] text-[#8A8FA9] mb-3 leading-relaxed">
+            <p className="text-[10px] text-[#6E6459] mb-3 leading-relaxed">
               {isVie
-                ? 'Thời gian hiệu lực của liên kết tải bảo mật tạm thời AWS S3 / Cloudinary cho file gốc chất lượng cao.'
+                ? 'Thời gian hiệu lực của liên kết tải bảo mật tạm thời AWS S3 / Cloudinary cho tệp gốc chất lượng cao.'
                 : 'Lifespan of temporary AWS S3 / Cloudinary presigned URLs for secure high-res deliverable downloads.'}
             </p>
           </div>
@@ -178,7 +178,7 @@ export function PolicyParametersGrid({
               id="presigned-url-expiration"
               value={presignedUrlMinutes}
               onChange={(e) => onPresignedUrlMinutesChange(parseInt(e.target.value, 10))}
-              className="w-full px-4 py-3 rounded-xl bg-[#0f1017] border border-white/15 text-white font-bold text-xs focus:border-red-400 focus:outline-none transition-colors"
+              className="w-full px-4 py-3 rounded-xl bg-[#FFFCF6] border border-[#221E1A]/10 text-[#241F1A] font-bold text-xs focus:border-[#A8321C]/30 focus:outline-none transition-colors"
             >
               {presignedUrlOptions.map((opt) => (
                 <option key={opt.value} value={opt.value}>

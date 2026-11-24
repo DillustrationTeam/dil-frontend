@@ -172,26 +172,26 @@ export function TradeDisputeModal({
     <div
       role="dialog"
       aria-modal="true"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#F0E7D8]/85 backdrop-blur-md animate-in fade-in duration-200"
       onClick={() => {
         if (!isSubmitting) onClose();
       }}
     >
       <div
-        className="relative w-full max-w-xl max-h-[90vh] overflow-y-auto rounded-3xl border border-white/15 bg-[#161926] p-6 sm:p-7 shadow-2xl space-y-5"
+        className="relative w-full max-w-xl max-h-[90vh] overflow-y-auto rounded-3xl border border-[#221E1A]/10 bg-[#FFFCF6] p-6 sm:p-7 shadow-2xl space-y-5"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-start justify-between border-b border-white/10 pb-4">
+        <div className="flex items-start justify-between border-b border-[#221E1A]/10 pb-4">
           <div className="flex items-center gap-3">
-            <div className="size-11 rounded-2xl bg-red-500/15 border border-red-500/30 text-red-400 flex items-center justify-center shrink-0 shadow-lg shadow-red-500/10">
+            <div className="size-11 rounded-2xl bg-[#A8321C]/15 border border-[#A8321C]/40 text-[#A8321C] flex items-center justify-center shrink-0 shadow-lg shadow-[#A8321C]">
               <Gavel className="size-5" />
             </div>
             <div>
-              <h3 className="font-h1 text-base sm:text-lg font-bold text-white flex items-center gap-2">
-                {isEng ? 'File Art Trade Dispute' : 'Gửi Khiếu Nại Tranh Chấp Art Trade'}
+              <h3 className="font-h1 text-base sm:text-lg font-bold text-[#241F1A] flex items-center gap-2">
+                {isEng ? 'File Art Trade Dispute' : 'Gửi Khiếu Nại Tranh Chấp trao đổi tranh'}
               </h3>
-              <p className="text-xs text-slate-400 mt-0.5">
+              <p className="text-xs text-[#746A5F] mt-0.5">
                 {isEng
                   ? `Report issue for trade: "${trade.title}"`
                   : `Báo cáo vi phạm cho giao dịch: "${trade.title}"`}
@@ -203,17 +203,17 @@ export function TradeDisputeModal({
             type="button"
             onClick={onClose}
             disabled={isSubmitting}
-            className="flex size-8 items-center justify-center rounded-full bg-white/5 border border-white/10 text-slate-400 hover:text-white transition disabled:opacity-40"
+            className="flex size-8 items-center justify-center rounded-full bg-[#FFFCF6] border border-[#221E1A]/10 text-[#746A5F] hover:text-[#241F1A] transition disabled:opacity-40"
           >
             <X className="size-4" />
           </button>
         </div>
 
         {/* Informational Alert Box */}
-        <div className="rounded-2xl border border-amber-500/25 bg-amber-500/10 p-3.5 text-xs text-amber-200/90 flex items-start gap-3">
-          <AlertTriangle className="size-4 text-amber-400 shrink-0 mt-0.5" />
+        <div className="rounded-2xl border border-[#8A6A1F]/35 bg-[#8A6A1F]/10 p-3.5 text-xs text-[#8A6A1F] flex items-start gap-3">
+          <AlertTriangle className="size-4 text-[#8A6A1F] shrink-0 mt-0.5" />
           <div className="space-y-1">
-            <span className="font-bold block text-amber-300">
+            <span className="font-bold block text-[#8A6A1F]">
               {isEng ? 'Arbitration Policy Notice' : 'Quy định giải quyết tranh chấp'}
             </span>
             <p className="leading-relaxed">
@@ -228,7 +228,7 @@ export function TradeDisputeModal({
         <form onSubmit={handleSubmit} className="space-y-4 text-xs">
           {/* 1. Category */}
           <div>
-            <label className="block text-slate-300 font-semibold mb-1.5">
+            <label className="block text-[#746A5F] font-semibold mb-1.5">
               {isEng ? 'Violation Type (Category):' : 'Loại vi phạm (Danh mục):'}
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -239,13 +239,13 @@ export function TradeDisputeModal({
                   onClick={() => setSelectedCategory(cat.id)}
                   className={`text-left p-2.5 rounded-xl border text-xs transition cursor-pointer flex items-center justify-between ${
                     selectedCategory === cat.id
-                      ? 'border-red-400 bg-red-500/15 text-white font-semibold shadow-[0_0_12px_rgba(239,68,68,0.2)]'
-                      : 'border-white/10 bg-white/[0.03] text-slate-300 hover:bg-white/[0.06] hover:text-white'
+                      ? 'border-[#A8321C]/30 bg-[#A8321C]/15 text-[#241F1A] font-semibold shadow-[0_0_12px_rgba(239,68,68,0.2)]'
+                      : 'border-[#221E1A]/10 bg-[#FFFCF6] text-[#746A5F] hover:bg-[#FFFCF6] hover:text-[#241F1A]'
                   }`}
                 >
                   <span>{isEng ? cat.labelEn : cat.labelVi}</span>
                   {selectedCategory === cat.id && (
-                    <span className="size-2 rounded-full bg-red-400 shrink-0 ml-2" />
+                    <span className="size-2 rounded-full bg-[#A8321C]/10 shrink-0 ml-2" />
                   )}
                 </button>
               ))}
@@ -254,7 +254,7 @@ export function TradeDisputeModal({
 
           {/* 2. Detailed Explanation */}
           <div>
-            <label className="block text-slate-300 font-semibold mb-1.5">
+            <label className="block text-[#746A5F] font-semibold mb-1.5">
               {isEng
                 ? 'Detailed Explanation & Arguments (Required):'
                 : 'Mô tả chi tiết lý do & luận cứ khiếu nại (Bắt buộc):'}
@@ -268,19 +268,19 @@ export function TradeDisputeModal({
                   ? 'State why the partner artwork violates guidelines (e.g. AI-generation artifacts on hands/eyes, image search matches, character mismatch, or lack of response)...'
                   : 'Nêu rõ lý do tranh của đối tác vi phạm (ví dụ: phát hiện lỗi tranh AI ở bàn tay/mắt, tìm thấy ảnh gốc bị sao chép, vẽ sai hoàn toàn nhân vật OC đã thỏa thuận)...'
               }
-              className="w-full rounded-2xl border border-white/10 bg-[#131316] p-3.5 text-xs text-white placeholder-slate-500 focus:border-red-400 focus:outline-none transition"
+              className="w-full rounded-2xl border border-[#221E1A]/10 bg-[#F7F2E9] p-3.5 text-xs text-[#241F1A] text-[#746A5F] focus:border-[#A8321C]/30 focus:outline-none transition"
             />
           </div>
 
           {/* 3. Evidence Upload */}
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label className="text-slate-300 font-semibold block">
+              <label className="text-[#746A5F] font-semibold block">
                 {isEng
                   ? 'Evidence Screenshots / Images (Optional):'
                   : 'Ảnh bằng chứng / Ảnh chụp màn hình (Tùy chọn):'}
               </label>
-              <span className="text-[11px] text-slate-400">
+              <span className="text-[11px] text-[#746A5F]">
                 {evidenceUrls.length}/6 {isEng ? 'images' : 'ảnh'}
               </span>
             </div>
@@ -289,7 +289,7 @@ export function TradeDisputeModal({
               {evidenceUrls.map((url, idx) => (
                 <div
                   key={idx}
-                  className="relative aspect-square rounded-xl overflow-hidden border border-white/15 bg-black/50 group"
+                  className="relative aspect-square rounded-xl overflow-hidden border border-[#221E1A]/10 bg-[#E5D8C2] group"
                 >
                   <Image
                     src={url}
@@ -301,7 +301,7 @@ export function TradeDisputeModal({
                   <button
                     type="button"
                     onClick={() => handleRemoveEvidence(idx)}
-                    className="absolute top-1.5 right-1.5 size-5 rounded-full bg-black/80 text-white flex items-center justify-center hover:bg-red-600 transition shadow"
+                    className="absolute top-1.5 right-1.5 size-5 rounded-full bg-[#E5D8C2] text-[#241F1A] flex items-center justify-center hover:bg-[#A8321C]/12 transition shadow"
                     title={isEng ? 'Remove image' : 'Xóa ảnh'}
                   >
                     <X size={12} />
@@ -314,10 +314,10 @@ export function TradeDisputeModal({
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
                   disabled={uploadingEvidence}
-                  className="aspect-square rounded-xl border border-dashed border-white/20 bg-white/[0.02] hover:bg-white/[0.06] hover:border-white/40 text-slate-400 hover:text-white flex flex-col items-center justify-center gap-1 transition cursor-pointer disabled:opacity-50"
+                  className="aspect-square rounded-xl border border-dashed border-[#221E1A]/20 bg-[#FFFCF6] hover:bg-[#FFFCF6] hover:border-[#221E1A]/20 text-[#746A5F] hover:text-[#241F1A] flex flex-col items-center justify-center gap-1 transition cursor-pointer disabled:opacity-50"
                 >
                   {uploadingEvidence ? (
-                    <Loader2 size={18} className="animate-spin text-red-400" />
+                    <Loader2 size={18} className="animate-spin text-[#A8321C]" />
                   ) : (
                     <>
                       <Plus size={18} />
@@ -341,12 +341,12 @@ export function TradeDisputeModal({
           </div>
 
           {/* Action Buttons */}
-          <div className="flex items-center justify-end gap-3 pt-3 border-t border-white/10">
+          <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#221E1A]/10">
             <button
               type="button"
               onClick={onClose}
               disabled={isSubmitting}
-              className="px-4 py-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-slate-300 text-xs font-semibold transition disabled:opacity-50"
+              className="px-4 py-2 rounded-xl bg-[#FFFCF6] border border-[#221E1A]/10 hover:bg-[#F0E7D8] text-[#746A5F] text-xs font-semibold transition disabled:opacity-50"
             >
               {isEng ? 'Cancel' : 'Hủy bỏ'}
             </button>
@@ -354,7 +354,7 @@ export function TradeDisputeModal({
             <button
               type="submit"
               disabled={isSubmitting || !details.trim()}
-              className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white text-xs font-bold transition shadow-lg shadow-red-600/30 disabled:opacity-50 cursor-pointer"
+              className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-gradient-to-r from-[#A8321C] to-[#A8321C] hover:from-[#A8321C] hover:to-[#A8321C] text-[#241F1A] text-xs font-bold transition shadow-lg shadow-[#A8321C] disabled:opacity-50 cursor-pointer"
             >
               {isSubmitting ? (
                 <>

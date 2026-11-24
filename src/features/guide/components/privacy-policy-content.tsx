@@ -7,21 +7,21 @@ const DATA_INVENTORY = {
   VIE: [
     {
       data: 'Họ tên, email, mật khẩu hoặc định danh Google OAuth',
-      source: 'Form đăng ký (/register), đăng nhập (/login), thiết lập mật khẩu',
+      source: 'Biểu mẫu đăng ký (/register), đăng nhập (/login), thiết lập mật khẩu',
       purpose: 'Tạo tài khoản, xác thực đăng nhập, bảo mật 2 lớp (2FA) và gửi mã OTP khôi phục tài khoản',
     },
     {
       data: 'Ảnh đại diện, ảnh bìa, tiểu sử, bảng giá & tác phẩm',
-      source: 'Cài đặt hồ sơ (/settings), Creator Studio (/creator/profile/edit)',
+      source: 'Cài đặt hồ sơ (/settings), họa sĩ xưởng vẽ (/họa sĩ/profile/edit)',
       purpose: 'Hiển thị hồ sơ công khai, giới thiệu dịch vụ vẽ và đăng tải tác phẩm trên sàn',
     },
     {
       data: 'Thông tin đối soát thanh toán, giao dịch ví & VietQR (Dữ liệu nhạy cảm)',
-      source: 'Ký quỹ payOS, nạp/rút ví (/wallet, /deposit, /payout)',
+      source: 'Ký quỹ payOS, nạp/rút ví (/ví, /deposit, /chi trả)',
       purpose: 'Tạm giữ ký quỹ theo chặng, hoàn tiền khi hủy/outbid và giải ngân thù lao cho họa sĩ',
     },
     {
-      data: 'Brief đặt vẽ, tin nhắn Workroom/Art Trade, tệp WIP & file gốc',
+      data: 'Đề bài đặt vẽ, tin nhắn phòng làm việc/trao đổi tranh, tệp WIP & tệp gốc',
       source: 'Workroom (/workroom/[id]), Art Trade (/art-trades/[id])',
       purpose: 'Thực hiện thỏa thuận đặt vẽ/trao đổi tranh và làm căn cứ đối soát khi có khiếu nại',
     },
@@ -155,88 +155,86 @@ export function PrivacyPolicyContent() {
   const thirdParties = THIRD_PARTIES[lang];
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-12 text-[#E4E1E5] sm:px-6" data-no-translate="true">
-      <div className="mb-8 rounded-2xl border border-amber-400/25 bg-amber-400/10 p-4 text-xs leading-relaxed text-amber-100">
+    <div className="mx-auto max-w-4xl px-4 py-12 text-[#241F1A] sm:px-6" data-no-translate="true">
+      <div className="mb-8 rounded-2xl border border-[#8A6A1F]/35 bg-[#8A6A1F]/10 p-4 text-xs leading-relaxed text-[#8A6A1F]">
         {isEng ? (
           <>
             <strong>Notice (Reference Draft):</strong> This policy is compiled from the actual platform data schema on 12/11/2026 for user transparency. The platform operator should complete placeholders marked{' '}
-            <code className="rounded bg-black/30 px-1.5 py-0.5 text-amber-200">[FILL: ...]</code> and obtain formal legal review prior to commercial launch.
+            <code className="rounded bg-[#F0E7D8] px-1.5 py-0.5 text-[#8A6A1F]">[FILL: ...]</code> and obtain formal legal review prior to commercial launch.
           </>
         ) : (
           <>
             <strong>Lưu ý (Bản nháp tham khảo):</strong> Tài liệu này được tổng hợp từ cấu trúc dữ liệu thực tế trong mã nguồn ngày 12/11/2026 để minh bạch với người dùng. Chủ sở hữu nền tảng cần hoàn thiện các mục đánh dấu{' '}
-            <code className="rounded bg-black/30 px-1.5 py-0.5 text-amber-200">[ĐIỀN: ...]</code> và tham vấn người có chuyên môn pháp lý trước khi công bố vận hành thương mại chính thức.
-          </>
+            <code className="rounded bg-[#F0E7D8] px-1.5 py-0.5 text-[#8A6A1F]">[ĐIỀN: ...]</code> và tham vấn người có chuyên môn pháp lý trước khi công bố vận hành thương mại chính thức. </>
         )}
       </div>
 
-      <header className="mb-10 border-b border-white/10 pb-6">
-        <p className="text-xs font-bold uppercase tracking-widest text-[#A7ACD9]">
+      <header className="mb-10 border-b border-[#221E1A]/10 pb-6">
+        <p className="text-xs font-bold uppercase tracking-widest text-[#B24A26]">
           {isEng
             ? 'Vietnam PDPL 91/2025/QH15 & Decree 356/2025/ND-CP'
             : 'Luật 91/2025/QH15 & Nghị định 356/2025/NĐ-CP'}
         </p>
-        <h1 className="font-h1 mt-2 text-3xl font-extrabold tracking-tight text-white">
+        <h1 className="font-h1 mt-2 text-3xl font-extrabold tracking-tight text-[#241F1A]">
           {isEng ? 'Personal Data Protection Policy' : 'Chính sách bảo vệ dữ liệu cá nhân'}
         </h1>
-        <p className="mt-2 text-sm text-[#C7C5CF]">
+        <p className="mt-2 text-sm text-[#6E6459]">
           {isEng
             ? 'Last updated: 12/11/2026 • Version: 1.0 (Draft)'
             : 'Cập nhật lần cuối: 12/11/2026 • Phiên bản: 1.0 (Bản nháp)'}
         </p>
       </header>
 
-      <div className="space-y-10 text-sm leading-7 text-[#C7C5CF]">
+      <div className="space-y-10 text-sm leading-7 text-[#6E6459]">
         <section className="space-y-3">
-          <h2 className="font-h1 text-xl font-bold text-white">
+          <h2 className="font-h1 text-xl font-bold text-[#241F1A]">
             {isEng ? '1. Data Controller' : '1. Đơn vị kiểm soát dữ liệu cá nhân'}
           </h2>
           <p>
-            <strong className="text-white">DILLUSTRATION Team</strong>{' '}
+            <strong className="text-[#241F1A]">DILLUSTRATION Team</strong>{' '}
             {isEng
               ? 'acts as the personal data controller for data collected through the DILLUSTRATION website. Full corporate particulars upon official launch:'
               : 'là bên kiểm soát dữ liệu cá nhân thu thập qua website DILLUSTRATION. Thông tin pháp nhân đầy đủ khi vận hành chính thức:'}
           </p>
           <ul className="list-disc space-y-1.5 pl-5">
             <li>
-              <strong className="text-white">
+              <strong className="text-[#241F1A]">
                 {isEng ? 'Legal Entity / Business Name:' : 'Tên pháp nhân / Hộ kinh doanh:'}
               </strong>{' '}
               {isEng ? '[FILL: Legal entity / owner name]' : '[ĐIỀN: Tên pháp nhân / chủ sở hữu]'}
             </li>
             <li>
-              <strong className="text-white">
+              <strong className="text-[#241F1A]">
                 {isEng ? 'Enterprise / Tax ID:' : 'Mã số doanh nghiệp / Mã số thuế:'}
               </strong>{' '}
               {isEng ? '[FILL: Registration / Tax Code]' : '[ĐIỀN: Mã số ĐKKD / MST]'}
             </li>
             <li>
-              <strong className="text-white">
+              <strong className="text-[#241F1A]">
                 {isEng ? 'Registered Address:' : 'Địa chỉ liên hệ:'}
               </strong>{' '}
               {isEng ? '[FILL: Official headquarters address]' : '[ĐIỀN: Địa chỉ trụ sở chính thức]'}
             </li>
             <li>
-              <strong className="text-white">
+              <strong className="text-[#241F1A]">
                 {isEng ? 'Request Channel:' : 'Kênh tiếp nhận yêu cầu:'}
               </strong>{' '}
               {isEng ? (
                 <>
                   [FILL: Official contact email] or submit directly via the{' '}
-                  <strong className="text-white">Support &amp; Issue Report</strong> dialog on the website.
+                  <strong className="text-[#241F1A]">Support &amp; Issue Report</strong> dialog on the website.
                 </>
               ) : (
                 <>
                   [ĐIỀN: Email chính thức] hoặc gửi trực tiếp qua hộp thoại{' '}
-                  <strong className="text-white">Hỗ trợ &amp; Báo cáo sự cố</strong> trên website.
-                </>
+                  <strong className="text-[#241F1A]">Hỗ trợ &amp; Báo cáo sự cố</strong> trên website. </>
               )}
             </li>
           </ul>
         </section>
 
         <section className="space-y-4">
-          <h2 className="font-h1 text-xl font-bold text-white">
+          <h2 className="font-h1 text-xl font-bold text-[#241F1A]">
             {isEng ? '2. Data Collected & Processing Purposes' : '2. Dữ liệu thu thập và mục đích xử lý'}
           </h2>
           <p>
@@ -244,21 +242,21 @@ export function PrivacyPolicyContent() {
               ? 'We only collect data strictly necessary for active platform features and will not use it for unrelated purposes without your consent:'
               : 'Chúng tôi chỉ thu thập dữ liệu cần thiết cho các chức năng thực tế của nền tảng và không dùng cho mục đích khác nếu chưa có sự đồng ý của bạn:'}
           </p>
-          <div className="overflow-x-auto rounded-2xl border border-white/10 bg-[#181B29]">
+          <div className="overflow-x-auto rounded-2xl border border-[#221E1A]/10 bg-[#F0E7D8]">
             <table className="w-full border-collapse text-left text-xs sm:text-sm">
               <thead>
-                <tr className="border-b border-white/10 bg-white/[0.03] text-[#A7ACD9]">
+                <tr className="border-b border-[#221E1A]/10 bg-[#FFFCF6] text-[#B24A26]">
                   <th className="p-3.5 font-bold">{isEng ? 'Data Category' : 'Loại dữ liệu'}</th>
                   <th className="p-3.5 font-bold">{isEng ? 'Collection Point' : 'Nơi thu thập'}</th>
                   <th className="p-3.5 font-bold">{isEng ? 'Purpose' : 'Mục đích sử dụng'}</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/10">
+              <tbody className="divide-y divide-[#221E1A]/10">
                 {inventory.map((row) => (
                   <tr key={row.data}>
-                    <td className="p-3.5 font-medium text-white">{row.data}</td>
-                    <td className="p-3.5 text-[#C7C5CF]">{row.source}</td>
-                    <td className="p-3.5 text-[#C7C5CF]">{row.purpose}</td>
+                    <td className="p-3.5 font-medium text-[#241F1A]">{row.data}</td>
+                    <td className="p-3.5 text-[#6E6459]">{row.source}</td>
+                    <td className="p-3.5 text-[#6E6459]">{row.purpose}</td>
                   </tr>
                 ))}
               </tbody>
@@ -267,26 +265,25 @@ export function PrivacyPolicyContent() {
         </section>
 
         <section className="space-y-3">
-          <h2 className="font-h1 text-xl font-bold text-white">
+          <h2 className="font-h1 text-xl font-bold text-[#241F1A]">
             {isEng ? '3. Sensitive Personal Data Processing' : '3. Xử lý dữ liệu cá nhân nhạy cảm'}
           </h2>
           <p>
             {isEng ? (
               <>
                 Bank account / VietQR details used for deposits/payouts and identity verification data are classified as{' '}
-                <strong className="text-white">sensitive personal data</strong> under Article 4.1 of Decree 356/2025/ND-CP. We process these details exclusively to fulfill escrow deposits, refunds, and payouts upon your explicit request.
+                <strong className="text-[#241F1A]">sensitive personal data</strong> under Article 4.1 of Decree 356/2025/ND-CP. We process these details exclusively to fulfill escrow deposits, refunds, and payouts upon your explicit request.
               </>
             ) : (
               <>
                 Thông tin tài khoản ngân hàng/VietQR dùng để đối soát nạp rút tiền và thông tin bảo mật định danh thuộc nhóm{' '}
-                <strong className="text-white">dữ liệu cá nhân nhạy cảm</strong> theo khoản 1 Điều 4 Nghị định 356/2025/NĐ-CP. Chúng tôi chỉ xử lý dữ liệu này để thực hiện giao dịch ký quỹ, hoàn tiền và giải ngân thù lao theo đúng yêu cầu giao dịch của bạn.
-              </>
+                <strong className="text-[#241F1A]">dữ liệu cá nhân nhạy cảm</strong> theo khoản 1 Điều 4 Nghị định 356/2025/NĐ-CP. Chúng tôi chỉ xử lý dữ liệu này để thực hiện giao dịch ký quỹ, hoàn tiền và giải ngân thù lao theo đúng yêu cầu giao dịch của bạn. </>
             )}
           </p>
         </section>
 
         <section className="space-y-4">
-          <h2 className="font-h1 text-xl font-bold text-white">
+          <h2 className="font-h1 text-xl font-bold text-[#241F1A]">
             {isEng ? '4. Third-Party Sharing & Data Retention' : '4. Chia sẻ bên thứ ba & Lưu trữ'}
           </h2>
           <p>
@@ -294,27 +291,27 @@ export function PrivacyPolicyContent() {
               ? 'We do not sell your personal data. Certain technical operations require transmitting relevant fields to integrated service providers:'
               : 'Chúng tôi không mua bán dữ liệu cá nhân của bạn. Một số tác vụ kỹ thuật cần truyền dữ liệu tới các bên cung cấp dịch vụ tích hợp:'}
           </p>
-          <div className="overflow-x-auto rounded-2xl border border-white/10 bg-[#181B29]">
+          <div className="overflow-x-auto rounded-2xl border border-[#221E1A]/10 bg-[#F0E7D8]">
             <table className="w-full border-collapse text-left text-xs sm:text-sm">
               <thead>
-                <tr className="border-b border-white/10 bg-white/[0.03] text-[#A7ACD9]">
+                <tr className="border-b border-[#221E1A]/10 bg-[#FFFCF6] text-[#B24A26]">
                   <th className="p-3.5 font-bold">{isEng ? 'Recipient' : 'Bên tiếp nhận'}</th>
                   <th className="p-3.5 font-bold">{isEng ? 'Relevant Data' : 'Dữ liệu liên quan'}</th>
                   <th className="p-3.5 font-bold">{isEng ? 'Purpose' : 'Mục đích'}</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/10">
+              <tbody className="divide-y divide-[#221E1A]/10">
                 {thirdParties.map((item) => (
                   <tr key={item.party}>
-                    <td className="p-3.5 font-medium text-white">{item.party}</td>
-                    <td className="p-3.5 text-[#C7C5CF]">{item.data}</td>
-                    <td className="p-3.5 text-[#C7C5CF]">{item.purpose}</td>
+                    <td className="p-3.5 font-medium text-[#241F1A]">{item.party}</td>
+                    <td className="p-3.5 text-[#6E6459]">{item.data}</td>
+                    <td className="p-3.5 text-[#6E6459]">{item.purpose}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-          <p className="text-xs text-[#919099]">
+          <p className="text-xs text-[#746A5F]">
             {isEng
               ? 'Note: Using cloud storage, OAuth, or AI models hosted outside Vietnam falls under cross-border data transfer regulations (Article 20 of Law 91/2025/QH15). Post-closure data retention period: [FILL: Retention period / tax & accounting statutory period].'
               : 'Lưu ý: Khi sử dụng dịch vụ đám mây, xác thực hoặc mô hình AI có máy chủ đặt ngoài lãnh thổ Việt Nam, hoạt động này thuộc phạm vi chuyển dữ liệu xuyên biên giới theo Điều 20 Luật 91/2025/QH15. Thời hạn lưu trữ dữ liệu sau khi đóng tài khoản: [ĐIỀN: Thời hạn lưu trữ / quy định kế toán - thuế liên quan].'}
@@ -322,14 +319,14 @@ export function PrivacyPolicyContent() {
         </section>
 
         <section className="space-y-4">
-          <h2 className="font-h1 text-xl font-bold text-white">
+          <h2 className="font-h1 text-xl font-bold text-[#241F1A]">
             {isEng ? '5. Your Rights & Statutory Response Timelines' : '5. Quyền của bạn & Thời hạn xử lý yêu cầu'}
           </h2>
           <p>
             {isEng ? (
               <>
                 You have the right to be informed, consent, withdraw consent, access, rectify, request copies, restrict processing, or delete your personal data (Art. 4.1 Law 91/2025/QH15). You can update or deactivate your account in{' '}
-                <Link href="/settings" className="font-semibold text-[#A7ACD9] underline hover:text-white">
+                <Link href="/settings" className="font-semibold text-[#B24A26] underline hover:text-[#241F1A]">
                   Profile Settings (/settings)
                 </Link>
                 , or submit data requests via Support within statutory SLAs:
@@ -337,46 +334,40 @@ export function PrivacyPolicyContent() {
             ) : (
               <>
                 Bạn có quyền được biết, đồng ý, rút lại sự đồng ý, xem, chỉnh sửa, yêu cầu cung cấp, hạn chế xử lý hoặc xóa dữ liệu cá nhân của mình (Điều 4 khoản 1 Luật 91/2025/QH15). Bạn có thể tự chỉnh sửa hồ sơ hoặc vô hiệu hóa tài khoản tại{' '}
-                <Link href="/settings" className="font-semibold text-[#A7ACD9] underline hover:text-white">
-                  Cài đặt hồ sơ (/settings)
-                </Link>
-                , hoặc gửi yêu cầu xóa/cung cấp dữ liệu qua kênh hỗ trợ để được xử lý đúng thời hạn luật định:
-              </>
+                <Link href="/settings" className="font-semibold text-[#B24A26] underline hover:text-[#241F1A]"> Cài đặt hồ sơ (/settings) </Link> , hoặc gửi yêu cầu xóa/cung cấp dữ liệu qua kênh hỗ trợ để được xử lý đúng thời hạn luật định: </>
             )}
           </p>
-          <ul className="space-y-2 rounded-2xl border border-white/10 bg-[#181B29] p-5 text-xs sm:text-sm">
+          <ul className="space-y-2 rounded-2xl border border-[#221E1A]/10 bg-[#F0E7D8] p-5 text-xs sm:text-sm">
             {timelines.map((item) => (
-              <li key={item.action} className="flex flex-col justify-between gap-1 border-b border-white/10 pb-2 last:border-0 last:pb-0 sm:flex-row sm:gap-4">
-                <span className="font-semibold text-white">{item.action}:</span>
-                <span className="text-[#A7ACD9]">{item.timeline}</span>
+              <li key={item.action} className="flex flex-col justify-between gap-1 border-b border-[#221E1A]/10 pb-2 last:border-0 last:pb-0 sm:flex-row sm:gap-4">
+                <span className="font-semibold text-[#241F1A]">{item.action}:</span>
+                <span className="text-[#B24A26]">{item.timeline}</span>
               </li>
             ))}
           </ul>
         </section>
 
         <section className="space-y-3">
-          <h2 className="font-h1 text-xl font-bold text-white">
+          <h2 className="font-h1 text-xl font-bold text-[#241F1A]">
             {isEng ? '6. Browser Storage & Incident Notification' : '6. Phiên đăng nhập & Thông báo sự cố'}
           </h2>
           <p>
             {isEng ? (
               <>
-                This website uses browser storage (<code className="rounded bg-white/10 px-1.5 py-0.5 text-xs">localStorage</code>) strictly for essential login sessions and language preferences. In the event of a personal data breach, the operator notifies the competent authority within <strong className="text-white">72 hours</strong> of discovery pursuant to Article 23.1 of Law 91/2025/QH15.
+                This website uses browser storage (<code className="rounded bg-[#F0E7D8] px-1.5 py-0.5 text-xs">localStorage</code>) strictly for essential login sessions and language preferences. In the event of a personal data breach, the operator notifies the competent authority within <strong className="text-[#241F1A]">72 hours</strong> of discovery pursuant to Article 23.1 of Law 91/2025/QH15.
               </>
             ) : (
-              <>
-                Trang web hiện sử dụng bộ nhớ trình duyệt (<code className="rounded bg-white/10 px-1.5 py-0.5 text-xs">localStorage</code>) cho mục đích thiết yếu là duy trì phiên đăng nhập và tùy chọn ngôn ngữ/giao diện. Nếu xảy ra sự cố lộ, mất dữ liệu cá nhân, đơn vị vận hành thực hiện thông báo cho cơ quan chuyên trách chậm nhất <strong className="text-white">72 giờ</strong> kể từ khi phát hiện theo Điều 23 khoản 1 Luật 91/2025/QH15.
-              </>
+              <> Trang web hiện sử dụng bộ nhớ trình duyệt (<code className="rounded bg-[#F0E7D8] px-1.5 py-0.5 text-xs">localStorage</code>) cho mục đích thiết yếu là duy trì phiên đăng nhập và tùy chọn ngôn ngữ/giao diện. Nếu xảy ra sự cố lộ, mất dữ liệu cá nhân, đơn vị vận hành thực hiện thông báo cho cơ quan chuyên trách chậm nhất <strong className="text-[#241F1A]">72 giờ</strong> kể từ khi phát hiện theo Điều 23 khoản 1 Luật 91/2025/QH15. </>
             )}
           </p>
         </section>
       </div>
 
-      <div className="mt-10 flex flex-wrap items-center justify-between gap-4 border-t border-white/10 pt-6 text-sm">
-        <Link href="/guide" className="font-semibold text-[#A7ACD9] hover:underline">
+      <div className="mt-10 flex flex-wrap items-center justify-between gap-4 border-t border-[#221E1A]/10 pt-6 text-sm">
+        <Link href="/guide" className="font-semibold text-[#B24A26] hover:underline">
           {isEng ? '← Back to Guide' : '← Quay lại trang Hướng dẫn'}
         </Link>
-        <Link href="/register" className="font-semibold text-[#A7ACD9] hover:underline">
+        <Link href="/register" className="font-semibold text-[#B24A26] hover:underline">
           {isEng ? 'Go to Registration →' : 'Đi tới Đăng ký tài khoản →'}
         </Link>
       </div>

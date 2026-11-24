@@ -47,14 +47,14 @@ export default function WalletPage() {
       window.location.assign(order.paymentUrl);
     } catch { setError('Không tạo được đơn nạp tiền. Hãy thử lại.'); setBusy(false); }
   };
-  return <main className="mx-auto max-w-xl space-y-5 rounded-2xl border border-white/10 bg-white/[0.035] p-8 text-white">
+  return <main className="mx-auto max-w-xl space-y-5 rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] p-8 text-[#241F1A]">
     <h1 className="text-2xl font-bold">Ví Dillustration</h1>
     <p>Số dư khả dụng: <strong>{walletFailed ? 'Không tải được' : walletLoading ? 'Đang tải…' : money(balance ?? 0)}</strong></p>
     <p>Tiền đang giữ ký quỹ: <strong>{money(locked)}</strong></p>
-    <p className="text-sm text-slate-400">Nạp tiền qua SePay. Khi SePay xác nhận thanh toán, tiền vào ví; bạn dùng số dư ví để ký quỹ đơn vẽ.</p>
-    {returnTo && <p className="text-sm text-slate-300">Sau khi thanh toán, <Link href={returnTo} className="text-[#C5C9F8] underline">quay lại đơn cần ký quỹ</Link> để kiểm tra số dư và xác nhận.</p>}
-    <form onSubmit={topUp} className="space-y-3"><label htmlFor="amount" className="block text-sm">Số tiền nạp (VND)</label><input id="amount" type="number" min={10000} max={500000000} step={1000} required value={amount} onChange={event => setAmount(Number(event.target.value))} className="w-full rounded-xl border border-white/20 bg-transparent px-3 py-2" /><button disabled={busy} className="commission-primary rounded-xl px-4 py-2 text-sm disabled:opacity-50">{busy ? 'Đang tạo đơn…' : 'Nạp tiền qua SePay'}</button></form>
-    {walletFailed && <p role="alert" className="text-sm text-red-300">Không tải được số dư ví. Hãy tải lại trang trước khi ký quỹ.</p>}
-    {error && <p role="alert" className="text-sm text-red-300">{error}</p>}
+    <p className="text-sm text-[#746A5F]">Nạp tiền qua SePay. Khi SePay xác nhận thanh toán, tiền vào ví; bạn dùng số dư ví để ký quỹ đơn vẽ.</p>
+    {returnTo && <p className="text-sm text-[#746A5F]">Sau khi thanh toán, <Link href={returnTo} className="text-[#8C3718] underline">quay lại đơn cần ký quỹ</Link> để kiểm tra số dư và xác nhận.</p>}
+    <form onSubmit={topUp} className="space-y-3"><label htmlFor="amount" className="block text-sm">Số tiền nạp (VND)</label><input id="amount" type="number" min={10000} max={500000000} step={1000} required value={amount} onChange={event => setAmount(Number(event.target.value))} className="w-full rounded-xl border border-[#221E1A]/20 bg-transparent px-3 py-2" /><button disabled={busy} className="commission-primary rounded-xl px-4 py-2 text-sm disabled:opacity-50">{busy ? 'Đang tạo đơn…' : 'Nạp tiền qua SePay'}</button></form>
+    {walletFailed && <p role="alert" className="text-sm text-[#A8321C]">Không tải được số dư ví. Hãy tải lại trang trước khi ký quỹ.</p>}
+    {error && <p role="alert" className="text-sm text-[#A8321C]">{error}</p>}
   </main>;
 }

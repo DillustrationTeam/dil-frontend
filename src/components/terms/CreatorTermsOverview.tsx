@@ -31,7 +31,7 @@ export const CREATOR_TERMS_PRESETS: Array<{
   {
     id: 'standard',
     label: 'Mẫu ToS tiêu chuẩn',
-    description: 'Cân bằng quyền lợi cho commission cá nhân & thương mại phổ biến.',
+    description: 'Cân bằng quyền lợi cho đặt vẽ cá nhân & thương mại phổ biến.',
     terms: {
       commercialLicenseMultiplier: 1.5,
       extended: { ...DEFAULT_EXTENDED_TERMS, customClauses: [] },
@@ -46,7 +46,7 @@ export const CREATOR_TERMS_PRESETS: Array<{
       extended: {
         ...DEFAULT_EXTENDED_TERMS,
         commercialScope:
-          'Bao gồm phát sóng livestream, thumbnail, merch in ấn và ấn phẩm truyền thông thương hiệu của chính Client.',
+          'Bao gồm phát sóng livestream, thumbnail, merch in ấn và ấn phẩm truyền thông thương hiệu của chính khách hàng.',
         usageRestrictions:
           'Không chuyển nhượng hoặc bán lại tệp gốc cho bên thứ ba. Mọi yêu cầu giữ kín hoàn toàn (NDA) cần thống nhất trước khi ký quỹ.',
         allowPortfolioDisplay: true,
@@ -121,13 +121,13 @@ export function CreatorTermsOverview({
     text: string;
   }> = [
     {
-      label: 'Đăng Portfolio (có watermark)',
+      label: 'Đăng hồ sơ tác phẩm (có dấu chìm)',
       enabled: ext.allowPortfolioDisplay,
       icon: ext.allowPortfolioDisplay ? 'check' : 'lock',
-      text: ext.allowPortfolioDisplay ? 'Creator được phép đăng' : 'Giữ kín riêng tư',
+      text: ext.allowPortfolioDisplay ? 'Họa sĩ được phép đăng' : 'Giữ kín riêng tư',
     },
     {
-      label: 'Ghi nguồn tác giả (Credit)',
+      label: 'Ghi nguồn tác giả',
       enabled: ext.requireCredit,
       icon: ext.requireCredit ? 'check' : 'x',
       text: ext.requireCredit ? 'Bắt buộc ghi nguồn' : 'Không bắt buộc',
@@ -148,45 +148,42 @@ export function CreatorTermsOverview({
 
   return (
     <div className={compact ? 'space-y-4 text-xs' : 'space-y-5 text-sm'}>
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#221E1A]/10 pb-3">
         <div>
-          <p className="font-h1 font-bold text-white">
-            {creatorName ? `Điều khoản dịch vụ của ${creatorName}` : 'Điều khoản dịch vụ (ToS) của Creator'}
+          <p className="font-h1 font-bold text-[#241F1A]">
+            {creatorName ? `Điều khoản dịch vụ của ${creatorName}` : 'Điều khoản dịch vụ (ToS) của họa sĩ'}
           </p>
           {data.updatedAt && (
-            <p className="mt-0.5 text-[11px] text-[#919099]">
+            <p className="mt-0.5 text-[11px] text-[#746A5F]">
               Cập nhật lần cuối: {new Date(data.updatedAt).toLocaleDateString('vi-VN')}
             </p>
           )}
         </div>
-        <span className="rounded-full border border-white/10 bg-white/[.04] px-2.5 py-1 font-mono text-[11px] font-medium text-[#C7C5CF]">
+        <span className="rounded-full border border-[#221E1A]/10 bg-[#FFFCF6] px-2.5 py-1 font-mono text-[11px] font-medium text-[#6E6459]">
           Phiên bản v{ext.version}
         </span>
       </div>
 
-      {/* Bản quyền & Hệ số: giữ nhấn giá thương mại bằng #DDE0FF có chủ đích */}
+      {/* Bản quyền & Hệ số: giữ nhấn giá thương mại bằng #A8321C có chủ đích */}
       <div className="grid gap-3 sm:grid-cols-2">
-        <div className="rounded-xl bg-white/[.03] p-3.5">
+        <div className="rounded-xl bg-[#FFFCF6] p-3.5">
           <div className="flex items-center justify-between gap-2">
-            <span className="text-xs font-semibold text-white">Cá nhân (Personal)</span>
-            <span className="font-mono text-xs font-semibold text-[#C7C5CF]">1.0× giá gốc</span>
+            <span className="text-xs font-semibold text-[#241F1A]">Cá nhân</span>
+            <span className="font-mono text-xs font-semibold text-[#6E6459]">1.0× giá gốc</span>
           </div>
-          <p className="mt-1.5 text-xs leading-5 text-[#C7C5CF]">
-            Sử dụng phi thương mại: avatar, hình nền, lưu niệm cá nhân.
-          </p>
+          <p className="mt-1.5 text-xs leading-5 text-[#6E6459]"> Sử dụng phi thương mại: avatar, hình nền, lưu niệm cá nhân. </p>
         </div>
 
-        <div className="rounded-xl bg-[#A7ACD9]/[.08] p-3.5">
+        <div className="rounded-xl bg-[#B24A26]/[.08] p-3.5">
           <div className="flex items-center justify-between gap-2">
-            <span className="text-xs font-semibold text-white">Thương mại (Commercial)</span>
-            <span className="font-mono text-xs font-bold text-[#DDE0FF]">
+            <span className="text-xs font-semibold text-[#241F1A]">Thương mại</span>
+            <span className="font-mono text-xs font-bold text-[#A8321C]">
               {mult.toFixed(1).replace(/\.0$/, '')}× giá gốc
             </span>
           </div>
-          <p className="mt-1.5 text-xs leading-5 text-[#E4E1E5]">{ext.commercialScope}</p>
-          <p className="mt-1.5 text-[11px] text-[#919099]">
-            Ví dụ: gói 1.000.000đ → <strong className="font-medium text-[#E4E1E5]">{sampleCommercialPrice}đ</strong> khi chọn Thương mại.
-          </p>
+          <p className="mt-1.5 text-xs leading-5 text-[#241F1A]">{ext.commercialScope}</p>
+          <p className="mt-1.5 text-[11px] text-[#746A5F]">
+            Ví dụ: gói 1.000.000đ → <strong className="font-medium text-[#241F1A]">{sampleCommercialPrice}đ</strong> khi chọn Thương mại. </p>
         </div>
       </div>
 
@@ -195,20 +192,20 @@ export function CreatorTermsOverview({
         {permissionItems.map((item) => (
           <div
             key={item.label}
-            className="flex items-center justify-between gap-3 rounded-xl bg-white/[.03] px-3 py-2.5 text-xs"
+            className="flex items-center justify-between gap-3 rounded-xl bg-[#FFFCF6] px-3 py-2.5 text-xs"
           >
-            <span className="text-[#C7C5CF]">{item.label}</span>
+            <span className="text-[#6E6459]">{item.label}</span>
             <span
               className={`inline-flex shrink-0 items-center gap-1.5 font-medium ${
-                item.enabled ? 'text-white' : 'text-[#919099]'
+                item.enabled ? 'text-[#241F1A]' : 'text-[#746A5F]'
               }`}
             >
               {item.icon === 'check' ? (
-                <Check className={`h-3.5 w-3.5 ${item.enabled ? 'text-[#A7ACD9]' : 'text-[#919099]'}`} />
+                <Check className={`h-3.5 w-3.5 ${item.enabled ? 'text-[#B24A26]' : 'text-[#746A5F]'}`} />
               ) : item.icon === 'lock' ? (
-                <Lock className={`h-3.5 w-3.5 ${item.enabled ? 'text-[#A7ACD9]' : 'text-[#919099]'}`} />
+                <Lock className={`h-3.5 w-3.5 ${item.enabled ? 'text-[#B24A26]' : 'text-[#746A5F]'}`} />
               ) : (
-                <X className="h-3.5 w-3.5 text-[#919099]" />
+                <X className="h-3.5 w-3.5 text-[#746A5F]" />
               )}
               {item.text}
             </span>
@@ -218,51 +215,47 @@ export function CreatorTermsOverview({
 
       {/* Will Draw / Won't Draw: giữ màu xanh / đỏ có chủ đích để phân biệt Nhận vs Từ chối */}
       <div className="grid gap-3 sm:grid-cols-2">
-        <div className="rounded-xl bg-white/[.03] p-3.5">
-          <p className="flex items-center gap-1.5 text-xs font-semibold text-emerald-300">
-            <ShieldCheck className="h-3.5 w-3.5" />
-            Nhận vẽ (Will Draw)
-          </p>
-          <p className="mt-1.5 whitespace-pre-line text-xs leading-5 text-[#E4E1E5]">{ext.willDraw}</p>
+        <div className="rounded-xl bg-[#FFFCF6] p-3.5">
+          <p className="flex items-center gap-1.5 text-xs font-semibold text-[#2F6B63]">
+            <ShieldCheck className="h-3.5 w-3.5" /> Nhận vẽ (Will Draw) </p>
+          <p className="mt-1.5 whitespace-pre-line text-xs leading-5 text-[#241F1A]">{ext.willDraw}</p>
         </div>
-        <div className="rounded-xl bg-white/[.03] p-3.5">
-          <p className="flex items-center gap-1.5 text-xs font-semibold text-rose-300">
+        <div className="rounded-xl bg-[#FFFCF6] p-3.5">
+          <p className="flex items-center gap-1.5 text-xs font-semibold text-[#A8321C]">
             <Ban className="h-3.5 w-3.5" />
             Không nhận vẽ (Won&apos;t Draw)
           </p>
-          <p className="mt-1.5 whitespace-pre-line text-xs leading-5 text-[#E4E1E5]">{ext.wontDraw}</p>
+          <p className="mt-1.5 whitespace-pre-line text-xs leading-5 text-[#241F1A]">{ext.wontDraw}</p>
         </div>
       </div>
 
       {/* Lưu ý & giới hạn khác */}
-      <div className="rounded-xl bg-white/[.03] p-3.5">
-        <h4 className="text-xs font-semibold text-white">Lưu ý &amp; giới hạn sử dụng</h4>
-        <p className="mt-1 whitespace-pre-line text-xs leading-5 text-[#C7C5CF]">{ext.usageRestrictions}</p>
+      <div className="rounded-xl bg-[#FFFCF6] p-3.5">
+        <h4 className="text-xs font-semibold text-[#241F1A]">Lưu ý &amp; giới hạn sử dụng</h4>
+        <p className="mt-1 whitespace-pre-line text-xs leading-5 text-[#6E6459]">{ext.usageRestrictions}</p>
       </div>
 
       {/* Điều khoản bổ sung riêng của Creator */}
       {customClauses.length > 0 && (
-        <div className="divide-y divide-white/10 rounded-xl bg-white/[.03]">
-          <div className="flex items-center gap-1.5 px-3.5 py-2.5 text-xs font-semibold text-[#DDE0FF]">
+        <div className="divide-y divide-[#221E1A]/10 rounded-xl bg-[#FFFCF6]">
+          <div className="flex items-center gap-1.5 px-3.5 py-2.5 text-xs font-semibold text-[#A8321C]">
             <FilePlus2 className="h-3.5 w-3.5" />
             <span>Điều khoản bổ sung riêng</span>
           </div>
           {customClauses.map((clause, index) => (
             <div key={`${clause.title}-${index}`} className="p-3.5">
-              <h4 className="text-xs font-semibold text-white">{clause.title}</h4>
+              <h4 className="text-xs font-semibold text-[#241F1A]">{clause.title}</h4>
               {clause.content && (
-                <p className="mt-1 whitespace-pre-line text-xs leading-5 text-[#C7C5CF]">{clause.content}</p>
+                <p className="mt-1 whitespace-pre-line text-xs leading-5 text-[#6E6459]">{clause.content}</p>
               )}
             </div>
           ))}
         </div>
       )}
 
-      <p className="flex items-start gap-2 rounded-xl bg-white/[.02] px-3 py-2.5 text-[11px] leading-5 text-[#919099]">
-        <ShieldAlert className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#A7ACD9]" />
-        <span>
-          Quy trình đặt vẽ, số lần chỉnh sửa theo từng mốc gói vẽ, chính sách hủy đơn (Escrow / 48h) và tự động nghiệm thu sau 72 giờ được áp dụng thống nhất theo quy chế của Dillustration.
-        </span>
+      <p className="flex items-start gap-2 rounded-xl bg-[#FFFCF6] px-3 py-2.5 text-[11px] leading-5 text-[#746A5F]">
+        <ShieldAlert className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#B24A26]" />
+        <span> Quy trình đặt vẽ, số lần chỉnh sửa theo từng mốc gói vẽ, chính sách hủy đơn (ký quỹ / 48h) và tự động nghiệm thu sau 72 giờ được áp dụng thống nhất theo quy chế của Dillustration. </span>
       </p>
     </div>
   );

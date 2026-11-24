@@ -70,23 +70,23 @@ export default function RaiseDisputeModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0C0D14]/80 backdrop-blur-md animate-fadeIn">
-      <div className="relative w-full max-w-lg bg-[#1F2335] border border-white/10 shadow-2xl overflow-hidden rounded-3xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#FFFCF6]/80 backdrop-blur-md animate-fadeIn">
+      <div className="relative w-full max-w-lg bg-[#F7F2E9] border border-[#221E1A]/10 shadow-2xl overflow-hidden rounded-3xl">
 
         {/* Header */}
-        <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between bg-[#161926]/80">
+        <div className="px-6 py-4 border-b border-[#221E1A]/10 flex items-center justify-between bg-[#FFFCF6]/80">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center border border-amber-500/30">
+            <div className="w-9 h-9 rounded-xl bg-[#8A6A1F]/20 text-[#8A6A1F] flex items-center justify-center border border-[#8A6A1F]/40">
               <ShieldAlert className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-sm font-space-grotesk font-bold text-white">Gửi Khiếu Nại Tranh Chấp</h3>
-              <p className="text-[11px] text-[#919099]">Yêu cầu Ban Quản trị / Trọng tài can thiệp giải quyết</p>
+              <h3 className="text-sm font-space-grotesk font-bold text-[#241F1A]">Gửi Khiếu Nại Tranh Chấp</h3>
+              <p className="text-[11px] text-[#746A5F]">Yêu cầu Ban Quản trị / Trọng tài can thiệp giải quyết</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-white/5 border border-white/10 text-slate-400 hover:text-white flex items-center justify-center transition-colors"
+            className="w-8 h-8 rounded-full bg-[#FFFCF6] border border-[#221E1A]/10 text-[#746A5F] hover:text-[#241F1A] flex items-center justify-center transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
@@ -96,16 +96,15 @@ export default function RaiseDisputeModal({
         <div className="p-6 space-y-4 max-h-[75vh] overflow-y-auto">
           {!success ? (
             <>
-              <div className="p-3.5 bg-amber-500/10 border border-amber-500/30 rounded-xl flex items-start gap-2.5 text-amber-200 text-xs leading-relaxed">
-                <ShieldAlert className="w-4 h-4 shrink-0 mt-0.5 text-amber-400" />
+              <div className="p-3.5 bg-[#8A6A1F]/10 border border-[#8A6A1F]/40 rounded-xl flex items-start gap-2.5 text-[#8A6A1F] text-xs leading-relaxed">
+                <ShieldAlert className="w-4 h-4 shrink-0 mt-0.5 text-[#8A6A1F]" />
                 <span>
-                  Khi gửi khiếu nại, trạng thái ký quỹ Escrow của đơn hàng sẽ bị tạm khóa (`Disputed`). Trọng tài sàn sẽ thẩm định lịch sử chat, các mốc phác thảo và bằng chứng để đưa ra phán quyết công bằng.
+                  Khi gửi khiếu nại, trạng thái ký quỹ của đơn hàng sẽ bị tạm khóa (`Disputed`). Trọng tài sàn sẽ thẩm định lịch sử trò chuyện, các mốc phác thảo và bằng chứng để đưa ra phán quyết công bằng.
                 </span>
               </div>
 
               <div>
-                <label className="block text-[11px] font-space-grotesk font-bold text-[#919099] uppercase tracking-wider mb-2">
-                  Phân loại mâu thuẫn <span className="text-amber-400">*</span>
+                <label className="block text-[11px] font-space-grotesk font-bold text-[#746A5F] uppercase tracking-wider mb-2"> Phân loại mâu thuẫn <span className="text-[#8A6A1F]">*</span>
                 </label>
                 <select
                   value={reasonCategory}
@@ -113,25 +112,24 @@ export default function RaiseDisputeModal({
                     setReasonCategory(e.target.value);
                     if (reasonError) setReasonError(null);
                   }}
-                  className={`w-full p-3 bg-[#1b1b1e] rounded-xl text-xs text-white focus:outline-none transition-all ${
+                  className={`w-full p-3 bg-[#FFFCF6] rounded-xl text-xs text-[#241F1A] focus:outline-none transition-all ${
                     reasonError && !reasonCategory
-                      ? 'border-2 border-amber-500/80'
-                      : 'border border-white/10 focus:border-[#A7ACD9] focus:ring-1 focus:ring-[#A7ACD9]'
+                      ? 'border-2 border-[#8A6A1F]/40'
+                      : 'border border-[#221E1A]/10 focus:border-[#B24A26] focus:ring-1 focus:ring-[#B24A26]'
                   }`}
                 >
-                  <option value="" disabled className="bg-[#1b1b1e] text-slate-400">Chọn lý do khiếu nại...</option>
-                  <option value="Creator vi phạm cam kết / Brief" className="bg-[#1b1b1e] text-white py-2">Creator vẽ không đúng thỏa thuận brief ban đầu</option>
-                  <option value="Trễ hạn chót (Missed Deadline)" className="bg-[#1b1b1e] text-white py-2">Quá hạn chót hoàn thành mà không có thỏa thuận</option>
-                  <option value="Nghi vấn AI / Chất lượng kém" className="bg-[#1b1b1e] text-white py-2">Nghi vấn tác phẩm sử dụng AI hoặc kém chất lượng</option>
-                  <option value="Không thống nhất được mốc nghiệm thu" className="bg-[#1b1b1e] text-white py-2">Bất đồng ý kiến không thể duyệt/sửa mốc phác thảo</option>
-                  <option value="Khách hàng yêu cầu vượt phạm vi hợp đồng" className="bg-[#1b1b1e] text-white py-2">Khách hàng đòi hỏi yêu cầu ngoài thỏa thuận ban đầu</option>
-                  <option value="Lý do khác" className="bg-[#1b1b1e] text-white py-2">Lý do khác</option>
+                  <option value="" disabled className="bg-[#FFFCF6] text-[#746A5F]">Chọn lý do khiếu nại...</option>
+                  <option value="Họa sĩ vi phạm cam kết / đề bài" className="bg-[#FFFCF6] text-[#241F1A] py-2">Họa sĩ vẽ không đúng thỏa thuận đề bài ban đầu</option>
+                  <option value="Trễ hạn chót (Missed hạn chót)" className="bg-[#FFFCF6] text-[#241F1A] py-2">Quá hạn chót hoàn thành mà không có thỏa thuận</option>
+                  <option value="Nghi vấn AI / Chất lượng kém" className="bg-[#FFFCF6] text-[#241F1A] py-2">Nghi vấn tác phẩm sử dụng AI hoặc kém chất lượng</option>
+                  <option value="Không thống nhất được mốc nghiệm thu" className="bg-[#FFFCF6] text-[#241F1A] py-2">Bất đồng ý kiến không thể duyệt/sửa mốc phác thảo</option>
+                  <option value="Khách hàng yêu cầu vượt phạm vi hợp đồng" className="bg-[#FFFCF6] text-[#241F1A] py-2">Khách hàng đòi hỏi yêu cầu ngoài thỏa thuận ban đầu</option>
+                  <option value="Lý do khác" className="bg-[#FFFCF6] text-[#241F1A] py-2">Lý do khác</option>
                 </select>
               </div>
 
               <div>
-                <label className="block text-[11px] font-space-grotesk font-bold text-[#919099] uppercase tracking-wider mb-2">
-                  Mô tả chi tiết nội dung khiếu nại <span className="text-amber-400">*</span>
+                <label className="block text-[11px] font-space-grotesk font-bold text-[#746A5F] uppercase tracking-wider mb-2"> Mô tả chi tiết nội dung khiếu nại <span className="text-[#8A6A1F]">*</span>
                 </label>
                 <textarea
                   rows={4}
@@ -141,62 +139,60 @@ export default function RaiseDisputeModal({
                     if (reasonError) setReasonError(null);
                   }}
                   placeholder="Ghi rõ diễn biến sự việc, các điểm mâu thuẫn và nguyện vọng mong muốn giải quyết..."
-                  className={`w-full p-3 bg-[#1b1b1e] rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none transition-all ${
+                  className={`w-full p-3 bg-[#FFFCF6] rounded-xl text-xs text-[#241F1A] text-[#746A5F] focus:outline-none transition-all ${
                     reasonError && !details.trim()
-                      ? 'border-2 border-amber-500/80'
-                      : 'border border-white/10 focus:border-[#A7ACD9] focus:ring-1 focus:ring-[#A7ACD9]'
+                      ? 'border-2 border-[#8A6A1F]/40'
+                      : 'border border-[#221E1A]/10 focus:border-[#B24A26] focus:ring-1 focus:ring-[#B24A26]'
                   }`}
                 />
                 {reasonError && (
-                  <p role="alert" className="mt-1.5 flex items-center gap-1.5 text-xs text-amber-400 font-medium">
+                  <p role="alert" className="mt-1.5 flex items-center gap-1.5 text-xs text-[#8A6A1F] font-medium">
                     <AlertCircle className="w-3.5 h-3.5 shrink-0" /> {reasonError}
                   </p>
                 )}
               </div>
 
               <div>
-                <label className="block text-[11px] font-space-grotesk font-bold text-[#919099] uppercase tracking-wider mb-2">
-                  Link Bằng chứng đính kèm (Không bắt buộc, mỗi link 1 dòng)
-                </label>
+                <label className="block text-[11px] font-space-grotesk font-bold text-[#746A5F] uppercase tracking-wider mb-2"> Link Bằng chứng đính kèm (Không bắt buộc, mỗi link 1 dòng) </label>
                 <div className="relative">
                   <textarea
                     rows={2}
                     value={evidenceUrlInput}
                     onChange={(e) => setEvidenceUrlInput(e.target.value)}
                     placeholder="https://drive.google.com/...\nhttps://imgur.com/..."
-                    className="w-full p-3 pl-9 bg-[#1b1b1e] border border-white/10 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-[#A7ACD9] focus:ring-1 focus:ring-[#A7ACD9] transition-all font-mono"
+                    className="w-full p-3 pl-9 bg-[#FFFCF6] border border-[#221E1A]/10 rounded-xl text-xs text-[#241F1A] text-[#746A5F] focus:outline-none focus:border-[#B24A26] focus:ring-1 focus:ring-[#B24A26] transition-all font-mono"
                   />
-                  <LinkIcon className="w-4 h-4 text-slate-500 absolute left-3 top-3.5" />
+                  <LinkIcon className="w-4 h-4 text-[#746A5F] absolute left-3 top-3.5" />
                 </div>
               </div>
 
               {/* Inline API Error Banner */}
               {submitError && (
-                <div role="alert" className="p-3.5 bg-rose-500/10 border border-rose-500/30 rounded-xl flex items-start gap-2.5 text-rose-200 text-xs">
-                  <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-400" />
+                <div role="alert" className="p-3.5 bg-[#A8321C]/10 border border-[#A8321C]/40 rounded-xl flex items-start gap-2.5 text-[#A8321C] text-xs">
+                  <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-[#A8321C]" />
                   <div>
-                    <p className="font-bold text-rose-200">Gửi khiếu nại thất bại</p>
-                    <p className="mt-0.5 text-xs text-rose-200/95">{submitError}</p>
+                    <p className="font-bold text-[#A8321C]">Gửi khiếu nại thất bại</p>
+                    <p className="mt-0.5 text-xs text-[#A8321C]">{submitError}</p>
                   </div>
                 </div>
               )}
             </>
           ) : (
             <div className="py-8 text-center space-y-3">
-              <div className="w-12 h-12 mx-auto rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center border border-emerald-500/30">
+              <div className="w-12 h-12 mx-auto rounded-full bg-[#2F6B63]/20 text-[#2F6B63] flex items-center justify-center border border-[#2F6B63]/40">
                 <CheckCircle2 className="w-6 h-6" />
               </div>
-              <h4 className="text-sm font-bold text-white">Đã gửi đơn khiếu nại thành công!</h4>
-              <p className="text-xs text-slate-300">Hồ sơ đã được chuyển tới Ban Trọng tài. Tiền ký quỹ Escrow đã được tạm khóa để chờ thẩm định.</p>
+              <h4 className="text-sm font-bold text-[#241F1A]">Đã gửi đơn khiếu nại thành công!</h4>
+              <p className="text-xs text-[#746A5F]">Hồ sơ đã được chuyển tới Ban Trọng tài. Tiền ký quỹ đã được tạm khóa để chờ thẩm định.</p>
             </div>
           )}
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-white/10 bg-[#161926]/90 flex justify-end gap-2.5 items-center">
+        <div className="px-6 py-4 border-t border-[#221E1A]/10 bg-[#FFFCF6]/90 flex justify-end gap-2.5 items-center">
           <button
             onClick={onClose}
-            className="px-4 py-2.5 rounded-full text-xs font-semibold border border-white/10 text-slate-300 hover:bg-white/5 transition-all"
+            className="px-4 py-2.5 rounded-full text-xs font-semibold border border-[#221E1A]/10 text-[#746A5F] hover:bg-[#FFFCF6] transition-all"
           >
             {success ? 'Đóng' : 'Hủy bỏ'}
           </button>
@@ -204,7 +200,7 @@ export default function RaiseDisputeModal({
             <button
               onClick={handleSubmit}
               disabled={isSubmitting}
-              className="px-5 py-2.5 rounded-full text-xs font-bold bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/25 hover:bg-amber-400 transition-all flex items-center gap-2 disabled:opacity-50"
+              className="px-5 py-2.5 rounded-full text-xs font-bold bg-[#8A6A1F]/12 text-[#241F1A] shadow-lg shadow-[#8A6A1F] hover:bg-[#8A6A1F]/10 transition-all flex items-center gap-2 disabled:opacity-50"
             >
               {isSubmitting ? 'Đang gửi...' : 'Gửi đơn khiếu nại'}
             </button>

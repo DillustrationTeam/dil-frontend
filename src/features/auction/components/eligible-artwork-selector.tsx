@@ -60,8 +60,7 @@ export function EligibleArtworkSelector({ selectedArtworkId, onSelect, reloadTri
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <label className="text-xs font-semibold text-on-surface-variant">
-          Chọn tác phẩm tranh đưa lên đấu giá <span className="text-red-400">*</span>
+        <label className="text-xs font-semibold text-on-surface-variant"> Chọn tác phẩm tranh đưa lên đấu giá <span className="text-[#A8321C]">*</span>
         </label>
         <button
           type="button"
@@ -69,26 +68,21 @@ export function EligibleArtworkSelector({ selectedArtworkId, onSelect, reloadTri
           disabled={loading}
           className="inline-flex items-center gap-1 text-[11px] text-outline hover:text-brand-periwinkle"
         >
-          <RefreshCw size={12} className={loading ? 'animate-spin' : ''} /> Tải lại danh sách
-        </button>
+          <RefreshCw size={12} className={loading ? 'animate-spin' : ''} /> Tải lại danh sách </button>
       </div>
 
       {error && (
-        <div role="alert" className="flex items-center gap-2 rounded-xl border border-red-400/30 bg-red-500/10 p-3 text-xs text-red-200">
+        <div role="alert" className="flex items-center gap-2 rounded-xl border border-[#A8321C]/40 bg-[#A8321C]/10 p-3 text-xs text-[#A8321C]">
           <CircleAlert size={14} className="shrink-0" />
           <span>{error}</span>
         </div>
       )}
 
       {loading && !artworks.length ? (
-        <div className="flex items-center justify-center rounded-2xl border border-white/10 bg-brand-navy/60 py-6 text-xs text-outline">
-          <RefreshCw size={16} className="mr-2 animate-spin text-brand-periwinkle" />
-          Đang tải danh sách tranh của bạn...
-        </div>
+        <div className="flex items-center justify-center rounded-2xl border border-[#221E1A]/10 bg-brand-navy/60 py-6 text-xs text-outline">
+          <RefreshCw size={16} className="mr-2 animate-spin text-brand-periwinkle" /> Đang tải danh sách tranh của bạn... </div>
       ) : artworks.length === 0 ? (
-        <div className="rounded-2xl border border-amber-400/30 bg-amber-500/10 p-4 text-xs text-amber-200">
-          Bạn chưa có tác phẩm nào đủ điều kiện để tạo phiên đấu giá (hoặc các tác phẩm hiện tại đã thuộc một phiên đang hoạt động).
-        </div>
+        <div className="rounded-2xl border border-[#8A6A1F]/40 bg-[#8A6A1F]/10 p-4 text-xs text-[#8A6A1F]"> Bạn chưa có tác phẩm nào đủ điều kiện để tạo phiên đấu giá (hoặc các tác phẩm hiện tại đã thuộc một phiên đang hoạt động). </div>
       ) : (
         <div className="relative">
           <button
@@ -96,11 +90,11 @@ export function EligibleArtworkSelector({ selectedArtworkId, onSelect, reloadTri
             aria-expanded={isOpen}
             aria-haspopup="listbox"
             onClick={() => setIsOpen((prev) => !prev)}
-            className="flex w-full items-center justify-between rounded-2xl border border-white/15 bg-brand-navy/80 px-4 py-3 text-left focus:border-brand-periwinkle focus:outline-none focus:ring-2 focus:ring-brand-periwinkle/30"
+            className="flex w-full items-center justify-between rounded-2xl border border-[#221E1A]/10 bg-brand-navy/80 px-4 py-3 text-left focus:border-brand-periwinkle focus:outline-none focus:ring-2 focus:ring-brand-periwinkle/30"
           >
             {selectedArtwork ? (
               <div className="flex items-center gap-3">
-                <div className="relative size-9 shrink-0 overflow-hidden rounded-lg bg-black/40 border border-white/10">
+                <div className="relative size-9 shrink-0 overflow-hidden rounded-lg bg-[#F0E7D8] border border-[#221E1A]/10">
                   {selectedArtwork.thumbnailUrl || selectedArtwork.imageUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
@@ -129,7 +123,7 @@ export function EligibleArtworkSelector({ selectedArtworkId, onSelect, reloadTri
             <div
               role="listbox"
               tabIndex={-1}
-              className="absolute z-20 mt-2 max-h-64 w-full overflow-y-auto rounded-2xl border border-white/15 bg-brand-navy p-2 shadow-2xl backdrop-blur-xl"
+              className="absolute z-20 mt-2 max-h-64 w-full overflow-y-auto rounded-2xl border border-[#221E1A]/10 bg-brand-navy p-2 shadow-2xl backdrop-blur-xl"
             >
               {artworks.map((item) => {
                 const isSelected = item.artworkId === selectedArtworkId;
@@ -150,12 +144,12 @@ export function EligibleArtworkSelector({ selectedArtworkId, onSelect, reloadTri
                         setIsOpen(false);
                       }
                     }}
-                    className={`flex cursor-pointer items-center justify-between rounded-xl p-2.5 transition focus:outline-none focus:bg-white/10 ${
-                      isSelected ? 'bg-brand-periwinkle/20 border border-brand-periwinkle/30' : 'hover:bg-white/5'
+                    className={`flex cursor-pointer items-center justify-between rounded-xl p-2.5 transition focus:outline-none focus:bg-[#F0E7D8] ${
+                      isSelected ? 'bg-brand-periwinkle/20 border border-brand-periwinkle/30' : 'hover:bg-[#FFFCF6]'
                     }`}
                   >
                     <div className="flex items-center gap-3">
-                      <div className="relative size-10 shrink-0 overflow-hidden rounded-lg bg-black/40 border border-white/10">
+                      <div className="relative size-10 shrink-0 overflow-hidden rounded-lg bg-[#F0E7D8] border border-[#221E1A]/10">
                         {item.thumbnailUrl || item.imageUrl ? (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img src={item.thumbnailUrl || item.imageUrl} alt={item.title} className="size-full object-cover" />
@@ -176,7 +170,7 @@ export function EligibleArtworkSelector({ selectedArtworkId, onSelect, reloadTri
               })}
 
               {nextCursor && (
-                <div className="pt-2 text-center border-t border-white/10 mt-1">
+                <div className="pt-2 text-center border-t border-[#221E1A]/10 mt-1">
                   <button
                     type="button"
                     disabled={loadingMore}

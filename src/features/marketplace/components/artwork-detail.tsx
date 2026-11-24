@@ -1,5 +1,7 @@
 'use client';
 
+import { createPortal } from 'react-dom';
+
 import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
@@ -214,21 +216,21 @@ function ArtworkDetailContent({
 
   if (loading && !artwork) {
     return (
-      <div className="p-16 text-center text-sm text-[#9ca3af]">Đang tải tác phẩm…</div>
+      <div className="p-16 text-center text-sm text-[#746A5F]">Đang tải tác phẩm…</div>
     );
   }
   if (!artwork) {
     return (
-      <div className="p-16 text-center text-sm text-[#9ca3af]">Không tìm thấy tác phẩm.</div>
+      <div className="p-16 text-center text-sm text-[#746A5F]">Không tìm thấy tác phẩm.</div>
     );
   }
 
   return (
-    <div className="grid items-start gap-7 lg:grid-cols-[minmax(0,1.35fr)_396px] lg:gap-8">
+    <div className={`qv-grid grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(21rem,24rem)] lg:gap-8 ${mode === 'modal' ? 'h-full min-h-0 items-stretch' : 'items-start'}`}>
       {/* CỘT TRÁI: Khung ngắm tranh bảo mật + Footer + Đánh giá / Bình luận */}
-      <div className="flex flex-col gap-6">
-        <div className="flex flex-col gap-2.5">
-          <div className="group relative h-[420px] w-full overflow-hidden rounded-2xl border border-white/[0.07] bg-[#0d0f17] sm:h-[520px]">
+      <div className={`flex flex-col gap-4 ${mode === 'modal' ? 'h-full min-h-0' : ''}`}>
+        <div className={`flex min-h-0 flex-col gap-3 ${mode === 'modal' ? 'flex-1' : ''}`}>
+          <div className={`group relative w-full overflow-hidden rounded-2xl border border-[#221E1A]/10 bg-[#F0E7D8] ${mode === 'modal' ? 'min-h-0 flex-1' : 'h-[min(46dvh,420px)] sm:h-[min(50dvh,470px)]'}`} style={mode === 'modal' ? { maxHeight: 'min(60dvh, 560px)' } : undefined}>
             <ProtectedArtworkViewer
               artworkId={activeId}
               fallbackImageUrl={artwork.imageUrl}
@@ -240,7 +242,7 @@ function ArtworkDetailContent({
             />
 
             <div
-              className="pointer-events-none absolute left-3.5 top-3.5 z-20 inline-flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-[#161923]/80 px-2.5 py-1 text-xs font-medium tabular-nums text-[#d1d5db] backdrop-blur-md"
+              className="pointer-events-none absolute left-3.5 top-3.5 z-20 inline-flex items-center gap-1.5 rounded-full border border-[#221E1A]/10 bg-[#FFFCF6]/80 px-2.5 py-1 text-xs font-medium tabular-nums text-[#746A5F] backdrop-blur-md"
               title="Lượt xem tác phẩm"
             >
               <Eye className="h-3.5 w-3.5" />
@@ -252,7 +254,7 @@ function ArtworkDetailContent({
               onClick={() => setIsLightboxOpen(true)}
               aria-label="Xem ảnh toàn màn hình"
               title="Xem ảnh toàn màn hình"
-              className="absolute right-3.5 top-3.5 z-20 inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-[#161923]/85 text-[#d1d5db] backdrop-blur-md transition hover:bg-[#1e2230] hover:text-white lg:opacity-0 lg:group-hover:opacity-100 lg:focus-visible:opacity-100"
+              className="absolute right-3.5 top-3.5 z-20 inline-flex h-8 w-8 items-center justify-center rounded-full border border-[#221E1A]/10 bg-[#FFFCF6]/85 text-[#746A5F] backdrop-blur-md transition hover:bg-[#F0E7D8] hover:text-[#241F1A] lg:opacity-0 lg:group-hover:opacity-100 lg:focus-visible:opacity-100"
             >
               <Maximize2 className="h-3.5 w-3.5" />
             </button>
@@ -267,8 +269,8 @@ function ArtworkDetailContent({
                 title={provenance ? 'Bấm để xem lai lịch chuyển nhượng' : 'Xác thực tác phẩm gốc trên hệ thống'}
                 className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 font-semibold transition ${
                   isExclusive
-                    ? 'border-amber-400/35 bg-amber-400/10 text-amber-300 hover:bg-amber-400/20'
-                    : 'border-emerald-400/30 bg-emerald-400/10 text-emerald-300 hover:bg-emerald-400/20'
+                    ? 'border-[#8A6A1F]/40 bg-[#8A6A1F]/10 text-[#8A6A1F] hover:bg-[#8A6A1F]/20'
+                    : 'border-[#2F6B63]/40 bg-[#2F6B63]/10 text-[#2F6B63] hover:bg-[#2F6B63]/20'
                 }`}
               >
                 <Award className="h-3.5 w-3.5" />
@@ -278,13 +280,13 @@ function ArtworkDetailContent({
               {!artwork.isAiGenerated ? (
                 <span
                   title="Tác phẩm vẽ tay, không gắn nhãn AI"
-                  className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.07] bg-[#1e2230] px-3 py-1.5 font-medium text-[#d1d5db]"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-[#221E1A]/10 bg-[#F0E7D8] px-3 py-1.5 font-medium text-[#746A5F]"
                 >
-                  <PenTool className="h-3.5 w-3.5 text-[#b3b7ee]" />
+                  <PenTool className="h-3.5 w-3.5 text-[#8C3718]" />
                   <span>100% Vẽ tay</span>
                 </span>
               ) : (
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/25 bg-amber-400/10 px-3 py-1.5 font-medium text-amber-200">
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-[#8A6A1F]/35 bg-[#8A6A1F]/10 px-3 py-1.5 font-medium text-[#8A6A1F]">
                   <Sparkles className="h-3.5 w-3.5" />
                   <span>Có hỗ trợ AI</span>
                 </span>
@@ -298,7 +300,7 @@ function ArtworkDetailContent({
                 onClick={() => void handleShare()}
                 aria-label="Chia sẻ đường dẫn tác phẩm"
                 title="Sao chép đường dẫn"
-                className="inline-flex h-10 w-10 items-center justify-center rounded-[10px] border border-white/[0.07] bg-[#1e2230] text-[#d1d5db] transition hover:bg-[#262b3d] hover:text-white"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-[10px] border border-[#221E1A]/10 bg-[#F0E7D8] text-[#746A5F] transition hover:bg-[#FFFCF6] hover:text-[#241F1A]"
               >
                 <Share2 className="h-4 w-4" />
               </button>
@@ -313,16 +315,16 @@ function ArtworkDetailContent({
         </div>
 
         {/* Bottom Left: Đánh giá gói vẽ & Bình luận */}
-        <section className="border-t border-white/[0.07] pt-5" aria-label="Đánh giá và bình luận">
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-            <div className="inline-flex rounded-xl bg-[#1e2230]/80 p-1 text-xs">
+        <section className={`border-t border-[#221E1A]/10 ${mode === 'modal' ? 'hidden' : 'pt-5'}`} aria-label="Đánh giá và bình luận">
+          <div className={`flex flex-wrap items-center justify-between gap-2 ${mode === 'modal' ? 'mb-2' : 'mb-4'}`}>
+            <div className="inline-flex rounded-xl bg-[#F0E7D8]/80 p-1 text-xs">
               <button
                 type="button"
                 onClick={() => setBottomTab('reviews')}
                 className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 font-semibold transition ${
                   bottomTab === 'reviews'
-                    ? 'bg-[#b3b7ee] text-[#161923]'
-                    : 'text-[#9ca3af] hover:text-white'
+                    ? 'bg-[#8C3718] text-[#FFFCF6]'
+                    : 'text-[#746A5F] hover:text-[#241F1A]'
                 }`}
               >
                 <Star className="h-3.5 w-3.5" />
@@ -333,8 +335,8 @@ function ArtworkDetailContent({
                 onClick={() => setBottomTab('comments')}
                 className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 font-semibold transition ${
                   bottomTab === 'comments'
-                    ? 'bg-[#b3b7ee] text-[#161923]'
-                    : 'text-[#9ca3af] hover:text-white'
+                    ? 'bg-[#8C3718] text-[#FFFCF6]'
+                    : 'text-[#746A5F] hover:text-[#241F1A]'
                 }`}
               >
                 <MessageCircle className="h-3.5 w-3.5" />
@@ -343,9 +345,9 @@ function ArtworkDetailContent({
             </div>
 
             {bottomTab === 'reviews' && ratingCount > 0 && (
-              <div className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.07] bg-[#1e2230] px-3 py-1 text-xs font-semibold tabular-nums text-amber-300">
+              <div className="inline-flex items-center gap-1.5 rounded-full border border-[#221E1A]/10 bg-[#F0E7D8] px-3 py-1 text-xs font-semibold tabular-nums text-[#8A6A1F]">
                 <span>★ {ratingAverage.toFixed(1)} / 5.0</span>
-                <span className="font-medium text-[#9ca3af]">· {ratingCount} lượt</span>
+                <span className="font-medium text-[#746A5F]">· {ratingCount} lượt</span>
               </div>
             )}
           </div>
@@ -353,38 +355,36 @@ function ArtworkDetailContent({
           {bottomTab === 'reviews' ? (
             visibleReviews.length > 0 ? (
               <div className="space-y-2.5">
-                {visibleReviews.map((item) => {
+                {(mode === 'modal' ? visibleReviews.slice(0, 2) : visibleReviews).map((item) => {
                   const text = parseReviewTags(item.comment);
                   return (
                     <article
                       key={item.id}
-                      className="rounded-xl bg-[#1e2230]/55 px-3.5 py-3 text-xs"
+                      className="rounded-xl bg-[#F0E7D8]/55 px-3.5 py-3 text-xs"
                     >
                       <div className="mb-1.5 flex flex-wrap items-center justify-between gap-2">
                         <div className="flex flex-wrap items-center gap-2">
-                          <span className="font-semibold text-white">
+                          <span className="font-semibold text-[#241F1A]">
                             {item.reviewerName || 'Khách hàng'}
                           </span>
-                          <span className="text-amber-400" aria-label={`${item.rating} sao`}>
+                          <span className="text-[#8A6A1F]" aria-label={`${item.rating} sao`}>
                             {'★'.repeat(Math.max(1, Math.min(5, item.rating)))}
                           </span>
                           {item.commissionTitle && (
-                            <span className="text-[#9ca3af]">· {item.commissionTitle}</span>
+                            <span className="text-[#746A5F]">· {item.commissionTitle}</span>
                           )}
                         </div>
-                        <span className="tabular-nums text-[#8b93a7]">
+                        <span className="tabular-nums text-[#746A5F]">
                           {new Date(item.createdAt).toLocaleDateString('vi-VN')}
                         </span>
                       </div>
-                      {text && <p className="text-[13px] leading-relaxed text-[#d1d5db]">{text}</p>}
+                      {text && <p className="text-[13px] leading-relaxed text-[#746A5F]">{text}</p>}
                     </article>
                   );
                 })}
               </div>
             ) : (
-              <p className="rounded-xl bg-[#1e2230]/40 px-4 py-5 text-center text-xs text-[#9ca3af]">
-                Chưa có đánh giá nào cho gói vẽ này.
-              </p>
+              <p className="rounded-xl bg-[#F0E7D8]/40 px-4 py-5 text-center text-xs text-[#746A5F]"> Chưa có đánh giá nào cho gói vẽ này. </p>
             )
           ) : (
             <div className="space-y-3">
@@ -395,12 +395,12 @@ function ArtworkDetailContent({
                   value={comment}
                   onChange={(event) => setComment(event.target.value)}
                   placeholder="Viết bình luận của bạn…"
-                  className="min-w-0 flex-1 rounded-xl border border-white/10 bg-[#1e2230]/70 px-3.5 py-2.5 text-xs text-white outline-none focus:border-[#b3b7ee]"
+                  className="min-w-0 flex-1 rounded-xl border border-[#221E1A]/10 bg-[#F0E7D8]/70 px-3.5 py-2.5 text-xs text-[#241F1A] outline-none focus:border-[#8C3718]"
                 />
                 <button
                   disabled={submitting}
                   aria-label="Gửi bình luận"
-                  className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#b3b7ee] text-[#161923] transition hover:bg-[#c5c8f5] disabled:opacity-50"
+                  className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#8C3718] text-[#FFFCF6] transition hover:bg-[#c5c8f5] disabled:opacity-50"
                 >
                   <Send className="h-4 w-4" />
                 </button>
@@ -410,20 +410,18 @@ function ArtworkDetailContent({
                   {comments.map((item, idx) => (
                     <article
                       key={`${item.time}-${idx}`}
-                      className="rounded-xl bg-[#1e2230]/55 px-3.5 py-3 text-xs"
+                      className="rounded-xl bg-[#F0E7D8]/55 px-3.5 py-3 text-xs"
                     >
                       <div className="flex items-center justify-between gap-2">
-                        <strong className="text-white">{item.name}</strong>
-                        <span className="text-[#8b93a7]">{item.time}</span>
+                        <strong className="text-[#241F1A]">{item.name}</strong>
+                        <span className="text-[#746A5F]">{item.time}</span>
                       </div>
-                      <p className="mt-1.5 text-[13px] text-[#d1d5db]">{item.text}</p>
+                      <p className="mt-1.5 text-[13px] text-[#746A5F]">{item.text}</p>
                     </article>
                   ))}
                 </div>
               ) : (
-                <p className="rounded-xl bg-[#1e2230]/40 px-4 py-4 text-center text-xs text-[#9ca3af]">
-                  Hãy là người đầu tiên bình luận tác phẩm này.
-                </p>
+                <p className="rounded-xl bg-[#F0E7D8]/40 px-4 py-4 text-center text-xs text-[#746A5F]"> Hãy là người đầu tiên bình luận tác phẩm này. </p>
               )}
             </div>
           )}
@@ -431,14 +429,14 @@ function ArtworkDetailContent({
       </div>
 
       {/* CỘT PHẢI: Thông tin tác phẩm + Gói đặt vẽ + Tác quyền + Tranh khác */}
-      <aside className="flex flex-col divide-y divide-white/[0.07]">
+      <aside className={`flex flex-col divide-y divide-[#221E1A]/10 ${mode === 'modal' ? 'h-full min-h-0 overflow-hidden' : ''}`}>
         {/* 1. Tiêu đề + Style/Ngày + Họa sĩ */}
-        <div className={`pb-4 ${mode === 'modal' ? 'pr-9' : ''}`}>
-          <h1 className="font-h1 text-balance text-[23px] font-bold leading-snug tracking-[-0.015em] text-white">
+        <div className={`pb-5 ${mode === 'modal' ? 'pr-12' : ''}`}>
+          <h1 className="font-h1 text-balance text-[23px] font-bold leading-snug tracking-[-0.015em] text-[#241F1A]">
             {artwork.title}
           </h1>
 
-          <div className="mt-2 flex flex-wrap items-center gap-3 text-xs tabular-nums text-[#8b93a7]">
+          <div className="mt-2 flex flex-wrap items-center gap-3 text-xs tabular-nums text-[#746A5F]">
             <Link
               href={
                 artwork.categoryName || artwork.style
@@ -446,7 +444,7 @@ function ArtworkDetailContent({
                   : '/explore'
               }
               onClick={onClose}
-              className="inline-flex items-center gap-1.5 rounded-full border border-[#b3b7ee]/30 bg-[#b3b7ee]/15 px-2.5 py-1 font-semibold text-[#d9dcff] transition hover:bg-[#b3b7ee]/25"
+              className="inline-flex items-center gap-1.5 rounded-full border border-[#8C3718]/30 bg-[#8C3718]/15 px-2.5 py-1 font-semibold text-[#8C3718] transition hover:bg-[#8C3718]/25"
             >
               <Palette className="h-3.5 w-3.5" />
               <span>{artwork.categoryName || artwork.style || 'Digital art'}</span>
@@ -459,7 +457,7 @@ function ArtworkDetailContent({
 
           <div className="mt-4 flex items-center gap-2.5">
             <div
-              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/10 bg-[#1e2230] text-xs font-semibold text-[#b3b7ee]"
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#221E1A]/10 bg-[#F0E7D8] text-xs font-semibold text-[#8C3718]"
               aria-hidden="true"
             >
               {initialsOf(creatorDisplay)}
@@ -469,16 +467,16 @@ function ArtworkDetailContent({
                 <Link
                   href={`/creators/${artwork.creatorProfileId}`}
                   onClick={onClose}
-                  className="truncate text-sm font-semibold text-white transition hover:text-[#b3b7ee]"
+                  className="truncate text-sm font-semibold text-[#241F1A] transition hover:text-[#8C3718]"
                 >
                   {creatorDisplay}
                 </Link>
                 {creatorProfile?.isApproved && (
-                  <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-[#b3b7ee]" />
+                  <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-[#8C3718]" />
                 )}
               </div>
-              <div className="mt-0.5 flex items-center gap-3 text-xs tabular-nums text-[#9ca3af]">
-                <span className="inline-flex items-center gap-1 font-semibold text-amber-300">
+              <div className="mt-0.5 flex items-center gap-3 text-xs tabular-nums text-[#746A5F]">
+                <span className="inline-flex items-center gap-1 font-semibold text-[#8A6A1F]">
                   <Star className="h-3 w-3 fill-current" />
                   <span>
                     {ratingAverage.toFixed(1)} ({ratingCount})
@@ -497,7 +495,7 @@ function ArtworkDetailContent({
         {(artwork.description || artwork.tags.length > 0) && (
           <div className="space-y-3 py-4">
             {artwork.description && (
-              <p className="whitespace-pre-line text-[13.5px] leading-relaxed text-[#d1d5db]">
+              <p className="whitespace-pre-line text-[13.5px] leading-relaxed text-[#746A5F]">
                 {artwork.description}
               </p>
             )}
@@ -508,7 +506,7 @@ function ArtworkDetailContent({
                     key={tag}
                     href={`/explore?tag=${encodeURIComponent(tag)}`}
                     onClick={onClose}
-                    className="rounded-lg bg-[#1e2230] px-2.5 py-1 text-xs text-[#9ca3af] transition hover:bg-[#262b3d] hover:text-white"
+                    className="rounded-lg bg-[#F0E7D8] px-2.5 py-1 text-xs text-[#746A5F] transition hover:bg-[#FFFCF6] hover:text-[#241F1A]"
                   >
                     #{tag}
                   </Link>
@@ -522,33 +520,33 @@ function ArtworkDetailContent({
         {(matchedPkg || !isOwnArtwork) && (
           <div className="py-4">
             {matchedPkg ? (
-              <div className="space-y-3 rounded-[14px] border border-[#b3b7ee]/25 bg-[#1e2230] p-4">
+              <div className="space-y-3 rounded-[14px] border border-[#8C3718]/25 bg-[#F0E7D8] p-4">
                 <div className="flex items-start justify-between gap-2.5">
                   <div className="flex min-w-0 items-center gap-2">
-                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#b3b7ee]/15 text-[#b3b7ee]">
+                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#8C3718]/15 text-[#8C3718]">
                       <Layers className="h-3.5 w-3.5" />
                     </span>
-                    <span className="text-[13.5px] font-semibold leading-snug text-white">
+                    <span className="text-[13.5px] font-semibold leading-snug text-[#241F1A]">
                       {matchedPkg.name}
                     </span>
                   </div>
-                  <span className="shrink-0 text-sm font-bold tabular-nums text-[#b3b7ee]">
+                  <span className="shrink-0 text-sm font-bold tabular-nums text-[#8C3718]">
                     {t(`Từ ${formatVnd(matchedPkg.price)}`)}
                   </span>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 border-t border-white/[0.07] pt-2.5 text-xs tabular-nums text-[#d1d5db]">
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 border-t border-[#221E1A]/10 pt-2.5 text-xs tabular-nums text-[#746A5F]">
                   <span className="inline-flex items-center gap-1.5" title={t('Số giai đoạn bàn giao & giải ngân')}>
-                    <Layers className="h-3.5 w-3.5 text-[#9ca3af]" />
+                    <Layers className="h-3.5 w-3.5 text-[#746A5F]" />
                     <span>{t(`${matchedPkg.milestones?.length || 1} cột mốc`)}</span>
                   </span>
                   <span className="inline-flex items-center gap-1.5" title={t('Số lần chỉnh sửa miễn phí mỗi mốc')}>
-                    <RotateCcw className="h-3.5 w-3.5 text-[#9ca3af]" />
+                    <RotateCcw className="h-3.5 w-3.5 text-[#746A5F]" />
                     <span>{t(`${pkgRevisions} lần sửa`)}</span>
                   </span>
                   <span className="inline-flex items-center gap-1.5" title={t('Định dạng tệp bàn giao theo thỏa thuận')}>
-                    <ImageIcon className="h-3.5 w-3.5 text-[#9ca3af]" />
-                    <span>{t('File theo yêu cầu')}</span>
+                    <ImageIcon className="h-3.5 w-3.5 text-[#746A5F]" />
+                    <span>{t('Tệp theo yêu cầu')}</span>
                   </span>
                 </div>
 
@@ -556,7 +554,7 @@ function ArtworkDetailContent({
                   <Link
                     href="/creator/services"
                     onClick={onClose}
-                    className="inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-[10px] border border-white/15 bg-white/5 px-3 text-[13px] font-semibold text-white transition hover:bg-white/10"
+                    className="inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-[10px] border border-[#221E1A]/10 bg-[#FFFCF6] px-3 text-[13px] font-semibold text-[#241F1A] transition hover:bg-[#F0E7D8]"
                   >
                     <span>{t('Chỉnh sửa gói')}</span>
                   </Link>
@@ -565,13 +563,13 @@ function ArtworkDetailContent({
                     type="button"
                     disabled={!canCommission}
                     onClick={() => setIsCommissionOpen(true)}
-                    className="inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-[10px] bg-[#b3b7ee] px-3 text-[13px] font-semibold tabular-nums text-[#161923] transition hover:bg-[#c5c8f5] disabled:cursor-not-allowed disabled:opacity-50"
+                    className="inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-[10px] bg-[#8C3718] px-3 text-[13px] font-semibold tabular-nums text-[#FFFCF6] transition hover:bg-[#c5c8f5] disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     <span>
                       {creatorProfile?.isAcceptingOrders === false
-                        ? t('Creator đang tạm ngưng nhận đơn')
+                        ? t('Họa sĩ đang tạm ngưng nhận đơn')
                         : pkgSlot?.isFull
-                          ? t('Gói này đã hết slot')
+                          ? t('Gói này đã hết lượt')
                           : pkgSlot?.isLimited
                             ? t(`Đặt vẽ gói này (${pkgSlot.remaining}/${pkgSlot.maxSlots} slot)`)
                             : t('Đặt vẽ gói này (∞ Không giới hạn)')}
@@ -585,11 +583,11 @@ function ArtworkDetailContent({
                 type="button"
                 disabled={creatorProfile?.isAcceptingOrders === false}
                 onClick={() => setIsCommissionOpen(true)}
-                className="inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-[10px] bg-[#b3b7ee] px-4 text-[13px] font-semibold text-[#161923] transition hover:bg-[#c5c8f5] disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-[10px] bg-[#8C3718] px-4 text-[13px] font-semibold text-[#FFFCF6] transition hover:bg-[#c5c8f5] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <span>
                   {creatorProfile?.isAcceptingOrders === false
-                    ? t('Creator đang tạm ngưng nhận đơn')
+                    ? t('Họa sĩ đang tạm ngưng nhận đơn')
                     : t('Đặt vẽ với họa sĩ này')}
                 </span>
                 {creatorProfile?.isAcceptingOrders !== false && <ArrowRight className="h-3.5 w-3.5" />}
@@ -600,38 +598,61 @@ function ArtworkDetailContent({
 
         {/* 4. Làm rõ bản quyền */}
         <div className="flex flex-wrap items-center justify-between gap-2 py-3.5 text-xs">
-          <div className="inline-flex items-center gap-1.5 text-[#9ca3af]">
-            <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-emerald-400" />
+          <div className="inline-flex items-center gap-1.5 text-[#746A5F]">
+            <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-[#2F6B63]" />
             {isExclusive && provenance ? (
               <span>
-                {t('Sáng tác:')} <strong className="text-white">{provenance.creatorName}</strong>
-                <span className="mx-1 text-[#8b93a7]">→</span>
-                {t('Sở hữu:')} <strong className="text-white">{provenance.currentOwnerName}</strong>
+                {t('Sáng tác:')} <strong className="text-[#241F1A]">{provenance.creatorName}</strong>
+                <span className="mx-1 text-[#746A5F]">→</span>
+                {t('Sở hữu:')} <strong className="text-[#241F1A]">{provenance.currentOwnerName}</strong>
               </span>
             ) : (
               <span>
-                {t('Tác quyền:')} <strong className="text-white">{t(`Thuộc về ${creatorDisplay}`)}</strong>
+                {t('Tác quyền:')} <strong className="text-[#241F1A]">{t(`Thuộc về ${creatorDisplay}`)}</strong>
               </span>
             )}
           </div>
           {isSampleMatch && matchedPkg && (
-            <span className="rounded-full border border-[#b3b7ee]/30 bg-[#b3b7ee]/10 px-2.5 py-1 text-[11px] font-medium text-[#b3b7ee]">
+            <span className="rounded-full border border-[#8C3718]/30 bg-[#8C3718]/10 px-2.5 py-1 text-[11px] font-medium text-[#8C3718]">
               {t(`Tranh mẫu gói ${matchedPkg.name}`)}
             </span>
           )}
         </div>
 
-        {/* 5. Tranh khác của họa sĩ */}
-        {artistThumbs.length > 0 && (
+        {/* Giải nghĩa giá khởi điểm / giấy phép / slot — CHỈ ở trang chi tiết,
+            modal xem nhanh giữ gọn một màn hình. */}
+        {mode !== 'modal' && (
+        <dl className="grid grid-cols-1 gap-x-4 gap-y-2 rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6]/60 px-4 py-3.5 text-[11.5px] leading-relaxed text-[#5f574d] sm:grid-cols-[auto_1fr]">
+          <dt className="font-semibold text-[#241F1A]">Giá khởi điểm</dt>
+          <dd className="min-w-0">Mức thấp nhất để bắt đầu một đơn vẽ; họa sĩ có thể báo thêm nếu yêu cầu phức tạp hơn.</dd>
+          <dt className="font-semibold text-[#241F1A]">Giấy phép cá nhân</dt>
+          <dd className="min-w-0">Dùng cho mục đích phi thương mại: in treo nhà, quà tặng, avatar, dự án học tập. Không bán lại, không dùng cho quảng cáo.</dd>
+          <dt className="font-semibold text-[#241F1A]">Giấy phép thương mại</dt>
+          <dd className="min-w-0">Được dùng trong sản phẩm/dịch vụ có thu tiền (bìa sách, game, nhãn hàng, quảng cáo) theo phạm vi hai bên thỏa thuận.</dd>
+          <dt className="font-semibold text-[#241F1A]">Lượt nhận đơn</dt>
+          <dd className="min-w-0">Số đơn tối đa họa sĩ nhận thêm trong tháng; 0 nghĩa là đang kín lịch.</dd>
+        </dl>
+        )}
+
+        {/* Nút sang trang chi tiết đầy đủ (modal chỉ là bản xem nhanh). */}
+        {mode === 'modal' && (
+          <div className="py-3.5">
+            <a href={`/artworks/${activeId}`} className="btn btn--outline btn--block btn--sm"> Xem trang chi tiết đầy đủ <ArrowLeft className="size-4 rotate-180" aria-hidden />
+            </a>
+          </div>
+        )}
+
+        {/* 5. Tranh khác của họa sĩ — ẩn trong modal để gói gọn một màn hình */}
+        {artistThumbs.length > 0 && mode !== 'modal' && (
           <div className="pt-4">
             <div className="mb-3 flex items-center justify-between">
-              <span className="text-[13px] font-semibold text-white">
+              <span className="text-[13px] font-semibold text-[#241F1A]">
                 Tranh khác của {creatorDisplay}
               </span>
               <Link
                 href={`/creators/${artwork.creatorProfileId}`}
                 onClick={onClose}
-                className="text-xs text-[#b3b7ee] hover:underline"
+                className="text-xs text-[#8C3718] hover:underline"
               >
                 Tất cả →
               </Link>
@@ -649,10 +670,10 @@ function ArtworkDetailContent({
                       setShowProvenanceDetail(false);
                       setActiveId(item.id);
                     }}
-                    className={`relative aspect-square overflow-hidden rounded-[10px] border bg-[#0d0f17] transition hover:-translate-y-0.5 hover:border-[#b3b7ee] ${
+                    className={`relative aspect-square overflow-hidden rounded-[10px] border bg-[#FFFCF6] transition hover:-translate-y-0.5 hover:border-[#8C3718] ${
                       isCurrent
-                        ? 'border-[#b3b7ee] ring-1 ring-[#b3b7ee]'
-                        : 'border-white/[0.07]'
+                        ? 'border-[#8C3718] ring-1 ring-[#8C3718]'
+                        : 'border-[#221E1A]/10'
                     }`}
                   >
                     <Image
@@ -693,19 +714,19 @@ function ArtworkDetailContent({
 
 export function ArtworkDetail({ id }: { id: string }) {
   return (
-    <main className="min-h-screen bg-[#0f1117] px-4 py-8 text-white sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-[1080px]">
+    <main className="min-h-screen bg-[#FFFCF6] px-4 py-8 text-[#241F1A] sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-[1280px]">
         <div className="mb-5">
           <Link
             href="/explore"
-            className="inline-flex items-center gap-2 text-[13px] font-medium text-[#9ca3af] transition hover:text-white"
+            className="inline-flex items-center gap-2 text-[13px] font-medium text-[#746A5F] transition hover:text-[#241F1A]"
           >
             <ArrowLeft className="h-4 w-4" />
             <span>Quay lại trang khám phá</span>
           </Link>
         </div>
 
-        <div className="rounded-3xl border border-white/10 bg-[#161923] p-5 shadow-[0_24px_48px_rgba(0,0,0,0.45)] sm:p-7">
+        <div className="rounded-3xl border border-[#221E1A]/10 bg-[#FFFCF6] p-5 shadow-[0_24px_48px_rgba(0,0,0,0.45)] sm:p-7">
           <ArtworkDetailContent key={id} id={id} mode="page" />
         </div>
       </div>
@@ -719,25 +740,35 @@ export function ArtworkDetailModal({ id, onClose }: { id: string; onClose: () =>
       if (event.key === 'Escape') onClose();
     };
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    // Khoá scroll trang nền; modal tự cuộn bên trong.
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = previousOverflow;
+    };
   }, [onClose]);
 
-  return (
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  if (!mounted) return null;
+
+  return createPortal(
     <div
-      className="fixed inset-0 z-[80] overflow-y-auto bg-[#0b0d16]/85 p-3 backdrop-blur-md sm:p-6"
+      className="fixed inset-0 z-[300] grid place-items-center overflow-hidden bg-[#221E1A]/38 p-4 backdrop-blur-[6px] sm:p-8"
       role="dialog"
       aria-modal="true"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="mx-auto my-4 max-w-[1080px]">
-        <div className="relative rounded-3xl border border-white/10 bg-[#161923] p-5 shadow-[0_24px_48px_rgba(0,0,0,0.5)] sm:p-7">
+      <div className="w-full max-w-[1280px]">
+        <div className="qv-panel relative h-[min(86dvh,820px)] w-full max-w-[1200px] overflow-hidden rounded-[26px] border border-[#221E1A]/10 bg-[#FFFCF6] p-5 shadow-[0_44px_90px_-44px_rgba(58,42,26,0.6)] sm:p-6">
           <button
             type="button"
             onClick={onClose}
             aria-label="Đóng"
-            className="absolute right-5 top-5 z-20 inline-flex h-8.5 w-8.5 items-center justify-center rounded-full border border-white/[0.07] bg-[#1e2230] text-[#9ca3af] transition hover:bg-[#262b3d] hover:text-white"
+            className="absolute right-5 top-5 z-30 inline-flex h-9 w-9 items-center justify-center rounded-full border border-[#221E1A]/12 bg-[#FFFCF6]/95 text-[#6E6459] shadow-[0_10px_20px_-14px_rgba(74,52,30,0.8)] backdrop-blur transition hover:border-[#B24A26]/40 hover:text-[#8C3718]"
           >
             <X className="h-4 w-4" />
           </button>
@@ -745,6 +776,7 @@ export function ArtworkDetailModal({ id, onClose }: { id: string; onClose: () =>
           <ArtworkDetailContent key={id} id={id} mode="modal" onClose={onClose} />
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

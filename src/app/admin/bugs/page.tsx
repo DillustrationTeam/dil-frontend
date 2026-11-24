@@ -10,17 +10,17 @@ const STATUS_BADGE: Record<BugReportStatus, { vie: string; eng: string; classNam
   0: {
     vie: 'Chờ khắc phục',
     eng: 'Pending Fix',
-    className: 'bg-rose-500/10 text-rose-400 border border-rose-500/20',
+    className: 'bg-[#A8321C]/10 text-[#A8321C] border border-[#A8321C]/30',
   },
   1: {
     vie: 'Đang xử lý',
     eng: 'In Progress',
-    className: 'bg-amber-500/10 text-amber-300 border border-amber-500/25',
+    className: 'bg-[#8A6A1F]/10 text-[#8A6A1F] border border-[#8A6A1F]/35',
   },
   2: {
     vie: 'Đã xử lý',
     eng: 'Resolved',
-    className: 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20',
+    className: 'bg-[#2F6B63]/10 text-[#2F6B63] border border-[#2F6B63]/30',
   },
 };
 
@@ -81,7 +81,7 @@ export default function AdminBugReportsPage() {
   const handleResolve = async (id: string) => {
     setUpdatingId(id);
     try {
-      const updated = await supportService.updateBugStatus(id, 2, 'Đã xử lý bởi Admin');
+      const updated = await supportService.updateBugStatus(id, 2, 'Đã xử lý bởi quản trị viên');
       toast.success(
         isEng ? 'Marked status as Resolved.' : 'Đã cập nhật trạng thái thành Đã xử lý.'
       );
@@ -152,12 +152,12 @@ export default function AdminBugReportsPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="flex items-center gap-2.5">
-            <Bug className="h-6 w-6 text-[#A7ACD9]" />
-            <h1 className="font-h1 text-2xl font-bold text-white">
+            <Bug className="h-6 w-6 text-[#B24A26]" />
+            <h1 className="font-h1 text-2xl font-bold text-[#241F1A]">
               {isEng ? 'Bug Reports Management' : 'Quản lý Báo cáo Sự cố'}
             </h1>
           </div>
-          <p className="mt-1 text-sm text-[#919099]">
+          <p className="mt-1 text-sm text-[#746A5F]">
             {isEng
               ? 'Track and respond directly to users via in-app notifications or email.'
               : 'Theo dõi và phản hồi trực tiếp tới người dùng qua thông báo hệ thống hoặc email.'}
@@ -168,7 +168,7 @@ export default function AdminBugReportsPage() {
           <select
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
-            className="rounded-2xl border border-white/10 bg-[#161926] px-4 py-2.5 text-xs text-white outline-none focus:border-[#A7ACD9]"
+            className="rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] px-4 py-2.5 text-xs text-[#241F1A] outline-none focus:border-[#B24A26]"
           >
             <option value="all">{isEng ? 'All statuses' : 'Tất cả trạng thái'}</option>
             <option value="open">{isEng ? 'Open' : 'Chờ xử lý'}</option>
@@ -179,7 +179,7 @@ export default function AdminBugReportsPage() {
           <button
             type="button"
             onClick={() => fetchReports(filter)}
-            className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-2.5 text-xs font-medium text-white hover:bg-white/10"
+            className="flex items-center gap-2 rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] px-4 py-2.5 text-xs font-medium text-[#241F1A] hover:bg-[#F0E7D8]"
           >
             <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} />
             <span>{isEng ? 'Refresh' : 'Làm mới'}</span>
@@ -188,16 +188,16 @@ export default function AdminBugReportsPage() {
       </div>
 
       {loading ? (
-        <div className="py-20 text-center text-sm text-[#919099]">
+        <div className="py-20 text-center text-sm text-[#746A5F]">
           {isEng ? 'Loading bug reports...' : 'Đang tải danh sách báo cáo...'}
         </div>
       ) : reports.length === 0 ? (
-        <div className="rounded-3xl border border-white/5 bg-[#161926]/50 py-20 text-center">
-          <CheckCircle2 className="mx-auto h-10 w-10 text-emerald-400/80" />
-          <p className="mt-3 text-sm font-medium text-white">
+        <div className="rounded-3xl border border-[#221E1A]/10 bg-[#FFFCF6]/50 py-20 text-center">
+          <CheckCircle2 className="mx-auto h-10 w-10 text-[#2F6B63]" />
+          <p className="mt-3 text-sm font-medium text-[#241F1A]">
             {isEng ? 'No bug reports right now!' : 'Hiện không có báo cáo sự cố nào!'}
           </p>
-          <p className="mt-1 text-xs text-[#919099]">
+          <p className="mt-1 text-xs text-[#746A5F]">
             {isEng ? 'All systems are running smoothly.' : 'Hệ thống đang hoạt động ổn định.'}
           </p>
         </div>
@@ -211,7 +211,7 @@ export default function AdminBugReportsPage() {
             return (
               <div
                 key={report.id}
-                className="rounded-3xl border border-white/10 bg-[#171A29] p-5 shadow-sm transition-all hover:border-white/20"
+                className="rounded-3xl border border-[#221E1A]/10 bg-[#FFFCF6] p-5 shadow-sm transition-all hover:border-[#221E1A]/20"
               >
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div className="space-y-2">
@@ -227,15 +227,15 @@ export default function AdminBugReportsPage() {
                         <span>{isEng ? badge.eng : badge.vie}</span>
                       </span>
 
-                      <h3 className="font-h1 text-base font-bold text-white">{report.title}</h3>
+                      <h3 className="font-h1 text-base font-bold text-[#241F1A]">{report.title}</h3>
                     </div>
 
-                    <p className="whitespace-pre-wrap text-sm text-[#C7C5CF]">{report.description}</p>
+                    <p className="whitespace-pre-wrap text-sm text-[#6E6459]">{report.description}</p>
 
-                    <div className="flex flex-wrap items-center gap-4 pt-1 text-xs text-[#919099]">
+                    <div className="flex flex-wrap items-center gap-4 pt-1 text-xs text-[#746A5F]">
                       <span>
                         {isEng ? 'Reporter:' : 'Người gửi:'}{' '}
-                        <strong className="text-white/80">
+                        <strong className="text-[#241F1A]/80">
                           {report.reporterEmail || (isEng ? 'Anonymous' : 'Ẩn danh')}
                         </strong>
                       </span>
@@ -248,7 +248,7 @@ export default function AdminBugReportsPage() {
                           href={report.pageUrl}
                           target="_blank"
                           rel="noreferrer"
-                          className="inline-flex items-center gap-1 text-[#A7ACD9] hover:underline"
+                          className="inline-flex items-center gap-1 text-[#B24A26] hover:underline"
                         >
                           <ExternalLink className="h-3 w-3" />
                           <span>{isEng ? 'Open affected page' : 'Xem trang bị lỗi'}</span>
@@ -257,9 +257,9 @@ export default function AdminBugReportsPage() {
                     </div>
 
                     {report.adminNote && (
-                      <div className="mt-2 rounded-2xl border border-[#A7ACD9]/25 bg-[#1F2335]/80 px-3.5 py-2.5 text-xs text-[#E4E1E5]">
-                        <span className="font-semibold text-[#A7ACD9]">
-                          {isEng ? 'Admin reply:' : 'Phản hồi từ Admin:'}
+                      <div className="mt-2 rounded-2xl border border-[#B24A26]/25 bg-[#F7F2E9]/80 px-3.5 py-2.5 text-xs text-[#241F1A]">
+                        <span className="font-semibold text-[#B24A26]">
+                          {isEng ? 'Admin reply:' : 'Phản hồi từ quản trị viên:'}
                         </span>{' '}
                         <span className="whitespace-pre-wrap">{report.adminNote}</span>
                       </div>
@@ -270,7 +270,7 @@ export default function AdminBugReportsPage() {
                     <button
                       type="button"
                       onClick={() => openReplyBox(report)}
-                      className="flex items-center gap-1.5 rounded-2xl border border-[#A7ACD9]/35 bg-[#A7ACD9]/15 px-4 py-2.5 text-xs font-semibold text-[#c2c7f6] transition-colors hover:bg-[#A7ACD9]/25"
+                      className="flex items-center gap-1.5 rounded-2xl border border-[#B24A26]/35 bg-[#B24A26]/15 px-4 py-2.5 text-xs font-semibold text-[#8C3718] transition-colors hover:bg-[#B24A26]/25"
                     >
                       <MessageSquareReply className="h-4 w-4" />
                       <span>
@@ -289,7 +289,7 @@ export default function AdminBugReportsPage() {
                         type="button"
                         disabled={updatingId === report.id}
                         onClick={() => handleResolve(report.id)}
-                        className="flex items-center gap-1.5 rounded-2xl bg-emerald-600/80 px-4 py-2.5 text-xs font-semibold text-white transition-colors hover:bg-emerald-600 disabled:opacity-50"
+                        className="flex items-center gap-1.5 rounded-2xl bg-[#2F6B63]/20 px-4 py-2.5 text-xs font-semibold text-[#241F1A] transition-colors hover:bg-[#2F6B63]/12 disabled:opacity-50"
                       >
                         <CheckCircle2 className="h-4 w-4" />
                         <span>{isEng ? 'Mark Resolved' : 'Xong (Đã sửa)'}</span>
@@ -301,24 +301,24 @@ export default function AdminBugReportsPage() {
                 {isReplying && (
                   <form
                     onSubmit={(e) => handleSendReply(e, report)}
-                    className="mt-4 space-y-3 rounded-2xl border border-white/10 bg-[#131624] p-4"
+                    className="mt-4 space-y-3 rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] p-4"
                   >
-                    <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-[#919099]">
+                    <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-[#746A5F]">
                       <div className="flex flex-wrap items-center gap-2">
                         <span>{isEng ? 'Delivery channels:' : 'Kênh gửi phản hồi:'}</span>
                         {report.reporterId ? (
-                          <span className="rounded-full border border-[#A7ACD9]/30 bg-[#A7ACD9]/10 px-2.5 py-0.5 text-[11px] font-medium text-[#c2c7f6]">
+                          <span className="rounded-full border border-[#B24A26]/30 bg-[#B24A26]/10 px-2.5 py-0.5 text-[11px] font-medium text-[#8C3718]">
                             {isEng ? 'In-app notification' : 'Thông báo trong app'}
                           </span>
                         ) : null}
                         {hasEmail ? (
-                          <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-2.5 py-0.5 text-[11px] font-medium text-emerald-300">
+                          <span className="inline-flex items-center gap-1 rounded-full border border-[#2F6B63]/35 bg-[#2F6B63]/10 px-2.5 py-0.5 text-[11px] font-medium text-[#2F6B63]">
                             <Mail className="h-3 w-3" />
                             Email: {report.reporterEmail}
                           </span>
                         ) : null}
                         {!report.reporterId && !hasEmail ? (
-                          <span className="text-[11px] text-amber-300/90">
+                          <span className="text-[11px] text-[#8A6A1F]">
                             {isEng
                               ? 'Anonymous reporter (reply saved on system only)'
                               : 'Người gửi ẩn danh (chỉ lưu nội dung phản hồi trên hệ thống)'}
@@ -329,7 +329,7 @@ export default function AdminBugReportsPage() {
                       <select
                         value={replyStatus}
                         onChange={(e) => setReplyStatus(Number(e.target.value) as BugReportStatus)}
-                        className="rounded-xl border border-white/10 bg-[#1B1F32] px-3 py-1.5 text-xs text-white outline-none focus:border-[#A7ACD9]"
+                        className="rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-3 py-1.5 text-xs text-[#241F1A] outline-none focus:border-[#B24A26]"
                       >
                         <option value={1}>{isEng ? 'In Progress' : 'Đang xử lý'}</option>
                         <option value={2}>{isEng ? 'Resolved' : 'Đã xử lý'}</option>
@@ -346,21 +346,21 @@ export default function AdminBugReportsPage() {
                           ? 'Enter reply message for the user...'
                           : 'Nhập nội dung phản hồi gửi tới người dùng...'
                       }
-                      className="w-full rounded-2xl border border-white/10 bg-[#1B1F32] px-4 py-2.5 text-sm text-white placeholder:text-[#919099] outline-none focus:border-[#A7ACD9]"
+                      className="w-full rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] px-4 py-2.5 text-sm text-[#241F1A] placeholder:text-[#746A5F] outline-none focus:border-[#B24A26]"
                     />
 
                     <div className="flex justify-end gap-2">
                       <button
                         type="button"
                         onClick={() => setReplyingId(null)}
-                        className="rounded-full px-4 py-2 text-xs font-medium text-[#919099] hover:text-white"
+                        className="rounded-full px-4 py-2 text-xs font-medium text-[#746A5F] hover:text-[#241F1A]"
                       >
                         {isEng ? 'Cancel' : 'Hủy'}
                       </button>
                       <button
                         type="submit"
                         disabled={sendingReply}
-                        className="flex items-center gap-2 rounded-full bg-[#A7ACD9] px-5 py-2 text-xs font-bold text-[#1F2335] transition hover:bg-[#c2c7f6] disabled:opacity-50"
+                        className="flex items-center gap-2 rounded-full bg-[#B24A26] px-5 py-2 text-xs font-bold text-[#F7F2E9] transition hover:bg-[#8C3718] disabled:opacity-50"
                       >
                         {sendingReply ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
                         <span>{isEng ? 'Send Reply' : 'Gửi phản hồi'}</span>

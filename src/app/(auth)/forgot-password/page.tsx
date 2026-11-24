@@ -155,16 +155,16 @@ export default function ForgotPasswordPage() {
 
   return (
     <AuthShell>
-      <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-2xl border border-[#A7ACD9]/30 bg-[#A7ACD9]/15 text-[#A7ACD9]">
+      <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-2xl border border-[#B24A26]/30 bg-[#B24A26]/15 text-[#B24A26]">
         <History className="h-5 w-5" aria-hidden />
       </div>
 
       {step === 'email' ? (
         <>
-          <h1 className="font-h1 text-2xl font-bold text-white sm:text-3xl">
+          <h1 className="font-h1 text-2xl font-bold text-[#241F1A] sm:text-3xl">
             {isEng ? 'Recover Access' : 'Khôi phục truy cập'}
           </h1>
-          <p className="mt-1.5 mb-7 text-sm leading-relaxed text-[#C7C5CF]">
+          <p className="mt-1.5 mb-7 text-sm leading-relaxed text-[#6E6459]">
             {isEng
               ? 'Enter your registered email and we will send a 6-digit verification code to reset your password.'
               : 'Nhập email đã đăng ký, chúng tôi sẽ gửi mã xác minh gồm 6 số để bạn đặt lại mật khẩu.'}
@@ -176,7 +176,7 @@ export default function ForgotPasswordPage() {
                 {isEng ? 'Email Address' : 'Địa chỉ Email'}
               </label>
               <div className={AUTH_INPUT_WRAP_CLASS}>
-                <Mail className="pointer-events-none ml-3.5 h-4 w-4 shrink-0 text-[#919099]" aria-hidden />
+                <Mail className="pointer-events-none ml-3.5 h-4 w-4 shrink-0 text-[#746A5F]" aria-hidden />
                 <input
                   {...emailForm.register('email')}
                   id="recover-email"
@@ -187,7 +187,7 @@ export default function ForgotPasswordPage() {
                 />
               </div>
               {emailForm.formState.errors.email && (
-                <p className="text-xs text-red-400">{emailForm.formState.errors.email.message}</p>
+                <p className="text-xs text-[#A8321C]">{emailForm.formState.errors.email.message}</p>
               )}
             </div>
 
@@ -207,7 +207,7 @@ export default function ForgotPasswordPage() {
             <div className="pt-1 text-center">
               <Link
                 href="/login"
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#919099] transition-colors hover:text-white"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#746A5F] transition-colors hover:text-[#241F1A]"
               >
                 <ArrowLeft className="h-3.5 w-3.5" aria-hidden />
                 <span>{isEng ? 'Return to sign in' : 'Quay lại đăng nhập'}</span>
@@ -217,18 +217,16 @@ export default function ForgotPasswordPage() {
         </>
       ) : (
         <>
-          <h1 className="font-h1 text-2xl font-bold text-white sm:text-3xl">
+          <h1 className="font-h1 text-2xl font-bold text-[#241F1A] sm:text-3xl">
             {isEng ? 'Enter Verification Code' : 'Nhập mã xác minh'}
           </h1>
-          <p className="mt-1.5 mb-7 text-sm leading-relaxed text-[#C7C5CF]">
+          <p className="mt-1.5 mb-7 text-sm leading-relaxed text-[#6E6459]">
             {isEng ? (
               <>
-                We sent a 6-digit code to <span className="font-medium text-white">{submittedEmail}</span>. It expires in 10 minutes.
+                We sent a 6-digit code to <span className="font-medium text-[#241F1A]">{submittedEmail}</span>. It expires in 10 minutes.
               </>
             ) : (
-              <>
-                Chúng tôi đã gửi mã 6 số tới <span className="font-medium text-white">{submittedEmail}</span>. Mã có hiệu lực trong 10 phút.
-              </>
+              <> Chúng tôi đã gửi mã 6 số tới <span className="font-medium text-[#241F1A]">{submittedEmail}</span>. Mã có hiệu lực trong 10 phút. </>
             )}
           </p>
 
@@ -239,7 +237,7 @@ export default function ForgotPasswordPage() {
               </label>
               <div className="flex gap-2">
                 <div className={`${AUTH_INPUT_WRAP_CLASS} flex-1`}>
-                  <KeyRound className="pointer-events-none ml-3.5 h-4 w-4 shrink-0 text-[#919099]" aria-hidden />
+                  <KeyRound className="pointer-events-none ml-3.5 h-4 w-4 shrink-0 text-[#746A5F]" aria-hidden />
                   <input
                     {...resetForm.register('code')}
                     id="reset-code"
@@ -254,7 +252,7 @@ export default function ForgotPasswordPage() {
                   type="button"
                   onClick={handleResend}
                   disabled={isLoading || resendCooldown > 0}
-                  className="h-12 shrink-0 cursor-pointer rounded-xl border border-white/10 bg-white/5 px-4 text-xs font-semibold text-[#A7ACD9] transition-colors hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40"
+                  className="h-12 shrink-0 cursor-pointer rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-4 text-xs font-semibold text-[#B24A26] transition-colors hover:bg-[#F0E7D8] disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   {resendCooldown > 0
                     ? isEng
@@ -266,7 +264,7 @@ export default function ForgotPasswordPage() {
                 </button>
               </div>
               {resetForm.formState.errors.code && (
-                <p className="text-xs text-red-400">{resetForm.formState.errors.code.message}</p>
+                <p className="text-xs text-[#A8321C]">{resetForm.formState.errors.code.message}</p>
               )}
             </div>
 
@@ -275,7 +273,7 @@ export default function ForgotPasswordPage() {
                 {isEng ? 'New Password' : 'Mật khẩu mới'}
               </label>
               <div className={AUTH_INPUT_WRAP_CLASS}>
-                <Lock className="pointer-events-none ml-3.5 h-4 w-4 shrink-0 text-[#919099]" aria-hidden />
+                <Lock className="pointer-events-none ml-3.5 h-4 w-4 shrink-0 text-[#746A5F]" aria-hidden />
                 <input
                   {...resetForm.register('newPassword')}
                   id="new-password"
@@ -286,7 +284,7 @@ export default function ForgotPasswordPage() {
                 />
               </div>
               {resetForm.formState.errors.newPassword && (
-                <p className="text-xs text-red-400">{resetForm.formState.errors.newPassword.message}</p>
+                <p className="text-xs text-[#A8321C]">{resetForm.formState.errors.newPassword.message}</p>
               )}
             </div>
 
@@ -295,7 +293,7 @@ export default function ForgotPasswordPage() {
                 {isEng ? 'Confirm New Password' : 'Xác nhận mật khẩu mới'}
               </label>
               <div className={AUTH_INPUT_WRAP_CLASS}>
-                <Lock className="pointer-events-none ml-3.5 h-4 w-4 shrink-0 text-[#919099]" aria-hidden />
+                <Lock className="pointer-events-none ml-3.5 h-4 w-4 shrink-0 text-[#746A5F]" aria-hidden />
                 <input
                   {...resetForm.register('confirmPassword')}
                   id="confirm-password"
@@ -306,7 +304,7 @@ export default function ForgotPasswordPage() {
                 />
               </div>
               {resetForm.formState.errors.confirmPassword && (
-                <p className="text-xs text-red-400">{resetForm.formState.errors.confirmPassword.message}</p>
+                <p className="text-xs text-[#A8321C]">{resetForm.formState.errors.confirmPassword.message}</p>
               )}
             </div>
 
@@ -327,7 +325,7 @@ export default function ForgotPasswordPage() {
               <button
                 type="button"
                 onClick={() => setStep('email')}
-                className="inline-flex cursor-pointer items-center gap-1.5 text-xs font-semibold text-[#919099] transition-colors hover:text-white"
+                className="inline-flex cursor-pointer items-center gap-1.5 text-xs font-semibold text-[#746A5F] transition-colors hover:text-[#241F1A]"
               >
                 <ArrowLeft className="h-3.5 w-3.5" aria-hidden />
                 <span>{isEng ? 'Use another email' : 'Đổi email khác'}</span>
@@ -337,9 +335,9 @@ export default function ForgotPasswordPage() {
         </>
       )}
 
-      <div className="mt-7 border-t border-white/10 pt-5 text-center text-xs text-[#919099]">
+      <div className="mt-7 border-t border-[#221E1A]/10 pt-5 text-center text-xs text-[#746A5F]">
         {isEng ? 'Having trouble?' : 'Gặp sự cố?'}{' '}
-        <Link href="/guide#guide-faq" className="text-[#A7ACD9] hover:underline">
+        <Link href="/guide#guide-faq" className="text-[#B24A26] hover:underline">
           {isEng ? 'Contact platform support' : 'Liên hệ hỗ trợ nền tảng'}
         </Link>
       </div>

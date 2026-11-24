@@ -26,9 +26,9 @@ export function getPackageSlotInfo(pkg: Pick<RateCardPackage, 'maxSlots' | 'acti
   const remaining = maxSlots !== null ? Math.max(0, pkg.remainingSlots ?? maxSlots - activeCount) : null;
   const isFull = remaining !== null && remaining <= 0;
   const label = !isLimited
-    ? 'Không giới hạn slot'
+    ? 'Không giới hạn lượt'
     : isFull
-      ? `Hết slot (${activeCount}/${maxSlots})`
+      ? `Hết lượt (${activeCount}/${maxSlots})`
       : `Còn ${remaining}/${maxSlots} slot`;
   return { isLimited, maxSlots, activeCount, remaining, isFull, label };
 }
@@ -43,7 +43,7 @@ export const creatorRateCardService = {
       sampleUrls: Array.isArray(pkg.sampleUrls) ? pkg.sampleUrls : [],
       milestones: Array.isArray(pkg.milestones) && pkg.milestones.length > 0
         ? pkg.milestones
-        : [{ sequence: 1, title: 'Hoàn thiện (Final)', price: pkg.price ?? 0, maxRevisions: pkg.maxRevisions ?? 2 }],
+        : [{ sequence: 1, title: 'Hoàn thiện', price: pkg.price ?? 0, maxRevisions: pkg.maxRevisions ?? 2 }],
     }));
   },
   async save(packages: RateCardPackage[]): Promise<RateCardPackage[]> {

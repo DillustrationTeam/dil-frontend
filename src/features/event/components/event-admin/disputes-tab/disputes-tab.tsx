@@ -241,11 +241,11 @@ export function DisputesTab() {
             <div className="w-8 h-8 rounded-xl bg-brand-periwinkle/20 text-brand-periwinkle flex items-center justify-center border border-brand-periwinkle/30 shrink-0">
               <Scale className="w-4 h-4" />
             </div>
-            <h1 className="font-h1 text-2xl font-extrabold text-white">
+            <h1 className="font-h1 text-2xl font-extrabold text-[#241F1A]">
               {isVie ? 'Hàng đợi Giải quyết Tranh chấp Sự kiện' : 'Contest Dispute Resolution Queue'}
             </h1>
           </div>
-          <p className="text-xs text-[#8A8FA9] mt-1 font-body">
+          <p className="text-xs text-[#6E6459] mt-1 font-body">
             {isVie
               ? 'Kiểm tra các bài dự thi bị báo cáo, khiếu nại chênh lệch điểm, cảnh báo tranh chấp AI và thực thi phán quyết trọng tài.'
               : 'Investigate reported contest submissions, score variance appeals, AI artwork flags, and execute arbitrator rulings.'}
@@ -254,7 +254,7 @@ export function DisputesTab() {
 
         <div className="flex items-center gap-3">
           {/* Pending Count Pill */}
-          <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-amber-500/20 text-amber-300 text-xs font-bold rounded-full border border-amber-500/30 shadow-[0_0_12px_rgba(245,158,11,0.2)]">
+          <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-[#8A6A1F]/20 text-[#8A6A1F] text-xs font-bold rounded-full border border-[#8A6A1F]/40 shadow-[0_0_12px_rgba(245,158,11,0.2)]">
             <AlertTriangle className="w-3.5 h-3.5" />
             <span>{isVie ? `${openCount} Khiếu nại đang chờ xử lý` : `${openCount} Cases Under Review`}</span>
           </span>
@@ -264,7 +264,7 @@ export function DisputesTab() {
             type="button"
             onClick={() => void loadDisputes(selectedEventId)}
             disabled={isLoading}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/10 hover:bg-white/15 text-white text-xs font-bold transition-all border border-white/10 disabled:opacity-50 cursor-pointer"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#F0E7D8] hover:bg-[#F0E7D8] text-[#241F1A] text-xs font-bold transition-all border border-[#221E1A]/10 disabled:opacity-50 cursor-pointer"
             title={isVie ? 'Làm mới hàng đợi' : 'Refresh queue'}
           >
             <RotateCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin text-brand-periwinkle' : ''}`} />
@@ -274,9 +274,9 @@ export function DisputesTab() {
       </div>
 
       {/* 2. Target Contest Selector & Status Banner (Identical to Jury Permissions) */}
-      <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl border border-white/10 bg-[#161926]/80 backdrop-blur-xl">
+      <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6]/80 backdrop-blur-xl">
         <div className="flex flex-wrap items-center gap-3">
-          <label className="text-xs font-semibold text-[#A7ACD9] uppercase tracking-wider shrink-0">
+          <label className="text-xs font-semibold text-[#B24A26] uppercase tracking-wider shrink-0">
             {isVie ? 'Cuộc thi mục tiêu:' : 'Target Contest:'}
           </label>
           <ContestSearchSelect
@@ -297,8 +297,8 @@ export function DisputesTab() {
             className={`px-3 py-1 rounded-full text-xs font-bold ${selectedEventId === 'all'
                 ? 'bg-brand-periwinkle/20 text-brand-periwinkle border border-brand-periwinkle/30'
                 : isJudgingPhaseActive
-                  ? 'bg-amber-500/20 text-amber-300 border border-amber-400/30'
-                  : 'bg-emerald-500/20 text-emerald-300 border border-emerald-400/30'
+                  ? 'bg-[#8A6A1F]/20 text-[#8A6A1F] border border-[#8A6A1F]/40'
+                  : 'bg-[#2F6B63]/20 text-[#2F6B63] border border-[#2F6B63]/40'
               }`}
           >
             {selectedEventId === 'all'
@@ -319,10 +319,10 @@ export function DisputesTab() {
       />
 
       {/* 4. Searchbar & Status Filter Toolbar (All Categories and All Priorities removed) */}
-      <div className="glass-container rounded-2xl p-4 border border-white/10 bg-[#161926]/80 backdrop-blur-xl flex flex-wrap items-center gap-3">
+      <div className="glass-container rounded-2xl p-4 border border-[#221E1A]/10 bg-[#FFFCF6]/80 backdrop-blur-xl flex flex-wrap items-center gap-3">
         {/* Search Bar on the Left */}
         <div className="relative flex-1 min-w-[260px]">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#746A5F] pointer-events-none" />
           <input
             type="text"
             value={searchQuery}
@@ -331,13 +331,13 @@ export function DisputesTab() {
               setPage(1);
             }}
             placeholder={isVie ? 'Tìm tranh chấp theo mã đơn, tiêu đề hoặc lý do...' : 'Search dispute by case ID, title, or reason...'}
-            className="w-full h-10 pl-10 pr-9 bg-[#090b12]/80 border border-white/10 rounded-xl text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-brand-periwinkle focus:ring-1 focus:ring-brand-periwinkle/30 transition-all font-body"
+            className="w-full h-10 pl-10 pr-9 bg-[#E5D8C2]/80 border border-[#221E1A]/10 rounded-xl text-xs text-[#241F1A] placeholder:text-[#746A5F] focus:outline-none focus:border-brand-periwinkle focus:ring-1 focus:ring-brand-periwinkle/30 transition-all font-body"
           />
           {searchQuery && (
             <button
               type="button"
               onClick={() => setSearchQuery('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white p-0.5 cursor-pointer"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-[#746A5F] hover:text-[#241F1A] p-0.5 cursor-pointer"
             >
               <X className="w-3.5 h-3.5" />
             </button>
@@ -352,13 +352,13 @@ export function DisputesTab() {
               setStatusFilter(e.target.value as SubmissionDisputeStatus);
               setPage(1);
             }}
-            className="w-full h-10 px-3 pr-8 bg-[#090b12]/80 border border-white/10 rounded-xl text-xs text-white focus:outline-none focus:border-brand-periwinkle focus:ring-1 focus:ring-brand-periwinkle/30 transition-all cursor-pointer font-medium"
+            className="w-full h-10 px-3 pr-8 bg-[#E5D8C2]/80 border border-[#221E1A]/10 rounded-xl text-xs text-[#241F1A] focus:outline-none focus:border-brand-periwinkle focus:ring-1 focus:ring-brand-periwinkle/30 transition-all cursor-pointer font-medium"
           >
-            <option value="All" className="bg-[#161926]">{isVie ? 'Tất cả trạng thái' : 'All Statuses'}</option>
-            <option value="Pending" className="bg-[#161926]">{isVie ? 'Chờ xử lý' : 'Pending'}</option>
-            <option value="UnderReview" className="bg-[#161926]">{isVie ? 'Đang duyệt' : 'Under Review'}</option>
-            <option value="Resolved" className="bg-[#161926]">{isVie ? 'Đã giải quyết' : 'Resolved'}</option>
-            <option value="Rejected" className="bg-[#161926]">{isVie ? 'Đã từ chối' : 'Rejected'}</option>
+            <option value="All" className="bg-[#FFFCF6]">{isVie ? 'Tất cả trạng thái' : 'All Statuses'}</option>
+            <option value="Pending" className="bg-[#FFFCF6]">{isVie ? 'Chờ xử lý' : 'Pending'}</option>
+            <option value="UnderReview" className="bg-[#FFFCF6]">{isVie ? 'Đang duyệt' : 'Under Review'}</option>
+            <option value="Resolved" className="bg-[#FFFCF6]">{isVie ? 'Đã giải quyết' : 'Resolved'}</option>
+            <option value="Rejected" className="bg-[#FFFCF6]">{isVie ? 'Đã từ chối' : 'Rejected'}</option>
           </select>
         </div>
       </div>

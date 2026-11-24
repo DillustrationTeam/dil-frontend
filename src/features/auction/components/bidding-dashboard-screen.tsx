@@ -37,7 +37,7 @@ function BiddingCard({ bid }: { bid: MyActiveBidDto }) {
   return (
     <div
       className={`glass-container flex flex-col justify-between rounded-3xl border p-6 transition-all duration-300 hover:-translate-y-1 ${
-        isLeading ? 'border-emerald-500/30 bg-emerald-500/5' : 'border-amber-500/30 bg-amber-500/5'
+        isLeading ? 'border-[#2F6B63]/40 bg-[#2F6B63]/5' : 'border-[#8A6A1F]/40 bg-[#8A6A1F]/5'
       }`}
     >
       <div>
@@ -45,14 +45,14 @@ function BiddingCard({ bid }: { bid: MyActiveBidDto }) {
           <span
             className={`inline-flex items-center gap-1 rounded-full px-3 py-0.5 text-xs font-semibold ${
               isLeading
-                ? 'border border-emerald-400/30 bg-emerald-400/10 text-emerald-300'
-                : 'border border-amber-400/30 bg-amber-400/10 text-amber-300'
+                ? 'border border-[#2F6B63]/40 bg-[#2F6B63]/10 text-[#2F6B63]'
+                : 'border border-[#8A6A1F]/40 bg-[#8A6A1F]/10 text-[#8A6A1F]'
             }`}
           >
             {isLeading ? <CheckCircle2 size={12} /> : <AlertTriangle size={12} />}
             {isLeading ? 'Đang dẫn đầu' : 'Bị đè giá!'}
           </span>
-          <span className="flex items-center gap-1 font-mono text-xs text-amber-300">
+          <span className="flex items-center gap-1 font-mono text-xs text-[#8A6A1F]">
             <Clock size={12} /> {clock.isEnded ? 'Đã kết thúc' : clock.formatted}
           </span>
         </div>
@@ -60,17 +60,17 @@ function BiddingCard({ bid }: { bid: MyActiveBidDto }) {
         <h3 className="font-h1 text-lg font-bold text-on-surface line-clamp-1">{bid.artworkTitle}</h3>
         <p className="mt-1 text-xs text-outline">Mã phiên: #{bid.auctionId.slice(0, 8).toUpperCase()}</p>
 
-        <div className="my-4 space-y-2 rounded-2xl border border-white/5 bg-black/20 p-3.5 text-xs">
+        <div className="my-4 space-y-2 rounded-2xl border border-[#221E1A]/10 bg-[#F0E7D8] p-3.5 text-xs">
           <div className="flex items-center justify-between">
             <span className="text-outline">Giá hiện tại:</span>
             <span className="font-mono font-bold text-brand-periwinkle">{formatVnd(bid.currentPrice)}</span>
           </div>
           <div className="flex items-center justify-between">
             <span className="text-outline">Tiền cọc đang giữ:</span>
-            <span className="font-mono font-semibold text-amber-400">{formatVnd(bid.lockedAmount)}</span>
+            <span className="font-mono font-semibold text-[#8A6A1F]">{formatVnd(bid.lockedAmount)}</span>
           </div>
           {!isLeading && (
-            <div className="flex items-center justify-between text-amber-300 border-t border-white/5 pt-1.5">
+            <div className="flex items-center justify-between text-[#8A6A1F] border-t border-[#221E1A]/10 pt-1.5">
               <span>Mức đặt tối thiểu tiếp theo:</span>
               <span className="font-mono font-bold">{formatVnd(bid.minimumNextBid)}</span>
             </div>
@@ -78,7 +78,7 @@ function BiddingCard({ bid }: { bid: MyActiveBidDto }) {
         </div>
       </div>
 
-      <div className="mt-2 pt-2 border-t border-white/5 flex items-center justify-between">
+      <div className="mt-2 pt-2 border-t border-[#221E1A]/10 flex items-center justify-between">
         <span className="text-[11px] text-outline">
           Đặt lúc: {new Date(bid.lastBidAt).toLocaleTimeString('vi-VN')}
         </span>
@@ -86,8 +86,8 @@ function BiddingCard({ bid }: { bid: MyActiveBidDto }) {
           href={`/auctions/${bid.auctionId}`}
           className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2 font-h1 text-xs font-bold transition ${
             isLeading
-              ? 'border border-brand-periwinkle/30 bg-brand-periwinkle/10 text-brand-periwinkle hover:bg-brand-periwinkle hover:text-brand-navy'
-              : 'bg-amber-400 text-brand-navy hover:brightness-110 shadow-md'
+              ? 'border border-brand-periwinkle/30 bg-brand-periwinkle/10 text-brand-periwinkle hover:bg-brand-periwinkle hover:text-[#FFFCF6]'
+              : 'bg-[#8A6A1F]/10 text-[#241F1A] hover:brightness-110 shadow-md'
           }`}
         >
           {isLeading ? 'Xem phiên' : 'Nâng giá ngay'} <ArrowRight size={13} />
@@ -112,19 +112,19 @@ function WatchedCard({
   const isLive = item.auctionStatus === 'Active';
 
   return (
-    <div className="glass-container flex flex-col justify-between rounded-3xl border border-white/10 bg-white/[0.03] p-6 transition-all duration-300 hover:-translate-y-1">
+    <div className="glass-container flex flex-col justify-between rounded-3xl border border-[#221E1A]/10 bg-[#FFFCF6] p-6 transition-all duration-300 hover:-translate-y-1">
       <div>
         <div className="mb-3 flex items-center justify-between">
           <span
             className={`inline-flex items-center gap-1 rounded-full px-3 py-0.5 text-xs font-semibold ${
               isLive
-                ? 'border border-emerald-400/30 bg-emerald-400/10 text-emerald-300'
-                : 'border border-white/15 bg-white/5 text-outline'
+                ? 'border border-[#2F6B63]/40 bg-[#2F6B63]/10 text-[#2F6B63]'
+                : 'border border-[#221E1A]/10 bg-[#FFFCF6] text-outline'
             }`}
           >
             <Eye size={12} /> {isLive ? 'Đang diễn ra' : 'Sắp diễn ra'}
           </span>
-          <span className="flex items-center gap-1 font-mono text-xs text-amber-300">
+          <span className="flex items-center gap-1 font-mono text-xs text-[#8A6A1F]">
             <Clock size={12} /> {clock.isEnded ? 'Đã kết thúc' : clock.formatted}
           </span>
         </div>
@@ -134,7 +134,7 @@ function WatchedCard({
         </h3>
         <p className="mt-1 text-xs text-outline">Mã phiên: #{item.auctionId.slice(0, 8).toUpperCase()}</p>
 
-        <div className="my-4 space-y-2 rounded-2xl border border-white/5 bg-black/20 p-3.5 text-xs">
+        <div className="my-4 space-y-2 rounded-2xl border border-[#221E1A]/10 bg-[#F0E7D8] p-3.5 text-xs">
           <div className="flex items-center justify-between">
             <span className="text-outline">Giá hiện tại:</span>
             <span className="font-mono font-bold text-brand-periwinkle">{formatVnd(item.currentPrice)}</span>
@@ -143,30 +143,29 @@ function WatchedCard({
             <span className="text-outline">Lượt đặt giá:</span>
             <span className="font-mono font-semibold text-on-surface">{item.bidCount}</span>
           </div>
-          <div className="flex items-center justify-between border-t border-white/5 pt-1.5">
+          <div className="flex items-center justify-between border-t border-[#221E1A]/10 pt-1.5">
             <span className="text-outline">Người theo dõi:</span>
-            <span className="inline-flex items-center gap-1 font-mono font-semibold text-emerald-300">
+            <span className="inline-flex items-center gap-1 font-mono font-semibold text-[#2F6B63]">
               <Bell size={11} /> {item.watchCount}
             </span>
           </div>
         </div>
       </div>
 
-      <div className="mt-2 flex items-center justify-between gap-2 border-t border-white/5 pt-2">
+      <div className="mt-2 flex items-center justify-between gap-2 border-t border-[#221E1A]/10 pt-2">
         <button
           type="button"
           onClick={() => onUnwatch(item.auctionId)}
           disabled={unwatching}
-          className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/5 px-3 py-2 text-[11px] font-semibold text-outline transition hover:border-rose-300/40 hover:text-rose-200 disabled:opacity-50"
+          className="inline-flex items-center gap-1.5 rounded-full border border-[#221E1A]/10 bg-[#FFFCF6] px-3 py-2 text-[11px] font-semibold text-outline transition hover:border-[#A8321C]/40 hover:text-[#A8321C] disabled:opacity-50"
           title="Bỏ theo dõi phiên này"
         >
           <BellOff size={12} /> {unwatching ? 'Đang bỏ…' : 'Bỏ theo dõi'}
         </button>
         <Link
           href={`/auctions/${item.auctionId}`}
-          className="inline-flex items-center gap-1.5 rounded-full border border-brand-periwinkle/30 bg-brand-periwinkle/10 px-4 py-2 font-h1 text-xs font-bold text-brand-periwinkle transition hover:bg-brand-periwinkle hover:text-brand-navy"
-        >
-          Xem phiên <ArrowRight size={13} />
+          className="inline-flex items-center gap-1.5 rounded-full border border-brand-periwinkle/30 bg-brand-periwinkle/10 px-4 py-2 font-h1 text-xs font-bold text-brand-periwinkle transition hover:bg-brand-periwinkle hover:text-[#FFFCF6]"
+        > Xem phiên <ArrowRight size={13} />
         </Link>
       </div>
     </div>
@@ -288,9 +287,7 @@ export function BiddingDashboardScreen({ initialTab = 'all' }: { initialTab?: Da
 
   if (!authReady) {
     return (
-      <div className="mx-auto w-full max-w-4xl px-4 py-16 text-center text-on-surface-variant">
-        Đang tải phiên đấu giá của bạn…
-      </div>
+      <div className="mx-auto w-full max-w-4xl px-4 py-16 text-center text-on-surface-variant"> Đang tải phiên đấu giá của bạn… </div>
     );
   }
 
@@ -326,77 +323,72 @@ export function BiddingDashboardScreen({ initialTab = 'all' }: { initialTab?: Da
       <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="font-h1 text-2xl font-bold md:text-3xl">Phiên Đấu Giá Của Tôi</h1>
-          <p className="mt-1 text-xs text-on-surface-variant">
-            Theo dõi các phiên đang tham gia, trạng thái cọc và đè giá theo thời gian thực
-          </p>
+          <p className="mt-1 text-xs text-on-surface-variant"> Theo dõi các phiên đang tham gia, trạng thái cọc và đè giá theo thời gian thực </p>
         </div>
         <div className="flex flex-wrap items-center gap-2 self-start">
           <Link
             href="/my-auctions/deliveries"
-            className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/30 bg-amber-400/10 px-4 py-2 text-xs font-semibold text-amber-200 hover:bg-amber-400/20"
+            className="inline-flex items-center gap-1.5 rounded-full border border-[#8A6A1F]/40 bg-[#8A6A1F]/10 px-4 py-2 text-xs font-semibold text-[#8A6A1F] hover:bg-[#8A6A1F]/20"
             title="Vận đơn, ký quỹ và khiếu nại của các phiên có bản tranh vật lý"
           >
-            <Truck size={14} /> Đơn giao tranh vật lý
-          </Link>
+            <Truck size={14} /> Đơn giao tranh vật lý </Link>
           <Link
             href="/my-auctions/penalties"
-            className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold text-outline hover:text-white"
+            className="inline-flex items-center gap-1.5 rounded-full border border-[#221E1A]/10 bg-[#FFFCF6] px-4 py-2 text-xs font-semibold text-outline hover:text-[#241F1A]"
             title="Hồ sơ người mua báo cáo bạn và kết luận của Ban quản trị"
           >
-            <ShieldAlert size={14} /> Tôi bị báo cáo
-          </Link>
+            <ShieldAlert size={14} /> Tôi bị báo cáo </Link>
           <button
             type="button"
             onClick={() => loadDashboard()}
-            className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold hover:bg-white/10"
+            className="inline-flex items-center gap-2 rounded-full border border-[#221E1A]/10 bg-[#FFFCF6] px-4 py-2 text-xs font-semibold hover:bg-[#F0E7D8]"
           >
-            <RefreshCw size={14} className={loading ? 'animate-spin' : ''} /> Cập nhật
-          </button>
+            <RefreshCw size={14} className={loading ? 'animate-spin' : ''} /> Cập nhật </button>
         </div>
       </div>
 
       {error && (
-        <div role="alert" className="mb-6 rounded-2xl border border-red-400/30 bg-red-500/10 p-4 text-sm text-red-200">
+        <div role="alert" className="mb-6 rounded-2xl border border-[#A8321C]/40 bg-[#A8321C]/10 p-4 text-sm text-[#A8321C]">
           {error}
         </div>
       )}
 
       {/* Overview Metric Cards */}
       <div className="mb-8 grid gap-4 sm:grid-cols-3">
-        <div className="glass-container rounded-3xl border border-amber-500/20 bg-amber-500/5 p-6">
+        <div className="glass-container rounded-3xl border border-[#8A6A1F]/30 bg-[#8A6A1F]/5 p-6">
           <div className="flex items-center gap-3">
-            <div className="flex size-10 items-center justify-center rounded-2xl bg-amber-500/20 text-amber-400">
+            <div className="flex size-10 items-center justify-center rounded-2xl bg-[#8A6A1F]/20 text-[#8A6A1F]">
               <Lock size={20} />
             </div>
             <div>
               <span className="text-xs text-outline">Tổng tiền đang khóa cọc</span>
-              <p className="font-mono text-xl font-bold text-amber-300">
+              <p className="font-mono text-xl font-bold text-[#8A6A1F]">
                 {formatVnd(meta?.totalLockedAmount ?? 0)}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="glass-container rounded-3xl border border-emerald-500/20 bg-emerald-500/5 p-6">
+        <div className="glass-container rounded-3xl border border-[#2F6B63]/30 bg-[#2F6B63]/5 p-6">
           <div className="flex items-center gap-3">
-            <div className="flex size-10 items-center justify-center rounded-2xl bg-emerald-500/20 text-emerald-400">
+            <div className="flex size-10 items-center justify-center rounded-2xl bg-[#2F6B63]/20 text-[#2F6B63]">
               <TrendingUp size={20} />
             </div>
             <div>
               <span className="text-xs text-outline">Đang dẫn đầu</span>
-              <p className="font-h1 text-xl font-bold text-emerald-400">{leadingCount} phiên</p>
+              <p className="font-h1 text-xl font-bold text-[#2F6B63]">{leadingCount} phiên</p>
             </div>
           </div>
         </div>
 
-        <div className="glass-container rounded-3xl border border-rose-500/20 bg-rose-500/5 p-6">
+        <div className="glass-container rounded-3xl border border-[#A8321C]/30 bg-[#A8321C]/5 p-6">
           <div className="flex items-center gap-3">
-            <div className="flex size-10 items-center justify-center rounded-2xl bg-rose-500/20 text-rose-400">
+            <div className="flex size-10 items-center justify-center rounded-2xl bg-[#A8321C]/20 text-[#A8321C]">
               <AlertTriangle size={20} />
             </div>
             <div>
               <span className="text-xs text-outline">Bị đè giá</span>
-              <p className="font-h1 text-xl font-bold text-rose-400">{outbidCount} phiên</p>
+              <p className="font-h1 text-xl font-bold text-[#A8321C]">{outbidCount} phiên</p>
             </div>
           </div>
         </div>
@@ -404,12 +396,12 @@ export function BiddingDashboardScreen({ initialTab = 'all' }: { initialTab?: Da
 
       {/* Tabs & Notice */}
       <div className="mb-6 flex items-center justify-between">
-        <div className="flex gap-2 rounded-2xl border border-white/10 bg-white/5 p-1 text-xs font-semibold">
+        <div className="flex gap-2 rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] p-1 text-xs font-semibold">
           <button
             type="button"
             onClick={() => setActiveTab('all')}
             className={`rounded-xl px-4 py-2 transition ${
-              activeTab === 'all' ? 'bg-brand-periwinkle text-brand-navy shadow' : 'text-outline hover:text-white'
+              activeTab === 'all' ? 'bg-brand-periwinkle text-[#FFFCF6] shadow' : 'text-outline hover:text-[#241F1A]'
             }`}
           >
             Tất cả ({bids.length})
@@ -418,7 +410,7 @@ export function BiddingDashboardScreen({ initialTab = 'all' }: { initialTab?: Da
             type="button"
             onClick={() => setActiveTab('leading')}
             className={`rounded-xl px-4 py-2 transition ${
-              activeTab === 'leading' ? 'bg-emerald-400 text-brand-navy shadow' : 'text-outline hover:text-white'
+              activeTab === 'leading' ? 'bg-[#2F6B63]/10 text-[#241F1A] shadow' : 'text-outline hover:text-[#241F1A]'
             }`}
           >
             Đang dẫn đầu ({leadingCount})
@@ -427,7 +419,7 @@ export function BiddingDashboardScreen({ initialTab = 'all' }: { initialTab?: Da
             type="button"
             onClick={() => setActiveTab('outbid')}
             className={`rounded-xl px-4 py-2 transition ${
-              activeTab === 'outbid' ? 'bg-amber-400 text-brand-navy shadow' : 'text-outline hover:text-white'
+              activeTab === 'outbid' ? 'bg-[#8A6A1F]/10 text-[#241F1A] shadow' : 'text-outline hover:text-[#241F1A]'
             }`}
           >
             Bị đè giá ({outbidCount})
@@ -436,7 +428,7 @@ export function BiddingDashboardScreen({ initialTab = 'all' }: { initialTab?: Da
             type="button"
             onClick={() => setActiveTab('watching')}
             className={`inline-flex items-center gap-1.5 rounded-xl px-4 py-2 transition ${
-              activeTab === 'watching' ? 'bg-brand-periwinkle text-brand-navy shadow' : 'text-outline hover:text-white'
+              activeTab === 'watching' ? 'bg-brand-periwinkle text-[#FFFCF6] shadow' : 'text-outline hover:text-[#241F1A]'
             }`}
           >
             <Bell size={12} /> Phiên tôi đang theo dõi ({watchingLoaded ? watched.length : '…'})
@@ -444,22 +436,18 @@ export function BiddingDashboardScreen({ initialTab = 'all' }: { initialTab?: Da
         </div>
 
         <span className="hidden text-xs text-outline md:inline-flex md:items-center md:gap-1">
-          <Sparkles size={13} className="text-brand-periwinkle" /> Cập nhật thời gian thực
-        </span>
+          <Sparkles size={13} className="text-brand-periwinkle" /> Cập nhật thời gian thực </span>
       </div>
 
       {activeTab === 'watching' ? (
         loadingWatches && !watchingLoaded ? (
           <PageLoader label="Đang tải phiên bạn đang theo dõi…" />
         ) : watched.length === 0 ? (
-          <div className="glass-container rounded-3xl border border-white/10 p-12 text-center text-outline">
+          <div className="glass-container rounded-3xl border border-[#221E1A]/10 p-12 text-center text-outline">
             <Bell size={40} className="mx-auto mb-3 opacity-40" />
             <p className="text-sm">Bạn chưa theo dõi phiên đấu giá nào.</p>
-            <p className="mt-1 text-xs">
-              Bấm “Theo dõi” trong trang chi tiết phiên để nhận thông báo khi phiên sắp kết thúc.
-            </p>
-            <Link href="/auctions" className="mt-4 inline-flex items-center gap-2 text-xs text-brand-periwinkle hover:underline">
-              Khám phá các phiên đấu giá đang diễn ra <ArrowRight size={14} />
+            <p className="mt-1 text-xs"> Bấm “Theo dõi” trong trang chi tiết phiên để nhận thông báo khi phiên sắp kết thúc. </p>
+            <Link href="/auctions" className="mt-4 inline-flex items-center gap-2 text-xs text-brand-periwinkle hover:underline"> Khám phá các phiên đấu giá đang diễn ra <ArrowRight size={14} />
             </Link>
           </div>
         ) : (
@@ -480,7 +468,7 @@ export function BiddingDashboardScreen({ initialTab = 'all' }: { initialTab?: Da
                   type="button"
                   disabled={loadingWatches}
                   onClick={() => void loadWatches(watchCursor)}
-                  className="inline-flex items-center gap-2 rounded-full border border-brand-periwinkle/40 bg-brand-periwinkle/10 px-6 py-2.5 font-h1 text-xs font-bold text-brand-periwinkle transition hover:bg-brand-periwinkle hover:text-brand-navy disabled:opacity-50"
+                  className="inline-flex items-center gap-2 rounded-full border border-brand-periwinkle/40 bg-brand-periwinkle/10 px-6 py-2.5 font-h1 text-xs font-bold text-brand-periwinkle transition hover:bg-brand-periwinkle hover:text-[#FFFCF6] disabled:opacity-50"
                 >
                   {loadingWatches ? 'Đang tải...' : 'Tải thêm phiên đang theo dõi'}
                 </button>
@@ -489,11 +477,10 @@ export function BiddingDashboardScreen({ initialTab = 'all' }: { initialTab?: Da
           </>
         )
       ) : filteredBids.length === 0 ? (
-        <div className="glass-container rounded-3xl border border-white/10 p-12 text-center text-outline">
+        <div className="glass-container rounded-3xl border border-[#221E1A]/10 p-12 text-center text-outline">
           <Gavel size={40} className="mx-auto mb-3 opacity-40" />
           <p className="text-sm">Không có phiên đấu giá nào trong mục này.</p>
-          <Link href="/auctions" className="mt-4 inline-flex items-center gap-2 text-xs text-brand-periwinkle hover:underline">
-            Khám phá các phiên đấu giá đang diễn ra <ArrowRight size={14} />
+          <Link href="/auctions" className="mt-4 inline-flex items-center gap-2 text-xs text-brand-periwinkle hover:underline"> Khám phá các phiên đấu giá đang diễn ra <ArrowRight size={14} />
           </Link>
         </div>
       ) : (
@@ -511,7 +498,7 @@ export function BiddingDashboardScreen({ initialTab = 'all' }: { initialTab?: Da
             type="button"
             disabled={loadingMore}
             onClick={() => loadDashboard(meta.nextCursor ?? undefined)}
-            className="inline-flex items-center gap-2 rounded-full border border-brand-periwinkle/40 bg-brand-periwinkle/10 px-6 py-2.5 font-h1 text-xs font-bold text-brand-periwinkle transition hover:bg-brand-periwinkle hover:text-brand-navy disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-full border border-brand-periwinkle/40 bg-brand-periwinkle/10 px-6 py-2.5 font-h1 text-xs font-bold text-brand-periwinkle transition hover:bg-brand-periwinkle hover:text-[#FFFCF6] disabled:opacity-50"
           >
             {loadingMore ? 'Đang tải...' : 'Tải thêm phiên'}
           </button>

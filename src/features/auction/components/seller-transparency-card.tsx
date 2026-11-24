@@ -61,9 +61,7 @@ export function SellerTransparencyCard({ seller }: SellerTransparencyProps) {
 
   if (!seller) {
     return (
-      <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-xs text-outline">
-        Thông tin người bán không khả dụng.
-      </div>
+      <div className="rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] p-4 text-xs text-outline"> Thông tin người bán không khả dụng. </div>
     );
   }
 
@@ -72,8 +70,8 @@ export function SellerTransparencyCard({ seller }: SellerTransparencyProps) {
   const profileHref = seller.creatorProfileId ? `/creators/${seller.creatorProfileId}` : null;
 
   return (
-    <div className="glass-container rounded-3xl border border-white/10 p-5 text-on-surface">
-      <div className={`flex items-center justify-between gap-3 ${expanded ? 'border-b border-white/10 pb-3' : ''}`}>
+    <div className="glass-container rounded-3xl border border-[#221E1A]/10 p-5 text-on-surface">
+      <div className={`flex items-center justify-between gap-3 ${expanded ? 'border-b border-[#221E1A]/10 pb-3' : ''}`}>
         <div className="flex items-center gap-3">
           <div className="flex size-10 items-center justify-center rounded-full bg-brand-periwinkle/20 text-brand-periwinkle font-bold">
             <User size={20} />
@@ -89,23 +87,21 @@ export function SellerTransparencyCard({ seller }: SellerTransparencyProps) {
           {profileHref ? (
             <Link
               href={profileHref}
-              className="rounded-full border border-brand-periwinkle/30 bg-brand-periwinkle/10 px-3 py-2 text-xs font-semibold text-brand-periwinkle transition hover:bg-brand-periwinkle hover:text-brand-navy"
+              className="rounded-full border border-brand-periwinkle/30 bg-brand-periwinkle/10 px-3 py-2 text-xs font-semibold text-brand-periwinkle transition hover:bg-brand-periwinkle hover:text-[#FFFCF6]"
             >
               Xem profile
             </Link>
           ) : (
             <span
-              title="Người bán chưa tạo hồ sơ Creator nên chưa có trang profile."
-              className="cursor-not-allowed rounded-full border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-outline"
-            >
-              Chưa có hồ sơ
-            </span>
+              title="Người bán chưa tạo hồ sơ họa sĩ nên chưa có trang profile."
+              className="cursor-not-allowed rounded-full border border-[#221E1A]/10 bg-[#FFFCF6] px-3 py-2 text-xs font-semibold text-outline"
+            > Chưa có hồ sơ </span>
           )}
           <button
             type="button"
             onClick={() => setExpanded((value) => !value)}
             aria-expanded={expanded}
-            className="inline-flex min-h-9 items-center gap-1 rounded-full border border-white/10 bg-white/5 px-3 text-xs font-semibold text-on-surface-variant hover:bg-white/10"
+            className="inline-flex min-h-9 items-center gap-1 rounded-full border border-[#221E1A]/10 bg-[#FFFCF6] px-3 text-xs font-semibold text-on-surface-variant hover:bg-[#F0E7D8]"
           >
             {expanded ? 'Thu gọn' : 'Chi tiết'}
             {expanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
@@ -114,34 +110,31 @@ export function SellerTransparencyCard({ seller }: SellerTransparencyProps) {
       </div>
 
       {expanded && <div className="mt-4 grid grid-cols-2 gap-3 text-xs">
-        <div className="rounded-xl border border-white/5 bg-white/[0.02] p-2.5">
+        <div className="rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] p-2.5">
           <span className="flex items-center gap-1 text-[11px] text-outline">
-            <CheckCircle size={12} className="text-emerald-400" /> Tỷ lệ hoàn thành
-          </span>
+            <CheckCircle size={12} className="text-[#2F6B63]" /> Tỷ lệ hoàn thành </span>
           <p className="mt-1 font-mono text-sm font-bold text-on-surface">
             {loading ? '...' : stats ? formatPercent(stats.commissionCompletionRate) : '—'}
           </p>
         </div>
 
-        <div className="rounded-xl border border-white/5 bg-white/[0.02] p-2.5">
+        <div className="rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] p-2.5">
           <span className="flex items-center gap-1 text-[11px] text-outline">
-            <Award size={12} className="text-brand-periwinkle" /> Đấu giá thành công
-          </span>
+            <Award size={12} className="text-brand-periwinkle" /> Đấu giá thành công </span>
           <p className="mt-1 font-mono text-sm font-bold text-on-surface">
             {loading ? '...' : stats ? `${stats.successfulAuctionCount} phiên` : '—'}
           </p>
         </div>
 
-        <div className="rounded-xl border border-white/5 bg-white/[0.02] p-2.5">
+        <div className="rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] p-2.5">
           <span className="flex items-center gap-1 text-[11px] text-outline">
-            <Star size={12} className="text-amber-400 fill-amber-400" /> Đánh giá trung bình
-          </span>
+            <Star size={12} className="text-[#8A6A1F] fill-[#8A6A1F]" /> Đánh giá trung bình </span>
           <p className="mt-1 font-mono text-sm font-bold text-on-surface">
             {loading ? '...' : stats ? `${stats.averageRating.toFixed(1)} / 5.0` : '—'}
           </p>
         </div>
 
-        <div className="rounded-xl border border-white/5 bg-white/[0.02] p-2.5">
+        <div className="rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] p-2.5">
           <span className="flex items-center gap-1 text-[11px] text-outline">
             Total Reviews
           </span>
@@ -152,7 +145,7 @@ export function SellerTransparencyCard({ seller }: SellerTransparencyProps) {
       </div>}
 
       {expanded && error && (
-        <p className="mt-2 text-[10px] text-amber-300/80 italic">
+        <p className="mt-2 text-[10px] text-[#8A6A1F] italic">
           * {error}
         </p>
       )}

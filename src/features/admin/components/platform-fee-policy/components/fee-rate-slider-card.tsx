@@ -21,18 +21,18 @@ export function FeeRateSliderCard({
   };
 
   return (
-    <div className="space-y-4 bg-black/40 p-6 lg:p-7 rounded-2xl border border-white/10 relative overflow-hidden">
+    <div className="space-y-4 bg-[#F0E7D8] p-6 lg:p-7 rounded-2xl border border-[#221E1A]/10 relative overflow-hidden">
       <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <label htmlFor="platform-fee-slider" className="font-bold text-white text-sm font-h1">
+            <label htmlFor="platform-fee-slider" className="font-bold text-[#241F1A] text-sm font-h1">
               {isVie ? 'Tỷ lệ phí hoa hồng nền tảng' : 'Global Platform Fee Rate Percentage'}
             </label>
-            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-white/10 text-white/80">
+            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#F0E7D8] text-[#241F1A]/80">
               5.0% - 15.0%
             </span>
           </div>
-          <p className="text-[11px] text-[#8A8FA9] font-body">
+          <p className="text-[11px] text-[#6E6459] font-body">
             {isVie
               ? 'Áp dụng cho tất cả các giao dịch giải ngân ký quỹ hợp đồng hoa hồng mới tạo.'
               : 'Applies to all newly created commission milestone escrow disbursements.'}
@@ -41,10 +41,10 @@ export function FeeRateSliderCard({
 
         {/* Rate Display Badge */}
         <div className="flex items-center gap-3 self-start sm:self-center">
-          <span className="text-xs text-[#8A8FA9] uppercase font-semibold tracking-wider">
+          <span className="text-xs text-[#6E6459] uppercase font-semibold tracking-wider">
             {isVie ? 'Mức phí hiện tại:' : 'Current Rate:'}
           </span>
-          <span className="px-4 py-2 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 font-mono font-extrabold text-xl shadow-[0_0_15px_rgba(52,211,153,0.2)]">
+          <span className="px-4 py-2 rounded-xl bg-[#2F6B63]/20 border border-[#2F6B63]/40 text-[#2F6B63] font-mono font-extrabold text-xl shadow-[0_0_15px_rgba(52,211,153,0.2)]">
             {feePercent.toFixed(1)}%
           </span>
         </div>
@@ -60,14 +60,14 @@ export function FeeRateSliderCard({
           step="0.5"
           value={feePercent}
           onChange={handleSliderChange}
-          className="w-full h-2.5 bg-[#1F2335] rounded-lg appearance-none cursor-pointer accent-emerald-400 transition-all"
+          className="w-full h-2.5 bg-[#F7F2E9] rounded-lg appearance-none cursor-pointer accent-[#2F6B63] transition-all"
         />
 
         {/* Slider scale markers */}
-        <div className="flex justify-between text-[10px] text-[#8A8FA9] font-mono px-1">
+        <div className="flex justify-between text-[10px] text-[#6E6459] font-mono px-1">
           <span>5.0% ({isVie ? 'Tối thiểu' : 'Min'})</span>
           <span>7.5%</span>
-          <span className="text-white/60 font-bold">10.0% ({isVie ? 'Mặc định' : 'Default'})</span>
+          <span className="text-[#4A423A] font-bold">10.0% ({isVie ? 'Mặc định' : 'Default'})</span>
           <span>12.5%</span>
           <span>15.0% ({isVie ? 'Tối đa' : 'Max'})</span>
         </div>

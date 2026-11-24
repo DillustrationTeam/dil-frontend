@@ -5,7 +5,6 @@ import Link from 'next/link';
 import {
   ArrowLeft,
   Calendar,
-  Trophy,
   Sparkles,
   Share2,
   CheckCircle2,
@@ -16,11 +15,11 @@ import {
 } from 'lucide-react';
 import type { EventDetailDto } from '@/features/event/types/event.types';
 import { EventStageProgress } from '../event-stage-progress';
+import { PrizeList } from '../prize-list';
 import { useLanguage } from '@/context/language-context';
 
 interface EventDetailHeroProps {
   event: EventDetailDto;
-  statusColor: string;
   statusLabel: string;
   statusStr: string;
   countdown: {
@@ -36,13 +35,18 @@ interface EventDetailHeroProps {
   onCopyLink: () => void;
 }
 
+/** Trạng thái sự kiện → modifier của `.badge` trong hệ Ink & Vermilion. */
+function statusBadgeClass(statusStr: string): string {
+  if (statusStr === 'Open') return 'badge badge--live';
+  if (statusStr === 'Judging') return 'badge badge--soon';
+  return 'badge badge--done';
+}
+
 export function EventDetailHero({
   event,
-  statusColor,
   statusLabel,
   statusStr,
   countdown,
-  isCreator,
   isJuryMember,
   onOpenRulesModal,
   onCopyLink,
@@ -50,185 +54,136 @@ export function EventDetailHero({
   const { lang } = useLanguage();
   const isVie = lang === 'VIE';
 
+  const organizer =
+    event.createdByAdminName || (isVie ? 'Ban tổ chức Dillustration' : 'Dillustration Committee');
+  const startedLabel = new Date(event.submissionStartAt).toLocaleDateString(isVie ? 'vi-VN' : 'en-US');
+  const countdownText = isVie ? countdown.formattedVie || countdown.formatted : countdown.formatted;
+  const countdownLabel = isVie ? countdown.phaseLabelVie || countdown.phaseLabel : countdown.phaseLabel;
+
   return (
     <>
-      {/* Top Bar Navigation */}
-      <div className="mb-6 flex items-center justify-between">
-        <Link
-          href="/events"
-          className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold text-[#A7ACD9] transition hover:border-white/20 hover:text-white"
-        >
-          <ArrowLeft size={15} />
-          <span>{isVie ? 'Tất cả cuộc thi' : 'All Contests'}</span>
+      <div className="ev-hero__bar">
+        <Link href="/events" className="btn btn--ghost btn--sm">
+          <ArrowLeft size={15} aria-hidden />
+          <span>{isVie ? 'Tất cả cuộc thi' : 'All contests'}</span>
         </Link>
 
-        <div className="flex items-center gap-3">
+        <div className="ev-hero__actions">
           {isJuryMember && (
-            <Link
-              href={`/events/${event.id}/jury`}
-              className="inline-flex items-center gap-2 rounded-xl border border-[#A7ACD9]/40 bg-[#A7ACD9]/15 px-4 py-2 text-xs font-bold text-white transition hover:bg-[#A7ACD9]/25 hover:border-[#A7ACD9] shadow-sm"
-            >
-              <Gavel size={15} className="text-[#A7ACD9]" />
-              <span>{isVie ? 'Không gian giám khảo' : 'Jury Workspace'}</span>
+            <Link href={`/events/${event.id}/jury`} className="btn btn--primary btn--sm">
+              <Gavel size={15} aria-hidden />
+              <span>{isVie ? 'Không gian giám khảo' : 'Jury workspace'}</span>
             </Link>
           )}
-
-          <button
-            type="button"
-            onClick={onOpenRulesModal}
-            className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold text-[#A7ACD9] transition hover:border-white/20 hover:text-white cursor-pointer"
-          >
-            <FileText size={15} />
-            <span>{isVie ? 'Thể lệ & Quy chế' : 'Rules & Guidelines'}</span>
+          <button type="button" onClick={onOpenRulesModal} className="btn btn--outline btn--sm">
+            <FileText size={15} aria-hidden />
+            <span>{isVie ? 'Thể lệ & quy chế' : 'Rules & guidelines'}</span>
           </button>
-
-          <button
-            type="button"
-            onClick={onCopyLink}
-            className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold text-[#A7ACD9] transition hover:border-white/20 hover:text-white cursor-pointer"
-          >
-            <Share2 size={15} />
+          <button type="button" onClick={onCopyLink} className="btn btn--outline btn--sm">
+            <Share2 size={15} aria-hidden />
             <span>{isVie ? 'Chia sẻ' : 'Share'}</span>
           </button>
         </div>
       </div>
 
-      {/* Hero Banner Section */}
-      <section className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-[#161926] shadow-2xl">
-        {/* Banner image */}
-        <div className="relative aspect-[21/9] w-full min-h-[260px] overflow-hidden bg-black/50">
-          {event.bannerUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={event.bannerUrl} alt={event.title} className="size-full object-cover" />
-          ) : (
-            <div className="flex size-full items-center justify-center bg-gradient-to-r from-[#1b1f36] to-[#121420]">
-              <Sparkles size={48} className="text-brand-periwinkle/30" />
-            </div>
-          )}
-          <div className="absolute inset-0 bg-gradient-to-t from-[#161926] via-[#161926]/60 to-black/30" />
-
-          {/* Badges on Banner */}
-          <div className="absolute left-6 top-6 flex flex-wrap items-center gap-3">
-            <span className={`rounded-full border px-4 py-1.5 text-xs font-bold backdrop-blur-md ${statusColor}`}>
-              {statusLabel}
-            </span>
-            {event.isFeatured && (
-              <span className="flex items-center gap-1.5 rounded-full border border-amber-400/40 bg-amber-500/20 px-3.5 py-1 text-xs font-bold text-amber-300 backdrop-blur-md">
-                <Flame size={13} className="text-amber-400" />
-                {isVie ? 'Cuộc thi Nổi bật' : 'Featured Contest'}
-              </span>
+      <section className="ev-hero">
+        <div className="detail__frame">
+          <div className="relative aspect-[21/9] min-h-[210px] w-full overflow-hidden bg-[var(--ink-3)]">
+            {event.bannerUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={event.bannerUrl} alt={event.title} className="size-full object-cover" />
+            ) : (
+              <div className="flex size-full items-center justify-center text-[var(--lumen)]/25">
+                <Sparkles size={44} aria-hidden />
+              </div>
             )}
+            <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-[var(--ink)]/85 to-transparent" />
+
+            <div className="ev-hero__badges">
+              <span className={statusBadgeClass(statusStr)}>{statusLabel}</span>
+              {event.isFeatured && (
+                <span className="badge badge--soon">
+                  <Flame size={12} aria-hidden />
+                  {isVie ? 'Nổi bật' : 'Featured'}
+                </span>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* Content Details Below Banner */}
-        <div className="p-6 sm:p-10 lg:p-12 space-y-8 -mt-16 relative z-10">
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 text-xs text-[#8A8FA9]">
-              <span className="flex items-center gap-1 font-semibold text-white">
-                <CheckCircle2 size={15} className="text-brand-periwinkle" />
-                {event.createdByAdminName || (isVie ? 'Ban tổ chức Dillustration' : 'Dillustration Committee')}
-              </span>
-              <span>•</span>
-              <span className="flex items-center gap-1">
-                <Calendar size={14} />{' '}
+        <div className="mt-6">
+          <div className="ev-hero__meta">
+            <span>
+              <CheckCircle2 aria-hidden />
+              <b>{organizer}</b>
+            </span>
+            <span>
+              <Calendar aria-hidden />
+              {isVie ? `Bắt đầu ${startedLabel}` : `Started ${startedLabel}`}
+            </span>
+          </div>
+
+          <h1 className="ev-hero__title">{event.title}</h1>
+
+          {event.description ? <p className="page-head__sub">{event.description}</p> : null}
+        </div>
+
+        <div className="mt-6 grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,20rem)] lg:items-start">
+          <div className="pane ev-hero__prize">
+            <p className="eyebrow">
+              {isVie ? 'Cơ cấu giải thưởng & danh hiệu' : 'Prize pool & honours'}
+            </p>
+            {event.prize ? (
+              <PrizeList prize={event.prize} size="md" />
+            ) : (
+              <p className="ev-hero__prize-value">
                 {isVie
-                  ? `Bắt đầu ${new Date(event.submissionStartAt).toLocaleDateString('vi-VN')}`
-                  : `Started ${new Date(event.submissionStartAt).toLocaleDateString('en-US')}`}
-              </span>
-            </div>
-
-            <h1 className="font-h1 text-2xl sm:text-4xl lg:text-5xl font-extrabold text-white leading-tight">
-              {event.title}
-            </h1>
-
-            <p className="text-sm sm:text-base text-[#A7ACD9] leading-relaxed max-w-4xl">
-              {event.description}
+                  ? 'Cúp & giải thưởng tiền mặt chính thức (sắp công bố)'
+                  : 'Trophy & official cash rewards (to be announced)'}
+              </p>
+            )}
+            <p className="ev-hero__note">
+              <span>{isVie ? 'Đảm bảo trao giải' : 'Guaranteed distribution'}</span>
+              <span className="badge badge--ok">{isVie ? 'Đã công bố' : 'Announced'}</span>
             </p>
           </div>
 
-          {/* Prestigious Prize Pool Showcase Box */}
-          <div className="rounded-3xl border border-amber-400/30 bg-gradient-to-r from-amber-500/15 via-amber-500/5 to-transparent p-5 sm:p-6 backdrop-blur-xl shadow-[0_4px_30px_rgba(251,191,36,0.1)]">
-            <div className="flex flex-col sm:flex-row sm:items-start gap-4">
-              <div className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 text-slate-950 shadow-[0_0_30px_rgba(251,191,36,0.4)]">
-                <Trophy size={28} />
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-                  <span className="text-xs font-extrabold uppercase tracking-widest text-amber-300">
-                    {isVie ? 'Cơ cấu giải thưởng & Danh hiệu' : 'Official Prize Pool & Honors'}
-                  </span>
-                  <span className="size-1.5 rounded-full bg-amber-400" />
-                  <span className="text-[11px] text-amber-300/80 font-medium">
-                    {isVie ? 'Đảm bảo trao giải' : 'Guaranteed Distribution'}
-                  </span>
-                </div>
-                <div className="font-h1 text-xl sm:text-2xl lg:text-3xl font-extrabold text-white leading-relaxed break-words whitespace-pre-line">
-                  {event.prize || (isVie ? 'Cúp & Giải thưởng tiền mặt chính thức (Sắp công bố)' : 'Trophy & Official Cash Rewards (To Be Announced)')}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Key Metrics Banner */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 rounded-3xl border border-white/10 bg-white/[0.025] p-5 backdrop-blur-xl">
-            <div>
-              <span className="text-[11px] font-bold uppercase tracking-wider text-brand-periwinkle">
-                {isVie ? 'Bài dự thi' : 'Submissions'}
-              </span>
-              <p className="mt-1 font-h1 text-lg sm:text-xl font-bold text-white">
-                {event.submissionCount} {isVie ? 'bài' : 'entries'}
-              </p>
-            </div>
-            <div>
-              <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-300">
-                {isVie ? 'Tổng lượt bình chọn' : 'Total Community Votes'}
-              </span>
-              <p className="mt-1 font-h1 text-lg sm:text-xl font-bold text-white">
-                {(event.totalVoteCount ?? 0).toLocaleString('en-US')}
-              </p>
-            </div>
-            <div className="col-span-2 sm:col-span-1">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-brand-periwinkle">
-                {isVie ? (countdown.phaseLabelVie || countdown.phaseLabel) : countdown.phaseLabel}
-              </span>
-              <p className="mt-1 font-mono text-base sm:text-lg font-bold text-white">
-                {isVie ? (countdown.formattedVie || countdown.formatted) : countdown.formatted}
-              </p>
-            </div>
+          <div className="statsline">
+            <span>
+              <b>{event.submissionCount}</b>
+              {isVie ? 'bài dự thi' : 'entries'}
+            </span>
+            <span>
+              <b>{(event.totalVoteCount ?? 0).toLocaleString('en-US')}</b>
+              {isVie ? 'lượt bình chọn' : 'votes'}
+            </span>
+            <span>
+              <b>{countdownText}</b>
+              {countdownLabel}
+            </span>
           </div>
         </div>
       </section>
 
-      {/* Jury Judging Callout Banner */}
       {isJuryMember && (countdown.phase === 'Judging' || statusStr === 'Judging') && (
-        <div className="mt-8 rounded-2xl border border-[#A7ACD9]/30 bg-gradient-to-r from-[#A7ACD9]/15 via-[#A7ACD9]/5 to-transparent p-4 sm:p-5 backdrop-blur-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-3.5">
-            <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-[#A7ACD9]/20 text-[#A7ACD9] border border-[#A7ACD9]/30">
-              <Gavel size={22} />
-            </div>
-            <div>
-              <h4 className="font-sora font-bold text-white text-sm sm:text-base">
-                {isVie ? 'Không gian Đánh giá của Ban giám khảo' : 'Official Jury Evaluation Workspace'}
-              </h4>
-              <p className="text-xs text-[#A7ACD9] mt-0.5">
-                {isVie
-                  ? 'Tiến hành chấm điểm độc lập dựa trên tiêu chí và biểu điểm chuẩn hóa.'
-                  : 'Conduct independent blind evaluations based on established criteria and rubrics.'}
-              </p>
-            </div>
+        <div className="pane mt-6 ev-hero__note">
+          <div>
+            <p className="pane__title">
+              {isVie ? 'Không gian đánh giá của ban giám khảo' : 'Official jury evaluation workspace'}
+            </p>
+            <p className="pane__sub">
+              {isVie
+                ? 'Chấm điểm độc lập theo tiêu chí và biểu điểm chuẩn hoá.'
+                : 'Independent scoring against the published rubric.'}
+            </p>
           </div>
-          <Link
-            href={`/events/${event.id}/jury`}
-            className="shrink-0 px-4 py-2 rounded-xl bg-gradient-to-r from-[#A7ACD9] to-[#7FD5E8] hover:brightness-110 text-[#1F2335] text-xs font-bold font-sora flex items-center gap-2 transition-all shadow-md"
-          >
-            <span>{isVie ? 'Vào không gian chấm thi' : 'Enter Jury Workspace'}</span>
-            <ExternalLink size={13} />
+          <Link href={`/events/${event.id}/jury`} className="btn btn--primary btn--sm">
+            <span>{isVie ? 'Vào chấm thi' : 'Enter workspace'}</span>
+            <ExternalLink size={13} aria-hidden />
           </Link>
         </div>
       )}
 
-      {/* Progress Bar with Dual Endpoints for Each Stage */}
       <div className="mt-10">
         <EventStageProgress event={event} />
       </div>

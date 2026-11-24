@@ -71,7 +71,7 @@ export function CreatorProfileSetup({ mode = 'create' }: { mode?: 'create' | 'ed
         availableSlots: data.availableSlots,
       });
 
-      toast.success(editing ? 'Đã cập nhật hồ sơ Creator.' : 'Creator profile created successfully.');
+      toast.success(editing ? 'Đã cập nhật hồ sơ họa sĩ.' : 'Creator profile created successfully.');
       if (editing) router.push(`/creators/${saved.id}`);
     } catch (error: unknown) {
       const message = extractErrorMessage(error, 'Không lưu được hồ sơ. Vui lòng thử lại.');
@@ -79,94 +79,94 @@ export function CreatorProfileSetup({ mode = 'create' }: { mode?: 'create' | 'ed
     }
   };
 
-  if (editing && !isAuthenticated) return <div className="p-8 text-[#C7C5CF]">Vui lòng <Link href="/login" className="text-[#A7ACD9] underline">đăng nhập</Link> để chỉnh sửa hồ sơ.</div>;
-  if (editing && (!profileId || loadedUserId !== userId)) return <div role="status" className="p-8 text-[#C7C5CF]">{loadError || 'Đang tải hồ sơ Creator…'}</div>;
+  if (editing && !isAuthenticated) return <div className="p-8 text-[#6E6459]">Vui lòng <Link href="/login" className="text-[#B24A26] underline">đăng nhập</Link> để chỉnh sửa hồ sơ.</div>;
+  if (editing && (!profileId || loadedUserId !== userId)) return <div role="status" className="p-8 text-[#6E6459]">{loadError || 'Đang tải hồ sơ họa sĩ…'}</div>;
 
   return (
     <div className="glass-container rounded-[32px] p-8 max-w-3xl mx-auto">
       <div className="mb-6">
-        <p className="text-xs uppercase tracking-[0.2em] text-[#A7ACD9]">{editing ? 'Creator profile' : 'Creator onboarding'}</p>
-        <h1 className="font-h1 text-3xl font-bold text-white mt-3">{editing ? 'Chỉnh sửa hồ sơ Creator' : 'Set up your creator profile'}</h1>
-        {editing && <Link href={`/creators/${profileId}`} className="mt-3 inline-block text-sm text-[#A7ACD9]">← Quay lại hồ sơ</Link>}
+        <p className="text-xs uppercase tracking-[0.2em] text-[#B24A26]">{editing ? 'Creator profile' : 'Creator onboarding'}</p>
+        <h1 className="font-h1 text-3xl font-bold text-[#241F1A] mt-3">{editing ? 'Chỉnh sửa hồ sơ họa sĩ' : 'Set up your creator profile'}</h1>
+        {editing && <Link href={`/creators/${profileId}`} className="mt-3 inline-block text-sm text-[#B24A26]">← Quay lại hồ sơ</Link>}
       </div>
 
       <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
         <div className="grid md:grid-cols-2 gap-6">
           <div className="space-y-2 md:col-span-2">
-            <label htmlFor="creator-profile-displayName" className="text-xs uppercase tracking-wider text-[#C7C5CF]">Display name</label>
+            <label htmlFor="creator-profile-displayName" className="text-xs uppercase tracking-wider text-[#6E6459]">Display name</label>
             <input
               id="creator-profile-displayName" {...register('displayName')}
-              className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none focus:border-[#A7ACD9]"
+              className="w-full rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-4 py-3 text-[#241F1A] outline-none focus:border-[#B24A26]"
               placeholder="Etherea Vox"
             />
-            {errors.displayName && <p className="text-red-400 text-xs">{errors.displayName.message}</p>}
+            {errors.displayName && <p className="text-[#A8321C] text-xs">{errors.displayName.message}</p>}
           </div>
 
           <div className="space-y-2 md:col-span-2">
-            <label htmlFor="creator-profile-headline" className="text-xs uppercase tracking-wider text-[#C7C5CF]">Headline</label>
+            <label htmlFor="creator-profile-headline" className="text-xs uppercase tracking-wider text-[#6E6459]">Headline</label>
             <input
               id="creator-profile-headline" {...register('headline')}
-              className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none focus:border-[#A7ACD9]"
+              className="w-full rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-4 py-3 text-[#241F1A] outline-none focus:border-[#B24A26]"
               placeholder="Fantasy illustrator crafting cinematic worlds"
             />
-            {errors.headline && <p className="text-red-400 text-xs">{errors.headline.message}</p>}
+            {errors.headline && <p className="text-[#A8321C] text-xs">{errors.headline.message}</p>}
           </div>
 
           <div className="space-y-2 md:col-span-2">
-            <label htmlFor="creator-profile-bio" className="text-xs uppercase tracking-wider text-[#C7C5CF]">Bio</label>
+            <label htmlFor="creator-profile-bio" className="text-xs uppercase tracking-wider text-[#6E6459]">Bio</label>
             <textarea
               id="creator-profile-bio" {...register('bio')}
-              className="w-full min-h-[120px] rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none focus:border-[#A7ACD9]"
+              className="w-full min-h-[120px] rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-4 py-3 text-[#241F1A] outline-none focus:border-[#B24A26]"
               placeholder="Tell collectors about your style, process, and experience."
             />
-            {errors.bio && <p className="text-red-400 text-xs">{errors.bio.message}</p>}
+            {errors.bio && <p className="text-[#A8321C] text-xs">{errors.bio.message}</p>}
           </div>
 
           <div className="space-y-2 md:col-span-2">
-            <label htmlFor="creator-profile-specialties" className="text-xs uppercase tracking-wider text-[#C7C5CF]">Specialties</label>
+            <label htmlFor="creator-profile-specialties" className="text-xs uppercase tracking-wider text-[#6E6459]">Specialties</label>
             <input
               id="creator-profile-specialties" {...register('specialties')}
-              className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none focus:border-[#A7ACD9]"
+              className="w-full rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-4 py-3 text-[#241F1A] outline-none focus:border-[#B24A26]"
               placeholder="Anime, fantasy, character design"
             />
-            {errors.specialties && <p className="text-red-400 text-xs">{errors.specialties.message}</p>}
+            {errors.specialties && <p className="text-[#A8321C] text-xs">{errors.specialties.message}</p>}
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="creator-profile-location" className="text-xs uppercase tracking-wider text-[#C7C5CF]">Location</label>
+            <label htmlFor="creator-profile-location" className="text-xs uppercase tracking-wider text-[#6E6459]">Location</label>
             <input
               id="creator-profile-location" {...register('location')}
-              className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none focus:border-[#A7ACD9]"
+              className="w-full rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-4 py-3 text-[#241F1A] outline-none focus:border-[#B24A26]"
               placeholder="Ho Chi Minh City"
             />
-            {errors.location && <p className="text-red-400 text-xs">{errors.location.message}</p>}
+            {errors.location && <p className="text-[#A8321C] text-xs">{errors.location.message}</p>}
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="creator-profile-websiteUrl" className="text-xs uppercase tracking-wider text-[#C7C5CF]">Website</label>
+            <label htmlFor="creator-profile-websiteUrl" className="text-xs uppercase tracking-wider text-[#6E6459]">Website</label>
             <input
               id="creator-profile-websiteUrl" {...register('websiteUrl')}
-              className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none focus:border-[#A7ACD9]"
+              className="w-full rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-4 py-3 text-[#241F1A] outline-none focus:border-[#B24A26]"
               placeholder="https://example.com"
             />
-            {errors.websiteUrl && <p className="text-red-400 text-xs">{errors.websiteUrl.message}</p>}
+            {errors.websiteUrl && <p className="text-[#A8321C] text-xs">{errors.websiteUrl.message}</p>}
           </div>
 
           <div className="space-y-2 md:col-span-2">
-            <label htmlFor="creator-profile-bannerUrl" className="text-xs uppercase tracking-wider text-[#C7C5CF]">Banner image URL</label>
+            <label htmlFor="creator-profile-bannerUrl" className="text-xs uppercase tracking-wider text-[#6E6459]">Banner image URL</label>
             <input
               id="creator-profile-bannerUrl" {...register('bannerUrl')}
-              className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none focus:border-[#A7ACD9]"
+              className="w-full rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-4 py-3 text-[#241F1A] outline-none focus:border-[#B24A26]"
               placeholder="https://images.example.com/banner.jpg"
             />
-            {errors.bannerUrl && <p className="text-red-400 text-xs">{errors.bannerUrl.message}</p>}
+            {errors.bannerUrl && <p className="text-[#A8321C] text-xs">{errors.bannerUrl.message}</p>}
           </div>
         </div>
 
-        <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 p-4">
+        <div className="flex items-center justify-between rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] p-4">
           <div>
-            <p className="font-semibold text-white">Accepting commissions</p>
-            <p className="text-sm text-[#C7C5CF]">Let clients discover your open slots instantly.</p>
+            <p className="font-semibold text-[#241F1A]">Accepting commissions</p>
+            <p className="text-sm text-[#6E6459]">Let clients discover your open slots instantly.</p>
           </div>
           <button
             type="button"
@@ -174,24 +174,24 @@ export function CreatorProfileSetup({ mode = 'create' }: { mode?: 'create' | 'ed
             aria-label="Accepting commissions"
             aria-checked={isAcceptingOrders}
             onClick={() => setIsAcceptingOrders((previous) => !previous)}
-            className={`relative h-7 w-12 rounded-full transition ${isAcceptingOrders ? 'bg-[#A7ACD9]' : 'bg-white/10'}`}
+            className={`relative h-7 w-12 rounded-full transition ${isAcceptingOrders ? 'bg-[#B24A26]' : 'bg-[#F0E7D8]'}`}
           >
             <span
-              className={`absolute top-1 h-5 w-5 rounded-full bg-white transition ${isAcceptingOrders ? 'left-6' : 'left-1'}`}
+              className={`absolute top-1 h-5 w-5 rounded-full bg-[#F0E7D8] transition ${isAcceptingOrders ? 'left-6' : 'left-1'}`}
             />
           </button>
         </div>
 
         <div className="space-y-2">
-          <label htmlFor="creator-profile-slots" className="text-xs uppercase tracking-wider text-[#C7C5CF]">Số slot nhận đơn</label>
-          <input id="creator-profile-slots" type="number" min={0} max={100} {...register('availableSlots', { valueAsNumber: true })} className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white" />
-          {errors.availableSlots && <p className="text-xs text-red-400">{errors.availableSlots.message}</p>}
+          <label htmlFor="creator-profile-slots" className="text-xs uppercase tracking-wider text-[#6E6459]">Số lượt nhận đơn</label>
+          <input id="creator-profile-slots" type="number" min={0} max={100} {...register('availableSlots', { valueAsNumber: true })} className="w-full rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-4 py-3 text-[#241F1A]" />
+          {errors.availableSlots && <p className="text-xs text-[#A8321C]">{errors.availableSlots.message}</p>}
         </div>
 
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full rounded-xl bg-[#A7ACD9] px-5 py-3 text-sm font-bold text-[#1F2335] disabled:cursor-not-allowed disabled:opacity-60"
+          className="w-full rounded-xl bg-[#B24A26] px-5 py-3 text-sm font-bold text-[#F7F2E9] disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isSubmitting ? 'Đang lưu…' : editing ? 'Lưu thay đổi' : 'Create profile'}
         </button>

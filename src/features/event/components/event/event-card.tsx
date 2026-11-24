@@ -1,11 +1,12 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
-import { ArrowUpRight, Clock, Trophy, Users, Sparkles, CheckCircle2, Flame, Eye, Edit3, Trash2, FastForward } from 'lucide-react';
+import { ArrowUpRight, Clock, Users, Sparkles, CheckCircle2, Flame, Eye, Edit3, Trash2, FastForward } from 'lucide-react';
 import type { EventListItemDto } from '../../types/event.types';
-import { eventStatusBadgeStyles, getEventStatusLabel, normalizeEventStatus } from '../../types/event.types';
+import { getEventStatusLabel, normalizeEventStatus } from '../../types/event.types';
 import { useEventCountdown } from '../../hooks/use-event-countdown';
+import { PrizeList } from './prize-list';
 import { useLanguage } from '@/context/language-context';
 
 interface EventCardProps {
@@ -18,162 +19,142 @@ interface EventCardProps {
   };
 }
 
+/** Trạng thái → modifier của `.badge` trong hệ Ink & Vermilion. */
+function statusBadgeClass(status?: string | number | null): string {
+  const norm = normalizeEventStatus(status);
+  if (norm === 'Open') return 'badge badge--live';
+  if (norm === 'Judging') return 'badge badge--soon';
+  return 'badge badge--done';
+}
+
 export function EventCard({ event, adminActions }: EventCardProps) {
   const { lang } = useLanguage();
   const isVie = lang === 'VIE';
   const countdown = useEventCountdown(event);
 
-  const statusStr = normalizeEventStatus(event.status);
+  // Ảnh có thể 404 → ẩn <img> để không hiện alt text đè lên badge/tiêu đề
+  const [imageFailed, setImageFailed] = useState(false);
 
-  const statusColor = eventStatusBadgeStyles[statusStr] || 'border-white/10 bg-white/5 text-outline';
+  const statusStr = normalizeEventStatus(event.status);
   const statusLabel = getEventStatusLabel(statusStr, isVie);
+  const organizer = event.createdByAdminName || (isVie ? 'Ban tổ chức Dillustration' : 'Dillustration Official');
 
   return (
-    <div className="group flex min-h-full flex-col justify-between overflow-hidden rounded-[2rem] border border-white/10 bg-[#161926]/80 shadow-[0_24px_70px_rgba(6,8,18,0.35)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1.5 hover:border-brand-periwinkle/50 hover:bg-[#1b1f31] hover:shadow-[0_28px_80px_rgba(167,172,217,0.18)]">
-      <div>
-        {/* Banner Image Container */}
-        <Link href={`/events/${event.id}`} className="relative aspect-[16/10] w-full overflow-hidden bg-black/40 block cursor-pointer">
-          {event.bannerUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={event.bannerUrl}
-              alt={event.title}
-              className="size-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-            />
-          ) : (
-            <div className="flex size-full items-center justify-center bg-gradient-to-br from-[#1F2335] to-[#161926] text-xs text-outline">
-              <Sparkles size={24} className="text-brand-periwinkle/50" />
-            </div>
-          )}
+    <article className="ev-card">
+      <Link href={`/events/${event.id}`} className="ev-card__media" aria-label={event.title}>
+        {event.bannerUrl && !imageFailed ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={event.bannerUrl}
+            alt=""
+            loading="lazy"
+            onError={() => setImageFailed(true)}
+          />
+        ) : (
+          <span className="ev-card__blank" aria-hidden="true">
+            <b>{event.title.trim().charAt(0)}</b>
+          </span>
+        )}
 
-          {/* Gradient Scrim */}
-          <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-[#161926] via-[#161926]/60 to-transparent" aria-hidden="true" />
-
-          {/* Badges Overlay */}
-          <div className="absolute inset-x-4 top-4 flex items-center justify-between gap-2">
-            <div className="flex items-center gap-1.5 flex-wrap">
-              <span className={`rounded-full border px-3 py-1 text-[11px] font-semibold backdrop-blur-md transition-all ${statusColor}`}>
-                {statusLabel}
+        <span className="ev-card__head">
+          <span className="ev-card__tags">
+            <span className={statusBadgeClass(event.status)}>{statusLabel}</span>
+            {event.isFeatured && (
+              <span className="badge badge--soon">
+                <Flame size={11} aria-hidden />
+                {isVie ? 'Nổi bật' : 'Featured'}
               </span>
-              {event.isFeatured && (
-                <span className="flex items-center gap-1 rounded-full border border-amber-400/40 bg-amber-500/20 px-2.5 py-0.5 text-[10px] font-bold text-amber-300 backdrop-blur-md">
-                  <Flame size={11} className="text-amber-400" />
-                  {isVie ? 'Nổi bật' : 'Featured'}
-                </span>
-              )}
-            </div>
+            )}
+          </span>
 
-            {/* Countdown Badge */}
-            <span className="flex items-center gap-1.5 rounded-full border border-white/15 bg-[#11131d]/85 px-3 py-1 font-mono text-[11px] tabular-nums text-white shadow-lg backdrop-blur-md">
-              <Clock size={12} className="text-brand-periwinkle animate-pulse" />
-              <span>{isVie ? countdown.formattedVie : countdown.formatted}</span>
-            </span>
-          </div>
-        </Link>
+          <span className="badge ev-card__clock" title={isVie ? 'Thời gian còn lại' : 'Time left'}>
+            <Clock size={11} aria-hidden />
+            <span className="tabular-nums">{isVie ? countdown.formattedVie : countdown.formatted}</span>
+          </span>
+        </span>
+      </Link>
 
-        {/* Content Body */}
-        <div className="p-6">
-          <div className="flex items-center justify-between gap-2 text-xs text-[#8A8FA9] mb-2">
-            <span className="inline-flex items-center gap-1 font-medium text-slate-300">
-              <CheckCircle2 size={13} className="text-[#A7ACD9]" />
-              {event.createdByAdminName || (isVie ? 'Ban tổ chức Dillustration' : 'Dillustration Official')}
-            </span>
-            <Link
-              href={`/events/${event.id}`}
-              className="flex items-center gap-1 text-brand-periwinkle font-semibold opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-            >
-              <span className="text-[11px]">{isVie ? 'Xem chi tiết' : 'View details'}</span>
-              <ArrowUpRight size={14} />
+      <div className="ev-card__body">
+        <div className="ev-card__who">
+          <span>
+            <CheckCircle2 aria-hidden />
+            <span className="truncate">{organizer}</span>
+          </span>
+          {!adminActions && (
+            <Link href={`/events/${event.id}`}>
+              {isVie ? 'Chi tiết' : 'Details'}
+              <ArrowUpRight size={13} aria-hidden />
             </Link>
-          </div>
-
-          <Link href={`/events/${event.id}`} className="block">
-            <h3 className="line-clamp-2 font-h1 text-lg font-bold text-white transition-colors group-hover:text-brand-periwinkle">
-              {event.title}
-            </h3>
-          </Link>
-
-          <p className="mt-2 line-clamp-2 text-xs leading-relaxed text-[#919099]">
-            {event.description}
-          </p>
-
-          {/* Prize Pool Callout Box */}
-          {event.prize && (
-            <div className="mt-4 flex items-center gap-3 rounded-2xl border border-amber-400/20 bg-gradient-to-r from-amber-500/10 via-amber-400/5 to-transparent p-3.5">
-              <div className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-amber-400/20 text-amber-300 shadow-inner">
-                <Trophy size={16} />
-              </div>
-              <div className="min-w-0 flex-1">
-                <span className="text-[10px] uppercase font-bold tracking-wider text-amber-300/80 block">
-                  {isVie ? 'Cơ cấu giải thưởng' : 'Prize Pool'}
-                </span>
-                <p className="line-clamp-1 text-xs font-bold text-white">
-                  {event.prize}
-                </p>
-              </div>
-            </div>
           )}
         </div>
-      </div>
 
-      {/* Metrics Row or Admin Actions Footer */}
-      <div className="px-6 pb-6 pt-2">
-        {adminActions ? (
-          <div className="flex items-center justify-around border-t border-white/10 pt-4">
-            <button
-              type="button"
-              title={isVie ? 'Xem chi tiết' : 'View Details'}
-              onClick={() => adminActions.onViewDetails?.()}
-              className="flex items-center justify-center size-9 rounded-xl border border-white/10 bg-white/5 text-[#A7ACD9] hover:bg-brand-periwinkle/20 hover:border-brand-periwinkle/40 hover:text-brand-periwinkle transition-all cursor-pointer"
-            >
-              <Eye size={16} />
-            </button>
+        <h3 className="ev-card__title">
+          <Link href={`/events/${event.id}`}>{event.title}</Link>
+        </h3>
 
-            <button
-              type="button"
-              title={isVie ? 'Chỉnh sửa sự kiện' : 'Update Event'}
-              onClick={() => adminActions.onUpdate?.()}
-              className="flex items-center justify-center size-9 rounded-xl border border-white/10 bg-white/5 text-[#A7ACD9] hover:bg-blue-500/20 hover:border-blue-400/40 hover:text-blue-300 transition-all cursor-pointer"
-            >
-              <Edit3 size={16} />
-            </button>
+        {event.description ? <p className="ev-card__desc">{event.description}</p> : null}
 
-            {adminActions.onAdvancePeriod && (
-              <button
-                type="button"
-                title={isVie ? 'Chuyển / Kết thúc giai đoạn (Demo Test)' : 'End / Advance Period (Demo Test)'}
-                onClick={() => adminActions.onAdvancePeriod?.()}
-                className="flex items-center justify-center size-9 rounded-xl border border-purple-500/35 bg-purple-500/10 text-purple-300 hover:bg-purple-500/25 hover:border-purple-400/50 hover:text-purple-200 transition-all cursor-pointer shadow-[0_0_12px_rgba(168,85,247,0.15)]"
-              >
-                <FastForward size={16} />
-              </button>
-            )}
-
-            <button
-              type="button"
-              title={isVie ? 'Xóa sự kiện' : 'Delete Event'}
-              onClick={() => adminActions.onDelete?.()}
-              className="flex items-center justify-center size-9 rounded-xl border border-white/10 bg-white/5 text-[#A7ACD9] hover:bg-rose-500/20 hover:border-rose-400/40 hover:text-rose-400 transition-all cursor-pointer"
-            >
-              <Trash2 size={16} />
-            </button>
-          </div>
-        ) : (
-          <div className="flex items-center justify-between border-t border-white/10 pt-4 text-xs">
-            <div className="flex items-center gap-1.5 text-on-surface-variant">
-              <Users size={14} className="text-brand-periwinkle" />
-              <span className="font-semibold text-white">{event.submissionCount}</span>
-              <span className="text-[11px] text-[#8A8FA9]">{isVie ? 'bài dự thi' : 'entries'}</span>
-            </div>
-
-            <div className="flex items-center gap-1.5 text-on-surface-variant">
-              <Sparkles size={14} className="text-[#A7ACD9]" />
-              <span className="font-semibold text-white">{(event.totalVoteCount ?? 0).toLocaleString('en-US')}</span>
-              <span className="text-[11px] text-[#8A8FA9]">{isVie ? 'bình chọn' : 'votes'}</span>
-            </div>
+        {event.prize && (
+          <div className="ev-card__prize">
+            <PrizeList prize={event.prize} size="sm" maxRows={4} />
           </div>
         )}
       </div>
-    </div>
+
+      {adminActions ? (
+        <div className="ev-card__foot justify-around">
+          <button
+            type="button"
+            title={isVie ? 'Xem chi tiết' : 'View details'}
+            onClick={() => adminActions.onViewDetails?.()}
+            className="flex size-9 cursor-pointer items-center justify-center rounded-[var(--r-sm)] border border-[var(--hair)] bg-[var(--ink-2)] text-[var(--lumen)] transition hover:border-[var(--lumen)] hover:bg-[var(--lumen-soft)]"
+          >
+            <Eye size={16} />
+          </button>
+
+          <button
+            type="button"
+            title={isVie ? 'Chỉnh sửa sự kiện' : 'Update event'}
+            onClick={() => adminActions.onUpdate?.()}
+            className="flex size-9 cursor-pointer items-center justify-center rounded-[var(--r-sm)] border border-[var(--hair)] bg-[var(--ink-2)] text-[var(--ash)] transition hover:border-[var(--hair-2)] hover:text-[var(--ivory)]"
+          >
+            <Edit3 size={16} />
+          </button>
+
+          {adminActions.onAdvancePeriod && (
+            <button
+              type="button"
+              title={isVie ? 'Chuyển / kết thúc giai đoạn (demo)' : 'End / advance period (demo)'}
+              onClick={() => adminActions.onAdvancePeriod?.()}
+              className="flex size-9 cursor-pointer items-center justify-center rounded-[var(--r-sm)] border border-[var(--hair)] bg-[var(--ink-2)] text-[var(--petrol)] transition hover:border-[var(--petrol)] hover:bg-[var(--petrol-soft)]"
+            >
+              <FastForward size={16} />
+            </button>
+          )}
+
+          <button
+            type="button"
+            title={isVie ? 'Xoá sự kiện' : 'Delete event'}
+            onClick={() => adminActions.onDelete?.()}
+            className="flex size-9 cursor-pointer items-center justify-center rounded-[var(--r-sm)] border border-[var(--hair)] bg-[var(--ink-2)] text-[var(--cinnabar-text)] transition hover:border-[var(--cinnabar)] hover:bg-[var(--cinnabar-soft)]"
+          >
+            <Trash2 size={16} />
+          </button>
+        </div>
+      ) : (
+        <div className="ev-card__foot">
+          <span>
+            <Users aria-hidden />
+            <b>{event.submissionCount}</b>
+            {isVie ? 'bài dự thi' : 'entries'}
+          </span>
+          <span>
+            <Sparkles aria-hidden />
+            <b>{(event.totalVoteCount ?? 0).toLocaleString('en-US')}</b>
+            {isVie ? 'bình chọn' : 'votes'}
+          </span>
+        </div>
+      )}
+    </article>
   );
 }

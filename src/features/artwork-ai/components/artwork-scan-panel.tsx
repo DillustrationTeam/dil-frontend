@@ -19,7 +19,7 @@ export function ArtworkScanPanel({ artworkId, canRetry = false, compact = false,
     if (!onCompleted || notified.current || !scan || !['Succeeded', 'Failed', 'NotConfigured'].includes(scan.status)) return;
     notified.current = true;
     if (scan.status === 'Succeeded' && scan.score !== null) toast.success(`Đã kiểm tra ảnh AI. Điểm nghi ngờ: ${(scan.score * 100).toFixed(1)}%.`);
-    else toast.error(scan.status === 'NotConfigured' ? 'Chưa thể kiểm tra ảnh AI do dịch vụ chưa được cấu hình.' : 'Kiểm tra ảnh AI thất bại. Xem trạng thái trong portfolio.');
+    else toast.error(scan.status === 'NotConfigured' ? 'Chưa thể kiểm tra ảnh AI do dịch vụ chưa được cấu hình.' : 'Kiểm tra ảnh AI thất bại. Xem trạng thái trong hồ sơ tác phẩm.');
     onCompleted();
   }, [scan, onCompleted]);
   useEffect(() => {
@@ -30,13 +30,13 @@ export function ArtworkScanPanel({ artworkId, canRetry = false, compact = false,
     }; void load();
     return () => { controller.abort(); clearTimeout(timer); };
   }, [artworkId, attempt]);
-  return <section className="space-y-3 rounded-2xl border border-white/10 p-4 text-sm text-slate-300" aria-label="Trạng thái kiểm tra ảnh AI"><h3 className="font-h1 font-semibold text-white">{compact ? 'Kiểm tra ảnh AI' : 'Phát hiện ảnh AI · Sightengine'}</h3>
-    {error ? <div role="alert" className="text-red-300">{error} <button type="button" className="underline" onClick={() => setAttempt(v => v + 1)}>Tải lại</button></div> : <>
+  return <section className="space-y-3 rounded-2xl border border-[#221E1A]/10 p-4 text-sm text-[#746A5F]" aria-label="Trạng thái kiểm tra ảnh AI"><h3 className="font-h1 font-semibold text-[#241F1A]">{compact ? 'Kiểm tra ảnh AI' : 'Phát hiện ảnh AI · Sightengine'}</h3>
+    {error ? <div role="alert" className="text-[#A8321C]">{error} <button type="button" className="underline" onClick={() => setAttempt(v => v + 1)}>Tải lại</button></div> : <>
       <p role="status" aria-live="polite">{scan ? labels[scan.status] : 'Đang tải trạng thái…'}</p>
-      {scan?.status === 'Succeeded' && scan.score !== null && <><p className="text-xl font-bold text-[#A7ACD9]">Điểm nghi ngờ: {(scan.score * 100).toFixed(1)}%</p><p className="text-xs text-slate-400">{scan.provider} · {scan.model} · {scan.checkedAt && new Date(scan.checkedAt).toLocaleString('vi-VN')}</p></>}
-      {scan?.error && <p className="text-amber-300">{scan.error}</p>}
-      <p className="text-xs leading-5 text-slate-400">{compact ? 'Điểm nghi ngờ AI chỉ hỗ trợ kiểm duyệt, không phải kết luận cuối cùng.' : 'Kết quả là tín hiệu hỗ trợ, có thể nhận nhầm. Moderator quyết định kiểm duyệt; điểm này không phải tỷ lệ phần trăm bức tranh do AI vẽ.'}</p>
-      {canRetry && scan && !['NotConfigured', 'Queued', 'Processing', 'Retrying'].includes(scan.status) && <button type="button" disabled={busy} className="rounded-xl border border-[#A7ACD9]/40 px-3 py-2 text-[#A7ACD9] disabled:opacity-40" onClick={async () => { setBusy(true); try { setScan(await artworkAiService.retry(artworkId)); setAttempt(v => v + 1); } catch (cause) { setError(extractErrorMessage(cause, 'Không gửi được yêu cầu kiểm tra lại.')); } finally { setBusy(false); } }}>{busy ? 'Đang gửi…' : 'Kiểm tra lại ảnh'}</button>}
+      {scan?.status === 'Succeeded' && scan.score !== null && <><p className="text-xl font-bold text-[#B24A26]">Điểm nghi ngờ: {(scan.score * 100).toFixed(1)}%</p><p className="text-xs text-[#746A5F]">{scan.provider} · {scan.model} · {scan.checkedAt && new Date(scan.checkedAt).toLocaleString('vi-VN')}</p></>}
+      {scan?.error && <p className="text-[#8A6A1F]">{scan.error}</p>}
+      <p className="text-xs leading-5 text-[#746A5F]">{compact ? 'Điểm nghi ngờ AI chỉ hỗ trợ kiểm duyệt, không phải kết luận cuối cùng.' : 'Kết quả là tín hiệu hỗ trợ, có thể nhận nhầm. Moderator quyết định kiểm duyệt; điểm này không phải tỷ lệ phần trăm bức tranh do AI vẽ.'}</p>
+      {canRetry && scan && !['NotConfigured', 'Queued', 'Processing', 'Retrying'].includes(scan.status) && <button type="button" disabled={busy} className="rounded-xl border border-[#B24A26]/40 px-3 py-2 text-[#B24A26] disabled:opacity-40" onClick={async () => { setBusy(true); try { setScan(await artworkAiService.retry(artworkId)); setAttempt(v => v + 1); } catch (cause) { setError(extractErrorMessage(cause, 'Không gửi được yêu cầu kiểm tra lại.')); } finally { setBusy(false); } }}>{busy ? 'Đang gửi…' : 'Kiểm tra lại ảnh'}</button>}
     </>}
   </section>;
 }
