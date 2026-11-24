@@ -3637,3 +3637,45 @@ html[data-theme="ink"] [class*="text-[#3F382F]/"] { color: var(--body) !importan
   color: var(--ink-2) !important;
 }
 .bg-brand-periwinkle:hover { background-color: var(--lumen-hi) !important; }
+
+
+
+.art-card__img img,
+.artframe__img {
+  border-radius: 18px !important;
+}
+
+
+/* Studio/Admin: <main> đã có padding riêng, .page không cộng thêm 48px nữa
+   (trước đây 32 + 48 + 32 = 112px khoảng trống trước nội dung đầu tiên). */
+.page--flush { padding-block: 0; }
+
+
+/* Card: cột nội dung phải co theo bề rộng card. Trước đây là grid với cột auto
+   nên một nhãn dài (vd "Chủ sở hữu độc bản") rộng 266px trong card 238px → tràn. */
+.art-card__meta { grid-template-columns: minmax(0, 1fr); }
+.art-card__meta > * { min-inline-size: 0; }
+
+
+/* ============================================================
+   UNIFIED RADIUS — mọi bo góc của khối/hộp dùng CHUNG một bán kính 16px.
+   Chỉ giữ 999px cho phần tử đúng nghĩa "viên thuốc" (chip, badge, avatar,
+   nút tròn, pill) vì các phần tử đó cao ~24–40px, bo 16px cũng thành pill.
+   ============================================================ */
+:root {
+  --r-xs: 16px;
+  --r-sm: 16px;
+  --r-md: 16px;
+  --r-lg: 16px;
+  --r-xl: 16px;
+  --r-frame: 16px;
+  --r-card: 16px;
+  --r-pill: 999px;
+}
+
+.rounded, .rounded-sm, .rounded-md, .rounded-lg, .rounded-xl, .rounded-2xl, .rounded-3xl,
+[class*="rounded-["],
+[class*="rounded-t-"], [class*="rounded-b-"], [class*="rounded-l-"], [class*="rounded-r-"],
+[class*="rounded-tl-"], [class*="rounded-tr-"], [class*="rounded-bl-"], [class*="rounded-br-"] {
+  border-radius: 16px !important;
+}

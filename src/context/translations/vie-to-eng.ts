@@ -2026,7 +2026,9 @@ export const extraVieToEngMap: Record<string, string> = {
 };
 
 export const extraVieToEngRegex: Array<{ pattern: RegExp; replacement: string }> = [
-  { pattern: /^([\d.,]+)đ$/i, replacement: ' VND' },
+  // Giữ lại số tiền: bản cũ thay cả chuỗi bằng ' VND' nên mọi giá trên tab EN
+  // biến thành "VND" trơ trọi (prize pool, giá tranh, số dư ví…).
+  { pattern: /^([\d.,]+)đ$/i, replacement: '$1 VND' },
   { pattern: /^Còn (\d+) slot$/i, replacement: '$1 slots left' },
   { pattern: /^(\d+) giao dịch đang hiển thị · (\d+) giao dịch$/i, replacement: '$1 transactions shown · $2 in total' },
   { pattern: /^Vì bạn đang xem “(.+)”\.$/i, replacement: 'Because you are viewing “$1”.' },
