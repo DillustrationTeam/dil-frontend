@@ -14,15 +14,15 @@ export function LeaderboardHeaderSorter({ wallSort, setWallSort }: LeaderboardHe
   const isVie = lang === 'VIE';
 
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-6">
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#221E1A]/10 pb-6">
       <div>
         <div className="flex items-center gap-2">
-          <Crown size={22} className="text-amber-400" />
-          <h2 className="font-h1 text-xl sm:text-2xl font-bold text-white">
+          <Crown size={22} className="text-[#8A6A1F]" />
+          <h2 className="font-h1 text-xl sm:text-2xl font-bold text-[#241F1A]">
             {isVie ? 'Bảng Vinh Danh' : 'The Wall Of Fame'}
           </h2>
         </div>
-        <p className="text-xs text-[#8A8FA9] mt-1">
+        <p className="text-xs text-[#6E6459] mt-1">
           {isVie
             ? 'Vinh danh các quán quân xuất sắc, người chiến thắng và các tác phẩm xếp hạng cao nhất của cuộc thi'
             : 'Honoring the grand champions, laureates, and highest-ranking creations of this competition'}
@@ -30,7 +30,7 @@ export function LeaderboardHeaderSorter({ wallSort, setWallSort }: LeaderboardHe
       </div>
 
       <div className="flex items-center gap-2">
-        <span className="text-xs text-[#8A8FA9]">
+        <span className="text-xs text-[#6E6459]">
           {isVie ? 'Xếp hạng theo:' : 'Rank by:'}
         </span>
         <button
@@ -38,8 +38,8 @@ export function LeaderboardHeaderSorter({ wallSort, setWallSort }: LeaderboardHe
           onClick={() => setWallSort('votes')}
           className={`rounded-xl px-4 py-2 text-xs font-bold transition cursor-pointer ${
             wallSort === 'votes'
-              ? 'bg-amber-400 text-slate-950 shadow-md'
-              : 'bg-white/5 text-[#A7ACD9] hover:bg-white/10'
+              ? 'bg-[#8A6A1F]/10 text-[#241F1A] shadow-md'
+              : 'bg-[#FFFCF6] text-[#B24A26] hover:bg-[#F0E7D8]'
           }`}
         >
           {isVie ? 'Bình chọn cộng đồng' : 'Community Votes'}
@@ -49,8 +49,8 @@ export function LeaderboardHeaderSorter({ wallSort, setWallSort }: LeaderboardHe
           onClick={() => setWallSort('score')}
           className={`rounded-xl px-4 py-2 text-xs font-bold transition cursor-pointer ${
             wallSort === 'score'
-              ? 'bg-amber-400 text-slate-950 shadow-md'
-              : 'bg-white/5 text-[#A7ACD9] hover:bg-white/10'
+              ? 'bg-[#8A6A1F]/10 text-[#241F1A] shadow-md'
+              : 'bg-[#FFFCF6] text-[#B24A26] hover:bg-[#F0E7D8]'
           }`}
         >
           {isVie ? 'Điểm Ban giám khảo' : 'Jury Score'}

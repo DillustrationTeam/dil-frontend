@@ -132,7 +132,7 @@ export function PhysicalDeliveryCard({ auction, userId, onReload }: PhysicalDeli
 
   // 2. Người thắng chọn chỉ nhận file số
   const handleDeclineDelivery = async () => {
-    if (!confirm('Bạn có chắc chắn muốn bỏ qua tranh vật lý và chỉ nhận file số chất lượng cao không? Tiền sẽ được quyết toán ngay cho người bán.')) {
+    if (!confirm('Bạn có chắc chắn muốn bỏ qua tranh vật lý và chỉ nhận tệp số chất lượng cao không? Tiền sẽ được quyết toán ngay cho người bán.')) {
       return;
     }
 
@@ -140,7 +140,7 @@ export function PhysicalDeliveryCard({ auction, userId, onReload }: PhysicalDeli
       setLoading(true);
       setError(null);
       await auctionService.declinePhysicalDelivery(auction.auctionId);
-      setSuccessMsg('Đã chuyển sang hình thức nhận file số. Tiền đã giải ngân cho người bán!');
+      setSuccessMsg('Đã chuyển sang hình thức nhận tệp số. Tiền đã giải ngân cho người bán!');
       onReload();
     } catch (err) {
       setError(auctionError(err));
@@ -454,17 +454,15 @@ export function PhysicalDeliveryCard({ auction, userId, onReload }: PhysicalDeli
   };
 
   return (
-    <div className="rounded-3xl border border-amber-500/25 bg-amber-500/5 p-5 md:p-6 space-y-4">
+    <div className="rounded-3xl border border-[#8A6A1F]/35 bg-[#8A6A1F]/5 p-5 md:p-6 space-y-4">
       {/* Header card */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-amber-500/20 pb-4">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#8A6A1F]/30 pb-4">
         <div className="flex items-center gap-2.5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-400/15 text-amber-300">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#8A6A1F]/15 text-[#8A6A1F]">
             <Package size={20} />
           </div>
           <div>
-            <h3 className="font-h1 text-sm font-bold text-white flex items-center gap-2">
-              Bản tranh vật lý & Giao vận an toàn
-              <span className="rounded-full bg-amber-400/20 px-2.5 py-0.5 text-[11px] font-semibold text-amber-300">
+            <h3 className="font-h1 text-sm font-bold text-[#241F1A] flex items-center gap-2"> Bản tranh vật lý & Giao vận an toàn <span className="rounded-full bg-[#8A6A1F]/20 px-2.5 py-0.5 text-[11px] font-semibold text-[#8A6A1F]">
                 P2P Escrow
               </span>
             </h3>
@@ -478,7 +476,7 @@ export function PhysicalDeliveryCard({ auction, userId, onReload }: PhysicalDeli
           <button
             type="button"
             onClick={() => setShowReceiptsModal(true)}
-            className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/40 bg-amber-400/10 px-3.5 py-1.5 text-xs font-semibold text-amber-300 hover:bg-amber-400/20 transition"
+            className="inline-flex items-center gap-1.5 rounded-full border border-[#8A6A1F]/40 bg-[#8A6A1F]/10 px-3.5 py-1.5 text-xs font-semibold text-[#8A6A1F] hover:bg-[#8A6A1F]/20 transition"
           >
             <Receipt size={14} /> Xem biên lai minh bạch ({receipts.length})
           </button>
@@ -487,38 +485,33 @@ export function PhysicalDeliveryCard({ auction, userId, onReload }: PhysicalDeli
 
       {/* Thông báo kết quả */}
       {error && (
-        <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-xs text-rose-300 flex items-center gap-2">
+        <div className="rounded-xl border border-[#A8321C]/40 bg-[#A8321C]/10 p-3 text-xs text-[#A8321C] flex items-center gap-2">
           <AlertTriangle size={15} /> {error}
         </div>
       )}
       {successMsg && (
-        <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs text-emerald-300 flex items-center gap-2">
+        <div className="rounded-xl border border-[#2F6B63]/40 bg-[#2F6B63]/10 p-3 text-xs text-[#2F6B63] flex items-center gap-2">
           <CheckCircle2 size={15} /> {successMsg}
         </div>
       )}
 
       {/* Mô tả tranh vật lý từ Họa sĩ */}
       {auction.physicalDescription && (
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-xs text-on-surface-variant space-y-1">
+        <div className="rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] p-4 text-xs text-on-surface-variant space-y-1">
           <span className="font-semibold text-brand-periwinkle">Chi tiết tranh vật lý từ người bán:</span>
-          <p className="text-white/90 whitespace-pre-wrap">{auction.physicalDescription}</p>
+          <p className="text-[#241F1A]/90 whitespace-pre-wrap">{auction.physicalDescription}</p>
         </div>
       )}
 
       {/* Tùy chọn dành cho Người thắng phiên khi đang ở trạng thái AwaitingPhysical */}
       {isWinner && auction.auctionStatus === 'AwaitingPhysical' && !auction.requiresPhysicalDelivery && (
-        <div className="rounded-2xl border border-amber-400/40 bg-amber-950/40 p-5 space-y-3">
+        <div className="rounded-2xl border border-[#8A6A1F]/40 bg-[#8A6A1F]/20 p-5 space-y-3">
           <div className="flex items-start gap-3">
-            <Clock size={20} className="text-amber-400 shrink-0 mt-0.5" />
+            <Clock size={20} className="text-[#8A6A1F] shrink-0 mt-0.5" />
             <div className="space-y-1">
-              <h4 className="text-sm font-bold text-amber-300">
-                Lựa chọn nhận tranh vật lý (Hạn chót trong 48 giờ)
-              </h4>
-              <p className="text-xs text-outline">
-                Bạn có thể yêu cầu Người bán gửi bản gốc vật lý tận nơi (có bưu cục đối soát), hoặc chỉ nhận file số độc quyền để hoàn tất phiên ngay.
-              </p>
-              <p className="text-xs text-amber-200/70">
-                Quá 48 giờ mà bạn chưa chọn, phiên sẽ <span className="font-semibold text-amber-200">tự huỷ và hoàn lại toàn bộ tiền về ví của bạn</span>; tác phẩm trở về quyền sở hữu của Người bán. Bạn cũng sẽ không nhận được file gốc của phiên này.
+              <h4 className="text-sm font-bold text-[#8A6A1F]"> Lựa chọn nhận tranh vật lý (Hạn chót trong 48 giờ) </h4>
+              <p className="text-xs text-outline"> Bạn có thể yêu cầu Người bán gửi bản gốc vật lý tận nơi (có bưu cục đối soát), hoặc chỉ nhận tệp số độc quyền để hoàn tất phiên ngay. </p>
+              <p className="text-xs text-[#8A6A1F]"> Quá 48 giờ mà bạn chưa chọn, phiên sẽ <span className="font-semibold text-[#8A6A1F]">tự huỷ và hoàn lại toàn bộ tiền về ví của bạn</span>; tác phẩm trở về quyền sở hữu của Người bán. Bạn cũng sẽ không nhận được file gốc của phiên này.
               </p>
             </div>
           </div>
@@ -528,22 +521,19 @@ export function PhysicalDeliveryCard({ auction, userId, onReload }: PhysicalDeli
               <button
                 type="button"
                 onClick={() => setShowRequestForm(true)}
-                className="inline-flex items-center gap-2 rounded-xl bg-amber-400 px-4 py-2.5 text-xs font-bold text-brand-navy hover:brightness-110 transition"
+                className="inline-flex items-center gap-2 rounded-xl bg-[#8A6A1F]/10 px-4 py-2.5 text-xs font-bold text-[#241F1A] hover:brightness-110 transition"
               >
-                <Truck size={15} /> Yêu cầu nhận tranh vật lý
-              </button>
+                <Truck size={15} /> Yêu cầu nhận tranh vật lý </button>
               <button
                 type="button"
                 disabled={loading}
                 onClick={handleDeclineDelivery}
-                className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/5 px-4 py-2.5 text-xs font-semibold text-white hover:bg-white/10 transition disabled:opacity-50"
-              >
-                Chỉ nhận file số (Bỏ qua tranh thật)
-              </button>
+                className="inline-flex items-center gap-2 rounded-xl border border-[#221E1A]/20 bg-[#FFFCF6] px-4 py-2.5 text-xs font-semibold text-[#241F1A] hover:bg-[#F0E7D8] transition disabled:opacity-50"
+              > Chỉ nhận tệp số (Bỏ qua tranh thật) </button>
             </div>
           ) : (
-            <form onSubmit={handleRequestDelivery} className="mt-3 space-y-3 border-t border-white/10 pt-3">
-              <h5 className="text-xs font-bold text-white">Điền thông tin địa chỉ nhận tranh:</h5>
+            <form onSubmit={handleRequestDelivery} className="mt-3 space-y-3 border-t border-[#221E1A]/10 pt-3">
+              <h5 className="text-xs font-bold text-[#241F1A]">Điền thông tin địa chỉ nhận tranh:</h5>
               <div className="grid gap-3 sm:grid-cols-2">
                 <input
                   type="text"
@@ -551,7 +541,7 @@ export function PhysicalDeliveryCard({ auction, userId, onReload }: PhysicalDeli
                   placeholder="Họ và tên người nhận *"
                   value={requestForm.recipientName}
                   onChange={(e) => setRequestForm((p) => ({ ...p, recipientName: e.target.value }))}
-                  className="rounded-xl border border-white/15 bg-black/30 p-2.5 text-xs text-white placeholder-white/30 focus:border-amber-400 focus:outline-none"
+                  className="rounded-xl border border-[#221E1A]/10 bg-[#F0E7D8] p-2.5 text-xs text-[#241F1A] placeholder-white/30 focus:border-[#8A6A1F]/30 focus:outline-none"
                 />
                 <input
                   type="tel"
@@ -559,7 +549,7 @@ export function PhysicalDeliveryCard({ auction, userId, onReload }: PhysicalDeli
                   placeholder="Số điện thoại nhận hàng *"
                   value={requestForm.recipientPhone}
                   onChange={(e) => setRequestForm((p) => ({ ...p, recipientPhone: e.target.value }))}
-                  className="rounded-xl border border-white/15 bg-black/30 p-2.5 text-xs text-white placeholder-white/30 focus:border-amber-400 focus:outline-none"
+                  className="rounded-xl border border-[#221E1A]/10 bg-[#F0E7D8] p-2.5 text-xs text-[#241F1A] placeholder-white/30 focus:border-[#8A6A1F]/30 focus:outline-none"
                 />
               </div>
               <input
@@ -568,30 +558,28 @@ export function PhysicalDeliveryCard({ auction, userId, onReload }: PhysicalDeli
                 placeholder="Địa chỉ giao hàng chi tiết (Số nhà, đường, phường/xã, quận/huyện, tỉnh/TP) *"
                 value={requestForm.shippingAddress}
                 onChange={(e) => setRequestForm((p) => ({ ...p, shippingAddress: e.target.value }))}
-                className="w-full rounded-xl border border-white/15 bg-black/30 p-2.5 text-xs text-white placeholder-white/30 focus:border-amber-400 focus:outline-none"
+                className="w-full rounded-xl border border-[#221E1A]/10 bg-[#F0E7D8] p-2.5 text-xs text-[#241F1A] placeholder-white/30 focus:border-[#8A6A1F]/30 focus:outline-none"
               />
               <textarea
                 rows={2}
                 placeholder="Ghi chú thêm cho người bán (nếu có)..."
                 value={requestForm.noteToSeller}
                 onChange={(e) => setRequestForm((p) => ({ ...p, noteToSeller: e.target.value }))}
-                className="w-full rounded-xl border border-white/15 bg-black/30 p-2.5 text-xs text-white placeholder-white/30 focus:border-amber-400 focus:outline-none"
+                className="w-full rounded-xl border border-[#221E1A]/10 bg-[#F0E7D8] p-2.5 text-xs text-[#241F1A] placeholder-white/30 focus:border-[#8A6A1F]/30 focus:outline-none"
               />
               <div className="flex gap-2">
                 <button
                   type="submit"
                   disabled={loading}
-                  className="rounded-xl bg-amber-400 px-4 py-2 text-xs font-bold text-brand-navy hover:brightness-110 disabled:opacity-50"
+                  className="rounded-xl bg-[#8A6A1F]/10 px-4 py-2 text-xs font-bold text-[#241F1A] hover:brightness-110 disabled:opacity-50"
                 >
                   {loading ? 'Đang lưu...' : 'Gửi địa chỉ nhận tranh'}
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowRequestForm(false)}
-                  className="rounded-xl border border-white/10 px-3 py-2 text-xs text-outline hover:text-white"
-                >
-                  Hủy
-                </button>
+                  className="rounded-xl border border-[#221E1A]/10 px-3 py-2 text-xs text-outline hover:text-[#241F1A]"
+                > Hủy </button>
               </div>
             </form>
           )}
@@ -600,12 +588,10 @@ export function PhysicalDeliveryCard({ auction, userId, onReload }: PhysicalDeli
 
       {/* Thông tin đơn vận chuyển khi đã có delivery */}
       {delivery && (
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-4 space-y-3">
-          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/8 pb-3 text-xs">
-            <span className="font-semibold text-white flex items-center gap-1.5">
-              <Truck size={15} className="text-amber-400" />
-              Tình trạng bưu kiện:
-              <span className="rounded-md bg-amber-400/20 px-2 py-0.5 text-amber-300 font-mono font-bold">
+        <div className="rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] p-4 space-y-3">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#221E1A]/10 pb-3 text-xs">
+            <span className="font-semibold text-[#241F1A] flex items-center gap-1.5">
+              <Truck size={15} className="text-[#8A6A1F]" /> Tình trạng bưu kiện: <span className="rounded-md bg-[#8A6A1F]/20 px-2 py-0.5 text-[#8A6A1F] font-mono font-bold">
                 {delivery.status === 'AwaitingShipment' && 'Chờ người bán gửi hàng'}
                 {delivery.status === 'InTransit' && 'Đang vận chuyển qua bưu cục'}
                 {delivery.status === 'Delivered' && 'Đã giao thành công'}
@@ -617,29 +603,27 @@ export function PhysicalDeliveryCard({ auction, userId, onReload }: PhysicalDeli
             </span>
 
             {delivery.trackingCode && (
-              <span className="font-mono text-outline">
-                Hãng: <strong className="text-white">{delivery.carrierName}</strong> · Mã vận đơn: <strong className="text-amber-300">{delivery.trackingCode}</strong>
+              <span className="font-mono text-outline"> Hãng: <strong className="text-[#241F1A]">{delivery.carrierName}</strong> · Mã vận đơn: <strong className="text-[#8A6A1F]">{delivery.trackingCode}</strong>
               </span>
             )}
           </div>
 
           <div className="grid gap-2 text-xs text-outline sm:grid-cols-2">
             <div>
-              <p>• Người nhận: <strong className="text-white">{delivery.recipientName}</strong> ({delivery.recipientPhone})</p>
-              <p>• Địa chỉ: <span className="text-white">{delivery.shippingAddress}</span></p>
-              {delivery.noteToSeller && <p>• Ghi chú: <span className="text-amber-200/90">{delivery.noteToSeller}</span></p>}
+              <p>• Người nhận: <strong className="text-[#241F1A]">{delivery.recipientName}</strong> ({delivery.recipientPhone})</p>
+              <p>• Địa chỉ: <span className="text-[#241F1A]">{delivery.shippingAddress}</span></p>
+              {delivery.noteToSeller && <p>• Ghi chú: <span className="text-[#8A6A1F]">{delivery.noteToSeller}</span></p>}
             </div>
             <div className="space-y-1">
-              {delivery.shippedAt && <p>• Ngày gửi bưu cục: <span className="font-mono text-white">{new Date(delivery.shippedAt).toLocaleString('vi-VN')}</span></p>}
-              {delivery.confirmedAt && <p>• Ngày xác nhận nhận: <span className="font-mono text-emerald-300">{new Date(delivery.confirmedAt).toLocaleString('vi-VN')}</span></p>}
+              {delivery.shippedAt && <p>• Ngày gửi bưu cục: <span className="font-mono text-[#241F1A]">{new Date(delivery.shippedAt).toLocaleString('vi-VN')}</span></p>}
+              {delivery.confirmedAt && <p>• Ngày xác nhận nhận: <span className="font-mono text-[#2F6B63]">{new Date(delivery.confirmedAt).toLocaleString('vi-VN')}</span></p>}
               {delivery.shippingReceiptUrl && (
                 <button
                   type="button"
                   onClick={() => setSelectedReceiptImage(delivery.shippingReceiptUrl || null)}
-                  className="inline-flex items-center gap-1 text-[11px] text-amber-300 hover:underline"
+                  className="inline-flex items-center gap-1 text-[11px] text-[#8A6A1F] hover:underline"
                 >
-                  <FileText size={12} className="shrink-0" /> Xem ảnh biên lai bưu cục
-                  <ExternalLink size={11} />
+                  <FileText size={12} className="shrink-0" /> Xem ảnh biên lai bưu cục <ExternalLink size={11} />
                 </button>
               )}
               {delivery.packageImageUrl && (
@@ -648,8 +632,7 @@ export function PhysicalDeliveryCard({ auction, userId, onReload }: PhysicalDeli
                   onClick={() => setSelectedReceiptImage(delivery.packageImageUrl || null)}
                   className="inline-flex items-center gap-1 text-[11px] text-brand-periwinkle hover:underline"
                 >
-                  <Package size={12} className="shrink-0" /> Xem ảnh kiện hàng đã đóng gói
-                  <ExternalLink size={11} />
+                  <Package size={12} className="shrink-0" /> Xem ảnh kiện hàng đã đóng gói <ExternalLink size={11} />
                 </button>
               )}
               {delivery.trackingUrl && /^https?:\/\//i.test(delivery.trackingUrl) && (
@@ -657,10 +640,9 @@ export function PhysicalDeliveryCard({ auction, userId, onReload }: PhysicalDeli
                   href={delivery.trackingUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center gap-1 text-[11px] text-emerald-300 hover:underline"
+                  className="inline-flex items-center gap-1 text-[11px] text-[#2F6B63] hover:underline"
                 >
-                  <Truck size={12} className="shrink-0" /> Tra cứu hành trình bưu phẩm
-                  <ExternalLink size={11} />
+                  <Truck size={12} className="shrink-0" /> Tra cứu hành trình bưu phẩm <ExternalLink size={11} />
                 </a>
               )}
               {/* Ảnh bưu kiện ĐÃ ĐẾN NƠI: người mua và Admin đều xem được để đối soát */}
@@ -668,14 +650,13 @@ export function PhysicalDeliveryCard({ auction, userId, onReload }: PhysicalDeli
                 <button
                   type="button"
                   onClick={() => setSelectedReceiptImage(delivery.arrivalProofUrl || null)}
-                  className="inline-flex items-center gap-1 text-[11px] text-amber-300 hover:underline"
+                  className="inline-flex items-center gap-1 text-[11px] text-[#8A6A1F] hover:underline"
                 >
-                  <ImagePlus size={12} className="shrink-0" /> Ảnh bưu kiện đã đến nơi (người bán gửi)
-                  <ExternalLink size={11} />
+                  <ImagePlus size={12} className="shrink-0" /> Ảnh bưu kiện đã đến nơi (người bán gửi) <ExternalLink size={11} />
                 </button>
               )}
               {delivery.sellerReportedDeliveredAt && (
-                <p className="text-[11px] text-amber-200">
+                <p className="text-[11px] text-[#8A6A1F]">
                   • Người bán báo đã giao tới nơi lúc{' '}
                   <span className="font-mono">
                     {new Date(delivery.sellerReportedDeliveredAt).toLocaleString('vi-VN')}
@@ -688,18 +669,17 @@ export function PhysicalDeliveryCard({ auction, userId, onReload }: PhysicalDeli
           {/* Hành động của Người bán: Cập nhật thông tin gửi hàng */}
           {/* Chỉ hiện khi phiên còn sống — Completed/Disputed thì không gửi hàng được nữa (backend chặn) */}
           {isSeller && delivery.status === 'AwaitingShipment' && isDeliveryActive && (
-            <div className="pt-3 border-t border-white/10 space-y-2">
+            <div className="pt-3 border-t border-[#221E1A]/10 space-y-2">
               {!showShipForm ? (
                 <button
                   type="button"
                   onClick={() => setShowShipForm(true)}
-                  className="inline-flex items-center gap-1.5 rounded-xl bg-amber-400 px-4 py-2 text-xs font-bold text-brand-navy hover:brightness-110"
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-[#8A6A1F]/10 px-4 py-2 text-xs font-bold text-[#241F1A] hover:brightness-110"
                 >
-                  <Send size={14} /> Nhập mã vận đơn & Biên lai gửi bưu cục
-                </button>
+                  <Send size={14} /> Nhập mã vận đơn & Biên lai gửi bưu cục </button>
               ) : (
-                <form onSubmit={handleUpdateShipping} className="space-y-3 bg-black/20 p-3 rounded-xl">
-                  <h5 className="text-xs font-bold text-white">Cập nhật vận đơn chuyển phát:</h5>
+                <form onSubmit={handleUpdateShipping} className="space-y-3 bg-[#F0E7D8] p-3 rounded-xl">
+                  <h5 className="text-xs font-bold text-[#241F1A]">Cập nhật vận đơn chuyển phát:</h5>
                   <div className="grid gap-2 sm:grid-cols-2">
                     <input
                       type="text"
@@ -707,7 +687,7 @@ export function PhysicalDeliveryCard({ auction, userId, onReload }: PhysicalDeli
                       placeholder="Tên hãng vận chuyển (VNPost, ViettelPost, GHTK...)"
                       value={shipForm.carrierName}
                       onChange={(e) => setShipForm((p) => ({ ...p, carrierName: e.target.value }))}
-                      className="rounded-xl border border-white/15 bg-white/5 p-2 text-xs text-white focus:outline-none"
+                      className="rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] p-2 text-xs text-[#241F1A] focus:outline-none"
                     />
                     <input
                       type="text"
@@ -715,16 +695,14 @@ export function PhysicalDeliveryCard({ auction, userId, onReload }: PhysicalDeli
                       placeholder="Mã vận đơn bưu cục *"
                       value={shipForm.trackingCode}
                       onChange={(e) => setShipForm((p) => ({ ...p, trackingCode: e.target.value }))}
-                      className="rounded-xl border border-white/15 bg-white/5 p-2 text-xs text-white focus:outline-none"
+                      className="rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] p-2 text-xs text-[#241F1A] focus:outline-none"
                     />
                   </div>
                   {/* Bắt buộc ít nhất 1 trong 3: link tra cứu, ảnh biên lai, ảnh kiện hàng */}
-                  <div className="rounded-xl border border-amber-400/30 bg-amber-400/10 px-3 py-2 text-[11px] text-amber-200 flex items-start gap-2">
+                  <div className="rounded-xl border border-[#8A6A1F]/40 bg-[#8A6A1F]/10 px-3 py-2 text-[11px] text-[#8A6A1F] flex items-start gap-2">
                     <AlertTriangle size={13} className="shrink-0 mt-0.5" />
-                    <span>
-                      Bắt buộc điền <strong>ít nhất một</strong> trong ba mục bên dưới: link tra cứu hành trình,
-                      ảnh biên lai bưu cục hoặc ảnh kiện hàng — để người mua đối soát được bưu phẩm.
-                    </span>
+                    <span> Bắt buộc điền <strong>ít nhất một</strong> trong ba mục bên dưới: link tra cứu hành trình,
+ ảnh biên lai bưu cục hoặc ảnh kiện hàng — để người mua đối soát được bưu phẩm. </span>
                   </div>
 
                   <input
@@ -732,7 +710,7 @@ export function PhysicalDeliveryCard({ auction, userId, onReload }: PhysicalDeli
                     placeholder="Link tra cứu hành trình (một trong ba bằng chứng bắt buộc)"
                     value={shipForm.trackingUrl}
                     onChange={(e) => setShipForm((p) => ({ ...p, trackingUrl: e.target.value }))}
-                    className="w-full rounded-xl border border-white/15 bg-white/5 p-2 text-xs text-white focus:outline-none"
+                    className="w-full rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] p-2 text-xs text-[#241F1A] focus:outline-none"
                   />
 
                   {/* Ảnh biên lai bưu cục + ảnh kiện hàng: tải trực tiếp từ máy,
@@ -750,10 +728,10 @@ export function PhysicalDeliveryCard({ auction, userId, onReload }: PhysicalDeli
                       return (
                         <div
                           key={slot.kind}
-                          className="rounded-xl border border-white/15 bg-black/25 p-2.5 space-y-1.5"
+                          className="rounded-xl border border-[#221E1A]/10 bg-[#F0E7D8]/25 p-2.5 space-y-1.5"
                         >
-                          <p className="text-[11px] font-semibold text-white flex items-center gap-1.5">
-                            <slot.Icon size={13} className="shrink-0 text-amber-300" />
+                          <p className="text-[11px] font-semibold text-[#241F1A] flex items-center gap-1.5">
+                            <slot.Icon size={13} className="shrink-0 text-[#8A6A1F]" />
                             {slot.label}
                             <span className="font-normal text-outline">(JPG/PNG/WebP ≤ 8MB)</span>
                           </p>
@@ -772,20 +750,18 @@ export function PhysicalDeliveryCard({ auction, userId, onReload }: PhysicalDeli
                               <img
                                 src={shipEvidencePreview[slot.kind] || uploadedUrl}
                                 alt={slot.label}
-                                className="h-12 w-12 rounded-lg object-cover border border-white/15"
+                                className="h-12 w-12 rounded-lg object-cover border border-[#221E1A]/10"
                               />
                               <a
                                 href={uploadedUrl}
                                 target="_blank"
                                 rel="noreferrer"
                                 className="text-[10px] text-brand-periwinkle underline"
-                              >
-                                Xem ảnh
-                              </a>
+                              > Xem ảnh </a>
                               <button
                                 type="button"
                                 onClick={() => handleRemoveShipEvidence(slot.kind)}
-                                className="ml-auto rounded-lg border border-rose-500/30 bg-rose-500/10 p-1 text-rose-300 hover:bg-rose-500/20"
+                                className="ml-auto rounded-lg border border-[#A8321C]/40 bg-[#A8321C]/10 p-1 text-[#A8321C] hover:bg-[#A8321C]/20"
                                 title="Xoá ảnh"
                               >
                                 <Trash2 size={12} />
@@ -796,7 +772,7 @@ export function PhysicalDeliveryCard({ auction, userId, onReload }: PhysicalDeli
                               type="button"
                               disabled={uploadingShipEvidence === slot.kind}
                               onClick={() => document.getElementById(inputId)?.click()}
-                              className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-white/25 px-2 py-2 text-[11px] font-semibold text-white hover:bg-white/5 disabled:opacity-50"
+                              className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-[#221E1A]/20 px-2 py-2 text-[11px] font-semibold text-[#241F1A] hover:bg-[#FFFCF6] disabled:opacity-50"
                             >
                               <ImagePlus size={13} />
                               {uploadingShipEvidence === slot.kind ? 'Đang tải...' : 'Chọn ảnh từ máy'}
@@ -813,17 +789,15 @@ export function PhysicalDeliveryCard({ auction, userId, onReload }: PhysicalDeli
                     <button
                       type="submit"
                       disabled={loading}
-                      className="rounded-xl bg-amber-400 px-4 py-2 text-xs font-bold text-brand-navy hover:brightness-110 disabled:opacity-50"
+                      className="rounded-xl bg-[#8A6A1F]/10 px-4 py-2 text-xs font-bold text-[#241F1A] hover:brightness-110 disabled:opacity-50"
                     >
                       {loading ? 'Đang gửi...' : 'Xác nhận đã gửi hàng'}
                     </button>
                     <button
                       type="button"
                       onClick={() => setShowShipForm(false)}
-                      className="rounded-xl border border-white/10 px-3 py-2 text-xs text-outline"
-                    >
-                      Đóng
-                    </button>
+                      className="rounded-xl border border-[#221E1A]/10 px-3 py-2 text-xs text-outline"
+                    > Đóng </button>
                   </div>
                 </form>
               )}
@@ -832,27 +806,21 @@ export function PhysicalDeliveryCard({ auction, userId, onReload }: PhysicalDeli
 
           {/* Hành động của Người bán: Báo bưu phẩm đã đến nơi (chỉ đối soát, không giải ngân) */}
           {isSeller && delivery.status === 'InTransit' && isDeliveryActive && (
-            <div className="pt-3 border-t border-white/10 space-y-2">
-              <div className="rounded-xl border border-amber-400/25 bg-amber-400/10 px-3 py-2 text-[11px] text-amber-200">
+            <div className="pt-3 border-t border-[#221E1A]/10 space-y-2">
+              <div className="rounded-xl border border-[#8A6A1F]/35 bg-[#8A6A1F]/10 px-3 py-2 text-[11px] text-[#8A6A1F]">
                 {hasTrackingJourney ? (
-                  <span>
-                    Đơn đã có <strong>link tra cứu hành trình</strong> nên không cần ảnh: chỉ cần báo bưu phẩm đã tới nơi.
-                    Tiền <strong>chưa</strong> giải ngân — người mua vẫn phải bấm “Đã nhận hàng”.
-                  </span>
+                  <span> Đơn đã có <strong>link tra cứu hành trình</strong> nên không cần ảnh: chỉ cần báo bưu phẩm đã tới nơi.
+ Tiền <strong>chưa</strong> giải ngân — người mua vẫn phải bấm “Đã nhận hàng”. </span>
                 ) : (
-                  <span>
-                    Đơn chỉ có ảnh biên lai / ảnh kiện hàng, <strong>không có link tra cứu hành trình</strong> — nên
-                    bắt buộc gửi kèm <strong>ảnh bưu kiện đã đến nơi</strong>. Ảnh này người mua và Ban quản trị đều xem được.
-                  </span>
+                  <span> Đơn chỉ có ảnh biên lai / ảnh kiện hàng, <strong>không có link tra cứu hành trình</strong> — nên
+ bắt buộc gửi kèm <strong>ảnh bưu kiện đã đến nơi</strong>. Ảnh này người mua và Ban quản trị đều xem được. </span>
                 )}
               </div>
 
               {!hasTrackingJourney && (
-                <div className="rounded-xl border border-white/15 bg-black/25 p-2.5 space-y-1.5">
-                  <p className="text-[11px] font-semibold text-white flex items-center gap-1.5">
-                    <ImagePlus size={13} className="shrink-0 text-amber-300" />
-                    Ảnh bưu kiện đã đến nơi
-                    <span className="font-normal text-outline">(JPG/PNG/WebP ≤ 8MB)</span>
+                <div className="rounded-xl border border-[#221E1A]/10 bg-[#F0E7D8]/25 p-2.5 space-y-1.5">
+                  <p className="text-[11px] font-semibold text-[#241F1A] flex items-center gap-1.5">
+                    <ImagePlus size={13} className="shrink-0 text-[#8A6A1F]" /> Ảnh bưu kiện đã đến nơi <span className="font-normal text-outline">(JPG/PNG/WebP ≤ 8MB)</span>
                   </p>
 
                   <input
@@ -870,16 +838,14 @@ export function PhysicalDeliveryCard({ auction, userId, onReload }: PhysicalDeli
                       <img
                         src={arrivalProofPreview || arrivalProofUrl}
                         alt="Ảnh bưu kiện đã đến nơi"
-                        className="h-12 w-12 rounded-lg object-cover border border-white/15"
+                        className="h-12 w-12 rounded-lg object-cover border border-[#221E1A]/10"
                       />
                       <a
                         href={arrivalProofUrl}
                         target="_blank"
                         rel="noreferrer"
                         className="text-[10px] text-brand-periwinkle underline"
-                      >
-                        Xem ảnh
-                      </a>
+                      > Xem ảnh </a>
                       <button
                         type="button"
                         onClick={() => {
@@ -887,7 +853,7 @@ export function PhysicalDeliveryCard({ auction, userId, onReload }: PhysicalDeli
                           setArrivalProofPreview(null);
                           if (arrivalProofInputRef.current) arrivalProofInputRef.current.value = '';
                         }}
-                        className="ml-auto rounded-lg border border-rose-500/30 bg-rose-500/10 p-1 text-rose-300 hover:bg-rose-500/20"
+                        className="ml-auto rounded-lg border border-[#A8321C]/40 bg-[#A8321C]/10 p-1 text-[#A8321C] hover:bg-[#A8321C]/20"
                         title="Xoá ảnh"
                       >
                         <Trash2 size={12} />
@@ -898,7 +864,7 @@ export function PhysicalDeliveryCard({ auction, userId, onReload }: PhysicalDeli
                       type="button"
                       disabled={uploadingArrivalProof}
                       onClick={() => arrivalProofInputRef.current?.click()}
-                      className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-white/25 px-2 py-2 text-[11px] font-semibold text-white hover:bg-white/5 disabled:opacity-50"
+                      className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-[#221E1A]/20 px-2 py-2 text-[11px] font-semibold text-[#241F1A] hover:bg-[#FFFCF6] disabled:opacity-50"
                     >
                       <ImagePlus size={13} />
                       {uploadingArrivalProof ? 'Đang tải...' : 'Chọn ảnh bưu kiện từ máy'}
@@ -912,13 +878,13 @@ export function PhysicalDeliveryCard({ auction, userId, onReload }: PhysicalDeli
                   type="button"
                   onClick={handleReportArrival}
                   disabled={loading || uploadingArrivalProof || (!hasTrackingJourney && !arrivalProofUrl)}
-                  className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-400 px-4 py-2 text-xs font-bold text-brand-navy hover:brightness-110 disabled:opacity-50"
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-[#2F6B63]/10 px-4 py-2 text-xs font-bold text-[#241F1A] hover:brightness-110 disabled:opacity-50"
                 >
                   <Package size={14} />
                   {delivery.sellerReportedDeliveredAt ? 'Cập nhật báo đã đến nơi' : 'Báo hàng đã đến nơi'}
                 </button>
                 {delivery.sellerReportedDeliveredAt && (
-                  <span className="text-[11px] text-emerald-300">
+                  <span className="text-[11px] text-[#2F6B63]">
                     Đã báo lúc {new Date(delivery.sellerReportedDeliveredAt).toLocaleString('vi-VN')}
                   </span>
                 )}
@@ -928,17 +894,14 @@ export function PhysicalDeliveryCard({ auction, userId, onReload }: PhysicalDeli
 
           {/* Hành động của Người mua: Xác nhận nhận tranh hoặc khiếu nại */}
           {isWinner && isDeliveryActive && (
-            <div className="pt-3 border-t border-white/10 space-y-3">
+            <div className="pt-3 border-t border-[#221E1A]/10 space-y-3">
               {!hasShippingInfo && (
-                <p className="rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-[11px] text-outline">
-                  Người bán chưa điền thông tin gửi hàng (hãng vận chuyển, mã vận đơn, bằng chứng gửi).
-                  Hai lựa chọn <strong>“Đã nhận hàng”</strong> và <strong>“Khiếu nại bưu phẩm”</strong> sẽ xuất hiện
-                  ngay khi người bán cập nhật xong.
-                </p>
+                <p className="rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-3 py-2 text-[11px] text-outline"> Người bán chưa điền thông tin gửi hàng (hãng vận chuyển, mã vận đơn, bằng chứng gửi).
+ Hai lựa chọn <strong>“Đã nhận hàng”</strong> và <strong>“Khiếu nại bưu phẩm”</strong> sẽ xuất hiện
+ ngay khi người bán cập nhật xong. </p>
               )}
               {hasShippingInfo && delivery.status === 'InTransit' && delivery.autoConfirmAt && (
-                <p className="rounded-xl border border-emerald-400/25 bg-emerald-400/10 px-3 py-2 text-[11px] text-emerald-200">
-                  Nếu bạn không xác nhận, đơn sẽ <strong>tự động hoàn tất sau 48 giờ</strong> kể từ lúc người bán gửi hàng
+                <p className="rounded-xl border border-[#2F6B63]/35 bg-[#2F6B63]/10 px-3 py-2 text-[11px] text-[#2F6B63]"> Nếu bạn không xác nhận, đơn sẽ <strong>tự động hoàn tất sau 48 giờ</strong> kể từ lúc người bán gửi hàng
                   ({new Date(delivery.autoConfirmAt).toLocaleString('vi-VN')}).
                 </p>
               )}
@@ -952,27 +915,23 @@ export function PhysicalDeliveryCard({ auction, userId, onReload }: PhysicalDeli
                     setConfirmChecked(false);
                     setShowConfirmModal(true);
                   }}
-                  className="inline-flex items-center gap-2 rounded-xl bg-emerald-400 px-4 py-2 text-xs font-bold text-brand-navy hover:brightness-110 disabled:opacity-50"
+                  className="inline-flex items-center gap-2 rounded-xl bg-[#2F6B63]/10 px-4 py-2 text-xs font-bold text-[#241F1A] hover:brightness-110 disabled:opacity-50"
                 >
-                  <CheckCircle2 size={15} /> Đã nhận hàng
-                </button>
+                  <CheckCircle2 size={15} /> Đã nhận hàng </button>
                 <button
                   type="button"
                   onClick={() => setShowDisputeForm((p) => !p)}
-                  className="inline-flex items-center gap-1.5 rounded-xl border border-rose-500/40 bg-rose-500/10 px-3.5 py-2 text-xs font-semibold text-rose-300 hover:bg-rose-500/20"
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-[#A8321C]/40 bg-[#A8321C]/10 px-3.5 py-2 text-xs font-semibold text-[#A8321C] hover:bg-[#A8321C]/20"
                 >
-                  <AlertTriangle size={14} /> Khiếu nại bưu phẩm
-                </button>
+                  <AlertTriangle size={14} /> Khiếu nại bưu phẩm </button>
               </div>
 
               {showDisputeForm && (
-                <form onSubmit={handleDispute} className="space-y-2 bg-rose-500/5 border border-rose-500/20 p-3 rounded-xl">
-                  <h5 className="text-xs font-bold text-rose-300">Gửi khiếu nại đơn giao tranh:</h5>
+                <form onSubmit={handleDispute} className="space-y-2 bg-[#A8321C]/5 border border-[#A8321C]/30 p-3 rounded-xl">
+                  <h5 className="text-xs font-bold text-[#A8321C]">Gửi khiếu nại đơn giao tranh:</h5>
                   {auction.auctionStatus === 'Completed' && (
-                    <p className="rounded-lg border border-amber-400/30 bg-amber-400/10 px-2.5 py-2 text-[11px] text-amber-200">
-                      Phiên này đã giải ngân cho người bán nên <strong>không thể hoàn tiền</strong>. Khiếu nại vẫn
-                      được ghi nhận để Ban quản trị đối soát bưu cục, và bạn có thể đánh giá người bán sau đó.
-                    </p>
+                    <p className="rounded-lg border border-[#8A6A1F]/40 bg-[#8A6A1F]/10 px-2.5 py-2 text-[11px] text-[#8A6A1F]"> Phiên này đã giải ngân cho người bán nên <strong>không thể hoàn tiền</strong>. Khiếu nại vẫn
+ được ghi nhận để Ban quản trị đối soát bưu cục, và bạn có thể đánh giá người bán sau đó. </p>
                   )}
                   <textarea
                     required
@@ -980,13 +939,12 @@ export function PhysicalDeliveryCard({ auction, userId, onReload }: PhysicalDeli
                     placeholder="Mô tả lý do (hàng vỡ hỏng, sai kích thước, chưa nhận được hàng...)"
                     value={disputeReason}
                     onChange={(e) => setDisputeReason(e.target.value)}
-                    className="w-full rounded-xl border border-white/15 bg-black/40 p-2 text-xs text-white focus:outline-none"
+                    className="w-full rounded-xl border border-[#221E1A]/10 bg-[#F0E7D8] p-2 text-xs text-[#241F1A] focus:outline-none"
                   />
 
                   {/* Bằng chứng khiếu nại: tối đa 5 ảnh + 1 video, tải trực tiếp từ máy */}
-                  <div className="rounded-xl border border-rose-500/25 bg-black/30 p-2.5 space-y-2">
-                    <p className="text-[11px] font-semibold text-rose-200">
-                      Ảnh / video bằng chứng <span className="text-rose-400">*</span>
+                  <div className="rounded-xl border border-[#A8321C]/35 bg-[#F0E7D8] p-2.5 space-y-2">
+                    <p className="text-[11px] font-semibold text-[#A8321C]"> Ảnh / video bằng chứng <span className="text-[#A8321C]">*</span>
                       <span className="ml-1 font-normal text-outline">
                         ({disputeImages.length}/{MAX_DISPUTE_IMAGES} ảnh · {disputeVideo ? '1/1' : '0/1'} video — JPG/PNG/WebP ≤8MB mỗi ảnh, MP4/MOV/WebM ≤80MB)
                       </span>
@@ -1018,12 +976,12 @@ export function PhysicalDeliveryCard({ auction, userId, onReload }: PhysicalDeli
                             <img
                               src={img.preview}
                               alt={`Bằng chứng ${index + 1}`}
-                              className="h-16 w-16 rounded-lg border border-white/15 object-cover"
+                              className="h-16 w-16 rounded-lg border border-[#221E1A]/10 object-cover"
                             />
                             <button
                               type="button"
                               onClick={() => handleRemoveEvidence(img.url)}
-                              className="absolute -right-1.5 -top-1.5 rounded-full border border-rose-500/40 bg-rose-500 p-0.5 text-white hover:brightness-110"
+                              className="absolute -right-1.5 -top-1.5 rounded-full border border-[#A8321C]/40 bg-[#A8321C]/12 p-0.5 text-[#241F1A] hover:brightness-110"
                               title="Xoá ảnh này"
                             >
                               <X size={11} />
@@ -1034,17 +992,16 @@ export function PhysicalDeliveryCard({ auction, userId, onReload }: PhysicalDeli
                     )}
 
                     {disputeVideo && (
-                      <div className="space-y-1.5 rounded-lg border border-white/10 bg-black/40 p-2">
-                        <p className="truncate text-[11px] font-semibold text-white">{disputeVideo.name}</p>
+                      <div className="space-y-1.5 rounded-lg border border-[#221E1A]/10 bg-[#F0E7D8] p-2">
+                        <p className="truncate text-[11px] font-semibold text-[#241F1A]">{disputeVideo.name}</p>
                         { }
                         <video src={disputeVideo.url} controls className="max-h-40 w-full rounded-lg" />
                         <button
                           type="button"
                           onClick={() => setDisputeVideo(null)}
-                          className="inline-flex items-center gap-1 rounded-lg border border-rose-500/30 bg-rose-500/10 px-2 py-1 text-[10px] text-rose-300 hover:bg-rose-500/20"
+                          className="inline-flex items-center gap-1 rounded-lg border border-[#A8321C]/40 bg-[#A8321C]/10 px-2 py-1 text-[10px] text-[#A8321C] hover:bg-[#A8321C]/20"
                         >
-                          <Trash2 size={11} /> Xoá video
-                        </button>
+                          <Trash2 size={11} /> Xoá video </button>
                       </div>
                     )}
 
@@ -1053,7 +1010,7 @@ export function PhysicalDeliveryCard({ auction, userId, onReload }: PhysicalDeli
                         type="button"
                         onClick={() => evidenceInputRef.current?.click()}
                         disabled={uploadingEvidence || disputeImages.length >= MAX_DISPUTE_IMAGES}
-                        className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg border border-dashed border-rose-400/40 bg-rose-500/5 px-3 py-2.5 text-[11px] font-semibold text-rose-200 hover:bg-rose-500/10 disabled:opacity-50"
+                        className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg border border-dashed border-[#A8321C]/40 bg-[#A8321C]/5 px-3 py-2.5 text-[11px] font-semibold text-[#A8321C] hover:bg-[#A8321C]/10 disabled:opacity-50"
                       >
                         <ImagePlus size={14} />
                         {uploadingEvidence ? 'Đang tải lên...' : `Thêm ảnh (${disputeImages.length}/${MAX_DISPUTE_IMAGES})`}
@@ -1062,7 +1019,7 @@ export function PhysicalDeliveryCard({ auction, userId, onReload }: PhysicalDeli
                         type="button"
                         onClick={() => videoInputRef.current?.click()}
                         disabled={uploadingEvidence || Boolean(disputeVideo)}
-                        className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg border border-dashed border-amber-400/40 bg-amber-500/5 px-3 py-2.5 text-[11px] font-semibold text-amber-200 hover:bg-amber-500/10 disabled:opacity-50"
+                        className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg border border-dashed border-[#8A6A1F]/40 bg-[#8A6A1F]/5 px-3 py-2.5 text-[11px] font-semibold text-[#8A6A1F] hover:bg-[#8A6A1F]/10 disabled:opacity-50"
                       >
                         <Video size={14} />
                         {disputeVideo ? 'Đã có video' : 'Thêm 1 video'}
@@ -1074,8 +1031,7 @@ export function PhysicalDeliveryCard({ auction, userId, onReload }: PhysicalDeli
                         target="_blank"
                         rel="noreferrer"
                         className="inline-flex items-center gap-1 text-[10px] text-brand-periwinkle underline"
-                      >
-                        Mở ảnh đầu tiên ở tab mới <ExternalLink size={10} />
+                      > Mở ảnh đầu tiên ở tab mới <ExternalLink size={10} />
                       </a>
                     )}
                   </div>
@@ -1084,17 +1040,15 @@ export function PhysicalDeliveryCard({ auction, userId, onReload }: PhysicalDeli
                     <button
                       type="submit"
                       disabled={loading || uploadingEvidence || (disputeImages.length === 0 && !disputeVideo)}
-                      className="rounded-xl bg-rose-500 px-4 py-1.5 text-xs font-bold text-white hover:brightness-110 disabled:opacity-50"
+                      className="rounded-xl bg-[#A8321C]/12 px-4 py-1.5 text-xs font-bold text-[#241F1A] hover:brightness-110 disabled:opacity-50"
                     >
                       {loading ? 'Đang gửi...' : 'Gửi khiếu nại ngay'}
                     </button>
                     <button
                       type="button"
                       onClick={() => setShowDisputeForm(false)}
-                      className="rounded-xl border border-white/10 px-3 py-1.5 text-xs text-outline"
-                    >
-                      Hủy
-                    </button>
+                      className="rounded-xl border border-[#221E1A]/10 px-3 py-1.5 text-xs text-outline"
+                    > Hủy </button>
                   </div>
                 </form>
               )}
@@ -1106,11 +1060,10 @@ export function PhysicalDeliveryCard({ auction, userId, onReload }: PhysicalDeli
           {/* Khiếu nại đã đóng nhưng tiền không hoàn được: nói rõ cho người mua biết,
               và mở quyền đánh giá người bán — kênh phản ánh duy nhất còn lại. */}
           {isWinner && delivery.disputeResolution === 'paid-out' && (
-            <div className="mt-3 rounded-2xl border border-amber-400/30 bg-amber-400/10 p-4 space-y-1.5">
-              <p className="text-xs font-bold text-amber-200 flex items-center gap-1.5">
-                <AlertTriangle size={14} /> Khiếu nại đã đóng — tiền đã giải ngân cho người bán
-              </p>
-              <p className="text-[11px] text-amber-100/90">
+            <div className="mt-3 rounded-2xl border border-[#8A6A1F]/40 bg-[#8A6A1F]/10 p-4 space-y-1.5">
+              <p className="text-xs font-bold text-[#8A6A1F] flex items-center gap-1.5">
+                <AlertTriangle size={14} /> Khiếu nại đã đóng — tiền đã giải ngân cho người bán </p>
+              <p className="text-[11px] text-[#8A6A1F]">
                 Ký quỹ đã về ví người bán trước khi phát sinh khiếu nại nên sàn không thể hoàn tiền được nữa.
                 {delivery.disputeResolvedNote ? ` Ghi chú của Ban quản trị: “${delivery.disputeResolvedNote}”.` : ''}
               </p>
@@ -1119,18 +1072,15 @@ export function PhysicalDeliveryCard({ auction, userId, onReload }: PhysicalDeli
 
           {/* Đánh giá người bán sau khi giao dịch khép lại */}
           {isWinner && (delivery.canRateSeller || delivery.hasRatedSeller || ratingDone) && (
-            <div className="mt-3 rounded-2xl border border-white/10 bg-white/5 p-4 space-y-3">
+            <div className="mt-3 rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] p-4 space-y-3">
               <div>
-                <h4 className="text-sm font-bold text-white">Đánh giá người bán</h4>
-                <p className="text-[11px] text-outline">
-                  Đánh giá của bạn hiển thị công khai trên hồ sơ nghệ sĩ và giúp người mua sau quyết định.
-                </p>
+                <h4 className="text-sm font-bold text-[#241F1A]">Đánh giá người bán</h4>
+                <p className="text-[11px] text-outline"> Đánh giá của bạn hiển thị công khai trên hồ sơ nghệ sĩ và giúp người mua sau quyết định. </p>
               </div>
 
               {delivery.hasRatedSeller || ratingDone ? (
-                <p className="rounded-xl border border-emerald-400/25 bg-emerald-400/10 px-3 py-2 text-[11px] text-emerald-200 flex items-center gap-1.5">
-                  <CheckCircle2 size={13} /> Bạn đã đánh giá người bán cho phiên này.
-                </p>
+                <p className="rounded-xl border border-[#2F6B63]/35 bg-[#2F6B63]/10 px-3 py-2 text-[11px] text-[#2F6B63] flex items-center gap-1.5">
+                  <CheckCircle2 size={13} /> Bạn đã đánh giá người bán cho phiên này. </p>
               ) : (
                 <form onSubmit={handleRateSeller} className="space-y-2.5">
                   <div className="flex items-center gap-1">
@@ -1148,12 +1098,12 @@ export function PhysicalDeliveryCard({ auction, userId, onReload }: PhysicalDeli
                         >
                           <Star
                             size={22}
-                            className={active ? 'fill-amber-400 text-amber-400' : 'text-outline/50'}
+                            className={active ? 'fill-[#8A6A1F] text-[#8A6A1F]' : 'text-outline/50'}
                           />
                         </button>
                       );
                     })}
-                    <span className="ml-1.5 text-[11px] font-semibold text-amber-300">
+                    <span className="ml-1.5 text-[11px] font-semibold text-[#8A6A1F]">
                       {ratingValue > 0 ? `${ratingValue}/5 sao` : 'Chọn số sao'}
                     </span>
                   </div>
@@ -1164,16 +1114,15 @@ export function PhysicalDeliveryCard({ auction, userId, onReload }: PhysicalDeli
                     placeholder="Cảm nhận của bạn về người bán (đóng gói, đúng mô tả, thái độ...)"
                     value={ratingComment}
                     onChange={(e) => setRatingComment(e.target.value)}
-                    className="w-full rounded-xl border border-white/15 bg-black/30 p-2.5 text-xs text-white placeholder-white/30 focus:border-amber-400 focus:outline-none"
+                    className="w-full rounded-xl border border-[#221E1A]/10 bg-[#F0E7D8] p-2.5 text-xs text-[#241F1A] placeholder-white/30 focus:border-[#8A6A1F]/30 focus:outline-none"
                   />
 
                   <button
                     type="submit"
                     disabled={loading || ratingValue === 0}
-                    className="inline-flex items-center gap-1.5 rounded-xl bg-amber-400 px-4 py-2 text-xs font-bold text-brand-navy hover:brightness-110 disabled:opacity-50"
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-[#8A6A1F]/10 px-4 py-2 text-xs font-bold text-[#241F1A] hover:brightness-110 disabled:opacity-50"
                   >
-                    <Star size={14} /> Gửi đánh giá
-                  </button>
+                    <Star size={14} /> Gửi đánh giá </button>
                 </form>
               )}
             </div>
@@ -1183,40 +1132,37 @@ export function PhysicalDeliveryCard({ auction, userId, onReload }: PhysicalDeli
 
       {/* Modal xác nhận người mua đã nhận hàng thành công */}
       {showConfirmModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 backdrop-blur-md">
-          <div className="w-full max-w-lg rounded-3xl border border-emerald-400/40 bg-[#1F2335] p-6 shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#F0E7D8]/85 p-4 backdrop-blur-md">
+          <div className="w-full max-w-lg rounded-3xl border border-[#2F6B63]/40 bg-[#F7F2E9] p-6 shadow-2xl">
             <div className="flex items-start gap-3">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-emerald-400/30 bg-emerald-400/15 text-emerald-300">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-[#2F6B63]/40 bg-[#2F6B63]/15 text-[#2F6B63]">
                 <Package size={22} />
               </div>
               <div>
-                <h3 className="font-h1 text-base font-bold text-emerald-300">Xác nhận đã nhận hàng?</h3>
-                <p className="mt-1 text-xs text-on-surface-variant">
-                  Bạn xác nhận đã nhận được bưu phẩm <strong className="text-white">nguyên vẹn, đúng tranh và không có lỗi gì</strong>.
+                <h3 className="font-h1 text-base font-bold text-[#2F6B63]">Xác nhận đã nhận hàng?</h3>
+                <p className="mt-1 text-xs text-on-surface-variant"> Bạn xác nhận đã nhận được bưu phẩm <strong className="text-[#241F1A]">nguyên vẹn, đúng tranh và không có lỗi gì</strong>.
                 </p>
               </div>
             </div>
 
-            <div className="mt-4 space-y-1.5 rounded-2xl border border-white/10 bg-black/25 p-4 text-xs text-on-surface-variant">
-              <p>Tác phẩm: <strong className="text-white">{auction.artwork?.artworkTitle}</strong></p>
-              <p>Người bán: <strong className="text-white">{auction.seller?.fullName || 'Nghệ sĩ'}</strong></p>
+            <div className="mt-4 space-y-1.5 rounded-2xl border border-[#221E1A]/10 bg-[#F0E7D8]/25 p-4 text-xs text-on-surface-variant">
+              <p>Tác phẩm: <strong className="text-[#241F1A]">{auction.artwork?.artworkTitle}</strong></p>
+              <p>Người bán: <strong className="text-[#241F1A]">{auction.seller?.fullName || 'Nghệ sĩ'}</strong></p>
               <p>
                 Tiền ký quỹ sẽ giải ngân ngay:{' '}
-                <strong className="text-emerald-300">{formatVnd(auction.finalPrice ?? auction.currentPrice)}</strong>
+                <strong className="text-[#2F6B63]">{formatVnd(auction.finalPrice ?? auction.currentPrice)}</strong>
               </p>
             </div>
 
-            <label className="mt-4 flex cursor-pointer items-start gap-2 rounded-xl border border-white/10 bg-white/5 p-3 text-[11px] text-on-surface-variant">
+            <label className="mt-4 flex cursor-pointer items-start gap-2 rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] p-3 text-[11px] text-on-surface-variant">
               <input
                 type="checkbox"
                 checked={confirmChecked}
                 onChange={(e) => setConfirmChecked(e.target.checked)}
-                className="mt-0.5 size-4 shrink-0 rounded border-white/20 bg-black/40 accent-emerald-500"
+                className="mt-0.5 size-4 shrink-0 rounded border-[#221E1A]/20 bg-[#F0E7D8] accent-[#2F6B63]"
               />
-              <span>
-                Tôi xác nhận bưu phẩm đã được giao đến tay mình, tranh không hư hại và tôi đồng ý để sàn giải ngân
-                tiền cho người bán. Sau bước này tôi không mở khiếu nại bồi hoàn được nữa.
-              </span>
+              <span> Tôi xác nhận bưu phẩm đã được giao đến tay mình, tranh không hư hại và tôi đồng ý để sàn giải ngân
+ tiền cho người bán. Sau bước này tôi không mở khiếu nại bồi hoàn được nữa. </span>
             </label>
 
             {delivery?.autoConfirmAt && (
@@ -1226,7 +1172,7 @@ export function PhysicalDeliveryCard({ auction, userId, onReload }: PhysicalDeli
               </p>
             )}
 
-            <div className="mt-5 flex flex-wrap items-center justify-end gap-3 border-t border-white/10 pt-4">
+            <div className="mt-5 flex flex-wrap items-center justify-end gap-3 border-t border-[#221E1A]/10 pt-4">
               <button
                 type="button"
                 onClick={() => {
@@ -1234,15 +1180,13 @@ export function PhysicalDeliveryCard({ auction, userId, onReload }: PhysicalDeli
                   setConfirmChecked(false);
                 }}
                 disabled={loading}
-                className="rounded-xl px-4 py-2 text-xs font-semibold text-outline hover:text-white transition disabled:opacity-50"
-              >
-                Chưa nhận được hàng
-              </button>
+                className="rounded-xl px-4 py-2 text-xs font-semibold text-outline hover:text-[#241F1A] transition disabled:opacity-50"
+              > Chưa nhận được hàng </button>
               <button
                 type="button"
                 onClick={handleConfirmDelivery}
                 disabled={loading || !confirmChecked}
-                className="inline-flex items-center gap-2 rounded-xl bg-emerald-400 px-5 py-2 text-xs font-bold text-brand-navy shadow-md hover:brightness-110 transition disabled:opacity-50"
+                className="inline-flex items-center gap-2 rounded-xl bg-[#2F6B63]/10 px-5 py-2 text-xs font-bold text-[#241F1A] shadow-md hover:brightness-110 transition disabled:opacity-50"
               >
                 <CheckCircle2 size={14} /> {loading ? 'Đang xử lý...' : 'Tôi chắc chắn đã nhận hàng'}
               </button>
@@ -1253,40 +1197,35 @@ export function PhysicalDeliveryCard({ auction, userId, onReload }: PhysicalDeli
 
       {/* Modal xem danh sách biên lai giao dịch */}
       {showReceiptsModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm">
-          <div className="relative w-full max-w-2xl rounded-3xl border border-white/15 bg-[#141829] p-6 shadow-2xl space-y-4 max-h-[85vh] overflow-y-auto">
-            <div className="flex items-center justify-between border-b border-white/10 pb-3">
-              <h3 className="font-h1 text-base font-bold text-white flex items-center gap-2">
-                <Receipt size={18} className="text-amber-400" />
-                Hồ sơ biên lai minh bạch giao dịch
-              </h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#F0E7D8]/75 p-4 backdrop-blur-sm">
+          <div className="relative w-full max-w-2xl rounded-3xl border border-[#221E1A]/10 bg-[#FFFCF6] p-6 shadow-2xl space-y-4 max-h-[85vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-[#221E1A]/10 pb-3">
+              <h3 className="font-h1 text-base font-bold text-[#241F1A] flex items-center gap-2">
+                <Receipt size={18} className="text-[#8A6A1F]" /> Hồ sơ biên lai minh bạch giao dịch </h3>
               <button
                 type="button"
                 onClick={() => setShowReceiptsModal(false)}
-                className="rounded-full p-1 text-outline hover:bg-white/10 hover:text-white"
+                className="rounded-full p-1 text-outline hover:bg-[#F0E7D8] hover:text-[#241F1A]"
               >
                 <X size={18} />
               </button>
             </div>
 
-            <p className="rounded-xl border border-brand-periwinkle/20 bg-brand-periwinkle/5 px-3.5 py-2.5 text-[11px] text-on-surface-variant">
-              Khoản <strong className="text-white">tạm giữ</strong> và khoản <strong className="text-white">quyết toán</strong> là
-              <strong className="text-white"> cùng một số tiền</strong>: sàn giữ hộ khi bạn thắng phiên, rồi chuyển cho người bán khi
-              giao dịch hoàn tất. Mỗi phiên chỉ bị trừ phí nền tảng <strong className="text-white">một lần</strong> ở bước quyết toán.
-            </p>
+            <p className="rounded-xl border border-brand-periwinkle/20 bg-brand-periwinkle/5 px-3.5 py-2.5 text-[11px] text-on-surface-variant"> Khoản <strong className="text-[#241F1A]">tạm giữ</strong> và khoản <strong className="text-[#241F1A]">quyết toán</strong> là <strong className="text-[#241F1A]"> cùng một số tiền</strong>: sàn giữ hộ khi bạn thắng phiên, rồi chuyển cho người bán khi
+ giao dịch hoàn tất. Mỗi phiên chỉ bị trừ phí nền tảng <strong className="text-[#241F1A]">một lần</strong> ở bước quyết toán. </p>
 
             <div className="space-y-3">
               {receipts.map((rec) => (
                 <div
                   key={rec.receiptNumber}
-                  className="rounded-2xl border border-white/10 bg-white/5 p-4 text-xs space-y-2"
+                  className="rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] p-4 text-xs space-y-2"
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div>
-                      <span className="font-mono text-[11px] font-bold text-amber-300">
+                      <span className="font-mono text-[11px] font-bold text-[#8A6A1F]">
                         #{rec.receiptNumber}
                       </span>
-                      <h4 className="font-bold text-white text-sm mt-0.5">{rec.title}</h4>
+                      <h4 className="font-bold text-[#241F1A] text-sm mt-0.5">{rec.title}</h4>
                     </div>
                     <span className="font-mono text-[11px] text-outline">
                       {new Date(rec.issuedAt).toLocaleString('vi-VN')}
@@ -1295,9 +1234,9 @@ export function PhysicalDeliveryCard({ auction, userId, onReload }: PhysicalDeli
 
                   <p className="text-outline text-xs">{rec.description}</p>
 
-                  <div className="flex flex-wrap items-center justify-between gap-2 border-t border-white/5 pt-2 text-[11px] font-mono">
+                  <div className="flex flex-wrap items-center justify-between gap-2 border-t border-[#221E1A]/10 pt-2 text-[11px] font-mono">
                     {rec.amount > 0 && (
-                      <span className="text-emerald-300 font-bold">
+                      <span className="text-[#2F6B63] font-bold">
                         {rec.receiptType === 'SettlementPayout' ? (
                           <>
                             Người bán thực nhận: {formatVnd(rec.netAmount ?? rec.amount)}
@@ -1322,10 +1261,9 @@ export function PhysicalDeliveryCard({ auction, userId, onReload }: PhysicalDeli
                       <button
                         type="button"
                         onClick={() => setSelectedReceiptImage(rec.proofImageUrl || null)}
-                        className="inline-flex items-center gap-1 text-amber-400 hover:underline"
+                        className="inline-flex items-center gap-1 text-[#8A6A1F] hover:underline"
                       >
-                        <FileText size={12} className="shrink-0" /> Xem ảnh chứng từ gốc
-                        <ExternalLink size={11} />
+                        <FileText size={12} className="shrink-0" /> Xem ảnh chứng từ gốc <ExternalLink size={11} />
                       </button>
                     )}
                   </div>
@@ -1338,12 +1276,12 @@ export function PhysicalDeliveryCard({ auction, userId, onReload }: PhysicalDeli
 
       {/* Modal phóng to ảnh biên lai / PoD */}
       {selectedReceiptImage && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#F0E7D8]/90 p-4">
           <div className="relative max-w-3xl max-h-[90vh] flex flex-col items-center">
             <button
               type="button"
               onClick={() => setSelectedReceiptImage(null)}
-              className="absolute -top-10 right-0 rounded-full bg-white/10 p-1.5 text-white hover:bg-white/20"
+              className="absolute -top-10 right-0 rounded-full bg-[#F0E7D8] p-1.5 text-[#241F1A] hover:bg-[#F0E7D8]"
             >
               <X size={20} />
             </button>
@@ -1351,7 +1289,7 @@ export function PhysicalDeliveryCard({ auction, userId, onReload }: PhysicalDeli
             <img
               src={selectedReceiptImage}
               alt="Biên lai chứng từ"
-              className="max-h-[80vh] w-auto rounded-2xl border border-white/20 object-contain shadow-2xl"
+              className="max-h-[80vh] w-auto rounded-2xl border border-[#221E1A]/20 object-contain shadow-2xl"
             />
           </div>
         </div>

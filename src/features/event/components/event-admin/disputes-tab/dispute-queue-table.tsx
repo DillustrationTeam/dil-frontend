@@ -81,13 +81,13 @@ export function DisputeQueueTable({
   const getPriorityBadge = (priority: string) => {
     switch (priority) {
       case 'High':
-        return 'bg-[#e598ad]/20 text-[#f2b3c4] border-[#e598ad]/30';
+        return 'bg-[#A8321C]/20 text-[#f2b3c4] border-[#A8321C]/30';
       case 'Medium':
-        return 'bg-amber-500/20 text-amber-300 border-amber-500/30';
+        return 'bg-[#8A6A1F]/20 text-[#8A6A1F] border-[#8A6A1F]/40';
       case 'Low':
-        return 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30';
+        return 'bg-[#2F6B63]/20 text-[#2F6B63] border-[#2F6B63]/40';
       default:
-        return 'bg-white/10 text-slate-300 border-white/10';
+        return 'bg-[#F0E7D8] text-[#746A5F] border-[#221E1A]/10';
     }
   };
 
@@ -107,15 +107,15 @@ export function DisputeQueueTable({
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'Pending':
-        return 'bg-amber-500/20 text-amber-300 border-amber-500/30';
+        return 'bg-[#8A6A1F]/20 text-[#8A6A1F] border-[#8A6A1F]/40';
       case 'UnderReview':
-        return 'bg-blue-500/20 text-blue-300 border-blue-500/30';
+        return 'bg-[#2C5A86]/20 text-[#2C5A86] border-[#2C5A86]/40';
       case 'Resolved':
-        return 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30';
+        return 'bg-[#2F6B63]/20 text-[#2F6B63] border-[#2F6B63]/40';
       case 'Rejected':
-        return 'bg-slate-500/20 text-slate-300 border-slate-500/30';
+        return 'bg-[#E5D8C2] text-[#746A5F] border-[#221E1A]/12';
       default:
-        return 'bg-white/10 text-slate-300 border-white/10';
+        return 'bg-[#F0E7D8] text-[#746A5F] border-[#221E1A]/10';
     }
   };
 
@@ -135,11 +135,11 @@ export function DisputeQueueTable({
   };
 
   return (
-    <div className="glass-container rounded-2xl border border-white/10 bg-[#161926]/90 backdrop-blur-xl overflow-hidden shadow-2xl">
+    <div className="glass-container rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6]/90 backdrop-blur-xl overflow-hidden shadow-2xl">
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse min-w-[760px]">
           <thead>
-            <tr className="border-b border-white/10 text-[11px] font-bold text-outline uppercase tracking-wider bg-black/20">
+            <tr className="border-b border-[#221E1A]/10 text-[11px] font-bold text-outline uppercase tracking-wider bg-[#F0E7D8]">
               <th className="py-3.5 px-4">{isVie ? 'Mã đơn' : 'Case ID'}</th>
               <th className="py-3.5 px-4">{isVie ? 'Tác phẩm' : 'Title'}</th>
               <th className="py-3.5 px-4">{isVie ? 'Cuộc thi' : 'Contest'}</th>
@@ -148,10 +148,10 @@ export function DisputeQueueTable({
               <th className="py-3.5 px-4 text-right">{isVie ? 'Thao tác' : 'Actions'}</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-white/5 text-xs">
+          <tbody className="divide-y divide-[#221E1A]/10 text-xs">
             {isLoading ? (
               <tr>
-                <td colSpan={6} className="py-12 text-center text-slate-400">
+                <td colSpan={6} className="py-12 text-center text-[#746A5F]">
                   <div className="flex flex-col items-center justify-center gap-2">
                     <div className="w-6 h-6 border-2 border-brand-periwinkle border-t-transparent rounded-full animate-spin" />
                     <span>{isVie ? 'Đang tải hàng đợi tranh chấp...' : 'Loading dispute queue...'}</span>
@@ -160,11 +160,11 @@ export function DisputeQueueTable({
               </tr>
             ) : items.length === 0 ? (
               <tr>
-                <td colSpan={6} className="py-12 text-center text-slate-400">
+                <td colSpan={6} className="py-12 text-center text-[#746A5F]">
                   <div className="flex flex-col items-center justify-center gap-2">
-                    <CheckCircle2 className="w-8 h-8 text-emerald-400/60 mb-1" />
-                    <span className="font-semibold text-white">{isVie ? 'Không có tranh chấp nào' : 'No Disputes In Queue'}</span>
-                    <span className="text-[11px] text-[#8A8FA9]">
+                    <CheckCircle2 className="w-8 h-8 text-[#2F6B63] mb-1" />
+                    <span className="font-semibold text-[#241F1A]">{isVie ? 'Không có tranh chấp nào' : 'No Disputes In Queue'}</span>
+                    <span className="text-[11px] text-[#6E6459]">
                       {isVie ? 'Tất cả tranh chấp cuộc thi đã được giải quyết.' : 'All contest disputes for this selection have been resolved.'}
                     </span>
                   </div>
@@ -180,20 +180,20 @@ export function DisputeQueueTable({
                     className={`transition-colors cursor-pointer ${
                       isSelected
                         ? 'bg-brand-periwinkle/15 hover:bg-brand-periwinkle/20 border-l-4 border-l-brand-periwinkle'
-                        : 'hover:bg-white/[0.03]'
+                        : 'hover:bg-[#FFFCF6]'
                     }`}
                   >
                     {/* 1. Case ID & Created Date */}
                     <td className="py-3.5 px-4">
                       <div className="flex items-center gap-2">
-                        <span className="font-mono font-bold text-white text-xs">
+                        <span className="font-mono font-bold text-[#241F1A] text-xs">
                           {formatDisputeCode(item.id)}
                         </span>
                         {item.priority === 'High' && (
                           <AlertTriangle className="w-3.5 h-3.5 text-[#f2b3c4]" />
                         )}
                       </div>
-                      <span className="text-[10px] text-[#8A8FA9] block mt-0.5">
+                      <span className="text-[10px] text-[#6E6459] block mt-0.5">
                         {isVie ? 'Bởi' : 'By'} {item.raisedByName || (isVie ? 'Thí sinh' : 'Participant')}
                       </span>
                     </td>
@@ -201,7 +201,7 @@ export function DisputeQueueTable({
                     {/* 2. Submission Artwork & Title */}
                     <td className="py-3.5 px-4">
                       <div className="flex items-center gap-3">
-                        <div className="relative w-11 h-11 rounded-lg overflow-hidden shrink-0 border border-white/10 bg-black/40">
+                        <div className="relative w-11 h-11 rounded-lg overflow-hidden shrink-0 border border-[#221E1A]/10 bg-[#F0E7D8]">
                           {item.artworkImageUrl ? (
                             <Image
                               src={item.artworkImageUrl}
@@ -212,13 +212,13 @@ export function DisputeQueueTable({
                               className="object-cover"
                             />
                           ) : (
-                            <div className="w-full h-full flex items-center justify-center text-slate-600">
+                            <div className="w-full h-full flex items-center justify-center text-[#241F1A]">
                               <FileText className="w-4 h-4" />
                             </div>
                           )}
                         </div>
                         <div className="min-w-0 max-w-[240px]">
-                          <p className="font-semibold text-white truncate text-xs">
+                          <p className="font-semibold text-[#241F1A] truncate text-xs">
                             {item.submissionTitle || (isVie ? 'Chưa đặt tên' : 'Untitled Artwork')}
                           </p>
                           <span className="text-[10px] text-brand-periwinkle font-mono block mt-0.5">
@@ -231,10 +231,10 @@ export function DisputeQueueTable({
                     {/* 3. Contest Event */}
                     <td className="py-3.5 px-4">
                       <div className="max-w-[200px]">
-                        <p className="text-xs text-slate-300 font-medium truncate">
+                        <p className="text-xs text-[#746A5F] font-medium truncate">
                           {item.eventTitle || (isVie ? 'Cuộc thi' : 'Contest Event')}
                         </p>
-                        <span className="text-[10px] text-[#8A8FA9] block mt-0.5">
+                        <span className="text-[10px] text-[#6E6459] block mt-0.5">
                           ID: {item.eventId.slice(0, 8)}
                         </span>
                       </div>
@@ -250,7 +250,7 @@ export function DisputeQueueTable({
                         >
                           {formatPriorityText(item.priority)}
                         </span>
-                        <span className="text-[10px] text-[#A7ACD9] font-medium">
+                        <span className="text-[10px] text-[#B24A26] font-medium">
                           {formatDisputeCategoryText(item.category)}
                         </span>
                       </div>
@@ -277,8 +277,8 @@ export function DisputeQueueTable({
                         }}
                         className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                           isSelected
-                            ? 'bg-brand-periwinkle text-brand-navy shadow-[0_0_15px_rgba(167,172,217,0.3)]'
-                            : 'border border-white/10 bg-white/5 hover:bg-white/15 text-white'
+                            ? 'bg-brand-periwinkle text-[#FFFCF6] shadow-[0_0_15px_rgba(167,172,217,0.3)]'
+                            : 'border border-[#221E1A]/10 bg-[#FFFCF6] hover:bg-[#F0E7D8] text-[#241F1A]'
                         }`}
                       >
                         <Eye className="w-3.5 h-3.5" />
@@ -294,11 +294,11 @@ export function DisputeQueueTable({
       </div>
 
       {/* Pagination Footer */}
-      <div className="flex flex-wrap items-center justify-between gap-3 p-4 border-t border-white/10 text-xs text-[#8A8FA9] bg-black/20">
+      <div className="flex flex-wrap items-center justify-between gap-3 p-4 border-t border-[#221E1A]/10 text-xs text-[#6E6459] bg-[#F0E7D8]">
         <div>
           <span>
-            {isVie ? 'Hiển thị' : 'Showing'} <strong className="text-white">{items.length}</strong> {isVie ? 'trên' : 'of'}{' '}
-            <strong className="text-white">{totalCount}</strong> {isVie ? 'vụ tranh chấp' : 'dispute cases'}
+            {isVie ? 'Hiển thị' : 'Showing'} <strong className="text-[#241F1A]">{items.length}</strong> {isVie ? 'trên' : 'of'}{' '}
+            <strong className="text-[#241F1A]">{totalCount}</strong> {isVie ? 'vụ tranh chấp' : 'dispute cases'}
           </span>
         </div>
 
@@ -307,19 +307,19 @@ export function DisputeQueueTable({
             type="button"
             onClick={() => onPageChange(page - 1)}
             disabled={page <= 1}
-            className="p-1.5 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-white disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer"
+            className="p-1.5 rounded-lg border border-[#221E1A]/10 bg-[#FFFCF6] hover:bg-[#F0E7D8] text-[#241F1A] disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer"
             title={isVie ? 'Trang trước' : 'Previous page'}
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
-          <span className="font-semibold text-white px-2">
+          <span className="font-semibold text-[#241F1A] px-2">
             {isVie ? `Trang ${page} / ${Math.max(1, totalPages)}` : `Page ${page} of ${Math.max(1, totalPages)}`}
           </span>
           <button
             type="button"
             onClick={() => onPageChange(page + 1)}
             disabled={page >= totalPages}
-            className="p-1.5 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-white disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer"
+            className="p-1.5 rounded-lg border border-[#221E1A]/10 bg-[#FFFCF6] hover:bg-[#F0E7D8] text-[#241F1A] disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer"
             title={isVie ? 'Trang sau' : 'Next page'}
           >
             <ChevronRight className="w-4 h-4" />

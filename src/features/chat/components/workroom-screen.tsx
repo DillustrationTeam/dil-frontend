@@ -694,7 +694,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
       const milestoneTitle = (updated?.milestones ?? sortedMilestones).find((m) => m.sequence === stage)?.title;
       void chat.sendMessage(formatEscrowDepositNotice(stage, isStaged, milestoneTitle, plannedAmount), 'SystemEvent').catch(() => null);
     } catch (err: unknown) {
-      setError(extractErrorMessage(err, 'Không thể nạp tiền ký quỹ Escrow.'));
+      setError(extractErrorMessage(err, 'Không thể nạp tiền ký quỹ.'));
     } finally {
       setDepositingEscrow(false);
     }
@@ -716,7 +716,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
   if (loading) {
     return (
       <div className="mx-auto w-full max-w-5xl px-4 py-16 text-on-surface">
-        <PageLoader label="Đang mở cuốn sổ Atelier Binder làm việc dự án Commission…" />
+        <PageLoader label="Đang mở cuốn sổ Atelier Binder làm việc dự án đặt vẽ…" />
       </div>
     );
   }
@@ -725,11 +725,10 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
     return (
       <div className="mx-auto w-full max-w-4xl px-4 py-16 text-center text-on-surface">
         <CircleAlert size={44} className="mx-auto mb-3 text-outline" />
-        <h1 className="font-h1 text-xl font-bold">Không tìm thấy phòng trao đổi commission</h1>
+        <h1 className="font-h1 text-xl font-bold">Không tìm thấy phòng trao đổi đơn đặt vẽ</h1>
         <p className="mt-2 text-sm text-on-surface-variant">Phòng trao đổi có thể chưa được tạo hoặc bạn không có quyền truy cập.</p>
         <Link href="/wallet" className="mt-6 inline-flex items-center gap-2 text-sm text-brand-periwinkle hover:underline">
-          <ArrowLeft size={16} /> Quay lại trang cá nhân
-        </Link>
+          <ArrowLeft size={16} /> Quay lại trang cá nhân </Link>
       </div>
     );
   }
@@ -738,8 +737,8 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
     <div className="w-full flex flex-col items-center justify-center relative font-body pb-6">
       {/* Cảnh báo lỗi chung */}
       {error && (
-        <div role="alert" className="w-full max-w-7xl z-10 mb-3 flex items-center gap-2 rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-xs text-red-200 [clip-path:polygon(10px_0,calc(100%-10px)_0,100%_10px,100%_calc(100%-10px),calc(100%-10px)_100%,10px_100%,0_calc(100%-10px),0_10px)]">
-          <CircleAlert size={14} className="shrink-0 text-red-400" />
+        <div role="alert" className="w-full max-w-7xl z-10 mb-3 flex items-center gap-2 rounded-xl border border-[#A8321C]/40 bg-[#A8321C]/10 p-3 text-xs text-[#A8321C] [clip-path:polygon(10px_0,calc(100%-10px)_0,100%_10px,100%_calc(100%-10px),calc(100%-10px)_100%,10px_100%,0_calc(100%-10px),0_10px)]">
+          <CircleAlert size={14} className="shrink-0 text-[#A8321C]" />
           <span>{error}</span>
         </div>
       )}
@@ -755,7 +754,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
             >
               {/* Thân mẩu Note (Cắt polygon 45 độ góc trái trên) */}
               <div
-                className={`flex h-[46px] bg-[#121620] hover:bg-[#181E2C] transition-all duration-200 rounded-tr-xl rounded-tl-none px-4 items-center gap-3.5 shadow-xl [clip-path:polygon(12px_0,100%_0,100%_100%,0_100%,0_12px)] ${deadlineText.includes('Quá hạn')
+                className={`flex h-[46px] bg-[#FFFCF6] hover:bg-[#FFFCF6] transition-all duration-200 rounded-tr-xl rounded-tl-none px-4 items-center gap-3.5 shadow-xl [clip-path:polygon(12px_0,100%_0,100%_100%,0_100%,0_12px)] ${deadlineText.includes('Quá hạn')
                     ? 'group-hover:shadow-[0_-8px_20px_rgba(0,0,0,0.7),0_0_15px_rgba(248,113,113,0.3)]'
                     : 'group-hover:shadow-[0_-8px_20px_rgba(0,0,0,0.7),0_0_15px_rgba(0,229,153,0.35)]'
                   }`}
@@ -763,16 +762,16 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                 {/* Chấm Pin ghim sáng */}
                 <div
                   className={`size-2 rounded-full shrink-0 ${deadlineText.includes('Quá hạn')
-                      ? 'bg-red-400 shadow-[0_0_10px_#F87171]'
-                      : 'bg-[#00E599] shadow-[0_0_10px_#00E599]'
+                      ? 'bg-[#A8321C]/10 shadow-[0_0_10px_#F87171]'
+                      : 'bg-[#2F6B63] shadow-[0_0_10px_#2F6B63]'
                     }`}
                 />
 
                 {/* Tiêu đề & Icon */}
-                <div className="flex items-center gap-2 text-xs font-bold text-white tracking-wide whitespace-nowrap">
+                <div className="flex items-center gap-2 text-xs font-bold text-[#241F1A] tracking-wide whitespace-nowrap">
                   <TrendingUp
                     size={15}
-                    className={deadlineText.includes('Quá hạn') ? 'text-red-400' : 'text-[#00E599]'}
+                    className={deadlineText.includes('Quá hạn') ? 'text-[#A8321C]' : 'text-[#2F6B63]'}
                   />
                   <span>Tiến độ &amp; Hạn chót</span>
                 </div>
@@ -780,8 +779,8 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                 {/* Chip 1: An toàn / Trạng thái */}
                 <span
                   className={`text-[11px] font-bold px-3 py-1 rounded-lg whitespace-nowrap border ${deadlineText.includes('Quá hạn')
-                      ? 'bg-red-500/15 border-red-500/60 text-red-300'
-                      : 'bg-[#12261E] border-[#00E599]/60 text-[#00E599]'
+                      ? 'bg-[#A8321C]/15 border-[#A8321C]/40 text-[#A8321C]'
+                      : 'bg-[#FFFCF6] border-[#2F6B63]/60 text-[#2F6B63]'
                     }`}
                 >
                   {allMilestonesApproved
@@ -794,8 +793,8 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                 {/* Chip 2: Mốc hiện tại */}
                 <span
                   className={`text-[11px] font-bold px-3 py-1 rounded-lg whitespace-nowrap border ${deadlineText.includes('Quá hạn')
-                      ? 'bg-red-500/20 border-red-500/70 text-red-200'
-                      : 'bg-[#12261E] border-[#00E599]/60 text-[#00E599]'
+                      ? 'bg-[#A8321C]/20 border-[#A8321C]/40 text-[#A8321C]'
+                      : 'bg-[#FFFCF6] border-[#2F6B63]/60 text-[#2F6B63]'
                     }`}
                 >
                   Mốc #{currentStageNum}
@@ -803,7 +802,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
 
                 {/* Thời gian / Hạn chót */}
                 <span
-                  className={`text-xs whitespace-nowrap flex items-center gap-1.5 font-bold ${deadlineText.includes('Quá hạn') ? 'text-red-300' : 'text-[#00E599]'
+                  className={`text-xs whitespace-nowrap flex items-center gap-1.5 font-bold ${deadlineText.includes('Quá hạn') ? 'text-[#A8321C]' : 'text-[#2F6B63]'
                     }`}
                 >
                   <Clock size={13} className="shrink-0" />
@@ -811,12 +810,12 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                 </span>
 
                 {/* Vạch tiến độ chạy ngầm ở đáy mẩu note */}
-                <div className="absolute bottom-0 left-3 right-3 h-[3px] bg-[#1A2822] rounded-full overflow-hidden">
+                <div className="absolute bottom-0 left-3 right-3 h-[3px] bg-[#FFFCF6] rounded-full overflow-hidden">
                   <div
                     style={{ width: `${progressPercent}%` }}
                     className={`h-full transition-all duration-500 ${deadlineText.includes('Quá hạn')
-                        ? 'bg-red-400 shadow-[0_0_8px_rgba(248,113,113,0.9)]'
-                        : 'bg-[#00E599] shadow-[0_0_10px_rgba(0,229,153,0.9)]'
+                        ? 'bg-[#A8321C]/10 shadow-[0_0_8px_rgba(248,113,113,0.9)]'
+                        : 'bg-[#2F6B63] shadow-[0_0_10px_rgba(0,229,153,0.9)]'
                       }`}
                   />
                 </div>
@@ -830,70 +829,62 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                 onClick={() => setShowCancelModal(true)}
                 disabled={commissionStatus === 'Completed' || commissionStatus === 'Cancelled' || commissionStatus === 'Disputed'}
                 title="Hủy đơn hàng thông thường"
-                className={`group relative h-[44px] bg-[#1C202D] hover:bg-[#232838] border border-r-0 rounded-l-lg flex items-center justify-end pr-3.5 shadow-xl [clip-path:polygon(10px_0,100%_0,100%_100%,0_100%,0_10px)] [transition:width_0.3s_cubic-bezier(0.34,1.3,0.64,1),background-color_0.2s_ease,border-color_0.2s_ease] cursor-pointer ${!hasLeftSpace
+                className={`group relative h-[44px] bg-[#FFFCF6] hover:bg-[#E5D8C2] border border-r-0 rounded-l-lg flex items-center justify-end pr-3.5 shadow-xl [clip-path:polygon(10px_0,100%_0,100%_100%,0_100%,0_10px)] [transition:width_0.3s_cubic-bezier(0.34,1.3,0.64,1),background-color_0.2s_ease,border-color_0.2s_ease] cursor-pointer ${!hasLeftSpace
                     ? showCancelModal
-                      ? 'w-[46px] border-rose-400 bg-[#232838] shadow-[0_0_12px_rgba(244,63,94,0.35)]'
-                      : 'w-[46px] border-[#2F364A] hover:border-rose-400'
+                      ? 'w-[46px] border-[#A8321C]/30 bg-[#E5D8C2] shadow-[0_0_12px_rgba(244,63,94,0.35)]'
+                      : 'w-[46px] border-[#FFFCF6] hover:border-[#A8321C]/30'
                     : showCancelModal
-                      ? 'w-[135px] border-rose-400 bg-[#232838] shadow-[0_0_12px_rgba(244,63,94,0.35)] overflow-hidden'
-                      : 'w-[46px] hover:w-[135px] border-[#2F364A] hover:border-rose-400 overflow-hidden'
+                      ? 'w-[135px] border-[#A8321C]/30 bg-[#E5D8C2] shadow-[0_0_12px_rgba(244,63,94,0.35)] overflow-hidden'
+                      : 'w-[46px] hover:w-[135px] border-[#FFFCF6] hover:border-[#A8321C]/30 overflow-hidden'
                   }`}
               >
                 <span
-                  className={`text-xs font-bold text-rose-300 mr-3 pl-3 transition-opacity duration-200 pointer-events-none select-none whitespace-nowrap ${hasLeftSpace
+                  className={`text-xs font-bold text-[#A8321C] mr-3 pl-3 transition-opacity duration-200 pointer-events-none select-none whitespace-nowrap ${hasLeftSpace
                       ? showCancelModal
                         ? 'opacity-100'
                         : 'opacity-0 group-hover:opacity-100'
                       : 'hidden'
                     }`}
-                >
-                  Hủy đơn
-                </span>
+                > Hủy đơn </span>
                 <div className="flex items-center justify-center shrink-0 w-5">
-                  <CircleAlert size={18} className="text-rose-400" />
+                  <CircleAlert size={18} className="text-[#A8321C]" />
                 </div>
                 {!hasLeftSpace && (
-                  <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none bg-[#161926]/95 border border-rose-500/40 text-rose-300 text-xs font-bold px-2.5 py-1 rounded-lg shadow-2xl backdrop-blur-md whitespace-nowrap z-50">
-                    Hủy đơn thông thường
-                  </div>
+                  <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none bg-[#FFFCF6]/95 border border-[#A8321C]/40 text-[#A8321C] text-xs font-bold px-2.5 py-1 rounded-lg shadow-2xl backdrop-blur-md whitespace-nowrap z-50"> Hủy đơn thông thường </div>
                 )}
               </button>
             </div>
 
-            {/* DẢI TAB CỐ ĐỊNH MÉP PHẢI (DUYỆT MỐC & KHO FILE GỐC - TỰ ĐỘNG THU GỌN NẾU BỊ KHUẤT) */}
+            {/* DẢI TAB CỐ ĐỊNH MÉP PHẢI (DUYỆT MỐC & KHO TỆP GỐC - TỰ ĐỘNG THU GỌN NẾU BỊ KHUẤT) */}
             <div className="hidden lg:flex absolute left-full top-[45%] -translate-y-1/2 flex-col gap-3 z-50 items-start">
               {/* Tab 1: Duyệt mốc */}
               <button
                 type="button"
                 onClick={() => setShowApprovalModal(true)}
-                className={`group relative h-[44px] bg-[#1C202D] hover:bg-[#232838] border border-l-0 rounded-r-lg flex items-center pl-3.5 shadow-xl [clip-path:polygon(0_0,calc(100%-10px)_0,100%_10px,100%_100%,0_100%)] [transition:width_0.3s_cubic-bezier(0.34,1.3,0.64,1),background-color_0.2s_ease,border-color_0.2s_ease] cursor-pointer ${!hasRightSpace
+                className={`group relative h-[44px] bg-[#FFFCF6] hover:bg-[#E5D8C2] border border-l-0 rounded-r-lg flex items-center pl-3.5 shadow-xl [clip-path:polygon(0_0,calc(100%-10px)_0,100%_10px,100%_100%,0_100%)] [transition:width_0.3s_cubic-bezier(0.34,1.3,0.64,1),background-color_0.2s_ease,border-color_0.2s_ease] cursor-pointer ${!hasRightSpace
                     ? showApprovalModal
-                      ? 'w-[46px] border-emerald-400 bg-[#232838] shadow-[0_0_12px_rgba(52,211,153,0.35)]'
-                      : 'w-[46px] border-[#2F364A] hover:border-emerald-400'
+                      ? 'w-[46px] border-[#2F6B63]/30 bg-[#E5D8C2] shadow-[0_0_12px_rgba(52,211,153,0.35)]'
+                      : 'w-[46px] border-[#FFFCF6] hover:border-[#2F6B63]/30'
                     : showApprovalModal
-                      ? 'w-[135px] border-emerald-400 bg-[#232838] shadow-[0_0_12px_rgba(52,211,153,0.35)] overflow-hidden'
-                      : 'w-[46px] hover:w-[135px] border-[#2F364A] hover:border-emerald-400 overflow-hidden'
+                      ? 'w-[135px] border-[#2F6B63]/30 bg-[#E5D8C2] shadow-[0_0_12px_rgba(52,211,153,0.35)] overflow-hidden'
+                      : 'w-[46px] hover:w-[135px] border-[#FFFCF6] hover:border-[#2F6B63]/30 overflow-hidden'
                   }`}
               >
                 <div className="flex items-center justify-center shrink-0 w-5">
-                  <Eye size={18} className="text-emerald-400" />
+                  <Eye size={18} className="text-[#2F6B63]" />
                 </div>
                 <span
-                  className={`text-xs font-bold text-emerald-300 ml-3 pr-3 transition-opacity duration-200 pointer-events-none select-none whitespace-nowrap ${hasRightSpace
+                  className={`text-xs font-bold text-[#2F6B63] ml-3 pr-3 transition-opacity duration-200 pointer-events-none select-none whitespace-nowrap ${hasRightSpace
                       ? showApprovalModal
                         ? 'opacity-100'
                         : 'opacity-0 group-hover:opacity-100'
                       : 'hidden'
                     }`}
-                >
-                  Duyệt mốc
-                </span>
+                > Duyệt mốc </span>
 
                 {/* Smart Tooltip khi ở dạng thu gọn (khi bị khuất/hẹp lề) */}
                 {!hasRightSpace && (
-                  <div className="absolute right-full mr-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none bg-[#161926]/95 border border-emerald-500/40 text-emerald-300 text-xs font-bold px-2.5 py-1 rounded-lg shadow-2xl backdrop-blur-md whitespace-nowrap z-50">
-                    Duyệt / Yêu cầu sửa mốc
-                  </div>
+                  <div className="absolute right-full mr-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none bg-[#FFFCF6]/95 border border-[#2F6B63]/40 text-[#2F6B63] text-xs font-bold px-2.5 py-1 rounded-lg shadow-2xl backdrop-blur-md whitespace-nowrap z-50"> Duyệt / Yêu cầu sửa mốc </div>
                 )}
               </button>
 
@@ -901,32 +892,30 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
               <button
                 type="button"
                 onClick={() => setShowQuickRefDrawer(true)}
-                className={`group relative h-[44px] bg-[#1C202D] hover:bg-[#232838] border border-l-0 rounded-r-lg flex items-center pl-3.5 shadow-xl [clip-path:polygon(0_0,calc(100%-10px)_0,100%_10px,100%_100%,0_100%)] [transition:width_0.3s_cubic-bezier(0.34,1.3,0.64,1),background-color_0.2s_ease,border-color_0.25s_ease] cursor-pointer ${!hasRightSpace
+                className={`group relative h-[44px] bg-[#FFFCF6] hover:bg-[#E5D8C2] border border-l-0 rounded-r-lg flex items-center pl-3.5 shadow-xl [clip-path:polygon(0_0,calc(100%-10px)_0,100%_10px,100%_100%,0_100%)] [transition:width_0.3s_cubic-bezier(0.34,1.3,0.64,1),background-color_0.2s_ease,border-color_0.25s_ease] cursor-pointer ${!hasRightSpace
                     ? showQuickRefDrawer
-                      ? 'w-[46px] border-sky-400 bg-[#232838] shadow-[0_0_12px_rgba(56,189,248,0.35)]'
-                      : 'w-[46px] border-[#2F364A] hover:border-sky-400'
+                      ? 'w-[46px] border-[#2C6A86]/30 bg-[#E5D8C2] shadow-[0_0_12px_rgba(56,189,248,0.35)]'
+                      : 'w-[46px] border-[#FFFCF6] hover:border-[#2C6A86]/30'
                     : showQuickRefDrawer
-                      ? 'w-[135px] border-sky-400 bg-[#232838] shadow-[0_0_12px_rgba(56,189,248,0.35)] overflow-hidden'
-                      : 'w-[46px] hover:w-[135px] border-[#2F364A] hover:border-sky-400 overflow-hidden'
+                      ? 'w-[135px] border-[#2C6A86]/30 bg-[#E5D8C2] shadow-[0_0_12px_rgba(56,189,248,0.35)] overflow-hidden'
+                      : 'w-[46px] hover:w-[135px] border-[#FFFCF6] hover:border-[#2C6A86]/30 overflow-hidden'
                   }`}
               >
                 <div className="flex items-center justify-center shrink-0 w-5">
-                  <ImageIcon size={18} className="text-sky-400" />
+                  <ImageIcon size={18} className="text-[#2C6A86]" />
                 </div>
                 <span
-                  className={`text-xs font-bold text-sky-300 ml-3 pr-3 transition-opacity duration-200 pointer-events-none select-none whitespace-nowrap ${hasRightSpace
+                  className={`text-xs font-bold text-[#2C6A86] ml-3 pr-3 transition-opacity duration-200 pointer-events-none select-none whitespace-nowrap ${hasRightSpace
                       ? showQuickRefDrawer
                         ? 'opacity-100'
                         : 'opacity-0 group-hover:opacity-100'
                       : 'hidden'
                     }`}
-                >
-                  Tài liệu mẫu
-                </span>
+                > Tài liệu mẫu </span>
 
                 {/* Smart Tooltip khi ở dạng thu gọn (khi bị khuất/hẹp lề) */}
                 {!hasRightSpace && (
-                  <div className="absolute right-full mr-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none bg-[#161926]/95 border border-sky-500/40 text-sky-300 text-xs font-bold px-2.5 py-1 rounded-lg shadow-2xl backdrop-blur-md whitespace-nowrap z-50">
+                  <div className="absolute right-full mr-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none bg-[#FFFCF6]/95 border border-[#2C6A86]/40 text-[#2C6A86] text-xs font-bold px-2.5 py-1 rounded-lg shadow-2xl backdrop-blur-md whitespace-nowrap z-50">
                     Ảnh &amp; Tài liệu tham khảo ({commission?.referenceImages?.length ?? 0})
                   </div>
                 )}
@@ -934,14 +923,14 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
             </div>
 
             {/* MAIN CONTAINER: BÌA SỔ (VIỀN NÉT LIỀN, MẢNH, BO 3 GÓC, CẮT CẠNH 1 GÓC PHẢI TRÊN) */}
-            <div className="relative w-full bg-[#1F2335] border border-white/10 shadow-2xl flex flex-col lg:flex-row z-10 min-h-[720px] lg:h-[calc(100vh-8.5rem)] rounded-tl-3xl rounded-bl-3xl rounded-br-3xl [clip-path:polygon(0_0,calc(100%-24px)_0,100%_24px,100%_100%,0_100%)]">
+            <div className="relative w-full bg-[#F7F2E9] border border-[#221E1A]/10 shadow-2xl flex flex-col lg:flex-row z-10 min-h-[720px] lg:h-[calc(100vh-8.5rem)] rounded-tl-3xl rounded-bl-3xl rounded-br-3xl [clip-path:polygon(0_0,calc(100%-24px)_0,100%_24px,100%_100%,0_100%)]">
 
               {/* GÁY SỔ LÒ XO KIM LOẠI Ở GIỮA */}
               <div className={`hidden lg:flex absolute left-1/2 top-0 bottom-0 -translate-x-1/2 w-8 z-30 flex-col justify-between py-6 pointer-events-none items-center transition-opacity duration-300 ease-in-out ${collapsedPanel === 'none' ? 'opacity-100' : 'opacity-0'}`}>
                 {Array.from({ length: 14 }).map((_, idx) => (
                   <div
                     key={idx}
-                    className="w-10 h-3 bg-gradient-to-r from-slate-700 via-slate-400 to-slate-800 shadow-md border border-black transform -rotate-3"
+                    className="w-10 h-3 bg-gradient-to-r from-[#E5D8C2] via-[#E5D8C2] to-[#E5D8C2] shadow-md border border-black transform -rotate-3"
                   />
                 ))}
               </div>
@@ -963,40 +952,40 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                     type="button"
                     onClick={() => setCollapsedPanel('none')}
                     title="Nhấn vào tờ ghim để khôi phục chia đôi hai trang (50/50)"
-                    className="w-full h-full py-3 lg:py-6 px-3 lg:px-1 bg-[#181A24] border-b lg:border-b-0 lg:border-r border-white/10 hover:border-white/20 transition-all duration-200 flex flex-row lg:flex-col items-center justify-between cursor-pointer group shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] select-none"
+                    className="w-full h-full py-3 lg:py-6 px-3 lg:px-1 bg-[#FFFCF6] border-b lg:border-b-0 lg:border-r border-[#221E1A]/10 hover:border-[#221E1A]/20 transition-all duration-200 flex flex-row lg:flex-col items-center justify-between cursor-pointer group shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] select-none"
                   >
                     <div className="flex flex-row lg:flex-col items-center gap-1.5">
-                      <div className="size-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center shadow-md group-hover:scale-105 group-hover:bg-white/10 group-hover:border-white/20 transition-all">
-                        <Pin size={16} className="text-slate-300 group-hover:text-white transition-colors" />
+                      <div className="size-8 rounded-full bg-[#FFFCF6] border border-[#221E1A]/10 flex items-center justify-center shadow-md group-hover:scale-105 group-hover:bg-[#F0E7D8] group-hover:border-[#221E1A]/20 transition-all">
+                        <Pin size={16} className="text-[#746A5F] group-hover:text-[#241F1A] transition-colors" />
                       </div>
                     </div>
                     <div className="my-auto flex items-center justify-center lg:[writing-mode:vertical-rl] lg:rotate-180">
-                      <span className="text-xs font-bold tracking-widest text-slate-300 group-hover:text-white uppercase transition-colors whitespace-nowrap">
+                      <span className="text-xs font-bold tracking-widest text-[#746A5F] group-hover:text-[#241F1A] uppercase transition-colors whitespace-nowrap">
                         TRAO ĐỔI &amp; CHAT
                       </span>
                     </div>
-                    <div className="flex items-center gap-1 text-[11px] font-semibold text-slate-400 group-hover:text-slate-200">
+                    <div className="flex items-center gap-1 text-[11px] font-semibold text-[#746A5F] group-hover:text-[#6E6459]">
                       <Columns2 size={14} className="group-hover:scale-110 transition-transform" />
                       <span className="text-[10px] font-bold tracking-wider lg:hidden">MỞ LẠI (50/50)</span>
                       <span className="hidden lg:block text-[9px] font-mono [writing-mode:vertical-rl] lg:rotate-180">50/50</span>
                     </div>
                   </button>
                 ) : (
-                  <div className="w-full h-full bg-[#1F1F22] border-b lg:border-b-0 lg:border-r border-white/10 p-4 lg:p-6 flex flex-col justify-between relative overflow-hidden">
+                  <div className="w-full h-full bg-[#FFFCF6] border-b lg:border-b-0 lg:border-r border-[#221E1A]/10 p-4 lg:p-6 flex flex-col justify-between relative overflow-hidden">
 
                 {/* Nền Hoạ tiết Lưới Chấm Dot-Grid Paper Texture */}
                 <div
                   className="absolute inset-0 opacity-[0.05] pointer-events-none"
                   style={{
-                    backgroundImage: 'radial-gradient(#919099 1px, transparent 1px)',
+                    backgroundImage: 'radial-gradient(#746A5F 1px, transparent 1px)',
                     backgroundSize: '16px 16px',
                   }}
                 />
 
                 {/* HEADER TRANG TRÁI */}
-                <div className="relative z-10 shrink-0 pb-3 border-b border-white/10 flex flex-wrap items-center justify-between gap-2">
+                <div className="relative z-10 shrink-0 pb-3 border-b border-[#221E1A]/10 flex flex-wrap items-center justify-between gap-2">
                   <div className="flex items-center gap-3">
-                    <Link href={activeRole === 'creator' ? '/creator/commissions' : '/client/commissions'} className="rounded-lg bg-white/5 border border-white/10 p-2 text-outline hover:text-white transition" title="Quay lại danh sách">
+                    <Link href={activeRole === 'creator' ? '/creator/commissions' : '/client/commissions'} className="rounded-lg bg-[#FFFCF6] border border-[#221E1A]/10 p-2 text-outline hover:text-[#241F1A] transition" title="Quay lại danh sách">
                       <ArrowLeft size={16} />
                     </Link>
                     <div>
@@ -1021,13 +1010,13 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                               disabled={isSavingTitle}
                               autoFocus
                               placeholder="Nhập tên dự án mới..."
-                              className="bg-black/80 border border-brand-periwinkle/80 rounded px-2.5 py-0.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand-periwinkle min-w-[200px] max-w-[340px]"
+                              className="bg-[#E5D8C2] border border-brand-periwinkle/80 rounded px-2.5 py-0.5 text-xs text-[#241F1A] focus:outline-none focus:ring-1 focus:ring-brand-periwinkle min-w-[200px] max-w-[340px]"
                             />
                             <button
                               type="button"
                               onClick={() => void handleSaveTitle()}
                               disabled={isSavingTitle || !editTitleInput.trim()}
-                              className="px-2 py-1 rounded bg-brand-periwinkle text-brand-navy hover:bg-[#c5c9f8] transition disabled:opacity-50 text-xs font-bold inline-flex items-center gap-1 shadow"
+                              className="px-2 py-1 rounded bg-brand-periwinkle text-[#FFFCF6] hover:bg-[#8C3718] transition disabled:opacity-50 text-xs font-bold inline-flex items-center gap-1 shadow"
                               title="Lưu tên mới (Enter)"
                             >
                               {isSavingTitle ? <RefreshCw size={12} className="animate-spin" /> : <Check size={12} />}
@@ -1037,14 +1026,14 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                               type="button"
                               onClick={handleCancelEditTitle}
                               disabled={isSavingTitle}
-                              className="px-2 py-1 rounded text-outline hover:text-white hover:bg-white/10 transition text-xs inline-flex items-center gap-1"
+                              className="px-2 py-1 rounded text-outline hover:text-[#241F1A] hover:bg-[#F0E7D8] transition text-xs inline-flex items-center gap-1"
                               title="Hủy (Esc)"
                             >
                               <X size={12} />
                               <span>Hủy</span>
                             </button>
                             {titleError && (
-                              <span className="text-[10px] text-red-400 font-normal">{titleError}</span>
+                              <span className="text-[10px] text-[#A8321C] font-normal">{titleError}</span>
                             )}
                           </div>
                         ) : (
@@ -1072,8 +1061,8 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                     <button
                       type="button"
                       onClick={() => setCollapsedPanel((prev) => (prev === 'left' ? 'none' : 'left'))}
-                      className="size-8 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white transition flex items-center justify-center shadow cursor-pointer"
-                      title="Thu gọn khung chat (Phóng to khung tranh)"
+                      className="size-8 rounded-lg bg-[#FFFCF6] hover:bg-[#F0E7D8] border border-[#221E1A]/10 text-[#746A5F] hover:text-[#241F1A] transition flex items-center justify-center shadow cursor-pointer"
+                      title="Thu gọn khung trò chuyện (Phóng to khung tranh)"
                     >
                       <PanelLeftClose size={15} />
                     </button>
@@ -1085,18 +1074,18 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                           : 'Đang kết nối lại kênh truyền thời gian thực...'
                       }
                       className={`inline-flex items-center gap-1.5 border px-2.5 py-1 text-[11px] font-semibold transition [clip-path:polygon(6px_0,100%_0,100%_calc(100%-6px),calc(100%-6px)_100%,0_100%,0_6px)] ${chat.status === 'connected'
-                          ? 'border-emerald-400/40 bg-emerald-500/10 text-emerald-300 shadow-[0_0_10px_rgba(52,211,153,0.15)]'
-                          : 'border-amber-400/40 bg-amber-500/10 text-amber-300'
+                          ? 'border-[#2F6B63]/40 bg-[#2F6B63]/10 text-[#2F6B63] shadow-[0_0_10px_rgba(52,211,153,0.15)]'
+                          : 'border-[#8A6A1F]/40 bg-[#8A6A1F]/10 text-[#8A6A1F]'
                         }`}
                     >
                       {chat.status === 'connected' ? (
                         <>
-                          <span className="size-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+                          <span className="size-2 rounded-full bg-[#2F6B63]/10 animate-pulse shrink-0" />
                           <span>{partnerTyping ? `${partnerDisplayName} đang nhập...` : 'Kênh trực tiếp'}</span>
                         </>
                       ) : (
                         <>
-                          <span className="size-2 rounded-full bg-amber-400 animate-ping shrink-0" />
+                          <span className="size-2 rounded-full bg-[#8A6A1F]/10 animate-ping shrink-0" />
                           <span>Đang kết nối lại...</span>
                         </>
                       )}
@@ -1110,11 +1099,10 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                       title="Tự động dịch tin nhắn đối tác"
                       className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold transition ${autoTranslate
                         ? 'border-brand-periwinkle/50 bg-brand-periwinkle/20 text-brand-periwinkle'
-                        : 'border-white/10 bg-white/5 text-outline hover:text-white'
+                        : 'border-[#221E1A]/10 bg-[#FFFCF6] text-outline hover:text-[#241F1A]'
                         }`}
                     >
-                      <Globe size={12} /> Dịch AI
-                      <span className={`inline-block size-2 rounded-full ${autoTranslate ? 'bg-brand-periwinkle animate-pulse' : 'bg-white/20'}`} />
+                      <Globe size={12} /> Dịch AI <span className={`inline-block size-2 rounded-full ${autoTranslate ? 'bg-brand-periwinkle animate-pulse' : 'bg-[#F0E7D8]'}`} />
                     </button>
 
                     {/* Nút Khiếu Nại / Xem Hồ Sơ Tranh Chấp */}
@@ -1123,16 +1111,16 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                         type="button"
                         onClick={() => (commission?.dispute || commissionStatus === 'Cancelled' || commissionStatus === 'Disputed') ? setShowDisputeDetailsModal(true) : setShowDisputeModal(true)}
                         title={commission?.dispute || commissionStatus === 'Cancelled' ? 'Xem hồ sơ và kết quả giải quyết tranh chấp' : 'Gửi khiếu nại tranh chấp với Trọng tài sàn'}
-                        className="group relative flex size-9 shrink-0 items-center justify-center border border-amber-500/40 bg-[#1C202D] hover:bg-[#232838] hover:border-amber-400 text-amber-400 transition shadow-md [clip-path:polygon(10px_0,100%_0,100%_100%,0_100%,0_10px)]"
+                        className="group relative flex size-9 shrink-0 items-center justify-center border border-[#8A6A1F]/40 bg-[#FFFCF6] hover:bg-[#E5D8C2] hover:border-[#8A6A1F]/30 text-[#8A6A1F] transition shadow-md [clip-path:polygon(10px_0,100%_0,100%_100%,0_100%,0_10px)]"
                       >
-                        <Scale size={18} className="text-amber-400 group-hover:scale-110 transition-transform" />
+                        <Scale size={18} className="text-[#8A6A1F] group-hover:scale-110 transition-transform" />
                       </button>
                     )}
 
                     <button
                       type="button"
                       onClick={refresh}
-                      className="rounded-lg bg-white/5 border border-white/10 p-2 text-outline hover:text-white transition"
+                      className="rounded-lg bg-[#FFFCF6] border border-[#221E1A]/10 p-2 text-outline hover:text-[#241F1A] transition"
                       title="Tải lại tin nhắn"
                     >
                       <RefreshCw size={13} />
@@ -1143,40 +1131,38 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                 {/* BANNER TRANH CHẤP (ĐANG XỬ LÝ HOẶC ĐÃ CÓ PHÁN QUYẾT RESOLVED) */}
                 {commission?.dispute && (
                   commission.dispute.status === 'Resolved' || commissionStatus !== 'Disputed' ? (
-                    <div className="relative z-10 my-3 border border-emerald-500/40 bg-emerald-500/15 p-3.5 text-xs text-emerald-200 shadow-lg [clip-path:polygon(0_0,calc(100%-12px)_0,100%_12px,100%_100%,0_100%)]">
+                    <div className="relative z-10 my-3 border border-[#2F6B63]/40 bg-[#2F6B63]/15 p-3.5 text-xs text-[#2F6B63] shadow-lg [clip-path:polygon(0_0,calc(100%-12px)_0,100%_12px,100%_100%,0_100%)]">
                       <div className="flex items-start gap-2.5">
-                        <div className="shrink-0 p-1 bg-emerald-500/20 rounded-md text-emerald-300 border border-emerald-400/40">
+                        <div className="shrink-0 p-1 bg-[#2F6B63]/20 rounded-md text-[#2F6B63] border border-[#2F6B63]/40">
                           <Scale size={16} />
                         </div>
                         <div className="flex-1 space-y-2">
                           <div className="flex flex-wrap items-center justify-between gap-2">
-                            <p className="font-h1 font-bold text-emerald-300 text-xs uppercase tracking-wider">
+                            <p className="font-h1 font-bold text-[#2F6B63] text-xs uppercase tracking-wider">
                               Phán quyết tranh chấp trọng tài (Trạng thái: {commission.dispute.status})
                             </p>
                             <button
                               type="button"
                               onClick={() => setShowDisputeDetailsModal(true)}
-                              className="px-2.5 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-200 text-[11px] font-bold transition"
-                            >
-                              Xem hồ sơ chi tiết
-                            </button>
+                              className="px-2.5 py-1 rounded-lg bg-[#2F6B63]/20 hover:bg-[#2F6B63]/20 border border-[#2F6B63]/40 text-[#2F6B63] text-[11px] font-bold transition"
+                            > Xem hồ sơ chi tiết </button>
                           </div>
-                          <div className="space-y-1 text-[11px] text-emerald-100/90 border-t border-emerald-500/20 pt-2">
+                          <div className="space-y-1 text-[11px] text-[#2F6B63] border-t border-[#2F6B63]/30 pt-2">
                             {commission.dispute.resolution && (
-                              <p><strong>Phán quyết xử lý:</strong> <span className="text-white font-semibold">{commission.dispute.resolution}</span></p>
+                              <p><strong>Phán quyết xử lý:</strong> <span className="text-[#241F1A] font-semibold">{commission.dispute.resolution}</span></p>
                             )}
                             {commission.dispute.adminNote && (
-                              <p><strong>Ghi chú quyết định:</strong> <span className="text-white italic">{commission.dispute.adminNote}</span></p>
+                              <p><strong>Ghi chú quyết định:</strong> <span className="text-[#241F1A] italic">{commission.dispute.adminNote}</span></p>
                             )}
                             <div className="flex flex-wrap gap-4 pt-1">
                               {commission.dispute.clientRefundAmount != null && (
                                 <span><strong>Hoàn khách:</strong> {new Intl.NumberFormat('vi-VN').format(commission.dispute.clientRefundAmount)} VND</span>
                               )}
                               {commission.dispute.artistPayAmount != null && (
-                                <span><strong>Creator nhận:</strong> {new Intl.NumberFormat('vi-VN').format(commission.dispute.artistPayAmount)} VND</span>
+                                <span><strong>Họa sĩ nhận:</strong> {new Intl.NumberFormat('vi-VN').format(commission.dispute.artistPayAmount)} VND</span>
                               )}
                               {commission.dispute.resolvedAt && (
-                                <span className="text-emerald-300/70"><strong>Ngày giải quyết:</strong> {new Date(commission.dispute.resolvedAt).toLocaleString('vi-VN')}</span>
+                                <span className="text-[#2F6B63]"><strong>Ngày giải quyết:</strong> {new Date(commission.dispute.resolvedAt).toLocaleString('vi-VN')}</span>
                               )}
                             </div>
                           </div>
@@ -1184,25 +1170,21 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                       </div>
                     </div>
                   ) : (
-                    <div className="relative z-10 my-3 border border-amber-500/40 bg-amber-500/15 p-3.5 text-xs text-amber-200 flex items-start gap-2.5 shadow-lg [clip-path:polygon(0_0,calc(100%-12px)_0,100%_12px,100%_100%,0_100%)]">
-                      <div className="shrink-0 p-1 bg-amber-500/20 rounded-md text-amber-300 border border-amber-400/40">
+                    <div className="relative z-10 my-3 border border-[#8A6A1F]/40 bg-[#8A6A1F]/15 p-3.5 text-xs text-[#8A6A1F] flex items-start gap-2.5 shadow-lg [clip-path:polygon(0_0,calc(100%-12px)_0,100%_12px,100%_100%,0_100%)]">
+                      <div className="shrink-0 p-1 bg-[#8A6A1F]/20 rounded-md text-[#8A6A1F] border border-[#8A6A1F]/40">
                         <ShieldAlert size={16} />
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center justify-between">
-                          <p className="font-h1 font-bold text-amber-300 text-xs uppercase tracking-wider">Đơn hàng đang trong quá trình khiếu nại tranh chấp (Disputed)</p>
+                          <p className="font-h1 font-bold text-[#8A6A1F] text-xs uppercase tracking-wider">Đơn hàng đang trong quá trình khiếu nại tranh chấp (Disputed)</p>
                           <button
                             type="button"
                             onClick={() => setShowDisputeDetailsModal(true)}
-                            className="px-2 py-0.5 rounded bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-200 text-[10px] font-bold"
-                          >
-                            Chi tiết
-                          </button>
+                            className="px-2 py-0.5 rounded bg-[#8A6A1F]/20 hover:bg-[#8A6A1F]/20 border border-[#8A6A1F]/40 text-[#8A6A1F] text-[10px] font-bold"
+                          > Chi tiết </button>
                         </div>
-                        <p className="text-[11px] text-amber-100/90 leading-relaxed mt-0.5">
-                          Hồ sơ khiếu nại đã được chuyển đến Ban Trọng tài sàn để thẩm định. Tiền ký quỹ Escrow được tạm khóa an toàn cho đến khi có phán quyết chính thức.
-                        </p>
-                        <div className="mt-2 space-y-1 border-t border-amber-400/20 pt-2 text-[11px]">
+                        <p className="text-[11px] text-[#8A6A1F] leading-relaxed mt-0.5"> Hồ sơ khiếu nại đã được chuyển đến Ban Trọng tài sàn để thẩm định. Tiền ký quỹ được tạm khóa an toàn cho đến khi có phán quyết chính thức. </p>
+                        <div className="mt-2 space-y-1 border-t border-[#8A6A1F]/30 pt-2 text-[11px]">
                           <p><strong>Lý do:</strong> {commission.dispute.reason}</p>
                           <p><strong>Ngày tạo:</strong> {new Date(commission.dispute.createdAt).toLocaleString('vi-VN')}</p>
                         </div>
@@ -1217,10 +1199,8 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                     <ShieldCheck size={16} />
                   </div>
                   <div className="flex-1">
-                    <p className="font-h1 font-bold text-brand-periwinkle text-[11px] uppercase tracking-wider">Bảo Vệ Thanh Toán Escrow An Toàn</p>
-                    <p className="text-[11px] text-on-surface-variant leading-relaxed mt-0.5">
-                      Các bản phác thảo (WIP) được xem thử trực quan ở khung bên phải. Tiền được bảo vệ an toàn trong Escrow và chỉ giải ngân khi bạn đồng ý duyệt từng mốc.
-                    </p>
+                    <p className="font-h1 text-[0.75rem] font-semibold uppercase tracking-[0.12em] text-[#8F2916]">Bảo Vệ Thanh Toán ký quỹ An Toàn</p>
+                    <p className="mt-1 text-[0.8125rem] leading-relaxed text-[#4A423A]"> Các bản phác thảo được xem thử trực quan ở khung bên phải. Tiền được bảo vệ an toàn trong ký quỹ và chỉ giải ngân khi bạn đồng ý duyệt từng mốc. </p>
                   </div>
 
                 </div>
@@ -1247,8 +1227,8 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
 
                           <div
                             className={`max-w-[88%] min-w-0 overflow-hidden p-3 text-xs leading-relaxed shadow-md ${isMe
-                              ? 'bg-brand-periwinkle text-brand-navy font-semibold rounded-2xl rounded-tr-none'
-                              : 'border border-white/10 bg-white/5 text-on-surface rounded-2xl rounded-tl-none'
+                              ? 'bg-brand-periwinkle text-[#FFFCF6] font-semibold rounded-2xl rounded-tr-none'
+                              : 'border border-[#221E1A]/10 bg-[#FFFCF6] text-on-surface rounded-2xl rounded-tl-none'
                               }`}
                           >
                             {(() => {
@@ -1271,7 +1251,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                                           key={i}
                                           type="button"
                                           onClick={() => setActiveLightboxUrl(fullImg)}
-                                          className="block overflow-hidden rounded-xl border border-black/15 bg-black/20 cursor-pointer hover:opacity-95 transition"
+                                          className="block overflow-hidden rounded-xl border border-[#221E1A]/12 bg-[#F0E7D8] cursor-pointer hover:opacity-95 transition"
                                           title="Bấm để xem ảnh gốc"
                                         >
                                           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -1286,8 +1266,8 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-[11px] font-medium break-all transition ${isMe
-                                          ? 'border-brand-navy/20 bg-brand-navy/10 text-brand-navy hover:bg-brand-navy/20'
-                                          : 'border-white/15 bg-white/10 text-slate-200 hover:bg-white/20'
+                                          ? 'border-brand-navy/20 bg-brand-navy/10 text-[#241F1A] hover:bg-brand-navy/20'
+                                          : 'border-[#221E1A]/10 bg-[#F0E7D8] text-[#6E6459] hover:bg-[#F0E7D8]'
                                           }`}
                                       >
                                         {isPdf ? <FileText size={13} className="shrink-0" /> : <ExternalLink size={13} className="shrink-0" />}
@@ -1300,10 +1280,9 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                             })()}
 
                             {msg.translatedBody && msg.translatedBody.trim() !== msg.body.trim() && (
-                              <div className="mt-2 border-t border-black/15 pt-2 text-[11px] italic opacity-90">
+                              <div className="mt-2 border-t border-[#221E1A]/12 pt-2 text-[11px] italic opacity-90">
                                 <p className="flex items-center gap-1 font-semibold not-italic">
-                                  <Globe size={11} /> Bản dịch:
-                                </p>
+                                  <Globe size={11} /> Bản dịch: </p>
                                 <p>{msg.translatedBody}</p>
                               </div>
                             )}
@@ -1315,12 +1294,12 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                                   const isImg = (att.mimeType && att.mimeType.startsWith('image/')) || ['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'svg'].includes(ext || '');
                                   const fullAttUrl = resolveAttachmentUrl(att.fileUrl);
                                   return (
-                                    <div key={att.messageAttachmentId} className="overflow-hidden rounded-xl border border-black/10 bg-black/20">
+                                    <div key={att.messageAttachmentId} className="overflow-hidden rounded-xl border border-[#221E1A]/12 bg-[#F0E7D8]">
                                       {isImg ? (
                                         <button
                                           type="button"
                                           onClick={() => setActiveLightboxUrl(fullAttUrl)}
-                                          className="group relative block w-full overflow-hidden rounded-xl bg-black/40 cursor-pointer"
+                                          className="group relative block w-full overflow-hidden rounded-xl bg-[#F0E7D8] cursor-pointer"
                                         >
                                           {/* eslint-disable-next-line @next/next/no-img-element */}
                                           <img
@@ -1328,9 +1307,8 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                                             alt={att.fileName || 'Ảnh'}
                                             className="max-h-56 w-full object-contain rounded-xl transition duration-200 group-hover:scale-[1.01]"
                                           />
-                                          <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition duration-200 group-hover:opacity-100 text-white text-xs font-semibold gap-1.5">
-                                            <Eye size={16} /> Xem ảnh gốc
-                                          </div>
+                                          <div className="absolute inset-0 flex items-center justify-center bg-[#F0E7D8] opacity-0 transition duration-200 group-hover:opacity-100 text-[#241F1A] text-xs font-semibold gap-1.5">
+                                            <Eye size={16} /> Xem ảnh gốc </div>
                                         </button>
                                       ) : (
                                         <div className="flex items-center justify-between p-2 text-[11px]">
@@ -1341,10 +1319,9 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                                             href={fullAttUrl}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="ml-2 inline-flex items-center gap-1 rounded-lg bg-brand-periwinkle/20 px-2 py-1 font-semibold text-brand-periwinkle hover:bg-brand-periwinkle hover:text-brand-navy transition"
+                                            className="ml-2 inline-flex items-center gap-1 rounded-lg bg-brand-periwinkle/20 px-2 py-1 font-semibold text-brand-periwinkle hover:bg-brand-periwinkle hover:text-[#FFFCF6] transition"
                                           >
-                                            <Download size={12} /> Tải
-                                          </a>
+                                            <Download size={12} /> Tải </a>
                                         </div>
                                       )}
                                     </div>
@@ -1357,8 +1334,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                           <div className="mt-1 flex items-center gap-2 text-[10px] text-outline">
                             {isTranslating && (
                               <span className="inline-flex items-center gap-1 text-brand-periwinkle">
-                                <RefreshCw size={10} className="animate-spin" /> Đang dịch…
-                              </span>
+                                <RefreshCw size={10} className="animate-spin" /> Đang dịch… </span>
                             )}
 
                             {!isMe && !msg.translatedBody && !isTranslating && (
@@ -1366,18 +1342,16 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                                 <button
                                   type="button"
                                   onClick={() => void translateOne(msg.messageId)}
-                                  className="inline-flex items-center gap-1 text-red-400 hover:underline"
+                                  className="inline-flex items-center gap-1 text-[#A8321C] hover:underline"
                                 >
-                                  <CircleAlert size={10} /> Dịch lỗi
-                                </button>
+                                  <CircleAlert size={10} /> Dịch lỗi </button>
                               ) : (
                                 <button
                                   type="button"
                                   onClick={() => void translateOne(msg.messageId)}
                                   className="inline-flex items-center gap-1 hover:text-on-surface"
                                 >
-                                  <Globe size={10} /> Dịch
-                                </button>
+                                  <Globe size={10} /> Dịch </button>
                               )
                             )}
 
@@ -1385,12 +1359,10 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                               <span className="inline-flex items-center gap-1">
                                 {partnerReadMine ? (
                                   <>
-                                    <CheckCheck size={11} className="text-brand-periwinkle" /> Đã xem
-                                  </>
+                                    <CheckCheck size={11} className="text-brand-periwinkle" /> Đã xem </>
                                 ) : (
                                   <>
-                                    <Check size={11} /> Đã gửi
-                                  </>
+                                    <Check size={11} /> Đã gửi </>
                                 )}
                               </span>
                             )}
@@ -1406,7 +1378,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                         <span>Bạn</span>
                         <span className="inline-flex items-center gap-1"><Clock size={10} /> đang gửi</span>
                       </div>
-                      <div className="max-w-[85%] rounded-2xl rounded-tr-none bg-brand-periwinkle/60 p-3 text-xs leading-relaxed text-brand-navy font-semibold">
+                      <div className="max-w-[85%] rounded-2xl rounded-tr-none bg-brand-periwinkle/60 p-3 text-xs leading-relaxed text-[#241F1A] font-semibold">
                         <p className="whitespace-pre-wrap">{item.body}</p>
                       </div>
                     </div>
@@ -1418,18 +1390,16 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                         <span className="size-1.5 animate-bounce rounded-full bg-brand-periwinkle [animation-delay:0ms]" />
                         <span className="size-1.5 animate-bounce rounded-full bg-brand-periwinkle [animation-delay:150ms]" />
                         <span className="size-1.5 animate-bounce rounded-full bg-brand-periwinkle [animation-delay:300ms]" />
-                      </span>
-                      Đối tác đang nhập tin nhắn…
-                    </div>
+                      </span> Đối tác đang nhập tin nhắn… </div>
                   )}
 
                   <div ref={bottomRef} />
                 </div>
 
                 {/* Ô NHẬP TIN NHẮN */}
-                <div className="relative z-10 shrink-0 pt-3 border-t border-white/10">
+                <div className="relative z-10 shrink-0 pt-3 border-t border-[#221E1A]/10">
                   {isCommissionEnded && (
-                    <div className="mb-2 flex items-center justify-center gap-2 border border-amber-400/30 bg-amber-500/10 px-3 py-2 text-center text-xs font-semibold text-amber-300 [clip-path:polygon(6px_0,calc(100%-6px)_0,100%_6px,100%_calc(100%-6px),calc(100%-6px)_100%,6px_100%,0_calc(100%-6px),0_6px)]">
+                    <div className="mb-2 flex items-center justify-center gap-2 border border-[#8A6A1F]/40 bg-[#8A6A1F]/10 px-3 py-2 text-center text-xs font-semibold text-[#8A6A1F] [clip-path:polygon(6px_0,calc(100%-6px)_0,100%_6px,100%_calc(100%-6px),calc(100%-6px)_100%,6px_100%,0_calc(100%-6px),0_6px)]">
                       <Lock size={14} className="shrink-0" />
                       <span>Dự án đã kết thúc. Phòng trao đổi hiện đã khóa lưu trữ.</span>
                     </div>
@@ -1440,9 +1410,9 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                       <div className="flex items-center gap-2 overflow-hidden">
                         {selectedFilePreview ? (
                           // eslint-disable-next-line @next/next/no-img-element
-                          <img src={selectedFilePreview} alt="Xem thử" className="size-10 rounded-md object-cover border border-white/20 shrink-0" />
+                          <img src={selectedFilePreview} alt="Xem thử" className="size-10 rounded-md object-cover border border-[#221E1A]/20 shrink-0" />
                         ) : (
-                          <div className="flex size-10 items-center justify-center rounded-md bg-white/10 text-brand-periwinkle shrink-0">
+                          <div className="flex size-10 items-center justify-center rounded-md bg-[#F0E7D8] text-brand-periwinkle shrink-0">
                             <FileText size={18} />
                           </div>
                         )}
@@ -1451,7 +1421,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                           <p className="text-[10px] text-outline">{(selectedFile.size / 1024 / 1024).toFixed(2)} MB · Sẵn sàng gửi</p>
                         </div>
                       </div>
-                      <button type="button" onClick={clearSelectedFile} className="rounded-full bg-white/10 p-1 text-outline hover:text-white shrink-0">
+                      <button type="button" onClick={clearSelectedFile} className="rounded-full bg-[#F0E7D8] p-1 text-outline hover:text-[#241F1A] shrink-0">
                         <X size={14} />
                       </button>
                     </div>
@@ -1480,23 +1450,23 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                       type="button"
                       onClick={() => setShowDisputeModal(true)}
                       title="Gửi khiếu nại tranh chấp với Trọng tài sàn"
-                      className="group relative flex size-10 shrink-0 items-center justify-center border border-amber-500/40 bg-[#1C202D] hover:bg-[#232838] hover:border-amber-400 text-amber-400 transition shadow-md [clip-path:polygon(10px_0,100%_0,100%_100%,0_100%,0_10px)]"
+                      className="group relative flex size-10 shrink-0 items-center justify-center border border-[#8A6A1F]/40 bg-[#FFFCF6] hover:bg-[#E5D8C2] hover:border-[#8A6A1F]/30 text-[#8A6A1F] transition shadow-md [clip-path:polygon(10px_0,100%_0,100%_100%,0_100%,0_10px)]"
                     >
-                      <Scale size={18} className="text-amber-400 group-hover:scale-110 transition-transform" />
+                      <Scale size={18} className="text-[#8A6A1F] group-hover:scale-110 transition-transform" />
                     </button>
 
                     <button
                       type="button"
                       disabled={uploading || isChatDisabled}
                       onClick={() => fileInputRef.current?.click()}
-                      className="flex size-10 shrink-0 items-center justify-center border border-white/15 bg-white/5 text-outline hover:text-brand-periwinkle hover:border-brand-periwinkle/40 transition disabled:opacity-50 [clip-path:polygon(6px_0,100%_0,100%_calc(100%-6px),calc(100%-6px)_100%,0_100%,0_6px)]"
+                      className="flex size-10 shrink-0 items-center justify-center border border-[#221E1A]/10 bg-[#FFFCF6] text-outline hover:text-brand-periwinkle hover:border-brand-periwinkle/40 transition disabled:opacity-50 [clip-path:polygon(6px_0,100%_0,100%_calc(100%-6px),calc(100%-6px)_100%,0_100%,0_6px)]"
                       title="Đính kèm tệp phác thảo"
                     >
                       <Paperclip size={16} className={uploading ? 'animate-spin' : ''} />
                     </button>
 
                     {isCreator && <button type="button" disabled={sending || uploading || isChatDisabled} onClick={() => setShowAssetPicker(true)}
-                      title="Thư viện tài nguyên" aria-label="Thư viện tài nguyên" className="flex size-10 shrink-0 items-center justify-center border border-white/15 bg-white/5 text-[#A7ACD9] disabled:opacity-50"><FolderOpen size={16} /></button>}
+                      title="Thư viện tài nguyên" aria-label="Thư viện tài nguyên" className="flex size-10 shrink-0 items-center justify-center border border-[#221E1A]/10 bg-[#FFFCF6] text-[#B24A26] disabled:opacity-50"><FolderOpen size={16} /></button>}
 
                     <textarea
                       rows={2}
@@ -1515,7 +1485,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                         }
                       }}
                       placeholder={isChatDisabled ? 'Phòng trao đổi đã đóng.' : 'Nhập tin nhắn hoặc trao đổi với đối tác...'}
-                      className="min-w-0 max-h-40 flex-1 resize-y border border-white/15 bg-slate-950/80 px-3.5 py-2.5 text-xs text-on-surface placeholder:text-outline focus:border-brand-periwinkle focus:outline-none disabled:opacity-50 [clip-path:polygon(8px_0,100%_0,100%_calc(100%-8px),calc(100%-8px)_100%,0_100%,0_8px)]"
+                      className="min-w-0 max-h-40 flex-1 resize-y border border-[#221E1A]/10 bg-[#F0E7D8] px-3.5 py-2.5 text-xs text-on-surface placeholder:text-outline focus:border-brand-periwinkle focus:outline-none disabled:opacity-50 [clip-path:polygon(8px_0,100%_0,100%_calc(100%-8px),calc(100%-8px)_100%,0_100%,0_8px)]"
                     />
 
                     <button
@@ -1550,32 +1520,32 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                     type="button"
                     onClick={() => setCollapsedPanel('none')}
                     title="Nhấn vào tờ ghim để khôi phục chia đôi hai trang (50/50)"
-                    className="w-full h-full py-3 lg:py-6 px-3 lg:px-1 bg-[#1A1D2B] border-t lg:border-t-0 lg:border-l border-white/10 hover:border-white/20 transition-all duration-200 flex flex-row lg:flex-col items-center justify-between cursor-pointer group shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] select-none"
+                    className="w-full h-full py-3 lg:py-6 px-3 lg:px-1 bg-[#FFFCF6] border-t lg:border-t-0 lg:border-l border-[#221E1A]/10 hover:border-[#221E1A]/20 transition-all duration-200 flex flex-row lg:flex-col items-center justify-between cursor-pointer group shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] select-none"
                   >
                     <div className="flex flex-row lg:flex-col items-center gap-1.5">
-                      <div className="size-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center shadow-md group-hover:scale-105 group-hover:bg-white/10 group-hover:border-white/20 transition-all">
-                        <Pin size={16} className="text-slate-300 group-hover:text-white transition-colors" />
+                      <div className="size-8 rounded-full bg-[#FFFCF6] border border-[#221E1A]/10 flex items-center justify-center shadow-md group-hover:scale-105 group-hover:bg-[#F0E7D8] group-hover:border-[#221E1A]/20 transition-all">
+                        <Pin size={16} className="text-[#746A5F] group-hover:text-[#241F1A] transition-colors" />
                       </div>
                     </div>
                     <div className="my-auto flex items-center justify-center lg:[writing-mode:vertical-rl] lg:rotate-180">
-                      <span className="text-xs font-bold tracking-widest text-slate-300 group-hover:text-white uppercase transition-colors whitespace-nowrap">
+                      <span className="text-xs font-bold tracking-widest text-[#746A5F] group-hover:text-[#241F1A] uppercase transition-colors whitespace-nowrap">
                         TRANH MINH HỌA &amp; MỐC
                       </span>
                     </div>
-                    <div className="flex items-center gap-1 text-[11px] font-semibold text-slate-400 group-hover:text-slate-200">
+                    <div className="flex items-center gap-1 text-[11px] font-semibold text-[#746A5F] group-hover:text-[#6E6459]">
                       <Columns2 size={14} className="group-hover:scale-110 transition-transform" />
                       <span className="text-[10px] font-bold tracking-wider lg:hidden">MỞ LẠI (50/50)</span>
                       <span className="hidden lg:block text-[9px] font-mono [writing-mode:vertical-rl] lg:rotate-180">50/50</span>
                     </div>
                   </button>
                 ) : (
-                  <div className="w-full h-full bg-[#1F2335] p-4 lg:p-6 flex flex-col justify-between relative overflow-hidden">
+                  <div className="w-full h-full bg-[#F7F2E9] p-4 lg:p-6 flex flex-col justify-between relative overflow-hidden">
                     <div className="absolute top-3.5 sm:top-4 lg:top-5 right-3.5 sm:right-[130px] z-40 flex items-center gap-1.5">
                       <button
                         type="button"
                         onClick={() => setCollapsedPanel((prev) => (prev === 'right' ? 'none' : 'right'))}
-                        className="size-8 sm:size-9 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white transition flex items-center justify-center shadow-md backdrop-blur-sm cursor-pointer"
-                        title="Thu gọn khung tranh (Mở rộng chat)"
+                        className="size-8 sm:size-9 rounded-lg bg-[#FFFCF6] hover:bg-[#F0E7D8] border border-[#221E1A]/10 text-[#746A5F] hover:text-[#241F1A] transition flex items-center justify-center shadow-md backdrop-blur-sm cursor-pointer"
+                        title="Thu gọn khung tranh (Mở rộng trò chuyện)"
                       >
                         <PanelRightClose size={16} />
                       </button>
@@ -1584,10 +1554,10 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                         onClick={() => setCollapsedPanel((prev) => (prev === 'left' ? 'none' : 'left'))}
                         className={`size-8 sm:size-9 rounded-lg border transition flex items-center justify-center shadow-md backdrop-blur-sm cursor-pointer ${
                           collapsedPanel === 'left'
-                            ? 'bg-white/15 border-white/25 text-white'
-                            : 'bg-white/5 hover:bg-white/10 border-white/10 text-slate-300 hover:text-white'
+                            ? 'bg-[#F0E7D8] border-[#221E1A]/20 text-[#241F1A]'
+                            : 'bg-[#FFFCF6] hover:bg-[#F0E7D8] border-[#221E1A]/10 text-[#746A5F] hover:text-[#241F1A]'
                         }`}
-                        title={collapsedPanel === 'left' ? 'Thu nhỏ về chia đôi (50/50)' : 'Phóng to khung tranh (Ẩn chat)'}
+                        title={collapsedPanel === 'left' ? 'Thu nhỏ về chia đôi (50/50)' : 'Phóng to khung tranh (Ẩn trò chuyện)'}
                       >
                         {collapsedPanel === 'left' ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
                       </button>
@@ -1599,18 +1569,18 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                   <button
                     type="button"
                     onClick={() => setRightPageView((prev) => (prev === 'brief' ? 'canvas' : 'brief'))}
-                    title="Xem brief yêu cầu hợp đồng"
-                    className={`group relative w-[40px] sm:w-[42px] h-[52px] hover:h-[115px] bg-[#1C202D] hover:bg-[#232838] border border-t-0 cursor-pointer overflow-hidden flex flex-col items-center justify-end pb-3 shadow-lg [clip-path:polygon(0_0,100%_0,100%_calc(100%-10px),50%_100%,0_calc(100%-10px))] [transition:height_0.32s_cubic-bezier(0.34,1.45,0.7,1),background-color_0.25s_ease,border-color_0.25s_ease] ${rightPageView === 'brief'
-                        ? 'bg-[#232838] border-brand-periwinkle shadow-[0_0_12px_rgba(167,172,217,0.35)]'
-                        : 'border-[#2F364A] hover:border-[#485472]'
+                    title="Xem đề bài yêu cầu hợp đồng"
+                    className={`group relative w-[40px] sm:w-[42px] h-[52px] hover:h-[115px] bg-[#FFFCF6] hover:bg-[#E5D8C2] border border-t-0 cursor-pointer overflow-hidden flex flex-col items-center justify-end pb-3 shadow-lg [clip-path:polygon(0_0,100%_0,100%_calc(100%-10px),50%_100%,0_calc(100%-10px))] [transition:height_0.32s_cubic-bezier(0.34,1.45,0.7,1),background-color_0.25s_ease,border-color_0.25s_ease] ${rightPageView === 'brief'
+                        ? 'bg-[#E5D8C2] border-brand-periwinkle shadow-[0_0_12px_rgba(167,172,217,0.35)]'
+                        : 'border-[#FFFCF6] hover:border-[#F0E7D8]'
                       }`}
                   >
-                    <span className={`[writing-mode:vertical-rl] [text-orientation:mixed] rotate-180 text-[10px] font-extrabold tracking-wider transition-opacity duration-200 mb-2 pointer-events-none whitespace-nowrap select-none ${rightPageView === 'brief' ? 'opacity-0 group-hover:opacity-100 text-brand-periwinkle' : 'opacity-0 group-hover:opacity-100 text-slate-300'
+                    <span className={`[writing-mode:vertical-rl] [text-orientation:mixed] rotate-180 text-[10px] font-extrabold tracking-wider transition-opacity duration-200 mb-2 pointer-events-none whitespace-nowrap select-none ${rightPageView === 'brief' ? 'opacity-0 group-hover:opacity-100 text-brand-periwinkle' : 'opacity-0 group-hover:opacity-100 text-[#746A5F]'
                       }`}>
                       BRIEF
                     </span>
                     <div className="flex items-center justify-center shrink-0">
-                      <FileText size={18} className={rightPageView === 'brief' ? 'text-brand-periwinkle' : 'text-slate-300 group-hover:text-white'} />
+                      <FileText size={18} className={rightPageView === 'brief' ? 'text-brand-periwinkle' : 'text-[#746A5F] group-hover:text-[#241F1A]'} />
                     </div>
                   </button>
 
@@ -1619,17 +1589,15 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                     type="button"
                     onClick={() => setRightPageView((prev) => (prev === 'milestones' ? 'canvas' : 'milestones'))}
                     title="Chi tiết tiến độ các mốc"
-                    className={`group relative w-[40px] sm:w-[42px] h-[72px] hover:h-[135px] bg-[#1C202D] hover:bg-[#232838] border border-t-0 cursor-pointer overflow-hidden flex flex-col items-center justify-end pb-3 shadow-lg [clip-path:polygon(0_0,100%_0,100%_calc(100%-10px),50%_100%,0_calc(100%-10px))] [transition:height_0.32s_cubic-bezier(0.34,1.45,0.7,1),background-color_0.25s_ease,border-color_0.25s_ease] ${rightPageView === 'milestones'
-                        ? 'bg-[#232838] border-purple-400 shadow-[0_0_12px_rgba(167,139,250,0.35)]'
-                        : 'border-[#2F364A] hover:border-[#485472]'
+                    className={`group relative w-[40px] sm:w-[42px] h-[72px] hover:h-[135px] bg-[#FFFCF6] hover:bg-[#E5D8C2] border border-t-0 cursor-pointer overflow-hidden flex flex-col items-center justify-end pb-3 shadow-lg [clip-path:polygon(0_0,100%_0,100%_calc(100%-10px),50%_100%,0_calc(100%-10px))] [transition:height_0.32s_cubic-bezier(0.34,1.45,0.7,1),background-color_0.25s_ease,border-color_0.25s_ease] ${rightPageView === 'milestones'
+                        ? 'bg-[#E5D8C2] border-[#5F3F86]/30 shadow-[0_0_12px_rgba(167,139,250,0.35)]'
+                        : 'border-[#FFFCF6] hover:border-[#F0E7D8]'
                       }`}
                   >
-                    <span className={`[writing-mode:vertical-rl] [text-orientation:mixed] rotate-180 text-[10px] font-extrabold tracking-wider transition-opacity duration-200 mb-2 pointer-events-none whitespace-nowrap select-none ${rightPageView === 'milestones' ? 'opacity-0 group-hover:opacity-100 text-purple-300' : 'opacity-0 group-hover:opacity-100 text-purple-300'
-                      }`}>
-                      TIẾN ĐỘ
-                    </span>
+                    <span className={`[writing-mode:vertical-rl] [text-orientation:mixed] rotate-180 text-[10px] font-extrabold tracking-wider transition-opacity duration-200 mb-2 pointer-events-none whitespace-nowrap select-none ${rightPageView === 'milestones' ? 'opacity-0 group-hover:opacity-100 text-[#5F3F86]' : 'opacity-0 group-hover:opacity-100 text-[#5F3F86]'
+                      }`}> TIẾN ĐỘ </span>
                     <div className="flex items-center justify-center shrink-0">
-                      <Clock size={18} className={rightPageView === 'milestones' ? 'text-purple-300' : 'text-purple-400 group-hover:text-purple-300'} />
+                      <Clock size={18} className={rightPageView === 'milestones' ? 'text-[#5F3F86]' : 'text-[#5F3F86] group-hover:text-[#5F3F86]'} />
                     </div>
                   </button>
 
@@ -1638,7 +1606,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                 {/* VIEW 1: DEFAULT STUDIO CANVAS VIEW */}
                 {rightPageView === 'canvas' && (
                   <>
-                    <div className="shrink-0 pb-3 border-b border-white/10 flex flex-col space-y-2.5">
+                    <div className="shrink-0 pb-3 border-b border-[#221E1A]/10 flex flex-col space-y-2.5">
                       <div className="flex flex-wrap items-center justify-between gap-2 sm:pr-64">
                         <div>
                           <div className="flex items-center gap-2">
@@ -1655,12 +1623,11 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                             <button
                               type="button"
                               disabled={!displayedMilestone || commission?.escrowStatus === 'Pending'}
-                              title={commission?.escrowStatus === 'Pending' ? 'Chờ khách hàng nạp ký quỹ Escrow cho mốc này' : undefined}
+                              title={commission?.escrowStatus === 'Pending' ? 'Chờ khách hàng nạp ký quỹ cho mốc này' : undefined}
                               onClick={() => setShowSubmitModal(true)}
                               className="commission-primary inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold shadow transition disabled:cursor-not-allowed disabled:opacity-40 [clip-path:polygon(0_0,calc(100%-6px)_0,100%_6px,100%_100%,6px_100%,0_calc(100%-6px))]"
                             >
-                              <UploadCloud size={14} /> Nộp phác thảo
-                            </button>
+                              <UploadCloud size={14} /> Nộp phác thảo </button>
                           </div>
                         )}
                       </div>
@@ -1683,10 +1650,10 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                                 {idx > 0 && (
                                   <div
                                     className={`h-[2px] w-5 sm:w-8 shrink-0 transition-all duration-300 ${prevApproved
-                                        ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]'
+                                        ? 'bg-[#2F6B63]/10 shadow-[0_0_8px_rgba(52,211,153,0.6)]'
                                         : isReached
-                                          ? 'bg-gradient-to-r from-emerald-400/80 to-white/20'
-                                          : 'bg-white/10'
+                                          ? 'bg-gradient-to-r from-[#2F6B63] to-white/20'
+                                          : 'bg-[#F0E7D8]'
                                       }`}
                                   />
                                 )}
@@ -1700,35 +1667,35 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                                       : `Xem phác thảo mốc #${ms.sequence}: ${ms.title}`
                                   }
                                   className={`group relative flex items-center gap-1.5 px-2.5 py-1 rounded-full transition-all shrink-0 border ${isLocked
-                                      ? 'bg-white/5 text-slate-500 border-white/5 opacity-40 cursor-not-allowed'
+                                      ? 'bg-[#FFFCF6] text-[#746A5F] border-[#221E1A]/10 opacity-40 cursor-not-allowed'
                                       : isSelected
                                         ? isApproved
-                                          ? 'bg-emerald-500/20 text-emerald-300 border-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.3)]'
+                                          ? 'bg-[#2F6B63]/20 text-[#2F6B63] border-[#2F6B63]/30 shadow-[0_0_12px_rgba(52,211,153,0.3)]'
                                           : isRevision
-                                            ? 'bg-amber-500/20 text-amber-300 border-amber-400 shadow-[0_0_12px_rgba(251,191,36,0.3)]'
+                                            ? 'bg-[#8A6A1F]/20 text-[#8A6A1F] border-[#8A6A1F]/30 shadow-[0_0_12px_rgba(251,191,36,0.3)]'
                                             : 'bg-brand-periwinkle/20 text-brand-periwinkle border-brand-periwinkle shadow-[0_0_12px_rgba(167,172,217,0.35)]'
                                         : isApproved
-                                          ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30 hover:bg-emerald-500/20'
+                                          ? 'bg-[#2F6B63]/10 text-[#2F6B63] border-[#2F6B63]/40 hover:bg-[#2F6B63]/20'
                                           : isRevision
-                                            ? 'bg-amber-500/10 text-amber-300 border-amber-500/30 hover:bg-amber-500/20'
-                                            : 'bg-white/5 text-slate-200 border-white/10 hover:bg-white/10'
+                                            ? 'bg-[#8A6A1F]/10 text-[#8A6A1F] border-[#8A6A1F]/40 hover:bg-[#8A6A1F]/20'
+                                            : 'bg-[#FFFCF6] text-[#6E6459] border-[#221E1A]/10 hover:bg-[#F0E7D8]'
                                     }`}
                                 >
                                   {/* Circle Node Icon/Badge */}
                                   <div
                                     className={`w-5 h-5 rounded-full flex items-center justify-center font-bold text-[11px] shrink-0 transition-transform group-hover:scale-105 ${isSelected
                                         ? isApproved
-                                          ? 'bg-emerald-400 text-slate-950 font-extrabold'
+                                          ? 'bg-[#2F6B63]/10 text-[#241F1A] font-extrabold'
                                           : isRevision
-                                            ? 'bg-amber-400 text-slate-950 font-extrabold'
-                                            : 'bg-brand-periwinkle text-slate-950 font-extrabold'
+                                            ? 'bg-[#8A6A1F]/10 text-[#241F1A] font-extrabold'
+                                            : 'bg-brand-periwinkle text-[#241F1A] font-extrabold'
                                         : isApproved
-                                          ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-400/40'
+                                          ? 'bg-[#2F6B63]/20 text-[#2F6B63] border border-[#2F6B63]/40'
                                           : isRevision
-                                            ? 'bg-amber-500/20 text-amber-300 border border-amber-400/40'
+                                            ? 'bg-[#8A6A1F]/20 text-[#8A6A1F] border border-[#8A6A1F]/40'
                                             : isLocked
-                                              ? 'bg-white/5 text-slate-500 border border-white/5'
-                                              : 'bg-white/10 text-slate-200 border border-white/15'
+                                              ? 'bg-[#FFFCF6] text-[#746A5F] border border-[#221E1A]/10'
+                                              : 'bg-[#F0E7D8] text-[#6E6459] border border-[#221E1A]/10'
                                       }`}
                                   >
                                     {isLocked ? <Lock size={10} /> : isApproved ? <CheckCircle2 size={11} /> : ms.sequence}
@@ -1741,7 +1708,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
 
                                   {/* Pulsing indicator if active stage */}
                                   {isActiveStage && !isApproved && (
-                                    <span className="size-1.5 rounded-full bg-emerald-400 animate-pulse ml-0.5" title="Đang ở mốc này" />
+                                    <span className="size-1.5 rounded-full bg-[#2F6B63]/10 animate-pulse ml-0.5" title="Đang ở mốc này" />
                                   )}
                                 </button>
                               </Fragment>
@@ -1752,20 +1719,18 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                     </div>
 
                     {isClient && commission?.escrowStatus === 'Pending' && (
-                      <div className="my-3 flex flex-wrap items-center justify-between gap-3 border border-amber-400/40 bg-amber-500/10 p-3.5 text-xs text-amber-200 shadow-lg [clip-path:polygon(10px_0,calc(100%-10px)_0,100%_10px,100%_calc(100%-10px),calc(100%-10px)_100%,10px_100%,0_calc(100%-10px),0_10px)]">
+                      <div className="my-3 flex flex-wrap items-center justify-between gap-3 border border-[#8A6A1F]/40 bg-[#8A6A1F]/10 p-3.5 text-xs text-[#8A6A1F] shadow-lg [clip-path:polygon(10px_0,calc(100%-10px)_0,100%_10px,100%_calc(100%-10px),calc(100%-10px)_100%,10px_100%,0_calc(100%-10px),0_10px)]">
                         <div className="flex items-center gap-3">
-                          <div className="flex size-9 shrink-0 items-center justify-center bg-amber-400/20 text-amber-300 border border-amber-400/40 [clip-path:polygon(4px_0,100%_0,100%_calc(100%-4px),calc(100%-4px)_100%,0_100%,0_4px)]">
+                          <div className="flex size-9 shrink-0 items-center justify-center bg-[#8A6A1F]/20 text-[#8A6A1F] border border-[#8A6A1F]/40 [clip-path:polygon(4px_0,100%_0,100%_calc(100%-4px),calc(100%-4px)_100%,0_100%,0_4px)]">
                             <ShieldCheck size={18} />
                           </div>
                           <div>
-                            <p className="font-h1 font-bold text-amber-300 text-xs">
+                            <p className="font-h1 font-bold text-[#8A6A1F] text-xs">
                               {commission.isStagedEscrow
                                 ? `Nạp tiền Escrow Mốc #${commission.currentStage ?? 1} (${((commission.nextEscrowDepositAmount ?? 0) > 0 ? (commission.nextEscrowDepositAmount ?? 0) : (commission.finalPrice ?? 0)).toLocaleString('vi-VN')}đ)`
                                 : `Nạp tiền Escrow bảo đảm đơn hàng (${(commission.finalPrice ?? 0).toLocaleString('vi-VN')}đ)`}
                             </p>
-                            <p className="mt-0.5 text-[11px] text-amber-200/80">
-                              Khoản tiền sẽ được giữ an toàn bởi hệ thống và chỉ giải ngân cho họa sĩ sau khi bạn nghiệm thu từng mốc.
-                            </p>
+                            <p className="mt-0.5 text-[11px] text-[#8A6A1F]"> Khoản tiền sẽ được giữ an toàn bởi hệ thống và chỉ giải ngân cho họa sĩ sau khi bạn nghiệm thu từng mốc. </p>
                           </div>
                         </div>
                         <button
@@ -1775,14 +1740,14 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                           className="commission-primary inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold shadow-md transition disabled:opacity-50 shrink-0 [clip-path:polygon(0_0,calc(100%-6px)_0,100%_6px,100%_100%,6px_100%,0_calc(100%-6px))]"
                         >
                           {depositingEscrow ? <RefreshCw size={13} className="animate-spin" /> : <ShieldCheck size={13} />}
-                          Nạp Escrow ngay
+                          Nạp ký quỹ ngay
                         </button>
                       </div>
                     )}
 
                     <div
                       ref={wipCanvasContainerRef}
-                      className="flex-1 flex flex-col justify-center items-center my-3 relative overflow-hidden border border-white/10 bg-[#1F1F22] p-4 min-h-[320px] [clip-path:polygon(14px_0,calc(100%-14px)_0,100%_14px,100%_calc(100%-14px),calc(100%-14px)_100%,14px_100%,0_calc(100%-14px),0_14px)]"
+                      className="flex-1 flex flex-col justify-center items-center my-3 relative overflow-hidden border border-[#221E1A]/10 bg-[#FFFCF6] p-4 min-h-[320px] [clip-path:polygon(14px_0,calc(100%-14px)_0,100%_14px,100%_calc(100%-14px),calc(100%-14px)_100%,14px_100%,0_calc(100%-14px),0_14px)]"
                     >
                       {/* Floating Cute Sticky Notes on Canvas WIP */}
                       {commission && (
@@ -1796,7 +1761,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                       )}
                       {currentWipPreviewUrl ? (
                         <div className="w-full h-full flex flex-col items-center justify-center relative space-y-3">
-                          <div className="relative flex items-center justify-center max-h-[380px] w-full overflow-auto rounded-xl border border-white/10 bg-[#141620] p-2">
+                          <div className="relative flex items-center justify-center max-h-[380px] w-full overflow-auto rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] p-2">
                             <div
                               onClick={() => setShowApprovalModal(true)}
                               style={{ transform: `scale(${zoomScale})`, transformOrigin: 'center center' }}
@@ -1810,14 +1775,13 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                               skipViewSession
                               showWatermarkBadge={false}
                               onOpenLightbox={() => setShowApprovalModal(true)}
-                              className="h-[340px] w-full rounded-lg bg-[#141620]"
+                              className="h-[340px] w-full rounded-lg bg-[#FFFCF6]"
                             />
 
-                            <div className="pointer-events-none absolute top-3 left-3 z-10 flex items-center gap-1.5 rounded-md border border-emerald-400/40 bg-black/80 px-2.5 py-1 text-[10px] font-bold text-emerald-300">
-                              <ShieldCheck size={12} className="text-emerald-400" /> Bản phác thảo xem thử
-                            </div>
+                            <div className="pointer-events-none absolute top-3 left-3 z-10 flex items-center gap-1.5 rounded-md border border-[#2F6B63]/40 bg-[#E5D8C2] px-2.5 py-1 text-[10px] font-bold text-[#2F6B63]">
+                              <ShieldCheck size={12} className="text-[#2F6B63]" /> Bản phác thảo xem thử </div>
 
-                            <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center bg-black/55 opacity-0 transition duration-200 group-hover:opacity-100">
+                            <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center bg-[#F0E7D8]/55 opacity-0 transition duration-200 group-hover:opacity-100">
                               <span className="commission-primary inline-flex items-center gap-2 px-4 py-2 text-xs font-bold shadow-lg [clip-path:polygon(0_0,calc(100%-8px)_0,100%_8px,100%_100%,8px_100%,0_calc(100%-8px))]">
                                 <Maximize2 size={16} /> Xem chi tiết &amp; Phản hồi Mốc #{displayedMilestone?.sequence}
                               </span>
@@ -1827,25 +1791,25 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                             {/* Zoom controls */}
                             <div
                               onClick={(e) => e.stopPropagation()}
-                              className="absolute bottom-3 left-3 z-30 flex items-center gap-1 rounded-lg border border-white/15 bg-black/80 p-1 backdrop-blur-md shadow-lg"
+                              className="absolute bottom-3 left-3 z-30 flex items-center gap-1 rounded-lg border border-[#221E1A]/10 bg-[#E5D8C2] p-1 backdrop-blur-md shadow-lg"
                             >
                               <button
                                 type="button"
                                 onClick={() => setZoomScale((prev) => Math.max(1, Math.round((prev - 0.25) * 100) / 100))}
                                 disabled={zoomScale <= 1}
-                                className="p-1 rounded text-slate-300 hover:text-white hover:bg-white/10 transition disabled:opacity-30"
+                                className="p-1 rounded text-[#746A5F] hover:text-[#241F1A] hover:bg-[#F0E7D8] transition disabled:opacity-30"
                                 title="Thu nhỏ"
                               >
                                 <ZoomOut size={14} />
                               </button>
-                              <span className="px-1.5 text-[10px] font-mono font-bold text-slate-200 min-w-[38px] text-center">
+                              <span className="px-1.5 text-[10px] font-mono font-bold text-[#6E6459] min-w-[38px] text-center">
                                 {Math.round(zoomScale * 100)}%
                               </span>
                               <button
                                 type="button"
                                 onClick={() => setZoomScale((prev) => Math.min(2.5, Math.round((prev + 0.25) * 100) / 100))}
                                 disabled={zoomScale >= 2.5}
-                                className="p-1 rounded text-slate-300 hover:text-white hover:bg-white/10 transition disabled:opacity-30"
+                                className="p-1 rounded text-[#746A5F] hover:text-[#241F1A] hover:bg-[#F0E7D8] transition disabled:opacity-30"
                                 title="Phóng to tranh"
                               >
                                 <ZoomIn size={14} />
@@ -1854,7 +1818,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                                 <button
                                   type="button"
                                   onClick={() => setZoomScale(1)}
-                                  className="p-1 rounded text-slate-300 hover:text-white hover:bg-white/10 transition"
+                                  className="p-1 rounded text-[#746A5F] hover:text-[#241F1A] hover:bg-[#F0E7D8] transition"
                                   title="Đặt lại 100%"
                                 >
                                   <RotateCcw size={14} />
@@ -1864,17 +1828,16 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                           </div>
 
                           {displayedMilestone?.status === 'RevisionRequested' && (
-                            <div className="w-full border border-amber-500/40 bg-amber-500/10 p-3 text-xs text-amber-200 space-y-1 [clip-path:polygon(6px_0,calc(100%-6px)_0,100%_6px,100%_calc(100%-6px),calc(100%-6px)_100%,6px_100%,0_calc(100%-6px),0_6px)]">
-                              <div className="flex items-center justify-between font-bold text-amber-300">
+                            <div className="w-full border border-[#8A6A1F]/40 bg-[#8A6A1F]/10 p-3 text-xs text-[#8A6A1F] space-y-1 [clip-path:polygon(6px_0,calc(100%-6px)_0,100%_6px,100%_calc(100%-6px),calc(100%-6px)_100%,6px_100%,0_calc(100%-6px),0_6px)]">
+                              <div className="flex items-center justify-between font-bold text-[#8A6A1F]">
                                 <span className="flex items-center gap-1.5 uppercase text-[10px] tracking-wider">
-                                  <CircleAlert size={14} className="text-amber-400" /> Yêu cầu điều chỉnh từ khách hàng:
-                                </span>
-                                <span className="text-[10px] bg-amber-500/20 px-2 py-0.5 border border-amber-400/30">
+                                  <CircleAlert size={14} className="text-[#8A6A1F]" /> Yêu cầu điều chỉnh từ khách hàng: </span>
+                                <span className="text-[10px] bg-[#8A6A1F]/20 px-2 py-0.5 border border-[#8A6A1F]/40">
                                   {displayedMilestone.revisionCount}/{displayedMilestone.maxRevisions}
                                 </span>
                               </div>
                               {displayedMilestone.revisionFeedback && (
-                                <p className="italic bg-black/40 p-2.5 border border-amber-500/20 text-amber-100 text-[11px]">
+                                <p className="italic bg-[#F0E7D8] p-2.5 border border-[#8A6A1F]/30 text-[#8A6A1F] text-[11px]">
                                   &ldquo;{displayedMilestone.revisionFeedback}&rdquo;
                                 </p>
                               )}
@@ -1888,15 +1851,13 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                           </div>
                           <div>
                             <p className="text-xs font-bold text-on-surface">Đang chờ bản phác thảo Mốc #{displayedMilestone?.sequence ?? 1}</p>
-                            <p className="mt-1 max-w-sm text-[11px] text-on-surface-variant leading-relaxed">
-                              Họa sĩ đang thực hiện công đoạn vẽ cho mốc này. Hình ảnh sẽ tự động hiển thị ngay khi họa sĩ tải lên!
-                            </p>
+                            <p className="mt-1 max-w-sm text-[11px] text-on-surface-variant leading-relaxed"> Họa sĩ đang thực hiện công đoạn vẽ cho mốc này. Hình ảnh sẽ tự động hiển thị ngay khi họa sĩ tải lên! </p>
                           </div>
                           {isCreator && (
                             <button
                               type="button"
                             disabled={!displayedMilestone || commission?.escrowStatus === 'Pending'}
-                              title={commission?.escrowStatus === 'Pending' ? 'Chờ khách hàng nạp ký quỹ Escrow cho mốc này' : undefined}
+                              title={commission?.escrowStatus === 'Pending' ? 'Chờ khách hàng nạp ký quỹ cho mốc này' : undefined}
                               onClick={() => setShowSubmitModal(true)}
                             className="commission-primary inline-flex items-center gap-2 px-4 py-2 text-xs font-bold shadow-md transition disabled:cursor-not-allowed disabled:opacity-40 [clip-path:polygon(0_0,calc(100%-6px)_0,100%_6px,100%_100%,6px_100%,0_calc(100%-6px))]"
                             >
@@ -1907,37 +1868,37 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                       )}
                     </div>
 
-                    <div className="shrink-0 pt-3 border-t border-white/10">
+                    <div className="shrink-0 pt-3 border-t border-[#221E1A]/10">
                       <div className="glass-container p-3.5 space-y-2.5 [clip-path:polygon(10px_0,calc(100%-10px)_0,100%_10px,100%_calc(100%-10px),calc(100%-10px)_100%,10px_100%,0_calc(100%-10px),0_10px)]">
                         <div className="flex items-center justify-between">
                           <div>
                             <h4 className="font-h1 font-bold text-xs text-on-surface">Bàn giao Sản Phẩm Hoàn Chỉnh</h4>
-                            <p className="text-[10px] text-outline">Tải trọn bộ file vẽ gốc HD sắc nét (.PSD, .PNG, .ZIP)</p>
+                            <p className="text-[10px] text-outline">Tải trọn bộ tệp vẽ gốc HD sắc nét (.PSD,.PNG,.ZIP)</p>
                           </div>
                           <span className={`px-2.5 py-0.5 text-[10px] font-bold border [clip-path:polygon(4px_0,100%_0,100%_calc(100%-4px),calc(100%-4px)_100%,0_100%,0_4px)] ${allMilestonesApproved
-                            ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-300'
-                            : 'border-white/10 bg-white/5 text-outline'
+                            ? 'border-[#2F6B63]/40 bg-[#2F6B63]/10 text-[#2F6B63]'
+                            : 'border-[#221E1A]/10 bg-[#FFFCF6] text-outline'
                             }`}>
-                            {allMilestonesApproved ? 'Sẵn sàng nhận file' : 'Chưa mở khóa'}
+                            {allMilestonesApproved ? 'Sẵn sàng nhận tệp' : 'Chưa mở khóa'}
                           </span>
                         </div>
 
                         {commissionStatus === 'SubmittedFinal' || commissionStatus === 'Delivered' || commissionStatus === 'Completed' ? (
                           <div
                             onClick={() => setShowDeliveryModal(true)}
-                            className="flex items-center justify-between border border-emerald-500/40 bg-emerald-500/10 p-3 cursor-pointer transition hover:bg-emerald-500/20 [clip-path:polygon(8px_0,calc(100%-8px)_0,100%_8px,100%_calc(100%-8px),calc(100%-8px)_100%,8px_100%,0_calc(100%-8px),0_8px)]"
+                            className="flex items-center justify-between border border-[#2F6B63]/40 bg-[#2F6B63]/10 p-3 cursor-pointer transition hover:bg-[#2F6B63]/20 [clip-path:polygon(8px_0,calc(100%-8px)_0,100%_8px,100%_calc(100%-8px),calc(100%-8px)_100%,8px_100%,0_calc(100%-8px),0_8px)]"
                           >
                             <div className="flex items-center gap-3">
-                              <FileArchive size={24} className="text-emerald-400" />
+                              <FileArchive size={24} className="text-[#2F6B63]" />
                               <div>
-                                <p className="text-xs font-bold text-emerald-300">
+                                <p className="text-xs font-bold text-[#2F6B63]">
                                   {commissionStatus === 'Completed'
                                     ? 'Sản phẩm gốc HD đã nghiệm thu!'
                                     : isCreator
                                       ? 'Đã tải tệp lên Kho Bàn giao (chờ khách nghiệm thu)'
-                                      : 'File gốc HD đã được bàn giao!'}
+                                      : 'Tệp gốc HD đã được bàn giao!'}
                                 </p>
-                                <p className="text-[10px] text-emerald-200/80">
+                                <p className="text-[10px] text-[#2F6B63]">
                                   {commissionStatus === 'Completed'
                                     ? 'Bấm để mở lại Kho Tệp Gốc & Chứng thư.'
                                     : isCreator
@@ -1946,40 +1907,37 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                                 </p>
                               </div>
                             </div>
-                            <Download size={16} className="text-emerald-300" />
+                            <Download size={16} className="text-[#2F6B63]" />
                           </div>
                         ) : isCreator && allMilestonesApproved ? (
                           <button
                             type="button"
                             onClick={() => setShowDeliveryModal(true)}
-                            className="w-full flex items-center justify-center gap-2 bg-emerald-500 px-4 py-2.5 text-xs font-bold text-slate-950 shadow-md transition hover:bg-emerald-400 [clip-path:polygon(0_0,calc(100%-8px)_0,100%_8px,100%_100%,8px_100%,0_calc(100%-8px))]"
+                            className="w-full flex items-center justify-center gap-2 bg-[#2F6B63]/12 px-4 py-2.5 text-xs font-bold text-[#241F1A] shadow-md transition hover:bg-[#2F6B63]/10 [clip-path:polygon(0_0,calc(100%-8px)_0,100%_8px,100%_100%,8px_100%,0_calc(100%-8px))]"
                           >
-                            <UploadCloud size={16} /> Bàn giao File gốc HD (.PSD, .ZIP)
-                          </button>
+                            <UploadCloud size={16} /> Bàn giao tệp gốc HD (.PSD,.ZIP) </button>
                         ) : (
-                          <div className="flex items-center gap-2.5 border border-white/10 bg-white/5 p-2.5 text-xs text-outline [clip-path:polygon(6px_0,calc(100%-6px)_0,100%_6px,100%_calc(100%-6px),calc(100%-6px)_100%,6px_100%,0_calc(100%-6px),0_6px)]">
+                          <div className="flex items-center gap-2.5 border border-[#221E1A]/10 bg-[#FFFCF6] p-2.5 text-xs text-outline [clip-path:polygon(6px_0,calc(100%-6px)_0,100%_6px,100%_calc(100%-6px),calc(100%-6px)_100%,6px_100%,0_calc(100%-6px),0_6px)]">
                             <Lock size={16} className="shrink-0 text-outline" />
-                            <span className="text-[11px]">File vẽ gốc HD sẽ tự động mở khóa sau khi tất cả các mốc phác thảo được duyệt.</span>
+                            <span className="text-[11px]">Tệp vẽ gốc HD sẽ tự động mở khóa sau khi tất cả các mốc phác thảo được duyệt.</span>
                           </div>
                         )}
 
                         {commissionStatus === 'Completed' && (
-                          <p className="text-[11px] text-emerald-300/85">
-                            Chứng thư Bản quyền Số đã được gửi qua Gmail và đính kèm ngay trong Kho Tệp Bàn giao ở trên.
-                          </p>
+                          <p className="text-[11px] text-[#2F6B63]"> Chứng thư Bản quyền Số đã được gửi qua Gmail và đính kèm ngay trong Kho Tệp Bàn giao ở trên. </p>
                         )}
                         
                         {commission?.review && (() => {
                           const { userComment, tags } = parseReviewComment(commission.review.comment);
                           return (
-                            <div className="mt-3 border border-white/10 bg-[#111420]/80 p-4 rounded-2xl space-y-3 text-xs text-slate-300 shadow-lg">
-                              <div className="flex items-center justify-between pb-2.5 border-b border-white/10">
+                            <div className="mt-3 border border-[#221E1A]/10 bg-[#FFFCF6]/80 p-4 rounded-2xl space-y-3 text-xs text-[#746A5F] shadow-lg">
+                              <div className="flex items-center justify-between pb-2.5 border-b border-[#221E1A]/10">
                                 <div className="flex items-center gap-2">
-                                  <span className="text-amber-400 font-bold text-sm">★ {commission.review.rating}/5</span>
-                                  <span className="font-semibold text-white">Đánh giá từ khách hàng</span>
+                                  <span className="text-[#8A6A1F] font-bold text-sm">★ {commission.review.rating}/5</span>
+                                  <span className="font-semibold text-[#241F1A]">Đánh giá từ khách hàng</span>
                                 </div>
                                 {commission.review.createdAt && (
-                                  <span className="text-[11px] text-slate-400 font-medium">
+                                  <span className="text-[11px] text-[#746A5F] font-medium">
                                     {new Date(commission.review.createdAt).toLocaleDateString('vi-VN')}
                                   </span>
                                 )}
@@ -1991,7 +1949,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                                   {tags.map((tag, idx) => (
                                     <span
                                       key={idx}
-                                      className="inline-flex items-center px-2.5 py-1 rounded-lg bg-[#A7ACD9]/15 border border-[#A7ACD9]/30 text-[11px] font-medium text-[#C5C9F8]"
+                                      className="inline-flex items-center px-2.5 py-1 rounded-lg bg-[#B24A26]/15 border border-[#B24A26]/30 text-[11px] font-medium text-[#8C3718]"
                                     >
                                       {tag}
                                     </span>
@@ -2001,22 +1959,22 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
 
                               {/* Clean User Comment */}
                               {userComment && (
-                                <p className="text-white/95 text-xs leading-relaxed bg-black/40 p-3 rounded-xl border border-white/5">
+                                <p className="text-[#241F1A]/95 text-xs leading-relaxed bg-[#F0E7D8] p-3 rounded-xl border border-[#221E1A]/10">
                                   &ldquo;{userComment}&rdquo;
                                 </p>
                               )}
 
                               {/* Creator Response */}
                               {commission.review.reviewerReply ? (
-                                <div className="border-l-2 border-[#A7ACD9] pl-3 py-1 space-y-1 bg-white/[0.02] rounded-r-xl">
-                                  <p className="text-[11px] font-semibold text-[#A7ACD9]">Phản hồi từ Creator:</p>
-                                  <p className="text-white/90 text-xs leading-relaxed">{commission.review.reviewerReply}</p>
+                                <div className="border-l-2 border-[#B24A26] pl-3 py-1 space-y-1 bg-[#FFFCF6] rounded-r-xl">
+                                  <p className="text-[11px] font-semibold text-[#B24A26]">Phản hồi từ họa sĩ:</p>
+                                  <p className="text-[#241F1A]/90 text-xs leading-relaxed">{commission.review.reviewerReply}</p>
                                 </div>
                               ) : isCreator ? (
                                 <button
                                   type="button"
                                   onClick={() => setShowReplyModal(true)}
-                                  className="w-full py-2 px-3 rounded-xl bg-[#A7ACD9]/20 hover:bg-[#A7ACD9]/30 border border-[#A7ACD9]/40 text-[#C5C9F8] font-semibold text-xs transition active:scale-98"
+                                  className="w-full py-2 px-3 rounded-xl bg-[#B24A26]/20 hover:bg-[#B24A26]/30 border border-[#B24A26]/40 text-[#8C3718] font-semibold text-xs transition active:scale-98"
                                 >
                                   💬 Trả lời đánh giá này
                                 </button>
@@ -2032,15 +1990,15 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                 {/* VIEW 2: BRIEF PAGE */}
                 {rightPageView === 'brief' && (
                   <div className="flex-1 flex flex-col justify-between overflow-y-auto space-y-4">
-                    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3 sm:pr-64">
+                    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#221E1A]/10 pb-3 sm:pr-64">
                       <div className="flex items-center gap-2">
                         <FileText size={18} className="text-brand-periwinkle" />
-                        <h3 className="font-h1 text-sm font-bold text-on-surface">Brief Yêu Cầu Dự Án Commission</h3>
+                        <h3 className="font-h1 text-sm font-bold text-on-surface">Đề bài yêu cầu dự án đặt vẽ</h3>
                       </div>
                       <button
                         type="button"
                         onClick={() => setRightPageView('canvas')}
-                        className="rounded-lg bg-white/5 border border-white/10 px-3 py-1.5 text-xs font-semibold text-outline hover:text-white transition"
+                        className="rounded-lg bg-[#FFFCF6] border border-[#221E1A]/10 px-3 py-1.5 text-xs font-semibold text-outline hover:text-[#241F1A] transition"
                       >
                         ← Quay lại Canvas
                       </button>
@@ -2049,14 +2007,14 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                     <div className="space-y-3 overflow-y-auto pr-1 flex-1">
                       <div className="glass-container p-4 space-y-2 [clip-path:polygon(10px_0,calc(100%-10px)_0,100%_10px,100%_calc(100%-10px),calc(100%-10px)_100%,10px_100%,0_calc(100%-10px),0_10px)]">
                         <span className="text-[10px] font-mono font-bold text-brand-periwinkle">MÃ ĐƠN HÀNG: #CMD-{roomId.slice(0, 8).toUpperCase()}</span>
-                        <h2 className="font-h1 text-base font-bold text-on-surface">{room.chatRoomTitle || 'Thiết kế tranh Minh hoạ Commission'}</h2>
-                        <div className="grid grid-cols-2 gap-2 text-xs pt-2 border-t border-white/10">
+                        <h2 className="font-h1 text-base font-bold text-on-surface">{room.chatRoomTitle || 'Thiết kế tranh Minh hoạ đặt vẽ'}</h2>
+                        <div className="grid grid-cols-2 gap-2 text-xs pt-2 border-t border-[#221E1A]/10">
                           <div>
                             <span className="text-outline text-[11px]">Giá hợp đồng:</span>
                             <p className="font-bold text-on-surface text-sm">{(commission?.finalPrice ?? commission?.totalPrice ?? 0).toLocaleString('vi-VN')}đ</p>
                           </div>
                           <div>
-                            <span className="text-outline text-[11px]">Trạng thái Escrow:</span>
+                            <span className="text-outline text-[11px]">Trạng thái ký quỹ:</span>
                             <p className="font-bold text-brand-periwinkle text-sm">
                               {commission?.escrowStatus === 'Released'
                                 ? 'Đã giải ngân (Hoàn tất)'
@@ -2064,10 +2022,10 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
 
                                     ? (commission.isStagedEscrow ? `Đang giữ ${(commission.escrowHeldAmount ?? 0).toLocaleString('vi-VN')}đ (Đã trả ${(commission.disbursedAmount ?? 0).toLocaleString('vi-VN')}đ)` : 'Đã nạp (Đang giải ngân)')
                                   : commission?.escrowStatus === 'Deposited'
-                                    ? (commission.isStagedEscrow ? `Đã nạp Mốc #${commission.currentStage ?? 1} (${(commission.escrowHeldAmount ?? 0).toLocaleString('vi-VN')}đ)` : 'Đã nạp Escrow')
+                                    ? (commission.isStagedEscrow ? `Đã nạp Mốc #${commission.currentStage ?? 1} (${(commission.escrowHeldAmount ?? 0).toLocaleString('vi-VN')}đ)` : 'Đã nạp ký quỹ')
                                     : commission?.escrowStatus === 'Refunded'
                                       ? 'Đã hoàn tiền'
-                                      : 'Chờ nạp Escrow'}
+                                      : 'Chờ nạp ký quỹ'}
                             </p>
                           </div>
                         </div>
@@ -2076,7 +2034,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                       <div className="glass-container p-4 space-y-2 [clip-path:polygon(10px_0,calc(100%-10px)_0,100%_10px,100%_calc(100%-10px),calc(100%-10px)_100%,10px_100%,0_calc(100%-10px),0_10px)]">
                         <h4 className="font-h1 text-xs font-bold text-brand-periwinkle">Mô tả &amp; Yêu cầu phong cách nghệ thuật</h4>
                         <p className="text-xs text-on-surface-variant leading-relaxed whitespace-pre-wrap">
-                          {commission?.description || 'Chi tiết thỏa thuận mô tả nhân vật, bối cảnh, màu sắc và phong cách nghệ thuật theo hợp đồng commission.'}
+                          {commission?.description || 'Chi tiết thỏa thuận mô tả nhân vật, bối cảnh, màu sắc và phong cách nghệ thuật theo hợp đồng đặt vẽ.'}
                         </p>
                       </div>
 
@@ -2084,7 +2042,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                       {/* MỤC THAM CHIẾU & TÀI LIỆU REF (REFERENCE BOARD) */}
                       {/* ========================================================================= */}
                       <div className="glass-container p-4 space-y-3 [clip-path:polygon(10px_0,calc(100%-10px)_0,100%_10px,100%_calc(100%-10px),calc(100%-10px)_100%,10px_100%,0_calc(100%-10px),0_10px)]">
-                        <div className="flex items-center justify-between border-b border-white/10 pb-2">
+                        <div className="flex items-center justify-between border-b border-[#221E1A]/10 pb-2">
                           <div className="flex items-center gap-2">
                             <ImageIcon size={16} className="text-brand-periwinkle" />
                             <h4 className="font-h1 text-xs font-bold text-brand-periwinkle">
@@ -2112,12 +2070,12 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                                 return (
                                   <div
                                     key={idx}
-                                    className="group relative rounded-xl border border-white/10 bg-[#161926] p-2 flex flex-col justify-between hover:border-brand-periwinkle/40 transition-all shadow-md"
+                                    className="group relative rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] p-2 flex flex-col justify-between hover:border-brand-periwinkle/40 transition-all shadow-md"
                                   >
                                     {isImg ? (
                                       <div
                                         onClick={() => setActiveLightboxUrl(resolveAttachmentUrl(url))}
-                                        className="relative h-28 w-full rounded-lg bg-black/40 overflow-hidden cursor-pointer group-hover:scale-[1.02] transition-transform"
+                                        className="relative h-28 w-full rounded-lg bg-[#F0E7D8] overflow-hidden cursor-pointer group-hover:scale-[1.02] transition-transform"
                                       >
                                         {/* eslint-disable-next-line @next/next/no-img-element */}
                                         <img
@@ -2125,23 +2083,22 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                                           alt={`Ref #${idx + 1}`}
                                           className="w-full h-full object-cover"
                                         />
-                                        <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity text-white text-xs font-bold gap-1">
-                                          <Maximize2 size={14} /> Phóng to
-                                        </div>
+                                        <div className="absolute inset-0 bg-[#F0E7D8] opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity text-[#241F1A] text-xs font-bold gap-1">
+                                          <Maximize2 size={14} /> Phóng to </div>
                                       </div>
                                     ) : (
                                       <a
                                         href={isPdf ? resolveAttachmentUrl(url) : url}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="h-28 w-full overflow-hidden rounded-lg bg-white/5 border border-white/10 flex flex-col items-center justify-center p-3 text-center hover:bg-white/10 transition text-slate-300 hover:text-white"
+                                        className="h-28 w-full overflow-hidden rounded-lg bg-[#FFFCF6] border border-[#221E1A]/10 flex flex-col items-center justify-center p-3 text-center hover:bg-[#F0E7D8] transition text-[#746A5F] hover:text-[#241F1A]"
                                       >
                                         {isPdf ? (
-                                          <FileText size={28} className="text-rose-400 mb-1" />
+                                          <FileText size={28} className="text-[#A8321C] mb-1" />
                                         ) : isDrive ? (
-                                          <FolderOpen size={28} className="text-amber-400 mb-1" />
+                                          <FolderOpen size={28} className="text-[#8A6A1F] mb-1" />
                                         ) : isPinterest ? (
-                                          <Pin size={28} className="text-rose-400 mb-1" />
+                                          <Pin size={28} className="text-[#A8321C] mb-1" />
                                         ) : (
                                           <ExternalLink size={28} className="text-brand-periwinkle mb-1" />
                                         )}
@@ -2154,7 +2111,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                                       </a>
                                     )}
 
-                                    <div className="flex items-center justify-between mt-2 pt-1 border-t border-white/5 text-[10px]">
+                                    <div className="flex items-center justify-between mt-2 pt-1 border-t border-[#221E1A]/10 text-[10px]">
                                       <span className="font-mono text-outline font-bold">#{idx + 1}</span>
                                       <div className="flex items-center gap-1">
                                         <button
@@ -2164,7 +2121,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                                             toast.success('Đã sao chép liên kết.');
                                           }}
                                           title="Sao chép liên kết"
-                                          className="p-1 rounded text-slate-400 hover:text-white hover:bg-white/10 transition"
+                                          className="p-1 rounded text-[#746A5F] hover:text-[#241F1A] hover:bg-[#F0E7D8] transition"
                                         >
                                           <Copy size={12} />
                                         </button>
@@ -2176,7 +2133,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             title="Mở tệp gốc / Tải về"
-                                            className="p-1 rounded text-slate-400 hover:text-white hover:bg-white/10 transition"
+                                            className="p-1 rounded text-[#746A5F] hover:text-[#241F1A] hover:bg-[#F0E7D8] transition"
                                           >
                                             <Download size={12} />
                                           </a>
@@ -2191,7 +2148,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                                                   assetType: 'Ref',
                                                   name: `Ref đơn ${commission?.title || ''} (#${idx + 1})`,
                                                   assetUrl: url,
-                                                  metadataJson: JSON.stringify({ notes: `Lưu từ đơn hàng commission #${roomId}`, commissionId: room?.commissionId }),
+                                                  metadataJson: JSON.stringify({ notes: `Lưu từ đơn đặt vẽ #${roomId}`, commissionId: room?.commissionId }),
                                                 });
                                                 toast.success('Đã lưu ảnh vào Thư viện tài nguyên của bạn!');
                                               } catch (e: unknown) {
@@ -2212,19 +2169,17 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                             </div>
                           </div>
                         ) : (
-                          <div className="p-3 text-center rounded-xl bg-white/[0.02] border border-white/5">
-                            <p className="text-xs text-outline">
-                              Khách hàng không đính kèm tệp tham khảo khi tạo yêu cầu.
-                            </p>
+                          <div className="p-3 text-center rounded-xl bg-[#FFFCF6] border border-[#221E1A]/10">
+                            <p className="text-xs text-outline"> Khách hàng không đính kèm tệp tham khảo khi tạo yêu cầu. </p>
                           </div>
                         )}
                       </div>
 
                       <div className="glass-container p-4 space-y-2 [clip-path:polygon(10px_0,calc(100%-10px)_0,100%_10px,100%_calc(100%-10px),calc(100%-10px)_100%,10px_100%,0_calc(100%-10px),0_10px)]">
-                        <h4 className="font-h1 text-xs font-bold text-brand-periwinkle">Tóm tắt các mốc thanh toán Escrow</h4>
+                        <h4 className="font-h1 text-xs font-bold text-brand-periwinkle">Tóm tắt các mốc thanh toán ký quỹ</h4>
                         <div className="space-y-1.5 pt-1">
                           {sortedMilestones.map((ms) => (
-                            <div key={ms.id} className="flex items-center justify-between text-xs p-2 rounded bg-white/5 border border-white/5">
+                            <div key={ms.id} className="flex items-center justify-between text-xs p-2 rounded bg-[#FFFCF6] border border-[#221E1A]/10">
                               <span className="font-medium text-on-surface">Mốc #{ms.sequence}: {ms.title}</span>
                               <span className="font-bold text-brand-periwinkle">{ms.price.toLocaleString('vi-VN')}đ</span>
                             </div>
@@ -2238,7 +2193,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                 {/* VIEW 3: MILESTONES PAGE */}
                 {rightPageView === 'milestones' && (
                   <div className="flex-1 flex flex-col justify-between overflow-y-auto space-y-4">
-                    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3 sm:pr-64">
+                    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#221E1A]/10 pb-3 sm:pr-64">
                       <div className="flex items-center gap-2">
                         <Clock size={18} className="text-brand-periwinkle" />
                         <h3 className="font-h1 text-sm font-bold text-on-surface">Chi Tiết Danh Sách Mốc Tiến Độ</h3>
@@ -2247,7 +2202,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                         <button
                           type="button"
                           onClick={() => setRightPageView('canvas')}
-                          className="rounded-lg bg-white/5 border border-white/10 px-3 py-1.5 text-xs font-semibold text-outline hover:text-white transition"
+                          className="rounded-lg bg-[#FFFCF6] border border-[#221E1A]/10 px-3 py-1.5 text-xs font-semibold text-outline hover:text-[#241F1A] transition"
                         >
                           ← Quay lại Canvas
                         </button>
@@ -2273,7 +2228,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                         return (
                           <div
                             key={ms.id}
-                            className={`glass-container p-4 space-y-2 border transition [clip-path:polygon(10px_0,calc(100%-10px)_0,100%_10px,100%_calc(100%-10px),calc(100%-10px)_100%,10px_100%,0_calc(100%-10px),0_10px)] ${isCurrent ? 'border-brand-periwinkle bg-brand-periwinkle/10' : 'border-white/10'
+                            className={`glass-container p-4 space-y-2 border transition [clip-path:polygon(10px_0,calc(100%-10px)_0,100%_10px,100%_calc(100%-10px),calc(100%-10px)_100%,10px_100%,0_calc(100%-10px),0_10px)] ${isCurrent ? 'border-brand-periwinkle bg-brand-periwinkle/10' : 'border-[#221E1A]/10'
                               }`}
                           >
                             <div className="flex items-center justify-between">
@@ -2281,19 +2236,19 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                                 <span className="font-h1 font-bold text-xs text-brand-periwinkle">Mốc #{ms.sequence}</span>
                                 <h4 className="font-bold text-xs text-on-surface">{ms.title}</h4>
                               </div>
-                              <span className={`px-2 py-0.5 text-[10px] font-bold border [clip-path:polygon(4px_0,100%_0,100%_calc(100%-4px),calc(100%-4px)_100%,0_100%,0_4px)] ${isApproved ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-300' : isRevision ? 'border-amber-500/40 bg-amber-500/10 text-amber-300' : 'border-white/10 bg-white/5 text-outline'
+                              <span className={`px-2 py-0.5 text-[10px] font-bold border [clip-path:polygon(4px_0,100%_0,100%_calc(100%-4px),calc(100%-4px)_100%,0_100%,0_4px)] ${isApproved ? 'border-[#2F6B63]/40 bg-[#2F6B63]/10 text-[#2F6B63]' : isRevision ? 'border-[#8A6A1F]/40 bg-[#8A6A1F]/10 text-[#8A6A1F]' : 'border-[#221E1A]/10 bg-[#FFFCF6] text-outline'
                                 }`}>
                                 {isApproved ? 'Đã duyệt' : isRevision ? 'Yêu cầu sửa' : isCurrent ? 'Đang thực hiện' : 'Chờ xử lý'}
                               </span>
                             </div>
 
-                            <div className="flex items-center justify-between text-xs text-outline pt-1 border-t border-white/5">
+                            <div className="flex items-center justify-between text-xs text-outline pt-1 border-t border-[#221E1A]/10">
                               <span>Giá mốc: <strong className="text-on-surface">{ms.price.toLocaleString('vi-VN')}đ</strong></span>
-                              <span>Số lần sửa: <strong className="text-amber-300">{ms.revisionCount ?? 0}/{ms.maxRevisions ?? 3}</strong></span>
+                              <span>Số lần sửa: <strong className="text-[#8A6A1F]">{ms.revisionCount ?? 0}/{ms.maxRevisions ?? 3}</strong></span>
                             </div>
 
                             {ms.revisionFeedback && (
-                              <p className="text-[11px] italic bg-black/30 p-2 rounded border border-amber-500/20 text-amber-200">
+                              <p className="text-[11px] italic bg-[#F0E7D8] p-2 rounded border border-[#8A6A1F]/30 text-[#8A6A1F]">
                                 &ldquo;{ms.revisionFeedback}&rdquo;
                               </p>
                             )}
@@ -2305,10 +2260,9 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                                   setSelectedMilestoneId(ms.id);
                                   setRightPageView('canvas');
                                 }}
-                                className="px-3 py-1 rounded text-[11px] font-semibold bg-white/5 border border-white/10 text-on-surface hover:bg-white/10"
+                                className="px-3 py-1 rounded text-[11px] font-semibold bg-[#FFFCF6] border border-[#221E1A]/10 text-on-surface hover:bg-[#F0E7D8]"
                               >
-                                <Eye size={12} className="inline mr-1" /> Xem phác thảo mốc
-                              </button>
+                                <Eye size={12} className="inline mr-1" /> Xem phác thảo mốc </button>
 
                               {isCreator && isCurrent && (
                                 <button
@@ -2319,8 +2273,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                                   }}
                                   className="commission-primary px-3 py-1 rounded text-[11px] font-bold shadow"
                                 >
-                                  <UploadCloud size={12} className="inline mr-1" /> Nộp phác thảo
-                                </button>
+                                  <UploadCloud size={12} className="inline mr-1" /> Nộp phác thảo </button>
                               )}
                             </div>
                           </div>
@@ -2362,7 +2315,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
             onClose={() => setShowApprovalModal(false)}
             commissionId={room.commissionId}
             milestoneId={displayedMilestone?.id || ''}
-            wipPreviewUrl={currentWipPreviewUrl || 'https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?auto=format&fit=crop&w=1200&q=80'}
+            wipPreviewUrl={currentWipPreviewUrl || ''}
             maxRevisions={displayedMilestone?.maxRevisions ?? 3}
             revisionCount={displayedMilestone?.revisionCount ?? 0}
             milestoneSequence={displayedMilestone?.sequence ?? 1}
@@ -2384,7 +2337,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                 const preview = cleanNote ? (cleanNote.length > 160 ? `${cleanNote.slice(0, 157)}...` : cleanNote) : '';
                 msg = `✏️ Khách hàng đã yêu cầu chỉnh sửa Mốc #${seq} (${title})${preview ? `: "${preview}"` : '.'}`;
               } else if (!nextMilestone) {
-                msg = `✅ Khách hàng đã duyệt Mốc #${seq} (${title}) — toàn bộ các mốc đã hoàn tất! Creator có thể gửi file hoàn chỉnh (HD) ngay.`;
+                msg = `✅ Khách hàng đã duyệt Mốc #${seq} (${title}) — toàn bộ các mốc đã hoàn tất! Họa sĩ có thể gửi tệp hoàn chỉnh (HD) ngay.`;
               } else if (commission?.isStagedEscrow) {
                 msg = `✅ Khách hàng đã duyệt Mốc #${seq} (${title}) và giải ngân cho Creator. Sang Mốc #${nextMilestone.sequence} (${nextMilestone.title}) — khách hàng vui lòng nạp ký quỹ Mốc #${nextMilestone.sequence} để Creator tiếp tục.`;
               } else {
@@ -2406,7 +2359,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
               if (action !== 'deleted') setShowDeliveryModal(false);
               refresh();
               const msg = action === 'completed'
-                ? '🎉 Khách hàng đã xác nhận nghiệm thu file hoàn chỉnh — đơn hàng đã hoàn tất và chứng thư bản quyền đã được cấp!'
+                ? '🎉 Khách hàng đã xác nhận nghiệm thu tệp hoàn chỉnh — đơn hàng đã hoàn tất và chứng thư bản quyền đã được cấp!'
                 : action === 'deleted'
                 ? `🗑️ Creator đã gỡ tệp "${summary || ''}" khỏi Kho Bàn giao. Khách hàng vui lòng kiểm tra lại danh sách tệp mới nhất trước khi xác nhận.`
                 : `📦 Creator đã cập nhật Kho Bàn giao${summary ? ` (${summary})` : ''}. Khách hàng vui lòng tải về và mở kiểm tra kỹ từng tệp trước khi xác nhận hoàn tất.`;
@@ -2439,14 +2392,14 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
               setShowCancelModal(false);
               refresh();
               const msgMap = {
-                cancelled_immediately: '🚫 Đơn hàng đã được hủy theo chính sách và hoàn trả phần ký quỹ Escrow còn lại.',
+                cancelled_immediately: '🚫 Đơn hàng đã được hủy theo chính sách và hoàn trả phần ký quỹ còn lại.',
                 cancel_requested: '⏳ Đã gửi yêu cầu hủy đơn. Đối tác có 48 giờ để đồng ý hoặc từ chối.',
-                cancel_approved: '✅ Yêu cầu hủy đơn đã được chấp thuận — đơn hàng đã hủy và hoàn trả phần Escrow còn lại.',
+                cancel_approved: '✅ Yêu cầu hủy đơn đã được chấp thuận — đơn hàng đã hủy và hoàn trả phần ký quỹ còn lại.',
                 cancel_rejected: '↩️ Yêu cầu hủy đơn đã bị từ chối — đơn hàng tiếp tục được thực hiện.',
               } as const;
               if (action === 'cancelled_immediately' || action === 'cancel_approved') {
                 cancelToastShownRef.current = true;
-                toast('Đơn hàng đã được hủy và hoàn phần Escrow còn lại. Phòng làm việc sẽ khóa lưu trữ.', {
+                toast('Đơn hàng đã được hủy và hoàn phần ký quỹ còn lại. Phòng làm việc sẽ khóa lưu trữ.', {
                   icon: '🚫',
                   duration: 6000,
                 });
@@ -2472,8 +2425,8 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
 
           {commission && (currentMemberRole === 'client' || currentMemberRole === 'creator') && (
             (commission.dispute || commission.status === 'Cancelled' || commission.status === 'Disputed') ? (
-              <section className="mt-4 space-y-3 rounded-2xl border border-white/10 bg-white/[.03] p-4">
-                <button type="button" onClick={() => setShowDisputeDetailsModal(true)} className="rounded-xl border border-[#A7ACD9]/40 px-4 py-2 text-sm text-[#C5C9F8] hover:bg-white/10 transition">
+              <section className="mt-4 space-y-3 rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] p-4">
+                <button type="button" onClick={() => setShowDisputeDetailsModal(true)} className="rounded-xl border border-[#B24A26]/40 px-4 py-2 text-sm text-[#8C3718] hover:bg-[#F0E7D8] transition">
                   Xem hồ sơ &amp; kết quả tranh chấp
                 </button>
               </section>
@@ -2495,24 +2448,22 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
           {/* QUICK REF DRAWER / MODAL */}
           {showQuickRefDrawer && (
             <div
-              className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-3 sm:p-4 backdrop-blur-sm"
+              className="fixed inset-0 z-50 flex items-center justify-center bg-[#E5D8C2] p-3 sm:p-4 backdrop-blur-sm"
               onClick={() => setShowQuickRefDrawer(false)}
             >
               <div
-                className="relative flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#161925] p-5 shadow-2xl"
+                className="relative flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] p-5 shadow-2xl"
                 onClick={(e) => e.stopPropagation()}
               >
-                <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                <div className="flex items-center justify-between border-b border-[#221E1A]/10 pb-3">
                   <div className="flex items-center gap-2">
                     <ImageIcon className="h-5 w-5 text-brand-periwinkle" />
-                    <h3 className="font-h1 text-sm font-bold text-white">
-                      Tài Liệu Tham Khảo Của Khách Hàng
-                    </h3>
+                    <h3 className="font-h1 text-sm font-bold text-[#241F1A]"> Tài Liệu Tham Khảo Của Khách Hàng </h3>
                   </div>
                   <button
                     type="button"
                     onClick={() => setShowQuickRefDrawer(false)}
-                    className="rounded-full p-1 text-slate-400 hover:bg-white/10 hover:text-white"
+                    className="rounded-full p-1 text-[#746A5F] hover:bg-[#F0E7D8] hover:text-[#241F1A]"
                   >
                     <X className="h-5 w-5" />
                   </button>
@@ -2520,11 +2471,9 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
 
                 <div className="mt-4 flex-1 overflow-y-auto pr-1">
                   {(commission?.referenceImages?.length ?? 0) === 0 ? (
-                    <div className="flex flex-col items-center justify-center rounded-xl border border-white/10 bg-white/[0.02] p-8 text-center">
-                      <ImageIcon className="mb-2 h-8 w-8 text-slate-500" />
-                      <p className="text-xs font-semibold text-slate-300">
-                        Đơn hàng này chưa có ảnh hoặc tài liệu tham khảo.
-                      </p>
+                    <div className="flex flex-col items-center justify-center rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] p-8 text-center">
+                      <ImageIcon className="mb-2 h-8 w-8 text-[#746A5F]" />
+                      <p className="text-xs font-semibold text-[#746A5F]"> Đơn hàng này chưa có ảnh hoặc tài liệu tham khảo. </p>
                     </div>
                   ) : (
                   <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -2534,7 +2483,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                       return (
                         <div
                           key={idx}
-                          className="group relative flex flex-col justify-between overflow-hidden rounded-xl border border-white/10 bg-black/40 p-2"
+                          className="group relative flex flex-col justify-between overflow-hidden rounded-xl border border-[#221E1A]/10 bg-[#F0E7D8] p-2"
                         >
                           {isImg ? (
                             <div
@@ -2550,8 +2499,8 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                                 alt={`Ref #${idx + 1}`}
                                 className="h-full w-full object-cover transition-transform group-hover:scale-105"
                               />
-                              <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
-                                <Maximize2 className="h-4 w-4 text-white" />
+                              <div className="absolute inset-0 flex items-center justify-center bg-[#F0E7D8] opacity-0 transition-opacity group-hover:opacity-100">
+                                <Maximize2 className="h-4 w-4 text-[#241F1A]" />
                               </div>
                             </div>
                           ) : (
@@ -2559,10 +2508,10 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                               href={isPdf ? resolveAttachmentUrl(url) : url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="flex h-32 w-full flex-col items-center justify-center overflow-hidden rounded-lg bg-white/5 p-3 text-center text-xs text-slate-300 hover:text-white"
+                              className="flex h-32 w-full flex-col items-center justify-center overflow-hidden rounded-lg bg-[#FFFCF6] p-3 text-center text-xs text-[#746A5F] hover:text-[#241F1A]"
                             >
                               {isPdf ? (
-                                <FileText className="mb-1.5 h-6 w-6 shrink-0 text-rose-400" />
+                                <FileText className="mb-1.5 h-6 w-6 shrink-0 text-[#A8321C]" />
                               ) : (
                                 <ExternalLink className="mb-1.5 h-6 w-6 shrink-0 text-brand-periwinkle" />
                               )}
@@ -2580,7 +2529,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                                   void navigator.clipboard.writeText(url);
                                   toast.success('Đã sao chép liên kết.');
                                 }}
-                                className="p-1 text-slate-400 hover:text-white"
+                                className="p-1 text-[#746A5F] hover:text-[#241F1A]"
                                 title="Sao chép liên kết"
                               >
                                 <Copy className="h-3 w-3" />
@@ -2591,7 +2540,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                                   download
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="p-1 text-slate-400 hover:text-white"
+                                  className="p-1 text-[#746A5F] hover:text-[#241F1A]"
                                   title="Tải tệp"
                                 >
                                   <Download className="h-3 w-3" />
@@ -2612,7 +2561,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
           {/* LIGHTBOX PREVIEW MODAL */}
           {activeLightboxUrl && (
             <div
-              className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4 backdrop-blur-md"
+              className="fixed inset-0 z-50 flex items-center justify-center bg-[#F0E7D8]/90 p-4 backdrop-blur-md"
               onClick={() => setActiveLightboxUrl(null)}
             >
               <div
@@ -2625,7 +2574,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                     download
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-1.5 rounded-lg bg-white/10 px-3 py-1.5 text-xs font-semibold text-white hover:bg-white/20 transition"
+                    className="flex items-center gap-1.5 rounded-lg bg-[#F0E7D8] px-3 py-1.5 text-xs font-semibold text-[#241F1A] hover:bg-[#F0E7D8] transition"
                   >
                     <Download className="h-3.5 w-3.5" />
                     <span>Tải ảnh gốc</span>
@@ -2633,7 +2582,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                   <button
                     type="button"
                     onClick={() => setActiveLightboxUrl(null)}
-                    className="rounded-full bg-white/10 p-1.5 text-white hover:bg-white/20 transition"
+                    className="rounded-full bg-[#F0E7D8] p-1.5 text-[#241F1A] hover:bg-[#F0E7D8] transition"
                     title="Đóng (Esc)"
                   >
                     <X className="h-4 w-4" />
@@ -2643,7 +2592,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                 <img
                   src={activeLightboxUrl}
                   alt="Ảnh tham khảo phóng to"
-                  className="max-h-[85vh] max-w-full rounded-xl object-contain shadow-2xl border border-white/10"
+                  className="max-h-[85vh] max-w-full rounded-xl object-contain shadow-2xl border border-[#221E1A]/10"
                 />
               </div>
             </div>

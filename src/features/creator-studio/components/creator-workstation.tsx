@@ -49,19 +49,19 @@ type Service = { id: number; name: string; price: string; days: string; active: 
 type FaqDraft = { id?: string; q: string; a: string };
 
 const titles: Record<WorkstationView, [string, string]> = {
-  artworks: ['Đăng tải & quản lý tác phẩm', 'Xây dựng portfolio với thiết lập AI hỗ trợ.'],
-  services: ['Bảng giá & dịch vụ', 'Thiết lập gói commission và số slot nhận đơn.'],
+  artworks: ['Đăng tải & quản lý tác phẩm', 'Xây dựng hồ sơ tác phẩm với thiết lập AI hỗ trợ.'],
+  services: ['Bảng giá & dịch vụ', 'Thiết lập gói đặt vẽ và số lượt nhận đơn.'],
   terms: ['Điều khoản & bản quyền', 'Thiết lập phụ phí thương mại, phạm vi vẽ và điều khoản riêng.'],
-  'ai-rules': ['Auto-reply & FAQ', 'Tự động phản hồi tin nhắn và câu hỏi thường gặp trong chat.'],
-  waitlist: ['Quản lý hàng chờ', 'Theo dõi mọi commission theo từng giai đoạn.'],
+  'ai-rules': ['Auto-reply & FAQ', 'Tự động phản hồi tin nhắn và câu hỏi thường gặp trong trò chuyện.'],
+  waitlist: ['Quản lý hàng chờ', 'Theo dõi mọi đặt vẽ theo từng giai đoạn.'],
   assets: ['Thư viện asset & presets', 'Tổ chức pose mẫu, palette và preset cá nhân.'],
 };
 
 const defaultState: CreatorWorkstationState = {
   terms: { commercialLicenseMultiplier: 1.5, revisionPolicy: '02 lần chỉnh sửa miễn phí trong giai đoạn sketch.', cancellationPolicy: 'Hoàn tiền theo tiến độ hoàn thành. Phí hủy có thể áp dụng sau khi duyệt sketch.' },
-  autoReply: { isEnabled: true, briefTemplate: 'Cảm ơn bạn đã gửi brief! Mình đã nhận được thông tin và sẽ phản hồi trong vòng 24 giờ.' },
+  autoReply: { isEnabled: true, briefTemplate: 'Cảm ơn bạn đã gửi đề bài! Mình đã nhận được thông tin và sẽ phản hồi trong vòng 24 giờ.' },
   faqs: [
-    { id: 'faq-1', question: 'Bạn nhận commission không?', answer: 'Mình đang nhận commission theo số slot hiển thị trên profile.', displayOrder: 1 },
+    { id: 'faq-1', question: 'Bạn nhận đặt vẽ không?', answer: 'Mình đang nhận đặt vẽ theo số lượt hiển thị trên profile.', displayOrder: 1 },
     { id: 'faq-2', question: 'Thời gian hoàn thành?', answer: 'Tùy gói dịch vụ, thường từ 3–7 ngày.', displayOrder: 2 },
   ],
   workItems: [],
@@ -75,8 +75,8 @@ function Shell({ view, actions, children }: { view: WorkstationView; actions?: R
     <div className="w-full space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0">
-          <h1 className="font-h1 text-balance text-2xl font-bold text-white sm:text-3xl">{title}</h1>
-          <p className="mt-1.5 text-sm text-[#C7C5CF]">{subtitle}</p>
+          <h1 className="font-h1 text-balance text-2xl font-bold text-[#241F1A] sm:text-3xl">{title}</h1>
+          <p className="mt-1.5 text-sm text-[#6E6459]">{subtitle}</p>
         </div>
         {actions && <div className="flex flex-wrap items-center gap-2.5">{actions}</div>}
       </div>
@@ -89,7 +89,7 @@ function Toggle({ label, description, checked, disabled = false, onChange }: { l
   return (
     <div className="mt-4 flex items-center justify-between gap-4 py-1.5">
       <div className="min-w-0">
-        <p className="text-sm font-medium text-white">{label}</p>
+        <p className="text-sm font-medium text-[#241F1A]">{label}</p>
         <p className="mt-0.5 text-xs text-[#B8B6C4]">{description}</p>
       </div>
       <button
@@ -99,9 +99,9 @@ function Toggle({ label, description, checked, disabled = false, onChange }: { l
         aria-label={label}
         disabled={disabled}
         onClick={() => onChange(!checked)}
-        className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#A7ACD9] disabled:cursor-not-allowed disabled:opacity-50 ${checked ? "bg-[#A7ACD9]" : "bg-white/15"}`}
+        className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B24A26] disabled:cursor-not-allowed disabled:opacity-50 ${checked ? "bg-[#B24A26]" : "bg-[#F0E7D8]"}`}
       >
-        <span className={`inline-block h-4 w-4 rounded-full bg-[#171a2a] shadow transition-transform ${checked ? "translate-x-6" : "translate-x-1"}`} />
+        <span className={`inline-block h-4 w-4 rounded-full bg-[#FFFCF6] shadow transition-transform ${checked ? "translate-x-6" : "translate-x-1"}`} />
       </button>
     </div>
   );
@@ -109,13 +109,13 @@ function Toggle({ label, description, checked, disabled = false, onChange }: { l
 
 function LicenseRow({ title, detail, value }: { title: string; detail: string; value: string }) {
   return (
-    <div className="rounded-2xl bg-white/[.035] p-4">
+    <div className="rounded-2xl bg-[#FFFCF6] p-4">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <p className="text-sm font-medium text-white">{title}</p>
-          <p className="mt-1 text-xs text-[#C7C5CF]">{detail}</p>
+          <p className="text-sm font-medium text-[#241F1A]">{title}</p>
+          <p className="mt-1 text-xs text-[#6E6459]">{detail}</p>
         </div>
-        <strong className="shrink-0 font-mono text-sm text-[#A7ACD9]">{value}</strong>
+        <strong className="shrink-0 font-mono text-sm text-[#B24A26]">{value}</strong>
       </div>
     </div>
   );
@@ -159,7 +159,7 @@ function Artworks() {
         await creatorProfileService.getMyProfile();
         setProfileReady(true);
       } catch {
-        setError('Không thể tải hồ sơ creator. Vui lòng hoàn tất hồ sơ và tải lại trang.');
+        setError('Không thể tải hồ sơ họa sĩ. Vui lòng hoàn tất hồ sơ và tải lại trang.');
       }
     };
 
@@ -171,7 +171,7 @@ function Artworks() {
     let active = true;
     creatorProfileService.getMyArtworks(artworkSearch, artworkStatus === 'All' ? undefined : artworkStatus)
       .then((items) => { if (active) setArtworks(items); })
-      .catch((cause) => { if (active) toast.error(cause instanceof Error ? cause.message : 'Không thể tải portfolio.'); })
+      .catch((cause) => { if (active) toast.error(cause instanceof Error ? cause.message : 'Không thể tải hồ sơ tác phẩm.'); })
       .finally(() => { if (active) setLoadingArtworks(false); });
     return () => { active = false; };
   }, [artworkSearch, artworkStatus]);
@@ -314,7 +314,7 @@ function Artworks() {
       setArtworks((current) => current.filter((artwork) => artwork.id !== deletingArtwork.id));
       if (editingArtwork?.id === deletingArtwork.id) setEditingArtwork(null);
       setDeletingArtwork(null);
-      toast.success('Đã xóa tác phẩm khỏi portfolio.');
+      toast.success('Đã xóa tác phẩm khỏi hồ sơ tác phẩm.');
     } catch (cause) {
       toast.error(cause instanceof Error ? cause.message : 'Không thể xóa tác phẩm.');
     } finally {
@@ -326,23 +326,21 @@ function Artworks() {
     <Shell view="artworks">
       <form onSubmit={handleSubmit} className="grid gap-6 xl:grid-cols-[1fr_340px]">
         <section className="glass-container rounded-[28px] p-5 sm:p-7">
-          <button type="button" onClick={() => inputRef.current?.click()} className="relative flex min-h-72 w-full flex-col items-center justify-center overflow-hidden rounded-3xl border border-dashed border-white/25 bg-white/[.025] p-6 transition hover:border-[#A7ACD9]/70">
+          <button type="button" onClick={() => inputRef.current?.click()} className="relative flex min-h-72 w-full flex-col items-center justify-center overflow-hidden rounded-3xl border border-dashed border-[#221E1A]/20 bg-[#FFFCF6] p-6 transition hover:border-[#B24A26]/70">
             {preview ? (
               <Image src={preview} alt="Artwork preview" fill unoptimized className="object-contain" />
             ) : (
               <>
-                <span className="rounded-2xl bg-[#A7ACD9]/15 p-4"><Upload className="h-7 w-7 text-[#A7ACD9]" /></span>
-                <strong className="mt-4 text-sm text-white">Tải file tác phẩm gốc</strong>
-                <span className="mt-1 text-xs text-[#919099]">PNG, JPG, WEBP · tối đa 25 MB</span>
+                <span className="rounded-2xl bg-[#B24A26]/15 p-4"><Upload className="h-7 w-7 text-[#B24A26]" /></span>
+                <strong className="mt-4 text-sm text-[#241F1A]">Tải tệp tác phẩm gốc</strong>
+                <span className="mt-1 text-xs text-[#746A5F]">PNG, JPG, WEBP · tối đa 25 MB</span>
               </>
             )}
             <input ref={inputRef} onChange={chooseFile} type="file" accept="image/*" className="hidden" />
           </button>
 
           <div className="mt-6 grid gap-5">
-            <label className="text-sm text-[#C7C5CF]">
-              Tiêu đề tác phẩm
-              <input maxLength={200} required value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Ví dụ: Violet afternoon" className="mt-2 w-full rounded-2xl border border-white/10 bg-[#171a2a] px-4 py-3 text-white outline-none focus:border-[#A7ACD9]" />
+            <label className="text-sm text-[#6E6459]"> Tiêu đề tác phẩm <input maxLength={200} required value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Ví dụ: Violet afternoon" className="mt-2 w-full rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] px-4 py-3 text-[#241F1A] outline-none focus:border-[#B24A26]" />
             </label>
 
             <ArtworkMetadataAssistant
@@ -363,13 +361,12 @@ function Artworks() {
               }}
             />
 
-            <label className="text-sm text-[#C7C5CF]">
-              Danh mục lớn <span className="text-rose-400">*</span>
+            <label className="text-sm text-[#6E6459]"> Danh mục lớn <span className="text-[#A8321C]">*</span>
               <select
                 required
                 value={categoryId}
                 onChange={(event) => setCategoryId(event.target.value)}
-                className="mt-2 w-full rounded-2xl border border-white/10 bg-[#171a2a] px-4 py-3 text-white outline-none focus:border-[#A7ACD9]"
+                className="mt-2 w-full rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] px-4 py-3 text-[#241F1A] outline-none focus:border-[#B24A26]"
               >
                 <option value="">-- Chọn danh mục chính của tác phẩm --</option>
                 {categories.map((cat) => (
@@ -380,21 +377,19 @@ function Artworks() {
               </select>
             </label>
 
-            <label className="text-sm text-[#C7C5CF]">
-              Mô tả
-              <textarea value={description} onChange={(event) => setDescription(event.target.value)} placeholder="Chia sẻ cảm hứng hoặc câu chuyện phía sau tác phẩm..." className="mt-2 min-h-28 w-full rounded-2xl border border-white/10 bg-[#171a2a] px-4 py-3 text-white outline-none focus:border-[#A7ACD9]" />
+            <label className="text-sm text-[#6E6459]"> Mô tả <textarea value={description} onChange={(event) => setDescription(event.target.value)} placeholder="Chia sẻ cảm hứng hoặc câu chuyện phía sau tác phẩm..." className="mt-2 min-h-28 w-full rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] px-4 py-3 text-[#241F1A] outline-none focus:border-[#B24A26]" />
             </label>
 
             <div>
-              <p className="text-sm text-[#C7C5CF]">Tags</p>
+              <p className="text-sm text-[#6E6459]">Tags</p>
               <div className="mt-2 flex gap-2">
                 <input value={tag} onChange={(event) => setTag(event.target.value)} onKeyDown={(event) => {
                   if (event.key === 'Enter') {
                     event.preventDefault();
                     addTag();
                   }
-                }} placeholder="Nhập tag và Enter" className="min-w-0 flex-1 rounded-2xl border border-white/10 bg-[#171a2a] px-4 py-3 text-sm outline-none focus:border-[#A7ACD9]" />
-                <button type="button" onClick={addTag} className="rounded-2xl bg-white/10 px-4 text-[#A7ACD9]">+</button>
+                }} placeholder="Nhập tag và Enter" className="min-w-0 flex-1 rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] px-4 py-3 text-sm outline-none focus:border-[#B24A26]" />
+                <button type="button" onClick={addTag} className="rounded-2xl bg-[#F0E7D8] px-4 text-[#B24A26]">+</button>
               </div>
               <div className="mt-2 flex flex-wrap gap-2">
                 {tags.map((item) => (
@@ -402,7 +397,7 @@ function Artworks() {
                     key={item}
                     type="button"
                     onClick={() => setTags((current) => current.filter((tagItem) => tagItem !== item))}
-                    className="rounded-full bg-[#A7ACD9]/15 px-2 py-1 text-[11px] text-[#DDE0FF]"
+                    className="rounded-full bg-[#B24A26]/15 px-2 py-1 text-[11px] text-[#A8321C]"
                   >
                     #{item}
                   </button>
@@ -413,29 +408,29 @@ function Artworks() {
         </section>
 
         <aside className="glass-container rounded-[28px] p-5">
-          <h2 className="font-h1 text-lg font-semibold text-white">Thông tin xuất bản</h2>
+          <h2 className="font-h1 text-lg font-semibold text-[#241F1A]">Thông tin xuất bản</h2>
           <Toggle label="Tác phẩm tạo bằng AI" description="Bật nếu bạn dùng AI để tạo hình ảnh này." checked={isAiGenerated} onChange={setIsAiGenerated} />
-          <p className="mt-5 text-xs leading-5 text-[#919099]">Tác phẩm sẽ được kiểm duyệt trước khi xuất hiện công khai. Bạn có thể chỉnh sửa và theo dõi trạng thái trong portfolio bên dưới.</p>
-          <p className="mt-3 rounded-xl border border-[#A7ACD9]/25 bg-[#A7ACD9]/5 p-3 text-xs leading-5 text-[#C7C5CF]">Sau khi bấm Lưu tác phẩm, hệ thống tự động kiểm tra ảnh AI. Tiến trình và điểm nghi ngờ sẽ hiện trên tác phẩm trong portfolio; chọn file thôi chưa bắt đầu quét.</p>
+          <p className="mt-5 text-xs leading-5 text-[#746A5F]">Tác phẩm sẽ được kiểm duyệt trước khi xuất hiện công khai. Bạn có thể chỉnh sửa và theo dõi trạng thái trong hồ sơ tác phẩm bên dưới.</p>
+          <p className="mt-3 rounded-xl border border-[#B24A26]/25 bg-[#B24A26]/5 p-3 text-xs leading-5 text-[#6E6459]">Sau khi bấm Lưu tác phẩm, hệ thống tự động kiểm tra ảnh AI. Tiến trình và điểm nghi ngờ sẽ hiện trên tác phẩm trong portfolio; chọn file thôi chưa bắt đầu quét.</p>
 
-          <button type="submit" disabled={uploading || !profileReady} className="mt-6 w-full rounded-2xl bg-[#A7ACD9] px-5 py-3 text-sm font-bold text-[#1F2335] disabled:opacity-60">
+          <button type="submit" disabled={uploading || !profileReady} className="mt-6 w-full rounded-2xl bg-[#B24A26] px-5 py-3 text-sm font-bold text-[#F7F2E9] disabled:opacity-60">
             {uploading ? 'Đang tải lên...' : 'Lưu tác phẩm'}
           </button>
 
-          {saved ? <p role="status" className="mt-3 flex items-center gap-2 text-sm text-[#BCE6B8]"><Check className="h-4 w-4 shrink-0" /> Đã lưu. Xem trạng thái kiểm tra AI trong portfolio bên dưới.</p> : null}
+          {saved ? <p role="status" className="mt-3 flex items-center gap-2 text-sm text-[#BCE6B8]"><Check className="h-4 w-4 shrink-0" /> Đã lưu. Xem trạng thái kiểm tra AI trong hồ sơ tác phẩm bên dưới.</p> : null}
           {error ? <p className="mt-3 text-sm text-[#ff9aa2]">{error}</p> : null}
         </aside>
       </form>
 
       <section className="glass-container rounded-[28px] p-5 sm:p-7">
-        <div className="flex flex-col gap-4 border-b border-white/10 pb-5 sm:flex-row sm:items-end sm:justify-between">
+        <div className="flex flex-col gap-4 border-b border-[#221E1A]/10 pb-5 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h2 className="font-h1 text-xl font-semibold text-white">Portfolio của bạn</h2>
-            <p className="mt-1 text-sm text-[#C7C5CF]">{artworks.length} tác phẩm</p>
+            <h2 className="font-h1 text-xl font-semibold text-[#241F1A]">Hồ sơ tác phẩm của bạn</h2>
+            <p className="mt-1 text-sm text-[#6E6459]">{artworks.length} tác phẩm</p>
           </div>
           <div className="grid gap-2 sm:grid-cols-[minmax(220px,1fr)_170px]">
-            <input value={artworkSearch} onChange={(event) => setArtworkSearch(event.target.value)} placeholder="Tìm tên, mô tả hoặc tag" className="rounded-xl border border-white/10 bg-[#171a2a] px-3 py-2 text-sm text-white outline-none focus:border-[#A7ACD9]" />
-            <select value={artworkStatus} onChange={(event) => setArtworkStatus(event.target.value)} className="rounded-xl border border-white/10 bg-[#171a2a] px-3 py-2 text-sm text-white outline-none">
+            <input value={artworkSearch} onChange={(event) => setArtworkSearch(event.target.value)} placeholder="Tìm tên, mô tả hoặc tag" className="rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-3 py-2 text-sm text-[#241F1A] outline-none focus:border-[#B24A26]" />
+            <select value={artworkStatus} onChange={(event) => setArtworkStatus(event.target.value)} className="rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-3 py-2 text-sm text-[#241F1A] outline-none">
               <option value="All">Mọi trạng thái</option>
               <option value="Pending">Đang duyệt</option>
               <option value="Approved">Đã duyệt</option>
@@ -445,30 +440,30 @@ function Artworks() {
             </select>
           </div>
         </div>
-        {loadingArtworks ? <p className="py-10 text-center text-sm text-[#C7C5CF]">Đang tải portfolio...</p> : artworks.length === 0 ? <p className="py-10 text-center text-sm text-[#C7C5CF]">Chưa có tác phẩm phù hợp.</p> : (
+        {loadingArtworks ? <p className="py-10 text-center text-sm text-[#6E6459]">Đang tải hồ sơ tác phẩm...</p> : artworks.length === 0 ? <p className="py-10 text-center text-sm text-[#6E6459]">Chưa có tác phẩm phù hợp.</p> : (
           <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {artworks.map((artwork) => (
-              <article key={artwork.id} className="overflow-hidden rounded-2xl border border-white/10 bg-[#171a2a]">
-                <div className="relative aspect-[4/3] bg-black/20">
+              <article key={artwork.id} className="overflow-hidden rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6]">
+                <div className="relative aspect-[4/3] bg-[#F0E7D8]">
                   <Image src={artwork.thumbnailUrl || artwork.imageUrl} alt={artwork.title} fill unoptimized className="object-contain" />
                 </div>
                 <div className="space-y-3 p-4">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <h3 className="truncate text-sm font-semibold text-white">{artwork.title}</h3>
-                      <p className="mt-1 text-xs text-[#A7ACD9]">{artwork.moderationStatus} · {artwork.viewCount} lượt xem</p>
+                      <h3 className="truncate text-sm font-semibold text-[#241F1A]">{artwork.title}</h3>
+                      <p className="mt-1 text-xs text-[#B24A26]">{artwork.moderationStatus} · {artwork.viewCount} lượt xem</p>
                       {(artwork.categoryName || artwork.style) && (
-                        <span className="mt-1.5 inline-block rounded-full bg-[#A7ACD9]/15 border border-[#A7ACD9]/30 px-2 py-0.5 text-[10px] font-semibold text-[#C5C9F8]">
+                        <span className="mt-1.5 inline-block rounded-full bg-[#B24A26]/15 border border-[#B24A26]/30 px-2 py-0.5 text-[10px] font-semibold text-[#8C3718]">
                           {artwork.categoryName || artwork.style}
                         </span>
                       )}
                     </div>
                     <div className="flex shrink-0 gap-1">
-                      <button type="button" onClick={() => openEdit(artwork)} title="Chỉnh sửa tác phẩm" aria-label={`Chỉnh sửa ${artwork.title}`} className="rounded-lg border border-white/10 p-2 text-[#C7C5CF] hover:bg-white/10 hover:text-white"><Pencil className="h-3.5 w-3.5" /></button>
-                      <button type="button" onClick={() => setDeletingArtwork(artwork)} title="Xóa tác phẩm" aria-label={`Xóa ${artwork.title}`} className="rounded-lg border border-rose-300/20 p-2 text-rose-200 hover:bg-rose-300/10"><Trash2 className="h-3.5 w-3.5" /></button>
+                      <button type="button" onClick={() => openEdit(artwork)} title="Chỉnh sửa tác phẩm" aria-label={`Chỉnh sửa ${artwork.title}`} className="rounded-lg border border-[#221E1A]/10 p-2 text-[#6E6459] hover:bg-[#F0E7D8] hover:text-[#241F1A]"><Pencil className="h-3.5 w-3.5" /></button>
+                      <button type="button" onClick={() => setDeletingArtwork(artwork)} title="Xóa tác phẩm" aria-label={`Xóa ${artwork.title}`} className="rounded-lg border border-[#A8321C]/30 p-2 text-[#A8321C] hover:bg-[#A8321C]/10"><Trash2 className="h-3.5 w-3.5" /></button>
                     </div>
                   </div>
-                  {artwork.tags.length ? <div className="flex flex-wrap gap-1.5">{artwork.tags.map((item) => <span key={item} className="rounded-full bg-white/5 px-2 py-1 text-[10px] text-[#C7C5CF]">#{item}</span>)}</div> : null}
+                  {artwork.tags.length ? <div className="flex flex-wrap gap-1.5">{artwork.tags.map((item) => <span key={item} className="rounded-full bg-[#FFFCF6] px-2 py-1 text-[10px] text-[#6E6459]">#{item}</span>)}</div> : null}
                   <ArtworkScanPanel key={`${artwork.id}:${artwork.imageUrl}`} artworkId={artwork.id} compact onCompleted={scanNotices[artwork.id] === artwork.imageUrl ? () => {
                     setScanNotices(current => {
                       if (current[artwork.id] !== artwork.imageUrl) return current;
@@ -484,18 +479,16 @@ function Artworks() {
         )}
       </section>
 
-      {editingArtwork ? <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/70 p-4" role="dialog" aria-modal="true" aria-label="Chỉnh sửa tác phẩm">
-        <form onSubmit={saveEdit} className="w-full max-w-xl space-y-4 rounded-2xl border border-white/10 bg-[#20253b] p-5 sm:p-6">
-          <div className="flex items-center justify-between"><h2 className="font-h1 text-lg font-semibold text-white">Chỉnh sửa tác phẩm</h2><button type="button" onClick={() => setEditingArtwork(null)} className="rounded-lg p-2 text-[#C7C5CF] hover:bg-white/10" aria-label="Đóng"><X className="h-4 w-4" /></button></div>
-          <button type="button" onClick={() => editImageInputRef.current?.click()} className="relative flex h-44 w-full items-center justify-center overflow-hidden rounded-xl border border-dashed border-white/15 bg-black/20 text-xs text-white hover:border-[#A7ACD9]/60">{editingImagePreview ? <Image src={editingImagePreview} alt="Ảnh artwork mới" fill unoptimized className="object-contain" /> : <span>Chọn ảnh thay thế</span>}<span className="absolute bottom-2 right-2 rounded-lg bg-black/70 px-2 py-1">Thay ảnh</span></button>
+      {editingArtwork ? <div className="fixed inset-0 z-[80] flex items-center justify-center bg-[#E5D8C2] p-4" role="dialog" aria-modal="true" aria-label="Chỉnh sửa tác phẩm">
+        <form onSubmit={saveEdit} className="w-full max-w-xl space-y-4 rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] p-5 sm:p-6">
+          <div className="flex items-center justify-between"><h2 className="font-h1 text-lg font-semibold text-[#241F1A]">Chỉnh sửa tác phẩm</h2><button type="button" onClick={() => setEditingArtwork(null)} className="rounded-lg p-2 text-[#6E6459] hover:bg-[#F0E7D8]" aria-label="Đóng"><X className="h-4 w-4" /></button></div>
+          <button type="button" onClick={() => editImageInputRef.current?.click()} className="relative flex h-44 w-full items-center justify-center overflow-hidden rounded-xl border border-dashed border-[#221E1A]/10 bg-[#F0E7D8] text-xs text-[#241F1A] hover:border-[#B24A26]/60">{editingImagePreview ? <Image src={editingImagePreview} alt="Ảnh artwork mới" fill unoptimized className="object-contain" /> : <span>Chọn ảnh thay thế</span>}<span className="absolute bottom-2 right-2 rounded-lg bg-[#E5D8C2] px-2 py-1">Thay ảnh</span></button>
           <input ref={editImageInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={chooseEditImage} className="hidden" />
-          <label className="block text-sm text-[#C7C5CF]">Tiêu đề<input value={editTitle} onChange={(event) => setEditTitle(event.target.value)} maxLength={200} required className="mt-1.5 w-full rounded-xl border border-white/10 bg-[#171a2a] px-3 py-2.5 text-white outline-none focus:border-[#A7ACD9]" /></label>
-          <label className="block text-sm text-[#C7C5CF]">
-            Danh mục lớn
-            <select
+          <label className="block text-sm text-[#6E6459]">Tiêu đề<input value={editTitle} onChange={(event) => setEditTitle(event.target.value)} maxLength={200} required className="mt-1.5 w-full rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-3 py-2.5 text-[#241F1A] outline-none focus:border-[#B24A26]" /></label>
+          <label className="block text-sm text-[#6E6459]"> Danh mục lớn <select
               value={editCategoryId}
               onChange={(event) => setEditCategoryId(event.target.value)}
-              className="mt-1.5 w-full rounded-xl border border-white/10 bg-[#171a2a] px-3 py-2.5 text-white outline-none focus:border-[#A7ACD9]"
+              className="mt-1.5 w-full rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-3 py-2.5 text-[#241F1A] outline-none focus:border-[#B24A26]"
             >
               <option value="">-- Giữ nguyên hoặc chọn danh mục --</option>
               {categories.map((cat) => (
@@ -505,16 +498,16 @@ function Artworks() {
               ))}
             </select>
           </label>
-          <label className="block text-sm text-[#C7C5CF]">Mô tả<textarea value={editDescription} onChange={(event) => setEditDescription(event.target.value)} className="mt-1.5 min-h-24 w-full rounded-xl border border-white/10 bg-[#171a2a] px-3 py-2.5 text-white outline-none focus:border-[#A7ACD9]" /></label>
-          <label className="block text-sm text-[#C7C5CF]">Tags, phân cách bằng dấu phẩy<input value={editTags} onChange={(event) => setEditTags(event.target.value)} className="mt-1.5 w-full rounded-xl border border-white/10 bg-[#171a2a] px-3 py-2.5 text-white outline-none focus:border-[#A7ACD9]" /></label>
-          <div className="flex justify-end gap-2"><button type="button" onClick={() => setEditingArtwork(null)} className="rounded-xl border border-white/10 px-4 py-2 text-sm text-white">Hủy</button><button type="submit" disabled={savingEdit} className="rounded-xl bg-[#A7ACD9] px-4 py-2 text-sm font-semibold text-[#1F2335] disabled:opacity-60">{savingEdit ? 'Đang lưu...' : 'Lưu thay đổi'}</button></div>
+          <label className="block text-sm text-[#6E6459]">Mô tả<textarea value={editDescription} onChange={(event) => setEditDescription(event.target.value)} className="mt-1.5 min-h-24 w-full rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-3 py-2.5 text-[#241F1A] outline-none focus:border-[#B24A26]" /></label>
+          <label className="block text-sm text-[#6E6459]">Tags, phân cách bằng dấu phẩy<input value={editTags} onChange={(event) => setEditTags(event.target.value)} className="mt-1.5 w-full rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-3 py-2.5 text-[#241F1A] outline-none focus:border-[#B24A26]" /></label>
+          <div className="flex justify-end gap-2"><button type="button" onClick={() => setEditingArtwork(null)} className="rounded-xl border border-[#221E1A]/10 px-4 py-2 text-sm text-[#241F1A]">Hủy</button><button type="submit" disabled={savingEdit} className="rounded-xl bg-[#B24A26] px-4 py-2 text-sm font-semibold text-[#F7F2E9] disabled:opacity-60">{savingEdit ? 'Đang lưu...' : 'Lưu thay đổi'}</button></div>
         </form>
       </div> : null}
-      {deletingArtwork ? <div className="fixed inset-0 z-[90] flex items-center justify-center bg-black/70 p-4" role="alertdialog" aria-modal="true" aria-labelledby="delete-artwork-title">
-        <div className="w-full max-w-sm rounded-2xl border border-white/10 bg-[#20253b] p-5">
-          <h2 id="delete-artwork-title" className="font-h1 text-lg font-semibold text-white">Xóa tác phẩm?</h2>
-          <p className="mt-2 text-sm leading-5 text-[#C7C5CF]">“{deletingArtwork.title}” sẽ bị gỡ khỏi portfolio và marketplace.</p>
-          <div className="mt-5 flex justify-end gap-2"><button type="button" disabled={deleteBusy} onClick={() => setDeletingArtwork(null)} className="rounded-xl border border-white/10 px-4 py-2 text-sm text-white">Hủy</button><button type="button" disabled={deleteBusy} onClick={confirmDeleteArtwork} className="rounded-xl bg-rose-300 px-4 py-2 text-sm font-semibold text-[#351718] disabled:opacity-60">{deleteBusy ? 'Đang xóa...' : 'Xóa tác phẩm'}</button></div>
+      {deletingArtwork ? <div className="fixed inset-0 z-[90] flex items-center justify-center bg-[#E5D8C2] p-4" role="alertdialog" aria-modal="true" aria-labelledby="delete-artwork-title">
+        <div className="w-full max-w-sm rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] p-5">
+          <h2 id="delete-artwork-title" className="font-h1 text-lg font-semibold text-[#241F1A]">Xóa tác phẩm?</h2>
+          <p className="mt-2 text-sm leading-5 text-[#6E6459]">“{deletingArtwork.title}” sẽ bị gỡ khỏi hồ sơ tác phẩm và marketplace.</p>
+          <div className="mt-5 flex justify-end gap-2"><button type="button" disabled={deleteBusy} onClick={() => setDeletingArtwork(null)} className="rounded-xl border border-[#221E1A]/10 px-4 py-2 text-sm text-[#241F1A]">Hủy</button><button type="button" disabled={deleteBusy} onClick={confirmDeleteArtwork} className="rounded-xl bg-[#A8321C]/10 px-4 py-2 text-sm font-semibold text-[#FFFCF6] disabled:opacity-60">{deleteBusy ? 'Đang xóa...' : 'Xóa tác phẩm'}</button></div>
         </div>
       </div> : null}
     </Shell>
@@ -551,9 +544,9 @@ function Services() {
     try {
       await creatorProfileService.updateMyProfile({ availableSlots: nextSlots });
       setSlots(nextSlots);
-      toast.success('Đã cập nhật số slot nhận đơn.');
+      toast.success('Đã cập nhật số lượt nhận đơn.');
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Không thể cập nhật slot.';
+      const message = error instanceof Error ? error.message : 'Không thể cập nhật lượt.';
       toast.error(message);
       setSlots((current) => Math.max(1, current));
     }
@@ -565,32 +558,31 @@ function Services() {
         <section className="space-y-3">
           {services.map((service) => (
             <article key={service.id} className="glass-container flex flex-col gap-4 rounded-3xl p-5 sm:flex-row sm:items-center">
-              <GripVertical className="hidden h-5 w-5 text-[#919099] sm:block" />
+              <GripVertical className="hidden h-5 w-5 text-[#746A5F] sm:block" />
               <div className="min-w-0 flex-1">
-                <input value={service.name} onChange={(event) => setServices((current) => current.map((item) => item.id === service.id ? { ...item, name: event.target.value } : item))} className="w-full bg-transparent font-h1 text-lg font-semibold text-white outline-none" />
-                <p className="mt-1 text-xs text-[#919099]">Gói commission</p>
+                <input value={service.name} onChange={(event) => setServices((current) => current.map((item) => item.id === service.id ? { ...item, name: event.target.value } : item))} className="w-full bg-transparent font-h1 text-lg font-semibold text-[#241F1A] outline-none" />
+                <p className="mt-1 text-xs text-[#746A5F]">Gói đặt vẽ</p>
               </div>
-              <input value={service.price} onChange={(event) => setServices((current) => current.map((item) => item.id === service.id ? { ...item, price: event.target.value } : item))} className="rounded-xl border border-white/10 bg-[#171a2a] px-3 py-2 text-sm text-white outline-none sm:w-32" />
-              <input value={service.days} onChange={(event) => setServices((current) => current.map((item) => item.id === service.id ? { ...item, days: event.target.value } : item))} className="rounded-xl border border-white/10 bg-[#171a2a] px-3 py-2 text-sm text-white outline-none sm:w-28" />
-              <button type="button" onClick={() => setServices((current) => current.map((item) => item.id === service.id ? { ...item, active: !item.active } : item))} className={`rounded-full px-3 py-2 text-xs ${service.active ? 'bg-[#BCE6B8]/15 text-[#BCE6B8]' : 'bg-white/5 text-[#919099]'}`}>
+              <input value={service.price} onChange={(event) => setServices((current) => current.map((item) => item.id === service.id ? { ...item, price: event.target.value } : item))} className="rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-3 py-2 text-sm text-[#241F1A] outline-none sm:w-32" />
+              <input value={service.days} onChange={(event) => setServices((current) => current.map((item) => item.id === service.id ? { ...item, days: event.target.value } : item))} className="rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-3 py-2 text-sm text-[#241F1A] outline-none sm:w-28" />
+              <button type="button" onClick={() => setServices((current) => current.map((item) => item.id === service.id ? { ...item, active: !item.active } : item))} className={`rounded-full px-3 py-2 text-xs ${service.active ? 'bg-[#BCE6B8]/15 text-[#BCE6B8]' : 'bg-[#FFFCF6] text-[#746A5F]'}`}>
                 {service.active ? 'Đang mở' : 'Tạm ẩn'}
               </button>
             </article>
           ))}
-          <button type="button" onClick={add} className="flex items-center gap-2 rounded-2xl border border-dashed border-white/15 px-4 py-3 text-sm text-[#A7ACD9]">
-            <Plus className="h-4 w-4" /> Thêm gói mới
-          </button>
+          <button type="button" onClick={add} className="flex items-center gap-2 rounded-2xl border border-dashed border-[#221E1A]/10 px-4 py-3 text-sm text-[#B24A26]">
+            <Plus className="h-4 w-4" /> Thêm gói mới </button>
         </section>
 
         <aside className="glass-container rounded-3xl p-5">
-          <p className="text-xs uppercase tracking-[.2em] text-[#A7ACD9]">Slots</p>
-          <h2 className="mt-3 font-h1 text-xl font-bold text-white">Số slot nhận đơn</h2>
-          <div className="mt-5 flex items-center justify-between rounded-2xl border border-white/10 bg-[#171a2a] p-3">
-            <button type="button" onClick={() => updateSlots(Math.max(1, slots - 1))} className="rounded-xl bg-white/5 px-3 py-2 text-white">−</button>
-            <span className="text-lg font-semibold text-white">{slots}</span>
-            <button type="button" onClick={() => updateSlots(slots + 1)} className="rounded-xl bg-white/5 px-3 py-2 text-white">+</button>
+          <p className="text-xs uppercase tracking-[.2em] text-[#B24A26]">Slots</p>
+          <h2 className="mt-3 font-h1 text-xl font-bold text-[#241F1A]">Số lượt nhận đơn</h2>
+          <div className="mt-5 flex items-center justify-between rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] p-3">
+            <button type="button" onClick={() => updateSlots(Math.max(1, slots - 1))} className="rounded-xl bg-[#FFFCF6] px-3 py-2 text-[#241F1A]">−</button>
+            <span className="text-lg font-semibold text-[#241F1A]">{slots}</span>
+            <button type="button" onClick={() => updateSlots(slots + 1)} className="rounded-xl bg-[#FFFCF6] px-3 py-2 text-[#241F1A]">+</button>
           </div>
-          <p className="mt-3 text-sm text-[#C7C5CF]">Tổng slot đang mở cho khách đặt hàng.</p>
+          <p className="mt-3 text-sm text-[#6E6459]">Tổng lượt đang mở cho khách đặt hàng.</p>
         </aside>
       </div>
     </Shell>
@@ -602,7 +594,7 @@ type DraftClause = { id: string; title: string; content: string };
 const CLAUSE_SNIPPETS: Array<{ title: string; content: string }> = [
   { title: "Phí làm gấp", content: "Đơn cần hoàn thành gấp hơn thời hạn tiêu chuẩn sẽ áp dụng phụ phí thỏa thuận theo mức độ ưu tiên." },
   { title: "Giữ kín (NDA)", content: "Nếu cần bảo mật tuyệt đối và không đăng mẫu công khai trong mọi thời điểm, vui lòng thỏa thuận NDA trước khi ký quỹ." },
-  { title: "Tệp nguồn (.PSD / .CLIP)", content: "Sản phẩm mặc định giao định dạng ảnh/PDF phẳng độ phân giải cao; tệp nguồn tách lớp cần thỏa thuận riêng." },
+  { title: "Tệp nguồn (.PSD /.CLIP)", content: "Sản phẩm mặc định giao định dạng ảnh/PDF phẳng độ phân giải cao; tệp nguồn tách lớp cần thỏa thuận riêng." },
 ];
 
 const makeClauseId = () => (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function" ? crypto.randomUUID() : `clause-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`);
@@ -825,7 +817,7 @@ function Terms() {
 
   const headerActions = (
     <>
-      <span className={`rounded-xl px-3 py-2 text-xs font-medium ${isDirty ? "bg-amber-400/15 text-amber-200" : "bg-white/[.05] text-[#C7C5CF]"}`}>
+      <span className={`rounded-xl px-3 py-2 text-xs font-medium ${isDirty ? "bg-[#8A6A1F]/15 text-[#8A6A1F]" : "bg-[#FFFCF6] text-[#6E6459]"}`}>
         {loading
           ? "Đang tải..."
           : isDirty
@@ -839,26 +831,22 @@ function Terms() {
           type="button"
           disabled={saving}
           onClick={revertChanges}
-          className="inline-flex items-center gap-1.5 rounded-2xl bg-white/10 px-3.5 py-2.5 text-xs font-semibold text-white transition hover:bg-white/15 disabled:opacity-50"
+          className="inline-flex items-center gap-1.5 rounded-2xl bg-[#F0E7D8] px-3.5 py-2.5 text-xs font-semibold text-[#241F1A] transition hover:bg-[#F0E7D8] disabled:opacity-50"
         >
-          <RotateCcw className="h-3.5 w-3.5" />
-          Hoàn tác
-        </button>
+          <RotateCcw className="h-3.5 w-3.5" /> Hoàn tác </button>
       )}
       <button
         type="button"
         disabled={!canEdit}
         onClick={() => setShowPreview(true)}
-        className="inline-flex items-center gap-1.5 rounded-2xl bg-white/10 px-4 py-2.5 text-xs font-semibold text-[#DDE0FF] transition hover:bg-white/15 disabled:opacity-45"
+        className="inline-flex items-center gap-1.5 rounded-2xl bg-[#F0E7D8] px-4 py-2.5 text-xs font-semibold text-[#A8321C] transition hover:bg-[#F0E7D8] disabled:opacity-45"
       >
-        <Eye className="h-3.5 w-3.5" />
-        Xem trước
-      </button>
+        <Eye className="h-3.5 w-3.5" /> Xem trước </button>
       <button
         type="button"
         disabled={!canEdit || saving || !multiplierValid || hasInvalidClause}
         onClick={() => void save()}
-        className="rounded-2xl bg-[#A7ACD9] px-5 py-2.5 text-xs font-bold text-[#1F2335] transition hover:bg-[#b8bde4] disabled:cursor-not-allowed disabled:opacity-50"
+        className="rounded-2xl bg-[#B24A26] px-5 py-2.5 text-xs font-bold text-[#F7F2E9] transition hover:bg-[#8C3718] disabled:cursor-not-allowed disabled:opacity-50"
       >
         {saving ? "Đang lưu..." : "Lưu điều khoản"}
       </button>
@@ -868,7 +856,7 @@ function Terms() {
   return (
     <Shell view="terms" actions={headerActions}>
       {loadError && (
-        <div role="alert" className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-rose-500/15 px-4 py-3 text-sm text-rose-200">
+        <div role="alert" className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-[#A8321C]/15 px-4 py-3 text-sm text-[#A8321C]">
           <span className="flex items-center gap-2">
             <AlertCircle className="h-4 w-4 shrink-0" />
             {loadError}
@@ -876,15 +864,13 @@ function Terms() {
           <button
             type="button"
             onClick={() => void loadState()}
-            className="rounded-xl bg-white/10 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-white/20"
-          >
-            Thử tải lại
-          </button>
+            className="rounded-xl bg-[#F0E7D8] px-3 py-1.5 text-xs font-semibold text-[#241F1A] transition hover:bg-[#F0E7D8]"
+          > Thử tải lại </button>
         </div>
       )}
 
       {saveError && (
-        <div role="alert" className="flex items-center gap-2 rounded-2xl bg-rose-500/15 px-4 py-3 text-xs text-rose-200">
+        <div role="alert" className="flex items-center gap-2 rounded-2xl bg-[#A8321C]/15 px-4 py-3 text-xs text-[#A8321C]">
           <AlertCircle className="h-4 w-4 shrink-0" />
           <span>{saveError}</span>
         </div>
@@ -894,8 +880,8 @@ function Terms() {
         <section className="glass-container rounded-3xl p-6">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <h2 className="font-h1 text-balance text-lg font-bold text-white">Bản quyền sử dụng</h2>
-              <p className="mt-1.5 text-pretty text-sm text-[#C7C5CF]">Phụ phí thương mại và quyền khai thác tác phẩm.</p>
+              <h2 className="font-h1 text-balance text-lg font-bold text-[#241F1A]">Bản quyền sử dụng</h2>
+              <p className="mt-1.5 text-pretty text-sm text-[#6E6459]">Phụ phí thương mại và quyền khai thác tác phẩm.</p>
             </div>
             <div className="flex flex-wrap gap-1.5">
               {CREATOR_TERMS_PRESETS.map((preset, idx) => (
@@ -905,7 +891,7 @@ function Terms() {
                   disabled={!canEdit}
                   onClick={() => requestApplyPreset(idx)}
                   title={preset.description}
-                  className="rounded-xl bg-white/10 px-3 py-1.5 text-xs font-medium text-[#DDE0FF] transition hover:bg-white/15 disabled:opacity-45"
+                  className="rounded-xl bg-[#F0E7D8] px-3 py-1.5 text-xs font-medium text-[#A8321C] transition hover:bg-[#F0E7D8] disabled:opacity-45"
                 >
                   {preset.label}
                 </button>
@@ -914,23 +900,23 @@ function Terms() {
           </div>
 
           {pendingPresetIdx !== null && (
-            <div className="mt-4 rounded-2xl bg-amber-400/10 p-3.5 text-xs text-amber-100">
+            <div className="mt-4 rounded-2xl bg-[#8A6A1F]/10 p-3.5 text-xs text-[#8A6A1F]">
               <p className="font-semibold">Áp dụng &ldquo;{CREATOR_TERMS_PRESETS[pendingPresetIdx]?.label}&rdquo; sẽ thay đổi nội dung hiện tại.</p>
               <div className="mt-2.5 flex flex-wrap gap-2">
-                <button type="button" onClick={() => commitPreset(pendingPresetIdx, true)} className="rounded-xl bg-[#A7ACD9] px-3 py-1.5 font-bold text-[#1F2335]">Áp dụng &amp; giữ điều khoản riêng</button>
-                <button type="button" onClick={() => commitPreset(pendingPresetIdx, false)} className="rounded-xl bg-white/15 px-3 py-1.5 font-semibold text-white">Ghi đè toàn bộ</button>
-                <button type="button" onClick={() => setPendingPresetIdx(null)} className="rounded-xl px-2.5 py-1.5 text-slate-300 hover:text-white">Hủy</button>
+                <button type="button" onClick={() => commitPreset(pendingPresetIdx, true)} className="rounded-xl bg-[#B24A26] px-3 py-1.5 font-bold text-[#F7F2E9]">Áp dụng &amp; giữ điều khoản riêng</button>
+                <button type="button" onClick={() => commitPreset(pendingPresetIdx, false)} className="rounded-xl bg-[#F0E7D8] px-3 py-1.5 font-semibold text-[#241F1A]">Ghi đè toàn bộ</button>
+                <button type="button" onClick={() => setPendingPresetIdx(null)} className="rounded-xl px-2.5 py-1.5 text-[#746A5F] hover:text-[#241F1A]">Hủy</button>
               </div>
             </div>
           )}
 
           <div className="mt-6 space-y-3">
-            <LicenseRow title="Cá nhân (Personal)" detail="Dùng cá nhân, phi thương mại" value="1.0× giá gốc" />
-            <div className="rounded-2xl bg-[#A7ACD9]/[.08] p-4">
+            <LicenseRow title="Cá nhân" detail="Dùng cá nhân, phi thương mại" value="1.0× giá gốc" />
+            <div className="rounded-2xl bg-[#B24A26]/[.08] p-4">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <p className="text-sm font-medium text-white">Thương mại (Commercial)</p>
-                  <p className="mt-0.5 text-xs text-[#C7C5CF]">Branding / livestream / kinh doanh</p>
+                  <p className="text-sm font-medium text-[#241F1A]">Thương mại</p>
+                  <p className="mt-0.5 text-xs text-[#6E6459]">Branding / livestream / kinh doanh</p>
                 </div>
                 <div className="flex items-center gap-1.5">
                   {[1.5, 2, 2.5].map((presetMult) => (
@@ -939,7 +925,7 @@ function Terms() {
                       type="button"
                       disabled={!canEdit}
                       onClick={() => setCommercial(String(presetMult))}
-                      className={`rounded-lg px-2 py-1 font-mono text-xs transition ${Number(commercial) === presetMult ? "bg-[#A7ACD9] font-bold text-[#1F2335]" : "bg-white/10 text-[#C7C5CF] hover:bg-white/15"}`}
+                      className={`rounded-lg px-2 py-1 font-mono text-xs transition ${Number(commercial) === presetMult ? "bg-[#B24A26] font-bold text-[#F7F2E9]" : "bg-[#F0E7D8] text-[#6E6459] hover:bg-[#F0E7D8]"}`}
                     >
                       {presetMult}×
                     </button>
@@ -956,37 +942,35 @@ function Terms() {
                   value={commercial}
                   onChange={(event) => setCommercial(event.target.value)}
                   aria-label="Hệ số thương mại"
-                  className="w-20 rounded-xl border border-white/10 bg-[#171a2a] px-3 py-2 text-center font-mono text-sm text-white outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none focus:border-[#A7ACD9] disabled:opacity-50"
+                  className="w-20 rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-3 py-2 text-center font-mono text-sm text-[#241F1A] outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none focus:border-[#B24A26] disabled:opacity-50"
                 />
-                <span className="text-sm text-[#DDE0FF]">× giá gốc</span>
+                <span className="text-sm text-[#A8321C]">× giá gốc</span>
               </div>
               {!multiplierValid && (
-                <p role="alert" className="mt-2 text-xs text-rose-300">Nhập hệ số từ 1.0 đến 10.0.</p>
+                <p role="alert" className="mt-2 text-xs text-[#A8321C]">Nhập hệ số từ 1.0 đến 10.0.</p>
               )}
-              <label className="mt-4 block text-sm text-[#C7C5CF]">
-                Phạm vi thương mại được phép
-                <textarea
+              <label className="mt-4 block text-sm text-[#6E6459]"> Phạm vi thương mại được phép <textarea
                   rows={2}
                   disabled={!canEdit}
                   value={extended.commercialScope ?? ""}
                   onChange={(event) => setExtended((prev) => ({ ...prev, commercialScope: event.target.value }))}
-                  className="mt-2 min-h-20 w-full rounded-2xl border border-white/10 bg-[#171a2a] p-3 text-sm text-white outline-none focus:border-[#A7ACD9] disabled:opacity-50"
+                  className="mt-2 min-h-20 w-full rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] p-3 text-sm text-[#241F1A] outline-none focus:border-[#B24A26] disabled:opacity-50"
                 />
               </label>
             </div>
           </div>
 
-          <div className="mt-4 divide-y divide-white/10 border-t border-white/10 pt-2">
+          <div className="mt-4 divide-y divide-[#221E1A]/10 border-t border-[#221E1A]/10 pt-2">
             <Toggle
-              label="Cho phép Creator đăng Portfolio"
-              description="Đăng mẫu có watermark lên hồ sơ/MXH sau khi bàn giao."
+              label="Cho phép họa sĩ đăng hồ sơ tác phẩm"
+              description="Đăng mẫu có dấu chìm lên hồ sơ/MXH sau khi bàn giao."
               checked={Boolean(extended.allowPortfolioDisplay)}
               disabled={!canEdit}
               onChange={(value) => setExtended((prev) => ({ ...prev, allowPortfolioDisplay: value }))}
             />
             <Toggle
-              label="Yêu cầu ghi nguồn (Credit)"
-              description="Client cần ghi tên/tài khoản Creator khi đăng tải tác phẩm."
+              label="Yêu cầu ghi nguồn"
+              description="Khách hàng cần ghi tên/tài khoản họa sĩ khi đăng tải tác phẩm."
               checked={Boolean(extended.requireCredit)}
               disabled={!canEdit}
               onChange={(value) => setExtended((prev) => ({ ...prev, requireCredit: value }))}
@@ -1000,7 +984,7 @@ function Terms() {
             />
             <Toggle
               label="Chống bán lại tệp gốc (gói Cá nhân)"
-              description="Không chuyển nhượng hoặc bán lại file khi đặt gói Cá nhân."
+              description="Không chuyển nhượng hoặc bán lại tệp khi đặt gói Cá nhân."
               checked={Boolean(extended.prohibitResale)}
               disabled={!canEdit}
               onChange={(value) => setExtended((prev) => ({ ...prev, prohibitResale: value }))}
@@ -1010,62 +994,59 @@ function Terms() {
 
         <section className="glass-container rounded-3xl p-6">
           <div>
-            <h2 className="font-h1 text-balance text-lg font-bold text-white">Phạm vi vẽ &amp; điều khoản riêng</h2>
-            <p className="mt-1.5 text-sm text-[#C7C5CF]">Nội dung nhận vẽ, giới hạn và các quy định bổ sung của bạn.</p>
+            <h2 className="font-h1 text-balance text-lg font-bold text-[#241F1A]">Phạm vi vẽ &amp; điều khoản riêng</h2>
+            <p className="mt-1.5 text-sm text-[#6E6459]">Nội dung nhận vẽ, giới hạn và các quy định bổ sung của bạn.</p>
           </div>
 
-          <p className="mt-4 rounded-2xl bg-white/[.03] px-3.5 py-2.5 text-xs leading-5 text-[#B8B6C4]">
-            <strong className="text-white">Quy chế chung của sàn:</strong> Ký quỹ Escrow theo mốc, số lần sửa theo Rate Card, hủy đơn 48h và tự động nghiệm thu 72h áp dụng thống nhất.
-          </p>
+          <p className="mt-4 rounded-2xl bg-[#FFFCF6] px-3.5 py-2.5 text-xs leading-5 text-[#B8B6C4]">
+            <strong className="text-[#241F1A]">Quy chế chung của sàn:</strong> Ký quỹ theo mốc, số lần sửa theo Rate Card, hủy đơn 48h và tự động nghiệm thu 72h áp dụng thống nhất. </p>
 
-          <label className="mt-5 block text-sm text-[#C7C5CF]">
-            <span className="inline-flex items-center gap-1.5 font-medium text-emerald-300">
-              <ShieldCheck className="h-4 w-4" /> Nhận vẽ (Will Draw)
-            </span>
+          <label className="mt-5 block text-sm text-[#6E6459]">
+            <span className="inline-flex items-center gap-1.5 font-medium text-[#2F6B63]">
+              <ShieldCheck className="h-4 w-4" /> Nhận vẽ (Will Draw) </span>
             <textarea
               disabled={!canEdit}
               value={extended.willDraw ?? ""}
               onChange={(event) => setExtended((prev) => ({ ...prev, willDraw: event.target.value }))}
-              className="mt-2 min-h-24 w-full rounded-2xl border border-emerald-500/20 bg-[#171a2a] p-3 text-sm text-white outline-none focus:border-emerald-400/60 disabled:opacity-50"
+              className="mt-2 min-h-24 w-full rounded-2xl border border-[#2F6B63]/30 bg-[#FFFCF6] p-3 text-sm text-[#241F1A] outline-none focus:border-[#2F6B63]/40 disabled:opacity-50"
             />
           </label>
 
-          <label className="mt-5 block text-sm text-[#C7C5CF]">
-            <span className="inline-flex items-center gap-1.5 font-medium text-rose-300">
+          <label className="mt-5 block text-sm text-[#6E6459]">
+            <span className="inline-flex items-center gap-1.5 font-medium text-[#A8321C]">
               <Ban className="h-4 w-4" /> Từ chối vẽ (Won&apos;t Draw)
             </span>
             <textarea
               disabled={!canEdit}
               value={extended.wontDraw ?? ""}
               onChange={(event) => setExtended((prev) => ({ ...prev, wontDraw: event.target.value }))}
-              className="mt-2 min-h-24 w-full rounded-2xl border border-rose-500/20 bg-[#171a2a] p-3 text-sm text-white outline-none focus:border-rose-400/60 disabled:opacity-50"
+              className="mt-2 min-h-24 w-full rounded-2xl border border-[#A8321C]/30 bg-[#FFFCF6] p-3 text-sm text-[#241F1A] outline-none focus:border-[#A8321C]/40 disabled:opacity-50"
             />
           </label>
 
-          <label className="mt-5 block text-sm text-[#C7C5CF]">
+          <label className="mt-5 block text-sm text-[#6E6459]">
             Lưu ý &amp; hạn chế sử dụng
             <textarea
               disabled={!canEdit}
               value={extended.usageRestrictions ?? ""}
               onChange={(event) => setExtended((prev) => ({ ...prev, usageRestrictions: event.target.value }))}
-              className="mt-2 min-h-20 w-full rounded-2xl border border-white/10 bg-[#171a2a] p-3 text-sm text-white outline-none focus:border-[#A7ACD9] disabled:opacity-50"
+              className="mt-2 min-h-20 w-full rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] p-3 text-sm text-[#241F1A] outline-none focus:border-[#B24A26] disabled:opacity-50"
             />
           </label>
 
-          <div className="mt-6 border-t border-white/10 pt-5">
+          <div className="mt-6 border-t border-[#221E1A]/10 pt-5">
             <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
               <div>
-                <h3 className="font-h1 text-base font-bold text-white">Điều khoản bổ sung riêng</h3>
+                <h3 className="font-h1 text-base font-bold text-[#241F1A]">Điều khoản bổ sung riêng</h3>
                 <p className="mt-0.5 text-pretty text-xs text-[#B8B6C4]">Thêm tối đa 10 điều khoản theo cách làm việc của bạn.</p>
               </div>
               <button
                 type="button"
                 disabled={!canEdit || draftClauses.length >= 10}
                 onClick={() => addCustomClause()}
-                className="inline-flex items-center gap-1.5 rounded-xl bg-white/10 px-3 py-2 text-xs font-semibold text-[#DDE0FF] transition hover:bg-white/15 disabled:opacity-45"
+                className="inline-flex items-center gap-1.5 rounded-xl bg-[#F0E7D8] px-3 py-2 text-xs font-semibold text-[#A8321C] transition hover:bg-[#F0E7D8] disabled:opacity-45"
               >
-                <Plus className="h-3.5 w-3.5" /> Thêm điều khoản
-              </button>
+                <Plus className="h-3.5 w-3.5" /> Thêm điều khoản </button>
             </div>
 
             <div className="mb-3 flex flex-wrap gap-1.5">
@@ -1075,7 +1056,7 @@ function Terms() {
                   type="button"
                   disabled={!canEdit || draftClauses.length >= 10}
                   onClick={() => addCustomClause(snippet)}
-                  className="rounded-lg bg-white/[.05] px-2.5 py-1 text-[11px] text-[#C7C5CF] transition hover:bg-white/10 hover:text-white disabled:opacity-45"
+                  className="rounded-lg bg-[#FFFCF6] px-2.5 py-1 text-[11px] text-[#6E6459] transition hover:bg-[#F0E7D8] hover:text-[#241F1A] disabled:opacity-45"
                 >
                   + {snippet.title}
                 </button>
@@ -1087,7 +1068,7 @@ function Terms() {
                 {draftClauses.map((clause, index) => {
                   const clauseErr = clauseErrorAt(clause);
                   return (
-                    <article key={clause.id} className="rounded-2xl bg-white/[.035] p-4">
+                    <article key={clause.id} className="rounded-2xl bg-[#FFFCF6] p-4">
                       <div className="flex items-center justify-between gap-2">
                         <input
                           disabled={!canEdit}
@@ -1095,14 +1076,14 @@ function Terms() {
                           value={clause.title}
                           onChange={(event) => updateCustomClause(clause.id, "title", event.target.value)}
                           placeholder={`Tiêu đề điều khoản #${index + 1}`}
-                          className="w-full bg-transparent text-sm font-medium text-white outline-none placeholder:text-slate-500"
+                          className="w-full bg-transparent text-sm font-medium text-[#241F1A] outline-none placeholder:text-[#746A5F]"
                         />
                         <button
                           type="button"
                           disabled={!canEdit}
                           onClick={() => removeCustomClause(clause.id)}
                           aria-label={`Xóa điều khoản ${index + 1}`}
-                          className="rounded-xl bg-white/5 p-1.5 text-[#B8B6C4] transition hover:text-rose-300 disabled:opacity-45"
+                          className="rounded-xl bg-[#FFFCF6] p-1.5 text-[#B8B6C4] transition hover:text-[#A8321C] disabled:opacity-45"
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>
@@ -1113,9 +1094,9 @@ function Terms() {
                         value={clause.content}
                         onChange={(event) => updateCustomClause(clause.id, "content", event.target.value)}
                         placeholder="Nội dung chi tiết..."
-                        className="mt-3 min-h-20 w-full rounded-2xl border border-white/10 bg-[#171a2a] p-3 text-sm text-white outline-none focus:border-[#A7ACD9] disabled:opacity-50"
+                        className="mt-3 min-h-20 w-full rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] p-3 text-sm text-[#241F1A] outline-none focus:border-[#B24A26] disabled:opacity-50"
                       />
-                      {clauseErr && <p role="alert" className="mt-2 text-xs text-rose-300">{clauseErr}</p>}
+                      {clauseErr && <p role="alert" className="mt-2 text-xs text-[#A8321C]">{clauseErr}</p>}
                     </article>
                   );
                 })}
@@ -1127,7 +1108,7 @@ function Terms() {
 
       {showPreview && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-[#E5D8C2] p-4 backdrop-blur-sm"
           onMouseDown={(event) => {
             if (event.target === event.currentTarget) setShowPreview(false);
           }}
@@ -1136,15 +1117,15 @@ function Terms() {
             role="dialog"
             aria-modal="true"
             aria-label="Xem trước điều khoản dịch vụ"
-            className="flex max-h-[88vh] w-full max-w-3xl flex-col overflow-hidden rounded-3xl border border-white/10 bg-[#141724] shadow-2xl"
+            className="flex max-h-[88vh] w-full max-w-3xl flex-col overflow-hidden rounded-3xl border border-[#221E1A]/10 bg-[#F0E7D8] shadow-2xl"
           >
-            <header className="flex items-center justify-between border-b border-white/10 px-6 py-4">
-              <h2 className="font-h1 text-base font-bold text-white">Xem trước hiển thị với khách hàng</h2>
+            <header className="flex items-center justify-between border-b border-[#221E1A]/10 px-6 py-4">
+              <h2 className="font-h1 text-base font-bold text-[#241F1A]">Xem trước hiển thị với khách hàng</h2>
               <button
                 type="button"
                 onClick={() => setShowPreview(false)}
                 aria-label="Đóng xem trước"
-                className="rounded-xl bg-white/5 p-2 text-slate-300 transition hover:bg-white/10 hover:text-white"
+                className="rounded-xl bg-[#FFFCF6] p-2 text-[#746A5F] transition hover:bg-[#F0E7D8] hover:text-[#241F1A]"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -1161,9 +1142,9 @@ function Terms() {
 
 function AiRules() {
   const [enabled, setEnabled] = useState(false);
-  const [template, setTemplate] = useState('Cảm ơn bạn đã gửi brief! Mình đã nhận được thông tin và sẽ phản hồi trong vòng 24 giờ.');
+  const [template, setTemplate] = useState('Cảm ơn bạn đã gửi đề bài! Mình đã nhận được thông tin và sẽ phản hồi trong vòng 24 giờ.');
   const [faqs, setFaqs] = useState<FaqDraft[]>([
-    { q: 'Bạn nhận commission không?', a: 'Mình đang nhận commission theo số slot hiển thị trên profile.' },
+    { q: 'Bạn nhận đặt vẽ không?', a: 'Mình đang nhận đặt vẽ theo số lượt hiển thị trên profile.' },
     { q: 'Thời gian hoàn thành?', a: 'Tùy gói dịch vụ, thường từ 3–7 ngày.' },
   ]);
 
@@ -1176,7 +1157,7 @@ function AiRules() {
         setFaqs(
           state.faqs?.length
             ? state.faqs.map((faq) => ({ id: faq.id, q: faq.question, a: faq.answer }))
-            : [{ q: 'Bạn nhận commission không?', a: 'Mình đang nhận commission theo số slot hiển thị trên profile.' }],
+            : [{ q: 'Bạn nhận đặt vẽ không?', a: 'Mình đang nhận đặt vẽ theo số lượt hiển thị trên profile.' }],
         );
       } catch {
         // keep defaults
@@ -1254,12 +1235,12 @@ function AiRules() {
         <section className="glass-container rounded-3xl p-6">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <Bot className="h-6 w-6 text-[#A7ACD9]" />
-              <h2 className="mt-4 font-h1 text-lg font-bold text-white">Auto-reply cho chat</h2>
-              <p className="mt-2 text-sm text-[#C7C5CF]">Tự động trả lời ngay khi client gửi tin nhắn đầu tiên.</p>
+              <Bot className="h-6 w-6 text-[#B24A26]" />
+              <h2 className="mt-4 font-h1 text-lg font-bold text-[#241F1A]">Auto-reply cho chat</h2>
+              <p className="mt-2 text-sm text-[#6E6459]">Tự động trả lời ngay khi khách hàng gửi tin nhắn đầu tiên.</p>
             </div>
             <div className="flex items-center gap-2">
-              <span className={`text-xs font-medium ${enabled ? 'text-[#A7ACD9]' : 'text-[#C7C5CF]/60'}`}>
+              <span className={`text-xs font-medium ${enabled ? 'text-[#B24A26]' : 'text-[#6E6459]'}`}>
                 {enabled ? 'Đang bật' : 'Đang tắt'}
               </span>
               <button
@@ -1268,57 +1249,49 @@ function AiRules() {
                 aria-checked={enabled}
                 onClick={toggleAutoReply}
                 className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer items-center rounded-full border transition-colors ${
-                  enabled ? 'border-[#A7ACD9] bg-[#A7ACD9]' : 'border-white/20 bg-white/10'
+                  enabled ? 'border-[#B24A26] bg-[#B24A26]' : 'border-[#221E1A]/20 bg-[#F0E7D8]'
                 }`}
                 aria-label="Bật tắt Auto-reply"
               >
                 <span
                   className={`inline-block h-5 w-5 transform rounded-full transition-transform ${
-                    enabled ? 'translate-x-6 bg-[#1F2335]' : 'translate-x-1 bg-white/70'
+                    enabled ? 'translate-x-6 bg-[#F7F2E9]' : 'translate-x-1 bg-[#FFFCF6]'
                   }`}
                 />
               </button>
             </div>
           </div>
 
-          <label className="mt-6 block text-sm text-[#C7C5CF]">
-            Mẫu tin nhắn
-            <textarea value={template} onChange={(event) => setTemplate(event.target.value)} className="mt-2 min-h-36 w-full rounded-2xl border border-white/10 bg-[#171a2a] p-3 text-sm text-white outline-none focus:border-[#A7ACD9]" />
+          <label className="mt-6 block text-sm text-[#6E6459]"> Mẫu tin nhắn <textarea value={template} onChange={(event) => setTemplate(event.target.value)} className="mt-2 min-h-36 w-full rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] p-3 text-sm text-[#241F1A] outline-none focus:border-[#B24A26]" />
           </label>
-          <button type="button" onClick={saveAutoReply} className="mt-5 w-full rounded-2xl bg-[#A7ACD9] py-3 text-sm font-bold text-[#1F2335]">
-            Lưu automation
-          </button>
+          <button type="button" onClick={saveAutoReply} className="mt-5 w-full rounded-2xl bg-[#B24A26] py-3 text-sm font-bold text-[#F7F2E9]"> Lưu automation </button>
         </section>
 
         <section>
           <div className="mb-4 flex items-center justify-between">
             <div>
-              <h2 className="font-h1 text-lg font-bold text-white">FAQ tự động</h2>
-              <p className="mt-1 text-sm text-[#C7C5CF]">Câu trả lời tự động gửi ngay khi khách hỏi câu tương ứng.</p>
+              <h2 className="font-h1 text-lg font-bold text-[#241F1A]">FAQ tự động</h2>
+              <p className="mt-1 text-sm text-[#6E6459]">Câu trả lời tự động gửi ngay khi khách hỏi câu tương ứng.</p>
             </div>
-            <button type="button" onClick={addFaq} className="rounded-xl bg-white/10 p-2 text-[#A7ACD9]" aria-label="Thêm FAQ">
+            <button type="button" onClick={addFaq} className="rounded-xl bg-[#F0E7D8] p-2 text-[#B24A26]" aria-label="Thêm FAQ">
               <Plus className="h-4 w-4" />
             </button>
           </div>
 
           <div className="space-y-3">
             {faqs.map((faq, index) => (
-              <article key={faq.id ?? `draft-${index}`} className="rounded-3xl border border-white/10 bg-white/[.035] p-4">
-                <input value={faq.q} onChange={(event) => setFaqs((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, q: event.target.value } : item))} className="w-full bg-transparent text-sm font-medium text-white outline-none" />
-                <textarea value={faq.a} onChange={(event) => setFaqs((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, a: event.target.value } : item))} className="mt-3 min-h-20 w-full rounded-2xl border border-white/10 bg-[#171a2a] p-3 text-sm text-white outline-none focus:border-[#A7ACD9]" />
+              <article key={faq.id ?? `draft-${index}`} className="rounded-3xl border border-[#221E1A]/10 bg-[#FFFCF6] p-4">
+                <input value={faq.q} onChange={(event) => setFaqs((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, q: event.target.value } : item))} className="w-full bg-transparent text-sm font-medium text-[#241F1A] outline-none" />
+                <textarea value={faq.a} onChange={(event) => setFaqs((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, a: event.target.value } : item))} className="mt-3 min-h-20 w-full rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] p-3 text-sm text-[#241F1A] outline-none focus:border-[#B24A26]" />
                 <div className="mt-3 flex items-center gap-2">
-                  <button type="button" onClick={() => saveFaq(index)} className="rounded-xl bg-white/10 px-3 py-2 text-xs text-[#A7ACD9]">
-                    Lưu FAQ
-                  </button>
+                  <button type="button" onClick={() => saveFaq(index)} className="rounded-xl bg-[#F0E7D8] px-3 py-2 text-xs text-[#B24A26]"> Lưu FAQ </button>
                   <button
                     type="button"
                     onClick={() => deleteFaq(index)}
-                    className="inline-flex items-center gap-1 rounded-xl bg-red-500/15 px-3 py-2 text-xs text-red-300 hover:bg-red-500/25"
+                    className="inline-flex items-center gap-1 rounded-xl bg-[#A8321C]/15 px-3 py-2 text-xs text-[#A8321C] hover:bg-[#A8321C]/20"
                     aria-label="Xóa FAQ"
                   >
-                    <Trash2 className="h-3.5 w-3.5" />
-                    Xóa
-                  </button>
+                    <Trash2 className="h-3.5 w-3.5" /> Xóa </button>
                 </div>
               </article>
             ))}
@@ -1342,7 +1315,7 @@ function Waitlist() {
     let active = true;
     commissionService.getByCreator()
       .then((items) => { if (active) setCommissions(items); })
-      .catch((cause) => { if (active) setError(cause instanceof Error ? cause.message : 'Không thể tải commission.'); })
+      .catch((cause) => { if (active) setError(cause instanceof Error ? cause.message : 'Không thể tải đặt vẽ.'); })
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
   }, []);
@@ -1364,14 +1337,14 @@ function Waitlist() {
     Disputed: 'Đang tranh chấp',
   };
   const statusColors: Record<CommissionStatus, string> = {
-    PendingAcceptance: 'bg-white/10 text-[#C7C5CF]',
-    InProgress: 'bg-blue-400/15 text-blue-200',
-    Negotiating: 'bg-amber-400/15 text-amber-200',
-    SubmittedFinal: 'bg-sky-400/15 text-sky-200',
-    Delivered: 'bg-teal-400/15 text-teal-200',
-    Completed: 'bg-emerald-400/15 text-emerald-200',
-    Cancelled: 'bg-rose-400/15 text-rose-200',
-    Disputed: 'bg-orange-400/15 text-orange-200',
+    PendingAcceptance: 'bg-[#F0E7D8] text-[#6E6459]',
+    InProgress: 'bg-[#2C5A86]/15 text-[#2C5A86]',
+    Negotiating: 'bg-[#8A6A1F]/15 text-[#8A6A1F]',
+    SubmittedFinal: 'bg-[#2C6A86]/15 text-[#2C6A86]',
+    Delivered: 'bg-[#2F6B63]/15 text-[#2F6B63]',
+    Completed: 'bg-[#2F6B63]/15 text-[#2F6B63]',
+    Cancelled: 'bg-[#A8321C]/15 text-[#A8321C]',
+    Disputed: 'bg-[#B24A26]/15 text-[#B24A26]',
   };
   const money = (amount?: number) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount ?? 0);
   const monthStart = new Date(monthCursor.getFullYear(), monthCursor.getMonth(), 1);
@@ -1405,57 +1378,57 @@ function Waitlist() {
 
   return (
     <Shell view="waitlist">
-      <section className="overflow-hidden rounded-2xl border border-white/10 bg-white/[.025]">
-        <div className="grid gap-3 border-b border-white/10 p-4 xl:grid-cols-[minmax(220px,1fr)_220px_auto] xl:items-center">
-          <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Tìm tên khách hoặc commission" className="rounded-xl border border-white/10 bg-[#171a2a] px-3 py-2.5 text-sm text-white outline-none focus:border-[#A7ACD9]" />
-          <select value={status} onChange={(event) => setStatus(event.target.value as 'All' | CommissionStatus)} className="rounded-xl border border-white/10 bg-[#171a2a] px-3 py-2.5 text-sm text-white outline-none">
+      <section className="overflow-hidden rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6]">
+        <div className="grid gap-3 border-b border-[#221E1A]/10 p-4 xl:grid-cols-[minmax(220px,1fr)_220px_auto] xl:items-center">
+          <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Tìm tên khách hoặc đặt vẽ" className="rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-3 py-2.5 text-sm text-[#241F1A] outline-none focus:border-[#B24A26]" />
+          <select value={status} onChange={(event) => setStatus(event.target.value as 'All' | CommissionStatus)} className="rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-3 py-2.5 text-sm text-[#241F1A] outline-none">
             <option value="All">Tất cả trạng thái</option>
             {(Object.keys(statusLabels) as CommissionStatus[]).map((value) => <option key={value} value={value}>{statusLabels[value]}</option>)}
           </select>
-          <div className="inline-flex w-fit rounded-xl border border-white/10 bg-[#171a2a] p-1" role="group" aria-label="Chế độ hiển thị waitlist">
-            <button type="button" aria-pressed={view === 'table'} onClick={() => setView('table')} className={`inline-flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium ${view === 'table' ? 'bg-[#A7ACD9] text-[#1F2335]' : 'text-[#C7C5CF] hover:text-white'}`}><List className="h-4 w-4" />Bảng</button>
-            <button type="button" aria-pressed={view === 'calendar'} onClick={() => setView('calendar')} className={`inline-flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium ${view === 'calendar' ? 'bg-[#A7ACD9] text-[#1F2335]' : 'text-[#C7C5CF] hover:text-white'}`}><CalendarDays className="h-4 w-4" />Lịch tháng</button>
+          <div className="inline-flex w-fit rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] p-1" role="group" aria-label="Chế độ hiển thị waitlist">
+            <button type="button" aria-pressed={view === 'table'} onClick={() => setView('table')} className={`inline-flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium ${view === 'table' ? 'bg-[#B24A26] text-[#F7F2E9]' : 'text-[#6E6459] hover:text-[#241F1A]'}`}><List className="h-4 w-4" />Bảng</button>
+            <button type="button" aria-pressed={view === 'calendar'} onClick={() => setView('calendar')} className={`inline-flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium ${view === 'calendar' ? 'bg-[#B24A26] text-[#F7F2E9]' : 'text-[#6E6459] hover:text-[#241F1A]'}`}><CalendarDays className="h-4 w-4" />Lịch tháng</button>
           </div>
         </div>
-        {loading ? <p className="py-12 text-center text-sm text-[#C7C5CF]">Đang tải commission...</p> : error ? <p className="py-12 text-center text-sm text-[#ff9aa2]">{error}</p> : visibleCommissions.length === 0 ? <p className="py-12 text-center text-sm text-[#C7C5CF]">Không có commission phù hợp.</p> : (
+        {loading ? <p className="py-12 text-center text-sm text-[#6E6459]">Đang tải đặt vẽ...</p> : error ? <p className="py-12 text-center text-sm text-[#ff9aa2]">{error}</p> : visibleCommissions.length === 0 ? <p className="py-12 text-center text-sm text-[#6E6459]">Không có đặt vẽ phù hợp.</p> : (
           view === 'table' ? <div className="overflow-x-auto">
             <table className="w-full min-w-[1040px] text-left text-sm">
-              <thead className="border-b border-white/10 bg-white/[.025] text-[11px] uppercase tracking-wide text-[#919099]"><tr><th className="px-4 py-3 font-medium">Khách hàng</th><th className="px-4 py-3 font-medium">Commission</th><th className="px-4 py-3 font-medium">Trạng thái</th><th className="px-4 py-3 font-medium">Hạn hoàn thành</th><th className="px-4 py-3 font-medium">Thanh toán</th><th className="px-4 py-3 font-medium">Ghi chú</th></tr></thead>
-              <tbody className="divide-y divide-white/5">{visibleCommissions.map((commission) => {
+              <thead className="border-b border-[#221E1A]/10 bg-[#FFFCF6] text-[11px] uppercase tracking-wide text-[#746A5F]"><tr><th className="px-4 py-3 font-medium">Khách hàng</th><th className="px-4 py-3 font-medium">Commission</th><th className="px-4 py-3 font-medium">Trạng thái</th><th className="px-4 py-3 font-medium">Hạn hoàn thành</th><th className="px-4 py-3 font-medium">Thanh toán</th><th className="px-4 py-3 font-medium">Ghi chú</th></tr></thead>
+              <tbody className="divide-y divide-[#221E1A]/10">{visibleCommissions.map((commission) => {
                 const percent = transactionPercent(commission);
-                return <tr key={commission.id} className="align-top hover:bg-white/[.025]">
-                  <td className="px-4 py-3.5"><p className="font-medium text-white">{commission.clientName || `Client ${commission.clientId.slice(0, 8)}`}</p><p className="mt-1 font-mono text-[10px] text-[#919099]">#{commission.id.slice(0, 8).toUpperCase()}</p></td>
-                  <td className="px-4 py-3.5"><Link href={`/workroom/${commission.id}`} className="font-medium text-[#DDE0FF] hover:text-white">{commission.title}<ChevronRight className="ml-1 inline h-3.5 w-3.5" /></Link></td>
-                  <td className="px-4 py-3.5"><span className={`inline-flex rounded-full px-2.5 py-1 text-xs ${statusColors[commission.status]}`}>{statusLabels[commission.status]}</span>{commission.status === 'InProgress' ? <p className="mt-1 text-[10px] text-[#919099]">Stage {commission.currentStage}</p> : null}</td>
-                  <td className="px-4 py-3.5 text-[#C7C5CF]">{commission.deadlineAt ? new Date(commission.deadlineAt).toLocaleDateString('vi-VN', { month: 'long', day: 'numeric', year: 'numeric' }) : '—'}</td>
-                  <td className="px-4 py-3.5"><span className="inline-flex rounded-md bg-rose-300/15 px-2 py-1 text-xs font-medium text-rose-200">{percent}%</span><p className="mt-1 text-[10px] text-[#919099]">{money((commission.escrowHeldAmount ?? 0) + (commission.disbursedAmount ?? 0))} / {money(commission.finalPrice || commission.totalPrice || commission.price || 0)}</p></td>
-                  <td className="max-w-[240px] px-4 py-3.5 text-xs leading-5 text-[#C7C5CF]"><p className="line-clamp-2" title={commission.description || ''}>{commission.description || '—'}</p></td>
+                return <tr key={commission.id} className="align-top hover:bg-[#FFFCF6]">
+                  <td className="px-4 py-3.5"><p className="font-medium text-[#241F1A]">{commission.clientName || `Client ${commission.clientId.slice(0, 8)}`}</p><p className="mt-1 font-mono text-[10px] text-[#746A5F]">#{commission.id.slice(0, 8).toUpperCase()}</p></td>
+                  <td className="px-4 py-3.5"><Link href={`/workroom/${commission.id}`} className="font-medium text-[#A8321C] hover:text-[#241F1A]">{commission.title}<ChevronRight className="ml-1 inline h-3.5 w-3.5" /></Link></td>
+                  <td className="px-4 py-3.5"><span className={`inline-flex rounded-full px-2.5 py-1 text-xs ${statusColors[commission.status]}`}>{statusLabels[commission.status]}</span>{commission.status === 'InProgress' ? <p className="mt-1 text-[10px] text-[#746A5F]">Stage {commission.currentStage}</p> : null}</td>
+                  <td className="px-4 py-3.5 text-[#6E6459]">{commission.deadlineAt ? new Date(commission.deadlineAt).toLocaleDateString('vi-VN', { month: 'long', day: 'numeric', year: 'numeric' }) : '—'}</td>
+                  <td className="px-4 py-3.5"><span className="inline-flex rounded-md bg-[#A8321C]/15 px-2 py-1 text-xs font-medium text-[#A8321C]">{percent}%</span><p className="mt-1 text-[10px] text-[#746A5F]">{money((commission.escrowHeldAmount ?? 0) + (commission.disbursedAmount ?? 0))} / {money(commission.finalPrice || commission.totalPrice || commission.price || 0)}</p></td>
+                  <td className="max-w-[240px] px-4 py-3.5 text-xs leading-5 text-[#6E6459]"><p className="line-clamp-2" title={commission.description || ''}>{commission.description || '—'}</p></td>
                 </tr>;
               })}</tbody>
             </table>
           </div> : <div className="p-4 sm:p-5">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-              <p className="font-h1 text-base font-semibold capitalize text-white">{monthLabel}</p>
+              <p className="font-h1 text-base font-semibold capitalize text-[#241F1A]">{monthLabel}</p>
               <div className="flex items-center gap-2">
-                <button type="button" onClick={() => setMonthCursor((current) => new Date(current.getFullYear(), current.getMonth() - 1, 1))} className="rounded-lg border border-white/10 p-2 text-[#C7C5CF] hover:bg-white/10" aria-label="Tháng trước"><ChevronLeft className="h-4 w-4" /></button>
-                <button type="button" onClick={() => setMonthCursor(new Date(new Date().getFullYear(), new Date().getMonth(), 1))} className="rounded-lg border border-white/10 px-3 py-2 text-xs text-[#C7C5CF] hover:bg-white/10">Hôm nay</button>
-                <button type="button" onClick={() => setMonthCursor((current) => new Date(current.getFullYear(), current.getMonth() + 1, 1))} className="rounded-lg border border-white/10 p-2 text-[#C7C5CF] hover:bg-white/10" aria-label="Tháng sau"><ChevronRight className="h-4 w-4" /></button>
+                <button type="button" onClick={() => setMonthCursor((current) => new Date(current.getFullYear(), current.getMonth() - 1, 1))} className="rounded-lg border border-[#221E1A]/10 p-2 text-[#6E6459] hover:bg-[#F0E7D8]" aria-label="Tháng trước"><ChevronLeft className="h-4 w-4" /></button>
+                <button type="button" onClick={() => setMonthCursor(new Date(new Date().getFullYear(), new Date().getMonth(), 1))} className="rounded-lg border border-[#221E1A]/10 px-3 py-2 text-xs text-[#6E6459] hover:bg-[#F0E7D8]">Hôm nay</button>
+                <button type="button" onClick={() => setMonthCursor((current) => new Date(current.getFullYear(), current.getMonth() + 1, 1))} className="rounded-lg border border-[#221E1A]/10 p-2 text-[#6E6459] hover:bg-[#F0E7D8]" aria-label="Tháng sau"><ChevronRight className="h-4 w-4" /></button>
               </div>
             </div>
             <div className="overflow-x-auto">
-              <div className="grid min-w-[720px] grid-cols-7 border-l border-t border-white/10">
-                {weekdays.map((weekday) => <div key={weekday} className="border-b border-r border-white/10 bg-white/[.025] px-2 py-2 text-center text-[10px] font-semibold uppercase text-[#919099]">{weekday}</div>)}
+              <div className="grid min-w-[720px] grid-cols-7 border-l border-t border-[#221E1A]/10">
+                {weekdays.map((weekday) => <div key={weekday} className="border-b border-r border-[#221E1A]/10 bg-[#FFFCF6] px-2 py-2 text-center text-[10px] font-semibold uppercase text-[#746A5F]">{weekday}</div>)}
                 {calendarDays.map((date, index) => {
                   const dayCommissions = date ? commissionsByDate.get(dateKey(date)) ?? [] : [];
                   const isToday = date?.toDateString() === new Date().toDateString();
-                  return <div key={date ? dateKey(date) : `empty-${index}`} className={`min-h-28 border-b border-r border-white/10 p-2 ${date ? 'bg-[#171a2a]/60' : 'bg-black/10'}`}>
-                    {date ? <><span className={`inline-flex h-6 w-6 items-center justify-center rounded-full text-xs ${isToday ? 'bg-[#A7ACD9] font-bold text-[#1F2335]' : 'text-[#C7C5CF]'}`}>{date.getDate()}</span><div className="mt-1 space-y-1">{dayCommissions.slice(0, 3).map((commission) => <Link key={commission.id} href={`/workroom/${commission.id}`} title={`${commission.clientName || 'Client'} · ${commission.title}`} className={`block truncate rounded px-1.5 py-1 text-[10px] ${statusColors[commission.status]}`}>{commission.clientName || commission.title}</Link>)}{dayCommissions.length > 3 ? <p className="px-1 text-[10px] text-[#919099]">+{dayCommissions.length - 3} more</p> : null}</div></> : null}
+                  return <div key={date ? dateKey(date) : `empty-${index}`} className={`min-h-28 border-b border-r border-[#221E1A]/10 p-2 ${date ? 'bg-[#FFFCF6]/60' : 'bg-[#F0E7D8]/10'}`}>
+                    {date ? <><span className={`inline-flex h-6 w-6 items-center justify-center rounded-full text-xs ${isToday ? 'bg-[#B24A26] font-bold text-[#F7F2E9]' : 'text-[#6E6459]'}`}>{date.getDate()}</span><div className="mt-1 space-y-1">{dayCommissions.slice(0, 3).map((commission) => <Link key={commission.id} href={`/workroom/${commission.id}`} title={`${commission.clientName || 'Client'} · ${commission.title}`} className={`block truncate rounded px-1.5 py-1 text-[10px] ${statusColors[commission.status]}`}>{commission.clientName || commission.title}</Link>)}{dayCommissions.length > 3 ? <p className="px-1 text-[10px] text-[#746A5F]">+{dayCommissions.length - 3} more</p> : null}</div></> : null}
                   </div>;
                 })}
               </div>
             </div>
-            {undatedCommissions.length ? <section className="mt-5 border-t border-white/10 pt-4"><h3 className="text-xs font-semibold uppercase tracking-wider text-[#919099]">Chưa có deadline <span className="ml-1 text-[#C7C5CF]">{undatedCommissions.length}</span></h3><div className="mt-2 divide-y divide-white/5">{undatedCommissions.map((commission) => <Link key={commission.id} href={`/workroom/${commission.id}`} className="flex items-center justify-between gap-3 py-3 text-sm hover:bg-white/[.025]"><span className="min-w-0 truncate text-white">{commission.title}<span className="ml-2 text-xs text-[#919099]">{commission.clientName || `Client ${commission.clientId.slice(0, 8)}`}</span></span><span className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] ${statusColors[commission.status]}`}>{statusLabels[commission.status]}</span></Link>)}</div></section> : null}
-            {!monthCommissions.length && !undatedCommissions.length ? <p className="py-10 text-center text-sm text-[#919099]">Không có deadline trong tháng này.</p> : null}
+            {undatedCommissions.length ? <section className="mt-5 border-t border-[#221E1A]/10 pt-4"><h3 className="text-xs font-semibold uppercase tracking-wider text-[#746A5F]">Chưa có hạn chót <span className="ml-1 text-[#6E6459]">{undatedCommissions.length}</span></h3><div className="mt-2 divide-y divide-[#221E1A]/10">{undatedCommissions.map((commission) => <Link key={commission.id} href={`/workroom/${commission.id}`} className="flex items-center justify-between gap-3 py-3 text-sm hover:bg-[#FFFCF6]"><span className="min-w-0 truncate text-[#241F1A]">{commission.title}<span className="ml-2 text-xs text-[#746A5F]">{commission.clientName || `Client ${commission.clientId.slice(0, 8)}`}</span></span><span className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] ${statusColors[commission.status]}`}>{statusLabels[commission.status]}</span></Link>)}</div></section> : null}
+            {!monthCommissions.length && !undatedCommissions.length ? <p className="py-10 text-center text-sm text-[#746A5F]">Không có hạn chót trong tháng này.</p> : null}
           </div>
         )}
       </section>

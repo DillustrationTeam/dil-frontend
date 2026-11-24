@@ -224,9 +224,7 @@ export function CreatorAddonManager({ packages }: Props) {
   const stageBadge = (milestone: string) => {
     if (milestone === 'Any') {
       return (
-        <span className="inline-flex items-center gap-1 rounded-md bg-purple-500/15 border border-purple-500/25 px-2 py-0.5 text-[10px] font-semibold text-purple-300">
-          Toàn bộ quy trình
-        </span>
+        <span className="inline-flex items-center gap-1 rounded-md bg-[#5F3F86]/15 border border-[#5F3F86]/35 px-2 py-0.5 text-[10px] font-semibold text-[#5F3F86]"> Toàn bộ quy trình </span>
       );
     }
     const tags = milestone.split(',');
@@ -237,36 +235,30 @@ export function CreatorAddonManager({ packages }: Props) {
             return (
               <span
                 key={t}
-                className="inline-flex items-center gap-1 rounded-md bg-amber-500/15 border border-amber-500/25 px-2 py-0.5 text-[10px] font-semibold text-amber-300"
-              >
-                Phác thảo (Sketch)
-              </span>
+                className="inline-flex items-center gap-1 rounded-md bg-[#8A6A1F]/15 border border-[#8A6A1F]/35 px-2 py-0.5 text-[10px] font-semibold text-[#8A6A1F]"
+              > Phác thảo </span>
             );
           }
           if (t === 'Lineart') {
             return (
               <span
                 key={t}
-                className="inline-flex items-center gap-1 rounded-md bg-sky-500/15 border border-sky-500/25 px-2 py-0.5 text-[10px] font-semibold text-sky-300"
-              >
-                Nét & Màu (Lineart)
-              </span>
+                className="inline-flex items-center gap-1 rounded-md bg-[#2C6A86]/15 border border-[#2C6A86]/35 px-2 py-0.5 text-[10px] font-semibold text-[#2C6A86]"
+              > Nét & Màu </span>
             );
           }
           if (t === 'Final') {
             return (
               <span
                 key={t}
-                className="inline-flex items-center gap-1 rounded-md bg-emerald-500/15 border border-emerald-500/25 px-2 py-0.5 text-[10px] font-semibold text-emerald-300"
-              >
-                Hoàn thiện (Final)
-              </span>
+                className="inline-flex items-center gap-1 rounded-md bg-[#2F6B63]/15 border border-[#2F6B63]/35 px-2 py-0.5 text-[10px] font-semibold text-[#2F6B63]"
+              > Hoàn thiện </span>
             );
           }
           return (
             <span
               key={t}
-              className="inline-flex items-center rounded-md bg-white/10 px-2 py-0.5 text-[10px] font-semibold text-slate-300"
+              className="inline-flex items-center rounded-md bg-[#F0E7D8] px-2 py-0.5 text-[10px] font-semibold text-[#746A5F]"
             >
               {t}
             </span>
@@ -285,31 +277,27 @@ export function CreatorAddonManager({ packages }: Props) {
   }, [presets]);
 
   const inputClass =
-    'w-full rounded-xl border border-white/10 bg-[#10121d] px-3.5 py-2.5 text-xs text-white placeholder-slate-400/70 outline-none focus:ring-2 focus:ring-[#A7ACD9]/30 focus:border-[#A7ACD9] transition';
-  const labelClass = 'block text-[11px] font-semibold text-slate-300 mb-1';
+    'w-full rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-3.5 py-2.5 text-xs text-[#241F1A] text-[#746A5F] outline-none focus:ring-2 focus:ring-[#B24A26]/30 focus:border-[#B24A26] transition';
+  const labelClass = 'block text-[11px] font-semibold text-[#746A5F] mb-1';
 
   return (
-    <div className="space-y-6 text-[#E4E1E5]">
+    <div className="space-y-6 text-[#241F1A]">
       {/* 1. Header Overview & Stats */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl border border-white/10 bg-[#141724]/90 p-4.5 sm:px-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl border border-[#221E1A]/10 bg-[#F0E7D8]/90 p-4.5 sm:px-6">
         <div>
-          <h2 className="text-base font-bold text-white flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-[#A7ACD9]" />
-            Quản lý Phụ phí Dịch vụ (Add-ons)
-          </h2>
-          <p className="mt-1 text-xs text-slate-400">
-            Thêm các tùy chọn vẽ thêm (thêm nhân vật, vũ khí, giao gấp, bản quyền) để khách hàng chọn khi đặt commission.
-          </p>
+          <h2 className="text-base font-bold text-[#241F1A] flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-[#B24A26]" /> Quản lý Phụ phí Dịch vụ (Add-ons) </h2>
+          <p className="mt-1 text-xs text-[#746A5F]"> Thêm các tùy chọn vẽ thêm (thêm nhân vật, vũ khí, giao gấp, bản quyền) để khách hàng chọn khi đặt đặt vẽ. </p>
         </div>
 
         {/* Stats Pill */}
         <div className="flex items-center gap-3 shrink-0">
-          <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-[#10121d] px-3.5 py-2 text-xs">
-            <span className="text-slate-400">Tổng phụ phí:</span>
-            <span className="font-bold text-white">{items.length}</span>
-            <span className="text-slate-600">|</span>
-            <span className="flex items-center gap-1.5 text-emerald-400 font-semibold">
-              <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+          <div className="flex items-center gap-2 rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-3.5 py-2 text-xs">
+            <span className="text-[#746A5F]">Tổng phụ phí:</span>
+            <span className="font-bold text-[#241F1A]">{items.length}</span>
+            <span className="text-[#241F1A]">|</span>
+            <span className="flex items-center gap-1.5 text-[#2F6B63] font-semibold">
+              <span className="h-2 w-2 rounded-full bg-[#2F6B63]/10 animate-pulse" />
               {activeCount} đang bật
             </span>
           </div>
@@ -324,19 +312,19 @@ export function CreatorAddonManager({ packages }: Props) {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             {/* Search Input */}
             <div className="relative flex-1 max-w-sm">
-              <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-slate-500" />
+              <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-[#746A5F]" />
               <input
                 type="text"
                 value={listSearch}
                 onChange={(e) => setListSearch(e.target.value)}
                 placeholder="Tìm phụ phí theo tên..."
-                className="w-full rounded-xl border border-white/10 bg-[#141724] pl-9 pr-3.5 py-2 text-xs text-white placeholder-slate-500 outline-none focus:border-[#A7ACD9] transition"
+                className="w-full rounded-xl border border-[#221E1A]/10 bg-[#F0E7D8] pl-9 pr-3.5 py-2 text-xs text-[#241F1A] text-[#746A5F] outline-none focus:border-[#B24A26] transition"
               />
               {listSearch && (
                 <button
                   type="button"
                   onClick={() => setListSearch('')}
-                  className="absolute right-2.5 top-2.5 text-slate-500 hover:text-white"
+                  className="absolute right-2.5 top-2.5 text-[#746A5F] hover:text-[#241F1A]"
                 >
                   <X className="h-3.5 w-3.5" />
                 </button>
@@ -344,7 +332,7 @@ export function CreatorAddonManager({ packages }: Props) {
             </div>
 
             {/* Status Segmented Filter */}
-            <div className="flex items-center gap-1 rounded-xl border border-white/10 bg-[#141724] p-1 text-xs">
+            <div className="flex items-center gap-1 rounded-xl border border-[#221E1A]/10 bg-[#F0E7D8] p-1 text-xs">
               {(['All', 'Active', 'Inactive'] as const).map((status) => (
                 <button
                   key={status}
@@ -352,8 +340,8 @@ export function CreatorAddonManager({ packages }: Props) {
                   onClick={() => setListFilterStatus(status)}
                   className={`rounded-lg px-2.5 py-1 font-medium transition ${
                     listFilterStatus === status
-                      ? 'bg-[#A7ACD9] text-[#1F2335] font-bold shadow'
-                      : 'text-slate-400 hover:text-white'
+                      ? 'bg-[#B24A26] text-[#F7F2E9] font-bold shadow'
+                      : 'text-[#746A5F] hover:text-[#241F1A]'
                   }`}
                 >
                   {status === 'All' ? 'Tất cả' : status === 'Active' ? 'Đang bật' : 'Tạm tắt'}
@@ -379,8 +367,8 @@ export function CreatorAddonManager({ packages }: Props) {
                   onClick={() => setListFilterStage(id as StageCategory)}
                   className={`rounded-xl px-3 py-1.5 font-medium whitespace-nowrap transition ${
                     isActive
-                      ? 'bg-white/15 text-white font-bold border border-white/20'
-                      : 'text-slate-400 hover:text-slate-200 hover:bg-white/5 border border-transparent'
+                      ? 'bg-[#F0E7D8] text-[#241F1A] font-bold border border-[#221E1A]/20'
+                      : 'text-[#746A5F] hover:text-[#6E6459] hover:bg-[#FFFCF6] border border-transparent'
                   }`}
                 >
                   {label}
@@ -395,30 +383,30 @@ export function CreatorAddonManager({ packages }: Props) {
               {[1, 2, 3].map((n) => (
                 <div
                   key={n}
-                  className="rounded-2xl border border-white/5 bg-[#141724]/50 p-4 space-y-3 animate-pulse"
+                  className="rounded-2xl border border-[#221E1A]/10 bg-[#F0E7D8]/50 p-4 space-y-3 animate-pulse"
                 >
                   <div className="flex items-center justify-between">
-                    <div className="h-4 w-40 bg-white/10 rounded-md" />
-                    <div className="h-4 w-20 bg-white/10 rounded-md" />
+                    <div className="h-4 w-40 bg-[#F0E7D8] rounded-md" />
+                    <div className="h-4 w-20 bg-[#F0E7D8] rounded-md" />
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="h-5 w-24 bg-white/5 rounded-md" />
-                    <div className="h-5 w-28 bg-white/5 rounded-md" />
+                    <div className="h-5 w-24 bg-[#FFFCF6] rounded-md" />
+                    <div className="h-5 w-28 bg-[#FFFCF6] rounded-md" />
                   </div>
                 </div>
               ))}
             </div>
           ) : filteredItems.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-white/10 bg-[#141724]/40 p-10 text-center space-y-2">
-              <Layers className="h-8 w-8 text-slate-600 mx-auto" />
-              <p className="text-xs font-semibold text-slate-300">
+            <div className="rounded-2xl border border-dashed border-[#221E1A]/10 bg-[#F0E7D8]/40 p-10 text-center space-y-2">
+              <Layers className="h-8 w-8 text-[#241F1A] mx-auto" />
+              <p className="text-xs font-semibold text-[#746A5F]">
                 {items.length === 0
                   ? 'Chưa có phụ phí nào trong danh sách'
                   : 'Không tìm thấy phụ phí nào phù hợp với bộ lọc'}
               </p>
-              <p className="text-[11px] text-slate-500 max-w-sm mx-auto">
+              <p className="text-[11px] text-[#746A5F] max-w-sm mx-auto">
                 {items.length === 0
-                  ? 'Chọn mẫu gợi ý bên phải hoặc điền form để tạo phụ phí đầu tiên của bạn.'
+                  ? 'Chọn mẫu gợi ý bên phải hoặc điền biểu mẫu để tạo phụ phí đầu tiên của bạn.'
                   : 'Hãy thử xóa bộ lọc hoặc từ khóa tìm kiếm để xem toàn bộ phụ phí.'}
               </p>
             </div>
@@ -433,26 +421,22 @@ export function CreatorAddonManager({ packages }: Props) {
                     key={item.id}
                     className={`rounded-2xl border transition p-4 ${
                       isCurrentEditing
-                        ? 'border-[#A7ACD9] border-l-4 border-l-[#A7ACD9] bg-[#1a1e32] shadow-lg ring-1 ring-[#A7ACD9]'
+                        ? 'border-[#B24A26] border-l-4 border-l-[#B24A26] bg-[#FFFCF6] shadow-lg ring-1 ring-[#B24A26]'
                         : item.isActive
-                        ? 'border-white/10 bg-[#141724]/80 hover:border-white/20'
-                        : 'border-white/5 bg-[#10121d]/50 opacity-60'
+                        ? 'border-[#221E1A]/10 bg-[#F0E7D8]/80 hover:border-[#221E1A]/20'
+                        : 'border-[#221E1A]/10 bg-[#FFFCF6]/50 opacity-60'
                     }`}
                   >
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                       {/* Left: Addon Info */}
                       <div className="space-y-1.5 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <h3 className="font-bold text-sm text-white truncate">{item.title}</h3>
+                          <h3 className="font-bold text-sm text-[#241F1A] truncate">{item.title}</h3>
                           {item.presetKey && (
-                            <span className="rounded bg-[#A7ACD9]/15 border border-[#A7ACD9]/25 px-1.5 py-0.5 text-[10px] font-semibold text-[#A7ACD9]">
-                              Mẫu chuẩn
-                            </span>
+                            <span className="rounded bg-[#B24A26]/15 border border-[#B24A26]/25 px-1.5 py-0.5 text-[10px] font-semibold text-[#B24A26]"> Mẫu chuẩn </span>
                           )}
                           {!item.isActive && (
-                            <span className="rounded bg-white/5 border border-white/10 px-1.5 py-0.5 text-[10px] font-medium text-slate-400">
-                              Tạm tắt
-                            </span>
+                            <span className="rounded bg-[#FFFCF6] border border-[#221E1A]/10 px-1.5 py-0.5 text-[10px] font-medium text-[#746A5F]"> Tạm tắt </span>
                           )}
                         </div>
 
@@ -460,43 +444,41 @@ export function CreatorAddonManager({ packages }: Props) {
                         <div className="flex flex-wrap items-center gap-2 text-xs">
                           {stageBadge(item.allowedMilestone)}
 
-                          <span className="inline-flex items-center gap-1 rounded-md bg-white/5 border border-white/10 px-2 py-0.5 text-[10px] text-slate-300">
-                            <Package className="h-3 w-3 text-slate-400" />
+                          <span className="inline-flex items-center gap-1 rounded-md bg-[#FFFCF6] border border-[#221E1A]/10 px-2 py-0.5 text-[10px] text-[#746A5F]">
+                            <Package className="h-3 w-3 text-[#746A5F]" />
                             {pkg ? pkg.name : 'Áp dụng mọi gói'}
                           </span>
 
                           {item.extendDays > 0 ? (
-                            <span className="inline-flex items-center gap-1 rounded-md bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 text-[10px] font-semibold text-amber-300">
+                            <span className="inline-flex items-center gap-1 rounded-md bg-[#8A6A1F]/10 border border-[#8A6A1F]/30 px-2 py-0.5 text-[10px] font-semibold text-[#8A6A1F]">
                               <Clock className="h-3 w-3" />
                               +{item.extendDays} ngày
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1 rounded-md bg-white/5 px-2 py-0.5 text-[10px] text-slate-400">
-                              <Clock className="h-3 w-3 text-slate-500" />
-                              Không tăng deadline
-                            </span>
+                            <span className="inline-flex items-center gap-1 rounded-md bg-[#FFFCF6] px-2 py-0.5 text-[10px] text-[#746A5F]">
+                              <Clock className="h-3 w-3 text-[#746A5F]" /> Không tăng hạn chót </span>
                           )}
                         </div>
                       </div>
 
                       {/* Right: Price & Quick Actions */}
-                      <div className="flex items-center justify-between sm:justify-end gap-3.5 border-t sm:border-t-0 border-white/5 pt-2.5 sm:pt-0 shrink-0">
+                      <div className="flex items-center justify-between sm:justify-end gap-3.5 border-t sm:border-t-0 border-[#221E1A]/10 pt-2.5 sm:pt-0 shrink-0">
                         <div className="text-right">
-                          <span className="text-[10px] text-slate-400 block uppercase font-mono tracking-wider">Đơn giá</span>
-                          <span className="text-sm font-bold text-emerald-400 font-mono tabular-nums">
+                          <span className="text-[10px] text-[#746A5F] block uppercase font-mono tracking-wider">Đơn giá</span>
+                          <span className="text-sm font-bold text-[#2F6B63] font-mono tabular-nums">
                             {item.price.toLocaleString('vi-VN')} ₫
                           </span>
                         </div>
 
                         {/* Controls: Edit & Toggle */}
-                        <div className="flex items-center gap-1.5 pl-2 border-l border-white/10">
+                        <div className="flex items-center gap-1.5 pl-2 border-l border-[#221E1A]/10">
                           <button
                             type="button"
                             onClick={() => startEdit(item)}
                             title="Chỉnh sửa phụ phí này"
-                            className="flex items-center gap-1 rounded-xl border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs font-semibold text-slate-300 hover:text-white hover:bg-white/10 transition"
+                            className="flex items-center gap-1 rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-2.5 py-1.5 text-xs font-semibold text-[#746A5F] hover:text-[#241F1A] hover:bg-[#F0E7D8] transition"
                           >
-                            <Edit2 className="h-3.5 w-3.5 text-[#A7ACD9]" />
+                            <Edit2 className="h-3.5 w-3.5 text-[#B24A26]" />
                             <span className="hidden sm:inline">Sửa</span>
                           </button>
 
@@ -506,18 +488,18 @@ export function CreatorAddonManager({ packages }: Props) {
                             title={item.isActive ? 'Bấm để tắt phụ phí' : 'Bấm để bật phụ phí'}
                             className={`flex items-center gap-1 rounded-xl px-2.5 py-1.5 text-xs font-semibold transition ${
                               item.isActive
-                                ? 'bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/25'
-                                : 'bg-white/5 border border-white/10 text-slate-400 hover:text-white'
+                                ? 'bg-[#2F6B63]/15 border border-[#2F6B63]/40 text-[#2F6B63] hover:bg-[#2F6B63]/20'
+                                : 'bg-[#FFFCF6] border border-[#221E1A]/10 text-[#746A5F] hover:text-[#241F1A]'
                             }`}
                           >
                             {item.isActive ? (
                               <>
-                                <ToggleRight className="h-4 w-4 text-emerald-400" />
+                                <ToggleRight className="h-4 w-4 text-[#2F6B63]" />
                                 <span className="text-[11px]">Đang bật</span>
                               </>
                             ) : (
                               <>
-                                <ToggleLeft className="h-4 w-4 text-slate-400" />
+                                <ToggleLeft className="h-4 w-4 text-[#746A5F]" />
                                 <span className="text-[11px]">Tạm tắt</span>
                               </>
                             )}
@@ -534,18 +516,18 @@ export function CreatorAddonManager({ packages }: Props) {
 
         {/* Right Column: Add/Edit Studio & Presets (5 cols) */}
         <aside id="addon-form-panel" className="lg:col-span-5 space-y-4 lg:sticky lg:top-6">
-          <div className="rounded-2xl border border-white/10 bg-[#141724]/95 backdrop-blur-md p-5 space-y-5 shadow-xl">
+          <div className="rounded-2xl border border-[#221E1A]/10 bg-[#F0E7D8]/95 backdrop-blur-md p-5 space-y-5 shadow-xl">
             {/* Header of Form Panel */}
-            <div className="flex items-center justify-between border-b border-white/5 pb-3">
+            <div className="flex items-center justify-between border-b border-[#221E1A]/10 pb-3">
               <div className="flex items-center gap-2">
-                <div className="h-7 w-7 rounded-xl bg-[#A7ACD9]/15 flex items-center justify-center text-[#A7ACD9]">
+                <div className="h-7 w-7 rounded-xl bg-[#B24A26]/15 flex items-center justify-center text-[#B24A26]">
                   {editingId ? <Edit2 className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
                 </div>
                 <div>
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-white">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-[#241F1A]">
                     {editingId ? 'Chỉnh sửa phụ phí' : 'Thêm phụ phí mới'}
                   </h3>
-                  <span className="text-[11px] text-slate-400">
+                  <span className="text-[11px] text-[#746A5F]">
                     {editingId ? 'Cập nhật giá hoặc mốc áp dụng' : 'Tạo tùy chọn thanh toán thêm cho đơn'}
                   </span>
                 </div>
@@ -555,33 +537,31 @@ export function CreatorAddonManager({ packages }: Props) {
                 <button
                   type="button"
                   onClick={resetForm}
-                  className="flex items-center gap-1 text-[11px] text-[#A7ACD9] hover:underline"
+                  className="flex items-center gap-1 text-[11px] text-[#B24A26] hover:underline"
                 >
-                  <RefreshCw className="h-3 w-3" /> Làm mới
-                </button>
+                  <RefreshCw className="h-3 w-3" /> Làm mới </button>
               )}
             </div>
 
             {/* Presets Quick Picker Accordion */}
-            <div className="rounded-xl border border-white/10 bg-[#10121d] p-3 space-y-2.5">
+            <div className="rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] p-3 space-y-2.5">
               <div className="flex items-center justify-between text-xs">
-                <span className="font-semibold text-slate-300 flex items-center gap-1.5">
-                  <Sparkles className="h-3.5 w-3.5 text-[#A7ACD9]" /> Mẫu gợi ý theo quy trình:
-                </span>
+                <span className="font-semibold text-[#746A5F] flex items-center gap-1.5">
+                  <Sparkles className="h-3.5 w-3.5 text-[#B24A26]" /> Mẫu gợi ý theo quy trình: </span>
                 {presetKey && (
-                  <span className="text-[10px] text-amber-300 font-mono">Đã chọn mẫu</span>
+                  <span className="text-[10px] text-[#8A6A1F] font-mono">Đã chọn mẫu</span>
                 )}
               </div>
 
               {/* Sub-tabs for presets */}
-              <div className="grid grid-cols-3 gap-1 rounded-lg bg-white/5 p-1 text-center text-[11px]">
+              <div className="grid grid-cols-3 gap-1 rounded-lg bg-[#FFFCF6] p-1 text-center text-[11px]">
                 <button
                   type="button"
                   onClick={() => setPresetTab('Sketch')}
                   className={`rounded-md py-1 font-semibold transition ${
                     presetTab === 'Sketch'
-                      ? 'bg-[#A7ACD9] text-[#1F2335] shadow'
-                      : 'text-slate-400 hover:text-white'
+                      ? 'bg-[#B24A26] text-[#F7F2E9] shadow'
+                      : 'text-[#746A5F] hover:text-[#241F1A]'
                   }`}
                 >
                   Phác thảo ({presetsByStage.Sketch.length})
@@ -591,8 +571,8 @@ export function CreatorAddonManager({ packages }: Props) {
                   onClick={() => setPresetTab('Lineart')}
                   className={`rounded-md py-1 font-semibold transition ${
                     presetTab === 'Lineart'
-                      ? 'bg-[#A7ACD9] text-[#1F2335] shadow'
-                      : 'text-slate-400 hover:text-white'
+                      ? 'bg-[#B24A26] text-[#F7F2E9] shadow'
+                      : 'text-[#746A5F] hover:text-[#241F1A]'
                   }`}
                 >
                   Lineart ({presetsByStage.Lineart.length})
@@ -602,8 +582,8 @@ export function CreatorAddonManager({ packages }: Props) {
                   onClick={() => setPresetTab('Final')}
                   className={`rounded-md py-1 font-semibold transition ${
                     presetTab === 'Final'
-                      ? 'bg-[#A7ACD9] text-[#1F2335] shadow'
-                      : 'text-slate-400 hover:text-white'
+                      ? 'bg-[#B24A26] text-[#F7F2E9] shadow'
+                      : 'text-[#746A5F] hover:text-[#241F1A]'
                   }`}
                 >
                   Hoàn thiện ({presetsByStage.Final.length})
@@ -622,14 +602,14 @@ export function CreatorAddonManager({ packages }: Props) {
                       onClick={() => handleSelectPreset(p)}
                       className={`w-full flex items-center justify-between rounded-xl px-2.5 py-1.5 text-left text-xs transition ${
                         isSelected
-                          ? 'bg-[#A7ACD9] text-[#1F2335] font-bold shadow'
-                          : 'bg-white/[0.03] text-slate-300 hover:bg-white/[0.08] hover:text-white'
+                          ? 'bg-[#B24A26] text-[#F7F2E9] font-bold shadow'
+                          : 'bg-[#FFFCF6] text-[#746A5F] hover:bg-[#FFFCF6] hover:text-[#241F1A]'
                       }`}
                     >
                       <span className="truncate">{p.title}</span>
                       <span
                         className={`text-[10px] shrink-0 font-mono ${
-                          isSelected ? 'text-[#1F2335] font-bold' : 'text-[#A7ACD9]'
+                          isSelected ? 'text-[#F7F2E9] font-bold' : 'text-[#B24A26]'
                         }`}
                       >
                         {isSelected ? <Check className="h-3 w-3 stroke-[3]" /> : '+ Áp dụng'}
@@ -655,7 +635,7 @@ export function CreatorAddonManager({ packages }: Props) {
                   maxLength={200}
                 />
                 {presetKey && (
-                  <span className="text-[10px] text-slate-500 mt-1 block">
+                  <span className="text-[10px] text-[#746A5F] mt-1 block">
                     * Đang áp dụng tên chuẩn từ mẫu sàn.
                   </span>
                 )}
@@ -666,9 +646,9 @@ export function CreatorAddonManager({ packages }: Props) {
                 <label className={labelClass}>Mốc tiến độ áp dụng</label>
                 <div className="grid grid-cols-2 gap-1.5">
                   {[
-                    { id: 'Sketch', label: 'Phác thảo (Sketch)' },
-                    { id: 'Lineart', label: 'Nét & Màu (Lineart)' },
-                    { id: 'Final', label: 'Hoàn thiện (Final)' },
+                    { id: 'Sketch', label: 'Phác thảo' },
+                    { id: 'Lineart', label: 'Nét & Màu' },
+                    { id: 'Final', label: 'Hoàn thiện' },
                     { id: 'Any', label: 'Mọi mốc (Toàn bộ)' },
                   ].map(({ id, label }) => {
                     const isChecked = stage.split(',').includes(id);
@@ -692,8 +672,8 @@ export function CreatorAddonManager({ packages }: Props) {
                         }}
                         className={`rounded-xl px-2.5 py-2 text-left text-xs transition flex items-center justify-between ${
                           isChecked
-                            ? 'bg-[#A7ACD9] text-[#1F2335] font-bold shadow'
-                            : 'bg-[#10121d] border border-white/5 text-slate-400 hover:text-white hover:bg-white/5'
+                            ? 'bg-[#B24A26] text-[#F7F2E9] font-bold shadow'
+                            : 'bg-[#FFFCF6] border border-[#221E1A]/10 text-[#746A5F] hover:text-[#241F1A] hover:bg-[#FFFCF6]'
                         }`}
                       >
                         <span className="truncate">{label}</span>
@@ -721,7 +701,7 @@ export function CreatorAddonManager({ packages }: Props) {
                       required
                       disabled={busy}
                     />
-                    <span className="absolute right-3 top-2.5 text-[11px] font-bold text-slate-500">₫</span>
+                    <span className="absolute right-3 top-2.5 text-[11px] font-bold text-[#746A5F]">₫</span>
                   </div>
 
                   {/* Quick price chips */}
@@ -735,8 +715,8 @@ export function CreatorAddonManager({ packages }: Props) {
                           onClick={() => setPrice(quickPrice.toString())}
                           className={`rounded-lg px-2 py-0.5 text-[10px] font-medium transition ${
                             isSelected
-                              ? 'bg-[#A7ACD9] text-[#1F2335] font-bold shadow'
-                              : 'bg-white/5 text-slate-300 hover:text-white hover:bg-white/10'
+                              ? 'bg-[#B24A26] text-[#F7F2E9] font-bold shadow'
+                              : 'bg-[#FFFCF6] text-[#746A5F] hover:text-[#241F1A] hover:bg-[#F0E7D8]'
                           }`}
                         >
                           {quickPrice >= 1000000
@@ -763,9 +743,9 @@ export function CreatorAddonManager({ packages }: Props) {
                       required
                       disabled={busy}
                     />
-                    <span className="absolute right-3 top-2.5 text-[11px] text-slate-500">ngày</span>
+                    <span className="absolute right-3 top-2.5 text-[11px] text-[#746A5F]">ngày</span>
                   </div>
-                  <span className="text-[10px] text-slate-500 mt-1 block">0 = Không đổi deadline</span>
+                  <span className="text-[10px] text-[#746A5F] mt-1 block">0 = Không đổi deadline</span>
                 </div>
               </div>
 
@@ -788,7 +768,7 @@ export function CreatorAddonManager({ packages }: Props) {
               </div>
 
               {error && (
-                <div className="flex items-center gap-1.5 rounded-xl border border-rose-500/30 bg-rose-500/10 p-2.5 text-xs text-rose-300">
+                <div className="flex items-center gap-1.5 rounded-xl border border-[#A8321C]/40 bg-[#A8321C]/10 p-2.5 text-xs text-[#A8321C]">
                   <AlertCircle className="h-4 w-4 shrink-0" />
                   <span>{error}</span>
                 </div>
@@ -800,15 +780,13 @@ export function CreatorAddonManager({ packages }: Props) {
                   <button
                     type="button"
                     onClick={resetForm}
-                    className="flex-1 rounded-xl border border-white/10 bg-white/5 py-2.5 text-xs font-semibold text-slate-300 hover:text-white hover:bg-white/10 transition"
-                  >
-                    Hủy sửa
-                  </button>
+                    className="flex-1 rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] py-2.5 text-xs font-semibold text-[#746A5F] hover:text-[#241F1A] hover:bg-[#F0E7D8] transition"
+                  > Hủy sửa </button>
                 )}
                 <button
                   type="submit"
                   disabled={busy || !profileId}
-                  className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-[#A7ACD9] py-2.5 text-xs font-bold text-[#1F2335] shadow hover:bg-[#b8bde4] disabled:opacity-50 transition"
+                  className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-[#B24A26] py-2.5 text-xs font-bold text-[#F7F2E9] shadow hover:bg-[#8C3718] disabled:opacity-50 transition"
                 >
                   {editingId ? (
                     <>

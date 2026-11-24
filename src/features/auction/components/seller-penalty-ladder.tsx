@@ -67,20 +67,18 @@ export function SellerPenaltyLadder({ level, defaultOpen = false }: SellerPenalt
   const current = Math.min(Math.max(level, 0), 5);
 
   return (
-    <div className="rounded-xl border border-white/12 bg-black/20">
+    <div className="rounded-xl border border-[#221E1A]/10 bg-[#F0E7D8]">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         aria-controls="seller-penalty-ladder"
-        className="flex w-full items-center gap-2 px-3 py-2 text-left text-[11px] hover:bg-white/5 transition rounded-xl"
+        className="flex w-full items-center gap-2 px-3 py-2 text-left text-[11px] hover:bg-[#FFFCF6] transition rounded-xl"
       >
         <ShieldCheck size={13} className="shrink-0 text-brand-periwinkle" />
-        <span className="flex-1 whitespace-nowrap text-brand-periwinkle underline underline-offset-2">
-          Xem mức phạt khi bị khiếu nại
-        </span>
+        <span className="flex-1 whitespace-nowrap text-brand-periwinkle underline underline-offset-2"> Xem mức phạt khi bị khiếu nại </span>
         {current > 0 && (
-          <span className="shrink-0 rounded-md bg-amber-400/20 px-1.5 py-0.5 text-[10px] font-bold text-amber-300 whitespace-nowrap">
+          <span className="shrink-0 rounded-md bg-[#8A6A1F]/20 px-1.5 py-0.5 text-[10px] font-bold text-[#8A6A1F] whitespace-nowrap">
             {`Bạn đang ở mức ${current}/5`}
           </span>
         )}
@@ -91,23 +89,21 @@ export function SellerPenaltyLadder({ level, defaultOpen = false }: SellerPenalt
       </button>
 
       {open && (
-        <div id="seller-penalty-ladder" className="space-y-2 border-t border-white/10 p-3">
+        <div id="seller-penalty-ladder" className="space-y-2 border-t border-[#221E1A]/10 p-3">
           <div className="flex items-start gap-2">
-            <AlertTriangle size={13} className="shrink-0 mt-0.5 text-amber-300" />
+            <AlertTriangle size={13} className="shrink-0 mt-0.5 text-[#8A6A1F]" />
             <div className="space-y-1">
-              <p className="text-[11px] font-bold text-white">Bị phạt thế nào nếu người mua khiếu nại đúng?</p>
-              <p className="text-[10px] leading-relaxed text-outline">
-                Ban quản trị xác nhận người mua đúng thì bạn bị tính một mức phạt. Mức phạt chỉ tăng, không giảm. Tiền
-                bán tranh còn ở sàn: mỗi lần bị xác nhận bạn lên 1 mức. Tiền đã về ví bạn: mỗi lần bị xác nhận bạn lên 2
-                mức.
-              </p>
+              <p className="text-[11px] font-bold text-[#241F1A]">Bị phạt thế nào nếu người mua khiếu nại đúng?</p>
+              <p className="text-[10px] leading-relaxed text-outline"> Ban quản trị xác nhận người mua đúng thì bạn bị tính một mức phạt. Mức phạt chỉ tăng, không giảm. Tiền
+ bán tranh còn ở sàn: mỗi lần bị xác nhận bạn lên 1 mức. Tiền đã về ví bạn: mỗi lần bị xác nhận bạn lên 2
+ mức. </p>
             </div>
           </div>
 
-          <div className="overflow-hidden rounded-lg border border-white/10">
+          <div className="overflow-hidden rounded-lg border border-[#221E1A]/10">
             <table className="w-full border-collapse text-left text-[11px]">
               <thead>
-                <tr className="bg-white/5 text-[10px] uppercase tracking-wide text-outline">
+                <tr className="bg-[#FFFCF6] text-[10px] uppercase tracking-wide text-outline">
                   <th className="w-16 px-2 py-1.5 font-semibold">Mức</th>
                   <th className="px-2 py-1.5 font-semibold">Bạn sẽ bị gì</th>
                 </tr>
@@ -121,31 +117,29 @@ export function SellerPenaltyLadder({ level, defaultOpen = false }: SellerPenalt
                       aria-current={isCurrent ? 'step' : undefined}
                       className={
                         isCurrent
-                          ? 'border-t border-amber-400/40 bg-amber-400/15 text-amber-100'
-                          : 'border-t border-white/8 text-outline'
+                          ? 'border-t border-[#8A6A1F]/40 bg-[#8A6A1F]/15 text-[#8A6A1F]'
+                          : 'border-t border-[#221E1A]/10 text-outline'
                       }
                     >
                       <td className="px-2 py-1.5 align-top">
-                        <span className={isCurrent ? 'font-bold text-amber-300' : 'font-semibold text-white/80'}>
+                        <span className={isCurrent ? 'font-bold text-[#8A6A1F]' : 'font-semibold text-[#241F1A]/80'}>
                           {row.title}
                         </span>
                       </td>
                       <td className="px-2 py-1.5 align-top">
-                        <span className={`block ${isCurrent ? 'font-semibold text-amber-100' : ''}`}>
+                        <span className={`block ${isCurrent ? 'font-semibold text-[#8A6A1F]' : ''}`}>
                           {row.consequence}
                         </span>
                         <span
                           className={`mt-0.5 block text-[10px] leading-relaxed ${
-                            isCurrent ? 'text-amber-200/90' : 'text-outline/80'
+                            isCurrent ? 'text-[#8A6A1F]' : 'text-outline/80'
                           }`}
                         >
                           {row.when}
                         </span>
                         {isCurrent && (
-                          <span className="mt-1 inline-flex items-center gap-0.5 rounded-md bg-amber-400 px-1.5 py-0.5 text-[10px] font-bold text-brand-navy whitespace-nowrap">
-                            <MapPin size={9} className="shrink-0" />
-                            (Bạn đang ở đây)
-                          </span>
+                          <span className="mt-1 inline-flex items-center gap-0.5 rounded-md bg-[#8A6A1F]/10 px-1.5 py-0.5 text-[10px] font-bold text-[#241F1A] whitespace-nowrap">
+                            <MapPin size={9} className="shrink-0" /> (Bạn đang ở đây) </span>
                         )}
                       </td>
                     </tr>
@@ -165,9 +159,8 @@ export function SellerPenaltyLadder({ level, defaultOpen = false }: SellerPenalt
               Ban quản trị kết luận ra sao — không chỉ con số mức phạt. */}
           <Link
             href="/my-auctions/penalties"
-            className="inline-flex items-center gap-1 rounded-lg border border-brand-periwinkle/30 bg-brand-periwinkle/10 px-2.5 py-1.5 text-[10px] font-semibold text-brand-periwinkle hover:bg-brand-periwinkle hover:text-brand-navy"
-          >
-            Xem hồ sơ bị báo cáo của tôi <ArrowRight size={11} />
+            className="inline-flex items-center gap-1 rounded-lg border border-brand-periwinkle/30 bg-brand-periwinkle/10 px-2.5 py-1.5 text-[10px] font-semibold text-brand-periwinkle hover:bg-brand-periwinkle hover:text-[#FFFCF6]"
+          > Xem hồ sơ bị báo cáo của tôi <ArrowRight size={11} />
           </Link>
         </div>
       )}

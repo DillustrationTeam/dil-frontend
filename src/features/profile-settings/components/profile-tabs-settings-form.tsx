@@ -60,22 +60,20 @@ export function ProfileTabsSettingsForm() {
     <div className="mx-auto max-w-3xl space-y-8">
       <section className="glass-container space-y-4 rounded-[32px] p-6 md:p-8">
         <p className={sectionTitleClass}>Danh mục hồ sơ</p>
-        <p className="text-sm text-outline">
-          Chọn danh mục nào hiển thị trên trang hồ sơ cá nhân của bạn, và sắp xếp lại thứ tự hiển thị.
-        </p>
+        <p className="text-sm text-outline"> Chọn danh mục nào hiển thị trên trang hồ sơ cá nhân của bạn, và sắp xếp lại thứ tự hiển thị. </p>
 
         <ul className="space-y-2">
           {preferences.order.map((id, index) => {
             const isHidden = preferences.hidden.includes(id);
             return (
-              <li key={id} className="flex items-center gap-3 rounded-2xl border border-white/10 px-4 py-3">
+              <li key={id} className="flex items-center gap-3 rounded-2xl border border-[#221E1A]/10 px-4 py-3">
                 <span className="flex flex-col">
                   <button
                     type="button"
                     onClick={() => move(index, -1)}
                     disabled={index === 0}
                     aria-label="Di chuyển lên"
-                    className="rounded p-0.5 text-outline transition hover:text-white disabled:opacity-30"
+                    className="rounded p-0.5 text-outline transition hover:text-[#241F1A] disabled:opacity-30"
                   >
                     <ChevronUp size={14} />
                   </button>
@@ -84,13 +82,13 @@ export function ProfileTabsSettingsForm() {
                     onClick={() => move(index, 1)}
                     disabled={index === preferences.order.length - 1}
                     aria-label="Di chuyển xuống"
-                    className="rounded p-0.5 text-outline transition hover:text-white disabled:opacity-30"
+                    className="rounded p-0.5 text-outline transition hover:text-[#241F1A] disabled:opacity-30"
                   >
                     <ChevronDown size={14} />
                   </button>
                 </span>
 
-                <span className={`flex-1 text-sm font-medium ${isHidden ? 'text-outline' : 'text-white'}`}>
+                <span className={`flex-1 text-sm font-medium ${isHidden ? 'text-outline' : 'text-[#241F1A]'}`}>
                   {labelOf(id)}
                 </span>
 
@@ -99,7 +97,7 @@ export function ProfileTabsSettingsForm() {
                   onClick={() => toggleHidden(id)}
                   className={`flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition ${
                     isHidden
-                      ? 'bg-white/5 text-outline hover:text-white'
+                      ? 'bg-[#FFFCF6] text-outline hover:text-[#241F1A]'
                       : 'bg-brand-periwinkle/15 text-brand-periwinkle hover:bg-brand-periwinkle/25'
                   }`}
                 >
@@ -111,9 +109,7 @@ export function ProfileTabsSettingsForm() {
           })}
         </ul>
 
-        <button type="button" onClick={resetDefaults} className="text-xs font-semibold text-outline hover:text-white">
-          Khôi phục mặc định
-        </button>
+        <button type="button" onClick={resetDefaults} className="text-xs font-semibold text-outline hover:text-[#241F1A]"> Khôi phục mặc định </button>
       </section>
     </div>
   );

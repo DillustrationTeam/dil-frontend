@@ -14,17 +14,15 @@ export function BecomeCreatorModal({ isOpen, onClose }: BecomeCreatorModalProps)
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-4">
-      <div className="w-full max-w-md rounded-3xl border border-white/10 bg-[#1F2335] p-6 text-center">
-        <p className="text-sm font-bold text-white">Trở thành Creator</p>
-        <p className="mt-2 text-xs text-[#C7C5CF]">Tính năng này đang được hoàn thiện, quay lại sau nhé.</p>
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#E5D8C2] p-4">
+      <div className="w-full max-w-md rounded-3xl border border-[#221E1A]/10 bg-[#F7F2E9] p-6 text-center">
+        <p className="text-sm font-bold text-[#241F1A]">Trở thành họa sĩ</p>
+        <p className="mt-2 text-xs text-[#6E6459]">Tính năng này đang được hoàn thiện, quay lại sau nhé.</p>
         <button
           type="button"
           onClick={onClose}
-          className="mt-5 rounded-xl bg-[#A7ACD9] px-4 py-2 text-sm font-bold text-[#1F2335] transition hover:bg-white"
-        >
-          Đóng
-        </button>
+          className="mt-5 rounded-xl bg-[#B24A26] px-4 py-2 text-sm font-bold text-[#F7F2E9] transition hover:bg-[#F0E7D8]"
+        > Đóng </button>
       </div>
     </div>
   );

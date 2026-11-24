@@ -42,7 +42,7 @@ export function ImageLightbox({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4 sm:p-8"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-[#F0E7D8]/90 p-4 sm:p-8"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
@@ -51,7 +51,7 @@ export function ImageLightbox({
         type="button"
         onClick={onClose}
         aria-label="Đóng"
-        className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white transition hover:bg-white/20"
+        className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-[#F0E7D8] text-[#241F1A] transition hover:bg-[#F0E7D8]"
       >
         <X className="h-5 w-5" />
       </button>
@@ -64,7 +64,7 @@ export function ImageLightbox({
             goPrev();
           }}
           aria-label="Ảnh trước"
-          className="absolute left-2 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white transition hover:bg-white/20 sm:left-4 sm:h-12 sm:w-12"
+          className="absolute left-2 flex h-10 w-10 items-center justify-center rounded-full bg-[#F0E7D8] text-[#241F1A] transition hover:bg-[#F0E7D8] sm:left-4 sm:h-12 sm:w-12"
         >
           <ChevronLeft className="h-6 w-6" />
         </button>
@@ -82,14 +82,14 @@ export function ImageLightbox({
             goNext();
           }}
           aria-label="Ảnh sau"
-          className="absolute right-2 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white transition hover:bg-white/20 sm:right-4 sm:h-12 sm:w-12"
+          className="absolute right-2 flex h-10 w-10 items-center justify-center rounded-full bg-[#F0E7D8] text-[#241F1A] transition hover:bg-[#F0E7D8] sm:right-4 sm:h-12 sm:w-12"
         >
           <ChevronRight className="h-6 w-6" />
         </button>
       )}
 
       {images.length > 1 && (
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full bg-black/50 px-3 py-1 text-xs text-white">
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full bg-[#E5D8C2] px-3 py-1 text-xs text-[#241F1A]">
           {index + 1} / {images.length}
         </div>
       )}

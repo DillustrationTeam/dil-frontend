@@ -12,7 +12,7 @@ export default function PublicLayout({
 }) {
   return (
     <Suspense fallback={children}>
-      <div className="min-h-screen bg-[#1F2335] text-[#e4e1e5] font-body selection:bg-[#A7ACD9]/30 selection:text-white">
+      <div className="shell min-h-screen bg-[#F7F2E9] font-body text-[#241F1A] selection:bg-[#B24A26]/25 selection:text-[#241F1A]">
         <PublicHeader />
         <main>{children}</main>
       </div>

@@ -2,7 +2,7 @@ export const auctionStatusLabels: Record<string, string> = {
   Scheduled: 'Sắp diễn ra',
   Active: 'Đang diễn ra',
   Ended: 'Đã kết thúc',
-  Settled: 'Đã chốt (File số)',
+  Settled: 'Đã chốt (tệp số)',
   Cancelled: 'Đã hủy',
   Expired: 'Hết hạn thanh toán',
   AwaitingPhysical: 'Chờ xác nhận tranh vật lý',

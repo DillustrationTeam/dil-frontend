@@ -40,24 +40,24 @@ export function PublishResultsTable({
     <div className="glass-container p-6 rounded-2xl space-y-5">
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
-          <h2 className="text-xl font-bold font-sora text-white">
+          <h2 className="text-xl font-bold font-sora text-[#241F1A]">
             {isVie ? 'Kết quả chung cuộc' : 'Final Contest Results'}
           </h2>
-          <p className="text-xs text-[#9695a1] mt-0.5">
+          <p className="text-xs text-[#746A5F] mt-0.5">
             {isVie ? (
-              <>Bảng xếp hạng và giải thưởng chính thức cho <span className="text-white font-medium">{eventTitle}</span>.</>
+              <>Bảng xếp hạng và giải thưởng chính thức cho <span className="text-[#241F1A] font-medium">{eventTitle}</span>.</>
             ) : (
-              <>Official ranking and award allocations for <span className="text-white font-medium">{eventTitle}</span>.</>
+              <>Official ranking and award allocations for <span className="text-[#241F1A] font-medium">{eventTitle}</span>.</>
             )}
           </p>
         </div>
         <span
           className={`px-3 py-1 rounded-full text-xs font-bold border transition-all ${
             isContestResultsPublished
-              ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400'
+              ? 'bg-[#2F6B63]/15 border-[#2F6B63]/40 text-[#2F6B63]'
               : isAwardAllocationsConfirmed
               ? 'bg-brand-periwinkle/15 border-brand-periwinkle/30 text-brand-periwinkle'
-              : 'bg-amber-500/15 border-amber-500/30 text-amber-300'
+              : 'bg-[#8A6A1F]/15 border-[#8A6A1F]/40 text-[#8A6A1F]'
           }`}
         >
           {isContestResultsPublished
@@ -68,20 +68,20 @@ export function PublishResultsTable({
         </span>
       </div>
 
-      <div className="overflow-x-auto rounded-xl border border-white/10">
+      <div className="overflow-x-auto rounded-xl border border-[#221E1A]/10">
         <table className="w-full border-collapse text-left min-w-[550px] text-xs">
           <thead>
-            <tr className="border-b border-white/10 bg-white/5 text-[#858694] uppercase font-semibold text-[10px]">
+            <tr className="border-b border-[#221E1A]/10 bg-[#FFFCF6] text-[#746A5F] uppercase font-semibold text-[10px]">
               <th className="py-3 px-3.5">{isVie ? 'Hạng mục giải thưởng' : 'Award Category'}</th>
               <th className="py-3 px-3.5">{isVie ? 'Tác phẩm đạt giải' : 'Winning Entry'}</th>
               <th className="py-3 px-3.5">{isVie ? 'Điểm / Bình chọn' : 'Score / Votes'}</th>
               <th className="py-3 px-3.5 text-right">{isVie ? 'Trạng thái' : 'Status'}</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-white/10 text-[#c8c6cf]">
+          <tbody className="divide-y divide-[#221E1A]/10 text-[#c8c6cf]">
             {isLoading ? (
               <tr>
-                <td colSpan={4} className="py-10 text-center text-slate-400">
+                <td colSpan={4} className="py-10 text-center text-[#746A5F]">
                   <div className="flex items-center justify-center gap-2">
                     <div className="size-4 animate-spin rounded-full border-2 border-brand-periwinkle border-t-transparent" />
                     <span>{isVie ? 'Đang tải kết quả chung cuộc...' : 'Loading final contest results from backend...'}</span>
@@ -90,37 +90,37 @@ export function PublishResultsTable({
               </tr>
             ) : finalWinnersList.length === 0 ? (
               <tr>
-                <td colSpan={4} className="py-10 text-center text-slate-400">
+                <td colSpan={4} className="py-10 text-center text-[#746A5F]">
                   {isVie ? 'Chưa có bài thi hoặc dữ liệu bảng xếp hạng nào cho cuộc thi này.' : 'No submissions or leaderboard data found for this event yet.'}
                 </td>
               </tr>
             ) : (
               finalWinnersList.map((item, idx) => (
-                <tr key={idx} className="hover:bg-white/[0.02] transition-colors">
+                <tr key={idx} className="hover:bg-[#FFFCF6] transition-colors">
                   <td className="py-3.5 px-3.5">
                     <span
                       className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold font-sora ${
                         item.badgeType === 'gold'
-                          ? 'bg-amber-950/70 border border-amber-400/40 text-amber-300 shadow-[0_0_12px_rgba(251,191,36,0.15)]'
+                          ? 'bg-[#8A6A1F]/20 border border-[#8A6A1F]/40 text-[#8A6A1F] shadow-[0_0_12px_rgba(251,191,36,0.15)]'
                           : item.badgeType === 'silver'
-                          ? 'bg-slate-900 border border-slate-400/40 text-slate-200'
+                          ? 'bg-[#F0E7D8] border border-[#221E1A]/12 text-[#6E6459]'
                           : item.badgeType === 'bronze'
-                          ? 'bg-amber-950/40 border border-amber-600/30 text-amber-400'
+                          ? 'bg-[#8A6A1F]/20 border border-[#8A6A1F]/40 text-[#8A6A1F]'
                           : item.badgeType === 'community'
-                          ? 'bg-cyan-950/50 border border-cyan-400/30 text-cyan-300'
-                          : 'bg-white/5 border border-white/10 text-[#c8c6cf]'
+                          ? 'bg-[#2C6A86]/20 border border-[#2C6A86]/40 text-[#2C6A86]'
+                          : 'bg-[#FFFCF6] border border-[#221E1A]/10 text-[#c8c6cf]'
                       }`}
                     >
                       {item.badgeType === 'gold' ? (
-                        <Trophy className="w-3.5 h-3.5 text-amber-400" />
+                        <Trophy className="w-3.5 h-3.5 text-[#8A6A1F]" />
                       ) : item.badgeType === 'silver' ? (
-                        <Award className="w-3.5 h-3.5 text-slate-300" />
+                        <Award className="w-3.5 h-3.5 text-[#746A5F]" />
                       ) : item.badgeType === 'bronze' ? (
-                        <Medal className="w-3.5 h-3.5 text-amber-500" />
+                        <Medal className="w-3.5 h-3.5 text-[#8A6A1F]" />
                       ) : item.badgeType === 'community' ? (
-                        <HeartHandshake className="w-3.5 h-3.5 text-cyan-300" />
+                        <HeartHandshake className="w-3.5 h-3.5 text-[#2C6A86]" />
                       ) : (
-                        <Trophy className="w-3.5 h-3.5 text-[#A7ACD9]" />
+                        <Trophy className="w-3.5 h-3.5 text-[#B24A26]" />
                       )}
                       <span>{item.awardName}</span>
                     </span>
@@ -132,27 +132,27 @@ export function PublishResultsTable({
                         <img
                           src={item.artworkImageUrl}
                           alt={item.title}
-                          className="size-9 rounded-lg object-cover border border-white/10 shrink-0"
+                          className="size-9 rounded-lg object-cover border border-[#221E1A]/10 shrink-0"
                         />
                       )}
                       <div>
-                        <span className="font-semibold text-white block">{item.title}</span>
-                        <span className="text-[11px] text-[#9695a1] block">
+                        <span className="font-semibold text-[#241F1A] block">{item.title}</span>
+                        <span className="text-[11px] text-[#746A5F] block">
                           {item.submitterName ? `${isVie ? 'bởi' : 'by'} @${item.submitterName}` : ''}
                           {item.code ? ` • ${item.code}` : ''}
                         </span>
                       </div>
                     </div>
                   </td>
-                  <td className="py-3.5 px-3.5 font-mono text-[#A7ACD9] font-bold text-xs">
+                  <td className="py-3.5 px-3.5 font-mono text-[#B24A26] font-bold text-xs">
                     {item.scoreOrVotes}
                   </td>
                   <td className="py-3.5 px-3.5 text-right">
                     <span
                       className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
                         isContestResultsPublished || isAwardAllocationsConfirmed
-                          ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400'
-                          : 'bg-amber-500/15 border-amber-500/30 text-amber-300'
+                          ? 'bg-[#2F6B63]/15 border-[#2F6B63]/40 text-[#2F6B63]'
+                          : 'bg-[#8A6A1F]/15 border-[#8A6A1F]/40 text-[#8A6A1F]'
                       }`}
                     >
                       {isContestResultsPublished ? (
@@ -167,7 +167,7 @@ export function PublishResultsTable({
                         </>
                       ) : (
                         <>
-                          <Clock className="w-3 h-3 text-amber-400" />
+                          <Clock className="w-3 h-3 text-[#8A6A1F]" />
                           {isVie ? 'Chờ duyệt' : 'Pending'}
                         </>
                       )}
@@ -181,8 +181,8 @@ export function PublishResultsTable({
       </div>
 
       {/* Action Bar under Final Results Table */}
-      <div className="pt-4 border-t border-white/10 flex items-center justify-between flex-wrap gap-3">
-        <span className="text-xs text-[#9695a1]">
+      <div className="pt-4 border-t border-[#221E1A]/10 flex items-center justify-between flex-wrap gap-3">
+        <span className="text-xs text-[#746A5F]">
           {isContestResultsPublished
             ? (isVie ? '✓ Kết quả chung cuộc đã được công bố chính thức trên Bảng vinh danh công khai.' : '✓ Final results officially published and visible on public Wall of Fame.')
             : isAwardAllocationsConfirmed

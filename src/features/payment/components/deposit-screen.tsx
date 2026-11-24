@@ -108,14 +108,13 @@ export function DepositScreen({ userId }: { userId: string | null }) {
         description="Số dư dùng để đặt giá đấu giá, thanh toán tranh nghệ thuật và đặt vẽ tranh."
         actions={
           <span className="flex items-center gap-1.5 text-xs text-outline">
-            <ShieldCheck size={16} className="text-brand-periwinkle" /> Cổng thanh toán bảo mật
-          </span>
+            <ShieldCheck size={16} className="text-brand-periwinkle" /> Cổng thanh toán bảo mật </span>
         }
       />
 
-      <div className="glass-container rounded-3xl border border-white/10 p-6 md:p-8">
+      <div className="glass-container rounded-3xl border border-[#221E1A]/10 p-6 md:p-8">
         {error && (
-          <div role="alert" className="mb-6 rounded-2xl border border-red-400/30 bg-red-500/10 p-4 text-sm text-red-200">
+          <div role="alert" className="mb-6 rounded-2xl border border-[#A8321C]/40 bg-[#A8321C]/10 p-4 text-sm text-[#A8321C]">
             {error}
           </div>
         )}
@@ -136,7 +135,7 @@ export function DepositScreen({ userId }: { userId: string | null }) {
                     className={`rounded-2xl border p-4 text-center font-h1 text-base font-semibold transition-all ${
                       amount === val
                         ? 'border-brand-periwinkle bg-brand-periwinkle/15 text-brand-periwinkle shadow-lg'
-                        : 'border-white/10 bg-white/5 text-on-surface hover:border-white/20'
+                        : 'border-[#221E1A]/10 bg-[#FFFCF6] text-on-surface hover:border-[#221E1A]/20'
                     }`}
                   >
                     {formatVnd(val)}
@@ -160,20 +159,18 @@ export function DepositScreen({ userId }: { userId: string | null }) {
                   setCustomAmount(e.target.value);
                   setAmount(Number(e.target.value) || 0);
                 }}
-                className="w-full rounded-xl border border-white/15 bg-brand-navy/60 px-4 py-3 font-h1 text-lg font-semibold text-on-surface placeholder:text-outline focus:border-brand-periwinkle focus:outline-none"
+                className="w-full rounded-xl border border-[#221E1A]/10 bg-brand-navy/60 px-4 py-3 font-h1 text-lg font-semibold text-on-surface placeholder:text-outline focus:border-brand-periwinkle focus:outline-none"
                 placeholder="Nhập số tiền tối thiểu 10.000 ₫"
               />
               <span className="mt-1 block text-xs text-outline">Từ 10.000 ₫ đến 500.000.000 ₫ · Miễn phí giao dịch</span>
             </div>
 
-            <div className="rounded-2xl border border-brand-periwinkle/20 bg-brand-periwinkle/5 p-4 text-xs text-on-surface-variant">
-              Phương thức thanh toán: <strong>VietQR qua PayOS</strong>. Hệ thống ghi nhận tiền vào ví sau khi PayOS xác nhận giao dịch.
-            </div>
+            <div className="rounded-2xl border border-brand-periwinkle/20 bg-brand-periwinkle/5 p-4 text-xs text-on-surface-variant"> Phương thức thanh toán: <strong>VietQR qua PayOS</strong>. Hệ thống ghi nhận tiền vào ví sau khi PayOS xác nhận giao dịch. </div>
 
             <button
               type="submit"
               disabled={loading || amount < 10000}
-              className="w-full rounded-full bg-brand-periwinkle py-3.5 text-center font-h1 text-sm font-bold text-brand-navy shadow-lg transition hover:brightness-110 disabled:opacity-50"
+              className="w-full rounded-full bg-brand-periwinkle py-3.5 text-center font-h1 text-sm font-bold text-[#FFFCF6] shadow-lg transition hover:brightness-110 disabled:opacity-50"
             >
               {loading ? <InlineLoader label="Đang khởi tạo đơn…" /> : `Tạo mã nạp ${formatVnd(amount)}`}
             </button>
@@ -181,33 +178,28 @@ export function DepositScreen({ userId }: { userId: string | null }) {
         ) : (
           <div className="space-y-6">
             {isPaid ? (
-              <div className="rounded-2xl border border-emerald-400/30 bg-emerald-500/10 p-6 text-center">
-                <CheckCircle2 size={48} className="mx-auto mb-3 text-emerald-400" />
-                <h2 className="font-h1 text-xl font-bold text-emerald-300">Nạp tiền thành công!</h2>
+              <div className="rounded-2xl border border-[#2F6B63]/40 bg-[#2F6B63]/10 p-6 text-center">
+                <CheckCircle2 size={48} className="mx-auto mb-3 text-[#2F6B63]" />
+                <h2 className="font-h1 text-xl font-bold text-[#2F6B63]">Nạp tiền thành công!</h2>
                 <p className="mt-1 text-sm text-on-surface-variant">
                   Đơn nạp #{order.orderRef} với số tiền {formatVnd(order.amount)} đã được cộng vào số dư ví của bạn.
                 </p>
                 <div className="mt-6 flex justify-center gap-3">
-                  <Link href="/wallet" className="rounded-full bg-brand-periwinkle px-6 py-2.5 font-h1 text-xs font-bold text-brand-navy">
-                    Xem số dư ví
-                  </Link>
+                  <Link href="/wallet" className="rounded-full bg-brand-periwinkle px-6 py-2.5 font-h1 text-xs font-bold text-[#FFFCF6]"> Xem số dư ví </Link>
                   <button
                     type="button"
                     onClick={() => setOrder(null)}
-                    className="rounded-full border border-white/15 px-6 py-2.5 text-xs font-semibold hover:bg-white/10"
-                  >
-                    Tạo đơn nạp khác
-                  </button>
+                    className="rounded-full border border-[#221E1A]/10 px-6 py-2.5 text-xs font-semibold hover:bg-[#F0E7D8]"
+                  > Tạo đơn nạp khác </button>
                 </div>
               </div>
             ) : (
               <div className="grid gap-6 md:grid-cols-2">
-                <div className="flex flex-col items-center justify-center rounded-2xl border border-white/10 bg-white/5 p-6 text-center">
+                <div className="flex flex-col items-center justify-center rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] p-6 text-center">
                   <div className="mb-3 flex items-center gap-2 text-sm font-medium text-brand-periwinkle">
-                    <QrCode size={18} /> Quét mã VietQR để thanh toán
-                  </div>
+                    <QrCode size={18} /> Quét mã VietQR để thanh toán </div>
                   {qrImageSrc && !qrFailed ? (
-                    <div className="overflow-hidden rounded-xl border border-white/20 bg-white p-2 shadow-xl">
+                    <div className="overflow-hidden rounded-xl border border-[#221E1A]/20 bg-[#F0E7D8] p-2 shadow-xl">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={qrImageSrc}
@@ -217,15 +209,11 @@ export function DepositScreen({ userId }: { userId: string | null }) {
                       />
                     </div>
                   ) : (
-                    <div className="flex size-56 flex-col items-center justify-center rounded-xl bg-black/20 p-4 text-center text-xs text-outline">
-                      <QrCode size={28} className="mb-2 opacity-60" />
-                      PayOS sẽ hiển thị VietQR trên trang thanh toán bảo mật.
-                    </div>
+                    <div className="flex size-56 flex-col items-center justify-center rounded-xl bg-[#F0E7D8] p-4 text-center text-xs text-outline">
+                      <QrCode size={28} className="mb-2 opacity-60" /> PayOS sẽ hiển thị VietQR trên trang thanh toán bảo mật. </div>
                   )}
                   {qrImageSrc && qrFailed && (
-                    <p className="mt-2 max-w-56 text-[11px] text-amber-300">
-                      Không tải được ảnh mã QR. Bạn vẫn có thể chuyển khoản theo thông tin bên cạnh.
-                    </p>
+                    <p className="mt-2 max-w-56 text-[11px] text-[#8A6A1F]"> Không tải được ảnh mã QR. Bạn vẫn có thể chuyển khoản theo thông tin bên cạnh. </p>
                   )}
                   {order.checkoutAction && order.checkoutFields?.length ? (
                     <form method="POST" action={order.checkoutAction} target="_blank" className="mt-4">
@@ -235,8 +223,7 @@ export function DepositScreen({ userId }: { userId: string | null }) {
                       <button
                         type="submit"
                         className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand-periwinkle hover:underline"
-                      >
-                        Mở cổng thanh toán PayOS <ExternalLink size={14} />
+                      > Mở cổng thanh toán PayOS <ExternalLink size={14} />
                       </button>
                     </form>
                   ) : order.paymentUrl ? (
@@ -245,13 +232,12 @@ export function DepositScreen({ userId }: { userId: string | null }) {
                       target="_blank"
                       rel="noreferrer"
                       className="mt-4 inline-flex items-center gap-1.5 text-xs font-semibold text-brand-periwinkle hover:underline"
-                    >
-                      Mở trang thanh toán ngân hàng <ExternalLink size={14} />
+                    > Mở trang thanh toán ngân hàng <ExternalLink size={14} />
                     </a>
                   ) : null}
                 </div>
 
-                <div className="space-y-4 rounded-2xl border border-white/10 bg-white/[0.02] p-6 text-sm">
+                <div className="space-y-4 rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] p-6 text-sm">
                   <h3 className="font-h1 font-bold text-on-surface">
                     {hasManualTransferDetails ? 'Thông tin chuyển khoản' : 'Thông tin đơn nạp'}
                   </h3>
@@ -263,12 +249,12 @@ export function DepositScreen({ userId }: { userId: string | null }) {
                     {order.accountNumber && (
                       <div>
                         <span className="text-outline">Số tài khoản nhận:</span>
-                        <div className="flex items-center justify-between rounded-lg border border-white/10 bg-white/5 px-3 py-2 font-mono text-sm">
+                        <div className="flex items-center justify-between rounded-lg border border-[#221E1A]/10 bg-[#FFFCF6] px-3 py-2 font-mono text-sm">
                           <span>{order.accountNumber}</span>
                           <button
                             type="button"
                             onClick={() => handleCopy(order.accountNumber || '')}
-                            className="text-brand-periwinkle hover:text-white"
+                            className="text-brand-periwinkle hover:text-[#241F1A]"
                             title="Sao chép số tài khoản"
                           >
                             <Copy size={14} />
@@ -285,12 +271,12 @@ export function DepositScreen({ userId }: { userId: string | null }) {
                     {hasManualTransferDetails ? (
                       <div>
                         <span className="text-outline">Nội dung chuyển khoản (bắt buộc):</span>
-                        <div className="flex items-center justify-between rounded-lg border border-white/10 bg-white/5 px-3 py-2 font-mono text-sm text-brand-periwinkle">
+                        <div className="flex items-center justify-between rounded-lg border border-[#221E1A]/10 bg-[#FFFCF6] px-3 py-2 font-mono text-sm text-brand-periwinkle">
                           <span>{order.orderRef}</span>
                           <button
                             type="button"
                             onClick={() => handleCopy(order.orderRef)}
-                            className="text-brand-periwinkle hover:text-white"
+                            className="text-brand-periwinkle hover:text-[#241F1A]"
                             title="Sao chép nội dung"
                           >
                             <Copy size={14} />
@@ -298,11 +284,9 @@ export function DepositScreen({ userId }: { userId: string | null }) {
                         </div>
                       </div>
                     ) : (
-                      <p className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-on-surface-variant">
-                        Mở cổng PayOS để lấy VietQR đã gắn đúng số tiền và mã đơn. Không tự sửa nội dung thanh toán.
-                      </p>
+                      <p className="rounded-lg border border-[#221E1A]/10 bg-[#FFFCF6] px-3 py-2 text-on-surface-variant"> Mở cổng PayOS để lấy VietQR đã gắn đúng số tiền và mã đơn. Không tự sửa nội dung thanh toán. </p>
                     )}
-                    {copied && <p className="text-xs text-emerald-400">Đã sao chép vào bộ nhớ tạm!</p>}
+                    {copied && <p className="text-xs text-[#2F6B63]">Đã sao chép vào bộ nhớ tạm!</p>}
                   </div>
 
                   <div className="pt-2">
@@ -310,7 +294,7 @@ export function DepositScreen({ userId }: { userId: string | null }) {
                       type="button"
                       disabled={checking}
                       onClick={handleCheckStatus}
-                      className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-brand-periwinkle py-2.5 font-h1 text-xs font-bold text-brand-navy shadow hover:brightness-110"
+                      className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-brand-periwinkle py-2.5 font-h1 text-xs font-bold text-[#FFFCF6] shadow hover:brightness-110"
                     >
                       <RefreshCw size={14} className={checking ? 'animate-spin' : ''} />
                       {checking ? 'Đang kiểm tra...' : 'Tôi đã chuyển khoản'}

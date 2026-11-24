@@ -118,48 +118,48 @@ export default function MyTradesPage() {
   const getStatusBadge = (status: TradeStatus, receiverAcceptedAt?: string | null) => {
     if (isDisputedStatus(status)) {
       return (
-        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-500/15 text-rose-300 border border-rose-500/30">
+        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#A8321C]/15 text-[#A8321C] border border-[#A8321C]/40">
           <AlertCircle className="w-3 h-3" /> {isVie ? 'Khiếu nại' : 'Under Dispute'}
         </span>
       );
     }
     if (isCompletedStatus(status)) {
       return (
-        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#2F6B63]/15 text-[#2F6B63] border border-[#2F6B63]/40">
           <CheckCircle2 className="w-3 h-3" /> {isVie ? 'Hoàn thành' : 'Completed'}
         </span>
       );
     }
     if (isCancelledStatus(status)) {
       return (
-        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-white/5 text-[#919099] border border-white/15">
+        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#FFFCF6] text-[#746A5F] border border-[#221E1A]/10">
           <XCircle className="w-3 h-3" /> {isVie ? 'Đã hủy' : 'Cancelled'}
         </span>
       );
     }
     if (isBothSubmittedStatus(status)) {
       return (
-        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-500/15 text-purple-300 border border-purple-500/30">
+        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#5F3F86]/15 text-[#5F3F86] border border-[#5F3F86]/40">
           <CheckCircle2 className="w-3 h-3" /> {isVie ? 'Cả hai đã nộp' : 'Both Submitted'}
         </span>
       );
     }
     if (isAcceptedStatus(status) || (isProposedStatus(status) && !!receiverAcceptedAt)) {
       return (
-        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-500/15 text-blue-300 border border-blue-500/30">
+        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#2C5A86]/15 text-[#2C5A86] border border-[#2C5A86]/40">
           <Clock className="w-3 h-3" /> {isVie ? 'Đang thực hiện' : 'In Progress'}
         </span>
       );
     }
     if (isProposedStatus(status)) {
       return (
-        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-300 border border-amber-500/30">
+        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#8A6A1F]/15 text-[#8A6A1F] border border-[#8A6A1F]/40">
           <Clock className="w-3 h-3" /> {isVie ? 'Chờ xác nhận' : 'Proposal Pending'}
         </span>
       );
     }
     return (
-      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-white/5 text-[#C7C5CF] border border-white/10">
+      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#FFFCF6] text-[#6E6459] border border-[#221E1A]/10">
         {status}
       </span>
     );
@@ -235,10 +235,10 @@ export default function MyTradesPage() {
           <div className="w-16 h-16 rounded-2xl bg-brand-periwinkle/10 border border-brand-periwinkle/25 text-brand-periwinkle flex items-center justify-center mx-auto mb-5">
             <Palette className="w-8 h-8" />
           </div>
-          <h2 className="text-xl md:text-2xl font-bold text-white mb-2 font-h1">
+          <h2 className="text-xl md:text-2xl font-bold text-[#241F1A] mb-2 font-h1">
             Art Trading is Exclusive to Creators
           </h2>
-          <p className="text-sm text-[#919099] mb-6 max-w-md mx-auto">
+          <p className="text-sm text-[#746A5F] mb-6 max-w-md mx-auto">
             Because trading involves exchanging and uploading original artwork, you must be a registered Creator to manage or participate in art trades.
           </p>
           <div className="flex items-center justify-center gap-4">
@@ -250,7 +250,7 @@ export default function MyTradesPage() {
             </Link>
             <Link
               href="/explore"
-              className="px-5 py-3 rounded-xl bg-white/5 border border-white/10 text-xs font-semibold text-[#C7C5CF] hover:text-white transition"
+              className="px-5 py-3 rounded-xl bg-[#FFFCF6] border border-[#221E1A]/10 text-xs font-semibold text-[#6E6459] hover:text-[#241F1A] transition"
             >
               Explore Artworks
             </Link>
@@ -263,17 +263,17 @@ export default function MyTradesPage() {
   return (
     <div className="w-full max-w-6xl mx-auto px-4 py-8">
       {/* Top Banner & Propose Button */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-8 mb-8 border-b border-white/10">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-8 mb-8 border-b border-[#221E1A]/10">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="text-xs uppercase tracking-wider text-brand-periwinkle font-semibold flex items-center gap-1.5">
               <ArrowLeftRight className="w-3.5 h-3.5" /> {isVie ? 'Quản lý Trao đổi tác phẩm' : 'Art Trade Management'}
             </span>
           </div>
-          <h1 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight font-h1">
+          <h1 className="text-2xl md:text-3xl font-extrabold text-[#241F1A] tracking-tight font-h1">
             {isVie ? 'Trao đổi của tôi' : 'My Art Trades'}
           </h1>
-          <p className="text-sm text-[#919099] mt-1">
+          <p className="text-sm text-[#746A5F] mt-1">
             {isVie
               ? 'Quản lý các lượt trao đổi tranh ngang hàng giữa các họa sĩ, phản hồi đề xuất và theo dõi tiến trình.'
               : 'Manage your peer-to-peer artist exchanges, accept proposals, and track active sessions.'}
@@ -296,31 +296,31 @@ export default function MyTradesPage() {
             <ShieldCheck className="w-5 h-5" />
           </div>
           <div>
-            <h4 className="text-sm font-bold text-white flex items-center gap-2">
-              {isVie ? 'Hạn mức lượt trao đổi (Slots):' : 'Trade Slots Quota:'}
+            <h4 className="text-sm font-bold text-[#241F1A] flex items-center gap-2">
+              {isVie ? 'Hạn mức lượt trao đổi:' : 'Trade Slots Quota:'}
               <span className="text-brand-periwinkle font-mono text-base">
                 {slotStatus?.activeTradesCount ?? 0} / {slotStatus?.totalSlots ?? 2} {isVie ? 'Đang chạy' : 'Active'}
               </span>
             </h4>
-            <p className="text-xs text-[#919099]">
+            <p className="text-xs text-[#746A5F]">
               {isVie
-                ? `Họa sĩ có thể tham gia tối đa ${slotStatus?.totalSlots ?? 2} lượt trao đổi cùng lúc. Số slot còn trống: `
+                ? `Họa sĩ có thể tham gia tối đa ${slotStatus?.totalSlots ?? 2} lượt trao đổi cùng lúc. Số lượt còn trống: `
                 : `Creators can run up to ${slotStatus?.totalSlots ?? 2} simultaneous trades to prevent over-commitment. Available slots: `}
-              <strong className="text-white">{loading ? '...' : (slotStatus?.availableSlots ?? 0)}</strong>
+              <strong className="text-[#241F1A]">{loading ? '...' : (slotStatus?.availableSlots ?? 0)}</strong>
             </p>
           </div>
         </div>
 
         {(slotStatus?.frozenSlotsCount ?? 0) > 0 ? (
-          <div className="px-3.5 py-1.5 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs font-semibold flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 text-rose-400" />
+          <div className="px-3.5 py-1.5 rounded-xl bg-[#A8321C]/15 border border-[#A8321C]/40 text-[#A8321C] text-xs font-semibold flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 text-[#A8321C]" />
             <span>
-              {isVie ? 'Slot bị đóng băng:' : 'Slots Frozen:'} {slotStatus?.frozenDetails?.[0]?.reason || (isVie ? 'Khiếu nại' : 'Dispute penalty')} ({slotStatus?.frozenSlotsCount} frozen)
+              {isVie ? 'Lượt bị đóng băng:' : 'Slots Frozen:'} {slotStatus?.frozenDetails?.[0]?.reason || (isVie ? 'Khiếu nại' : 'Dispute penalty')} ({slotStatus?.frozenSlotsCount} frozen)
             </span>
           </div>
         ) : (
-          <div className="text-xs text-emerald-400 font-medium flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
-            <CheckCircle2 className="w-4 h-4" /> {isVie ? 'Bảo vệ Escrow & Sẵn sàng' : 'Escrow Protected & Active'}
+          <div className="text-xs text-[#2F6B63] font-medium flex items-center gap-1.5 px-3 py-1 rounded-lg bg-[#2F6B63]/10 border border-[#2F6B63]/30">
+            <CheckCircle2 className="w-4 h-4" /> {isVie ? 'Bảo vệ ký quỹ & Sẵn sàng' : 'Escrow Protected & Active'}
           </div>
         )}
       </div>
@@ -338,7 +338,7 @@ export default function MyTradesPage() {
         onStatusChange={setStatusFilter}
         statusOptions={[
           { value: 'ALL', label: isVie ? 'Tất cả trạng thái (Mặc định)' : 'All Statuses (Default)' },
-          { value: 'ACTIVE', label: isVie ? 'Đang thực hiện (In Progress)' : 'In Progress (Active)' },
+          { value: 'ACTIVE', label: isVie ? 'Đang thực hiện' : 'In Progress (Active)' },
           { value: 'PROPOSALS', label: isVie ? 'Đề xuất chờ duyệt' : 'Proposals (Pending)' },
           { value: 'COMPLETED', label: isVie ? 'Đã hoàn tất' : 'Completed' },
           { value: 'DISPUTED', label: isVie ? 'Khiếu nại & Đã hủy' : 'Disputes & Cancelled' },
@@ -357,7 +357,7 @@ export default function MyTradesPage() {
       />
 
       {/* Filter Status & Counter Info */}
-      <div className="flex items-center justify-between gap-3 pb-4 mb-2 text-xs text-[#919099]">
+      <div className="flex items-center justify-between gap-3 pb-4 mb-2 text-xs text-[#746A5F]">
         <span>
           {isVie
             ? `Hiển thị ${filteredTrades.length} trên tổng số ${trades.length} lượt trao đổi`
@@ -371,7 +371,7 @@ export default function MyTradesPage() {
               setStatusFilter('ALL');
               setSortBy('latest');
             }}
-            className="inline-flex items-center gap-1.5 text-brand-periwinkle hover:text-white font-medium transition cursor-pointer"
+            className="inline-flex items-center gap-1.5 text-brand-periwinkle hover:text-[#241F1A] font-medium transition cursor-pointer"
           >
             <RotateCcw className="w-3.5 h-3.5" />
             <span>{isVie ? 'Đặt lại bộ lọc' : 'Reset filters'}</span>
@@ -381,18 +381,18 @@ export default function MyTradesPage() {
 
       {/* Trades List */}
       {loading ? (
-        <div className="min-h-[300px] flex flex-col items-center justify-center p-8 text-center text-[#919099]">
+        <div className="min-h-[300px] flex flex-col items-center justify-center p-8 text-center text-[#746A5F]">
           <Loader2 className="w-8 h-8 animate-spin text-brand-periwinkle mb-3" />
           <p className="text-xs font-medium">{isVie ? 'Đang tải danh sách trao đổi...' : 'Loading your trades...'}</p>
         </div>
       ) : filteredTrades.length === 0 ? (
         trades.length === 0 ? (
           <div className="glass-container p-12 text-center rounded-3xl max-w-lg mx-auto">
-            <ArrowLeftRight className="w-12 h-12 mx-auto mb-3 text-[#919099] opacity-60" />
-            <h3 className="text-base font-bold text-white mb-1 font-h1">
+            <ArrowLeftRight className="w-12 h-12 mx-auto mb-3 text-[#746A5F] opacity-60" />
+            <h3 className="text-base font-bold text-[#241F1A] mb-1 font-h1">
               {isVie ? 'Chưa có lượt trao đổi nào' : 'No Art Trades Found'}
             </h3>
-            <p className="text-xs text-[#919099] mb-6">
+            <p className="text-xs text-[#746A5F] mb-6">
               {isVie
                 ? 'Bạn chưa tham gia lượt trao đổi tranh nào. Hãy bắt đầu tạo một đề nghị trao đổi mới!'
                 : 'You do not have any trade sessions yet. Start by proposing a new art trade!'}
@@ -406,11 +406,11 @@ export default function MyTradesPage() {
           </div>
         ) : (
           <div className="glass-container p-12 text-center rounded-3xl max-w-lg mx-auto space-y-3">
-            <ArrowLeftRight className="w-12 h-12 mx-auto mb-2 text-[#919099] opacity-60" />
-            <h3 className="text-base font-bold text-white font-h1">
+            <ArrowLeftRight className="w-12 h-12 mx-auto mb-2 text-[#746A5F] opacity-60" />
+            <h3 className="text-base font-bold text-[#241F1A] font-h1">
               {isVie ? 'Không tìm thấy lượt trao đổi phù hợp' : 'No Matching Trades Found'}
             </h3>
-            <p className="text-xs text-[#919099] max-w-sm mx-auto">
+            <p className="text-xs text-[#746A5F] max-w-sm mx-auto">
               {isVie
                 ? 'Không có lượt trao đổi nào khớp với từ khóa tìm kiếm hoặc tiêu chí lọc hiện tại của bạn.'
                 : 'There are currently no trade sessions matching your search or filter criteria.'}
@@ -423,7 +423,7 @@ export default function MyTradesPage() {
                   setStatusFilter('ALL');
                   setSortBy('latest');
                 }}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-white transition cursor-pointer"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#FFFCF6] hover:bg-[#F0E7D8] border border-[#221E1A]/10 text-xs font-semibold text-[#241F1A] transition cursor-pointer"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
                 <span>{isVie ? 'Đặt lại bộ lọc' : 'Reset Search & Filters'}</span>
@@ -467,19 +467,19 @@ export default function MyTradesPage() {
                   <div>
                     <div className="flex items-center gap-2 flex-wrap mb-1">
                       {getStatusBadge(trade.status, trade.receiverAcceptedAt)}
-                      <span className="text-[11px] text-[#919099]">
+                      <span className="text-[11px] text-[#746A5F]">
                         {isInitiator
                           ? (isVie ? 'Bạn đề xuất' : 'Proposed by You')
                           : (isVie ? `Nhận từ ${trade.partner.fullName}` : `Received from ${trade.partner.fullName}`)}
                       </span>
                     </div>
 
-                    <h3 className="text-base font-bold text-white font-h1">
+                    <h3 className="text-base font-bold text-[#241F1A] font-h1">
                       {trade.title}
                     </h3>
 
-                    <div className="flex items-center gap-3 text-xs text-[#919099] mt-1">
-                      <span>{isVie ? 'Đối tác:' : 'Partner:'} <strong className="text-[#C7C5CF]">{trade.partner.fullName}</strong></span>
+                    <div className="flex items-center gap-3 text-xs text-[#746A5F] mt-1">
+                      <span>{isVie ? 'Đối tác:' : 'Partner:'} <strong className="text-[#6E6459]">{trade.partner.fullName}</strong></span>
                       {trade.submissionDeadlineAt && (
                         <span>• {isVie ? 'Hạn nộp:' : 'Deadline:'} {new Date(trade.submissionDeadlineAt).toLocaleDateString()}</span>
                       )}
@@ -488,12 +488,12 @@ export default function MyTradesPage() {
                 </div>
 
                 {/* Right Action Buttons */}
-                <div className="flex items-center gap-2.5 w-full sm:w-auto justify-end shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-white/5">
+                <div className="flex items-center gap-2.5 w-full sm:w-auto justify-end shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-[#221E1A]/10">
                   {isPendingProposalForMe ? (
                     <>
                       <Link
                         href={`/art-trades/${trade.id}`}
-                        className="px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-[#C7C5CF] text-xs font-semibold border border-white/10 transition"
+                        className="px-3.5 py-2 rounded-xl bg-[#FFFCF6] hover:bg-[#F0E7D8] text-[#6E6459] text-xs font-semibold border border-[#221E1A]/10 transition"
                       >
                         {isVie ? 'Xem đề nghị' : 'View Proposal'}
                       </Link>
@@ -501,7 +501,7 @@ export default function MyTradesPage() {
                         type="button"
                         onClick={() => handleRespond(trade.id, false)}
                         disabled={actionLoadingId === trade.id}
-                        className="px-3 py-2 rounded-xl bg-white/5 hover:bg-rose-500/20 hover:text-rose-300 text-[#C7C5CF] text-xs font-semibold border border-white/10 transition disabled:opacity-50"
+                        className="px-3 py-2 rounded-xl bg-[#FFFCF6] hover:bg-[#A8321C]/20 hover:text-[#A8321C] text-[#6E6459] text-xs font-semibold border border-[#221E1A]/10 transition disabled:opacity-50"
                       >
                         {isVie ? 'Từ chối' : 'Decline'}
                       </button>
@@ -521,12 +521,12 @@ export default function MyTradesPage() {
                     </>
                   ) : isMyProposalPending ? (
                     <div className="flex items-center gap-2">
-                      <div className="text-xs text-amber-300/80 italic px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/20">
+                      <div className="text-xs text-[#8A6A1F] italic px-3 py-1.5 rounded-xl bg-[#8A6A1F]/10 border border-[#8A6A1F]/30">
                         {isVie ? 'Chờ đối tác phản hồi' : 'Waiting for response'}
                       </div>
                       <Link
                         href={`/art-trades/${trade.id}`}
-                        className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-[#C7C5CF] text-xs font-medium border border-white/10 transition"
+                        className="px-3 py-1.5 rounded-xl bg-[#FFFCF6] hover:bg-[#F0E7D8] text-[#6E6459] text-xs font-medium border border-[#221E1A]/10 transition"
                       >
                         {isVie ? 'Xem đề nghị' : 'View Proposal'}
                       </Link>
@@ -553,13 +553,13 @@ export default function MyTradesPage() {
                       <Link
                         href={`/art-trades/${trade.id}?tab=chat`}
                         title={isVie ? 'Xem lịch sử trò chuyện' : 'View Chat History'}
-                        className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-[#919099] hover:text-white border border-white/10 transition"
+                        className="p-2 rounded-xl bg-[#FFFCF6] hover:bg-[#F0E7D8] text-[#746A5F] hover:text-[#241F1A] border border-[#221E1A]/10 transition"
                       >
                         <MessageSquare className="w-4 h-4" />
                       </Link>
                       <Link
                         href={`/art-trades/${trade.id}`}
-                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600/20 hover:bg-emerald-600 text-emerald-300 hover:text-white border border-emerald-500/30 text-xs font-semibold transition shadow-sm"
+                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#2F6B63]/20 hover:bg-[#2F6B63]/12 text-[#2F6B63] hover:text-[#241F1A] border border-[#2F6B63]/40 text-xs font-semibold transition shadow-sm"
                       >
                         <span>{isVie ? 'Xem kết quả trao đổi' : 'View Completed Trade'}</span>
                         <ChevronRight className="w-3.5 h-3.5" />
@@ -570,13 +570,13 @@ export default function MyTradesPage() {
                       <Link
                         href={`/art-trades/${trade.id}?tab=chat`}
                         title={isVie ? 'Mở phòng trò chuyện' : 'Open Trade Chat'}
-                        className="p-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 transition"
+                        className="p-2 rounded-xl bg-[#A8321C]/10 hover:bg-[#A8321C]/20 text-[#A8321C] border border-[#A8321C]/40 transition"
                       >
                         <MessageSquare className="w-4 h-4" />
                       </Link>
                       <Link
                         href={`/art-trades/${trade.id}`}
-                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/30 text-xs font-semibold transition shadow-sm"
+                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#A8321C]/20 hover:bg-[#A8321C]/12 text-[#A8321C] hover:text-[#241F1A] border border-[#A8321C]/40 text-xs font-semibold transition shadow-sm"
                       >
                         <span>{isVie ? 'Xem tranh chấp' : 'View Dispute'}</span>
                         <ChevronRight className="w-3.5 h-3.5" />
@@ -587,13 +587,13 @@ export default function MyTradesPage() {
                       <Link
                         href={`/art-trades/${trade.id}?tab=chat`}
                         title={isVie ? 'Mở phòng trò chuyện' : 'Open Trade Chat'}
-                        className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-[#919099] hover:text-white border border-white/10 transition"
+                        className="p-2 rounded-xl bg-[#FFFCF6] hover:bg-[#F0E7D8] text-[#746A5F] hover:text-[#241F1A] border border-[#221E1A]/10 transition"
                       >
                         <MessageSquare className="w-4 h-4" />
                       </Link>
                       <Link
                         href={`/art-trades/${trade.id}`}
-                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-[#C7C5CF] border border-white/10 text-xs font-semibold transition shadow-sm"
+                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#FFFCF6] hover:bg-[#F0E7D8] text-[#6E6459] border border-[#221E1A]/10 text-xs font-semibold transition shadow-sm"
                       >
                         <span>{isVie ? 'Xem chi tiết' : 'View Details'}</span>
                         <ChevronRight className="w-3.5 h-3.5" />
@@ -609,19 +609,17 @@ export default function MyTradesPage() {
 
       {/* Pagination Controls */}
       {!loading && totalItems > 0 && (
-        <div className="mt-8 flex flex-wrap items-center justify-between gap-4 border-t border-white/10 pt-6">
-          <p className="text-xs text-[#8A8FA9]">
+        <div className="mt-8 flex flex-wrap items-center justify-between gap-4 border-t border-[#221E1A]/10 pt-6">
+          <p className="text-xs text-[#6E6459]">
             {isVie ? (
-              <>
-                Hiển thị <span className="font-semibold text-white">{Math.min((currentPage - 1) * pageSize + 1, totalItems)}</span> -{' '}
-                <span className="font-semibold text-white">{Math.min(currentPage * pageSize, totalItems)}</span> trên tổng số{' '}
-                <span className="font-semibold text-white">{totalItems}</span> giao dịch
-              </>
+              <> Hiển thị <span className="font-semibold text-[#241F1A]">{Math.min((currentPage - 1) * pageSize + 1, totalItems)}</span> -{' '}
+                <span className="font-semibold text-[#241F1A]">{Math.min(currentPage * pageSize, totalItems)}</span> trên tổng số{' '}
+                <span className="font-semibold text-[#241F1A]">{totalItems}</span> giao dịch </>
             ) : (
               <>
-                Showing <span className="font-semibold text-white">{Math.min((currentPage - 1) * pageSize + 1, totalItems)}</span> -{' '}
-                <span className="font-semibold text-white">{Math.min(currentPage * pageSize, totalItems)}</span> of{' '}
-                <span className="font-semibold text-white">{totalItems}</span> trades
+                Showing <span className="font-semibold text-[#241F1A]">{Math.min((currentPage - 1) * pageSize + 1, totalItems)}</span> -{' '}
+                <span className="font-semibold text-[#241F1A]">{Math.min(currentPage * pageSize, totalItems)}</span> of{' '}
+                <span className="font-semibold text-[#241F1A]">{totalItems}</span> trades
               </>
             )}
           </p>
@@ -635,7 +633,7 @@ export default function MyTradesPage() {
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
                 disabled={currentPage <= 1}
-                className="flex h-9 items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-3.5 text-xs font-semibold text-[#c7c5cf] transition hover:border-white/20 hover:bg-white/10 hover:text-white disabled:pointer-events-none disabled:opacity-40 cursor-pointer"
+                className="flex h-9 items-center gap-1.5 rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-3.5 text-xs font-semibold text-[#6E6459] transition hover:border-[#221E1A]/20 hover:bg-[#F0E7D8] hover:text-[#241F1A] disabled:pointer-events-none disabled:opacity-40 cursor-pointer"
               >
                 <ChevronLeft size={15} />
                 <span>{isVie ? 'Trước' : 'Previous'}</span>
@@ -653,7 +651,7 @@ export default function MyTradesPage() {
                   }, [])
                   .map((item, idx) =>
                     item === '...' ? (
-                      <span key={`ellipsis-${idx}`} className="px-2 text-xs text-[#8A8FA9]">
+                      <span key={`ellipsis-${idx}`} className="px-2 text-xs text-[#6E6459]">
                         ...
                       </span>
                     ) : (
@@ -666,8 +664,8 @@ export default function MyTradesPage() {
                         }}
                         className={`h-9 min-w-9 rounded-xl px-3 text-xs font-bold transition cursor-pointer ${
                           currentPage === item
-                            ? 'bg-brand-periwinkle text-brand-navy shadow-[0_4px_15px_rgba(167,172,217,0.3)]'
-                            : 'border border-white/10 bg-white/5 text-[#c7c5cf] hover:border-white/20 hover:bg-white/10 hover:text-white'
+                            ? 'bg-brand-periwinkle text-[#FFFCF6] shadow-[0_4px_15px_rgba(167,172,217,0.3)]'
+                            : 'border border-[#221E1A]/10 bg-[#FFFCF6] text-[#6E6459] hover:border-[#221E1A]/20 hover:bg-[#F0E7D8] hover:text-[#241F1A]'
                         }`}
                       >
                         {item}
@@ -683,7 +681,7 @@ export default function MyTradesPage() {
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
                 disabled={currentPage >= totalPages}
-                className="flex h-9 items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-3.5 text-xs font-semibold text-[#c7c5cf] transition hover:border-white/20 hover:bg-white/10 hover:text-white disabled:pointer-events-none disabled:opacity-40 cursor-pointer"
+                className="flex h-9 items-center gap-1.5 rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-3.5 text-xs font-semibold text-[#6E6459] transition hover:border-[#221E1A]/20 hover:bg-[#F0E7D8] hover:text-[#241F1A] disabled:pointer-events-none disabled:opacity-40 cursor-pointer"
               >
                 <span>{isVie ? 'Sau' : 'Next'}</span>
                 <ChevronRight size={15} />

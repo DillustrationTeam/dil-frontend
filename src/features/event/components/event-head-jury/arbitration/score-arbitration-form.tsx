@@ -32,16 +32,16 @@ export function ScoreArbitrationForm({
           onClick={() => onDecisionChange('Maintain Current Median Score')}
           className={`p-3.5 rounded-xl border text-left transition-all flex flex-col justify-between cursor-pointer ${
             decision === 'Maintain Current Median Score'
-              ? 'border-[#A7ACD9] bg-[#A7ACD9]/20 text-white shadow-lg shadow-[#A7ACD9]/10'
-              : 'border-white/10 bg-white/5 text-[#c7c5cf] hover:bg-white/10 hover:border-white/20'
+              ? 'border-[#B24A26] bg-[#B24A26]/20 text-[#241F1A] shadow-lg shadow-[#B24A26]/10'
+              : 'border-[#221E1A]/10 bg-[#FFFCF6] text-[#6E6459] hover:bg-[#F0E7D8] hover:border-[#221E1A]/20'
           }`}
         >
           <div className="space-y-1">
             <div className="flex items-center gap-1.5 font-sora text-xs font-bold">
-              <Scale className="w-4 h-4 text-[#7FD5E8] shrink-0" />
+              <Scale className="w-4 h-4 text-[#2F6B63] shrink-0" />
               <span>{isVie ? 'Giữ điểm trung vị' : 'Maintain Median'}</span>
             </div>
-            <p className="text-[11px] text-[#9695a1] leading-normal">
+            <p className="text-[11px] text-[#746A5F] leading-normal">
               {isVie
                 ? 'Khóa điểm trung vị hiện tại. Loại trừ các điểm lệch bất thường.'
                 : 'Lock current median score. Suppress outlier variance.'}
@@ -49,7 +49,7 @@ export function ScoreArbitrationForm({
           </div>
           <span
             className={`mt-2 text-[10px] font-bold ${
-              decision === 'Maintain Current Median Score' ? 'text-[#7FD5E8]' : 'text-[#858694]'
+              decision === 'Maintain Current Median Score' ? 'text-[#2F6B63]' : 'text-[#746A5F]'
             }`}
           >
             {decision === 'Maintain Current Median Score'
@@ -63,16 +63,16 @@ export function ScoreArbitrationForm({
           onClick={() => onDecisionChange('Request Panel Re-evaluation')}
           className={`p-3.5 rounded-xl border text-left transition-all flex flex-col justify-between cursor-pointer ${
             decision === 'Request Panel Re-evaluation'
-              ? 'border-amber-400 bg-amber-500/20 text-white shadow-lg shadow-amber-500/10'
-              : 'border-white/10 bg-white/5 text-[#c7c5cf] hover:bg-white/10 hover:border-white/20'
+              ? 'border-[#8A6A1F]/30 bg-[#8A6A1F]/20 text-[#241F1A] shadow-lg shadow-[#8A6A1F]'
+              : 'border-[#221E1A]/10 bg-[#FFFCF6] text-[#6E6459] hover:bg-[#F0E7D8] hover:border-[#221E1A]/20'
           }`}
         >
           <div className="space-y-1">
-            <div className="flex items-center gap-1.5 font-sora text-xs font-bold text-amber-300">
-              <UserCheck className="w-4 h-4 text-amber-400 shrink-0" />
+            <div className="flex items-center gap-1.5 font-sora text-xs font-bold text-[#8A6A1F]">
+              <UserCheck className="w-4 h-4 text-[#8A6A1F] shrink-0" />
               <span>{isVie ? 'Yêu cầu chấm lại' : 'Request Re-evaluation'}</span>
             </div>
-            <p className="text-[11px] text-[#9695a1] leading-normal">
+            <p className="text-[11px] text-[#746A5F] leading-normal">
               {isVie
                 ? 'Mở khóa bảng điểm cho các giám khảo cụ thể để đánh giá lại.'
                 : 'Unlock scoresheet for specific jury members to re-review.'}
@@ -80,7 +80,7 @@ export function ScoreArbitrationForm({
           </div>
           <span
             className={`mt-2 text-[10px] font-bold ${
-              decision === 'Request Panel Re-evaluation' ? 'text-amber-300' : 'text-[#858694]'
+              decision === 'Request Panel Re-evaluation' ? 'text-[#8A6A1F]' : 'text-[#746A5F]'
             }`}
           >
             {decision === 'Request Panel Re-evaluation'
@@ -94,8 +94,8 @@ export function ScoreArbitrationForm({
           onClick={() => onDecisionChange('Cast Head Jury Tie-Breaker')}
           className={`p-3.5 rounded-xl border text-left transition-all flex flex-col justify-between cursor-pointer ${
             decision === 'Cast Head Jury Tie-Breaker'
-              ? 'border-brand-periwinkle bg-brand-periwinkle/20 text-white shadow-lg shadow-brand-periwinkle/10'
-              : 'border-white/10 bg-white/5 text-[#c7c5cf] hover:bg-white/10 hover:border-white/20'
+              ? 'border-brand-periwinkle bg-brand-periwinkle/20 text-[#241F1A] shadow-lg shadow-brand-periwinkle/10'
+              : 'border-[#221E1A]/10 bg-[#FFFCF6] text-[#6E6459] hover:bg-[#F0E7D8] hover:border-[#221E1A]/20'
           }`}
         >
           <div className="space-y-1">
@@ -103,7 +103,7 @@ export function ScoreArbitrationForm({
               <Award className="w-4 h-4 text-brand-periwinkle shrink-0" />
               <span>{isVie ? 'Bỏ phiếu Tie-Breaker' : 'Tie-Breaker Vote'}</span>
             </div>
-            <p className="text-[11px] text-[#9695a1] leading-normal">
+            <p className="text-[11px] text-[#746A5F] leading-normal">
               {isVie
                 ? 'Bỏ phiếu quyết định của Trưởng ban GK đối với các bài đồng hạng.'
                 : 'Cast decisive Head Jury vote for tied placements.'}
@@ -111,7 +111,7 @@ export function ScoreArbitrationForm({
           </div>
           <span
             className={`mt-2 text-[10px] font-bold ${
-              decision === 'Cast Head Jury Tie-Breaker' ? 'text-brand-periwinkle' : 'text-[#858694]'
+              decision === 'Cast Head Jury Tie-Breaker' ? 'text-brand-periwinkle' : 'text-[#746A5F]'
             }`}
           >
             {decision === 'Cast Head Jury Tie-Breaker'
@@ -123,12 +123,12 @@ export function ScoreArbitrationForm({
 
       {/* Sub-Panel 1: Maintain Median Score */}
       {decision === 'Maintain Current Median Score' && (
-        <div className="p-4 rounded-xl border border-[#7FD5E8]/30 bg-[#7FD5E8]/10 space-y-2 text-xs">
-          <div className="flex items-center gap-2 font-sora font-bold text-white">
-            <Lock className="w-4 h-4 text-[#7FD5E8]" />
+        <div className="p-4 rounded-xl border border-[#2F6B63]/30 bg-[#2F6B63]/10 space-y-2 text-xs">
+          <div className="flex items-center gap-2 font-sora font-bold text-[#241F1A]">
+            <Lock className="w-4 h-4 text-[#2F6B63]" />
             <span>{isVie ? 'Xác nhận khóa điểm trung vị' : 'Lock Median Score Confirmation'}</span>
           </div>
-          <p className="text-[#c7c5cf] leading-relaxed">
+          <p className="text-[#6E6459] leading-relaxed">
             {isVie
               ? 'Việc giữ điểm trung vị của hội đồng sẽ tự động bỏ qua các điểm số ngoại lai bất thường mà không cần mở khóa bảng điểm.'
               : 'Maintaining the panel median score will automatically disregard extreme score outliers without unlocking scoresheets.'}
@@ -138,33 +138,33 @@ export function ScoreArbitrationForm({
 
       {/* Sub-Panel 2: Request Panel Re-evaluation */}
       {decision === 'Request Panel Re-evaluation' && (
-        <div className="p-4 rounded-xl border border-amber-400/30 bg-amber-500/10 space-y-3 text-xs">
-          <div className="flex items-center gap-2 font-sora font-bold text-amber-300">
-            <UserCheck className="w-4 h-4 text-amber-400" />
+        <div className="p-4 rounded-xl border border-[#8A6A1F]/40 bg-[#8A6A1F]/10 space-y-3 text-xs">
+          <div className="flex items-center gap-2 font-sora font-bold text-[#8A6A1F]">
+            <UserCheck className="w-4 h-4 text-[#8A6A1F]" />
             <span>
               {isVie ? 'Chọn giám khảo cần mở khóa để chấm lại' : 'Select Target Outlier Jury Members for Re-evaluation'}
             </span>
           </div>
-          <p className="text-[#c7c5cf] leading-relaxed">
+          <p className="text-[#6E6459] leading-relaxed">
             {isVie
               ? 'Bảng điểm của các giám khảo được chọn sẽ được mở khóa trong 24 giờ kèm theo ghi chú yêu cầu kiểm toán:'
               : 'Scoresheets for the selected jury members will be unlocked for a 24-hour window with audit notes attached:'}
           </p>
           <div className="space-y-2">
-            <label className="flex items-center gap-2.5 p-2.5 rounded-lg bg-black/40 border border-white/10 text-white cursor-pointer">
-              <input type="checkbox" defaultChecked className="rounded accent-amber-400" />
+            <label className="flex items-center gap-2.5 p-2.5 rounded-lg bg-[#F0E7D8] border border-[#221E1A]/10 text-[#241F1A] cursor-pointer">
+              <input type="checkbox" defaultChecked className="rounded accent-[#8A6A1F]" />
               <div className="flex-1 flex items-center justify-between">
                 <span className="font-semibold">Thu Dinh Art (Jury #2)</span>
-                <span className="font-mono text-xs text-amber-400 font-bold">
+                <span className="font-mono text-xs text-[#8A6A1F] font-bold">
                   {isVie ? 'Chấm 96/100 (+15.3% độ lệch)' : 'Rated 96/100 (+15.3% variance)'}
                 </span>
               </div>
             </label>
-            <label className="flex items-center gap-2.5 p-2.5 rounded-lg bg-black/40 border border-white/10 text-white cursor-pointer">
-              <input type="checkbox" defaultChecked className="rounded accent-amber-400" />
+            <label className="flex items-center gap-2.5 p-2.5 rounded-lg bg-[#F0E7D8] border border-[#221E1A]/10 text-[#241F1A] cursor-pointer">
+              <input type="checkbox" defaultChecked className="rounded accent-[#8A6A1F]" />
               <div className="flex-1 flex items-center justify-between">
                 <span className="font-semibold">Tung Ho Illustration (Jury #3)</span>
-                <span className="font-mono text-xs text-rose-400 font-bold">
+                <span className="font-mono text-xs text-[#A8321C] font-bold">
                   {isVie ? 'Chấm 58/100 (-22.7% độ lệch)' : 'Rated 58/100 (-22.7% variance)'}
                 </span>
               </div>
@@ -177,7 +177,7 @@ export function ScoreArbitrationForm({
       {decision === 'Cast Head Jury Tie-Breaker' && (
         <div className="p-4 rounded-xl border border-brand-periwinkle/30 bg-brand-periwinkle/10 space-y-4 text-xs">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 font-sora font-bold text-[#E4E1E5]">
+            <div className="flex items-center gap-2 font-sora font-bold text-[#241F1A]">
               <Award className="w-4 h-4 text-brand-periwinkle" />
               <span>{isVie ? 'So sánh đối đầu trực tiếp' : 'Interactive Head-to-Head Comparison'}</span>
             </div>
@@ -186,61 +186,61 @@ export function ScoreArbitrationForm({
             </span>
           </div>
 
-          <div className="overflow-x-auto rounded-lg border border-white/10 bg-black/40">
+          <div className="overflow-x-auto rounded-lg border border-[#221E1A]/10 bg-[#F0E7D8]">
             <table className="w-full border-collapse text-left text-xs">
               <thead>
-                <tr className="border-b border-white/10 bg-white/5 text-[#9695a1] uppercase font-semibold text-[10px]">
+                <tr className="border-b border-[#221E1A]/10 bg-[#FFFCF6] text-[#746A5F] uppercase font-semibold text-[10px]">
                   <th className="py-2 px-3">{isVie ? 'Tiêu chí / Ứng viên' : 'Metric / Candidate'}</th>
-                  <th className="py-2 px-3 text-center border-l border-white/10 text-white font-bold">
+                  <th className="py-2 px-3 text-center border-l border-[#221E1A]/10 text-[#241F1A] font-bold">
                     {selectedCase.title} ({selectedCase.code})
                   </th>
-                  <th className="py-2 px-3 text-center border-l border-white/10 text-white font-bold">
+                  <th className="py-2 px-3 text-center border-l border-[#221E1A]/10 text-[#241F1A] font-bold">
                     Skyline (#SUB-D89B)
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/10 text-[#c7c5cf]">
+              <tbody className="divide-y divide-[#221E1A]/10 text-[#6E6459]">
                 <tr>
-                  <td className="py-2 px-3 text-[#9695a1] font-medium">
+                  <td className="py-2 px-3 text-[#746A5F] font-medium">
                     {isVie ? 'Điểm TB Hội đồng' : 'Panel Avg Score'}
                   </td>
-                  <td className="py-2 px-3 text-center font-mono font-bold text-[#A7ACD9] border-l border-white/10">
+                  <td className="py-2 px-3 text-center font-mono font-bold text-[#B24A26] border-l border-[#221E1A]/10">
                     80.7 / 100
                   </td>
-                  <td className="py-2 px-3 text-center font-mono font-bold text-[#A7ACD9] border-l border-white/10">
+                  <td className="py-2 px-3 text-center font-mono font-bold text-[#B24A26] border-l border-[#221E1A]/10">
                     80.0 / 100
                   </td>
                 </tr>
                 <tr>
-                  <td className="py-2 px-3 text-[#9695a1] font-medium">
+                  <td className="py-2 px-3 text-[#746A5F] font-medium">
                     {isVie ? 'Điểm Trưởng ban GK' : 'Head Jury Score'}
                   </td>
-                  <td className="py-2 px-3 text-center font-mono font-bold text-amber-300 border-l border-white/10">
+                  <td className="py-2 px-3 text-center font-mono font-bold text-[#8A6A1F] border-l border-[#221E1A]/10">
                     88.0 / 100
                   </td>
-                  <td className="py-2 px-3 text-center font-mono font-bold text-amber-300 border-l border-white/10">
+                  <td className="py-2 px-3 text-center font-mono font-bold text-[#8A6A1F] border-l border-[#221E1A]/10">
                     85.0 / 100
                   </td>
                 </tr>
                 <tr>
-                  <td className="py-2 px-3 text-[#9695a1] font-medium">
+                  <td className="py-2 px-3 text-[#746A5F] font-medium">
                     {isVie ? 'Độ bám sát chủ đề' : 'Theme Adherence'}
                   </td>
-                  <td className="py-2 px-3 text-center font-mono text-emerald-400 border-l border-white/10">
+                  <td className="py-2 px-3 text-center font-mono text-[#2F6B63] border-l border-[#221E1A]/10">
                     22 / 25
                   </td>
-                  <td className="py-2 px-3 text-center font-mono text-emerald-400 border-l border-white/10">
+                  <td className="py-2 px-3 text-center font-mono text-[#2F6B63] border-l border-[#221E1A]/10">
                     20 / 25
                   </td>
                 </tr>
                 <tr>
-                  <td className="py-2 px-3 text-[#9695a1] font-medium">
+                  <td className="py-2 px-3 text-[#746A5F] font-medium">
                     {isVie ? 'Kỹ thuật & Bố cục' : 'Technical & Composition'}
                   </td>
-                  <td className="py-2 px-3 text-center font-mono text-brand-periwinkle border-l border-white/10">
+                  <td className="py-2 px-3 text-center font-mono text-brand-periwinkle border-l border-[#221E1A]/10">
                     31 / 35
                   </td>
-                  <td className="py-2 px-3 text-center font-mono text-brand-periwinkle border-l border-white/10">
+                  <td className="py-2 px-3 text-center font-mono text-brand-periwinkle border-l border-[#221E1A]/10">
                     30 / 35
                   </td>
                 </tr>
@@ -250,7 +250,7 @@ export function ScoreArbitrationForm({
 
           {/* Interactive Winner Selector */}
           <div className="space-y-2 pt-1">
-            <label className="text-xs font-semibold text-[#E4E1E5] block">
+            <label className="text-xs font-semibold text-[#241F1A] block">
               {isVie ? 'Tuyên bố ứng viên thắng Tie-Breaker:' : 'Declare Official Tie-Breaker Winner:'}
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -259,18 +259,18 @@ export function ScoreArbitrationForm({
                 onClick={() => onTieBreakerWinnerChange(selectedCase.submissionId)}
                 className={`p-3 rounded-xl border text-left transition-all flex items-center justify-between cursor-pointer ${
                   tieBreakerWinnerId === selectedCase.submissionId
-                    ? 'border-emerald-400 bg-emerald-500/20 text-white shadow-md shadow-emerald-500/10'
-                    : 'border-white/10 bg-white/5 text-[#c7c5cf] hover:bg-white/10'
+                    ? 'border-[#2F6B63]/30 bg-[#2F6B63]/20 text-[#241F1A] shadow-md shadow-[#2F6B63]'
+                    : 'border-[#221E1A]/10 bg-[#FFFCF6] text-[#6E6459] hover:bg-[#F0E7D8]'
                 }`}
               >
                 <div>
                   <span className="block text-xs font-bold">{selectedCase.title}</span>
-                  <span className="block text-[10px] text-[#9695a1] font-mono">
+                  <span className="block text-[10px] text-[#746A5F] font-mono">
                     {selectedCase.code}
                   </span>
                 </div>
                 {tieBreakerWinnerId === selectedCase.submissionId && (
-                  <Check className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <Check className="w-4 h-4 text-[#2F6B63] shrink-0" />
                 )}
               </button>
 
@@ -279,16 +279,16 @@ export function ScoreArbitrationForm({
                 onClick={() => onTieBreakerWinnerChange('sub-d89b')}
                 className={`p-3 rounded-xl border text-left transition-all flex items-center justify-between cursor-pointer ${
                   tieBreakerWinnerId === 'sub-d89b'
-                    ? 'border-emerald-400 bg-emerald-500/20 text-white shadow-md shadow-emerald-500/10'
-                    : 'border-white/10 bg-white/5 text-[#c7c5cf] hover:bg-white/10'
+                    ? 'border-[#2F6B63]/30 bg-[#2F6B63]/20 text-[#241F1A] shadow-md shadow-[#2F6B63]'
+                    : 'border-[#221E1A]/10 bg-[#FFFCF6] text-[#6E6459] hover:bg-[#F0E7D8]'
                 }`}
               >
                 <div>
                   <span className="block text-xs font-bold">Skyline</span>
-                  <span className="block text-[10px] text-[#9695a1] font-mono">#SUB-D89B</span>
+                  <span className="block text-[10px] text-[#746A5F] font-mono">#SUB-D89B</span>
                 </div>
                 {tieBreakerWinnerId === 'sub-d89b' && (
-                  <Check className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <Check className="w-4 h-4 text-[#2F6B63] shrink-0" />
                 )}
               </button>
             </div>

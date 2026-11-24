@@ -218,13 +218,13 @@ export default function RegisterPage() {
         <AccountPasswordSetupForm
           introText={
             <>
-              <p className="text-sm text-[#C7C5CF]">
+              <p className="text-sm text-[#6E6459]">
                 {isEng ? 'Welcome back' : 'Chào mừng trở lại'}
                 {passwordSetup.fullName ? `, ${passwordSetup.fullName}` : ''}!{' '}
                 {isEng ? 'Signed in as' : 'Đăng nhập với'}{' '}
-                <span className="font-medium text-white">{passwordSetup.email}</span>.
+                <span className="font-medium text-[#241F1A]">{passwordSetup.email}</span>.
               </p>
-              <p className="mt-2 text-sm text-[#C7C5CF]">
+              <p className="mt-2 text-sm text-[#6E6459]">
                 {isEng
                   ? "This account doesn't have a username and password yet — set them now before continuing."
                   : 'Tài khoản này chưa có tên đăng nhập và mật khẩu — hãy thiết lập ngay trước khi tiếp tục.'}
@@ -257,13 +257,13 @@ export default function RegisterPage() {
         <AccountPasswordSetupForm
           introText={
             <>
-              <p className="text-sm text-[#C7C5CF]">
+              <p className="text-sm text-[#6E6459]">
                 {isEng ? 'Welcome' : 'Chào mừng'}
                 {googleRegistration.fullName ? `, ${googleRegistration.fullName}` : ''}!{' '}
                 {isEng ? 'Signed in with Google as' : 'Đăng nhập Google bằng'}{' '}
-                <span className="font-medium text-white">{googleRegistration.email}</span>.
+                <span className="font-medium text-[#241F1A]">{googleRegistration.email}</span>.
               </p>
-              <p className="mt-2 text-sm text-[#C7C5CF]">
+              <p className="mt-2 text-sm text-[#6E6459]">
                 {isEng
                   ? "Google accounts don't come with a password here — choose a username and password to finish creating your account."
                   : 'Tài khoản Google cần thiết lập tên đăng nhập và mật khẩu để hoàn tất tạo tài khoản.'}
@@ -294,10 +294,10 @@ export default function RegisterPage() {
       ) : (
         <>
           <header className="mb-7">
-            <h1 className="font-h1 text-2xl font-bold text-white sm:text-3xl">
+            <h1 className="font-h1 text-2xl font-bold text-[#241F1A] sm:text-3xl">
               {isEng ? 'Create Account' : 'Tạo tài khoản'}
             </h1>
-            <p className="mt-1.5 text-sm text-[#C7C5CF]">
+            <p className="mt-1.5 text-sm text-[#6E6459]">
               {isEng
                 ? 'Join DILLUSTRATION to commission artists, join auctions, and trade art.'
                 : 'Tham gia DILLUSTRATION để đặt vẽ tranh, đấu giá và giao lưu tác phẩm.'}
@@ -311,7 +311,7 @@ export default function RegisterPage() {
                 {isEng ? 'Full Name' : 'Họ và tên'}
               </label>
               <div className={AUTH_INPUT_WRAP_CLASS}>
-                <User className="pointer-events-none ml-3.5 h-4 w-4 shrink-0 text-[#919099]" aria-hidden />
+                <User className="pointer-events-none ml-3.5 h-4 w-4 shrink-0 text-[#746A5F]" aria-hidden />
                 <input
                   {...register('fullName')}
                   id="fullName"
@@ -322,7 +322,7 @@ export default function RegisterPage() {
                   disabled={isLoading}
                 />
               </div>
-              {errors.fullName && <p className="text-xs text-red-400">{errors.fullName.message}</p>}
+              {errors.fullName && <p className="text-xs text-[#A8321C]">{errors.fullName.message}</p>}
             </div>
 
             {/* Email Address + OTP verification */}
@@ -331,7 +331,7 @@ export default function RegisterPage() {
                 {isEng ? 'Email Address' : 'Địa chỉ Email'}
               </label>
               <div className={AUTH_INPUT_WRAP_CLASS}>
-                <Mail className="pointer-events-none ml-3.5 h-4 w-4 shrink-0 text-[#919099]" aria-hidden />
+                <Mail className="pointer-events-none ml-3.5 h-4 w-4 shrink-0 text-[#746A5F]" aria-hidden />
                 <input
                   {...emailRegistration}
                   id="email"
@@ -353,7 +353,7 @@ export default function RegisterPage() {
                     !!errors.email ||
                     resendCooldown > 0
                   }
-                  className="absolute right-2 cursor-pointer rounded-lg border border-[#A7ACD9]/30 bg-[#A7ACD9]/15 px-3 py-1.5 text-xs font-semibold text-[#c2c7f6] transition-colors hover:bg-[#A7ACD9]/25 disabled:cursor-not-allowed disabled:opacity-45"
+                  className="absolute right-2 cursor-pointer rounded-lg border border-[#B24A26]/30 bg-[#B24A26]/15 px-3 py-1.5 text-xs font-semibold text-[#8C3718] transition-colors hover:bg-[#B24A26]/25 disabled:cursor-not-allowed disabled:opacity-45"
                 >
                   {verifyState === 'verified'
                     ? isEng
@@ -376,10 +376,10 @@ export default function RegisterPage() {
                             : 'Gửi mã'}
                 </button>
               </div>
-              {errors.email && <p className="text-xs text-red-400">{errors.email.message}</p>}
+              {errors.email && <p className="text-xs text-[#A8321C]">{errors.email.message}</p>}
 
               {verifyState === 'verified' ? (
-                <p className="flex items-center gap-1.5 text-xs font-medium text-emerald-400">
+                <p className="flex items-center gap-1.5 text-xs font-medium text-[#2F6B63]">
                   <CheckCircle2 className="h-3.5 w-3.5" aria-hidden />
                   {isEng ? 'Email verified' : 'Email đã được xác thực'}
                 </p>
@@ -389,7 +389,7 @@ export default function RegisterPage() {
                     <input
                       value={verificationCode}
                       onChange={(e) => setVerificationCode(e.target.value)}
-                      className="h-11 w-full rounded-xl border border-white/10 bg-[#141724]/90 px-4 text-sm tracking-widest text-[#E4E1E5] placeholder:text-[#919099] focus:border-[#A7ACD9] focus:outline-none focus:ring-1 focus:ring-[#A7ACD9]"
+                      className="h-11 w-full rounded-xl border border-[#221E1A]/10 bg-[#F0E7D8]/90 px-4 text-sm tracking-widest text-[#241F1A] placeholder:text-[#746A5F] focus:border-[#B24A26] focus:outline-none focus:ring-1 focus:ring-[#B24A26]"
                       placeholder={isEng ? '6-digit code' : 'Mã 6 chữ số'}
                       maxLength={6}
                       disabled={verifyState === 'confirming'}
@@ -398,7 +398,7 @@ export default function RegisterPage() {
                       type="button"
                       onClick={handleConfirmCode}
                       disabled={verifyState === 'confirming'}
-                      className="h-11 shrink-0 cursor-pointer rounded-xl bg-[#A7ACD9] px-4 text-xs font-bold text-[#1F2335] transition-colors hover:bg-[#c2c7f6] disabled:opacity-60"
+                      className="h-11 shrink-0 cursor-pointer rounded-xl bg-[#B24A26] px-4 text-xs font-bold text-[#F7F2E9] transition-colors hover:bg-[#8C3718] disabled:opacity-60"
                     >
                       {verifyState === 'confirming'
                         ? isEng
@@ -419,7 +419,7 @@ export default function RegisterPage() {
                 {isEng ? 'Password' : 'Mật khẩu'}
               </label>
               <div className={AUTH_INPUT_WRAP_CLASS}>
-                <Lock className="pointer-events-none ml-3.5 h-4 w-4 shrink-0 text-[#919099]" aria-hidden />
+                <Lock className="pointer-events-none ml-3.5 h-4 w-4 shrink-0 text-[#746A5F]" aria-hidden />
                 <input
                   {...register('password')}
                   id="password"
@@ -432,7 +432,7 @@ export default function RegisterPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword((prev) => !prev)}
-                  className="absolute right-3.5 cursor-pointer text-[#919099] transition-colors hover:text-white"
+                  className="absolute right-3.5 cursor-pointer text-[#746A5F] transition-colors hover:text-[#241F1A]"
                   aria-label={isEng ? 'Toggle password visibility' : 'Hiện/ẩn mật khẩu'}
                 >
                   {showPassword ? (
@@ -442,7 +442,7 @@ export default function RegisterPage() {
                   )}
                 </button>
               </div>
-              {errors.password && <p className="text-xs text-red-400">{errors.password.message}</p>}
+              {errors.password && <p className="text-xs text-[#A8321C]">{errors.password.message}</p>}
             </div>
 
             {/* PDPL & Platform Terms Checkbox */}
@@ -451,17 +451,17 @@ export default function RegisterPage() {
                 {...register('terms')}
                 id="terms"
                 type="checkbox"
-                className="mt-0.5 h-4 w-4 cursor-pointer rounded border-white/15 bg-[#141724] text-[#A7ACD9] focus:ring-[#A7ACD9]"
+                className="mt-0.5 h-4 w-4 cursor-pointer rounded border-[#221E1A]/10 bg-[#F0E7D8] text-[#B24A26] focus:ring-[#B24A26]"
               />
-              <label htmlFor="terms" className="cursor-pointer text-xs leading-relaxed text-[#C7C5CF]">
+              <label htmlFor="terms" className="cursor-pointer text-xs leading-relaxed text-[#6E6459]">
                 {isEng ? (
                   <>
                     I agree to the{' '}
-                    <Link href="/guide" className="text-[#A7ACD9] underline hover:text-white">
+                    <Link href="/guide" className="text-[#B24A26] underline hover:text-[#241F1A]">
                       Platform Guidelines
                     </Link>{' '}
                     and the processing of account information under the{' '}
-                    <Link href="/privacy" className="text-[#A7ACD9] underline hover:text-white">
+                    <Link href="/privacy" className="text-[#B24A26] underline hover:text-[#241F1A]">
                       Personal Data Protection Policy
                     </Link>
                     .
@@ -469,19 +469,15 @@ export default function RegisterPage() {
                 ) : (
                   <>
                     Tôi đồng ý với{' '}
-                    <Link href="/guide" className="text-[#A7ACD9] underline hover:text-white">
-                      Quy chế nền tảng
-                    </Link>{' '}
+                    <Link href="/guide" className="text-[#B24A26] underline hover:text-[#241F1A]"> Quy chế nền tảng </Link>{' '}
                     và việc xử lý thông tin tài khoản theo{' '}
-                    <Link href="/privacy" className="text-[#A7ACD9] underline hover:text-white">
-                      Chính sách bảo vệ dữ liệu cá nhân
-                    </Link>
+                    <Link href="/privacy" className="text-[#B24A26] underline hover:text-[#241F1A]"> Chính sách bảo vệ dữ liệu cá nhân </Link>
                     .
                   </>
                 )}
               </label>
             </div>
-            {errors.terms && <p className="text-xs text-red-400">{errors.terms.message}</p>}
+            {errors.terms && <p className="text-xs text-[#A8321C]">{errors.terms.message}</p>}
 
             <button
               type="submit"
@@ -501,20 +497,20 @@ export default function RegisterPage() {
             </button>
           </form>
 
-          <div className="mt-7 space-y-5 border-t border-white/10 pt-6">
+          <div className="mt-7 space-y-5 border-t border-[#221E1A]/10 pt-6">
             <div className="flex items-center gap-4">
-              <div className="h-px flex-1 bg-white/10" />
-              <span className="text-[10px] uppercase tracking-widest text-[#919099]">
+              <div className="h-px flex-1 bg-[#F0E7D8]" />
+              <span className="text-[10px] uppercase tracking-widest text-[#746A5F]">
                 {isEng ? 'Or continue with' : 'Hoặc tiếp tục với'}
               </span>
-              <div className="h-px flex-1 bg-white/10" />
+              <div className="h-px flex-1 bg-[#F0E7D8]" />
             </div>
 
             <GoogleAuthButton onClick={() => googleLogin()} />
 
-            <p className="text-center text-xs text-[#C7C5CF]">
+            <p className="text-center text-xs text-[#6E6459]">
               {isEng ? 'Already have an account?' : 'Đã có tài khoản?'}{' '}
-              <Link href="/login" className="font-bold text-[#A7ACD9] transition-colors hover:text-white hover:underline">
+              <Link href="/login" className="font-bold text-[#B24A26] transition-colors hover:text-[#241F1A] hover:underline">
                 {isEng ? 'Sign In' : 'Đăng nhập'}
               </Link>
             </p>

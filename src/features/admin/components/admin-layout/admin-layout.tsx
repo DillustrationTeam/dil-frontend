@@ -110,11 +110,11 @@ export function AdminLayout({
 
 if (!authenticated || (!administrator && (!moderator || adminOnly))) {
     return (
-      <div className="min-h-screen bg-[#1F2335] px-6 py-24 text-center text-[#E4E1E5]">
+      <div className="min-h-screen bg-[#F7F2E9] px-6 py-24 text-center text-[#241F1A]">
         <h1 className="font-h1 text-2xl">
           {authenticated ? 'Bạn không có quyền truy cập trang này' : 'Đăng nhập để mở trang quản trị'}
         </h1>
-        <Link href={authenticated ? '/' : '/login'} className="mt-6 inline-block text-[#A7ACD9] underline">
+        <Link href={authenticated ? '/' : '/login'} className="mt-6 inline-block text-[#B24A26] underline">
           {authenticated ? 'Về trang chủ' : 'Đăng nhập'}
         </Link>
       </div>
@@ -128,7 +128,7 @@ if (!authenticated || (!administrator && (!moderator || adminOnly))) {
   };
 
   return (
-    <div className={`min-h-screen bg-[#1F2335] text-[#e4e1e5] flex flex-col font-sora ${className}`}>
+    <div className={`min-h-screen bg-[#F7F2E9] text-[#241F1A] flex flex-col font-sora ${className}`}>
       {/* 1. TOP NAVBAR */}
       <TopNavbar
         currentRole="admin"
@@ -140,13 +140,13 @@ if (!authenticated || (!administrator && (!moderator || adminOnly))) {
 
       {/* 2. MOBILE DRAWER */}
       {isMobileNavOpen && (
-        <div className="fixed inset-0 z-50 md:hidden flex animate-fadeIn">
+        <div className="fixed inset-0 z-[120] lg:hidden flex animate-fadeIn">
           <div
-            className="fixed inset-0 bg-black/70 backdrop-blur-sm transition-opacity"
+            className="fixed inset-0 bg-[#E5D8C2] backdrop-blur-sm transition-opacity"
             onClick={closeMobileNav}
             aria-hidden="true"
           />
-          <div className="relative w-72 max-w-[80vw] h-full z-10 bg-[#1F2335] border-r border-white/10 shadow-2xl flex flex-col">
+          <div className="relative w-[17rem] max-w-[85vw] h-full z-10 bg-[#F7F2E9] border-r border-[#221E1A]/10 shadow-2xl flex flex-col">
             <VerticalNavbar
               items={sidebarItems}
               sections={effectiveSidebarSections}
@@ -156,7 +156,7 @@ if (!authenticated || (!administrator && (!moderator || adminOnly))) {
               onItemClick={closeMobileNav}
               onLogout={closeMobileNav}
               isCollapsed={false}
-              className="h-full border-r-0 shadow-2xl border border-white/15"
+              className="h-full border-r-0 shadow-2xl border border-[#221E1A]/10"
             />
           </div>
         </div>
@@ -164,7 +164,7 @@ if (!authenticated || (!administrator && (!moderator || adminOnly))) {
 
       {/* 3. MAIN WORKSPACE */}
       <div className="flex-1 flex w-full relative">
-        <div className="hidden md:flex">
+        <div className="hidden lg:flex">
           <VerticalNavbar
             items={sidebarItems}
             sections={effectiveSidebarSections}
@@ -176,7 +176,7 @@ if (!authenticated || (!administrator && (!moderator || adminOnly))) {
           />
         </div>
 
-        <main className={`flex-1 min-w-0 p-4 lg:p-8 overflow-y-auto ${contentClassName}`}>
+        <main className={`flex-1 min-w-0 overflow-x-hidden p-3 pb-10 sm:p-5 lg:p-8 overflow-y-auto ${contentClassName}`}>
           {children}
         </main>
       </div>

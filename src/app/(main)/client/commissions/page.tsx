@@ -85,19 +85,19 @@ export default function ClientDashboardPage() {
         />
       </div>
 
-      <section id="workrooms" className="rounded-2xl border border-white/10 bg-white/[0.035] p-5 sm:p-6">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4">
-          <h1 className="font-h1 text-base font-bold text-white">
+      <section id="workrooms" className="rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] p-5 sm:p-6">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#221E1A]/10 pb-4">
+          <h1 className="font-h1 text-base font-bold text-[#241F1A]">
             {isEng ? 'Your commissions' : 'Đơn đặt vẽ của bạn'}
           </h1>
           <div className="flex flex-wrap items-center gap-3">
             <Link
               href="/client/requests"
-              className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-[#d8dbff] transition hover:bg-white/10"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-[#221E1A]/10 bg-[#FFFCF6] px-3 py-2 text-xs font-semibold text-[#A8321C] transition hover:bg-[#F0E7D8]"
             >
               {isEng ? 'Sent requests' : 'Yêu cầu đã gửi'}
               {metrics.awaiting > 0 && (
-                <span className="rounded-full bg-[#A7ACD9]/25 px-1.5 py-0.5 text-[10px] font-bold text-[#d8dbff]">
+                <span className="rounded-full bg-[#B24A26]/25 px-1.5 py-0.5 text-[10px] font-bold text-[#A8321C]">
                   {metrics.awaiting}
                 </span>
               )}
@@ -106,7 +106,7 @@ export default function ClientDashboardPage() {
               aria-label={isEng ? 'Filter commissions by status' : 'Lọc đơn đặt vẽ theo trạng thái'}
               value={statusFilter}
               onChange={(event) => setStatusFilter(event.target.value as CommissionStatus | 'All')}
-              className="rounded-lg border border-white/10 bg-[#1F2335] px-3 py-2 text-xs text-white"
+              className="rounded-lg border border-[#221E1A]/10 bg-[#F7F2E9] px-3 py-2 text-xs text-[#241F1A]"
             >
               <option value="All">{isEng ? 'All statuses' : 'Tất cả trạng thái'}</option>
               {(
@@ -126,19 +126,19 @@ export default function ClientDashboardPage() {
                 </option>
               ))}
             </select>
-            <span className="text-xs text-slate-400">
+            <span className="text-xs text-[#746A5F]">
               {visibleCommissions.length} {isEng ? 'shown' : 'đơn'}
             </span>
           </div>
         </div>
 
         {loading ? (
-          <div className="flex min-h-48 items-center justify-center text-sm text-slate-400">
+          <div className="flex min-h-48 items-center justify-center text-sm text-[#746A5F]">
             <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />{' '}
             {isEng ? 'Loading commissions…' : 'Đang tải danh sách đơn vẽ…'}
           </div>
         ) : error ? (
-          <p className="py-12 text-center text-sm text-red-300">{error}</p>
+          <p className="py-12 text-center text-sm text-[#A8321C]">{error}</p>
         ) : visibleCommissions.length === 0 ? (
           <EmptyState isEng={isEng} />
         ) : (
@@ -155,12 +155,12 @@ export default function ClientDashboardPage() {
 
 function Metric({ label, value, icon }: { label: string; value: string; icon: React.ReactNode }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/[0.035] p-4">
-      <div className="flex items-center justify-between text-[11px] font-medium text-slate-400">
+    <div className="rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] p-4">
+      <div className="flex items-center justify-between text-[11px] font-medium text-[#746A5F]">
         <span>{label}</span>
-        <span className="text-[#A7ACD9]">{icon}</span>
+        <span className="text-[#B24A26]">{icon}</span>
       </div>
-      <p className="mt-2 font-h1 text-xl font-bold text-white">{value}</p>
+      <p className="mt-2 font-h1 text-xl font-bold text-[#241F1A]">{value}</p>
     </div>
   );
 }
@@ -199,7 +199,7 @@ function CommissionCard({ commission, isEng }: { commission: Commission; isEng: 
           : commission.status === 'Cancelled' || commission.status === 'Disputed'
             ? isEng
               ? 'View dispute & workroom'
-              : 'Xem tranh chấp & Workroom'
+              : 'Xem tranh chấp & phòng làm việc'
             : isEng
               ? 'Open workroom'
               : 'Mở phòng làm việc';
@@ -215,23 +215,23 @@ function CommissionCard({ commission, isEng }: { commission: Commission; isEng: 
       : (STATUS_LABELS[commission.status]?.[isEng ? 'eng' : 'vie'] ?? commission.status);
 
   return (
-    <div className="border-b border-white/10 py-5 first:pt-0 last:border-0 last:pb-0">
+    <div className="border-b border-[#221E1A]/10 py-5 first:pt-0 last:border-0 last:pb-0">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <span className="font-mono text-xs font-bold text-[#A7ACD9]">
+            <span className="font-mono text-xs font-bold text-[#B24A26]">
               #CMD-{commission.id.slice(0, 8).toUpperCase()}
             </span>
-            <span className="rounded-full bg-white/[0.07] px-2 py-0.5 text-[10px] font-bold text-slate-300">
+            <span className="rounded-full bg-[#FFFCF6] px-2 py-0.5 text-[10px] font-bold text-[#746A5F]">
               {statusText}
             </span>
           </div>
-          <h2 className="mt-2 text-sm font-bold text-white">{commission.title}</h2>
-          <p className="mt-1 text-xs text-slate-400">
+          <h2 className="mt-2 text-sm font-bold text-[#241F1A]">{commission.title}</h2>
+          <p className="mt-1 text-xs text-[#746A5F]">
             @{commission.creatorName || commission.creatorId} · {money(price)}
           </p>
           {awaitingEscrow && (
-            <p className="mt-2 text-xs text-[#d8dbff]">
+            <p className="mt-2 text-xs text-[#A8321C]">
               {awaitingNextStage
                 ? isEng
                   ? `Milestone #${(commission.currentStage ?? 2) - 1} completed. Deposit stage #${commission.currentStage ?? 2} to continue.`
@@ -242,7 +242,7 @@ function CommissionCard({ commission, isEng }: { commission: Commission; isEng: 
                     : `Họa sĩ đã chấp nhận đơn. Ký quỹ mốc đầu tiên: ${money(commission.nextEscrowDepositAmount)}.`
                   : isEng
                     ? 'Your creator accepted this request. Deposit escrow to start the workroom.'
-                    : 'Họa sĩ đã chấp nhận đơn. Vui lòng nạp ký quỹ để bắt đầu Workroom.'}
+                    : 'Họa sĩ đã chấp nhận đơn. Vui lòng nạp ký quỹ để bắt đầu phòng làm việc.'}
             </p>
           )}
         </div>
@@ -257,11 +257,11 @@ function CommissionCard({ commission, isEng }: { commission: Commission; isEng: 
 function EmptyState({ isEng }: { isEng: boolean }) {
   return (
     <div className="py-14 text-center">
-      <CircleDollarSign className="mx-auto h-9 w-9 text-[#A7ACD9]" />
-      <h2 className="mt-3 font-h1 font-bold text-white">
+      <CircleDollarSign className="mx-auto h-9 w-9 text-[#B24A26]" />
+      <h2 className="mt-3 font-h1 font-bold text-[#241F1A]">
         {isEng ? 'No commissions yet' : 'Chưa có đơn đặt vẽ nào'}
       </h2>
-      <p className="mt-1 text-sm text-slate-400">
+      <p className="mt-1 text-sm text-[#746A5F]">
         {isEng
           ? 'Your requests and active projects will appear here.'
           : 'Các yêu cầu đặt vẽ và dự án đang thực hiện của bạn sẽ hiển thị tại đây.'}

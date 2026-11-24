@@ -53,12 +53,12 @@ export function EventTabLeaderboard({
           <LeaderboardHeaderSorter wallSort={wallSort} setWallSort={setWallSort} />
 
           {leaderboard.length === 0 ? (
-            <div className="rounded-3xl border border-dashed border-white/15 p-16 text-center">
-              <Trophy size={40} className="mx-auto text-amber-400/40 mb-3" />
-              <h3 className="font-h1 text-lg font-bold text-white">
+            <div className="rounded-3xl border border-dashed border-[#221E1A]/10 p-16 text-center">
+              <Trophy size={40} className="mx-auto text-[#8A6A1F] mb-3" />
+              <h3 className="font-h1 text-lg font-bold text-[#241F1A]">
                 {isVie ? 'Bảng vinh danh đang chờ đón các quán quân' : 'Wall of Fame Awaiting Champions'}
               </h3>
-              <p className="mt-1 text-xs text-[#8A8FA9]">
+              <p className="mt-1 text-xs text-[#6E6459]">
                 {isVie
                   ? 'Khi lượt bình chọn của cộng đồng và điểm chấm từ ban giám khảo được tổng hợp, các họa sĩ xuất sắc nhất sẽ được vinh danh tại đây.'
                   : 'As community votes and jury evaluations accumulate, the top artists will be immortalized here.'}

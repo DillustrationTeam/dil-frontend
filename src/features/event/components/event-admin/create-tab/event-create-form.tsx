@@ -569,13 +569,13 @@ export function EventCreateForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="w-full max-w-4xl mx-auto rounded-3xl border border-white/15 bg-[#161926] p-6 sm:p-8 shadow-2xl space-y-6 text-[#e4e1e5]"
+      className="w-full max-w-4xl mx-auto rounded-3xl border border-[#221E1A]/10 bg-[#FFFCF6] p-6 sm:p-8 shadow-2xl space-y-6 text-[#241F1A]"
     >
       {/* Form Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4 pb-5 border-b border-white/10">
+      <div className="flex flex-wrap items-center justify-between gap-4 pb-5 border-b border-[#221E1A]/10">
         <div>
           <div className="flex items-center gap-2">
-            <h2 className="text-xl sm:text-2xl font-bold font-h1 text-white">
+            <h2 className="text-xl sm:text-2xl font-bold font-h1 text-[#241F1A]">
               {isEditing
                 ? isVie
                   ? 'Cập nhật chi tiết cuộc thi'
@@ -590,7 +590,7 @@ export function EventCreateForm({
               </span>
             )}
           </div>
-          <p className="text-xs text-[#8A8FA9] mt-1">
+          <p className="text-xs text-[#6E6459] mt-1">
             {isVie
               ? 'Thiết lập thông tin cuộc thi, cơ cấu giải thưởng, thời hạn nộp bài và ảnh bìa.'
               : 'Configure contest overview, prize structure, submission deadlines, and banner image.'}
@@ -600,7 +600,7 @@ export function EventCreateForm({
         <button
           type="button"
           onClick={onCancelEdit}
-          className="rounded-xl border border-white/10 px-3.5 py-2 text-xs font-semibold text-[#A7ACD9] hover:bg-white/5 hover:text-white transition cursor-pointer flex items-center gap-1.5"
+          className="rounded-xl border border-[#221E1A]/10 px-3.5 py-2 text-xs font-semibold text-[#B24A26] hover:bg-[#FFFCF6] hover:text-[#241F1A] transition cursor-pointer flex items-center gap-1.5"
         >
           <ArrowLeft size={14} />
           <span>{isVie ? 'Quay lại' : 'Back'}</span>
@@ -609,10 +609,10 @@ export function EventCreateForm({
 
       {/* Stage / Ended Warning Banner */}
       {isEventEnded && (
-        <div className="rounded-2xl border border-amber-400/30 bg-amber-500/10 p-4 flex items-start gap-3 text-xs text-amber-200">
-          <Lock size={18} className="text-amber-400 shrink-0 mt-0.5" />
+        <div className="rounded-2xl border border-[#8A6A1F]/40 bg-[#8A6A1F]/10 p-4 flex items-start gap-3 text-xs text-[#8A6A1F]">
+          <Lock size={18} className="text-[#8A6A1F] shrink-0 mt-0.5" />
           <div>
-            <strong className="text-amber-300 font-bold block mb-0.5">Contest Completed / Ended</strong>
+            <strong className="text-[#8A6A1F] font-bold block mb-0.5">Contest Completed / Ended</strong>
             This contest has ended or reached the result announcement phase. Past stage dates are locked in accordance with backend constraints.
           </div>
         </div>
@@ -620,8 +620,8 @@ export function EventCreateForm({
 
       {/* 1. Contest Banner Image (Dropzone & Live Preview) */}
       <div className="space-y-2">
-        <label className="block text-xs font-semibold uppercase tracking-wider text-[#A7ACD9]">
-          Contest Banner Image <span className="text-rose-400">*</span>
+        <label className="block text-xs font-semibold uppercase tracking-wider text-[#B24A26]">
+          Contest Banner Image <span className="text-[#A8321C]">*</span>
         </label>
 
         <input
@@ -633,14 +633,14 @@ export function EventCreateForm({
         />
 
         {bannerPreviewUrl ? (
-          <div className="relative aspect-[21/9] sm:aspect-[24/9] w-full rounded-2xl overflow-hidden border border-white/15 bg-black/40 group">
+          <div className="relative aspect-[21/9] sm:aspect-[24/9] w-full rounded-2xl overflow-hidden border border-[#221E1A]/10 bg-[#F0E7D8] group">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={bannerPreviewUrl} alt="Contest Banner Preview" className="size-full object-cover" />
-            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition flex items-center justify-center gap-3 backdrop-blur-xs">
+            <div className="absolute inset-0 bg-[#E5D8C2] opacity-0 group-hover:opacity-100 transition flex items-center justify-center gap-3 backdrop-blur-xs">
               <button
                 type="button"
                 onClick={() => bannerInputRef.current?.click()}
-                className="rounded-xl bg-brand-periwinkle px-4 py-2 text-xs font-bold text-brand-navy shadow-md cursor-pointer hover:brightness-110 transition flex items-center gap-1.5"
+                className="rounded-xl bg-brand-periwinkle px-4 py-2 text-xs font-bold text-[#FFFCF6] shadow-md cursor-pointer hover:brightness-110 transition flex items-center gap-1.5"
               >
                 <ImageIcon size={14} />
                 <span>Change Banner</span>
@@ -651,7 +651,7 @@ export function EventCreateForm({
                   setBannerFile(null);
                   setBannerPreviewUrl('');
                 }}
-                className="rounded-xl bg-rose-500/80 px-4 py-2 text-xs font-bold text-white shadow-md cursor-pointer hover:bg-rose-600 transition"
+                className="rounded-xl bg-[#A8321C]/20 px-4 py-2 text-xs font-bold text-[#241F1A] shadow-md cursor-pointer hover:bg-[#A8321C]/12 transition"
               >
                 Remove
               </button>
@@ -660,13 +660,13 @@ export function EventCreateForm({
         ) : (
           <div
             onClick={() => bannerInputRef.current?.click()}
-            className="flex flex-col items-center justify-center p-8 rounded-2xl border-2 border-dashed border-white/20 bg-white/[0.02] hover:border-brand-periwinkle/60 hover:bg-white/[0.04] transition cursor-pointer"
+            className="flex flex-col items-center justify-center p-8 rounded-2xl border-2 border-dashed border-[#221E1A]/20 bg-[#FFFCF6] hover:border-brand-periwinkle/60 hover:bg-[#FFFCF6] transition cursor-pointer"
           >
             <div className="flex size-14 items-center justify-center rounded-2xl bg-brand-periwinkle/15 text-brand-periwinkle mb-3">
               <MonitorUp size={28} />
             </div>
-            <p className="font-h1 text-sm font-bold text-white">Click or drag & drop contest banner from your PC</p>
-            <p className="text-xs text-[#8A8FA9] mt-1">Recommended size: 1920x800px (PNG, JPG, WEBP up to 25MB)</p>
+            <p className="font-h1 text-sm font-bold text-[#241F1A]">Click or drag & drop contest banner from your PC</p>
+            <p className="text-xs text-[#6E6459] mt-1">Recommended size: 1920x800px (PNG, JPG, WEBP up to 25MB)</p>
           </div>
         )}
       </div>
@@ -674,8 +674,8 @@ export function EventCreateForm({
       {/* 2. Core Contest Fields */}
       <div className="space-y-4 pt-2">
         <div>
-          <label className="block text-xs font-semibold uppercase tracking-wider text-[#A7ACD9] mb-1.5">
-            Event Title <span className="text-rose-400">*</span>
+          <label className="block text-xs font-semibold uppercase tracking-wider text-[#B24A26] mb-1.5">
+            Event Title <span className="text-[#A8321C]">*</span>
           </label>
           <input
             type="text"
@@ -684,13 +684,13 @@ export function EventCreateForm({
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="e.g. AURA 2026: Beyond the Visible"
-            className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-[#8A8FA9] focus:border-brand-periwinkle focus:outline-none"
+            className="w-full rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-4 py-2.5 text-sm text-[#241F1A] placeholder-[#6E6459] focus:border-brand-periwinkle focus:outline-none"
           />
         </div>
 
         <div>
-          <label className="block text-xs font-semibold uppercase tracking-wider text-[#A7ACD9] mb-1.5">
-            Event Overview & Description <span className="text-rose-400">*</span>
+          <label className="block text-xs font-semibold uppercase tracking-wider text-[#B24A26] mb-1.5">
+            Event Overview & Description <span className="text-[#A8321C]">*</span>
           </label>
           <textarea
             rows={4}
@@ -698,12 +698,12 @@ export function EventCreateForm({
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Describe the contest theme, creative guidelines, and overview..."
-            className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-[#8A8FA9] focus:border-brand-periwinkle focus:outline-none leading-relaxed"
+            className="w-full rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-4 py-2.5 text-sm text-[#241F1A] placeholder-[#6E6459] focus:border-brand-periwinkle focus:outline-none leading-relaxed"
           />
         </div>
 
         <div>
-          <label className="block text-xs font-semibold uppercase tracking-wider text-[#A7ACD9] mb-1.5">
+          <label className="block text-xs font-semibold uppercase tracking-wider text-[#B24A26] mb-1.5">
             Contest Rules & Submission Guidelines
           </label>
           <textarea
@@ -711,12 +711,12 @@ export function EventCreateForm({
             value={rules}
             onChange={(e) => setRules(e.target.value)}
             placeholder="Specify eligibility criteria, submission limits, and copyright rules..."
-            className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-[#8A8FA9] focus:border-brand-periwinkle focus:outline-none leading-relaxed"
+            className="w-full rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-4 py-2.5 text-sm text-[#241F1A] placeholder-[#6E6459] focus:border-brand-periwinkle focus:outline-none leading-relaxed"
           />
         </div>
 
         <div>
-          <label className="block text-xs font-semibold uppercase tracking-wider text-[#A7ACD9] mb-1.5">
+          <label className="block text-xs font-semibold uppercase tracking-wider text-[#B24A26] mb-1.5">
             Prize Pool & Honors Structure
           </label>
           <input
@@ -725,7 +725,7 @@ export function EventCreateForm({
             value={prize}
             onChange={(e) => setPrize(e.target.value)}
             placeholder="e.g. 120,000,000 VND · 6 Categories"
-            className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-[#8A8FA9] focus:border-brand-periwinkle focus:outline-none"
+            className="w-full rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-4 py-2.5 text-sm text-[#241F1A] placeholder-[#6E6459] focus:border-brand-periwinkle focus:outline-none"
           />
         </div>
       </div>
@@ -733,7 +733,7 @@ export function EventCreateForm({
       {/* 3. Configuration Settings */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 items-center">
         <div>
-          <label className="block text-xs font-semibold uppercase tracking-wider text-[#A7ACD9] mb-1.5">
+          <label className="block text-xs font-semibold uppercase tracking-wider text-[#B24A26] mb-1.5">
             Max Votes Per User
           </label>
           <input
@@ -742,7 +742,7 @@ export function EventCreateForm({
             max={100}
             value={maxVote}
             onChange={(e) => setMaxVote(Number(e.target.value))}
-            className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white focus:border-brand-periwinkle focus:outline-none"
+            className="w-full rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-4 py-2.5 text-sm text-[#241F1A] focus:border-brand-periwinkle focus:outline-none"
           />
         </div>
 
@@ -752,16 +752,16 @@ export function EventCreateForm({
               type="checkbox"
               checked={isFeatured}
               onChange={(e) => setIsFeatured(e.target.checked)}
-              className="size-4 rounded border-white/20 bg-white/5 text-brand-periwinkle focus:ring-0 cursor-pointer"
+              className="size-4 rounded border-[#221E1A]/20 bg-[#FFFCF6] text-brand-periwinkle focus:ring-0 cursor-pointer"
             />
-            <Sparkles size={16} className="text-amber-300" />
-            <span className="text-xs font-semibold text-white">Mark as Featured Contest on Homepage Carousel</span>
+            <Sparkles size={16} className="text-[#8A6A1F]" />
+            <span className="text-xs font-semibold text-[#241F1A]">Mark as Featured Contest on Homepage Carousel</span>
           </label>
         </div>
       </div>
 
       {/* 4. Event Stages & Timeline Schedules */}
-      <div className="space-y-4 pt-4 border-t border-white/10">
+      <div className="space-y-4 pt-4 border-t border-[#221E1A]/10">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h3 className="text-xs font-bold text-brand-periwinkle uppercase tracking-wider flex items-center gap-1.5">
             <Calendar size={15} /> Event Stages & Timeline Schedules
@@ -772,15 +772,15 @@ export function EventCreateForm({
           {/* Submission Start */}
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#A7ACD9]">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-[#B24A26]">
                 Submission Start
               </label>
               {isSubmissionStartPassed ? (
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center gap-1">
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#8A6A1F]/20 text-[#8A6A1F] border border-[#8A6A1F]/40 flex items-center gap-1">
                   <Lock size={10} /> Passed (Locked)
                 </span>
               ) : isSubmissionActive ? (
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#2F6B63]/20 text-[#2F6B63] border border-[#2F6B63]/40 flex items-center gap-1">
                   <Clock size={10} /> Active Phase
                 </span>
               ) : null}
@@ -790,22 +790,22 @@ export function EventCreateForm({
               disabled={isSubmissionStartPassed || isEventEnded}
               value={submissionStartAt}
               onChange={(e) => setSubmissionStartAt(e.target.value)}
-              className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-xs text-white focus:border-brand-periwinkle focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-4 py-2.5 text-xs text-[#241F1A] focus:border-brand-periwinkle focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
             />
           </div>
 
           {/* Submission Deadline */}
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#A7ACD9]">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-[#B24A26]">
                 Submission Deadline
               </label>
               {isSubmissionEndPassed ? (
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center gap-1">
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#8A6A1F]/20 text-[#8A6A1F] border border-[#8A6A1F]/40 flex items-center gap-1">
                   <Lock size={10} /> Passed (Locked)
                 </span>
               ) : isSubmissionActive ? (
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30 flex items-center gap-1">
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#2C5A86]/20 text-[#2C5A86] border border-[#2C5A86]/40 flex items-center gap-1">
                   Extendable Only
                 </span>
               ) : null}
@@ -816,22 +816,22 @@ export function EventCreateForm({
               min={isSubmissionActive ? formatDateForInput(selectedEvent?.submissionEndAt) : undefined}
               value={submissionEndAt}
               onChange={(e) => setSubmissionEndAt(e.target.value)}
-              className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-xs text-white focus:border-brand-periwinkle focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-4 py-2.5 text-xs text-[#241F1A] focus:border-brand-periwinkle focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
             />
           </div>
 
           {/* Judging Start */}
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#A7ACD9]">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-[#B24A26]">
                 Judging Start
               </label>
               {isJudgingStartPassed ? (
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center gap-1">
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#8A6A1F]/20 text-[#8A6A1F] border border-[#8A6A1F]/40 flex items-center gap-1">
                   <Lock size={10} /> Passed (Locked)
                 </span>
               ) : isJudgingActive ? (
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#2F6B63]/20 text-[#2F6B63] border border-[#2F6B63]/40 flex items-center gap-1">
                   <Clock size={10} /> Active Phase
                 </span>
               ) : null}
@@ -841,22 +841,22 @@ export function EventCreateForm({
               disabled={isJudgingStartPassed || isEventEnded}
               value={judgingStartAt}
               onChange={(e) => setJudgingStartAt(e.target.value)}
-              className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-xs text-white focus:border-brand-periwinkle focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-4 py-2.5 text-xs text-[#241F1A] focus:border-brand-periwinkle focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
             />
           </div>
 
           {/* Judging Deadline */}
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#A7ACD9]">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-[#B24A26]">
                 Judging Deadline
               </label>
               {isJudgingEndPassed ? (
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center gap-1">
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#8A6A1F]/20 text-[#8A6A1F] border border-[#8A6A1F]/40 flex items-center gap-1">
                   <Lock size={10} /> Passed (Locked)
                 </span>
               ) : isJudgingActive ? (
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30 flex items-center gap-1">
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#2C5A86]/20 text-[#2C5A86] border border-[#2C5A86]/40 flex items-center gap-1">
                   Extendable Only
                 </span>
               ) : null}
@@ -867,22 +867,22 @@ export function EventCreateForm({
               min={isJudgingActive ? formatDateForInput(selectedEvent?.judgingEndAt) : undefined}
               value={judgingEndAt}
               onChange={(e) => setJudgingEndAt(e.target.value)}
-              className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-xs text-white focus:border-brand-periwinkle focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-4 py-2.5 text-xs text-[#241F1A] focus:border-brand-periwinkle focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
             />
           </div>
 
           {/* Public Voting Start */}
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#A7ACD9]">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-[#B24A26]">
                 Public Voting Start
               </label>
               {isVotingStartPassed ? (
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center gap-1">
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#8A6A1F]/20 text-[#8A6A1F] border border-[#8A6A1F]/40 flex items-center gap-1">
                   <Lock size={10} /> Passed (Locked)
                 </span>
               ) : isVotingActive ? (
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#2F6B63]/20 text-[#2F6B63] border border-[#2F6B63]/40 flex items-center gap-1">
                   <Clock size={10} /> Active Phase
                 </span>
               ) : null}
@@ -892,22 +892,22 @@ export function EventCreateForm({
               disabled={isVotingStartPassed || isEventEnded}
               value={votingStartAt}
               onChange={(e) => setVotingStartAt(e.target.value)}
-              className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-xs text-white focus:border-brand-periwinkle focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-4 py-2.5 text-xs text-[#241F1A] focus:border-brand-periwinkle focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
             />
           </div>
 
           {/* Public Voting End */}
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#A7ACD9]">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-[#B24A26]">
                 Public Voting End
               </label>
               {isVotingEndPassed ? (
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center gap-1">
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#8A6A1F]/20 text-[#8A6A1F] border border-[#8A6A1F]/40 flex items-center gap-1">
                   <Lock size={10} /> Passed (Locked)
                 </span>
               ) : isVotingActive ? (
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30 flex items-center gap-1">
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#2C5A86]/20 text-[#2C5A86] border border-[#2C5A86]/40 flex items-center gap-1">
                   Extendable Only
                 </span>
               ) : null}
@@ -918,22 +918,22 @@ export function EventCreateForm({
               min={isVotingActive ? formatDateForInput(selectedEvent?.votingEndAt) : undefined}
               value={votingEndAt}
               onChange={(e) => setVotingEndAt(e.target.value)}
-              className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-xs text-white focus:border-brand-periwinkle focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-4 py-2.5 text-xs text-[#241F1A] focus:border-brand-periwinkle focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
             />
           </div>
 
           {/* Result Announcement */}
           <div className="sm:col-span-2">
             <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#A7ACD9]">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-[#B24A26]">
                 Result Announcement Date
               </label>
               {isResultAnnouncementPassed || isEventEnded ? (
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center gap-1">
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#8A6A1F]/20 text-[#8A6A1F] border border-[#8A6A1F]/40 flex items-center gap-1">
                   <Lock size={10} /> Passed (Locked)
                 </span>
               ) : isResultAnnouncementPending ? (
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30 flex items-center gap-1">
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#2C5A86]/20 text-[#2C5A86] border border-[#2C5A86]/40 flex items-center gap-1">
                   Postponable Only
                 </span>
               ) : null}
@@ -944,25 +944,25 @@ export function EventCreateForm({
               min={isResultAnnouncementPending ? formatDateForInput(selectedEvent?.resultAnnouncementAt) : undefined}
               value={resultAnnouncementAt}
               onChange={(e) => setResultAnnouncementAt(e.target.value)}
-              className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-xs text-white focus:border-brand-periwinkle focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-4 py-2.5 text-xs text-[#241F1A] focus:border-brand-periwinkle focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
             />
           </div>
         </div>
       </div>
 
       {/* 5. Scoring Criteria & Rubrics */}
-      <div className="space-y-4 pt-4 border-t border-white/10">
+      <div className="space-y-4 pt-4 border-t border-[#221E1A]/10">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div>
             <h3 className="text-xs font-bold text-brand-periwinkle uppercase tracking-wider flex items-center gap-1.5">
               <ListChecks size={15} /> 5. Event Scoring Criteria & Rubrics
             </h3>
-            <p className="text-[11px] text-[#8A8FA9] mt-0.5">
+            <p className="text-[11px] text-[#6E6459] mt-0.5">
               Configure evaluation criteria and rubrics for the Jury during the judging stage.
             </p>
           </div>
           {isCriteriaLocked ? (
-            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-semibold">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#8A6A1F]/10 border border-[#8A6A1F]/40 text-[#8A6A1F] text-xs font-semibold">
               <Lock size={13} />
               <span>Criteria Locked</span>
             </span>
@@ -980,11 +980,11 @@ export function EventCreateForm({
 
         {/* Warning if criteria is locked */}
         {isCriteriaLocked && (
-          <div className="flex items-start gap-2.5 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-200 text-xs">
-            <Lock size={15} className="text-amber-400 shrink-0 mt-0.5" />
+          <div className="flex items-start gap-2.5 p-3 rounded-xl bg-[#8A6A1F]/10 border border-[#8A6A1F]/30 text-[#8A6A1F] text-xs">
+            <Lock size={15} className="text-[#8A6A1F] shrink-0 mt-0.5" />
             <div>
-              <p className="font-semibold text-amber-300">Criteria editing is locked</p>
-              <p className="text-[11px] text-amber-200/80 mt-0.5">
+              <p className="font-semibold text-[#8A6A1F]">Criteria editing is locked</p>
+              <p className="text-[11px] text-[#8A6A1F] mt-0.5">
                 Evaluation criteria can only be modified before the judging stage begins. Once judging is active or has concluded, scoring criteria are read-only to ensure grading consistency.
               </p>
             </div>
@@ -992,12 +992,12 @@ export function EventCreateForm({
         )}
 
         {/* Summary pill */}
-        <div className="flex flex-wrap items-center gap-3 text-xs bg-white/5 border border-white/10 rounded-xl px-4 py-2">
-          <span className="text-[#8A8FA9]">Total Criteria: <strong className="text-white">{criteriaList.length}</strong></span>
-          <span className="text-[#8A8FA9]">·</span>
-          <span className="text-[#8A8FA9]">Max Score Total: <strong className="text-amber-300">{criteriaList.reduce((sum, c) => sum + (Number(c.maxScore) || 0), 0)}</strong></span>
-          <span className="text-[#8A8FA9]">·</span>
-          <span className="text-[#8A8FA9]">Total Weight: <strong className="text-emerald-300">{criteriaList.reduce((sum, c) => sum + (Number(c.weight) || 0), 0).toFixed(2)}</strong></span>
+        <div className="flex flex-wrap items-center gap-3 text-xs bg-[#FFFCF6] border border-[#221E1A]/10 rounded-xl px-4 py-2">
+          <span className="text-[#6E6459]">Total Criteria: <strong className="text-[#241F1A]">{criteriaList.length}</strong></span>
+          <span className="text-[#6E6459]">·</span>
+          <span className="text-[#6E6459]">Max Score Total: <strong className="text-[#8A6A1F]">{criteriaList.reduce((sum, c) => sum + (Number(c.maxScore) || 0), 0)}</strong></span>
+          <span className="text-[#6E6459]">·</span>
+          <span className="text-[#6E6459]">Total Weight: <strong className="text-[#2F6B63]">{criteriaList.reduce((sum, c) => sum + (Number(c.weight) || 0), 0).toFixed(2)}</strong></span>
         </div>
 
         {/* Criteria items list */}
@@ -1005,10 +1005,10 @@ export function EventCreateForm({
           {criteriaList.map((crit, idx) => (
             <div
               key={crit.id || `crit-${idx}`}
-              className="p-3.5 rounded-xl border border-white/10 bg-[#0c0e18]/80 hover:border-white/20 transition space-y-3"
+              className="p-3.5 rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6]/80 hover:border-[#221E1A]/20 transition space-y-3"
             >
               <div className="flex items-center justify-between gap-2">
-                <span className="text-xs font-bold text-white flex items-center gap-1.5">
+                <span className="text-xs font-bold text-[#241F1A] flex items-center gap-1.5">
                   <span className="size-5 rounded-full bg-brand-periwinkle/20 text-brand-periwinkle text-[11px] flex items-center justify-center font-mono">
                     {idx + 1}
                   </span>
@@ -1018,7 +1018,7 @@ export function EventCreateForm({
                   <button
                     type="button"
                     onClick={() => handleRemoveCriterion(idx)}
-                    className="p-1 rounded-lg text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 transition cursor-pointer"
+                    className="p-1 rounded-lg text-[#A8321C] hover:bg-[#A8321C]/10 hover:text-[#A8321C] transition cursor-pointer"
                     title="Remove this criterion"
                   >
                     <Trash2 size={14} />
@@ -1028,8 +1028,8 @@ export function EventCreateForm({
 
               <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
                 <div className="sm:col-span-6">
-                  <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#A7ACD9] mb-1">
-                    Criterion Name <span className="text-rose-400">*</span>
+                  <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#B24A26] mb-1">
+                    Criterion Name <span className="text-[#A8321C]">*</span>
                   </label>
                   <input
                     type="text"
@@ -1038,12 +1038,12 @@ export function EventCreateForm({
                     value={crit.name}
                     onChange={(e) => handleCriterionChange(idx, 'name', e.target.value)}
                     placeholder="e.g. Creativity & Concept"
-                    className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-white placeholder-[#8A8FA9] focus:border-brand-periwinkle focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed"
+                    className="w-full rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-3 py-2 text-xs text-[#241F1A] placeholder-[#6E6459] focus:border-brand-periwinkle focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed"
                   />
                 </div>
 
                 <div className="sm:col-span-3">
-                  <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#A7ACD9] mb-1">
+                  <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#B24A26] mb-1">
                     Max Score
                   </label>
                   <input
@@ -1054,12 +1054,12 @@ export function EventCreateForm({
                     disabled={isCriteriaLocked}
                     value={crit.maxScore}
                     onChange={(e) => handleCriterionChange(idx, 'maxScore', e.target.value)}
-                    className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-white focus:border-brand-periwinkle focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed"
+                    className="w-full rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-3 py-2 text-xs text-[#241F1A] focus:border-brand-periwinkle focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed"
                   />
                 </div>
 
                 <div className="sm:col-span-3">
-                  <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#A7ACD9] mb-1">
+                  <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#B24A26] mb-1">
                     Weight
                   </label>
                   <input
@@ -1070,12 +1070,12 @@ export function EventCreateForm({
                     disabled={isCriteriaLocked}
                     value={crit.weight}
                     onChange={(e) => handleCriterionChange(idx, 'weight', e.target.value)}
-                    className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-white focus:border-brand-periwinkle focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed"
+                    className="w-full rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-3 py-2 text-xs text-[#241F1A] focus:border-brand-periwinkle focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed"
                   />
                 </div>
 
                 <div className="sm:col-span-12">
-                  <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#A7ACD9] mb-1">
+                  <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#B24A26] mb-1">
                     Scoring Guide & Description
                   </label>
                   <input
@@ -1084,7 +1084,7 @@ export function EventCreateForm({
                     value={crit.description}
                     onChange={(e) => handleCriterionChange(idx, 'description', e.target.value)}
                     placeholder="e.g. Originality, visual storytelling, and adherence to the contest theme..."
-                    className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-white placeholder-[#8A8FA9] focus:border-brand-periwinkle focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed"
+                    className="w-full rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-3 py-2 text-xs text-[#241F1A] placeholder-[#6E6459] focus:border-brand-periwinkle focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed"
                   />
                 </div>
               </div>
@@ -1094,13 +1094,13 @@ export function EventCreateForm({
       </div>
 
       {/* Footer Actions */}
-      <div className="flex flex-wrap items-center justify-end gap-3 pt-4 border-t border-white/10">
+      <div className="flex flex-wrap items-center justify-end gap-3 pt-4 border-t border-[#221E1A]/10">
         {(!isEditing || String(status).toLowerCase() === 'draft' || String(status) === '1') && (
           <button
             type="button"
             onClick={handleSaveDraft}
             disabled={submitting}
-            className="rounded-xl border border-white/10 px-5 py-2.5 text-xs font-semibold text-[#A7ACD9] hover:bg-white/5 hover:text-white transition cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
+            className="rounded-xl border border-[#221E1A]/10 px-5 py-2.5 text-xs font-semibold text-[#B24A26] hover:bg-[#FFFCF6] hover:text-[#241F1A] transition cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
           >
             <Save size={14} className="text-brand-periwinkle" />
             <span>{isVie ? 'Lưu bản nháp' : 'Save Draft'}</span>
@@ -1110,7 +1110,7 @@ export function EventCreateForm({
         <button
           type="submit"
           disabled={submitting}
-          className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-brand-periwinkle to-[#c2c7f6] px-6 py-2.5 text-xs font-bold text-brand-navy shadow-lg transition hover:brightness-110 active:scale-95 disabled:opacity-50 cursor-pointer"
+          className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-brand-periwinkle to-[#8C3718] px-6 py-2.5 text-xs font-bold text-[#241F1A] shadow-lg transition hover:brightness-110 active:scale-95 disabled:opacity-50 cursor-pointer"
         >
           <CheckCircle size={16} />
           <span>

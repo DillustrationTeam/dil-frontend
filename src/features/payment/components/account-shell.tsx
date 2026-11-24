@@ -25,15 +25,14 @@ export function AccountShell({
     <div lang="vi" className="min-h-screen bg-brand-navy font-body text-on-surface">
       <a
         href="#wallet-content"
-        className={`sr-only z-50 rounded-xl bg-brand-periwinkle p-3 text-brand-navy focus:not-sr-only focus:fixed focus:left-4 focus:top-4 ${focusClass}`}
-      >
-        Đến nội dung chính
-      </a>
+        className={`sr-only z-50 rounded-xl bg-brand-periwinkle p-3 text-[#FFFCF6] focus:not-sr-only focus:fixed focus:left-4 focus:top-4 ${focusClass}`}
+      > Đến nội dung chính </a>
 
       <div className="mx-auto max-w-[1600px] px-2 py-4 sm:px-4 md:px-6">
-        <main id="wallet-content" className="min-w-0 scroll-mt-6">
+        {/* Layout (main) đã có <main>; ở đây chỉ là vùng nội dung để không lặp landmark. */}
+        <div id="wallet-content" className="min-w-0 scroll-mt-6">
           {children}
-        </main>
+        </div>
       </div>
     </div>
   );
@@ -54,9 +53,7 @@ export function AccountPageHeading({
   return (
     <div className="mb-8 flex flex-wrap items-end justify-between gap-5">
       <div>
-        <p className="mb-3 flex items-center gap-2 text-xs text-outline">
-          Tài khoản
-          <ChevronRight size={12} aria-hidden />
+        <p className="mb-3 flex items-center gap-2 text-xs text-outline"> Tài khoản <ChevronRight size={12} aria-hidden />
           <span className="text-on-surface-variant">{breadcrumb}</span>
         </p>
         <h1 className="font-h1 text-3xl font-semibold tracking-tight md:text-[40px] md:leading-tight">
@@ -73,7 +70,7 @@ export function AccountPageHeading({
 /** Chân trang chung của nhóm màn hình tài khoản. */
 export function AccountPageFooter({ right }: { right: string }) {
   return (
-    <footer className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-white/5 py-5 text-[11px] text-outline">
+    <footer className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-[#221E1A]/10 py-5 text-[11px] text-outline">
       <span>Dillustration · Không gian cho sáng tạo</span>
       <span>{right}</span>
     </footer>

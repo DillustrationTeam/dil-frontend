@@ -88,7 +88,7 @@ export function VoucherApplyPanel({
   }
 
   return (
-    <section className="glass-container rounded-3xl border border-white/10 p-5 md:p-6">
+    <section className="glass-container rounded-3xl border border-[#221E1A]/10 p-5 md:p-6">
       <div className="mb-4 flex items-center gap-2">
         <BadgePercent size={18} className="text-brand-periwinkle" aria-hidden="true" />
         <h2 className="font-h1 text-base font-bold">Mã giảm giá cho thanh toán</h2>
@@ -96,9 +96,7 @@ export function VoucherApplyPanel({
 
       <form onSubmit={handleValidate} className="flex flex-wrap items-end gap-3">
         <div className="min-w-[12rem] flex-1">
-          <label htmlFor="voucher-apply-code" className="mb-1.5 block text-xs text-on-surface-variant">
-            Mã giảm giá
-          </label>
+          <label htmlFor="voucher-apply-code" className="mb-1.5 block text-xs text-on-surface-variant"> Mã giảm giá </label>
           <input
             id="voucher-apply-code"
             type="text"
@@ -108,16 +106,14 @@ export function VoucherApplyPanel({
               reset();
             }}
             placeholder="VD: DILLU50"
-            className="w-full rounded-2xl border border-white/15 bg-brand-navy/80 px-4 py-2.5 font-mono text-sm uppercase text-on-surface placeholder:text-outline focus:border-brand-periwinkle focus:outline-none"
+            className="w-full rounded-2xl border border-[#221E1A]/10 bg-brand-navy/80 px-4 py-2.5 font-mono text-sm uppercase text-on-surface placeholder:text-outline focus:border-brand-periwinkle focus:outline-none"
           />
         </div>
 
         {allowManualInput && (
           <>
             <div className="w-40">
-              <label htmlFor="voucher-apply-amount" className="mb-1.5 block text-xs text-on-surface-variant">
-                Số tiền đơn
-              </label>
+              <label htmlFor="voucher-apply-amount" className="mb-1.5 block text-xs text-on-surface-variant"> Số tiền đơn </label>
               <input
                 id="voucher-apply-amount"
                 type="number"
@@ -128,14 +124,12 @@ export function VoucherApplyPanel({
                   reset();
                 }}
                 placeholder="0"
-                className="w-full rounded-2xl border border-white/15 bg-brand-navy/80 px-4 py-2.5 text-sm text-on-surface placeholder:text-outline focus:border-brand-periwinkle focus:outline-none"
+                className="w-full rounded-2xl border border-[#221E1A]/10 bg-brand-navy/80 px-4 py-2.5 text-sm text-on-surface placeholder:text-outline focus:border-brand-periwinkle focus:outline-none"
               />
             </div>
 
             <div className="w-56">
-              <label htmlFor="voucher-apply-ref" className="mb-1.5 block text-xs text-on-surface-variant">
-                Mã giao dịch (commission)
-              </label>
+              <label htmlFor="voucher-apply-ref" className="mb-1.5 block text-xs text-on-surface-variant"> Mã giao dịch </label>
               <input
                 id="voucher-apply-ref"
                 type="text"
@@ -147,7 +141,7 @@ export function VoucherApplyPanel({
                   setRefIdInput(e.target.value);
                 }}
                 placeholder="GUID của đơn đặt vẽ"
-                className="w-full rounded-2xl border border-white/15 bg-brand-navy/80 px-4 py-2.5 font-mono text-xs text-on-surface placeholder:text-outline focus:border-brand-periwinkle focus:outline-none"
+                className="w-full rounded-2xl border border-[#221E1A]/10 bg-brand-navy/80 px-4 py-2.5 font-mono text-xs text-on-surface placeholder:text-outline focus:border-brand-periwinkle focus:outline-none"
               />
             </div>
           </>
@@ -156,7 +150,7 @@ export function VoucherApplyPanel({
         <button
           type="submit"
           disabled={!code.trim() || busy !== null}
-          className="inline-flex items-center gap-1.5 rounded-2xl border border-white/15 bg-white/5 px-5 py-2.5 text-sm font-semibold hover:bg-white/10 disabled:opacity-50"
+          className="inline-flex items-center gap-1.5 rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] px-5 py-2.5 text-sm font-semibold hover:bg-[#F0E7D8] disabled:opacity-50"
         >
           {busy === 'validate' ? <RefreshCw size={15} className="animate-spin" /> : <Ticket size={15} />}
           Kiểm tra mã
@@ -164,7 +158,7 @@ export function VoucherApplyPanel({
       </form>
 
       {error && (
-        <div role="alert" className="mt-4 flex items-start gap-2 rounded-2xl border border-red-400/30 bg-red-500/10 p-3 text-xs text-red-200">
+        <div role="alert" className="mt-4 flex items-start gap-2 rounded-2xl border border-[#A8321C]/40 bg-[#A8321C]/10 p-3 text-xs text-[#A8321C]">
           <CircleAlert size={15} className="mt-0.5 shrink-0" />
           <span>{error}</span>
         </div>
@@ -174,15 +168,14 @@ export function VoucherApplyPanel({
         <div
           className={`mt-4 rounded-2xl border p-4 text-xs ${
             validation.isValid
-              ? 'border-emerald-400/30 bg-emerald-500/10 text-emerald-200'
-              : 'border-amber-400/30 bg-amber-500/10 text-amber-200'
+              ? 'border-[#2F6B63]/40 bg-[#2F6B63]/10 text-[#2F6B63]'
+              : 'border-[#8A6A1F]/40 bg-[#8A6A1F]/10 text-[#8A6A1F]'
           }`}
         >
           {validation.isValid ? (
             <div className="flex flex-wrap items-center justify-between gap-3">
               <span className="flex items-center gap-2">
-                <CheckCircle2 size={15} />
-                Giảm <strong>{formatVnd(validation.discountAmount)}</strong> · còn phải trả{' '}
+                <CheckCircle2 size={15} /> Giảm <strong>{formatVnd(validation.discountAmount)}</strong> · còn phải trả{' '}
                 <strong>{formatVnd(validation.finalAmount)}</strong>
               </span>
               <button
@@ -190,7 +183,7 @@ export function VoucherApplyPanel({
                 onClick={handleRedeem}
                 disabled={!effectiveRefId || busy !== null}
                 title={effectiveRefId ? 'Ghi nhận dùng mã cho giao dịch này' : 'Cần mã giao dịch để áp dụng'}
-                className="inline-flex items-center gap-1.5 rounded-full bg-brand-periwinkle px-4 py-2 font-semibold text-brand-navy hover:brightness-110 disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 rounded-full bg-brand-periwinkle px-4 py-2 font-semibold text-[#FFFCF6] hover:brightness-110 disabled:opacity-50"
               >
                 {busy === 'redeem' ? <RefreshCw size={13} className="animate-spin" /> : <BadgePercent size={13} />}
                 Áp dụng mã
@@ -205,18 +198,15 @@ export function VoucherApplyPanel({
       )}
 
       {redeemed && (
-        <div role="status" className="mt-4 flex flex-wrap items-center gap-2 rounded-2xl border border-emerald-400/30 bg-emerald-500/10 p-4 text-xs text-emerald-200">
-          <CheckCircle2 size={15} />
-          Đã áp mã <strong className="font-mono">{redeemed.voucherCode}</strong> · giảm{' '}
+        <div role="status" className="mt-4 flex flex-wrap items-center gap-2 rounded-2xl border border-[#2F6B63]/40 bg-[#2F6B63]/10 p-4 text-xs text-[#2F6B63]">
+          <CheckCircle2 size={15} /> Đã áp mã <strong className="font-mono">{redeemed.voucherCode}</strong> · giảm{' '}
           <strong>{formatVnd(redeemed.discountAmount)}</strong> · thanh toán{' '}
           <strong>{formatVnd(redeemed.finalAmount)}</strong>
         </div>
       )}
 
       {!effectiveRefId && (
-        <p className="mt-3 text-[11px] text-outline">
-          Mã chỉ được ghi nhận khi có mã giao dịch (commission) — màn thanh toán Brief sẽ truyền mã này vào.
-        </p>
+        <p className="mt-3 text-[11px] text-outline"> Mã chỉ được ghi nhận khi có mã giao dịch — màn thanh toán đề bài sẽ truyền mã này vào. </p>
       )}
     </section>
   );

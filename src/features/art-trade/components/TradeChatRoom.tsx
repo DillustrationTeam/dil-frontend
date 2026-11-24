@@ -79,16 +79,16 @@ export function TradeChatRoom({ trade, currentUser, onOpenDispute }: TradeChatRo
 
   const partnerName = useMemo(() => {
     if (isInitiator) {
-      return trade.receiver?.fullName || (isVie ? 'Đối tác nhận (Side B)' : 'Receiver (Side B)');
+      return trade.receiver?.fullName || (isVie ? 'Đối tác nhận' : 'Receiver (Side B)');
     }
-    return trade.initiator?.fullName || (isVie ? 'Người khởi tạo (Side A)' : 'Initiator (Side A)');
+    return trade.initiator?.fullName || (isVie ? 'Người khởi tạo' : 'Initiator (Side A)');
   }, [isInitiator, trade.receiver, trade.initiator, isVie]);
 
   const partnerRole = useMemo(() => {
     if (isInitiator) {
-      return isVie ? 'Người nhận đề nghị (Side B)' : 'Partner / Receiver (Side B)';
+      return isVie ? 'Người nhận đề nghị' : 'Partner / Receiver (Side B)';
     }
-    return isVie ? 'Người đề nghị (Side A)' : 'Initiator (Side A)';
+    return isVie ? 'Người đề nghị' : 'Initiator (Side A)';
   }, [isInitiator, isVie]);
 
   const isTradeEnded = useMemo(() => {
@@ -174,7 +174,7 @@ export function TradeChatRoom({ trade, currentUser, onOpenDispute }: TradeChatRo
   }, []);
 
   const handleFailure = useCallback((reason: string) => {
-    toast.error(reason || 'Lỗi kết nối phòng chat.');
+    toast.error(reason || 'Lỗi kết nối phòng trò chuyện.');
   }, []);
 
   const chat = useChatHub(trade.id, {
@@ -303,17 +303,17 @@ export function TradeChatRoom({ trade, currentUser, onOpenDispute }: TradeChatRo
   };
 
   return (
-    <div className="glass-container relative flex flex-col rounded-3xl shadow-2xl overflow-hidden h-[560px] md:h-[640px] max-h-[calc(100vh-210px)] min-h-[420px] border border-white/10 bg-[#16161b]/90 backdrop-blur-xl">
+    <div className="glass-container relative flex flex-col rounded-3xl shadow-2xl overflow-hidden h-[560px] md:h-[640px] max-h-[calc(100vh-210px)] min-h-[420px] border border-[#221E1A]/10 bg-[#FFFCF6]/90 backdrop-blur-xl">
       {/* 1. CHAT HEADER */}
-      <div className="flex-none flex items-center justify-between px-6 py-4 border-b border-white/10 bg-[#1a1a24]/90 backdrop-blur-md z-10">
+      <div className="flex-none flex items-center justify-between px-6 py-4 border-b border-[#221E1A]/10 bg-[#FFFCF6]/90 backdrop-blur-md z-10">
         <div className="flex items-center gap-3">
           <div className="relative">
             <div className="size-11 rounded-2xl bg-brand-navy border border-brand-periwinkle/35 flex items-center justify-center text-brand-periwinkle font-bold text-sm shadow-md">
               {partnerName.slice(0, 2).toUpperCase()}
             </div>
             <span
-              className={`absolute -bottom-0.5 -right-0.5 size-3.5 rounded-full border-2 border-[#131316] ${
-                chat.status === 'connected' ? 'bg-emerald-400' : 'bg-amber-400'
+              className={`absolute -bottom-0.5 -right-0.5 size-3.5 rounded-full border-2 border-[#F7F2E9] ${
+                chat.status === 'connected' ? 'bg-[#2F6B63]/10' : 'bg-[#8A6A1F]/10'
               }`}
               title={chat.status === 'connected' ? 'Live SignalR Connected' : 'Connecting...'}
             />
@@ -321,12 +321,12 @@ export function TradeChatRoom({ trade, currentUser, onOpenDispute }: TradeChatRo
 
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="font-bold text-sm text-white">{partnerName}</h3>
+              <h3 className="font-bold text-sm text-[#241F1A]">{partnerName}</h3>
               <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-brand-periwinkle/15 border border-brand-periwinkle/30 text-brand-periwinkle">
                 {partnerRole}
               </span>
             </div>
-            <p className="text-xs text-[#919099] flex items-center gap-1.5 mt-0.5">
+            <p className="text-xs text-[#746A5F] flex items-center gap-1.5 mt-0.5">
               {partnerTyping ? (
                 <span className="text-brand-periwinkle font-medium animate-pulse flex items-center gap-1">
                   <span className="size-1.5 rounded-full bg-brand-periwinkle animate-bounce" />
@@ -356,7 +356,7 @@ export function TradeChatRoom({ trade, currentUser, onOpenDispute }: TradeChatRo
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition cursor-pointer ${
               autoTranslate
                 ? 'bg-brand-periwinkle/15 text-brand-periwinkle border-brand-periwinkle/40 shadow-sm'
-                : 'bg-white/5 text-[#919099] border-white/10 hover:text-white hover:bg-white/10'
+                : 'bg-[#FFFCF6] text-[#746A5F] border-[#221E1A]/10 hover:text-[#241F1A] hover:bg-[#F0E7D8]'
             }`}
             title={
               autoTranslate
@@ -384,7 +384,7 @@ export function TradeChatRoom({ trade, currentUser, onOpenDispute }: TradeChatRo
           <button
             type="button"
             onClick={() => void fetchRoomData()}
-            className="p-2 rounded-xl bg-white/5 border border-white/10 text-[#919099] hover:text-white hover:bg-white/10 transition cursor-pointer"
+            className="p-2 rounded-xl bg-[#FFFCF6] border border-[#221E1A]/10 text-[#746A5F] hover:text-[#241F1A] hover:bg-[#F0E7D8] transition cursor-pointer"
             title={isVie ? 'Tải lại tin nhắn' : 'Reload messages'}
           >
             <RefreshCw className="size-4" />
@@ -395,10 +395,10 @@ export function TradeChatRoom({ trade, currentUser, onOpenDispute }: TradeChatRo
             <button
               type="button"
               onClick={onOpenDispute}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-amber-500/10 border border-amber-500/30 text-amber-300 hover:bg-amber-500/20 transition cursor-pointer"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-[#8A6A1F]/10 border border-[#8A6A1F]/40 text-[#8A6A1F] hover:bg-[#8A6A1F]/20 transition cursor-pointer"
               title={isVie ? 'Khiếu nại / Báo cáo sự cố' : 'Raise Dispute / Report'}
             >
-              <Gavel className="size-3.5 text-amber-400" />
+              <Gavel className="size-3.5 text-[#8A6A1F]" />
               <span className="hidden sm:inline">{isVie ? 'Khiếu nại' : 'Dispute'}</span>
             </button>
           )}
@@ -407,11 +407,11 @@ export function TradeChatRoom({ trade, currentUser, onOpenDispute }: TradeChatRo
 
       {/* 2. NOTICE BANNER IF TRADE IS CLOSED / LOCKED */}
       {isChatDisabled && (
-        <div className="flex-none flex items-center gap-3 px-6 py-2.5 bg-amber-500/10 border-b border-amber-500/20 text-xs text-amber-200">
-          <Lock className="size-4 text-amber-400 shrink-0" />
+        <div className="flex-none flex items-center gap-3 px-6 py-2.5 bg-[#8A6A1F]/10 border-b border-[#8A6A1F]/30 text-xs text-[#8A6A1F]">
+          <Lock className="size-4 text-[#8A6A1F] shrink-0" />
           <span>
             {isVie
-              ? 'Giao dịch trao đổi này đã kết thúc. Phòng chat được chuyển sang chế độ chỉ đọc lưu trữ.'
+              ? 'Giao dịch trao đổi này đã kết thúc. Phòng trò chuyện được chuyển sang chế độ chỉ đọc lưu trữ.'
               : 'This art trade has ended. The chat room is now in read-only archive mode.'}
           </span>
         </div>
@@ -425,15 +425,15 @@ export function TradeChatRoom({ trade, currentUser, onOpenDispute }: TradeChatRo
           className="flex-1 overflow-y-auto px-4 sm:px-6 py-6 space-y-4 custom-scrollbar overscroll-contain"
         >
         {loading && (
-          <div className="flex flex-col items-center justify-center py-20 text-[#919099]">
+          <div className="flex flex-col items-center justify-center py-20 text-[#746A5F]">
             <RefreshCw className="size-8 animate-spin text-brand-periwinkle mb-3" />
             <p className="text-xs">{isVie ? 'Đang tải tin nhắn…' : 'Loading messages…'}</p>
           </div>
         )}
 
         {error && !loading && (
-          <div className="p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-300 text-xs text-center">
-            <AlertCircle className="size-5 mx-auto mb-1 text-red-400" />
+          <div className="p-4 rounded-2xl bg-[#A8321C]/10 border border-[#A8321C]/30 text-[#A8321C] text-xs text-center">
+            <AlertCircle className="size-5 mx-auto mb-1 text-[#A8321C]" />
             {error}
           </div>
         )}
@@ -443,10 +443,10 @@ export function TradeChatRoom({ trade, currentUser, onOpenDispute }: TradeChatRo
             <div className="size-14 rounded-2xl bg-brand-periwinkle/10 border border-brand-periwinkle/25 flex items-center justify-center text-brand-periwinkle mb-3">
               <Sparkles className="size-6" />
             </div>
-            <h4 className="font-bold text-white text-sm mb-1 font-h1">
+            <h4 className="font-bold text-[#241F1A] text-sm mb-1 font-h1">
               {isVie ? 'Chào mừng đến phòng trao đổi tác phẩm!' : 'Welcome to the Trade Room!'}
             </h4>
-            <p className="text-xs text-[#919099] max-w-md">
+            <p className="text-xs text-[#746A5F] max-w-md">
               {isVie
                 ? 'Hãy bắt đầu trò chuyện, trao đổi ý tưởng vẽ và cập nhật tiến độ nộp tranh cùng đối tác của bạn tại đây.'
                 : 'Start chatting, exchanging artistic references, and keeping each other updated on artwork progress right here.'}
@@ -465,8 +465,8 @@ export function TradeChatRoom({ trade, currentUser, onOpenDispute }: TradeChatRo
               className={`flex flex-col ${isMe ? 'items-end' : 'items-start'} group`}
             >
               {/* Sender & timestamp header */}
-              <div className="mb-1 flex items-center gap-2 text-[10px] text-[#919099] px-1">
-                <span className="font-semibold text-[#C7C5CF]">
+              <div className="mb-1 flex items-center gap-2 text-[10px] text-[#746A5F] px-1">
+                <span className="font-semibold text-[#6E6459]">
                   {isMe ? (isVie ? 'Bạn' : 'You') : msg.senderFullName || partnerName}
                 </span>
                 <span>
@@ -478,7 +478,7 @@ export function TradeChatRoom({ trade, currentUser, onOpenDispute }: TradeChatRo
                 {isMe && (
                   <span title={msg.isRead ? (isVie ? 'Đã xem' : 'Read') : (isVie ? 'Đã gửi' : 'Sent')}>
                     <CheckCheck
-                      className={`size-3.5 ${msg.isRead ? 'text-brand-periwinkle' : 'text-[#919099]'}`}
+                      className={`size-3.5 ${msg.isRead ? 'text-brand-periwinkle' : 'text-[#746A5F]'}`}
                     />
                   </span>
                 )}
@@ -488,8 +488,8 @@ export function TradeChatRoom({ trade, currentUser, onOpenDispute }: TradeChatRo
               <div
                 className={`relative max-w-[85%] md:max-w-[75%] p-3.5 text-xs leading-relaxed shadow-lg ${
                   isMe
-                    ? 'bg-brand-periwinkle text-brand-navy font-medium rounded-2xl rounded-tr-none'
-                    : 'border border-white/10 bg-white/[0.05] text-[#E4E1E5] rounded-2xl rounded-tl-none'
+                    ? 'bg-brand-periwinkle text-[#FFFCF6] font-medium rounded-2xl rounded-tr-none'
+                    : 'border border-[#221E1A]/10 bg-[#FFFCF6] text-[#241F1A] rounded-2xl rounded-tl-none'
                 }`}
               >
                 {/* Body Text */}
@@ -499,11 +499,11 @@ export function TradeChatRoom({ trade, currentUser, onOpenDispute }: TradeChatRo
                 {msg.translatedBody && msg.translatedBody.trim() !== msg.body.trim() && (
                   <div
                     className={`mt-2.5 pt-2 border-t text-[11px] leading-relaxed ${
-                      isMe ? 'border-brand-navy/20 text-brand-navy/90' : 'border-white/10 text-[#C7C5CF]'
+                      isMe ? 'border-brand-navy/20 text-[#241F1A]/90' : 'border-[#221E1A]/10 text-[#6E6459]'
                     }`}
                   >
                     <p className="flex items-center gap-1 font-semibold text-[10px] uppercase tracking-wider mb-1">
-                      <Globe className={`size-3 ${isMe ? 'text-brand-navy' : 'text-brand-periwinkle'}`} />
+                      <Globe className={`size-3 ${isMe ? 'text-[#241F1A]' : 'text-brand-periwinkle'}`} />
                       {isVie ? 'Bản dịch AI' : 'AI Translation'}
                     </p>
                     <p className="italic">{msg.translatedBody}</p>
@@ -523,7 +523,7 @@ export function TradeChatRoom({ trade, currentUser, onOpenDispute }: TradeChatRo
                       return (
                         <div
                           key={att.messageAttachmentId}
-                          className="overflow-hidden rounded-xl border border-white/10 bg-black/40"
+                          className="overflow-hidden rounded-xl border border-[#221E1A]/10 bg-[#F0E7D8]"
                         >
                           {isImg ? (
                             <a
@@ -538,20 +538,20 @@ export function TradeChatRoom({ trade, currentUser, onOpenDispute }: TradeChatRo
                                 alt={att.fileName || 'Attachment'}
                                 className="max-h-60 w-full object-contain rounded-xl transition duration-200 group-hover/img:scale-[1.02]"
                               />
-                              <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover/img:opacity-100 transition duration-200 text-white text-xs font-semibold gap-1.5">
+                              <div className="absolute inset-0 flex items-center justify-center bg-[#F0E7D8] opacity-0 group-hover/img:opacity-100 transition duration-200 text-[#241F1A] text-xs font-semibold gap-1.5">
                                 <Eye className="size-4" /> {isVie ? 'Xem ảnh gốc' : 'View Full Image'}
                               </div>
                             </a>
                           ) : (
                             <div className="flex items-center justify-between p-2.5 text-[11px]">
-                              <span className={`truncate font-medium ${isMe ? 'text-brand-navy' : 'text-[#E4E1E5]'}`}>
+                              <span className={`truncate font-medium ${isMe ? 'text-[#241F1A]' : 'text-[#241F1A]'}`}>
                                 {att.fileName || (isVie ? 'Tệp đính kèm' : 'Attachment')}
                               </span>
                               <a
                                 href={fullUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="ml-2 inline-flex items-center gap-1 rounded-lg bg-brand-periwinkle/20 px-2.5 py-1 font-semibold text-brand-periwinkle hover:bg-brand-periwinkle hover:text-brand-navy transition"
+                                className="ml-2 inline-flex items-center gap-1 rounded-lg bg-brand-periwinkle/20 px-2.5 py-1 font-semibold text-brand-periwinkle hover:bg-brand-periwinkle hover:text-[#FFFCF6] transition"
                               >
                                 <Download className="size-3" /> {isVie ? 'Tải về' : 'Download'}
                               </a>
@@ -566,7 +566,7 @@ export function TradeChatRoom({ trade, currentUser, onOpenDispute }: TradeChatRo
 
               {/* Translate button for partner messages */}
               {!isMe && (
-                <div className="mt-1 flex items-center gap-2 text-[10px] text-[#919099] px-1">
+                <div className="mt-1 flex items-center gap-2 text-[10px] text-[#746A5F] px-1">
                   {isTranslating ? (
                     <span className="inline-flex items-center gap-1 text-brand-periwinkle">
                       <RefreshCw className="size-2.5 animate-spin" />
@@ -576,7 +576,7 @@ export function TradeChatRoom({ trade, currentUser, onOpenDispute }: TradeChatRo
                     <button
                       type="button"
                       onClick={() => void handleTranslateOne(msg.messageId, !!msg.translatedBody)}
-                      className="inline-flex items-center gap-1 text-[#919099] hover:text-brand-periwinkle transition cursor-pointer"
+                      className="inline-flex items-center gap-1 text-[#746A5F] hover:text-brand-periwinkle transition cursor-pointer"
                     >
                       <Globe className="size-2.5" />
                       {msg.translatedBody
@@ -611,7 +611,7 @@ export function TradeChatRoom({ trade, currentUser, onOpenDispute }: TradeChatRo
       </div>
 
       {/* 4. CHAT INPUT BAR */}
-      <div className="flex-none border-t border-white/10 bg-[#1a1a24]/90 backdrop-blur-md p-3 sm:p-4 z-10">
+      <div className="flex-none border-t border-[#221E1A]/10 bg-[#FFFCF6]/90 backdrop-blur-md p-3 sm:p-4 z-10">
         {/* Selected File Preview */}
         {selectedFile && (
           <div className="mb-3 flex items-center gap-3 rounded-2xl border border-brand-periwinkle/30 bg-brand-periwinkle/10 p-2.5">
@@ -620,23 +620,23 @@ export function TradeChatRoom({ trade, currentUser, onOpenDispute }: TradeChatRo
               <img
                 src={selectedFilePreview}
                 alt="Upload preview"
-                className="size-12 rounded-xl object-cover border border-white/20"
+                className="size-12 rounded-xl object-cover border border-[#221E1A]/20"
               />
             ) : (
-              <div className="size-12 rounded-xl bg-white/10 flex items-center justify-center text-brand-periwinkle">
+              <div className="size-12 rounded-xl bg-[#F0E7D8] flex items-center justify-center text-brand-periwinkle">
                 <Paperclip className="size-6" />
               </div>
             )}
             <div className="flex-1 min-w-0 text-xs">
-              <p className="font-semibold text-white truncate">{selectedFile.name}</p>
-              <p className="text-[10px] text-[#919099]">
+              <p className="font-semibold text-[#241F1A] truncate">{selectedFile.name}</p>
+              <p className="text-[10px] text-[#746A5F]">
                 {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
               </p>
             </div>
             <button
               type="button"
               onClick={handleClearSelectedFile}
-              className="p-1.5 rounded-lg text-[#919099] hover:text-white hover:bg-white/10 transition cursor-pointer"
+              className="p-1.5 rounded-lg text-[#746A5F] hover:text-[#241F1A] hover:bg-[#F0E7D8] transition cursor-pointer"
             >
               <X className="size-4" />
             </button>
@@ -659,7 +659,7 @@ export function TradeChatRoom({ trade, currentUser, onOpenDispute }: TradeChatRo
             type="button"
             onClick={() => fileInputRef.current?.click()}
             disabled={isChatDisabled}
-            className="flex size-11 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-[#919099] hover:text-white hover:bg-white/10 disabled:opacity-40 transition cursor-pointer"
+            className="flex size-11 shrink-0 items-center justify-center rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] text-[#746A5F] hover:text-[#241F1A] hover:bg-[#F0E7D8] disabled:opacity-40 transition cursor-pointer"
             title={isVie ? 'Đính kèm tệp/ảnh' : 'Attach file/image'}
           >
             <Paperclip className="size-4" />
@@ -684,13 +684,13 @@ export function TradeChatRoom({ trade, currentUser, onOpenDispute }: TradeChatRo
             placeholder={
               isChatDisabled
                 ? isVie
-                  ? 'Phòng chat đã kết thúc…'
+                  ? 'Phòng trò chuyện đã kết thúc…'
                   : 'Chat room is closed…'
                 : isVie
                 ? 'Nhập tin nhắn trao đổi tranh… (Enter để gửi)'
                 : 'Type a message… (Enter to send)'
             }
-            className="flex-1 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-xs text-white placeholder-[#919099] focus:border-brand-periwinkle focus:outline-none focus:ring-1 focus:ring-brand-periwinkle disabled:opacity-50 transition"
+            className="flex-1 rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] px-4 py-3 text-xs text-[#241F1A] placeholder-[#746A5F] focus:border-brand-periwinkle focus:outline-none focus:ring-1 focus:ring-brand-periwinkle disabled:opacity-50 transition"
           />
 
           {/* Send button */}

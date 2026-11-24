@@ -55,14 +55,14 @@ export function DisputeArbitrationConsole() {
 
       {/* Error alert banner if queue fetch fails */}
       {queueError && (
-        <div className="p-4 rounded-2xl bg-red-500/10 border border-red-500/30 flex items-center justify-between text-xs text-red-300">
+        <div className="p-4 rounded-2xl bg-[#A8321C]/10 border border-[#A8321C]/40 flex items-center justify-between text-xs text-[#A8321C]">
           <div className="flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 shrink-0 text-red-400" />
+            <AlertCircle className="w-4 h-4 shrink-0 text-[#A8321C]" />
             <span>{queueError}</span>
           </div>
           <button
             onClick={() => loadQueue()}
-            className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-red-500/20 hover:bg-red-500/30 text-white font-bold transition-all cursor-pointer"
+            className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-[#A8321C]/20 hover:bg-[#A8321C]/20 text-[#241F1A] font-bold transition-all cursor-pointer"
           >
             <RefreshCw className="w-3.5 h-3.5" />
             <span>Retry</span>

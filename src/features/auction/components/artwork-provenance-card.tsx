@@ -84,50 +84,46 @@ export function ArtworkProvenanceCard({ artworkId }: { artworkId: string }) {
   }
 
   return (
-    <section className="glass-container rounded-3xl border border-white/10 p-5 space-y-4">
+    <section className="glass-container rounded-3xl border border-[#221E1A]/10 p-5 space-y-4">
       {/* Header Provenance */}
       <div className="flex items-center justify-between">
-        <h3 className="flex items-center gap-2 font-h1 text-sm font-bold text-white">
-          <History size={16} className="text-amber-400" />
+        <h3 className="flex items-center gap-2 font-h1 text-sm font-bold text-[#241F1A]">
+          <History size={16} className="text-[#8A6A1F]" />
           Lịch sử sở hữu &amp; Lai lịch tác phẩm (Provenance)
         </h3>
-        <span className="inline-flex items-center gap-1 rounded-full border border-amber-400/40 bg-amber-400/10 px-2.5 py-0.5 text-[10px] font-bold text-amber-300">
+        <span className="inline-flex items-center gap-1 rounded-full border border-[#8A6A1F]/40 bg-[#8A6A1F]/10 px-2.5 py-0.5 text-[10px] font-bold text-[#8A6A1F]">
           <Crown size={12} /> Verified
         </span>
       </div>
 
       {/* Dòng tóm tắt định danh hiện tại: Tác giả ➔ Chủ sở hữu */}
-      <div className="rounded-2xl border border-amber-400/30 bg-black/40 p-4">
-        <span className="text-[10px] text-outline uppercase tracking-wider block mb-1.5 font-mono">
-          Chuỗi chuyển nhượng quyền sở hữu
-        </span>
+      <div className="rounded-2xl border border-[#8A6A1F]/40 bg-[#F0E7D8] p-4">
+        <span className="text-[10px] text-outline uppercase tracking-wider block mb-1.5 font-mono"> Chuỗi chuyển nhượng quyền sở hữu </span>
         <div className="flex flex-wrap items-center gap-2 text-xs md:text-sm">
-          <span className="font-semibold text-white flex items-center gap-1">
-            <User size={14} className="text-brand-periwinkle" />
-            Tác giả: <strong className="text-brand-periwinkle">{provenance.creatorName}</strong>
+          <span className="font-semibold text-[#241F1A] flex items-center gap-1">
+            <User size={14} className="text-brand-periwinkle" /> Tác giả: <strong className="text-brand-periwinkle">{provenance.creatorName}</strong>
           </span>
 
-          <ArrowRight size={15} className="text-amber-400 shrink-0" />
+          <ArrowRight size={15} className="text-[#8A6A1F] shrink-0" />
 
-          <span className="font-semibold text-white flex items-center gap-1">
-            <Crown size={14} className="text-amber-400" />
+          <span className="font-semibold text-[#241F1A] flex items-center gap-1">
+            <Crown size={14} className="text-[#8A6A1F]" />
             Chủ sở hữu hiện tại:{' '}
-            <strong className="text-emerald-300">
+            <strong className="text-[#2F6B63]">
               {provenance.currentOwnerName || 'Đang bảo lưu'}
             </strong>
           </span>
 
           {provenance.isCurrentOwnerCollector && (
-            <span className="ml-auto inline-flex items-center gap-1 rounded-full bg-emerald-500/20 border border-emerald-400/30 px-2 py-0.5 text-[10px] font-bold text-emerald-300">
+            <span className="ml-auto inline-flex items-center gap-1 rounded-full bg-[#2F6B63]/20 border border-[#2F6B63]/40 px-2 py-0.5 text-[10px] font-bold text-[#2F6B63]">
               <ShieldCheck size={11} /> Exclusive Owner
             </span>
           )}
         </div>
-        <div className="mt-2 pt-2 border-t border-white/5 flex items-center gap-1.5 text-[11px] text-outline">
-          <ShieldCheck size={13} className="text-amber-400 shrink-0" />
+        <div className="mt-2 pt-2 border-t border-[#221E1A]/10 flex items-center gap-1.5 text-[11px] text-outline">
+          <ShieldCheck size={13} className="text-[#8A6A1F] shrink-0" />
           <span>
-            <strong className="text-white">Quyền tác giả gốc bất biến:</strong> Danh tính Họa sĩ sáng tác vĩnh viễn không thay đổi dù tác phẩm được chuyển nhượng hay bán lại qua nhiều thế hệ chủ sở hữu.
-          </span>
+            <strong className="text-[#241F1A]">Quyền tác giả gốc bất biến:</strong> Danh tính Họa sĩ sáng tác vĩnh viễn không thay đổi dù tác phẩm được chuyển nhượng hay bán lại qua nhiều thế hệ chủ sở hữu. </span>
         </div>
       </div>
 
@@ -141,15 +137,13 @@ export function ArtworkProvenanceCard({ artworkId }: { artworkId: string }) {
             {provenance.history.map((h, index) => (
               <div
                 key={`${h.ownerId}-${index}`}
-                className="flex items-center justify-between rounded-xl border border-white/5 bg-white/[0.02] p-2.5 text-xs"
+                className="flex items-center justify-between rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] p-2.5 text-xs"
               >
                 <div>
-                  <p className="font-semibold text-white flex items-center gap-1.5">
+                  <p className="font-semibold text-[#241F1A] flex items-center gap-1.5">
                     {h.ownerName}
                     {h.isCurrent && (
-                      <span className="rounded bg-emerald-500/20 px-1.5 py-0.5 text-[9px] font-bold text-emerald-300">
-                        Đang sở hữu
-                      </span>
+                      <span className="rounded bg-[#2F6B63]/20 px-1.5 py-0.5 text-[9px] font-bold text-[#2F6B63]"> Đang sở hữu </span>
                     )}
                   </p>
                   <p className="text-[10px] text-outline">
@@ -159,7 +153,7 @@ export function ArtworkProvenanceCard({ artworkId }: { artworkId: string }) {
 
                 <div className="text-right">
                   {h.price && (
-                    <span className="font-mono font-bold text-amber-400 block text-xs">
+                    <span className="font-mono font-bold text-[#8A6A1F] block text-xs">
                       {formatVnd(h.price)}
                     </span>
                   )}
@@ -168,8 +162,7 @@ export function ArtworkProvenanceCard({ artworkId }: { artworkId: string }) {
                       type="button"
                       onClick={() => viewCertificate(h.auctionId, h.ownerId)}
                       className="inline-flex items-center gap-1 text-[10px] text-brand-periwinkle hover:underline mt-0.5 cursor-pointer"
-                    >
-                      Chứng chỉ <ExternalLink size={10} />
+                    > Chứng chỉ <ExternalLink size={10} />
                     </button>
                   )}
                 </div>

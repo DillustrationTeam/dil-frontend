@@ -232,7 +232,7 @@ export function VerticalNavbar({
 
   return (
     <aside
-      className={`relative sticky top-16 h-[calc(100vh-4rem)] bg-[#1F2335]/90 backdrop-blur-[20px] border-r border-white/10 transition-all duration-300 flex flex-col justify-between z-30 shrink-0 ${
+      className={`relative sticky top-16 h-[calc(100vh-4rem)] bg-[#F7F2E9]/90 backdrop-blur-[20px] border-r border-[#221E1A]/10 transition-all duration-300 flex flex-col justify-between z-30 shrink-0 ${
         isCollapsed ? 'w-20' : 'w-64'
       } ${className}`}
     >
@@ -241,7 +241,7 @@ export function VerticalNavbar({
         <button
           type="button"
           onClick={onToggleCollapse}
-          className="absolute -right-3.5 top-6 w-7 h-7 rounded-full bg-[#1b1b1e] border border-white/20 text-slate-300 hover:text-white hover:border-[#A7ACD9]/50 flex items-center justify-center shadow-lg transition-all z-40 cursor-pointer"
+          className="absolute -right-3.5 top-6 w-7 h-7 rounded-full bg-[#FFFCF6] border border-[#221E1A]/20 text-[#746A5F] hover:text-[#241F1A] hover:border-[#B24A26]/50 flex items-center justify-center shadow-lg transition-all z-40 cursor-pointer"
           title={isCollapsed ? t('Expand Sidebar') : t('Collapse Sidebar')}
           aria-label={isCollapsed ? t('Expand Sidebar') : t('Collapse Sidebar')}
         >
@@ -258,21 +258,21 @@ export function VerticalNavbar({
         {/* Admin Header / Profile Banner */}
         {showProfile && (
           <div
-            className={`p-2.5 rounded-2xl bg-white/5 border border-white/10 flex items-center gap-3 ${
+            className={`p-2.5 rounded-2xl bg-[#FFFCF6] border border-[#221E1A]/10 flex items-center gap-3 ${
               isCollapsed ? 'justify-center p-2' : ''
             }`}
           >
-            <div className="w-8 h-8 rounded-xl bg-[#A7ACD9]/20 text-[#A7ACD9] font-bold flex items-center justify-center font-sora text-xs border border-[#A7ACD9]/30 shrink-0 select-none shadow-[0_0_12px_rgba(167,172,217,0.15)]">
+            <div className="w-8 h-8 rounded-xl bg-[#B24A26]/20 text-[#B24A26] font-bold flex items-center justify-center font-sora text-xs border border-[#B24A26]/30 shrink-0 select-none shadow-[0_0_12px_rgba(167,172,217,0.15)]">
               {displayInitials}
             </div>
             {!isCollapsed && (
               <div className="min-w-0 flex-1">
-                <h4 className="font-bold text-white text-xs truncate font-sora">
+                <h4 className="font-bold text-[#241F1A] text-xs truncate font-sora">
                   {displayName}
                 </h4>
                 <div className="flex items-center gap-1.5 mt-0.5">
-                  <Shield className="w-3 h-3 text-[#A7ACD9]" />
-                  <span className="text-[10px] text-[#A7ACD9] font-medium tracking-wide truncate">
+                  <Shield className="w-3 h-3 text-[#B24A26]" />
+                  <span className="text-[10px] text-[#B24A26] font-medium tracking-wide truncate">
                     {localizedRole}
                   </span>
                 </div>
@@ -288,12 +288,12 @@ export function VerticalNavbar({
             {section.title && (
               <div className="px-3 pt-2 pb-1">
                 {!isCollapsed ? (
-                  <p className="text-[10px] font-space-grotesk tracking-widest uppercase font-bold text-[#919099]">
+                  <p className="text-[10px] font-space-grotesk tracking-widest uppercase font-bold text-[#746A5F]">
                     {t(section.title)}
                   </p>
                 ) : (
                   sectionIdx > 0 && (
-                    <div className="h-[1px] bg-white/10 w-full my-2" />
+                    <div className="h-[1px] bg-[#F0E7D8] w-full my-2" />
                   )
                 )}
               </div>
@@ -311,8 +311,8 @@ export function VerticalNavbar({
                     onClick={() => onItemClick?.(item)}
                     className={`relative flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-sora font-medium transition-all group ${
                       active
-                        ? 'bg-[#A7ACD9]/20 text-white border border-[#A7ACD9]/40 shadow-[0_0_15px_rgba(167,172,217,0.2)]'
-                        : 'text-[#919099] hover:text-white hover:bg-white/5 border border-transparent'
+                        ? 'bg-[#B24A26]/20 text-[#241F1A] border border-[#B24A26]/40 shadow-[0_0_15px_rgba(167,172,217,0.2)]'
+                        : 'text-[#746A5F] hover:text-[#241F1A] hover:bg-[#FFFCF6] border border-transparent'
                     } ${isCollapsed ? 'justify-center px-0' : ''}`}
                     title={isCollapsed ? t(item.label) : undefined}
                     aria-current={active ? 'page' : undefined}
@@ -322,21 +322,11 @@ export function VerticalNavbar({
                       <span
                         className={`w-4 h-4 shrink-0 transition-colors ${
                           active
-                            ? 'text-[#A7ACD9]'
-                            : 'text-[#919099] group-hover:text-white'
+                            ? 'text-[#B24A26]'
+                            : 'text-[#746A5F] group-hover:text-[#241F1A]'
                         }`}
                       >
                         {item.icon}
-                      </span>
-                    ) : item.materialIcon ? (
-                      <span
-                        className={`material-symbols-outlined text-lg transition-colors ${
-                          active
-                            ? 'text-[#A7ACD9]'
-                            : 'text-[#919099] group-hover:text-white'
-                        }`}
-                      >
-                        {item.materialIcon}
                       </span>
                     ) : null}
 
@@ -352,12 +342,12 @@ export function VerticalNavbar({
                           <span
                             className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${
                               item.badgeVariant === 'danger'
-                                ? 'bg-rose-500/20 text-rose-300 border-rose-500/30'
+                                ? 'bg-[#A8321C]/20 text-[#A8321C] border-[#A8321C]/40'
                                 : item.badgeVariant === 'warning'
-                                ? 'bg-amber-500/20 text-amber-300 border-amber-500/30'
+                                ? 'bg-[#8A6A1F]/20 text-[#8A6A1F] border-[#8A6A1F]/40'
                                 : item.badgeVariant === 'success'
-                                ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
-                                : 'bg-[#A7ACD9]/20 text-[#A7ACD9] border-[#A7ACD9]/30'
+                                ? 'bg-[#2F6B63]/20 text-[#2F6B63] border-[#2F6B63]/40'
+                                : 'bg-[#B24A26]/20 text-[#B24A26] border-[#B24A26]/30'
                             }`}
                           >
                             {item.badge}
@@ -377,7 +367,7 @@ export function VerticalNavbar({
 
       {/* Bottom Footer Section (matching CollapsibleSidebar) */}
       {showFooter && (
-        <div className="p-3 border-t border-white/10 space-y-1.5">
+        <div className="p-3 border-t border-[#221E1A]/10 space-y-1.5">
           {footerContent ? (
             footerContent
           ) : (
@@ -385,17 +375,17 @@ export function VerticalNavbar({
               {/* Return to Marketplace */}
               <Link
                 href="/"
-                className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-sora text-[#919099] hover:text-white hover:bg-white/5 transition-colors group ${
+                className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-sora text-[#746A5F] hover:text-[#241F1A] hover:bg-[#FFFCF6] transition-colors group ${
                   isCollapsed ? 'justify-center px-0' : ''
                 }`}
                 title={isCollapsed ? t('Return to Marketplace') : undefined}
               >
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+                <span className="w-2 h-2 rounded-full bg-[#2F6B63]/10 animate-pulse shrink-0" />
                 {!isCollapsed && (
                   <span className="truncate flex-1 font-medium">{t('Marketplace')}</span>
                 )}
                 {!isCollapsed && (
-                  <ArrowUpRight className="w-3.5 h-3.5 text-[#919099] group-hover:text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                  <ArrowUpRight className="w-3.5 h-3.5 text-[#746A5F] group-hover:text-[#241F1A] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                 )}
               </Link>
 
@@ -403,7 +393,7 @@ export function VerticalNavbar({
               <button
                 type="button"
                 onClick={handleLogout}
-                className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-sora text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 transition-colors text-left cursor-pointer ${
+                className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-sora text-[#A8321C] hover:text-[#A8321C] hover:bg-[#A8321C]/10 transition-colors text-left cursor-pointer ${
                   isCollapsed ? 'justify-center px-0' : ''
                 }`}
                 title={isCollapsed ? t('Exit Console') : undefined}

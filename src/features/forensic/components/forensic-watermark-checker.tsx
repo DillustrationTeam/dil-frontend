@@ -64,27 +64,27 @@ const WATERMARK_TYPE_LABELS: Record<string, { label: string; accountLabel: strin
   DwtPublish: {
     label: 'Ảnh trưng bày',
     accountLabel: 'Người đăng',
-    badgeClass: 'border-[#A7ACD9]/35 bg-[#A7ACD9]/10 text-[#DDE0FF]',
+    badgeClass: 'border-[#B24A26]/35 bg-[#B24A26]/10 text-[#A8321C]',
   },
   DwtForensic: {
     label: 'Phiên xem tranh',
     accountLabel: 'Người xem',
-    badgeClass: 'border-sky-500/35 bg-sky-500/10 text-sky-300',
+    badgeClass: 'border-[#2C6A86]/40 bg-[#2C6A86]/10 text-[#2C6A86]',
   },
   DwtCommissionWip: {
     label: 'Bản nháp WIP',
     accountLabel: 'Khách hàng',
-    badgeClass: 'border-amber-500/35 bg-amber-500/10 text-amber-300',
+    badgeClass: 'border-[#8A6A1F]/40 bg-[#8A6A1F]/10 text-[#8A6A1F]',
   },
   DwtCommissionFinal: {
     label: 'Bàn giao cuối (ảnh)',
     accountLabel: 'Khách nhận',
-    badgeClass: 'border-emerald-500/35 bg-emerald-500/10 text-emerald-300',
+    badgeClass: 'border-[#2F6B63]/40 bg-[#2F6B63]/10 text-[#2F6B63]',
   },
   HashCommissionFinal: {
-    label: 'Bàn giao cuối (file gốc / ZIP)',
+    label: 'Bàn giao cuối (tệp gốc / ZIP)',
     accountLabel: 'Khách nhận',
-    badgeClass: 'border-violet-500/35 bg-violet-500/10 text-violet-300',
+    badgeClass: 'border-[#5F3F86]/40 bg-[#5F3F86]/10 text-[#5F3F86]',
   },
 };
 
@@ -334,7 +334,7 @@ export function ForensicWatermarkChecker({ mode = 'user' }: ForensicWatermarkChe
       if (!d) throw new Error('Không nhận được kết quả xử lý.');
       setBackfillMsg(
         `Đã xử lý ${d.processed}/${d.totalPending} tranh chưa có bản xem trước và cập nhật ${d.visualHashesUpdated ?? 0} dấu vân tay ảnh${
-          d.skippedCount > 0 ? ` (bỏ qua ${d.skippedCount} tranh không đọc được file gốc)` : ''
+          d.skippedCount > 0 ? ` (bỏ qua ${d.skippedCount} tranh không đọc được tệp gốc)` : ''
         }.`
       );
       await loadRecentReceipts();
@@ -359,7 +359,7 @@ export function ForensicWatermarkChecker({ mode = 'user' }: ForensicWatermarkChe
     (type && WATERMARK_TYPE_LABELS[type]) || {
       label: type || 'Phiên xem tranh',
       accountLabel: 'Tài khoản',
-      badgeClass: 'border-white/15 bg-white/[.04] text-[#C7C5CF]',
+      badgeClass: 'border-[#221E1A]/10 bg-[#FFFCF6] text-[#6E6459]',
     };
 
   const formatSource = (ip: string) => SOURCE_LABELS[ip] || ip;
@@ -367,9 +367,7 @@ export function ForensicWatermarkChecker({ mode = 'user' }: ForensicWatermarkChe
   const renderMatchesTable = (matches: ForensicTraceMatch[], showActions = false) => {
     if (matches.length === 0) {
       return (
-        <div className="rounded-xl border border-white/10 bg-white/[.02] p-5 text-sm text-[#919099]">
-          Chưa có biên lai nào khớp.
-        </div>
+        <div className="rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] p-5 text-sm text-[#746A5F]"> Chưa có biên lai nào khớp. </div>
       );
     }
 
@@ -390,7 +388,7 @@ export function ForensicWatermarkChecker({ mode = 'user' }: ForensicWatermarkChe
           return (
             <div
               key={m.receiptId}
-              className="rounded-xl border border-white/10 bg-[#131624] p-4 transition-colors hover:border-white/20"
+              className="rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] p-4 transition-colors hover:border-[#221E1A]/20"
             >
               {/* Hàng 1: Tên tác phẩm / đơn (bấm mở trang) + Loại + Thời gian */}
               <div className="flex flex-wrap items-center justify-between gap-2">
@@ -398,13 +396,13 @@ export function ForensicWatermarkChecker({ mode = 'user' }: ForensicWatermarkChe
                   {targetHref ? (
                     <Link
                       href={targetHref}
-                      className="inline-flex items-center gap-1.5 text-sm font-semibold text-white hover:text-[#DDE0FF] hover:underline"
+                      className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#241F1A] hover:text-[#A8321C] hover:underline"
                     >
                       <span>{m.artworkTitle}</span>
-                      <ExternalLink className="h-3.5 w-3.5 text-[#A7ACD9]" />
+                      <ExternalLink className="h-3.5 w-3.5 text-[#B24A26]" />
                     </Link>
                   ) : (
-                    <span className="text-sm font-semibold text-white">{m.artworkTitle}</span>
+                    <span className="text-sm font-semibold text-[#241F1A]">{m.artworkTitle}</span>
                   )}
                   <span
                     className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-medium ${typeInfo.badgeClass}`}
@@ -420,7 +418,7 @@ export function ForensicWatermarkChecker({ mode = 'user' }: ForensicWatermarkChe
                         type="button"
                         onClick={() => handleQuickTestReceipt(m)}
                         disabled={testingToken === m.receiptToken}
-                        className="inline-flex items-center gap-1.5 rounded-lg border border-[#A7ACD9]/30 bg-[#A7ACD9]/10 px-2.5 py-1 text-[11px] font-medium text-[#DDE0FF] transition hover:bg-[#A7ACD9]/20 disabled:opacity-50"
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-[#B24A26]/30 bg-[#B24A26]/10 px-2.5 py-1 text-[11px] font-medium text-[#A8321C] transition hover:bg-[#B24A26]/20 disabled:opacity-50"
                         title="Tải ảnh của biên lai này và chạy kiểm tra ngay"
                       >
                         {testingToken === m.receiptToken ? (
@@ -435,7 +433,7 @@ export function ForensicWatermarkChecker({ mode = 'user' }: ForensicWatermarkChe
                           m.receiptToken
                         )}`}
                         download={`${m.receiptToken}.png`}
-                        className="inline-flex items-center gap-1 rounded-lg border border-white/15 bg-white/[.04] px-2.5 py-1 text-[11px] font-medium text-[#C7C5CF] transition hover:bg-white/10 hover:text-white"
+                        className="inline-flex items-center gap-1 rounded-lg border border-[#221E1A]/10 bg-[#FFFCF6] px-2.5 py-1 text-[11px] font-medium text-[#6E6459] transition hover:bg-[#F0E7D8] hover:text-[#241F1A]"
                         title="Tải ảnh PNG đã gắn thuỷ vân"
                       >
                         <Download className="h-3 w-3" />
@@ -443,7 +441,7 @@ export function ForensicWatermarkChecker({ mode = 'user' }: ForensicWatermarkChe
                       </a>
                     </>
                   )}
-                  <span className="text-xs text-[#919099]">
+                  <span className="text-xs text-[#746A5F]">
                     {new Date(m.viewedAt).toLocaleString('vi-VN')}
                   </span>
                 </div>
@@ -452,45 +450,42 @@ export function ForensicWatermarkChecker({ mode = 'user' }: ForensicWatermarkChe
               {/* Hàng 2: Thông tin chính dễ đọc (Tác giả - Tài khoản - Nguồn) */}
               <div className="mt-3 grid grid-cols-1 gap-2.5 text-xs sm:grid-cols-3">
                 <div>
-                  <span className="text-[#919099]">Tác giả: </span>
-                  <span className="font-medium text-white">{m.creatorName}</span>
+                  <span className="text-[#746A5F]">Tác giả: </span>
+                  <span className="font-medium text-[#241F1A]">{m.creatorName}</span>
                 </div>
                 <div>
-                  <span className="text-[#919099]">{typeInfo.accountLabel}: </span>
-                  <span className="font-medium text-[#E4E1E5]">{accountDisplay}</span>
+                  <span className="text-[#746A5F]">{typeInfo.accountLabel}: </span>
+                  <span className="font-medium text-[#241F1A]">{accountDisplay}</span>
                 </div>
                 <div>
-                  <span className="text-[#919099]">Nguồn: </span>
-                  <span className="font-mono text-[#C7C5CF]">{formatSource(m.ipAddress)}</span>
+                  <span className="text-[#746A5F]">Nguồn: </span>
+                  <span className="font-mono text-[#6E6459]">{formatSource(m.ipAddress)}</span>
                 </div>
               </div>
 
               {/* Hàng 3: Thông số đối chiếu kỹ thuật (gọn nhẹ ở cuối card) */}
-              <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 border-t border-white/10 pt-2.5 text-[11px] text-[#919099]">
-                <span>
-                  Biên lai: <code className="font-mono text-[#C7C5CF]">{m.receiptToken}</code>
+              <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 border-t border-[#221E1A]/10 pt-2.5 text-[11px] text-[#746A5F]">
+                <span> Biên lai: <code className="font-mono text-[#6E6459]">{m.receiptToken}</code>
                 </span>
                 {m.fileName && (
-                  <span>
-                    Tệp: <code className="font-mono text-[#C7C5CF]">{m.fileName}</code>
+                  <span> Tệp: <code className="font-mono text-[#6E6459]">{m.fileName}</code>
                   </span>
                 )}
                 {m.numericPayload != null && (
-                  <span>
-                    Mã DWT: <code className="font-mono text-[#DDE0FF]">{m.numericPayload}</code>
+                  <span> Mã DWT: <code className="font-mono text-[#A8321C]">{m.numericPayload}</code>
                   </span>
                 )}
                 {m.fileSha256 && (
                   <span className="inline-flex items-center gap-1">
-                    SHA-256: <code className="font-mono text-[#C7C5CF]">{m.fileSha256.slice(0, 16)}…</code>
+                    SHA-256: <code className="font-mono text-[#6E6459]">{m.fileSha256.slice(0, 16)}…</code>
                     <button
                       type="button"
                       onClick={() => copyValue(m.fileSha256!)}
-                      className="rounded p-0.5 text-[#919099] hover:bg-white/10 hover:text-white"
+                      className="rounded p-0.5 text-[#746A5F] hover:bg-[#F0E7D8] hover:text-[#241F1A]"
                       title="Sao chép đủ mã SHA-256"
                     >
                       {copiedSha === m.fileSha256 ? (
-                        <Check className="h-3 w-3 text-emerald-400" />
+                        <Check className="h-3 w-3 text-[#2F6B63]" />
                       ) : (
                         <Copy className="h-3 w-3" />
                       )}
@@ -507,26 +502,20 @@ export function ForensicWatermarkChecker({ mode = 'user' }: ForensicWatermarkChe
 
   return (
     <div className="mx-auto max-w-5xl space-y-8 py-6">
-      <header className="space-y-1.5 border-b border-white/10 pb-5">
-        <h1 className="text-2xl font-bold tracking-tight text-white">
-          Kiểm tra thuỷ vân và truy vết nguồn gốc
-        </h1>
-        <p className="max-w-3xl text-sm text-[#919099]">
-          Tải lên ảnh nghi bị rò rỉ, file gốc bàn giao hoặc gói .zip để đọc mã thuỷ vân ẩn và đối chiếu biên lai trên hệ thống.
-        </p>
+      <header className="space-y-1.5 border-b border-[#221E1A]/10 pb-5">
+        <h1 className="text-2xl font-bold tracking-tight text-[#241F1A]"> Kiểm tra thuỷ vân và truy vết nguồn gốc </h1>
+        <p className="max-w-3xl text-sm text-[#746A5F]"> Tải lên ảnh nghi bị rò rỉ, tệp gốc bàn giao hoặc gói.zip để đọc mã thuỷ vân ẩn và đối chiếu biên lai trên hệ thống. </p>
       </header>
 
       {hasHydrated && !isAuthenticated && (
-        <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-amber-500/35 bg-amber-950/20 px-5 py-4">
+        <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-[#8A6A1F]/40 bg-[#8A6A1F]/20 px-5 py-4">
           <div className="space-y-0.5">
-            <p className="text-sm font-semibold text-white">Bạn chưa đăng nhập</p>
-            <p className="text-xs text-[#C7C5CF]">
-              Cần đăng nhập để tải tệp kiểm tra thuỷ vân và xem lịch sử biên lai của bạn.
-            </p>
+            <p className="text-sm font-semibold text-[#241F1A]">Bạn chưa đăng nhập</p>
+            <p className="text-xs text-[#6E6459]"> Cần đăng nhập để tải tệp kiểm tra thuỷ vân và xem lịch sử biên lai của bạn. </p>
           </div>
           <Link
             href="/login"
-            className="inline-flex items-center gap-2 rounded-xl bg-[#A7ACD9] px-4 py-2 text-xs font-semibold text-[#0B0E18] transition hover:bg-[#c2c6eb]"
+            className="inline-flex items-center gap-2 rounded-xl bg-[#B24A26] px-4 py-2 text-xs font-semibold text-[#FFFCF6] transition hover:bg-[#c2c6eb]"
           >
             <LogIn className="h-3.5 w-3.5" />
             <span>Đăng nhập</span>
@@ -535,21 +524,17 @@ export function ForensicWatermarkChecker({ mode = 'user' }: ForensicWatermarkChe
       )}
 
       {isAdminMode && isStaff && (
-        <section className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-[#A7ACD9]/25 bg-[#131624] px-5 py-4">
+        <section className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-[#B24A26]/25 bg-[#FFFCF6] px-5 py-4">
           <div className="space-y-1">
-            <p className="text-sm font-semibold text-white">
-              Cập nhật bản thuỷ vân cho tranh cũ
-            </p>
-            <p className="text-xs text-[#919099]">
-              Tạo bản xem trước giảm độ phân giải kèm mã DWT cho các tranh đã đăng từ trước để không hiển thị file gốc ngoài trang chủ.
-            </p>
-            {backfillMsg && <p className="pt-1 text-xs text-[#DDE0FF]">{backfillMsg}</p>}
+            <p className="text-sm font-semibold text-[#241F1A]"> Cập nhật bản thuỷ vân cho tranh cũ </p>
+            <p className="text-xs text-[#746A5F]"> Tạo bản xem trước giảm độ phân giải kèm mã DWT cho các tranh đã đăng từ trước để không hiển thị tệp gốc ngoài trang chủ. </p>
+            {backfillMsg && <p className="pt-1 text-xs text-[#A8321C]">{backfillMsg}</p>}
           </div>
           <button
             type="button"
             onClick={handleBackfillPreviews}
             disabled={backfilling}
-            className="inline-flex shrink-0 items-center gap-2 rounded-xl border border-[#A7ACD9]/40 bg-[#A7ACD9]/15 px-4 py-2 text-xs font-semibold text-[#DDE0FF] transition hover:bg-[#A7ACD9]/25 disabled:opacity-50"
+            className="inline-flex shrink-0 items-center gap-2 rounded-xl border border-[#B24A26]/40 bg-[#B24A26]/15 px-4 py-2 text-xs font-semibold text-[#A8321C] transition hover:bg-[#B24A26]/25 disabled:opacity-50"
           >
             {backfilling ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
             <span>{backfilling ? 'Đang xử lý...' : 'Chạy cho tranh cũ'}</span>
@@ -558,11 +543,9 @@ export function ForensicWatermarkChecker({ mode = 'user' }: ForensicWatermarkChe
       )}
 
       {/* Panel 1: Decode Suspect File */}
-      <section className="rounded-2xl border border-white/10 bg-[#0d101b] p-6">
-        <h2 className="text-base font-semibold text-white">1. Kiểm tra tệp tin</h2>
-        <p className="mt-1 text-xs text-[#919099]">
-          Nhận ảnh (PNG, JPG, WEBP, GIF), file kỹ thuật số (PSD, PSB, CLIP, AI, PDF) và file .zip. Với ảnh chụp màn hình, có thể bật tăng tương phản kênh xanh dương để soi lớp chữ chìm.
-        </p>
+      <section className="rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] p-6">
+        <h2 className="text-base font-semibold text-[#241F1A]">1. Kiểm tra tệp tin</h2>
+        <p className="mt-1 text-xs text-[#746A5F]"> Nhận ảnh (PNG, JPG, WEBP, GIF), tệp kỹ thuật số (PSD, PSB, CLIP, AI, PDF) và tệp.zip. Với ảnh chụp màn hình, có thể bật tăng tương phản kênh xanh dương để soi lớp chữ chìm. </p>
 
         <form onSubmit={handleDecodeSubmit} className="mt-5 space-y-4">
           <div
@@ -572,7 +555,7 @@ export function ForensicWatermarkChecker({ mode = 'user' }: ForensicWatermarkChe
               e.preventDefault();
               handleFilePick(e.dataTransfer.files?.[0] || null);
             }}
-            className="relative flex cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed border-white/20 bg-[#131624] px-6 py-8 text-center transition-colors hover:border-[#A7ACD9]/60 hover:bg-[#171b2d]"
+            className="relative flex cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed border-[#221E1A]/20 bg-[#FFFCF6] px-6 py-8 text-center transition-colors hover:border-[#B24A26]/60 hover:bg-[#FFFCF6]"
           >
             <input
               ref={fileInputRef}
@@ -585,50 +568,44 @@ export function ForensicWatermarkChecker({ mode = 'user' }: ForensicWatermarkChe
               <button
                 type="button"
                 onClick={handleClearFile}
-                className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-lg border border-white/15 bg-white/[.05] px-2 py-1 text-[11px] text-[#C7C5CF] transition hover:bg-white/10 hover:text-white"
+                className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-lg border border-[#221E1A]/10 bg-[#FFFCF6] px-2 py-1 text-[11px] text-[#6E6459] transition hover:bg-[#F0E7D8] hover:text-[#241F1A]"
                 title="Xoá tệp đã chọn"
               >
                 <X className="h-3 w-3" />
                 <span>Xoá tệp</span>
               </button>
             )}
-            <div className="mb-3 flex items-center gap-2 text-[#A7ACD9]">
+            <div className="mb-3 flex items-center gap-2 text-[#B24A26]">
               <ImageIcon className="h-5 w-5" />
               <FileCode2 className="h-5 w-5" />
               <FileArchive className="h-5 w-5" />
             </div>
             {selectedFile ? (
               <div className="space-y-1">
-                <p className="text-sm font-semibold text-white">{selectedFile.name}</p>
-                <p className="text-xs text-[#919099]">
+                <p className="text-sm font-semibold text-[#241F1A]">{selectedFile.name}</p>
+                <p className="text-xs text-[#746A5F]">
                   {(selectedFile.size / 1024).toFixed(1)} KB, bấm để đổi tệp khác
                 </p>
               </div>
             ) : (
               <div className="space-y-1">
-                <p className="text-sm font-medium text-[#E4E1E5]">
-                  Kéo thả hoặc bấm để chọn tệp (tối đa 100 MB)
-                </p>
-                <p className="text-xs text-[#919099]">
-                  PNG, JPG, WEBP, GIF, PSD, CLIP, AI, PDF hoặc ZIP
-                </p>
+                <p className="text-sm font-medium text-[#241F1A]"> Kéo thả hoặc bấm để chọn tệp (tối đa 100 MB) </p>
+                <p className="text-xs text-[#746A5F]"> PNG, JPG, WEBP, GIF, PSD, CLIP, AI, PDF hoặc ZIP </p>
               </div>
             )}
           </div>
 
           {isImageFile(selectedFile) && (
-            <div className="space-y-3 rounded-xl border border-white/10 bg-[#131624] p-4">
+            <div className="space-y-3 rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] p-4">
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <span className="text-xs font-medium text-[#C7C5CF]">
-                  Xem trước ảnh
-                </span>
+                <span className="text-xs font-medium text-[#6E6459]"> Xem trước ảnh </span>
                 <button
                   type="button"
                   onClick={() => setBoostScreenshot((v) => !v)}
                   className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium transition ${
                     boostScreenshot
-                      ? 'border-[#A7ACD9] bg-[#A7ACD9]/20 text-white'
-                      : 'border-white/15 bg-white/[.04] text-[#C7C5CF] hover:bg-white/10'
+                      ? 'border-[#B24A26] bg-[#B24A26]/20 text-[#241F1A]'
+                      : 'border-[#221E1A]/10 bg-[#FFFCF6] text-[#6E6459] hover:bg-[#F0E7D8]'
                   }`}
                 >
                   <Eye className="h-3.5 w-3.5" />
@@ -637,7 +614,7 @@ export function ForensicWatermarkChecker({ mode = 'user' }: ForensicWatermarkChe
               </div>
               <canvas
                 ref={previewCanvasRef}
-                className="mx-auto max-h-80 w-auto rounded-lg border border-white/10 object-contain"
+                className="mx-auto max-h-80 w-auto rounded-lg border border-[#221E1A]/10 object-contain"
               />
             </div>
           )}
@@ -646,7 +623,7 @@ export function ForensicWatermarkChecker({ mode = 'user' }: ForensicWatermarkChe
             <button
               type="submit"
               disabled={!selectedFile || decoding || !isAuthenticated}
-              className="inline-flex items-center gap-2 rounded-xl bg-[#A7ACD9] px-5 py-2.5 text-sm font-semibold text-[#0B0E18] transition hover:bg-[#c2c6eb] disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex items-center gap-2 rounded-xl bg-[#B24A26] px-5 py-2.5 text-sm font-semibold text-[#FFFCF6] transition hover:bg-[#c2c6eb] disabled:cursor-not-allowed disabled:opacity-50"
             >
               {decoding ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
               <span>{decoding ? 'Đang kiểm tra...' : 'Kiểm tra thuỷ vân'}</span>
@@ -655,48 +632,47 @@ export function ForensicWatermarkChecker({ mode = 'user' }: ForensicWatermarkChe
         </form>
 
         {decodeError && (
-          <div className="mt-4 rounded-xl border border-rose-500/40 bg-rose-950/30 p-4 text-sm text-rose-200">
+          <div className="mt-4 rounded-xl border border-[#A8321C]/40 bg-[#A8321C]/20 p-4 text-sm text-[#A8321C]">
             {decodeError}
           </div>
         )}
 
         {decodeResult && (
-          <div className="mt-6 space-y-4 border-t border-white/10 pt-5">
+          <div className="mt-6 space-y-4 border-t border-[#221E1A]/10 pt-5">
             <div
               className={`flex flex-wrap items-start justify-between gap-4 rounded-xl border p-4 ${
                 decodeResult.found && decodeResult.matches.length > 0
-                  ? 'border-emerald-500/35 bg-emerald-950/20'
-                  : 'border-amber-500/35 bg-amber-950/20'
+                  ? 'border-[#2F6B63]/40 bg-[#2F6B63]/20'
+                  : 'border-[#8A6A1F]/40 bg-[#8A6A1F]/20'
               }`}
             >
               <div className="flex items-start gap-3">
                 {decodeResult.found && decodeResult.matches.length > 0 ? (
-                  <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-emerald-300" />
+                  <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-[#2F6B63]" />
                 ) : (
-                  <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0 text-amber-300" />
+                  <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0 text-[#8A6A1F]" />
                 )}
                 <div className="space-y-1">
-                  <p className="text-sm font-semibold text-white">
+                  <p className="text-sm font-semibold text-[#241F1A]">
                     {decodeResult.found && decodeResult.matches.length > 0
                       ? `Khớp nguồn gốc (${decodeResult.matchMethod})`
                       : 'Không tìm thấy biên lai nào khớp'}
                   </p>
                   {decodeResult.message && (
-                    <p className="text-xs leading-relaxed text-[#C7C5CF]">{decodeResult.message}</p>
+                    <p className="text-xs leading-relaxed text-[#6E6459]">{decodeResult.message}</p>
                   )}
-                  <div className="flex flex-wrap gap-x-5 gap-y-1 pt-1 text-xs text-[#C7C5CF]">
+                  <div className="flex flex-wrap gap-x-5 gap-y-1 pt-1 text-xs text-[#6E6459]">
                     {decodeResult.extractedPayload && (
-                      <span>
-                        DWT đọc được: <code className="font-mono text-[#DDE0FF]">{decodeResult.extractedPayload}</code>
+                      <span> DWT đọc được: <code className="font-mono text-[#A8321C]">{decodeResult.extractedPayload}</code>
                       </span>
                     )}
                     <span>
-                      SHA-256: <code className="font-mono text-[#E4E1E5]">{decodeResult.fileSha256}</code>
+                      SHA-256: <code className="font-mono text-[#241F1A]">{decodeResult.fileSha256}</code>
                     </span>
                   </div>
                 </div>
               </div>
-              <span className="rounded-full border border-white/15 bg-white/[.05] px-3 py-1 text-xs font-medium text-white">
+              <span className="rounded-full border border-[#221E1A]/10 bg-[#FFFCF6] px-3 py-1 text-xs font-medium text-[#241F1A]">
                 {decodeResult.totalMatches} biên lai khớp
               </span>
             </div>
@@ -707,26 +683,21 @@ export function ForensicWatermarkChecker({ mode = 'user' }: ForensicWatermarkChe
       </section>
 
       {/* Panel 2: Trace Receipt + Recent Receipts */}
-      <section className="space-y-6 rounded-2xl border border-white/10 bg-[#0d101b] p-6">
+      <section className="space-y-6 rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] p-6">
         <div>
           <div className="flex items-center gap-2">
-            <History className="h-4 w-4 text-[#A7ACD9]" />
-            <h2 className="text-base font-semibold text-white">2. Tra cứu lịch sử biên lai</h2>
+            <History className="h-4 w-4 text-[#B24A26]" />
+            <h2 className="text-base font-semibold text-[#241F1A]">2. Tra cứu lịch sử biên lai</h2>
           </div>
-          <p className="mt-1 text-xs text-[#919099]">
-            Tìm theo mã biên lai (WR-..., PUB-..., WIP-..., FIN-...), mã tác phẩm hoặc mã đơn hàng.
-          </p>
+          <p className="mt-1 text-xs text-[#746A5F]"> Tìm theo mã biên lai (WR-..., PUB-..., WIP-..., FIN-...), mã tác phẩm hoặc mã đơn hàng. </p>
 
           {/* Hộp ghi chú hướng dẫn lấy mã rõ ràng */}
           <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-            <div className="rounded-xl border border-white/10 bg-white/[0.02] p-3 text-slate-300">
-              <span className="font-bold text-white block mb-0.5">📌 Lấy Mã đơn hàng (#CMD-...):</span>
-              Vào <strong>Phòng làm việc</strong> hoặc <strong>Đơn vẽ của tôi</strong>, copy mã hiển thị trên đầu đơn (ví dụ: <code className="text-[#A7ACD9] font-mono">#CMD-454C01A4</code>).
+            <div className="rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] p-3 text-[#746A5F]">
+              <span className="font-bold text-[#241F1A] block mb-0.5">📌 Lấy Mã đơn hàng (#CMD-...):</span> Vào <strong>Phòng làm việc</strong> hoặc <strong>Đơn vẽ của tôi</strong>, copy mã hiển thị trên đầu đơn (ví dụ: <code className="text-[#B24A26] font-mono">#CMD-454C01A4</code>).
             </div>
-            <div className="rounded-xl border border-white/10 bg-white/[0.02] p-3 text-slate-300">
-              <span className="font-bold text-white block mb-0.5">🔍 Lấy Mã biên lai (FIN-... / WIP-...):</span>
-              Tự động sinh khi nộp phác thảo hoặc tải file bàn giao. Hoặc kéo ảnh nghi vấn thả vào mục 1 ở trên để quét tự động.
-            </div>
+            <div className="rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] p-3 text-[#746A5F]">
+              <span className="font-bold text-[#241F1A] block mb-0.5">🔍 Lấy Mã biên lai (FIN-... / WIP-...):</span> Tự động sinh khi nộp phác thảo hoặc tải tệp bàn giao. Hoặc kéo ảnh nghi vấn thả vào mục 1 ở trên để quét tự động. </div>
           </div>
 
           <form onSubmit={handleTraceSearch} className="mt-3 flex flex-col gap-3 sm:flex-row">
@@ -735,13 +706,13 @@ export function ForensicWatermarkChecker({ mode = 'user' }: ForensicWatermarkChe
               value={traceInput}
               onChange={(e) => setTraceInput(e.target.value)}
               placeholder="Nhập mã đơn hàng (ví dụ: #CMD-454C01A4) hoặc mã biên lai (FIN-..., WIP-...)..."
-              className="flex-1 rounded-xl border border-white/15 bg-[#131624] px-4 py-2.5 text-sm text-white placeholder-[#919099] outline-none focus:border-[#A7ACD9]"
+              className="flex-1 rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-4 py-2.5 text-sm text-[#241F1A] placeholder-[#746A5F] outline-none focus:border-[#B24A26]"
             />
 
             <button
               type="submit"
               disabled={!traceInput.trim() || tracing || !isAuthenticated}
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/15 bg-[#A7ACD9] text-[#1F2335] hover:bg-[#B8BCDF] px-6 py-2.5 text-sm font-bold transition shadow disabled:opacity-50"
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#221E1A]/10 bg-[#B24A26] text-[#F7F2E9] hover:bg-[#8C3718] px-6 py-2.5 text-sm font-bold transition shadow disabled:opacity-50"
             >
               {tracing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4 stroke-[2.5]" />}
               <span>Tra cứu</span>
@@ -749,7 +720,7 @@ export function ForensicWatermarkChecker({ mode = 'user' }: ForensicWatermarkChe
           </form>
 
           {traceError && (
-            <div className="mt-4 rounded-xl border border-rose-500/40 bg-rose-950/30 p-4 text-sm text-rose-200">
+            <div className="mt-4 rounded-xl border border-[#A8321C]/40 bg-[#A8321C]/20 p-4 text-sm text-[#A8321C]">
               {traceError}
             </div>
           )}
@@ -758,19 +729,17 @@ export function ForensicWatermarkChecker({ mode = 'user' }: ForensicWatermarkChe
         </div>
 
         {isAdminMode && (
-          <div className="border-t border-white/10 pt-5">
+          <div className="border-t border-[#221E1A]/10 pt-5">
             <div className="mb-3 flex items-center justify-between gap-2">
               <div>
-                <h3 className="text-sm font-semibold text-white">Biên lai gần đây trên hệ thống</h3>
-                <p className="text-xs text-[#919099]">
-                  15 biên lai mới nhất dùng cho quản trị viên kiểm tra nhanh hoặc tải PNG đối chiếu.
-                </p>
+                <h3 className="text-sm font-semibold text-[#241F1A]">Biên lai gần đây trên hệ thống</h3>
+                <p className="text-xs text-[#746A5F]"> 15 biên lai mới nhất dùng cho quản trị viên kiểm tra nhanh hoặc tải PNG đối chiếu. </p>
               </div>
               <button
                 type="button"
                 onClick={loadRecentReceipts}
                 disabled={loadingRecent || !isAuthenticated}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-white/15 bg-white/[.04] px-3 py-1.5 text-xs font-medium text-[#C7C5CF] transition hover:bg-white/10 hover:text-white disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-[#221E1A]/10 bg-[#FFFCF6] px-3 py-1.5 text-xs font-medium text-[#6E6459] transition hover:bg-[#F0E7D8] hover:text-[#241F1A] disabled:opacity-50"
               >
                 <RefreshCw className={`h-3.5 w-3.5 ${loadingRecent ? 'animate-spin' : ''}`} />
                 <span>Làm mới</span>

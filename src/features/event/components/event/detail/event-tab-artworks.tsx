@@ -42,28 +42,28 @@ export function EventTabArtworks({
   return (
     <div className="space-y-6">
       {/* Filter and Search Bar */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 rounded-2xl border border-white/10 bg-[#161926] p-4">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] p-4">
         <div className="relative w-full sm:w-80">
-          <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8A8FA9]" />
+          <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#6E6459]" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={isVie ? 'Tìm tác phẩm hoặc họa sĩ...' : 'Search artworks or artists...'}
-            className="w-full rounded-xl border border-white/10 bg-white/5 py-2 pl-9 pr-4 text-xs text-white placeholder-[#8A8FA9] focus:border-brand-periwinkle focus:outline-none"
+            className="w-full rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] py-2 pl-9 pr-4 text-xs text-[#241F1A] placeholder-[#6E6459] focus:border-brand-periwinkle focus:outline-none"
           />
         </div>
 
         <div className="flex items-center justify-between w-full sm:w-auto gap-3">
           <div className="flex items-center gap-2">
-            <span className="text-xs text-[#8A8FA9]">{isVie ? 'Sắp xếp:' : 'Sort:'}</span>
+            <span className="text-xs text-[#6E6459]">{isVie ? 'Sắp xếp:' : 'Sort:'}</span>
             <button
               type="button"
               onClick={() => setSortBy('votes')}
               className={`rounded-xl px-3 py-1.5 text-xs font-semibold transition cursor-pointer ${
                 sortBy === 'votes'
-                  ? 'bg-brand-periwinkle text-brand-navy'
-                  : 'bg-white/5 text-[#A7ACD9] hover:bg-white/10'
+                  ? 'bg-brand-periwinkle text-[#FFFCF6]'
+                  : 'bg-[#FFFCF6] text-[#B24A26] hover:bg-[#F0E7D8]'
               }`}
             >
               {isVie ? 'Nhiều bình chọn nhất' : 'Most Votes'}
@@ -73,8 +73,8 @@ export function EventTabArtworks({
               onClick={() => setSortBy('newest')}
               className={`rounded-xl px-3 py-1.5 text-xs font-semibold transition cursor-pointer ${
                 sortBy === 'newest'
-                  ? 'bg-brand-periwinkle text-brand-navy'
-                  : 'bg-white/5 text-[#A7ACD9] hover:bg-white/10'
+                  ? 'bg-brand-periwinkle text-[#FFFCF6]'
+                  : 'bg-[#FFFCF6] text-[#B24A26] hover:bg-[#F0E7D8]'
               }`}
             >
               {isVie ? 'Mới nhất' : 'Newest'}
@@ -85,12 +85,12 @@ export function EventTabArtworks({
 
       {/* Artworks Grid */}
       {filteredArtworks.length === 0 ? (
-        <div className="rounded-3xl border border-dashed border-white/15 p-16 text-center">
+        <div className="rounded-3xl border border-dashed border-[#221E1A]/10 p-16 text-center">
           <Palette size={40} className="mx-auto text-outline/50 mb-3" />
-          <h3 className="font-h1 text-lg font-bold text-white">
+          <h3 className="font-h1 text-lg font-bold text-[#241F1A]">
             {isVie ? 'Chưa có bài dự thi nào' : 'No submissions found'}
           </h3>
-          <p className="mt-1 text-xs text-[#8A8FA9] max-w-md mx-auto">
+          <p className="mt-1 text-xs text-[#6E6459] max-w-md mx-auto">
             {isVie
               ? searchQuery
                 ? 'Không có tác phẩm nào khớp với tiêu chí tìm kiếm. Hãy thử từ khóa khác.'
@@ -119,15 +119,15 @@ export function EventTabArtworks({
             return (
               <article
                 key={sub.id}
-                className={`group overflow-hidden rounded-3xl border bg-[#161926] shadow-lg transition duration-200 hover:-translate-y-1 ${
+                className={`group overflow-hidden rounded-3xl border bg-[#FFFCF6] shadow-lg transition duration-200 hover:-translate-y-1 ${
                   isMine
                     ? 'border-brand-periwinkle/50 ring-1 ring-brand-periwinkle/30'
-                    : 'border-white/10 hover:border-brand-periwinkle/30'
+                    : 'border-[#221E1A]/10 hover:border-brand-periwinkle/30'
                 }`}
               >
                 <Link
                   href={artworkLink}
-                  className="relative aspect-[4/3] w-full block overflow-hidden bg-black/40 group/img cursor-pointer"
+                  className="relative aspect-[4/3] w-full block overflow-hidden bg-[#F0E7D8] group/img cursor-pointer"
                 >
                   {sub.artworkImageUrl || sub.artworkThumbnailUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
@@ -143,12 +143,12 @@ export function EventTabArtworks({
                   )}
 
                   {isMine && (
-                    <div className="absolute left-3 top-3 rounded-full border border-brand-periwinkle/40 bg-brand-periwinkle/90 px-3 py-1 text-[11px] font-extrabold text-brand-navy shadow-md backdrop-blur-md">
+                    <div className="absolute left-3 top-3 rounded-full border border-brand-periwinkle/40 bg-brand-periwinkle/90 px-3 py-1 text-[11px] font-extrabold text-[#241F1A] shadow-md backdrop-blur-md">
                       {isVie ? 'Bài của tôi' : 'My Entry'}
                     </div>
                   )}
 
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/img:opacity-100 transition flex items-center justify-center gap-1.5 text-xs font-bold text-white backdrop-blur-[2px]">
+                  <div className="absolute inset-0 bg-[#F0E7D8] opacity-0 group-hover/img:opacity-100 transition flex items-center justify-center gap-1.5 text-xs font-bold text-[#241F1A] backdrop-blur-[2px]">
                     <ExternalLink size={14} />
                     <span>{isVie ? 'Xem tác phẩm' : 'View Artwork'}</span>
                   </div>
@@ -156,20 +156,20 @@ export function EventTabArtworks({
 
                 <div className="p-5 space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-[#A7ACD9] font-medium">@{sub.submitterName || (isVie ? 'Họa sĩ' : 'Artist')}</span>
-                    <span className="inline-flex items-center gap-1 text-xs font-bold text-amber-300">
+                    <span className="text-xs text-[#B24A26] font-medium">@{sub.submitterName || (isVie ? 'Họa sĩ' : 'Artist')}</span>
+                    <span className="inline-flex items-center gap-1 text-xs font-bold text-[#8A6A1F]">
                       <Trophy size={13} /> {sub.voteCount} {isVie ? 'bình chọn' : 'votes'}
                     </span>
                   </div>
 
                   <Link href={artworkLink} className="block group/title cursor-pointer">
-                    <h4 className="font-h1 text-base font-bold text-white line-clamp-1 group-hover/title:text-brand-periwinkle group-hover/title:underline transition">
+                    <h4 className="font-h1 text-base font-bold text-[#241F1A] line-clamp-1 group-hover/title:text-brand-periwinkle group-hover/title:underline transition">
                       {sub.title}
                     </h4>
                   </Link>
 
                   {sub.description && (
-                    <p className="line-clamp-2 text-xs text-[#8A8FA9]">{sub.description}</p>
+                    <p className="line-clamp-2 text-xs text-[#6E6459]">{sub.description}</p>
                   )}
 
                   <div className="pt-2 flex items-center justify-center gap-2">
@@ -182,7 +182,7 @@ export function EventTabArtworks({
                         className={`flex-1 flex items-center justify-center gap-1.5 rounded-xl py-2.5 px-2 text-xs font-bold transition active:scale-95 cursor-pointer text-center ${
                           sub.hasVoted
                             ? 'border border-brand-periwinkle bg-brand-periwinkle/20 text-brand-periwinkle'
-                            : 'bg-white/10 hover:bg-brand-periwinkle hover:text-brand-navy text-white'
+                            : 'bg-[#F0E7D8] hover:bg-brand-periwinkle hover:text-[#FFFCF6] text-[#241F1A]'
                         }`}
                       >
                         <ThumbsUp size={14} className={sub.hasVoted ? 'fill-current' : ''} />
@@ -203,10 +203,10 @@ export function EventTabArtworks({
                           }
                           setDisputeTarget(sub);
                         }}
-                        className="flex-1 flex items-center justify-center gap-1.5 rounded-xl border border-rose-500/30 bg-rose-500/10 py-2.5 px-2 text-xs font-semibold text-rose-300 hover:bg-rose-500/20 hover:text-rose-200 transition cursor-pointer text-center"
+                        className="flex-1 flex items-center justify-center gap-1.5 rounded-xl border border-[#A8321C]/40 bg-[#A8321C]/10 py-2.5 px-2 text-xs font-semibold text-[#A8321C] hover:bg-[#A8321C]/20 hover:text-[#A8321C] transition cursor-pointer text-center"
                         title={isVie ? 'Gửi khiếu nại cho bài dự thi này' : 'Raise a dispute for this submission'}
                       >
-                        <ShieldAlert size={14} className="text-rose-400 shrink-0" />
+                        <ShieldAlert size={14} className="text-[#A8321C] shrink-0" />
                         <span className="truncate">{isVie ? 'Khiếu nại' : 'Raise Dispute'}</span>
                       </button>
                     )}
@@ -214,7 +214,7 @@ export function EventTabArtworks({
 
                     <Link
                       href={artworkLink}
-                      className="flex-1 flex items-center justify-center gap-1.5 rounded-xl border border-white/10 bg-white/5 py-2.5 px-2 text-xs font-semibold text-[#A7ACD9] hover:bg-white/10 hover:text-white transition cursor-pointer text-center"
+                      className="flex-1 flex items-center justify-center gap-1.5 rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] py-2.5 px-2 text-xs font-semibold text-[#B24A26] hover:bg-[#F0E7D8] hover:text-[#241F1A] transition cursor-pointer text-center"
                       title={isVie ? 'Xem chi tiết bài dự thi' : 'View artwork details'}
                     >
                       <ExternalLink size={13} className="shrink-0" />

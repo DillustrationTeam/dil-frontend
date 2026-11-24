@@ -32,76 +32,76 @@ const statusBadgeConfig: Record<
 > = {
   AwaitingPhysical: {
     label: 'Chờ người mua chọn',
-    bg: 'bg-amber-500/10',
-    text: 'text-amber-300',
-    border: 'border-amber-500/30',
+    bg: 'bg-[#8A6A1F]/10',
+    text: 'text-[#8A6A1F]',
+    border: 'border-[#8A6A1F]/40',
   },
   AwaitingShipment: {
     label: 'Chờ gửi hàng',
-    bg: 'bg-orange-500/10',
-    text: 'text-orange-300',
-    border: 'border-orange-500/30',
+    bg: 'bg-[#B24A26]/10',
+    text: 'text-[#B24A26]',
+    border: 'border-[#B24A26]/40',
   },
   InTransit: {
     label: 'Đang vận chuyển',
-    bg: 'bg-blue-500/10',
-    text: 'text-blue-300',
-    border: 'border-blue-500/30',
+    bg: 'bg-[#2C5A86]/10',
+    text: 'text-[#2C5A86]',
+    border: 'border-[#2C5A86]/40',
   },
   Delivered: {
     label: 'Đã giao thành công',
-    bg: 'bg-emerald-500/10',
-    text: 'text-emerald-300',
-    border: 'border-emerald-500/30',
+    bg: 'bg-[#2F6B63]/10',
+    text: 'text-[#2F6B63]',
+    border: 'border-[#2F6B63]/40',
   },
   Completed: {
     label: 'Hoàn tất & Giải ngân',
-    bg: 'bg-emerald-500/10',
-    text: 'text-emerald-300',
-    border: 'border-emerald-500/30',
+    bg: 'bg-[#2F6B63]/10',
+    text: 'text-[#2F6B63]',
+    border: 'border-[#2F6B63]/40',
   },
   Disputed: {
     label: 'Đang khiếu nại',
-    bg: 'bg-rose-500/10',
-    text: 'text-rose-300',
-    border: 'border-rose-500/30',
+    bg: 'bg-[#A8321C]/10',
+    text: 'text-[#A8321C]',
+    border: 'border-[#A8321C]/40',
   },
   DigitalAccepted: {
     label: 'Đã nhận bản điện tử',
-    bg: 'bg-emerald-500/10',
-    text: 'text-emerald-300',
-    border: 'border-emerald-500/30',
+    bg: 'bg-[#2F6B63]/10',
+    text: 'text-[#2F6B63]',
+    border: 'border-[#2F6B63]/40',
   },
   Active: {
     label: 'Đang đấu giá (Có bản vật lý)',
-    bg: 'bg-purple-500/10',
-    text: 'text-purple-300',
-    border: 'border-purple-500/30',
+    bg: 'bg-[#5F3F86]/10',
+    text: 'text-[#5F3F86]',
+    border: 'border-[#5F3F86]/40',
   },
   // Hai trạng thái còn thiếu trước đây nên badge rơi về nhánh mặc định và in raw enum.
   Resolved: {
     label: 'Khiếu nại đã đóng',
-    bg: 'bg-slate-500/10',
-    text: 'text-slate-300',
-    border: 'border-slate-500/30',
+    bg: 'bg-[#E5D8C2]',
+    text: 'text-[#746A5F]',
+    border: 'border-[#221E1A]/12',
   },
   Cancelled: {
     label: 'Đã huỷ',
-    bg: 'bg-slate-500/10',
-    text: 'text-slate-300',
-    border: 'border-slate-500/30',
+    bg: 'bg-[#E5D8C2]',
+    text: 'text-[#746A5F]',
+    border: 'border-[#221E1A]/12',
   },
   Settled: {
     label: 'Đã chốt — chờ chọn hình thức',
-    bg: 'bg-amber-500/10',
-    text: 'text-amber-300',
-    border: 'border-amber-500/30',
+    bg: 'bg-[#8A6A1F]/10',
+    text: 'text-[#8A6A1F]',
+    border: 'border-[#8A6A1F]/40',
   },
   Expired: {
     label: 'Quá hạn',
-    bg: 'bg-slate-500/10',
-    text: 'text-slate-300',
-    border: 'border-slate-500/30',
+    bg: 'bg-[#E5D8C2]',
+    text: 'text-[#746A5F]',
+    border: 'border-[#221E1A]/12',
   },
 };
 
@@ -175,62 +175,50 @@ export function PhysicalDeliveryManager() {  const currentUserId = useAuthStore(
       {/* Header & Bộ lọc tổng quan */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="flex items-center gap-2 text-xl font-bold text-white font-h1">
-            <Truck className="text-amber-400" size={24} />
-            Quản lý Giao nhận Tranh vật lý
-          </h2>
-          <p className="text-xs text-outline mt-1">
-            Theo dõi tiến độ bưu cục, mã vận đơn và tiền tạm giữ ký quỹ sàn cho các tác phẩm có bản vật lý.
-          </p>
+          <h2 className="flex items-center gap-2 text-xl font-bold text-[#241F1A] font-h1">
+            <Truck className="text-[#8A6A1F]" size={24} /> Quản lý Giao nhận Tranh vật lý </h2>
+          <p className="text-xs text-outline mt-1"> Theo dõi tiến độ bưu cục, mã vận đơn và tiền tạm giữ ký quỹ sàn cho các tác phẩm có bản vật lý. </p>
         </div>
 
         <button
           type="button"
           onClick={fetchDeliveries}
           disabled={loading}
-          className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3.5 py-2 text-xs font-semibold text-white hover:bg-white/10 transition disabled:opacity-50 self-start sm:self-auto"
+          className="inline-flex items-center gap-2 rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-3.5 py-2 text-xs font-semibold text-[#241F1A] hover:bg-[#F0E7D8] transition disabled:opacity-50 self-start sm:self-auto"
         >
-          <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
-          Làm mới
-        </button>
+          <RefreshCw size={14} className={loading ? 'animate-spin' : ''} /> Làm mới </button>
       </div>
 
       {/* Tabs vai trò */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#221E1A]/10 pb-3">
         <div className="flex gap-2">
           <button
             type="button"
             onClick={() => setRoleFilter('all')}
             className={`rounded-xl px-3.5 py-1.5 text-xs font-semibold transition ${
               roleFilter === 'all'
-                ? 'bg-brand-periwinkle text-brand-navy shadow-sm'
-                : 'text-outline hover:text-white hover:bg-white/5'
+                ? 'bg-brand-periwinkle text-[#FFFCF6] shadow-sm'
+                : 'text-outline hover:text-[#241F1A] hover:bg-[#FFFCF6]'
             }`}
-          >
-            Tất cả vai trò
-          </button>
+          > Tất cả vai trò </button>
           <button
             type="button"
             onClick={() => setRoleFilter('seller')}
             className={`rounded-xl px-3.5 py-1.5 text-xs font-semibold transition ${
               roleFilter === 'seller'
-                ? 'bg-amber-400 text-brand-navy shadow-sm'
-                : 'text-outline hover:text-white hover:bg-white/5'
+                ? 'bg-[#8A6A1F]/10 text-[#241F1A] shadow-sm'
+                : 'text-outline hover:text-[#241F1A] hover:bg-[#FFFCF6]'
             }`}
-          >
-            Đơn tôi bán (Họa sĩ)
-          </button>
+          > Đơn tôi bán </button>
           <button
             type="button"
             onClick={() => setRoleFilter('winner')}
             className={`rounded-xl px-3.5 py-1.5 text-xs font-semibold transition ${
               roleFilter === 'winner'
-                ? 'bg-emerald-400 text-brand-navy shadow-sm'
-                : 'text-outline hover:text-white hover:bg-white/5'
+                ? 'bg-[#2F6B63]/10 text-[#241F1A] shadow-sm'
+                : 'text-outline hover:text-[#241F1A] hover:bg-[#FFFCF6]'
             }`}
-          >
-            Đơn tôi thắng (Người nhận)
-          </button>
+          > Đơn tôi thắng (Người nhận) </button>
         </div>
 
         {/* Ô tìm kiếm */}
@@ -241,7 +229,7 @@ export function PhysicalDeliveryManager() {  const currentUserId = useAuthStore(
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Tìm theo tác phẩm, mã vận đơn..."
-            className="w-full rounded-xl border border-white/10 bg-white/5 py-1.5 pl-8 pr-3 text-xs text-white placeholder-white/30 focus:border-brand-periwinkle focus:outline-none"
+            className="w-full rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] py-1.5 pl-8 pr-3 text-xs text-[#241F1A] placeholder-white/30 focus:border-brand-periwinkle focus:outline-none"
           />
         </div>
       </div>
@@ -263,7 +251,7 @@ export function PhysicalDeliveryManager() {  const currentUserId = useAuthStore(
             className={`rounded-lg px-2.5 py-1 text-[11px] font-medium transition ${
               statusFilter === tab.key
                 ? 'border border-brand-periwinkle/50 bg-brand-periwinkle/20 text-brand-periwinkle'
-                : 'border border-white/5 bg-white/5 text-outline hover:text-white'
+                : 'border border-[#221E1A]/10 bg-[#FFFCF6] text-outline hover:text-[#241F1A]'
             }`}
           >
             {tab.label}
@@ -273,7 +261,7 @@ export function PhysicalDeliveryManager() {  const currentUserId = useAuthStore(
 
       {/* Error state */}
       {error && (
-        <div className="rounded-2xl border border-rose-500/30 bg-rose-500/10 p-4 text-xs text-rose-300 flex items-center gap-2">
+        <div className="rounded-2xl border border-[#A8321C]/40 bg-[#A8321C]/10 p-4 text-xs text-[#A8321C] flex items-center gap-2">
           <AlertTriangle size={16} />
           {error}
         </div>
@@ -289,19 +277,15 @@ export function PhysicalDeliveryManager() {  const currentUserId = useAuthStore(
 
       {/* Empty state */}
       {!loading && filteredItems.length === 0 && (
-        <div className="rounded-3xl border border-white/10 bg-white/5 py-16 text-center">
+        <div className="rounded-3xl border border-[#221E1A]/10 bg-[#FFFCF6] py-16 text-center">
           <Package size={40} className="mx-auto text-outline/50" />
-          <h3 className="mt-3 text-sm font-semibold text-white">Chưa có đơn giao nhận nào</h3>
-          <p className="mt-1 text-xs text-outline max-w-sm mx-auto">
-            Khi bạn tạo hoặc trúng đấu giá phiên có tuỳ chọn tranh vật lý, tiến độ bưu phẩm và ký quỹ sẽ xuất hiện tại đây.
-          </p>
+          <h3 className="mt-3 text-sm font-semibold text-[#241F1A]">Chưa có đơn giao nhận nào</h3>
+          <p className="mt-1 text-xs text-outline max-w-sm mx-auto"> Khi bạn tạo hoặc trúng đấu giá phiên có tuỳ chọn tranh vật lý, tiến độ bưu phẩm và ký quỹ sẽ xuất hiện tại đây. </p>
           <div className="mt-5 flex justify-center gap-3">
             <Link
               href="/auctions"
-              className="rounded-xl bg-brand-periwinkle px-4 py-2 text-xs font-bold text-brand-navy hover:brightness-110 transition"
-            >
-              Khám phá phiên đấu giá
-            </Link>
+              className="rounded-xl bg-brand-periwinkle px-4 py-2 text-xs font-bold text-[#FFFCF6] hover:brightness-110 transition"
+            > Khám phá phiên đấu giá </Link>
           </div>
         </div>
       )}
@@ -322,15 +306,15 @@ export function PhysicalDeliveryManager() {  const currentUserId = useAuthStore(
               delivery?.status !== 'Cancelled';
             const badge = statusBadgeConfig[statusKey] ?? {
               label: statusKey,
-              bg: 'bg-white/10',
-              text: 'text-white',
-              border: 'border-white/20',
+              bg: 'bg-[#F0E7D8]',
+              text: 'text-[#241F1A]',
+              border: 'border-[#221E1A]/20',
             };
 
             return (
               <article
                 key={item.auctionId}
-                className="overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-5 transition hover:border-brand-periwinkle/40 flex flex-col justify-between"
+                className="overflow-hidden rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] p-5 transition hover:border-brand-periwinkle/40 flex flex-col justify-between"
               >
                 <div>
                   {/* Header thẻ: Status badge + Role badge */}
@@ -340,17 +324,17 @@ export function PhysicalDeliveryManager() {  const currentUserId = useAuthStore(
                     >
                       <Truck size={12} />
                       {badge.label}
-                      {paidEarly && <span className="text-[10px] font-normal text-amber-300"> · đã giải ngân trước</span>}
+                      {paidEarly && <span className="text-[10px] font-normal text-[#8A6A1F]"> · đã giải ngân trước</span>}
                     </span>
 
-                    <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-white/10 text-on-surface-variant">
+                    <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-[#F0E7D8] text-on-surface-variant">
                       {isSeller ? 'Tôi là Người bán' : isWinner ? 'Tôi là Người thắng' : 'Người xem'}
                     </span>
                   </div>
 
                   {/* Thông tin tác phẩm */}
                   <div className="flex gap-4">
-                    <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-black/40 border border-white/10">
+                    <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-[#F0E7D8] border border-[#221E1A]/10">
                       <Image
                         src={item.artworkImageUrl || '/weblogo.png'}
                         alt={item.artworkTitle}
@@ -361,44 +345,41 @@ export function PhysicalDeliveryManager() {  const currentUserId = useAuthStore(
                     </div>
 
                     <div className="min-w-0 flex-1 space-y-1">
-                      <h3 className="truncate font-semibold text-white text-sm hover:text-brand-periwinkle transition">
+                      <h3 className="truncate font-semibold text-[#241F1A] text-sm hover:text-brand-periwinkle transition">
                         <Link href={`/auctions/${item.auctionId}`}>{item.artworkTitle}</Link>
                       </h3>
                       {item.artworkStyle && (
                         <p className="text-[11px] text-outline">Phong cách: {item.artworkStyle}</p>
                       )}
-                      <p className="text-xs font-bold text-amber-300">
+                      <p className="text-xs font-bold text-[#8A6A1F]">
                         {formatVnd(item.finalPrice ?? item.currentPrice)}
                       </p>
                     </div>
                   </div>
 
                   {/* Chi tiết người nhận / người gửi */}
-                  <div className="mt-4 rounded-xl border border-white/5 bg-black/20 p-3 space-y-1.5 text-xs">
+                  <div className="mt-4 rounded-xl border border-[#221E1A]/10 bg-[#F0E7D8] p-3 space-y-1.5 text-xs">
                     <div className="flex justify-between text-outline text-[11px]">
-                      <span>Họa sĩ: <strong className="text-white">{item.sellerName}</strong></span>
-                      <span>Người thắng: <strong className="text-white">{item.winnerName || 'Chưa chốt'}</strong></span>
+                      <span>Họa sĩ: <strong className="text-[#241F1A]">{item.sellerName}</strong></span>
+                      <span>Người thắng: <strong className="text-[#241F1A]">{item.winnerName || 'Chưa chốt'}</strong></span>
                     </div>
 
                     {delivery?.shippingAddress && (
-                      <p className="text-on-surface-variant truncate">
-                        Địa chỉ nhận: <span className="text-white">{delivery.shippingAddress}</span>
+                      <p className="text-on-surface-variant truncate"> Địa chỉ nhận: <span className="text-[#241F1A]">{delivery.shippingAddress}</span>
                       </p>
                     )}
 
                     {delivery?.trackingCode && (
-                      <div className="flex items-center justify-between text-[11px] pt-1 border-t border-white/5">
-                        <span className="text-outline">
-                          Bưu cục: <strong className="text-amber-300">{delivery.carrierName}</strong> ({delivery.trackingCode})
+                      <div className="flex items-center justify-between text-[11px] pt-1 border-t border-[#221E1A]/10">
+                        <span className="text-outline"> Bưu cục: <strong className="text-[#8A6A1F]">{delivery.carrierName}</strong> ({delivery.trackingCode})
                         </span>
                         {delivery.trackingUrl && (
                           <a
                             href={delivery.trackingUrl}
                             target="_blank"
                             rel="noreferrer"
-                            className="inline-flex items-center gap-1 text-brand-periwinkle underline hover:text-white"
-                          >
-                            Tra cứu <ExternalLink size={10} />
+                            className="inline-flex items-center gap-1 text-brand-periwinkle underline hover:text-[#241F1A]"
+                          > Tra cứu <ExternalLink size={10} />
                           </a>
                         )}
                       </div>
@@ -406,22 +387,22 @@ export function PhysicalDeliveryManager() {  const currentUserId = useAuthStore(
 
                     {/* Escrow badge — map sang tiếng Việt, trước đây in raw enum (Deposited/Released) */}
                     <div className="flex items-center gap-1.5 text-[11px] text-outline pt-1">
-                      <ShieldCheck size={13} className="text-emerald-400" />
+                      <ShieldCheck size={13} className="text-[#2F6B63]" />
                       <span>Ký quỹ sàn: </span>
-                      <strong className="text-white">{escrowLabel(item.escrowStatus)}</strong>
+                      <strong className="text-[#241F1A]">{escrowLabel(item.escrowStatus)}</strong>
                     </div>
                   </div>
                 </div>
 
                 {/* Footer action button */}
-                <div className="mt-4 pt-3 border-t border-white/10 flex items-center justify-between">
+                <div className="mt-4 pt-3 border-t border-[#221E1A]/10 flex items-center justify-between">
                   <span className="text-[11px] text-outline">
                     {item.auctionStatus === 'Active' ? 'Phiên đang nhận giá' : item.auctionStatus === 'Completed' ? 'Giao dịch đã hoàn tất' : item.auctionStatus === 'Disputed' ? 'Đang khiếu nại' : 'Đang xử lý giao nhận'}
                   </span>
 
                   <Link
                     href={`/auctions/${item.auctionId}`}
-                    className="inline-flex items-center gap-1.5 rounded-xl bg-white/10 px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-brand-periwinkle hover:text-brand-navy transition"
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-[#F0E7D8] px-3.5 py-1.5 text-xs font-semibold text-[#241F1A] hover:bg-brand-periwinkle hover:text-[#FFFCF6] transition"
                   >
                     Xem chi tiết &amp; Thao tác
                     <ArrowRight size={14} />

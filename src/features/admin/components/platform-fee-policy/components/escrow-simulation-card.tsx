@@ -30,35 +30,35 @@ export function EscrowSimulationCard({ feePercent }: EscrowSimulationCardProps) 
   };
 
   return (
-    <div className="mt-4 pt-4 border-t border-white/10 bg-white/[0.02] p-4 rounded-xl">
-      <div className="flex items-center gap-2 text-xs font-bold text-white mb-2">
-        <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+    <div className="mt-4 pt-4 border-t border-[#221E1A]/10 bg-[#FFFCF6] p-4 rounded-xl">
+      <div className="flex items-center gap-2 text-xs font-bold text-[#241F1A] mb-2">
+        <Sparkles className="w-3.5 h-3.5 text-[#8A6A1F]" />
         <span>Real-time Milestone Escrow Simulation (Sample: {formatVND(simulation.totalAmount)})</span>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-        <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-between">
+        <div className="p-3 rounded-lg bg-[#2F6B63]/10 border border-[#2F6B63]/30 flex items-center justify-between">
           <div>
-            <span className="text-[10px] text-emerald-300/70 block uppercase font-bold">
+            <span className="text-[10px] text-[#2F6B63] block uppercase font-bold">
               Creator Net Payout ({(100 - feePercent).toFixed(1)}%)
             </span>
-            <span className="font-mono font-bold text-emerald-300 text-sm">
+            <span className="font-mono font-bold text-[#2F6B63] text-sm">
               {formatVND(simulation.creatorEarnings)}
             </span>
           </div>
-          <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+          <CheckCircle2 className="w-4 h-4 text-[#2F6B63]" />
         </div>
 
-        <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 flex items-center justify-between">
+        <div className="p-3 rounded-lg bg-[#A8321C]/10 border border-[#A8321C]/30 flex items-center justify-between">
           <div>
-            <span className="text-[10px] text-red-300/70 block uppercase font-bold">
+            <span className="text-[10px] text-[#A8321C] block uppercase font-bold">
               Platform Retained Fee ({feePercent.toFixed(1)}%)
             </span>
-            <span className="font-mono font-bold text-red-300 text-sm">
+            <span className="font-mono font-bold text-[#A8321C] text-sm">
               {formatVND(simulation.platformFee)}
             </span>
           </div>
-          <Layers className="w-4 h-4 text-red-400" />
+          <Layers className="w-4 h-4 text-[#A8321C]" />
         </div>
       </div>
     </div>

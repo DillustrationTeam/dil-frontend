@@ -97,14 +97,14 @@ export default function VerifyOtpPage() {
   return (
     <AuthShell>
       <header className="mb-7">
-        <h1 className="font-h1 text-2xl font-bold text-white sm:text-3xl">
+        <h1 className="font-h1 text-2xl font-bold text-[#241F1A] sm:text-3xl">
           {isEng ? 'Verify Your Email' : 'Xác minh Email'}
         </h1>
-        <p className="mt-1.5 text-sm leading-relaxed text-[#C7C5CF]">
+        <p className="mt-1.5 text-sm leading-relaxed text-[#6E6459]">
           {isEng ? (
             <>
               Enter the 6-digit verification code sent to{' '}
-              <span className="font-medium text-[#A7ACD9]">
+              <span className="font-medium text-[#B24A26]">
                 {targetEmail ?? 'your registered email'}
               </span>
               .
@@ -112,7 +112,7 @@ export default function VerifyOtpPage() {
           ) : (
             <>
               Nhập mã xác minh 6 chữ số đã gửi tới{' '}
-              <span className="font-medium text-[#A7ACD9]">
+              <span className="font-medium text-[#B24A26]">
                 {targetEmail ?? 'email đã đăng ký của bạn'}
               </span>
               .
@@ -141,21 +141,21 @@ export default function VerifyOtpPage() {
                 onChange={(e) => handleChange(index, e.target.value)}
                 onKeyDown={(e) => handleKeyDown(index, e)}
                 placeholder="•"
-                className="h-13 w-full rounded-xl border border-white/10 bg-[#141724]/90 text-center font-h1 text-xl font-bold text-white placeholder:text-[#919099] transition-all focus:border-[#A7ACD9] focus:outline-none focus:ring-1 focus:ring-[#A7ACD9]"
+                className="h-13 w-full rounded-xl border border-[#221E1A]/10 bg-[#F0E7D8]/90 text-center font-h1 text-xl font-bold text-[#241F1A] placeholder:text-[#746A5F] transition-all focus:border-[#B24A26] focus:outline-none focus:ring-1 focus:ring-[#B24A26]"
                 disabled={isLoading}
               />
             ))}
           </div>
         </div>
 
-        <div className="flex items-center justify-between text-xs text-[#C7C5CF]">
+        <div className="flex items-center justify-between text-xs text-[#6E6459]">
           <span>{isEng ? "Didn't receive the code?" : 'Chưa nhận được mã?'}</span>
           <button
             type="button"
             onClick={handleResend}
             disabled={!canResend}
             className={`font-semibold transition-colors ${
-              canResend ? 'cursor-pointer text-[#A7ACD9] hover:underline' : 'cursor-not-allowed text-[#919099]'
+              canResend ? 'cursor-pointer text-[#B24A26] hover:underline' : 'cursor-not-allowed text-[#746A5F]'
             }`}
           >
             {canResend
@@ -182,10 +182,10 @@ export default function VerifyOtpPage() {
         </button>
       </form>
 
-      <div className="mt-7 border-t border-white/10 pt-5 text-center">
+      <div className="mt-7 border-t border-[#221E1A]/10 pt-5 text-center">
         <Link
           href="/register"
-          className="inline-flex items-center gap-1.5 text-xs font-medium text-[#C7C5CF] transition-colors hover:text-[#A7ACD9]"
+          className="inline-flex items-center gap-1.5 text-xs font-medium text-[#6E6459] transition-colors hover:text-[#B24A26]"
         >
           <ArrowLeft className="h-3.5 w-3.5" aria-hidden />
           <span>

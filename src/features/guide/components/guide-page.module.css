@@ -1,69 +1,40 @@
 /* Scoped styles for the DILLUSTRATION Platform Guide & Legal Escrow Flow (/guide) */
 
 .guideWrapper {
+  /* Retoken hoá: mọi màu đi qua biến của hệ INK & VERMILION để trang /guide
+     tự lật theo `html[data-theme]` thay vì khoá cứng bảng màu navy cũ. */
   --guide-bg-base: transparent;
-  --guide-bg-node: #1f2335;
-  --guide-bg-card: rgba(24, 27, 41, 0.72);
-  --guide-bg-card-solid: #181b29;
-  --guide-bubble-bg: #181b29;
-  --guide-border-subtle: rgba(255, 255, 255, 0.08);
-  --guide-border-top: rgba(255, 255, 255, 0.18);
-  --guide-border-strong: rgba(167, 172, 217, 0.28);
-  --guide-accent: #a7acd9;
-  --guide-accent-bright: #c2c7f6;
-  --guide-text-main: #e4e1e5;
-  --guide-text-muted: #c7c5cf;
-  --guide-tablet-body: #161926;
-  --guide-tablet-screen: #101320;
-  --guide-tablet-border: rgba(167, 172, 217, 0.28);
-  --guide-pen-body: #272c44;
-  --guide-pen-accent: #a7acd9;
-  --guide-divider: rgba(255, 255, 255, 0.09);
-  --guide-cascade-bg: rgba(19, 19, 22, 0.55);
-  --guide-cascade-row: rgba(167, 172, 217, 0.07);
-  --guide-tag-bg: rgba(167, 172, 217, 0.14);
-  --guide-btn-primary-bg: #a7acd9;
-  --guide-btn-primary-hover: #c2c7f6;
-  --guide-btn-primary-text: #1f2335;
-  --guide-btn-secondary-bg: rgba(255, 255, 255, 0.05);
-  --guide-sidebar-bg: rgba(255, 255, 255, 0.03);
+  --guide-bg-node: var(--ink-3);
+  --guide-bg-card: color-mix(in srgb, var(--ink-2) 88%, transparent);
+  --guide-bg-card-solid: var(--ink-2);
+  --guide-bubble-bg: var(--ink-2);
+  --guide-border-subtle: var(--hair);
+  --guide-border-top: var(--hair-2);
+  --guide-border-strong: color-mix(in srgb, var(--lumen) 45%, transparent);
+  --guide-accent: var(--lumen);
+  --guide-accent-bright: var(--lumen-hi);
+  --guide-text-main: var(--ivory);
+  --guide-text-muted: var(--ash);
+  --guide-tablet-body: var(--ink-3);
+  --guide-tablet-screen: var(--ink);
+  --guide-tablet-border: var(--hair-2);
+  --guide-pen-body: var(--ink-4);
+  --guide-pen-accent: var(--lumen);
+  --guide-divider: var(--hair);
+  --guide-cascade-bg: var(--ink-3);
+  --guide-cascade-row: var(--lumen-soft);
+  --guide-tag-bg: var(--lumen-soft);
+  --guide-btn-primary-bg: var(--lumen);
+  --guide-btn-primary-hover: var(--lumen-hi);
+  --guide-btn-primary-text: var(--ink-2);
+  --guide-btn-secondary-bg: var(--ink-2);
+  --guide-sidebar-bg: var(--ink-3);
 
   min-height: calc(100vh - 80px);
   width: 100%;
   background: transparent;
   color: var(--guide-text-main);
   font-family: var(--font-body-grotesk), system-ui, -apple-system, sans-serif;
-}
-
-:global(html.light) .guideWrapper {
-  --guide-bg-base: transparent;
-  --guide-bg-node: #f8fafc;
-  --guide-bg-card: #ffffff;
-  --guide-bg-card-solid: #ffffff;
-  --guide-bubble-bg: #ffffff;
-  --guide-border-subtle: #e2e8f0;
-  --guide-border-top: #e2e8f0;
-  --guide-border-strong: rgba(74, 84, 142, 0.28);
-  --guide-accent: #4a548e;
-  --guide-accent-bright: #3b4478;
-  --guide-text-main: #0f172a;
-  --guide-text-muted: #475569;
-  --guide-tablet-body: #e2e8f0;
-  --guide-tablet-screen: #1f2335;
-  --guide-tablet-border: #cbd5e1;
-  --guide-pen-body: #334155;
-  --guide-pen-accent: #6872aa;
-  --guide-divider: #e2e8f0;
-  --guide-cascade-bg: #f8fafc;
-  --guide-cascade-row: rgba(74, 84, 142, 0.06);
-  --guide-tag-bg: rgba(74, 84, 142, 0.1);
-  --guide-btn-primary-bg: #a7acd9;
-  --guide-btn-primary-hover: #c2c7f6;
-  --guide-btn-primary-text: #1f2335;
-  --guide-btn-secondary-bg: #ffffff;
-  --guide-sidebar-bg: #ffffff;
-
-  background: transparent;
 }
 
 .deskStage {
@@ -300,7 +271,7 @@
   padding: 3px 10px;
   border-radius: 9999px;
   background: var(--guide-tag-bg);
-  color: var(--guide-accent);
+  color: var(--lumen-hi);
   border: 1px solid var(--guide-border-strong);
   margin-left: auto;
   display: inline-flex;
@@ -581,7 +552,7 @@
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: var(--guide-accent);
+  color: var(--lumen-hi);
   background: var(--guide-tag-bg);
   padding: 3px 9px;
   border-radius: 6px;
@@ -684,7 +655,7 @@
 .cascadePct {
   font-size: 11.5px;
   font-weight: 700;
-  color: var(--guide-accent);
+  color: var(--lumen-hi);
   background: var(--guide-tag-bg);
   padding: 2px 7px;
   border-radius: 4px;
@@ -819,7 +790,7 @@
   padding: 2px 8px;
   border-radius: 4px;
   background: var(--guide-tag-bg);
-  color: var(--guide-accent);
+  color: var(--lumen-hi);
   border: 1px solid var(--guide-border-strong);
   flex-shrink: 0;
 }
@@ -911,7 +882,7 @@
   padding: 2px 7px;
   border-radius: 4px;
   background: var(--guide-tag-bg);
-  color: var(--guide-accent);
+  color: var(--lumen-hi);
   border: 1px solid var(--guide-border-strong);
 }
 
@@ -958,7 +929,7 @@
 
 .supportMetaLink,
 .supportMetaActionLink {
-  color: var(--guide-accent);
+  color: var(--lumen-hi);
   font-weight: 700;
   text-decoration: underline;
   background: transparent;

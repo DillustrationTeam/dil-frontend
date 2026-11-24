@@ -85,7 +85,7 @@ export function AccountPasswordSetupForm({
       <div className="space-y-1.5">
         <label className={AUTH_LABEL_CLASS}>{isEng ? 'Username' : 'Tên đăng nhập'}</label>
         <div className={AUTH_INPUT_WRAP_CLASS}>
-          <User className="pointer-events-none ml-3.5 h-4 w-4 shrink-0 text-[#919099]" aria-hidden />
+          <User className="pointer-events-none ml-3.5 h-4 w-4 shrink-0 text-[#746A5F]" aria-hidden />
           <input
             value={username}
             onChange={(e) => setUsername(e.target.value)}
@@ -101,7 +101,7 @@ export function AccountPasswordSetupForm({
       <div className="space-y-1.5">
         <label className={AUTH_LABEL_CLASS}>{isEng ? 'Password' : 'Mật khẩu'}</label>
         <div className={AUTH_INPUT_WRAP_CLASS}>
-          <Lock className="pointer-events-none ml-3.5 h-4 w-4 shrink-0 text-[#919099]" aria-hidden />
+          <Lock className="pointer-events-none ml-3.5 h-4 w-4 shrink-0 text-[#746A5F]" aria-hidden />
           <input
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -114,7 +114,7 @@ export function AccountPasswordSetupForm({
           <button
             type="button"
             onClick={() => setShowPassword((prev) => !prev)}
-            className="absolute right-3.5 text-[#919099] transition-colors hover:text-white"
+            className="absolute right-3.5 text-[#746A5F] transition-colors hover:text-[#241F1A]"
             aria-label={isEng ? 'Toggle password visibility' : 'Hiện/ẩn mật khẩu'}
           >
             {showPassword ? <EyeOff className="h-4 w-4" aria-hidden /> : <Eye className="h-4 w-4" aria-hidden />}
@@ -125,7 +125,7 @@ export function AccountPasswordSetupForm({
       <div className="space-y-1.5">
         <label className={AUTH_LABEL_CLASS}>{isEng ? 'Confirm Password' : 'Xác nhận mật khẩu'}</label>
         <div className={AUTH_INPUT_WRAP_CLASS}>
-          <Lock className="pointer-events-none ml-3.5 h-4 w-4 shrink-0 text-[#919099]" aria-hidden />
+          <Lock className="pointer-events-none ml-3.5 h-4 w-4 shrink-0 text-[#746A5F]" aria-hidden />
           <input
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
@@ -146,7 +146,7 @@ export function AccountPasswordSetupForm({
         type="button"
         onClick={onCancel}
         disabled={isSubmitting}
-        className="w-full cursor-pointer text-center text-xs font-medium text-[#919099] transition-colors hover:text-white"
+        className="w-full cursor-pointer text-center text-xs font-medium text-[#746A5F] transition-colors hover:text-[#241F1A]"
       >
         {isEng ? 'Cancel' : 'Hủy'}
       </button>

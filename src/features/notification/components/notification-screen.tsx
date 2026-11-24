@@ -37,19 +37,19 @@ import { InvitationDetailModal } from './invitation-detail-modal';
 function getIcon(type: string) {
   switch (type) {
     case 'OutbidAlert':
-      return <Gavel size={18} className="text-amber-400" />;
+      return <Gavel size={18} className="text-[#8A6A1F]" />;
     case 'AuctionEndingSoon':
-      return <Clock size={18} className="text-amber-400" />;
+      return <Clock size={18} className="text-[#8A6A1F]" />;
     case 'AuctionWon':
-      return <Gavel size={18} className="text-emerald-400" />;
+      return <Gavel size={18} className="text-[#2F6B63]" />;
     case 'DeadlineRiskWarning':
-      return <Clock size={18} className="text-red-400" />;
+      return <Clock size={18} className="text-[#A8321C]" />;
     case 'PaymentSucceeded':
       return <Wallet size={18} className="text-brand-periwinkle" />;
     case 'PayoutStatusChanged':
-      return <Wallet size={18} className="text-sky-400" />;
+      return <Wallet size={18} className="text-[#2C6A86]" />;
     case 'UserSanctionAlert':
-      return <ShieldAlert size={18} className="text-red-400" />;
+      return <ShieldAlert size={18} className="text-[#A8321C]" />;
     case 'BugReportReplied':
       return <Bug size={18} className="text-brand-periwinkle" />;
     case 'PromotionAnnouncement':
@@ -59,32 +59,32 @@ function getIcon(type: string) {
     case 'WorkroomMessage':
       return <MessageSquare size={18} className="text-brand-periwinkle" />;
     case 'EscrowStatusChanged':
-      return <LockKeyhole size={18} className="text-emerald-400" />;
+      return <LockKeyhole size={18} className="text-[#2F6B63]" />;
     case 'DisputeStatusChanged':
-      return <Scale size={18} className="text-amber-400" />;
+      return <Scale size={18} className="text-[#8A6A1F]" />;
     case 'InvitationReceived':
-      return <Award size={18} className="text-amber-400" />;
+      return <Award size={18} className="text-[#8A6A1F]" />;
     case 'InvitationAccepted':
-      return <Award size={18} className="text-emerald-400" />;
+      return <Award size={18} className="text-[#2F6B63]" />;
     case 'InvitationDeclined':
-      return <Award size={18} className="text-rose-400" />;
+      return <Award size={18} className="text-[#A8321C]" />;
     case 'InvitationCanceled':
         case 'InvitationExpired':
       return <Award size={18} className="text-outline" />;
     case 'ArtTradeProposed':
-      return <ArrowLeftRight size={18} className="text-amber-400" />;
+      return <ArrowLeftRight size={18} className="text-[#8A6A1F]" />;
     case 'ArtTradeAccepted':
-      return <ArrowLeftRight size={18} className="text-emerald-400" />;
+      return <ArrowLeftRight size={18} className="text-[#2F6B63]" />;
     case 'ArtTradeDeclined':
     case 'ArtTradeCancelled':
-      return <ArrowLeftRight size={18} className="text-rose-400" />;
+      return <ArrowLeftRight size={18} className="text-[#A8321C]" />;
     case 'ArtTradeArtworkSubmitted':
       return <ArrowLeftRight size={18} className="text-brand-periwinkle" />;
     case 'ArtTradeCompleted':
-      return <ArrowLeftRight size={18} className="text-emerald-400" />;
+      return <ArrowLeftRight size={18} className="text-[#2F6B63]" />;
     case 'TradeDisputeCreated':
     case 'TradeDisputeResolved':
-      return <Scale size={18} className="text-amber-400" />;
+      return <Scale size={18} className="text-[#8A6A1F]" />;
     default:
       return <Info size={18} className="text-outline" />;
   }
@@ -261,7 +261,7 @@ export function NotificationScreen({ userId }: { userId: string | null }) {
           <div className="flex items-center gap-2">
             <h1 className="font-h1 text-2xl font-bold">{isEng ? 'Notification Center' : 'Trung tâm thông báo'}</h1>
             {unreadCount > 0 && (
-              <span className="rounded-full bg-brand-periwinkle px-2.5 py-0.5 font-mono text-xs font-bold text-brand-navy">
+              <span className="rounded-full bg-brand-periwinkle px-2.5 py-0.5 font-mono text-xs font-bold text-[#FFFCF6]">
                 {unreadCount} {isEng ? 'new' : 'mới'}
               </span>
             )}
@@ -276,7 +276,7 @@ export function NotificationScreen({ userId }: { userId: string | null }) {
             <button
               type="button"
               onClick={handleMarkAllRead}
-              className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/5 px-4 py-2 text-xs font-semibold text-brand-periwinkle hover:bg-white/10"
+              className="inline-flex items-center gap-1.5 rounded-full border border-[#221E1A]/10 bg-[#FFFCF6] px-4 py-2 text-xs font-semibold text-brand-periwinkle hover:bg-[#F0E7D8]"
             >
               <CheckCheck size={15} /> {isEng ? 'Mark all as read' : 'Đánh dấu đã đọc tất cả'}
             </button>
@@ -285,7 +285,7 @@ export function NotificationScreen({ userId }: { userId: string | null }) {
             type="button"
             onClick={() => loadData(true)}
             disabled={loading}
-            className="rounded-full border border-white/10 bg-white/5 p-2 text-outline hover:text-white"
+            className="rounded-full border border-[#221E1A]/10 bg-[#FFFCF6] p-2 text-outline hover:text-[#241F1A]"
             title="Làm mới"
           >
             <RefreshCw size={15} className={loading ? 'animate-spin' : ''} />
@@ -294,7 +294,7 @@ export function NotificationScreen({ userId }: { userId: string | null }) {
       </div>
 
       {/* Tab phân loại (SCR-45): Tất cả + Tài chính / Đơn hàng / Hệ thống / Khuyến mãi */}
-      <div className="glass-container mb-6 flex flex-wrap items-center gap-2 rounded-2xl border border-white/10 p-2 text-xs">
+      <div className="glass-container mb-6 flex flex-wrap items-center gap-2 rounded-2xl border border-[#221E1A]/10 p-2 text-xs">
         {[{ id: 'all', label: 'Tất cả', labelEn: 'All' }, ...notificationCategories].map((tab) => (
           <button
             key={tab.id}
@@ -303,8 +303,8 @@ export function NotificationScreen({ userId }: { userId: string | null }) {
             aria-pressed={activeTab === tab.id}
             className={`rounded-full px-4 py-1.5 font-semibold transition ${
               activeTab === tab.id
-                ? 'bg-brand-periwinkle text-brand-navy'
-                : 'text-on-surface-variant hover:bg-white/5 hover:text-on-surface'
+                ? 'bg-brand-periwinkle text-[#FFFCF6]'
+                : 'text-on-surface-variant hover:bg-[#FFFCF6] hover:text-on-surface'
             }`}
           >
             {isEng ? tab.labelEn : tab.label}
@@ -318,7 +318,7 @@ export function NotificationScreen({ userId }: { userId: string | null }) {
           className={`ml-auto inline-flex items-center gap-1.5 rounded-full border px-4 py-1.5 font-semibold transition ${
             unreadOnly
               ? 'border-brand-periwinkle/40 bg-brand-periwinkle/15 text-brand-periwinkle'
-              : 'border-white/15 text-on-surface-variant hover:bg-white/5'
+              : 'border-[#221E1A]/10 text-on-surface-variant hover:bg-[#FFFCF6]'
           }`}
         >
           <span className={`size-2 rounded-full ${unreadOnly ? 'bg-brand-periwinkle' : 'bg-outline'}`} />
@@ -327,7 +327,7 @@ export function NotificationScreen({ userId }: { userId: string | null }) {
       </div>
 
       {error && (
-        <div role="alert" className="mb-6 flex items-center gap-2 rounded-2xl border border-red-400/30 bg-red-500/10 p-4 text-sm text-red-200">
+        <div role="alert" className="mb-6 flex items-center gap-2 rounded-2xl border border-[#A8321C]/40 bg-[#A8321C]/10 p-4 text-sm text-[#A8321C]">
           <CircleAlert size={18} className="shrink-0" />
           <span>{error}</span>
         </div>
@@ -336,11 +336,11 @@ export function NotificationScreen({ userId }: { userId: string | null }) {
       {loading ? (
         <div className="space-y-3">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="glass-container h-24 animate-pulse rounded-2xl border border-white/5 bg-white/[0.02]" />
+            <div key={i} className="glass-container h-24 animate-pulse rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6]" />
           ))}
         </div>
       ) : (!Array.isArray(notifications) || notifications.length === 0) ? (
-        <div className="glass-container rounded-3xl border border-white/10 p-16 text-center">
+        <div className="glass-container rounded-3xl border border-[#221E1A]/10 p-16 text-center">
           <Bell size={40} className="mx-auto mb-3 text-outline" />
           <h2 className="font-h1 text-base font-bold text-on-surface">{isEng ? 'No notifications' : 'Không có thông báo nào'}</h2>
           <p className="mt-1 text-xs text-on-surface-variant">{isEng ? 'You are all caught up!' : 'Bạn đã xem hết tất cả thông báo hiện có.'}</p>
@@ -354,11 +354,11 @@ export function NotificationScreen({ userId }: { userId: string | null }) {
                 key={n.notificationId}
                 className={`glass-container relative flex items-start gap-4 rounded-2xl border p-4 transition ${
                   n.isRead
-                    ? 'border-white/5 bg-white/[0.02] text-on-surface-variant'
+                    ? 'border-[#221E1A]/10 bg-[#FFFCF6] text-on-surface-variant'
                     : 'border-brand-periwinkle/30 bg-brand-periwinkle/5 text-on-surface'
                 }`}
               >
-                <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-white/5">
+                <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[#FFFCF6]">
                   {getIcon(n.notificationType)}
                 </div>
 
@@ -374,54 +374,44 @@ export function NotificationScreen({ userId }: { userId: string | null }) {
 
                   {/* Lời mời tham gia Ban giám khảo sự kiện (Invitation Event Reply) */}
                   {n.refType?.toLowerCase() === 'invitation' && n.refId && (
-                    <div className="mt-3 rounded-2xl border border-white/10 bg-white/[0.03] p-3 text-xs">
+                    <div className="mt-3 rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] p-3 text-xs">
                       {respondedInvitations[n.refId] === 'Accepted' || n.notificationType === 'InvitationAccepted' ? (
                         <div className="flex flex-wrap items-center justify-between gap-2">
-                          <span className="inline-flex items-center gap-1.5 font-semibold text-emerald-400">
-                            <Check size={14} /> Bạn đã chấp nhận lời mời này
-                          </span>
+                          <span className="inline-flex items-center gap-1.5 font-semibold text-[#2F6B63]">
+                            <Check size={14} /> Bạn đã chấp nhận lời mời này </span>
                           <button
                             type="button"
                             onClick={() => setSelectedInvitationId(n.refId!)}
-                            className="inline-flex items-center gap-1 rounded-xl border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-medium text-outline hover:text-white transition"
+                            className="inline-flex items-center gap-1 rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-3 py-1 text-[11px] font-medium text-outline hover:text-[#241F1A] transition"
                           >
-                            <Eye size={12} /> Chi tiết sự kiện
-                          </button>
+                            <Eye size={12} /> Chi tiết sự kiện </button>
                         </div>
                       ) : respondedInvitations[n.refId] === 'Declined' || n.notificationType === 'InvitationDeclined' ? (
                         <div className="flex flex-wrap items-center justify-between gap-2">
-                          <span className="inline-flex items-center gap-1.5 font-semibold text-rose-400">
-                            <X size={14} /> Bạn đã từ chối lời mời này
-                          </span>
+                          <span className="inline-flex items-center gap-1.5 font-semibold text-[#A8321C]">
+                            <X size={14} /> Bạn đã từ chối lời mời này </span>
                           <button
                             type="button"
                             onClick={() => setSelectedInvitationId(n.refId!)}
-                            className="inline-flex items-center gap-1 rounded-xl border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-medium text-outline hover:text-white transition"
+                            className="inline-flex items-center gap-1 rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-3 py-1 text-[11px] font-medium text-outline hover:text-[#241F1A] transition"
                           >
-                            <Eye size={12} /> Chi tiết
-                          </button>
+                            <Eye size={12} /> Chi tiết </button>
                         </div>
                       ) : n.notificationType === 'InvitationCanceled' ? (
-                        <span className="text-[11px] text-outline">
-                          Lời mời đã bị Ban tổ chức hủy bỏ.
-                        </span>
+                        <span className="text-[11px] text-outline"> Lời mời đã bị Ban tổ chức hủy bỏ. </span>
                       ) : n.notificationType === 'InvitationExpired' ? (
-                        <span className="text-[11px] text-outline">
-                          Lời mời đã hết hạn phản hồi.
-                        </span>
+                        <span className="text-[11px] text-outline"> Lời mời đã hết hạn phản hồi. </span>
                       ) : (
                         <div>
                           {confirmDeclineId === n.refId ? (
                             <div className="flex flex-wrap items-center justify-between gap-2">
-                              <span className="text-[11px] font-medium text-rose-300">
-                                Xác nhận từ chối lời mời tham gia sự kiện?
-                              </span>
+                              <span className="text-[11px] font-medium text-[#A8321C]"> Xác nhận từ chối lời mời tham gia sự kiện? </span>
                               <div className="flex items-center gap-2">
                                 <button
                                   type="button"
                                   disabled={actionLoadingId === n.refId}
                                   onClick={() => handleDeclineInvitation(n.refId!, n.notificationId)}
-                                  className="inline-flex items-center gap-1 rounded-xl bg-rose-500 px-3 py-1 text-[11px] font-bold text-white transition hover:bg-rose-600 disabled:opacity-50"
+                                  className="inline-flex items-center gap-1 rounded-xl bg-[#A8321C]/12 px-3 py-1 text-[11px] font-bold text-[#241F1A] transition hover:bg-[#A8321C]/12 disabled:opacity-50"
                                 >
                                   {actionLoadingId === n.refId ? (
                                     <RefreshCw size={11} className="animate-spin" />
@@ -433,10 +423,8 @@ export function NotificationScreen({ userId }: { userId: string | null }) {
                                 <button
                                   type="button"
                                   onClick={() => setConfirmDeclineId(null)}
-                                  className="rounded-xl border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] text-on-surface-variant hover:text-white"
-                                >
-                                  Hủy
-                                </button>
+                                  className="rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-2.5 py-1 text-[11px] text-on-surface-variant hover:text-[#241F1A]"
+                                > Hủy </button>
                               </div>
                             </div>
                           ) : (
@@ -445,7 +433,7 @@ export function NotificationScreen({ userId }: { userId: string | null }) {
                                 type="button"
                                 disabled={actionLoadingId === n.refId}
                                 onClick={() => handleAcceptInvitation(n.refId!, n.notificationId)}
-                                className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-500/40 bg-emerald-500/20 px-3.5 py-1.5 text-xs font-bold text-emerald-300 shadow-sm transition hover:bg-emerald-500/30 active:scale-95 disabled:opacity-50"
+                                className="inline-flex items-center gap-1.5 rounded-xl border border-[#2F6B63]/40 bg-[#2F6B63]/20 px-3.5 py-1.5 text-xs font-bold text-[#2F6B63] shadow-sm transition hover:bg-[#2F6B63]/20 active:scale-95 disabled:opacity-50"
                               >
                                 {actionLoadingId === n.refId ? (
                                   <RefreshCw size={13} className="animate-spin" />
@@ -458,17 +446,15 @@ export function NotificationScreen({ userId }: { userId: string | null }) {
                                 type="button"
                                 disabled={actionLoadingId === n.refId}
                                 onClick={() => setConfirmDeclineId(n.refId!)}
-                                className="inline-flex items-center gap-1.5 rounded-xl border border-rose-500/30 bg-rose-500/10 px-3 py-1.5 text-xs font-medium text-rose-300 transition hover:bg-rose-500/20 active:scale-95 disabled:opacity-50"
+                                className="inline-flex items-center gap-1.5 rounded-xl border border-[#A8321C]/40 bg-[#A8321C]/10 px-3 py-1.5 text-xs font-medium text-[#A8321C] transition hover:bg-[#A8321C]/20 active:scale-95 disabled:opacity-50"
                               >
-                                <X size={13} /> Từ chối
-                              </button>
+                                <X size={13} /> Từ chối </button>
                               <button
                                 type="button"
                                 onClick={() => setSelectedInvitationId(n.refId!)}
-                                className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-on-surface-variant hover:bg-white/10 hover:text-white transition"
+                                className="inline-flex items-center gap-1.5 rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-3 py-1.5 text-xs font-medium text-on-surface-variant hover:bg-[#F0E7D8] hover:text-[#241F1A] transition"
                               >
-                                <Eye size={13} /> Chi tiết lời mời
-                              </button>
+                                <Eye size={13} /> Chi tiết lời mời </button>
                             </div>
                           )}
                         </div>
@@ -477,7 +463,7 @@ export function NotificationScreen({ userId }: { userId: string | null }) {
                   )}
 
                   <div className="mt-3 flex flex-wrap items-center justify-between gap-3 text-xs">
-                    <span className="rounded-full border border-white/10 px-2.5 py-0.5 text-[10px] text-outline">
+                    <span className="rounded-full border border-[#221E1A]/10 px-2.5 py-0.5 text-[10px] text-outline">
                       {typeLabels[n.notificationType] || n.notificationType}
                     </span>
 
@@ -494,7 +480,7 @@ export function NotificationScreen({ userId }: { userId: string | null }) {
                         <button
                           type="button"
                           onClick={() => handleMarkRead(n.notificationId)}
-                          className="inline-flex items-center gap-1 text-[11px] text-outline hover:text-white"
+                          className="inline-flex items-center gap-1 text-[11px] text-outline hover:text-[#241F1A]"
                         >
                           <Check size={13} /> {isEng ? 'Mark read' : 'Đã đọc'}
                         </button>
@@ -521,7 +507,7 @@ export function NotificationScreen({ userId }: { userId: string | null }) {
               setLoadingMore(true);
               loadData(false);
             }}
-            className="rounded-full border border-white/15 px-6 py-2 text-xs font-semibold hover:bg-white/10 disabled:opacity-50"
+            className="rounded-full border border-[#221E1A]/10 px-6 py-2 text-xs font-semibold hover:bg-[#F0E7D8] disabled:opacity-50"
           >
             {loadingMore ? (isEng ? 'Loading...' : 'Đang tải...') : (isEng ? 'Load older notifications' : 'Xem các thông báo cũ hơn')}
           </button>
