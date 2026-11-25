@@ -8,7 +8,7 @@ const previewCommission: Commission = {
   clientId: 'preview-client',
   creatorId: 'preview-creator',
   title: 'Thiết kế nhân vật minh họa',
-  description: 'Bản xem trước màn hình điều khoản Workroom.',
+  description: 'Bản xem trước màn hình điều khoản phòng làm việc.',
   status: 'InProgress',
   licenseType: 'Commercial',
   licenseMultiplierApplied: 1.5,
@@ -34,7 +34,7 @@ const previewCommission: Commission = {
 
 export default function WorkroomTermsPreview() {
   return (
-    <main className="min-h-screen bg-[#0d0f18]">
+    <main className="min-h-screen bg-[#FFFCF6]">
       <WorkroomTermsModal
         isOpen
         role="client"

@@ -49,11 +49,11 @@ export function DisputesQueueCard({
                   className={`p-4 rounded-xl border transition-all cursor-pointer flex items-center justify-between gap-4 ${
                     isSelected
                       ? 'border-brand-periwinkle/60 bg-brand-periwinkle/15 shadow-[0_0_20px_rgba(167,172,217,0.15)]'
-                      : 'border-white/10 bg-white/[0.02] hover:bg-white/[0.05] hover:border-white/20'
+                      : 'border-[#221E1A]/10 bg-[#FFFCF6] hover:bg-[#FFFCF6] hover:border-[#221E1A]/20'
                   }`}
                 >
                   <div className="flex items-start gap-3">
-                    <div className="p-2.5 rounded-lg bg-[#e598ad]/10 text-[#f2b3c4] mt-0.5">
+                    <div className="p-2.5 rounded-lg bg-[#A8321C]/10 text-[#f2b3c4] mt-0.5">
                       <AlertTriangle className="w-4 h-4" />
                     </div>
                     <div>
@@ -64,8 +64,8 @@ export function DisputesQueueCard({
                         <span
                           className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
                             item.priority === 'High'
-                              ? 'bg-[#e598ad]/20 text-[#f2b3c4] border border-[#e598ad]/30'
-                              : 'bg-amber-950/50 text-amber-300 border border-amber-500/20'
+                              ? 'bg-[#A8321C]/20 text-[#f2b3c4] border border-[#A8321C]/30'
+                              : 'bg-[#8A6A1F]/20 text-[#8A6A1F] border border-[#8A6A1F]/30'
                           }`}
                         >
                           {item.priority} Priority

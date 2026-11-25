@@ -22,7 +22,12 @@ function subscribe(callback: () => void) {
 
 function getSnapshot(): boolean {
   try {
-    return window.localStorage.getItem(STORAGE_KEY) === '1';
+    const stored = window.localStorage.getItem(STORAGE_KEY);
+    if (stored === '1') return true;
+    if (stored === '0') return false;
+    // Chưa từng chọn: màn hình hẹp thì thu cụm tiện ích nổi lại để không đè nội dung
+    // của khu studio (sidebar, thẻ số liệu, bảng) trên mobile.
+    return window.matchMedia('(max-width: 639px)').matches;
   } catch {
     return false;
   }
@@ -57,7 +62,7 @@ export function FloatingUtilitiesDock({ children }: { children: ReactNode }) {
           onClick={toggleHidden}
           aria-label={isEng ? 'Show floating tools' : 'Hiện 3 nút tiện ích (Ngôn ngữ, Báo lỗi, AI)'}
           title={isEng ? 'Show floating tools' : 'Hiện công cụ nổi'}
-          className="fixed bottom-4 right-0 z-40 flex h-9 cursor-pointer items-center gap-1 rounded-l-full border border-r-0 border-[var(--hair-2)] bg-[var(--ink-2)] pl-2.5 pr-1.5 text-[11px] font-semibold text-[#919099] shadow-md backdrop-blur-xl transition-all hover:bg-[var(--ink-3)] hover:pr-2.5 hover:text-[var(--lumen)] active:scale-95"
+          className="fixed bottom-4 right-0 z-40 flex h-9 cursor-pointer items-center gap-1 rounded-l-full border border-r-0 border-[#221E1A]/10 bg-[#FFFCF6]/92 pl-2.5 pr-1.5 text-[11px] font-semibold text-[#B24A26] shadow-[0_10px_28px_-18px_rgba(74,52,30,0.85)] backdrop-blur-xl transition-all hover:bg-[#FFFCF6] hover:pr-2.5 hover:text-[#241F1A] active:scale-95"
         >
           <ChevronLeft className="h-3.5 w-3.5 opacity-75" aria-hidden />
           <Eye className="h-3.5 w-3.5" aria-hidden />
@@ -68,7 +73,7 @@ export function FloatingUtilitiesDock({ children }: { children: ReactNode }) {
           onClick={toggleHidden}
           aria-label={isEng ? 'Hide floating tools' : 'Ẩn 3 nút tiện ích (Ngôn ngữ, Báo lỗi, AI)'}
           title={isEng ? 'Hide floating tools' : 'Ẩn công cụ nổi'}
-          className="fixed bottom-[180px] right-5 z-40 flex size-10 cursor-pointer items-center justify-center rounded-full border border-[var(--hair-2)] bg-[var(--ink-2)] text-[var(--ivory)] shadow-md backdrop-blur-xl transition-all hover:scale-105 hover:border-[var(--lumen)] hover:bg-[var(--ink-3)] active:scale-95 sm:right-6"
+          className="fixed bottom-[216px] right-7 z-40 flex size-8 cursor-pointer items-center justify-center rounded-full border border-[#221E1A]/10 bg-[#FFFCF6]/92 text-[#746A5F] shadow-[0_10px_28px_-18px_rgba(74,52,30,0.85)] backdrop-blur-xl transition-all hover:scale-105 hover:border-[#B24A26]/45 hover:bg-[#FFFCF6] hover:text-[#B24A26] active:scale-95 sm:right-9"
         >
           <EyeOff className="h-4 w-4 text-[var(--ivory)]" aria-hidden />
         </button>

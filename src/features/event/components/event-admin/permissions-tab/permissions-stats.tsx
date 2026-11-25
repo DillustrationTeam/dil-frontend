@@ -25,7 +25,7 @@ export function PermissionsStats({
       label: isVie ? 'Trưởng ban' : 'Head Jury',
       value: headJuryCount,
       icon: Crown,
-      color: 'text-amber-300',
+      color: 'text-[#8A6A1F]',
     },
     {
       label: isVie ? 'Thành viên BGK' : 'Jury Members',
@@ -37,13 +37,13 @@ export function PermissionsStats({
       label: isVie ? 'Lời mời đang chờ' : 'Pending Invites',
       value: pendingInvitesCount,
       icon: MailCheck,
-      color: 'text-cyan-300',
+      color: 'text-[#2C6A86]',
     },
     {
       label: isVie ? 'Bài thi đã giao' : 'Assigned Submissions',
       value: assignedCount,
       icon: FileSpreadsheet,
-      color: 'text-emerald-300',
+      color: 'text-[#2F6B63]',
     },
   ];
 
@@ -56,7 +56,7 @@ export function PermissionsStats({
             key={idx}
             className="glass-container rounded-2xl p-5 relative overflow-hidden flex flex-col justify-between"
           >
-            <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-brand-periwinkle via-cyan-400 to-transparent opacity-75" />
+            <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-brand-periwinkle via-[#2C6A86] to-transparent opacity-75" />
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-outline uppercase tracking-wider">
                 {stat.label}

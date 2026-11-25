@@ -64,9 +64,7 @@ export function RevenueChart({ points }: { points: RevenuePointDto[] }) {
 
   if (points.length === 0) {
     return (
-      <div className="flex h-56 items-center justify-center text-sm text-outline">
-        Chưa có dữ liệu giao dịch trong khoảng thời gian này.
-      </div>
+      <div className="flex h-56 items-center justify-center text-sm text-outline"> Chưa có dữ liệu giao dịch trong khoảng thời gian này. </div>
     );
   }
 
@@ -80,8 +78,8 @@ export function RevenueChart({ points }: { points: RevenuePointDto[] }) {
       >
         <defs>
           <linearGradient id="revenue-net-area" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#A7ACD9" stopOpacity="0.45" />
-            <stop offset="100%" stopColor="#A7ACD9" stopOpacity="0.02" />
+            <stop offset="0%" stopColor="#B24A26" stopOpacity="0.45" />
+            <stop offset="100%" stopColor="#B24A26" stopOpacity="0.02" />
           </linearGradient>
         </defs>
 
@@ -93,11 +91,11 @@ export function RevenueChart({ points }: { points: RevenuePointDto[] }) {
               y1={tick.y}
               x2={CHART_WIDTH - PADDING.right}
               y2={tick.y}
-              stroke="#919099"
+              stroke="#746A5F"
               strokeOpacity="0.18"
               strokeDasharray={tick.ratio === 0 ? undefined : '3 5'}
             />
-            <text x={PADDING.left - 10} y={tick.y + 3} textAnchor="end" fontSize="10" fill="#919099">
+            <text x={PADDING.left - 10} y={tick.y + 3} textAnchor="end" fontSize="10" fill="#746A5F">
               {formatAxisValue(tick.value)}
             </text>
           </g>
@@ -107,7 +105,7 @@ export function RevenueChart({ points }: { points: RevenuePointDto[] }) {
         <path
           d={geometry.linePath}
           fill="none"
-          stroke="#A7ACD9"
+          stroke="#B24A26"
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -115,13 +113,13 @@ export function RevenueChart({ points }: { points: RevenuePointDto[] }) {
 
         {geometry.coords.map((coord, index) => (
           <g key={`${coord.point.periodLabel}-${index}`}>
-            <circle cx={coord.x} cy={coord.y} r="3" fill="#1F2335" stroke="#A7ACD9" strokeWidth="2">
+            <circle cx={coord.x} cy={coord.y} r="3" fill="#F7F2E9" stroke="#B24A26" strokeWidth="2">
               <title>
                 {`${coord.point.periodLabel}: ròng ${formatFullVnd(coord.point.netAmount)} · gộp ${formatFullVnd(coord.point.grossAmount)} · phí ${formatFullVnd(coord.point.feeAmount)}`}
               </title>
             </circle>
             {index % geometry.labelStep === 0 && (
-              <text x={coord.x} y={geometry.baseline + 18} textAnchor="middle" fontSize="10" fill="#919099">
+              <text x={coord.x} y={geometry.baseline + 18} textAnchor="middle" fontSize="10" fill="#746A5F">
                 {coord.point.periodLabel}
               </text>
             )}

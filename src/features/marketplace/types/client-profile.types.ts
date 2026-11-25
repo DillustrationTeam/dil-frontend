@@ -32,6 +32,14 @@ export interface FollowedCreatorDto {
   creatorUserId: string;
   displayName: string;
   avatarUrl?: string | null;
+  roles: string[];
+}
+
+export interface FollowerUserDto {
+  userId: string;
+  displayName: string;
+  avatarUrl?: string | null;
+  roles: string[];
 }
 
 export interface UpdateClientProfileRequest {

@@ -49,24 +49,24 @@ function getRequestStatusMeta(item: Commission, isEng: boolean) {
   if (item.status === 'PendingAcceptance') {
     return {
       label: isEng ? 'Awaiting creator' : 'Chờ họa sĩ phản hồi',
-      badgeClass: 'bg-[#A7ACD9]/15 text-[#d8dbff]',
+      badgeClass: 'bg-[#B24A26]/15 text-[#A8321C]',
     };
   }
   if (item.status === 'Negotiating') {
     return {
       label: isEng ? 'Counter-offer' : 'Đề xuất giá mới',
-      badgeClass: 'bg-amber-300/15 text-amber-200',
+      badgeClass: 'bg-[#8A6A1F]/15 text-[#8A6A1F]',
     };
   }
   if (isAwaitingEscrow(item)) {
     return {
       label: isEng ? 'Awaiting escrow' : 'Chờ ký quỹ',
-      badgeClass: 'bg-emerald-400/15 text-emerald-200',
+      badgeClass: 'bg-[#2F6B63]/15 text-[#2F6B63]',
     };
   }
   return {
     label: isEng ? 'Cancelled / Declined' : 'Đã hủy / Từ chối',
-    badgeClass: 'bg-rose-400/15 text-rose-200',
+    badgeClass: 'bg-[#A8321C]/15 text-[#A8321C]',
   };
 }
 
@@ -197,10 +197,10 @@ export default function ClientSentRequestsPage() {
     <div className="mx-auto w-full max-w-5xl space-y-4" data-no-translate="true">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-baseline gap-2.5">
-          <h1 className="font-h1 text-lg font-bold text-white">
+          <h1 className="font-h1 text-lg font-bold text-[#241F1A]">
             {isEng ? 'Sent booking requests' : 'Yêu cầu đặt vẽ đã gửi'}
           </h1>
-          <span className="text-xs text-slate-400">({visibleRequests.length})</span>
+          <span className="text-xs text-[#746A5F]">({visibleRequests.length})</span>
         </div>
         <Link
           href="/creators"
@@ -214,7 +214,7 @@ export default function ClientSentRequestsPage() {
       {error && (
         <div
           role="alert"
-          className="flex items-center justify-between gap-3 rounded-xl border border-rose-400/30 bg-rose-400/10 px-4 py-2.5 text-xs text-rose-200"
+          className="flex items-center justify-between gap-3 rounded-xl border border-[#A8321C]/40 bg-[#A8321C]/10 px-4 py-2.5 text-xs text-[#A8321C]"
         >
           <span className="flex items-center gap-2">
             <AlertCircle className="h-4 w-4 shrink-0" />
@@ -225,20 +225,20 @@ export default function ClientSentRequestsPage() {
               <button
                 type="button"
                 onClick={loadRequests}
-                className="rounded-lg border border-rose-300/30 px-2.5 py-1 text-[11px] font-semibold hover:bg-rose-400/20"
+                className="rounded-lg border border-[#A8321C]/40 px-2.5 py-1 text-[11px] font-semibold hover:bg-[#A8321C]/20"
               >
                 {isEng ? 'Retry' : 'Thử lại'}
               </button>
             )}
-            <button onClick={() => setError(null)} className="hover:text-white" aria-label="Dismiss">
+            <button onClick={() => setError(null)} className="hover:text-[#241F1A]" aria-label="Dismiss">
               <X className="h-3.5 w-3.5" />
             </button>
           </div>
         </div>
       )}
 
-      <section className="rounded-2xl border border-white/10 bg-white/[0.035] p-4 sm:p-5">
-        <div className="flex flex-col gap-3 border-b border-white/10 pb-4 sm:flex-row sm:items-center sm:justify-between">
+      <section className="rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] p-4 sm:p-5">
+        <div className="flex flex-col gap-3 border-b border-[#221E1A]/10 pb-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-wrap gap-1.5">
             {tabs.map((tab) => {
               const active = filter === tab.key;
@@ -252,8 +252,8 @@ export default function ClientSentRequestsPage() {
                   }}
                   className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
                     active
-                      ? 'bg-[#A7ACD9] text-[#151725]'
-                      : 'bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white'
+                      ? 'bg-[#B24A26] text-[#FFFCF6]'
+                      : 'bg-[#FFFCF6] text-[#746A5F] hover:bg-[#F0E7D8] hover:text-[#241F1A]'
                   }`}
                 >
                   {tab.label}
@@ -263,26 +263,26 @@ export default function ClientSentRequestsPage() {
           </div>
 
           <div className="relative w-full sm:w-56">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#746A5F]" />
             <input
               type="search"
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
               placeholder={isEng ? 'Search title or creator…' : 'Tìm tên đơn, họa sĩ…'}
-              className="w-full rounded-lg border border-white/10 bg-[#10131f] py-1.5 pl-8 pr-3 text-xs text-white placeholder:text-slate-500 outline-none focus:border-[#A7ACD9]/60"
+              className="w-full rounded-lg border border-[#221E1A]/10 bg-[#FFFCF6] py-1.5 pl-8 pr-3 text-xs text-[#241F1A] placeholder:text-[#746A5F] outline-none focus:border-[#B24A26]/60"
             />
           </div>
         </div>
 
         {loading ? (
-          <div className="flex min-h-48 items-center justify-center text-sm text-slate-400">
+          <div className="flex min-h-48 items-center justify-center text-sm text-[#746A5F]">
             <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
             {isEng ? 'Loading requests…' : 'Đang tải yêu cầu…'}
           </div>
         ) : visibleRequests.length === 0 ? (
           <div className="py-12 text-center">
-            <CheckCircle2 className="mx-auto h-8 w-8 text-[#A7ACD9]" />
-            <p className="mt-3 text-sm font-semibold text-white">
+            <CheckCircle2 className="mx-auto h-8 w-8 text-[#B24A26]" />
+            <p className="mt-3 text-sm font-semibold text-[#241F1A]">
               {requests.length === 0
                 ? isEng
                   ? 'No sent requests yet'
@@ -291,7 +291,7 @@ export default function ClientSentRequestsPage() {
                   ? 'No matching requests'
                   : 'Không có yêu cầu phù hợp'}
             </p>
-            <p className="mt-1 text-xs text-slate-400">
+            <p className="mt-1 text-xs text-[#746A5F]">
               {requests.length === 0
                 ? isEng
                   ? 'Explore creators to send your first commission brief.'
@@ -302,7 +302,7 @@ export default function ClientSentRequestsPage() {
             </p>
           </div>
         ) : (
-          <div className="divide-y divide-white/10">
+          <div className="divide-y divide-[#221E1A]/10">
             {visibleRequests.map((item) => {
               const price = item.finalPrice ?? item.totalPrice ?? item.price;
               const statusMeta = getRequestStatusMeta(item, isEng);
@@ -315,25 +315,25 @@ export default function ClientSentRequestsPage() {
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className="font-mono text-[11px] font-bold text-[#A7ACD9]">
+                        <span className="font-mono text-[11px] font-bold text-[#B24A26]">
                           #CMD-{item.id.slice(0, 8).toUpperCase()}
                         </span>
                         <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${statusMeta.badgeClass}`}>
                           {statusMeta.label}
                         </span>
-                        <span className="text-[11px] text-slate-500">{formatDate(item.createdAt, isEng)}</span>
+                        <span className="text-[11px] text-[#746A5F]">{formatDate(item.createdAt, isEng)}</span>
                       </div>
                       <Link
                         href={`/client/requests/${item.id}`}
-                        className="mt-1.5 block truncate text-sm font-bold text-white hover:text-[#A7ACD9]"
+                        className="mt-1.5 block truncate text-sm font-bold text-[#241F1A] hover:text-[#B24A26]"
                       >
                         {item.title}
                       </Link>
-                      <p className="mt-0.5 text-xs text-slate-400">
+                      <p className="mt-0.5 text-xs text-[#746A5F]">
                         @{item.creatorName || item.creatorId} · {formatMoney(price)}
                       </p>
                       {item.status === 'Cancelled' && item.cancellationReason && (
-                        <p className="mt-1 text-xs text-rose-300/90">
+                        <p className="mt-1 text-xs text-[#A8321C]">
                           {isEng ? 'Reason:' : 'Lý do:'} {item.cancellationReason}
                         </p>
                       )}
@@ -348,7 +348,7 @@ export default function ClientSentRequestsPage() {
                             setWithdrawId(item.id);
                             setWithdrawReason('');
                           }}
-                          className="rounded-lg border border-rose-400/30 bg-rose-400/10 px-3 py-2 text-xs font-semibold text-rose-200 transition hover:bg-rose-400/20 disabled:opacity-50"
+                          className="rounded-lg border border-[#A8321C]/40 bg-[#A8321C]/10 px-3 py-2 text-xs font-semibold text-[#A8321C] transition hover:bg-[#A8321C]/20 disabled:opacity-50"
                         >
                           {isEng ? 'Withdraw' : 'Rút yêu cầu'}
                         </button>
@@ -368,7 +368,7 @@ export default function ClientSentRequestsPage() {
                             type="button"
                             disabled={isBusy}
                             onClick={() => void handleCounteroffer(item.id, false)}
-                            className="rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-xs font-semibold text-slate-200 transition hover:bg-white/10 disabled:opacity-50"
+                            className="rounded-lg border border-[#221E1A]/10 bg-[#FFFCF6] px-3 py-2 text-xs font-semibold text-[#6E6459] transition hover:bg-[#F0E7D8] disabled:opacity-50"
                           >
                             {isEng ? 'Decline' : 'Từ chối'}
                           </button>
@@ -387,7 +387,7 @@ export default function ClientSentRequestsPage() {
 
                       <Link
                         href={`/client/requests/${item.id}`}
-                        className="inline-flex items-center gap-1 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-slate-200 transition hover:bg-white/10"
+                        className="inline-flex items-center gap-1 rounded-lg border border-[#221E1A]/10 bg-[#FFFCF6] px-3 py-2 text-xs font-semibold text-[#6E6459] transition hover:bg-[#F0E7D8]"
                       >
                         {isEng ? 'Details' : 'Chi tiết'}
                       </Link>
@@ -395,7 +395,7 @@ export default function ClientSentRequestsPage() {
                   </div>
 
                   {isWithdrawing && (
-                    <div className="mt-3 flex flex-col gap-2 rounded-xl border border-rose-400/25 bg-rose-400/10 p-3 sm:flex-row sm:items-center">
+                    <div className="mt-3 flex flex-col gap-2 rounded-xl border border-[#A8321C]/35 bg-[#A8321C]/10 p-3 sm:flex-row sm:items-center">
                       <input
                         type="text"
                         value={withdrawReason}
@@ -403,14 +403,14 @@ export default function ClientSentRequestsPage() {
                         placeholder={
                           isEng ? 'Reason for withdrawing (optional)' : 'Lý do rút yêu cầu (không bắt buộc)'
                         }
-                        className="min-w-0 flex-1 rounded-lg border border-white/15 bg-[#10131f] px-3 py-1.5 text-xs text-white outline-none focus:border-rose-300"
+                        className="min-w-0 flex-1 rounded-lg border border-[#221E1A]/10 bg-[#FFFCF6] px-3 py-1.5 text-xs text-[#241F1A] outline-none focus:border-[#A8321C]/30"
                       />
                       <div className="flex items-center gap-2">
                         <button
                           type="button"
                           disabled={isBusy}
                           onClick={() => void handleWithdraw(item.id)}
-                          className="rounded-lg bg-rose-400 px-3 py-1.5 text-xs font-bold text-[#351016] disabled:opacity-50"
+                          className="rounded-lg bg-[#A8321C]/10 px-3 py-1.5 text-xs font-bold text-[#FFFCF6] disabled:opacity-50"
                         >
                           {isBusy ? (isEng ? 'Withdrawing…' : 'Đang hủy…') : isEng ? 'Confirm' : 'Xác nhận hủy'}
                         </button>
@@ -418,7 +418,7 @@ export default function ClientSentRequestsPage() {
                           type="button"
                           disabled={isBusy}
                           onClick={() => setWithdrawId(null)}
-                          className="rounded-lg border border-white/15 px-3 py-1.5 text-xs text-slate-200"
+                          className="rounded-lg border border-[#221E1A]/10 px-3 py-1.5 text-xs text-[#6E6459]"
                         >
                           {isEng ? 'Cancel' : 'Thôi'}
                         </button>

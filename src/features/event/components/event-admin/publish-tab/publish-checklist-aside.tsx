@@ -42,25 +42,25 @@ export function PublishChecklistAside({
   return (
     <aside className="glass-container p-6 rounded-2xl space-y-4 lg:sticky lg:top-24">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold font-sora text-white">
+        <h2 className="text-xl font-bold font-sora text-[#241F1A]">
           {isVie ? 'Danh mục kiểm toán công bố' : 'Release Audit Checklist'}
         </h2>
-        <span className="text-xs text-[#9695a1] font-mono">
+        <span className="text-xs text-[#746A5F] font-mono">
           {Object.values(checklist).filter((v) => v === true).length}/4 {isVie ? 'Đã xác minh' : 'Verified'}
         </span>
       </div>
 
       <div className="space-y-2.5 text-xs">
         {/* 1. Event Period Concluded */}
-        <div className="flex items-center justify-between p-3 rounded-xl border border-white/10 bg-white/[0.02]">
-          <span className="text-white font-medium">
+        <div className="flex items-center justify-between p-3 rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6]">
+          <span className="text-[#241F1A] font-medium">
             {isVie ? 'Thời gian sự kiện đã kết thúc' : 'Event Period Concluded'}
           </span>
           <span
             className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border transition-all ${
               checklist.eventConcluded
-                ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300'
-                : 'bg-amber-500/15 border-amber-500/30 text-amber-300'
+                ? 'bg-[#2F6B63]/15 border-[#2F6B63]/40 text-[#2F6B63]'
+                : 'bg-[#8A6A1F]/15 border-[#8A6A1F]/40 text-[#8A6A1F]'
             }`}
           >
             {checklist.eventConcluded ? (
@@ -76,15 +76,15 @@ export function PublishChecklistAside({
         </div>
 
         {/* 2. Jury Evaluations Completed */}
-        <div className="flex items-center justify-between p-3 rounded-xl border border-white/10 bg-white/[0.02]">
-          <span className="text-white font-medium">
+        <div className="flex items-center justify-between p-3 rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6]">
+          <span className="text-[#241F1A] font-medium">
             {isVie ? 'Ban giám khảo đã chấm điểm xong' : 'All Jury Evaluations Completed'}
           </span>
           <span
             className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border transition-all ${
               checklist.juryEvaluationsDone
-                ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300'
-                : 'bg-amber-500/15 border-amber-500/30 text-amber-300'
+                ? 'bg-[#2F6B63]/15 border-[#2F6B63]/40 text-[#2F6B63]'
+                : 'bg-[#8A6A1F]/15 border-[#8A6A1F]/40 text-[#8A6A1F]'
             }`}
           >
             {checklist.juryEvaluationsDone ? (
@@ -100,15 +100,15 @@ export function PublishChecklistAside({
         </div>
 
         {/* 3. Disputes & Arbitrations Resolved */}
-        <div className="flex items-center justify-between p-3 rounded-xl border border-white/10 bg-white/[0.02]">
-          <span className="text-white font-medium">
+        <div className="flex items-center justify-between p-3 rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6]">
+          <span className="text-[#241F1A] font-medium">
             {isVie ? 'Tranh chấp & Khiếu nại đã giải quyết' : 'Disputes & Arbitrations Resolved'}
           </span>
           <span
             className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border transition-all ${
               checklist.disputesResolved
-                ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300'
-                : 'bg-rose-500/15 border-rose-500/30 text-rose-300'
+                ? 'bg-[#2F6B63]/15 border-[#2F6B63]/40 text-[#2F6B63]'
+                : 'bg-[#A8321C]/15 border-[#A8321C]/40 text-[#A8321C]'
             }`}
           >
             {checklist.disputesResolved ? (
@@ -124,15 +124,15 @@ export function PublishChecklistAside({
         </div>
 
         {/* 4. Head Jury Sign-Off Complete */}
-        <div className="flex items-center justify-between p-3 rounded-xl border border-white/10 bg-white/[0.02]">
-          <span className="text-white font-medium">
+        <div className="flex items-center justify-between p-3 rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6]">
+          <span className="text-[#241F1A] font-medium">
             {isVie ? 'Trưởng ban giám khảo đã ký duyệt' : 'Head Jury Sign-Off Complete'}
           </span>
           <span
             className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border transition-all ${
               checklist.headJurySignOff || isAwardAllocationsConfirmed
-                ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300'
-                : 'bg-amber-500/15 border-amber-500/30 text-amber-300'
+                ? 'bg-[#2F6B63]/15 border-[#2F6B63]/40 text-[#2F6B63]'
+                : 'bg-[#8A6A1F]/15 border-[#8A6A1F]/40 text-[#8A6A1F]'
             }`}
           >
             {checklist.headJurySignOff || isAwardAllocationsConfirmed ? (
@@ -168,8 +168,8 @@ export function PublishChecklistAside({
         </span>
       </button>
 
-      <div className="p-3 rounded-xl border-l-4 border-[#A7ACD9] bg-[#A7ACD9]/10 text-xs text-[#c7c5cf] leading-relaxed flex items-start gap-2">
-        <Lock className="w-4 h-4 text-[#A7ACD9] shrink-0 mt-0.5" />
+      <div className="p-3 rounded-xl border-l-4 border-[#B24A26] bg-[#B24A26]/10 text-xs text-[#6E6459] leading-relaxed flex items-start gap-2">
+        <Lock className="w-4 h-4 text-[#B24A26] shrink-0 mt-0.5" />
         <span>
           {isVie
             ? 'Công bố sẽ tạo ảnh chụp bất biến kết quả cuộc thi và công bố người chiến thắng lên Bảng vinh danh và Bảng xếp hạng.'

@@ -54,17 +54,17 @@ export function UserActionPanel({
     {
       id: 'Client',
       name: isVie ? 'Khách hàng' : 'Client',
-      badge: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
-      icon: <ShoppingBag className="w-3.5 h-3.5 text-emerald-400" />,
+      badge: 'bg-[#2F6B63]/20 text-[#2F6B63] border-[#2F6B63]/40',
+      icon: <ShoppingBag className="w-3.5 h-3.5 text-[#2F6B63]" />,
       description: isVie
-        ? 'Duyệt tác phẩm, đặt vẽ tranh, nạp tiền ký quỹ Escrow.'
+        ? 'Duyệt tác phẩm, đặt vẽ tranh, nạp tiền ký quỹ.'
         : 'Browse artworks, request commissions, deposit escrow funds.',
     },
     {
       id: 'Creator',
       name: isVie ? 'Họa sĩ' : 'Creator',
-      badge: 'bg-sky-500/20 text-sky-400 border-sky-500/30',
-      icon: <Palette className="w-3.5 h-3.5 text-sky-400" />,
+      badge: 'bg-[#2C6A86]/20 text-[#2C6A86] border-[#2C6A86]/40',
+      icon: <Palette className="w-3.5 h-3.5 text-[#2C6A86]" />,
       description: isVie
         ? 'Đăng tải tranh, nhận đơn đặt vẽ, quản lý rút tiền.'
         : 'Publish illustrations, accept commission orders, manage payouts.',
@@ -72,8 +72,8 @@ export function UserActionPanel({
     {
       id: 'Moderator',
       name: isVie ? 'Kiểm duyệt viên' : 'Moderator',
-      badge: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
-      icon: <ShieldCheck className="w-3.5 h-3.5 text-purple-400" />,
+      badge: 'bg-[#5F3F86]/20 text-[#5F3F86] border-[#5F3F86]/40',
+      icon: <ShieldCheck className="w-3.5 h-3.5 text-[#5F3F86]" />,
       description: isVie
         ? 'Kiểm duyệt nội dung gắn cờ, đánh giá điểm AI, phân xử khiếu nại.'
         : 'Review flagged content, evaluate AI moderation scores, arbitrate disputes.',
@@ -81,8 +81,8 @@ export function UserActionPanel({
     {
       id: 'Administrator',
       name: isVie ? 'Quản trị viên' : 'Administrator',
-      badge: 'bg-red-500/20 text-red-400 border-red-500/30',
-      icon: <Shield className="w-3.5 h-3.5 text-red-400" />,
+      badge: 'bg-[#A8321C]/20 text-[#A8321C] border-[#A8321C]/40',
+      icon: <Shield className="w-3.5 h-3.5 text-[#A8321C]" />,
       description: isVie
         ? 'Quản trị toàn diện: chính sách phí, xử phạt người dùng, chỉ số hệ thống.'
         : 'Full governance: fee policies, user sanctions, system overview KPIs.',
@@ -176,11 +176,11 @@ export function UserActionPanel({
   };
 
   return (
-    <div className="glass-container bg-[#161926]/85 backdrop-blur-[32px] border border-white/10 rounded-[28px] p-6 space-y-5 flex flex-col justify-between h-full">
+    <div className="glass-container bg-[#FFFCF6]/85 backdrop-blur-[32px] border border-[#221E1A]/10 rounded-[28px] p-6 space-y-5 flex flex-col justify-between h-full">
       <div className="space-y-5">
         {/* Header: Displays solely Apply Sanction or Edit Role centered in the middle */}
-        <div className="pb-3 border-b border-white/10 flex items-center justify-center text-center">
-          <h3 className="font-h1 font-bold text-white text-base">
+        <div className="pb-3 border-b border-[#221E1A]/10 flex items-center justify-center text-center">
+          <h3 className="font-h1 font-bold text-[#241F1A] text-base">
             {activeMode === 'sanction'
               ? (isVie ? 'Áp dụng Chế tài Xử phạt' : 'Apply Sanction')
               : (isVie ? 'Chỉnh sửa Phân quyền' : 'Edit Role')}
@@ -192,17 +192,17 @@ export function UserActionPanel({
           <form onSubmit={handleSanctionSubmit} className="space-y-4">
             {/* Action Type Tabs */}
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-[#8A8FA9]">
+              <label className="text-xs font-semibold text-[#6E6459]">
                 {isVie ? 'Hình thức Xử lý Kỷ luật' : 'Disciplinary Action Type'}
               </label>
-              <div className="grid grid-cols-4 gap-1.5 p-1 rounded-xl bg-black/40 border border-white/10">
+              <div className="grid grid-cols-4 gap-1.5 p-1 rounded-xl bg-[#F0E7D8] border border-[#221E1A]/10">
                 <button
                   type="button"
                   onClick={() => handleActionTypeChange('Warn')}
                   className={`py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
                     actionType === 'Warn'
-                      ? 'bg-amber-500 text-black shadow-md'
-                      : 'text-[#8A8FA9] hover:text-white'
+                      ? 'bg-[#8A6A1F]/12 text-[#F7F2E9] shadow-md'
+                      : 'text-[#6E6459] hover:text-[#241F1A]'
                   }`}
                 >
                   {isVie ? 'Cảnh cáo' : 'Warn'}
@@ -212,8 +212,8 @@ export function UserActionPanel({
                   onClick={() => handleActionTypeChange('Suspend')}
                   className={`py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
                     actionType === 'Suspend'
-                      ? 'bg-red-500 text-white shadow-md'
-                      : 'text-[#8A8FA9] hover:text-white'
+                      ? 'bg-[#A8321C]/12 text-[#241F1A] shadow-md'
+                      : 'text-[#6E6459] hover:text-[#241F1A]'
                   }`}
                 >
                   {isVie ? 'Tạm khóa' : 'Suspend'}
@@ -223,8 +223,8 @@ export function UserActionPanel({
                   onClick={() => handleActionTypeChange('Ban')}
                   className={`py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
                     actionType === 'Ban'
-                      ? 'bg-red-700 text-white shadow-md'
-                      : 'text-[#8A8FA9] hover:text-white'
+                      ? 'bg-[#A8321C]/12 text-[#241F1A] shadow-md'
+                      : 'text-[#6E6459] hover:text-[#241F1A]'
                   }`}
                 >
                   {isVie ? 'Cấm vĩnh viễn' : 'Ban'}
@@ -240,8 +240,8 @@ export function UserActionPanel({
                   }
                   className={`py-2 text-xs font-bold rounded-lg transition-all ${
                     actionType === 'Unban'
-                      ? 'bg-emerald-500 text-black shadow-md'
-                      : 'text-[#8A8FA9] hover:text-white'
+                      ? 'bg-[#2F6B63]/12 text-[#F7F2E9] shadow-md'
+                      : 'text-[#6E6459] hover:text-[#241F1A]'
                   } ${!user.isLockedOut ? 'opacity-30 cursor-not-allowed' : 'cursor-pointer'}`}
                 >
                   {isVie ? 'Gỡ phạt' : 'Unban'}
@@ -251,13 +251,13 @@ export function UserActionPanel({
 
             {/* Duration Selector (Only if ActionType = 'Suspend') */}
             {actionType === 'Suspend' && (
-              <div className="space-y-2 p-3.5 rounded-2xl bg-red-500/5 border border-red-500/20">
+              <div className="space-y-2 p-3.5 rounded-2xl bg-[#A8321C]/5 border border-[#A8321C]/30">
                 <div className="flex items-center justify-between">
-                  <label className="text-xs font-semibold text-red-300 flex items-center gap-1.5">
+                  <label className="text-xs font-semibold text-[#A8321C] flex items-center gap-1.5">
                     <Clock className="w-3.5 h-3.5" />
                     {isVie ? 'Thời hạn tạm khóa' : 'Suspension Length'}
                   </label>
-                  <span className="text-xs font-bold text-white font-mono">
+                  <span className="text-xs font-bold text-[#241F1A] font-mono">
                     {isVie ? `${durationDays} Ngày` : `${durationDays} Days`}
                   </span>
                 </div>
@@ -270,8 +270,8 @@ export function UserActionPanel({
                       onClick={() => handleDurationPreset(preset.days)}
                       className={`py-1.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
                         durationDays === preset.days && !customDays
-                          ? 'bg-red-500/30 text-white border-red-500/60'
-                          : 'bg-black/30 text-[#8A8FA9] border-white/10 hover:text-white'
+                          ? 'bg-[#A8321C]/20 text-[#241F1A] border-[#A8321C]/40'
+                          : 'bg-[#F0E7D8] text-[#6E6459] border-[#221E1A]/10 hover:text-[#241F1A]'
                       }`}
                     >
                       {preset.label}
@@ -280,7 +280,7 @@ export function UserActionPanel({
                 </div>
 
                 <div className="flex items-center gap-2 pt-1">
-                  <span className="text-[11px] text-[#8A8FA9]">
+                  <span className="text-[11px] text-[#6E6459]">
                     {isVie ? 'Số ngày tùy chỉnh:' : 'Custom days:'}
                   </span>
                   <input
@@ -290,7 +290,7 @@ export function UserActionPanel({
                     placeholder={isVie ? 'Ví dụ: 21' : 'e.g. 21'}
                     value={customDays}
                     onChange={(e) => handleCustomDaysChange(e.target.value)}
-                    className="w-24 px-3 py-1 bg-black/40 rounded-lg border border-white/10 text-white text-xs focus:outline-none focus:border-red-400"
+                    className="w-24 px-3 py-1 bg-[#F0E7D8] rounded-lg border border-[#221E1A]/10 text-[#241F1A] text-xs focus:outline-none focus:border-[#A8321C]/30"
                   />
                 </div>
               </div>
@@ -298,8 +298,8 @@ export function UserActionPanel({
 
             {/* Explanatory Banner */}
             {actionType === 'Ban' && (
-              <div className="p-3 rounded-xl bg-red-950/40 border border-red-600/40 text-xs text-red-200 flex items-start gap-2">
-                <Ban className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+              <div className="p-3 rounded-xl bg-[#A8321C]/20 border border-[#A8321C]/40 text-xs text-[#A8321C] flex items-start gap-2">
+                <Ban className="w-4 h-4 text-[#A8321C] shrink-0 mt-0.5" />
                 <span>
                   {isVie
                     ? 'Cấm vĩnh viễn sẽ khóa tài khoản này vô thời hạn và thu hồi toàn bộ quyền truy cập sàn.'
@@ -309,8 +309,8 @@ export function UserActionPanel({
             )}
 
             {actionType === 'Warn' && (
-              <div className="p-3 rounded-xl bg-amber-950/40 border border-amber-600/40 text-xs text-amber-200 flex items-start gap-2">
-                <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+              <div className="p-3 rounded-xl bg-[#8A6A1F]/20 border border-[#8A6A1F]/40 text-xs text-[#8A6A1F] flex items-start gap-2">
+                <AlertTriangle className="w-4 h-4 text-[#8A6A1F] shrink-0 mt-0.5" />
                 <span>
                   {isVie
                     ? 'Gửi cảnh cáo vi phạm chính thức được ghi vào lịch sử người dùng mà không giới hạn tài khoản.'
@@ -320,8 +320,8 @@ export function UserActionPanel({
             )}
 
             {actionType === 'Unban' && (
-              <div className="p-3 rounded-xl bg-emerald-950/40 border border-emerald-600/40 text-xs text-emerald-200 flex items-start gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+              <div className="p-3 rounded-xl bg-[#2F6B63]/20 border border-[#2F6B63]/40 text-xs text-[#2F6B63] flex items-start gap-2">
+                <CheckCircle2 className="w-4 h-4 text-[#2F6B63] shrink-0 mt-0.5" />
                 <span>
                   {isVie
                     ? 'Khôi phục trạng thái hoạt động và gỡ bỏ toàn bộ hạn chế khóa tài khoản cho người dùng này.'
@@ -332,11 +332,11 @@ export function UserActionPanel({
 
             {/* Violation Reason */}
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-[#8A8FA9] flex justify-between">
+              <label className="text-xs font-semibold text-[#6E6459] flex justify-between">
                 <span>
-                  {isVie ? 'Lý do Vi phạm' : 'Violation Reason'} <span className="text-red-400">*</span>
+                  {isVie ? 'Lý do Vi phạm' : 'Violation Reason'} <span className="text-[#A8321C]">*</span>
                 </span>
-                <span className="text-[11px] text-[#8A8FA9]">{reason.length}/300</span>
+                <span className="text-[11px] text-[#6E6459]">{reason.length}/300</span>
               </label>
               <textarea
                 rows={3}
@@ -349,7 +349,7 @@ export function UserActionPanel({
                     ? 'Nêu rõ điều khoản vi phạm hoặc căn cứ áp dụng biện pháp xử phạt này...'
                     : 'State the terms violation or rationale for this action...'
                 }
-                className="w-full px-3.5 py-2.5 bg-black/40 rounded-xl border border-white/10 text-white placeholder-[#8A8FA9]/60 text-xs focus:outline-none focus:border-red-400/80 transition-colors resize-none"
+                className="w-full px-3.5 py-2.5 bg-[#F0E7D8] rounded-xl border border-[#221E1A]/10 text-[#241F1A] placeholder-[#6E6459]/60 text-xs focus:outline-none focus:border-[#A8321C]/40 transition-colors resize-none"
               />
             </div>
 
@@ -359,10 +359,10 @@ export function UserActionPanel({
               disabled={isSanctionSubmitting || !reason.trim()}
               className={`w-full py-2.5 rounded-xl text-xs font-bold transition-all shadow-lg cursor-pointer flex items-center justify-center gap-2 ${
                 actionType === 'Unban'
-                  ? 'bg-emerald-500 hover:bg-emerald-400 text-black'
+                  ? 'bg-[#2F6B63]/12 hover:bg-[#2F6B63]/10 text-[#F7F2E9]'
                   : actionType === 'Warn'
-                  ? 'bg-amber-500 hover:bg-amber-400 text-black'
-                  : 'bg-red-500 hover:bg-red-400 text-white shadow-red-500/20'
+                  ? 'bg-[#8A6A1F]/12 hover:bg-[#8A6A1F]/10 text-[#F7F2E9]'
+                  : 'bg-[#A8321C]/12 hover:bg-[#A8321C]/10 text-[#241F1A] shadow-[#A8321C]'
               } disabled:opacity-50 disabled:cursor-not-allowed`}
             >
               {isSanctionSubmitting ? (
@@ -395,15 +395,15 @@ export function UserActionPanel({
                     onClick={() => toggleRole(role.id)}
                     className={`p-3 rounded-2xl border transition-all duration-150 cursor-pointer flex items-start gap-2.5 select-none ${
                       isChecked
-                        ? 'bg-white/[0.08] border-red-500/40 shadow-sm'
-                        : 'bg-black/30 border-white/5 hover:border-white/15'
+                        ? 'bg-[#FFFCF6] border-[#A8321C]/40 shadow-sm'
+                        : 'bg-[#F0E7D8] border-[#221E1A]/10 hover:border-[#221E1A]/10'
                     }`}
                   >
                     <div
                       className={`w-4 h-4 rounded-md border mt-0.5 flex items-center justify-center transition-colors shrink-0 ${
                         isChecked
-                          ? 'bg-red-500 border-red-500 text-white'
-                          : 'border-white/20 bg-black/40'
+                          ? 'bg-[#A8321C]/12 border-[#A8321C]/30 text-[#241F1A]'
+                          : 'border-[#221E1A]/20 bg-[#F0E7D8]'
                       }`}
                     >
                       {isChecked && <Check className="w-3 h-3 stroke-[3]" />}
@@ -413,7 +413,7 @@ export function UserActionPanel({
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-1.5">
                           {role.icon}
-                          <span className="font-bold text-white text-xs">{role.name}</span>
+                          <span className="font-bold text-[#241F1A] text-xs">{role.name}</span>
                         </div>
                         <span
                           className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full border ${role.badge}`}
@@ -421,7 +421,7 @@ export function UserActionPanel({
                           {role.id}
                         </span>
                       </div>
-                      <p className="text-[10px] text-[#8A8FA9] leading-relaxed">
+                      <p className="text-[10px] text-[#6E6459] leading-relaxed">
                         {role.description}
                       </p>
                     </div>
@@ -430,7 +430,7 @@ export function UserActionPanel({
               })}
             </div>
 
-            <p className="text-[10px] text-[#8A8FA9]/70 italic">
+            <p className="text-[10px] text-[#6E6459]/70 italic">
               {isVie
                 ? '* Mỗi tài khoản phải giữ ít nhất một vai trò.'
                 : '* Every account must hold at least one role.'}
@@ -440,7 +440,7 @@ export function UserActionPanel({
             <button
               type="submit"
               disabled={isRolesSubmitting || selectedRoles.length === 0}
-              className="w-full py-2.5 rounded-xl text-xs font-bold bg-red-500 hover:bg-red-400 text-white shadow-lg shadow-red-500/20 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-2.5 rounded-xl text-xs font-bold bg-[#A8321C]/12 hover:bg-[#A8321C]/10 text-[#241F1A] shadow-lg shadow-[#A8321C] transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isRolesSubmitting
                 ? (isVie ? 'Đang lưu vai trò...' : 'Saving Roles...')

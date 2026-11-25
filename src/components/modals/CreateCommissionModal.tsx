@@ -27,8 +27,8 @@ const schema = z.object({
 type Form = z.infer<typeof schema>;
 
 const money = (value: number) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
-const field = 'w-full px-4 py-3 bg-[var(--ink-3)] rounded-xl border border-[var(--hair-2)] text-[var(--ivory)] text-xs font-semibold placeholder:text-[var(--ash)] focus:outline-none focus:border-[var(--lumen)] transition-colors font-[family-name:var(--font-ui)]';
-const label = 'block text-[11px] font-semibold text-[var(--ivory)] font-[family-name:var(--font-ui)]';
+const field = 'w-full px-4 py-3.5 bg-[#F0E7D8] rounded-xl border border-[#221E1A]/10 text-[#241F1A] text-xs font-semibold focus:outline-none focus:border-[#8C3718] transition-colors';
+const label = 'block text-[10px] uppercase font-bold tracking-wider text-[#6E6459]';
 
 export default function CreateCommissionModal({ creatorId, creatorName, onClose, initialPackageId, initialTerms }: { creatorId: string; creatorName: string; onClose: () => void; initialPackageId?: string; initialTerms?: CreatorTermsDto | null }) {
   const router = useRouter();
@@ -167,12 +167,12 @@ export default function CreateCommissionModal({ creatorId, creatorName, onClose,
     .reduce((sum, addon) => sum + addon.price, 0);
 
   useEffect(() => {
-    addonService.creator(creatorId).then(items => { setAddons(items); setAddonIds([]); }).catch(() => setError('Không tải được phụ phí của Creator.'));
+    addonService.creator(creatorId).then(items => { setAddons(items); setAddonIds([]); }).catch(() => setError('Không tải được phụ phí của họa sĩ.'));
     creatorRateCardService.get(creatorId).then(setPackages)
-      .catch(() => setError('Không tải được bảng giá Creator.'))
+      .catch(() => setError('Không tải được bảng giá họa sĩ.'))
       .finally(() => setLoadingPackages(false));
     creatorProfileService.getTerms(creatorId).then((data) => { setTerms(data); setError((prev) => prev.includes('điều khoản') ? '' : prev); })
-      .catch((cause) => setError(extractErrorMessage(cause, 'Không tải được điều khoản của Creator.')));
+      .catch((cause) => setError(extractErrorMessage(cause, 'Không tải được điều khoản của họa sĩ.')));
   }, [creatorId]);
 
   const closeDialog = useEffectEvent(() => { if (!busy) onClose(); });
@@ -198,7 +198,7 @@ export default function CreateCommissionModal({ creatorId, creatorName, onClose,
     const currentTitle = getValues('title');
     const currentDesc = getValues('description');
     if (!currentTitle?.trim() && !currentDesc?.trim()) {
-      setError('Vui lòng nhập ít nhất tên dự án hoặc vài từ khóa ý tưởng để AI gợi ý brief.');
+      setError('Vui lòng nhập ít nhất tên dự án hoặc vài từ khóa ý tưởng để AI gợi ý đề bài.');
       return;
     }
     setAiBriefing(true);
@@ -216,7 +216,7 @@ export default function CreateCommissionModal({ creatorId, creatorName, onClose,
         setAiSuggestion(res.content);
       }
     } catch (cause) {
-      setError(extractErrorMessage(cause, 'Không thể gọi AI hỗ trợ brief lúc này.'));
+      setError(extractErrorMessage(cause, 'Không thể gọi AI hỗ trợ đề bài lúc này.'));
     } finally {
       setAiBriefing(false);
     }
@@ -233,7 +233,7 @@ export default function CreateCommissionModal({ creatorId, creatorName, onClose,
     setTermsError(null);
 
     if (!selectedPackage) {
-      setPackageError('Vui lòng chọn 1 gói vẽ trong bảng giá của Creator.');
+      setPackageError('Vui lòng chọn 1 gói vẽ trong bảng giá của họa sĩ.');
       return;
     }
 
@@ -260,447 +260,431 @@ export default function CreateCommissionModal({ creatorId, creatorName, onClose,
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-3 backdrop-blur-md sm:p-4 font-[family-name:var(--font-ui)]" onMouseDown={event => { if (event.target === event.currentTarget && !busy) onClose(); }}>
-      <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="commission-modal-title" className="flex max-h-[92vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl border border-[var(--hair-2)] bg-[var(--ink-2)] text-[var(--ivory)] shadow-2xl shadow-black/50 backdrop-blur-2xl font-[family-name:var(--font-ui)]">
-        <header className="border-b border-[var(--hair)] bg-[var(--ink-3)] px-5 py-4 sm:px-8">
+    <div className="overlay-scrim" onMouseDown={event => { if (event.target === event.currentTarget && !busy) onClose(); }}>
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="commission-modal-title" className="flex max-h-[92vh] w-full max-w-3xl flex-col overflow-hidden rounded-[28px] border border-[#221E1A]/10 bg-[#FFFCF6] shadow-2xl shadow-black/30">
+        <header className="border-b border-[#221E1A]/10 bg-[#F7F2E9]/70 px-5 py-4 sm:px-8">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="text-[11px] font-semibold text-[var(--ash)] font-[family-name:var(--font-ui)]">COMMISSION REQUEST · BƯỚC {step} / 2</p>
-              <h2 id="commission-modal-title" className="mt-1 font-[family-name:var(--font-display)] text-xl font-bold text-[var(--ivory)]">Đặt vẽ với {creatorName}</h2>
-              <p className="mt-1 text-xs text-[var(--ash)] font-[family-name:var(--font-ui)]">Creator xác nhận trước; Client ký quỹ sau khi thống nhất giá.</p>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-[#B24A26]">COMMISSION REQUEST · BƯỚC {step} / 2</p>
+              <h2 id="commission-modal-title" className="mt-1 font-h1 text-xl font-bold text-[#241F1A]">Đặt vẽ với {creatorName}</h2>
+              <p className="mt-1 text-xs text-[#6E6459]">Creator xác nhận trước; Client ký quỹ sau khi thống nhất giá.</p>
             </div>
-            <button type="button" onClick={onClose} disabled={busy} aria-label="Đóng form Commission" className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-[var(--hair-2)] bg-[var(--ink-3)] text-[var(--ash)] hover:text-[var(--lumen)] hover:border-[var(--lumen)] disabled:opacity-50 transition-colors"><X className="h-4 w-4" /></button>
+            <button type="button" onClick={onClose} disabled={busy} aria-label="Đóng biểu mẫu" className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#221E1A]/10 bg-[#FFFCF6] text-[#746A5F] hover:text-[#241F1A] disabled:opacity-50"><X className="h-4 w-4" /></button>
           </div>
-          <div className="mt-4 grid grid-cols-2 gap-2 text-xs font-[family-name:var(--font-ui)]">
+          <div className="mt-4 grid grid-cols-2 gap-2 text-xs">
             <button
               type="button"
               onClick={() => goToStep(1)}
-              className={`flex items-center gap-2 rounded-xl border px-3 py-2 text-left font-semibold transition ${step === 1 ? "border-[var(--lumen)] bg-[var(--lumen)]/15 text-[var(--ivory)]" : "border-[var(--hair-2)] bg-[var(--ink-2)] text-[var(--ash)] hover:text-[var(--ivory)]"}`}
+              className={`flex items-center gap-2 rounded-xl border px-3 py-2 text-left font-semibold transition ${step === 1 ? "border-[#B24A26] bg-[#B24A26]/15 text-[#241F1A]" : "border-[#221E1A]/10 bg-[#FFFCF6] text-[#746A5F] hover:bg-[#FFFCF6]"}`}
             >
-              <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-bold ${step === 1 ? "bg-[var(--lumen)] text-white" : "bg-emerald-600/30 text-emerald-400"}`}>{acceptedCreatorTerms ? "✓" : "1"}</span>
+              <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-bold ${step === 1 ? "bg-[#B24A26] text-[#F7F2E9]" : "bg-[#2F6B63]/20 text-[#2F6B63]"}`}>{acceptedCreatorTerms ? "✓" : "1"}</span>
               <span className="truncate">1. Đọc điều khoản (ToS)</span>
             </button>
             <button
               type="button"
               disabled={!terms || !acceptedCreatorTerms}
               onClick={() => goToStep(2)}
-              className={`flex items-center gap-2 rounded-xl border px-3 py-2 text-left font-semibold transition disabled:cursor-not-allowed disabled:opacity-45 ${step === 2 ? "border-[var(--lumen)] bg-[var(--lumen)]/15 text-[var(--ivory)]" : "border-[var(--hair-2)] bg-[var(--ink-2)] text-[var(--ash)] hover:text-[var(--ivory)]"}`}
+              className={`flex items-center gap-2 rounded-xl border px-3 py-2 text-left font-semibold transition disabled:cursor-not-allowed disabled:opacity-45 ${step === 2 ? "border-[#B24A26] bg-[#B24A26]/15 text-[#241F1A]" : "border-[#221E1A]/10 bg-[#FFFCF6] text-[#746A5F] hover:bg-[#FFFCF6]"}`}
             >
-              <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-bold ${step === 2 ? "bg-[var(--lumen)] text-white" : "bg-[var(--ink-3)] text-[var(--ash)]"}`}>2</span>
+              <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-bold ${step === 2 ? "bg-[#B24A26] text-[#F7F2E9]" : "bg-[#F0E7D8] text-[#746A5F]"}`}>2</span>
               <span className="truncate">2. Chọn gói vẽ &amp; gửi yêu cầu</span>
             </button>
           </div>
         </header>
 
-        <div ref={bodyRef} className="min-h-0 flex-1 overflow-y-auto p-5 sm:p-8 font-[family-name:var(--font-ui)]">
+        <div ref={bodyRef} className="min-h-0 flex-1 overflow-y-auto p-5 sm:p-8">
           {step === 1 ? (
             <div className="space-y-5">
               {terms ? (
                 <CreatorTermsOverview terms={terms} creatorName={creatorName} />
               ) : error ? (
-                <div role="alert" className="rounded-xl border border-red-400/30 bg-red-400/10 px-4 py-3 text-xs text-red-200 flex items-center justify-between gap-2">
+                <div role="alert" className="rounded-xl border border-[#A8321C]/40 bg-[#A8321C]/10 px-4 py-3 text-xs text-[#A8321C] flex items-center justify-between gap-2">
                   <span className="flex items-center gap-2"><AlertCircle className="w-4 h-4 shrink-0" /><span>{error}</span></span>
-                  <button type="button" onClick={() => void creatorProfileService.getTerms(creatorId).then((data) => { setTerms(data); setError(""); }).catch((cause) => setError(extractErrorMessage(cause, "Không tải được điều khoản của Creator.")))} className="shrink-0 rounded-lg border border-red-300/30 bg-white/5 px-2.5 py-1 font-semibold text-white hover:bg-white/10">Thử tải lại</button>
+                  <button type="button" onClick={() => void creatorProfileService.getTerms(creatorId).then((data) => { setTerms(data); setError(""); }).catch((cause) => setError(extractErrorMessage(cause, "Không tải được điều khoản của họa sĩ.")))} className="shrink-0 rounded-lg border border-[#A8321C]/40 bg-[#FFFCF6] px-2.5 py-1 font-semibold text-[#241F1A] hover:bg-[#F0E7D8]">Thử tải lại</button>
                 </div>
               ) : (
-                <p className="py-8 text-center text-xs text-[var(--ash)]">Đang tải điều khoản dịch vụ của Creator…</p>
+                <p className="py-8 text-center text-xs text-[#746A5F]">Đang tải điều khoản dịch vụ của họa sĩ…</p>
               )}
 
-              <div className="space-y-2 rounded-2xl border border-[var(--hair-2)] bg-[var(--ink-3)] p-4">
-                <label className="flex cursor-pointer items-start gap-3 text-xs leading-5 text-[var(--ivory)] font-[family-name:var(--font-ui)]">
+              <div className="space-y-2 rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] p-4">
+                <label className="flex cursor-pointer items-start gap-3 text-xs leading-5 text-[#6E6459]">
                   <input
                     type="checkbox"
                     checked={acceptedCreatorTerms}
                     disabled={!terms || busy}
                     onChange={(e) => { setAcceptedCreatorTerms(e.target.checked); if (e.target.checked) setTermsError(null); }}
-                    className="mt-0.5 size-4 accent-[var(--lumen)]"
+                    className="mt-0.5 size-4 accent-[#B24A26]"
                   />
                   <span>Tôi đã đọc, hiểu và đồng ý với phạm vi nhận vẽ, bản quyền sử dụng và các điều khoản riêng trong Điều khoản dịch vụ (ToS) của <strong>{creatorName}</strong>.</span>
                 </label>
-                {termsError && <p role="alert" className="text-xs font-medium text-red-300">{termsError}</p>}
+                {termsError && <p role="alert" className="text-xs font-medium text-[#A8321C]">{termsError}</p>}
               </div>
 
-              <div className="flex justify-end border-t border-[var(--hair)] pt-5">
+              <div className="flex justify-end border-t border-[#221E1A]/10 pt-5">
                 <button
                   type="button"
                   disabled={!terms}
                   onClick={() => {
                     if (!acceptedCreatorTerms) {
-                      setTermsError("Vui lòng xác nhận đã đọc và đồng ý với Điều khoản dịch vụ (ToS) của Creator trước khi tiếp tục.");
+                      setTermsError("Vui lòng xác nhận đã đọc và đồng ý với Điều khoản dịch vụ (ToS) của họa sĩ trước khi tiếp tục.");
                       return;
                     }
                     goToStep(2);
                   }}
-                  className="rounded-full bg-[var(--lumen)] px-7 py-3 text-xs font-bold text-white shadow-lg transition hover:bg-[var(--lumen-hi)] disabled:opacity-45"
+                  className="rounded-xl bg-[#B24A26] px-7 py-3 text-xs font-extrabold text-[#F7F2E9] shadow-lg transition hover:bg-[#8C3718] disabled:opacity-45"
                 >
                   Tiếp tục chọn gói vẽ →
                 </button>
               </div>
             </div>
           ) : (
-            <form onSubmit={handleSubmit(submit)} className="space-y-6 font-[family-name:var(--font-ui)]">
-              <div className="flex items-center justify-between gap-3 rounded-xl border border-emerald-400/20 bg-emerald-500/[0.06] px-4 py-3 text-xs">
-                <span className="text-emerald-400 font-medium">✓ Đã đọc &amp; đồng ý ToS của <strong className="text-emerald-300">{creatorName}</strong> (v{terms?.extended?.version ?? 1})</span>
-                <button type="button" onClick={() => goToStep(1)} className="shrink-0 font-medium text-[var(--ash)] hover:text-[var(--ivory)] transition-colors underline-offset-4 hover:underline">Xem lại ToS</button>
-              </div>
-              <div className="space-y-2">
-                <label className={label} htmlFor="commission-title">TÊN DỰ ÁN</label>
-                <input id="commission-title" className={`${field} ${errors.title ? 'border-red-500/70' : ''}`} placeholder="Ví dụ: Minh họa nhân vật Game" {...register('title')} />
-                {errors.title && <p role="alert" className="mt-1 flex items-center gap-1.5 text-xs text-red-300"><AlertCircle className="w-3.5 h-3.5 shrink-0" /> {errors.title.message}</p>}
-              </div>
+        <form onSubmit={handleSubmit(submit)} className="space-y-6">
+          <div className="flex items-center justify-between gap-3 rounded-xl border border-[#2F6B63]/30 bg-[#2F6B63]/12/[0.06] px-3.5 py-2.5 text-xs">
+            <span className="text-[#2F6B63]">✓ Đã đọc &amp; đồng ý ToS của <strong>{creatorName}</strong> (v{terms?.extended?.version ?? 1})</span>
+            <button type="button" onClick={() => goToStep(1)} className="shrink-0 font-semibold text-[#8C3718] underline-offset-4 hover:underline">Xem lại ToS</button>
+          </div>
+          <div className="space-y-2">
+            <label className={label} htmlFor="commission-title">TÊN DỰ ÁN</label>
+            <input id="commission-title" className={`${field} ${errors.title ? 'border-[#A8321C]/40' : ''}`} placeholder="Ví dụ: Minh họa nhân vật Game" {...register('title')} />
+            {errors.title && <p role="alert" className="mt-1 flex items-center gap-1.5 text-xs text-[#A8321C]"><AlertCircle className="w-3.5 h-3.5 shrink-0" /> {errors.title.message}</p>}
+          </div>
 
-              <div className="space-y-2">
-                <label className={label} htmlFor="commission-deadline">HẠN DỰ KIẾN (DELIVERY TARGET)</label>
-                <input id="commission-deadline" type="date" className={field} {...register('deadlineAt')} />
-              </div>
+          <div className="space-y-2">
+            <label className={label} htmlFor="commission-deadline">HẠN DỰ KIẾN (DELIVERY TARGET)</label>
+            <input id="commission-deadline" type="date" className={field} {...register('deadlineAt')} />
+          </div>
 
-              <div className="space-y-2">
-                <div className="flex items-center justify-between gap-2">
-                  <label className={label} htmlFor="commission-brief">MÔ TẢ YÊU CẦU CHI TIẾT <span className="text-red-400">*</span></label>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between gap-2">
+              <label className={label} htmlFor="commission-brief">MÔ TẢ YÊU CẦU CHI TIẾT <span className="text-[#A8321C]">*</span></label>
+              <button
+                type="button"
+                disabled={aiBriefing}
+                onClick={() => handleAiBriefHelper(false)}
+                className="inline-flex items-center gap-1.5 rounded-xl border border-brand-periwinkle/30 bg-brand-periwinkle/10 hover:bg-brand-periwinkle/20 text-brand-periwinkle px-3 py-1 text-[11px] font-bold transition-all hover:border-brand-periwinkle/60 shadow-sm shadow-brand-periwinkle/5 active:scale-95 disabled:opacity-50 cursor-pointer"
+                title="Gợi ý đề bài chuẩn họa sĩ từ ý tưởng thô"
+              >
+                {aiBriefing && !isRandomIdea ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin text-brand-periwinkle" />
+                ) : (
+                  <Sparkles className="w-3.5 h-3.5 text-brand-periwinkle" />
+                )}
+                <span>AI Brief Helper</span>
+              </button>
+            </div>
+            <textarea id="commission-brief" rows={4} className={`${field} ${errors.description ? 'border-[#A8321C]/40' : ''}`} placeholder="Mô tả chi tiết phong cách, màu sắc, kích thước và yêu cầu nhân vật…" {...register('description')} />
+            {errors.description && <p role="alert" className="mt-1 flex items-center gap-1.5 text-xs text-[#A8321C]"><AlertCircle className="w-3.5 h-3.5 shrink-0" /> {errors.description.message}</p>}
+
+            {aiSuggestion && (
+              <div className="mt-3 rounded-2xl border border-brand-periwinkle/25 bg-[#FFFCF6]/95 backdrop-blur-md p-4 space-y-3 shadow-xl shadow-black/40 animate-fadeIn">
+                <div className="flex items-center justify-between border-b border-[#221E1A]/10 pb-2.5">
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-lg bg-brand-periwinkle/15 border border-brand-periwinkle/30 flex items-center justify-center">
+                      <Sparkles className="w-3.5 h-3.5 text-brand-periwinkle" />
+                    </div>
+                    <span className="text-xs font-bold text-[#241F1A] tracking-wide"> Gợi ý đề bài từ AI </span>
+                    {isRandomIdea && (
+                      <span className="rounded-full bg-brand-periwinkle/15 px-2 py-0.5 text-[10px] font-medium text-brand-periwinkle border border-brand-periwinkle/25"> Ý tưởng ngẫu nhiên </span>
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setAiSuggestion(null)}
+                    className="w-6 h-6 rounded-full bg-[#FFFCF6] hover:bg-[#F0E7D8] text-[#6E6459] hover:text-[#241F1A] flex items-center justify-center text-xs transition-colors"
+                    title="Đóng xem trước"
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                <div className="max-h-56 overflow-y-auto whitespace-pre-wrap rounded-xl bg-[#E5D8C2] p-3.5 font-body text-xs leading-relaxed text-[#241F1A] border border-[#221E1A]/10 selection:bg-brand-periwinkle/30">
+                  {aiSuggestion}
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2 pt-1">
+                  <button
+                    type="button"
+                    disabled={aiBriefing}
+                    onClick={() => {
+                      setValue('description', aiSuggestion, { shouldValidate: true });
+                      setAiSuggestion(null);
+                    }}
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-brand-periwinkle hover:brightness-110 px-3.5 py-1.5 text-xs font-bold text-[#FFFCF6] shadow-md transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
+                  >
+                    <Check className="w-3.5 h-3.5" />
+                    <span>Áp dụng gợi ý này</span>
+                  </button>
+
                   <button
                     type="button"
                     disabled={aiBriefing}
                     onClick={() => handleAiBriefHelper(false)}
-                    className="inline-flex items-center gap-1.5 rounded-full border border-[var(--hair-2)] bg-[var(--ink-3)] hover:bg-[var(--ink-1)] text-[var(--lumen)] px-3 py-1 text-[11px] font-bold transition-all hover:border-[var(--lumen)] shadow-sm active:scale-95 disabled:opacity-50 cursor-pointer"
-                    title="Gợi ý brief chuẩn artist từ ý tưởng thô"
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] hover:bg-[#F0E7D8] hover:border-[#221E1A]/20 px-3 py-1.5 text-xs font-semibold text-[#6E6459] hover:text-[#241F1A] transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
                   >
                     {aiBriefing && !isRandomIdea ? (
-                      <Loader2 className="w-3.5 h-3.5 animate-spin text-[var(--lumen)]" />
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
                     ) : (
-                      <Sparkles className="w-3.5 h-3.5 text-[var(--lumen)]" />
+                      <RefreshCw className="w-3.5 h-3.5" />
                     )}
-                    <span>AI Brief Helper</span>
+                    <span>Tạo lại</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={aiBriefing}
+                    onClick={() => handleAiBriefHelper(true)}
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-brand-periwinkle/30 bg-brand-periwinkle/10 hover:bg-brand-periwinkle/20 px-3 py-1.5 text-xs font-semibold text-brand-periwinkle transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
+                  >
+                    {aiBriefing && isRandomIdea ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <Dice5 className="w-3.5 h-3.5 text-brand-periwinkle" />
+                    )}
+                    <span>Gợi ý ngẫu nhiên</span>
                   </button>
                 </div>
-                <textarea id="commission-brief" rows={4} className={`${field} ${errors.description ? 'border-red-500/70' : ''}`} placeholder="Mô tả chi tiết phong cách, màu sắc, kích thước và yêu cầu nhân vật…" {...register('description')} />
-                {errors.description && <p role="alert" className="mt-1 flex items-center gap-1.5 text-xs text-red-300"><AlertCircle className="w-3.5 h-3.5 shrink-0" /> {errors.description.message}</p>}
+              </div>
+            )}
+          </div>
 
-                {aiSuggestion && (
-                  <div className="mt-3 rounded-2xl border border-[var(--hair-2)] bg-[var(--ink-2)] backdrop-blur-md p-4 space-y-3 shadow-xl shadow-black/40 animate-fadeIn">
-                    <div className="flex items-center justify-between border-b border-[var(--hair)] pb-2.5">
-                      <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 rounded-lg bg-[var(--ink-3)] border border-[var(--hair-2)] flex items-center justify-center text-[var(--lumen)]">
-                          <Sparkles className="w-3.5 h-3.5" />
-                        </div>
-                        <span className="text-xs font-bold text-[var(--ivory)] tracking-wide">
-                          Gợi ý Brief từ AI
-                        </span>
-                        {isRandomIdea && (
-                          <span className="rounded-full bg-[var(--lumen)]/15 px-2 py-0.5 text-[10px] font-medium text-[var(--lumen)] border border-[var(--hair-2)]">
-                            Ý tưởng ngẫu nhiên
-                          </span>
-                        )}
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => setAiSuggestion(null)}
-                        className="w-6 h-6 rounded-full bg-[var(--ink-3)] hover:bg-[var(--ink-1)] text-[var(--ash)] hover:text-[var(--ivory)] flex items-center justify-center text-xs transition-colors"
-                        title="Đóng xem trước"
-                      >
-                        ✕
-                      </button>
-                    </div>
+          {/* TÀI LIỆU & HÌNH ẢNH THAM KHẢO (REFERENCE / REF) */}
+          <div className="space-y-3 rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] p-4">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <label className={label}>ẢNH / TÀI LIỆU THAM KHẢO</label>
+                <p className="mt-0.5 text-[11px] text-[#6E6459]"> Đính kèm ảnh mẫu hoặc liên kết tham khảo cho họa sĩ. </p>
+              </div>
+              <span className="shrink-0 whitespace-nowrap text-[10px] font-mono font-bold text-[#746A5F]">
+                {referenceItems.length}/10 tệp
+              </span>
+            </div>
 
-                    <div className="max-h-56 overflow-y-auto whitespace-pre-wrap rounded-xl bg-[var(--ink-3)] p-3.5 font-[family-name:var(--font-ui)] text-xs leading-relaxed text-[var(--ivory)] border border-[var(--hair-2)] selection:bg-[var(--lumen)]/30">
-                      {aiSuggestion}
-                    </div>
-
-                    <div className="flex flex-wrap items-center gap-2 pt-1">
-                      <button
-                        type="button"
-                        disabled={aiBriefing}
-                        onClick={() => {
-                          setValue('description', aiSuggestion, { shouldValidate: true });
-                          setAiSuggestion(null);
-                        }}
-                        className="inline-flex items-center gap-1.5 rounded-full bg-[var(--lumen)] hover:bg-[var(--lumen-hi)] px-3.5 py-1.5 text-xs font-bold text-white shadow-md transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
-                      >
-                        <Check className="w-3.5 h-3.5" />
-                        <span>Áp dụng gợi ý này</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        disabled={aiBriefing}
-                        onClick={() => handleAiBriefHelper(false)}
-                        className="inline-flex items-center gap-1.5 rounded-full border border-[var(--hair-2)] bg-[var(--ink-3)] hover:bg-[var(--ink-1)] hover:border-[var(--lumen)] px-3 py-1.5 text-xs font-semibold text-[var(--ivory)] transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
-                      >
-                        {aiBriefing && !isRandomIdea ? (
-                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                        ) : (
-                          <RefreshCw className="w-3.5 h-3.5" />
-                        )}
-                        <span>Tạo lại</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        disabled={aiBriefing}
-                        onClick={() => handleAiBriefHelper(true)}
-                        className="inline-flex items-center gap-1.5 rounded-full border border-[var(--hair-2)] bg-[var(--ink-3)] hover:bg-[var(--ink-1)] hover:border-[var(--lumen)] px-3 py-1.5 text-xs font-semibold text-[var(--lumen)] transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
-                      >
-                        {aiBriefing && isRandomIdea ? (
-                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                        ) : (
-                          <Dice5 className="w-3.5 h-3.5 text-[var(--lumen)]" />
-                        )}
-                        <span>Gợi ý ngẫu nhiên</span>
-                      </button>
-                    </div>
-                  </div>
-                )}
+            <div className="grid gap-3 sm:grid-cols-2">
+              {/* Tải tệp lên */}
+              <div>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  multiple
+                  accept="image/png,image/jpeg,image/webp,image/gif,application/pdf,.pdf"
+                  className="hidden"
+                  onChange={(e) => void handleFilesSelected(e)}
+                />
+                <button
+                  type="button"
+                  disabled={busy || isUploadingFile || referenceItems.length >= 10}
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-[#221E1A]/20 bg-[#FFFCF6] px-4 py-3 text-xs font-semibold text-[#6E6459] transition hover:border-[#B24A26] hover:bg-[#B24A26]/10 disabled:opacity-45"
+                >
+                  {isUploadingFile ? (
+                    <Loader2 className="h-4 w-4 animate-spin text-[#B24A26]" />
+                  ) : (
+                    <UploadCloud className="h-4 w-4 text-[#B24A26]" />
+                  )}
+                  <span>{isUploadingFile ? 'Đang tải tệp lên…' : 'Tải ảnh mẫu (PNG, JPG, PDF ≤ 10MB)'}</span>
+                </button>
               </div>
 
-              {/* TÀI LIỆU & HÌNH ẢNH THAM KHẢO (REFERENCE / REF) */}
-              <div className="space-y-3 rounded-2xl border border-[var(--hair-2)] bg-[var(--ink-3)] p-4">
-                <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <label className={label}>ẢNH / TÀI LIỆU THAM KHẢO</label>
-                    <p className="mt-0.5 text-[11px] text-[var(--ash)]">
-                      Đính kèm ảnh mẫu hoặc liên kết tham khảo cho họa sĩ.
-                    </p>
-                  </div>
-                  <span className="shrink-0 whitespace-nowrap text-xs font-semibold text-[var(--ash)] font-[family-name:var(--font-ui)]">
-                    {referenceItems.length}/10 tệp
-                  </span>
+              {/* Dán link */}
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <input
+                    type="url"
+                    value={linkInput}
+                    onChange={(e) => {
+                      setLinkInput(e.target.value);
+                      if (linkError) setLinkError(null);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleAddLink();
+                      }
+                    }}
+                    placeholder="Dán liên kết Drive, Pinterest, Imgur…"
+                    className="w-full rounded-xl border border-[#221E1A]/10 bg-[#F0E7D8] px-3.5 py-3 text-xs text-[#241F1A] placeholder:text-[#746A5F] focus:border-[#8C3718] focus:outline-none"
+                  />
                 </div>
+                <button
+                  type="button"
+                  disabled={busy || !linkInput.trim() || referenceItems.length >= 10}
+                  onClick={handleAddLink}
+                  title="Thêm liên kết"
+                  className="shrink-0 rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-3.5 py-3 text-xs font-bold text-[#241F1A] transition hover:bg-[#F0E7D8] disabled:opacity-40"
+                >
+                  <Plus className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
 
-                <div className="grid gap-3 sm:grid-cols-2">
-                  {/* Tải tệp lên */}
-                  <div>
-                    <input
-                      type="file"
-                      ref={fileInputRef}
-                      multiple
-                      accept="image/png,image/jpeg,image/webp,image/gif,application/pdf,.pdf"
-                      className="hidden"
-                      onChange={(e) => void handleFilesSelected(e)}
-                    />
+            {linkError && (
+              <p role="alert" className="flex items-center gap-1.5 text-xs text-[#A8321C]">
+                <AlertCircle className="h-3.5 w-3.5 shrink-0" /> {linkError}
+              </p>
+            )}
+
+            {/* Danh sách tệp/link đã thêm */}
+            {referenceItems.length > 0 && (
+              <div className="grid grid-cols-2 gap-2 pt-1 sm:grid-cols-3">
+                {referenceItems.map((item) => (
+                  <div
+                    key={item.id}
+                    className="group relative flex items-center gap-2.5 overflow-hidden rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] p-2 pr-7 text-xs transition hover:border-[#221E1A]/20"
+                  >
+                    {item.type === 'image' && item.url ? (
+                      <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-[#F0E7D8]">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={item.url} alt={item.name} className="h-full w-full object-cover" />
+                      </div>
+                    ) : (
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#FFFCF6] text-[#B24A26]">
+                        {item.type === 'drive' ? <FolderOpen className="h-5 w-5" /> : <Link2 className="h-5 w-5" />}
+                      </div>
+                    )}
+
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-[11px] font-semibold text-[#241F1A]">{item.name}</p>
+                      <p className="text-[10px] text-[#746A5F]">
+                        {item.isUploading
+                          ? 'Đang tải lên…'
+                          : item.size
+                            ? `${(item.size / (1024 * 1024)).toFixed(1)} MB`
+                            : item.type === 'drive'
+                              ? 'Google Drive'
+                              : item.type === 'pinterest'
+                                ? 'Pinterest'
+                                : 'Liên kết web'}
+                      </p>
+                    </div>
+
                     <button
                       type="button"
-                      disabled={busy || isUploadingFile || referenceItems.length >= 10}
-                      onClick={() => fileInputRef.current?.click()}
-                      className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-[var(--hair-2)] bg-[var(--ink-2)] px-4 py-3 text-xs font-semibold text-[var(--ivory)] transition hover:border-[var(--lumen)] hover:bg-[var(--ink-3)] disabled:opacity-45"
+                      onClick={() => handleRemoveItem(item.id)}
+                      className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded-md p-1 text-[#746A5F] transition hover:bg-[#A8321C]/20 hover:text-[#A8321C]"
+                      title="Xóa tệp tham khảo này"
                     >
-                      {isUploadingFile ? (
-                        <Loader2 className="h-4 w-4 animate-spin text-[var(--lumen)]" />
-                      ) : (
-                        <UploadCloud className="h-4 w-4 text-[var(--lumen)]" />
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <fieldset className="space-y-3 border-t border-[#221E1A]/10 pt-5">
+            <legend className="font-h1 text-sm font-bold text-[#241F1A]">BẢNG GIÁ DỊCH VỤ CREATOR (RATE CARD)</legend>
+            <p className="text-xs text-[#6E6459]">Chọn gói vẽ do họa sĩ cấu hình. Giá và các mốc thanh toán do họa sĩ quyết định.</p>
+            {loadingPackages ? (
+              <p className="text-xs text-[#746A5F]">Đang tải bảng giá…</p>
+            ) : packages.length === 0 ? (
+              <p className="text-xs text-[#8A6A1F]">Họa sĩ chưa cấu hình bảng giá nên chưa thể nhận yêu cầu mới.</p>
+            ) : (
+              packages.map(item => {
+                const slot = getPackageSlotInfo(item);
+                return (
+                  <label key={item.id} className={`block rounded-xl border p-4 text-xs ${slot.isFull ? 'cursor-not-allowed opacity-55 border-[#221E1A]/10 bg-[#FFFCF6]' : selectedPackageId === item.id ? 'cursor-pointer border-[#B24A26] bg-[#B24A26]/10' : 'cursor-pointer border-[#221E1A]/10 bg-[#FFFCF6]'}`}>
+                    <span className="flex flex-wrap items-center gap-2.5">
+                      <input type="radio" name="rate-package" disabled={slot.isFull} checked={selectedPackageId === item.id && !slot.isFull} onChange={() => { setSelectedPackageId(item.id); if (packageError) setPackageError(null); }} />
+                      <strong className="text-[#241F1A]">{item.name}</strong>
+                      {item.categoryName && (
+                        <span className="rounded-md border border-[#B24A26]/30 bg-[#B24A26]/15 px-2 py-0.5 text-[10px] font-semibold text-[#8C3718]">
+                          {item.categoryName}
+                        </span>
                       )}
-                      <span>{isUploadingFile ? 'Đang tải tệp lên…' : 'Tải ảnh mẫu (PNG, JPG, PDF ≤ 10MB)'}</span>
-                    </button>
-                  </div>
-
-                  {/* Dán link */}
-                  <div className="flex gap-2">
-                    <div className="relative flex-1">
-                      <input
-                        type="url"
-                        value={linkInput}
-                        onChange={(e) => {
-                          setLinkInput(e.target.value);
-                          if (linkError) setLinkError(null);
-                        }}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
-                            e.preventDefault();
-                            handleAddLink();
-                          }
-                        }}
-                        placeholder="Dán liên kết Drive, Pinterest, Imgur…"
-                        className="w-full rounded-xl border border-[var(--hair-2)] bg-[var(--ink-2)] px-3.5 py-3 text-xs text-[var(--ivory)] placeholder:text-[var(--ash)] focus:border-[var(--lumen)] focus:outline-none"
-                      />
-                    </div>
-                    <button
-                      type="button"
-                      disabled={busy || !linkInput.trim() || referenceItems.length >= 10}
-                      onClick={handleAddLink}
-                      title="Thêm liên kết"
-                      className="shrink-0 rounded-xl border border-[var(--hair-2)] bg-[var(--ink-2)] px-3.5 py-3 text-xs font-bold text-[var(--ivory)] transition hover:bg-[var(--ink-3)] hover:border-[var(--lumen)] disabled:opacity-40"
-                    >
-                      <Plus className="h-4 w-4" />
-                    </button>
-                  </div>
-                </div>
-
-                {linkError && (
-                  <p role="alert" className="flex items-center gap-1.5 text-xs text-red-300">
-                    <AlertCircle className="h-3.5 w-3.5 shrink-0" /> {linkError}
-                  </p>
-                )}
-
-                {/* Danh sách tệp/link đã thêm */}
-                {referenceItems.length > 0 && (
-                  <div className="grid grid-cols-2 gap-2 pt-1 sm:grid-cols-3">
-                    {referenceItems.map((item) => (
-                      <div
-                        key={item.id}
-                        className="group relative flex items-center gap-2.5 overflow-hidden rounded-xl border border-[var(--hair-2)] bg-[var(--ink-2)] p-2 pr-7 text-xs transition hover:border-[var(--lumen)]"
-                      >
-                        {item.type === 'image' && item.url ? (
-                          <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-[var(--ink-3)]">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={item.url} alt={item.name} className="h-full w-full object-cover" />
-                          </div>
-                        ) : (
-                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[var(--ink-3)] text-[var(--lumen)]">
-                            {item.type === 'drive' ? <FolderOpen className="h-5 w-5" /> : <Link2 className="h-5 w-5" />}
-                          </div>
-                        )}
-
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate text-[11px] font-semibold text-[var(--ivory)]">{item.name}</p>
-                          <p className="text-[10px] text-[var(--ash)]">
-                            {item.isUploading
-                              ? 'Đang tải lên…'
-                              : item.size
-                                ? `${(item.size / (1024 * 1024)).toFixed(1)} MB`
-                                : item.type === 'drive'
-                                  ? 'Google Drive'
-                                  : item.type === 'pinterest'
-                                    ? 'Pinterest'
-                                    : 'Liên kết web'}
-                          </p>
-                        </div>
-
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveItem(item.id)}
-                          className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded-md p-1 text-[var(--ash)] transition hover:bg-rose-500/20 hover:text-rose-300"
-                          title="Xóa tệp tham khảo này"
-                        >
-                          <X className="h-3.5 w-3.5" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              <fieldset className="space-y-4 border-t border-[var(--hair)] pt-6">
-                <div>
-                  <legend className="font-[family-name:var(--font-display)] text-sm font-bold text-[var(--ivory)]">BẢNG GIÁ DỊCH VỤ CREATOR (RATE CARD)</legend>
-                  <p className="mt-1.5 text-xs text-[var(--ash)] py-1">Chọn gói vẽ do Creator cấu hình. Giá và các mốc thanh toán do Creator quyết định.</p>
-                </div>
-                {loadingPackages ? (
-                  <p className="text-xs text-[var(--ash)] py-2">Đang tải bảng giá…</p>
-                ) : packages.length === 0 ? (
-                  <p className="text-xs text-amber-200 py-2">Creator chưa cấu hình bảng giá nên chưa thể nhận yêu cầu mới.</p>
-                ) : (
-                  packages.map(item => {
-                    const slot = getPackageSlotInfo(item);
-                    return (
-                      <label key={item.id} className={`block rounded-xl border p-4 text-xs transition ${slot.isFull ? 'cursor-not-allowed opacity-55 border-[var(--hair-2)] bg-[var(--ink-3)]' : selectedPackageId === item.id ? 'cursor-pointer border-[var(--lumen)] bg-[var(--lumen)]/10' : 'cursor-pointer border-[var(--hair-2)] bg-[var(--ink-3)] hover:border-[var(--lumen)]'}`}>
-                        <span className="flex flex-wrap items-center gap-2.5">
-                          <input type="radio" name="rate-package" disabled={slot.isFull} checked={selectedPackageId === item.id && !slot.isFull} onChange={() => { setSelectedPackageId(item.id); if (packageError) setPackageError(null); }} className="accent-[var(--lumen)]" />
-                          <strong className="text-[var(--ivory)] font-bold">{item.name}</strong>
-                          {item.categoryName && (
-                            <span className="rounded-md border border-[var(--hair-2)] bg-[var(--ink-2)] px-2 py-0.5 text-[10px] font-semibold text-[var(--ash)]">
-                              {item.categoryName}
+                      <span className={`rounded-md border px-2 py-0.5 text-[10px] font-semibold ${
+                        !slot.isLimited
+                          ? 'border-[#2C6A86]/35 bg-[#2C6A86]/10 text-[#2C6A86]'
+                          : slot.isFull
+                            ? 'border-[#A8321C]/40 bg-[#A8321C]/10 text-[#A8321C]'
+                            : 'border-[#2F6B63]/35 bg-[#2F6B63]/10 text-[#2F6B63]'
+                      }`}>
+                        {slot.isLimited ? slot.label : '∞ Không giới hạn'}
+                      </span>
+                      <span className="ml-auto font-bold text-[#8C3718]">{money(item.price)}</span>
+                    </span>
+                    {item.description && <span className="mt-2 block text-[#746A5F] whitespace-pre-line">{item.description}</span>}
+                    {(item.milestones?.length ?? 0) > 0 && (
+                      <ul className="mt-2.5 space-y-1 rounded-lg border border-[#221E1A]/10 bg-[#F0E7D8]/25 p-2.5 text-[11px]">
+                        {[...item.milestones].sort((a, b) => a.sequence - b.sequence).map((m) => (
+                          <li key={m.sequence} className="flex items-center justify-between gap-2 text-[#746A5F]">
+                            <span><strong className="text-[#241F1A]">Mốc #{m.sequence}:</strong> {m.title}</span>
+                            <span className="shrink-0 text-[#746A5F]">
+                              {money(m.price)} · {m.maxRevisions ?? item.maxRevisions ?? 3} lần sửa
                             </span>
-                          )}
-                          <span className={`rounded-md border px-2 py-0.5 text-[10px] font-semibold ${!slot.isLimited
-                            ? 'border-sky-400/25 bg-sky-500/10 text-sky-300'
-                            : slot.isFull
-                              ? 'border-rose-400/30 bg-rose-500/10 text-rose-300'
-                              : 'border-emerald-400/25 bg-emerald-500/10 text-emerald-300'
-                            }`}>
-                            {slot.isLimited ? slot.label : '∞ Không giới hạn'}
-                          </span>
-                          <span className="ml-auto font-bold text-[var(--lumen)]">{money(item.price)}</span>
-                        </span>
-                        {item.description && <span className="mt-2.5 block text-xs leading-relaxed text-[var(--ash)] whitespace-pre-line py-1.5">{item.description}</span>}
-                        {(item.milestones?.length ?? 0) > 0 && (
-                          <ul className="mt-3.5 space-y-2 rounded-xl border border-[var(--hair-2)] bg-[var(--ink-2)] p-3.5 text-xs">
-                            {[...item.milestones].sort((a, b) => a.sequence - b.sequence).map((m) => (
-                              <li key={m.sequence} className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1.5 rounded-lg bg-[var(--ink-3)] px-3 py-2 text-[var(--ash)] border border-[var(--hair-2)]/60">
-                                <span className="min-w-0 break-words font-medium"><strong className="text-[var(--ivory)] font-semibold">Mốc #{m.sequence}:</strong> {m.title}</span>
-                                <span className="shrink-0 font-semibold text-[var(--ash)] whitespace-nowrap">
-                                  {money(m.price)} · {m.maxRevisions ?? item.maxRevisions ?? 3} lần sửa
-                                </span>
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-                      </label>
-                    );
-                  })
-                )}
-
-                {packageError && <p role="alert" className="mt-1.5 flex items-center gap-1.5 text-xs text-red-300 font-medium"><AlertCircle className="w-3.5 h-3.5 shrink-0" /> {packageError}</p>}
-
-                {selectedPackage && <div className="space-y-4 border-t border-[var(--hair)] pt-6">
-                  <div>
-                    <h3 className="font-[family-name:var(--font-display)] text-sm font-bold text-[var(--ivory)]">PHỤ PHÍ TÙY CHỌN</h3>
-                    <p className="mt-1.5 text-xs text-[var(--ash)] py-1">Phụ phí được ký quỹ cùng đơn hàng và thực hiện tại mốc đã ghi.</p>
-                  </div>
-                  <div className="space-y-2 pt-1">
-                    {availableAddons.map(a => <label key={a.id} className="flex items-center gap-3 text-xs text-[var(--ivory)] py-1"><input type="checkbox" checked={addonIds.includes(a.id)} disabled={busy} onChange={e => setAddonIds(ids => e.target.checked ? [...ids, a.id] : ids.filter(id => id !== a.id))} className="accent-[var(--lumen)]" />{a.title} · {a.allowedMilestone} · +{addonMoney(a.price)} · +{a.extendDays} ngày</label>)}
-                  </div>
-                </div>}
-                <div className="space-y-4 border-t border-[var(--hair)] pt-6">
-                  <div>
-                    <h3 className="font-[family-name:var(--font-display)] text-sm font-bold text-[var(--ivory)]">MỤC ĐÍCH SỬ DỤNG</h3>
-                    <p className="mt-1.5 text-xs text-[var(--ash)] py-1">Chọn mục đích sử dụng cho tác phẩm để áp dụng hệ số bản quyền phù hợp.</p>
-                  </div>
-                  <div className="grid gap-3 pt-1 sm:grid-cols-2">
-                    {(['Personal', 'Commercial'] as const).map(value => (
-                      <label key={value} className={`cursor-pointer rounded-xl border p-4 text-xs transition ${licenseType === value ? 'border-[var(--lumen)] bg-[var(--lumen)]/10' : 'border-[var(--hair-2)] bg-[var(--ink-3)] hover:border-[var(--lumen)]'}`}>
-                        <span className="flex items-center gap-2">
-                          <input type="radio" name="license-type" checked={licenseType === value} onChange={() => setLicenseType(value)} className="accent-[var(--lumen)]" />
-                          <strong className="text-[var(--ivory)]">{value === 'Personal' ? 'Cá nhân' : 'Thương mại'}</strong>
-                        </span>
-                        <span className="mt-2.5 block text-xs leading-relaxed text-[var(--ash)] py-1">{value === 'Personal' ? 'Không sử dụng để kinh doanh.' : `Áp dụng hệ số ${terms?.commercialLicenseMultiplier ?? 1.5}×.`}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-
-                {selectedPackage && (
-                  <div className="space-y-6 pt-5">
-                    <div className="rounded-2xl border border-[var(--hair-2)] bg-[var(--ink-3)] p-5 sm:p-6">
-                      <h3 className="font-[family-name:var(--font-display)] text-sm font-bold text-[var(--ivory)] pb-1">Kế hoạch các mốc vẽ (Artwork milestone plan)</h3>
-                      <ol className="mt-4 space-y-3">
-                        {selectedPackage.milestones.map(stage => (
-                          <li key={stage.sequence} className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2 rounded-xl bg-[var(--ink-2)] px-4 py-3 text-xs text-[var(--ash)] border border-[var(--hair-2)]/70 shadow-sm">
-                            <span className="min-w-0 break-words font-medium"><strong className="text-[var(--ivory)] font-semibold">{stage.sequence}. {stage.title}</strong><span className="ml-2 text-[var(--ash)] whitespace-nowrap">· {stage.maxRevisions ?? 3} lần sửa</span></span>
-                            <span className="text-[var(--ivory)] font-bold whitespace-nowrap">{money(milestoneEstimate(stage))}</span>
                           </li>
                         ))}
-                      </ol>
-                      <p className="mt-4 text-xs text-[var(--ash)] py-2">HD original files are delivered after all sketches are approved.</p>
-                      <div className="mt-5 space-y-2.5 border-t border-[var(--hair)] pt-5 text-xs">
-                        <p className="flex justify-between text-[var(--ash)] py-1"><span>Package price</span><span className="text-[var(--ivory)]">{money(selectedPackage.price)}</span></p>
-                        <p className="flex justify-between text-[var(--ash)] py-1"><span>License multiplier</span><span className="text-[var(--ivory)]">× {multiplier}</span></p>
-                        <p className="flex justify-between font-bold text-[var(--ivory)] py-1"><span>Estimated total</span><span className="text-[var(--lumen)] font-bold text-sm">{money(estimatedTotal)}</span></p>
-                        {estimatedTotal >= 2_000_000 && <p className="pt-2.5 text-[11px] text-[var(--ash)] py-1">Đơn từ 2.000.000đ chỉ cần ký quỹ trước Mốc #1 ({money(milestoneEstimate(selectedPackage.milestones[0]))}) khi bắt đầu.</p>}
-                      </div>
-                    </div>
+                      </ul>
+                    )}
+                  </label>
+                );
+              })
+            )}
 
-                    <div className="pt-3">
-                      <label className={label} htmlFor="commission-voucher">MÃ GIẢM GIÁ (KHÔNG BẮT BUỘC)</label>
-                      <div className="mt-2">
-                        <input id="commission-voucher" className={field} placeholder="Nhập mã giảm giá" {...register('voucherCode')} />
-                      </div>
-                      {errors.voucherCode && <p role="alert" className="mt-1 text-xs text-red-300">{errors.voucherCode.message}</p>}
-                      <p className="mt-2.5 text-xs text-[var(--ash)] py-1">Hệ thống kiểm tra mã khi tạo yêu cầu và chỉ sử dụng lượt khi ký quỹ.</p>
-                    </div>
-                  </div>
-                )}
-              </fieldset>
+            {packageError && <p role="alert" className="mt-1.5 flex items-center gap-1.5 text-xs text-[#A8321C] font-medium"><AlertCircle className="w-3.5 h-3.5 shrink-0" /> {packageError}</p>}
 
-
-              {error && <div role="alert" className="rounded-xl border border-red-400/30 bg-red-400/10 px-4 py-3 text-xs text-red-200 flex items-center justify-between gap-2"><span className="flex items-center gap-2"><AlertCircle className="w-4 h-4 shrink-0" /><span>{error}</span></span>{!terms && <button type="button" onClick={() => void creatorProfileService.getTerms(creatorId).then((data) => { setTerms(data); setError(''); }).catch((cause) => setError(extractErrorMessage(cause, 'Không tải được điều khoản của Creator.')))} className="shrink-0 rounded-lg border border-red-300/30 bg-white/5 px-2.5 py-1 font-semibold text-white hover:bg-white/10">Thử tải lại</button>}</div>}
-
-              <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[var(--hair)] pt-5">
-                <button type="button" disabled={busy} onClick={() => goToStep(1)} className="rounded-full border border-[var(--hair-2)] bg-[var(--ink-3)] px-5 py-2.5 text-xs font-semibold text-[var(--ivory)] transition hover:border-[var(--lumen)] disabled:opacity-50">
-                  ← Quay lại đọc ToS
-                </button>
-                <button disabled={busy || !selectedPackage || !terms} className="rounded-full bg-[var(--lumen)] px-7 py-3 text-xs font-bold text-white shadow-lg transition-all hover:bg-[var(--lumen-hi)] disabled:opacity-50">
-                  {busy ? "Đang gửi…" : "Gửi yêu cầu đặt vẽ"}
-                </button>
+            {selectedPackage && <div className="space-y-3 border-t border-[#221E1A]/10 pt-5">
+              <h3 className="font-h1 text-sm font-bold text-[#241F1A]">PHỤ PHÍ TÙY CHỌN</h3>
+              <p className="text-xs text-[#B24A26]">Phụ phí được ký quỹ cùng đơn hàng và thực hiện tại mốc đã ghi.</p>
+              {availableAddons.map(a => <label key={a.id} className="flex items-center gap-3 text-xs text-[#241F1A]"><input type="checkbox" checked={addonIds.includes(a.id)} disabled={busy} onChange={e => setAddonIds(ids => e.target.checked ? [...ids, a.id] : ids.filter(id => id !== a.id))} />{a.title} · {a.allowedMilestone} · +{addonMoney(a.price)} · +{a.extendDays} ngày</label>)}
+            </div>}
+            <div className="space-y-3 border-t border-[#221E1A]/10 pt-5">
+              <h3 className="font-h1 text-sm font-bold text-[#241F1A]">MỤC ĐÍCH SỬ DỤNG</h3>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {(['Personal', 'Commercial'] as const).map(value => (
+                  <label key={value} className={`cursor-pointer rounded-xl border p-4 text-xs ${licenseType === value ? 'border-[#B24A26] bg-[#B24A26]/10' : 'border-[#221E1A]/10 bg-[#FFFCF6]'}`}>
+                    <span className="flex items-center gap-2">
+                      <input type="radio" name="license-type" checked={licenseType === value} onChange={() => setLicenseType(value)} />
+                      <strong className="text-[#241F1A]">{value === 'Personal' ? 'Cá nhân' : 'Thương mại'}</strong>
+                    </span>
+                    <span className="mt-2 block text-[#746A5F]">{value === 'Personal' ? 'Không sử dụng để kinh doanh.' : `Áp dụng hệ số ${terms?.commercialLicenseMultiplier ?? 1.5}×.`}</span>
+                  </label>
+                ))}
               </div>
-            </form>
+            </div>
+
+            {selectedPackage && (
+              <>
+                <div className="rounded-xl border border-[#221E1A]/10 bg-[#F0E7D8] p-4">
+                  <h3 className="text-xs font-bold text-[#241F1A]">Kế hoạch các mốc vẽ (Milestone plan)</h3>
+                  <ol className="mt-3 space-y-2">
+                    {selectedPackage.milestones.map(stage => (
+                      <li key={stage.sequence} className="flex justify-between gap-3 text-xs text-[#746A5F]">
+                        <span>{stage.sequence}. {stage.title}<span className="ml-2 text-[#746A5F]">· {stage.maxRevisions ?? 3} lần sửa</span></span>
+                        <span>{money(milestoneEstimate(stage))}</span>
+                      </li>
+                    ))}
+                  </ol>
+                  <p className="mt-3 text-xs text-[#6E6459]">Tệp gốc HD được bàn giao sau khi duyệt xong tất cả các bản phác thảo.</p>
+                  <div className="mt-4 space-y-1 border-t border-[#221E1A]/10 pt-3 text-xs">
+                    <p className="flex justify-between text-[#746A5F]"><span>Giá gói</span><span>{money(selectedPackage.price)}</span></p>
+                    <p className="flex justify-between text-[#746A5F]"><span>Hệ số bản quyền</span><span>× {multiplier}</span></p>
+                    <p className="flex justify-between font-bold text-[#241F1A]"><span>Tổng dự kiến</span><span>{money(estimatedTotal)}</span></p>
+                    {estimatedTotal >= 2_000_000 && <p className="pt-1 text-[11px] text-[#B24A26]">Đơn từ 2.000.000đ chỉ cần ký quỹ trước Mốc #1 ({money(milestoneEstimate(selectedPackage.milestones[0]))}) khi bắt đầu.</p>}
+                  </div>
+                </div>
+
+                <div className="pt-2">
+                  <label className={label} htmlFor="commission-voucher">MÃ GIẢM GIÁ (KHÔNG BẮT BUỘC)</label>
+                  <input id="commission-voucher" className={field} placeholder="Nhập mã giảm giá" {...register('voucherCode')} />
+                  {errors.voucherCode && <p role="alert" className="text-xs text-[#A8321C]">{errors.voucherCode.message}</p>}
+                  <p className="mt-2 text-xs text-[#746A5F]">Hệ thống kiểm tra mã khi tạo yêu cầu và chỉ sử dụng lượt khi ký quỹ.</p>
+                </div>
+              </>
+            )}
+          </fieldset>
+
+
+          {error && <div role="alert" className="rounded-xl border border-[#A8321C]/40 bg-[#A8321C]/10 px-4 py-3 text-xs text-[#A8321C] flex items-center justify-between gap-2"><span className="flex items-center gap-2"><AlertCircle className="w-4 h-4 shrink-0" /><span>{error}</span></span>{!terms && <button type="button" onClick={() => void creatorProfileService.getTerms(creatorId).then((data) => { setTerms(data); setError(''); }).catch((cause) => setError(extractErrorMessage(cause, 'Không tải được điều khoản của họa sĩ.')))} className="shrink-0 rounded-lg border border-[#A8321C]/40 bg-[#FFFCF6] px-2.5 py-1 font-semibold text-[#241F1A] hover:bg-[#F0E7D8]">Thử tải lại</button>}</div>}
+
+          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#221E1A]/10 pt-5">
+            <button type="button" disabled={busy} onClick={() => goToStep(1)} className="rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-5 py-3 text-xs font-semibold text-[#6E6459] transition hover:bg-[#F0E7D8] disabled:opacity-50">
+              ← Quay lại đọc ToS
+            </button>
+            <button disabled={busy || !selectedPackage || !terms} className="rounded-xl bg-[#F0E7D8] px-8 py-3.5 text-xs font-extrabold text-[#FFFCF6] shadow-xl transition-all hover:bg-[#8C3718] disabled:opacity-50">
+              {busy ? "Đang gửi…" : "Gửi yêu cầu đặt vẽ"}
+            </button>
+          </div>
+        </form>
           )}
         </div>
       </div>

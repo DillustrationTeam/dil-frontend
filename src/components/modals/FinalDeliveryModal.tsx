@@ -385,7 +385,7 @@ export default function FinalDeliveryModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-md animate-fadeIn">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-[#E5D8C2] backdrop-blur-md animate-fadeIn">
       <div
         onDragOver={(e) => {
           e.preventDefault();
@@ -393,41 +393,39 @@ export default function FinalDeliveryModal({
         }}
         onDragLeave={() => setIsDragOver(false)}
         onDrop={handleDropFiles}
-        className={`relative w-full max-w-5xl bg-[#111420] border ${
-          isDragOver ? 'border-[#A7ACD9] shadow-[0_0_30px_rgba(167,172,217,0.3)]' : 'border-white/10'
+        className={`relative w-full max-w-5xl bg-[#FFFCF6] border ${
+          isDragOver ? 'border-[#B24A26] shadow-[0_0_30px_rgba(167,172,217,0.3)]' : 'border-[#221E1A]/10'
         } rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] transition-all`}
       >
         {/* DRIVE HEADER BAR */}
-        <div className="px-5 py-4 border-b border-white/10 flex flex-wrap items-center justify-between gap-3 bg-[#151928]">
+        <div className="px-5 py-4 border-b border-[#221E1A]/10 flex flex-wrap items-center justify-between gap-3 bg-[#FFFCF6]">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[#A7ACD9]/15 border border-[#A7ACD9]/30 flex items-center justify-center text-[#A7ACD9]">
+            <div className="w-10 h-10 rounded-xl bg-[#B24A26]/15 border border-[#B24A26]/30 flex items-center justify-center text-[#B24A26]">
               <HardDrive className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-sm font-bold text-white flex items-center gap-1.5">
-                  <FolderOpen className="w-4 h-4 text-[#A7ACD9]" /> Kho Tệp Bàn giao (Deliverables Drive)
-                </span>
-                <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-400">
+                <span className="text-sm font-bold text-[#241F1A] flex items-center gap-1.5">
+                  <FolderOpen className="w-4 h-4 text-[#B24A26]" /> Kho Tệp Bàn giao (Deliverables Drive) </span>
+                <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[#2F6B63]/10 border border-[#2F6B63]/35 text-[#2F6B63]">
                   {files.length} tệp • {formatFileSize(totalDriveSize)}
                 </span>
               </div>
-              <p className="text-xs text-slate-400 mt-0.5">
-                Đơn hàng: <strong className="text-slate-200">{artworkTitle}</strong> • Mã #{commissionId.slice(0, 8)}
+              <p className="text-xs text-[#746A5F] mt-0.5"> Đơn hàng: <strong className="text-[#6E6459]">{artworkTitle}</strong> • Mã #{commissionId.slice(0, 8)}
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
             {/* View Mode Toggle */}
-            <div className="flex items-center bg-black/40 p-1 rounded-xl border border-white/10">
+            <div className="flex items-center bg-[#F0E7D8] p-1 rounded-xl border border-[#221E1A]/10">
               <button
                 type="button"
                 onClick={() => setViewMode('grid')}
                 className={`p-1.5 rounded-lg transition-colors ${
-                  viewMode === 'grid' ? 'bg-[#A7ACD9] text-[#1F2335]' : 'text-slate-400 hover:text-white'
+                  viewMode === 'grid' ? 'bg-[#B24A26] text-[#F7F2E9]' : 'text-[#746A5F] hover:text-[#241F1A]'
                 }`}
-                title="Dạng ô lưới (Grid View)"
+                title="Dạng ô lưới"
               >
                 <Grid className="w-4 h-4" />
               </button>
@@ -435,9 +433,9 @@ export default function FinalDeliveryModal({
                 type="button"
                 onClick={() => setViewMode('list')}
                 className={`p-1.5 rounded-lg transition-colors ${
-                  viewMode === 'list' ? 'bg-[#A7ACD9] text-[#1F2335]' : 'text-slate-400 hover:text-white'
+                  viewMode === 'list' ? 'bg-[#B24A26] text-[#F7F2E9]' : 'text-[#746A5F] hover:text-[#241F1A]'
                 }`}
-                title="Dạng danh sách (List View)"
+                title="Dạng danh sách"
               >
                 <List className="w-4 h-4" />
               </button>
@@ -457,10 +455,9 @@ export default function FinalDeliveryModal({
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="px-3.5 py-1.5 rounded-xl bg-[#A7ACD9] hover:bg-[#B8BCDF] text-[#1F2335] text-xs font-bold flex items-center gap-1.5 shadow transition-all active:scale-95"
+                  className="px-3.5 py-1.5 rounded-xl bg-[#B24A26] hover:bg-[#8C3718] text-[#F7F2E9] text-xs font-bold flex items-center gap-1.5 shadow transition-all active:scale-95"
                 >
-                  <Plus className="w-4 h-4" /> Thêm tệp
-                </button>
+                  <Plus className="w-4 h-4" /> Thêm tệp </button>
               </>
             )}
 
@@ -469,16 +466,16 @@ export default function FinalDeliveryModal({
               type="button"
               onClick={handleDownloadAllZip}
               disabled={downloadingFileId === 'all-zip'}
-              className="px-3.5 py-1.5 rounded-xl bg-white/[0.08] hover:bg-white/[0.14] text-white border border-white/15 text-xs font-semibold flex items-center gap-1.5 transition-all active:scale-95 disabled:opacity-50"
+              className="px-3.5 py-1.5 rounded-xl bg-[#FFFCF6] hover:bg-[#F0E7D8] text-[#241F1A] border border-[#221E1A]/10 text-xs font-semibold flex items-center gap-1.5 transition-all active:scale-95 disabled:opacity-50"
             >
-              <Download className="w-4 h-4 text-[#A7ACD9]" />
+              <Download className="w-4 h-4 text-[#B24A26]" />
               <span className="hidden sm:inline">Tải toàn bộ (.ZIP)</span>
             </button>
 
             {/* Close Button */}
             <button
               onClick={onClose}
-              className="w-8 h-8 rounded-full bg-white/5 border border-white/10 text-slate-400 hover:text-white hover:bg-white/10 flex items-center justify-center transition-colors ml-1"
+              className="w-8 h-8 rounded-full bg-[#FFFCF6] border border-[#221E1A]/10 text-[#746A5F] hover:text-[#241F1A] hover:bg-[#F0E7D8] flex items-center justify-center transition-colors ml-1"
             >
               <X className="w-4 h-4" />
             </button>
@@ -486,16 +483,16 @@ export default function FinalDeliveryModal({
         </div>
 
         {/* DRIVE SEARCH & FILTER TOOLBAR */}
-        <div className="px-5 py-3 border-b border-white/10 bg-[#121524] flex flex-wrap items-center justify-between gap-3">
+        <div className="px-5 py-3 border-b border-[#221E1A]/10 bg-[#FFFCF6] flex flex-wrap items-center justify-between gap-3">
           {/* Search Input */}
           <div className="relative flex-1 min-w-[200px] max-w-md">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <Search className="w-4 h-4 text-[#746A5F] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
               type="text"
               placeholder="Tìm kiếm tệp trong drive..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-[#A7ACD9]"
+              className="w-full pl-9 pr-3 py-1.5 rounded-xl bg-[#FFFCF6] border border-[#221E1A]/10 text-xs text-[#241F1A] text-[#746A5F] focus:outline-none focus:border-[#B24A26]"
             />
           </div>
 
@@ -506,8 +503,8 @@ export default function FinalDeliveryModal({
               onClick={() => setTypeFilter('all')}
               className={`px-2.5 py-1 rounded-lg font-medium transition-colors ${
                 typeFilter === 'all'
-                  ? 'bg-white/15 text-white border border-white/20'
-                  : 'text-slate-400 hover:text-slate-200'
+                  ? 'bg-[#F0E7D8] text-[#241F1A] border border-[#221E1A]/20'
+                  : 'text-[#746A5F] hover:text-[#6E6459]'
               }`}
             >
               Tất cả ({files.length})
@@ -517,8 +514,8 @@ export default function FinalDeliveryModal({
               onClick={() => setTypeFilter('psd')}
               className={`px-2.5 py-1 rounded-lg font-medium transition-colors ${
                 typeFilter === 'psd'
-                  ? 'bg-sky-500/20 text-sky-300 border border-sky-500/30'
-                  : 'text-slate-400 hover:text-sky-300'
+                  ? 'bg-[#2C6A86]/20 text-[#2C6A86] border border-[#2C6A86]/40'
+                  : 'text-[#746A5F] hover:text-[#2C6A86]'
               }`}
             >
               Master PSD/AI ({files.filter((f) => f.type === 'psd').length})
@@ -528,8 +525,8 @@ export default function FinalDeliveryModal({
               onClick={() => setTypeFilter('image')}
               className={`px-2.5 py-1 rounded-lg font-medium transition-colors ${
                 typeFilter === 'image'
-                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                  : 'text-slate-400 hover:text-emerald-300'
+                  ? 'bg-[#2F6B63]/20 text-[#2F6B63] border border-[#2F6B63]/40'
+                  : 'text-[#746A5F] hover:text-[#2F6B63]'
               }`}
             >
               Hình ảnh PNG ({files.filter((f) => f.type === 'image').length})
@@ -539,8 +536,8 @@ export default function FinalDeliveryModal({
               onClick={() => setTypeFilter('zip')}
               className={`px-2.5 py-1 rounded-lg font-medium transition-colors ${
                 typeFilter === 'zip'
-                  ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
-                  : 'text-slate-400 hover:text-amber-300'
+                  ? 'bg-[#8A6A1F]/20 text-[#8A6A1F] border border-[#8A6A1F]/40'
+                  : 'text-[#746A5F] hover:text-[#8A6A1F]'
               }`}
             >
               Nén ZIP ({files.filter((f) => f.type === 'zip').length})
@@ -550,8 +547,8 @@ export default function FinalDeliveryModal({
               onClick={() => setTypeFilter('pdf')}
               className={`px-2.5 py-1 rounded-lg font-medium transition-colors ${
                 typeFilter === 'pdf'
-                  ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
-                  : 'text-slate-400 hover:text-purple-300'
+                  ? 'bg-[#5F3F86]/20 text-[#5F3F86] border border-[#5F3F86]/40'
+                  : 'text-[#746A5F] hover:text-[#5F3F86]'
               }`}
             >
               Chứng chỉ PDF ({files.filter((f) => f.type === 'pdf').length})
@@ -563,29 +560,26 @@ export default function FinalDeliveryModal({
         <div className="flex-1 overflow-y-auto p-5 md:p-6 space-y-6">
           {/* Creator Staged Files Banner (If creator dropped/picked new files) */}
           {canUploadDeliverables && stagedUploads.length > 0 && (
-            <div className="p-4 rounded-2xl bg-[#A7ACD9]/10 border border-[#A7ACD9]/30 space-y-3">
+            <div className="p-4 rounded-2xl bg-[#B24A26]/10 border border-[#B24A26]/30 space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-[#A7ACD9] flex items-center gap-1.5">
+                <span className="text-xs font-bold text-[#B24A26] flex items-center gap-1.5">
                   <Upload className="w-4 h-4 animate-bounce" /> Đã chọn {stagedUploads.length} tệp mới để thêm vào Drive
                 </span>
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
                     onClick={() => setStagedUploads([])}
-                    className="text-xs text-slate-400 hover:text-rose-400"
-                  >
-                    Hủy bỏ
-                  </button>
+                    className="text-xs text-[#746A5F] hover:text-[#A8321C]"
+                  > Hủy bỏ </button>
                   <button
                     type="button"
                     onClick={handleUploadStagedFiles}
                     disabled={isUploading}
-                    className="px-4 py-1.5 rounded-xl bg-[#A7ACD9] hover:bg-[#B8BCDF] text-[#1F2335] text-xs font-bold flex items-center gap-1.5 shadow disabled:opacity-50"
+                    className="px-4 py-1.5 rounded-xl bg-[#B24A26] hover:bg-[#8C3718] text-[#F7F2E9] text-xs font-bold flex items-center gap-1.5 shadow disabled:opacity-50"
                   >
                     {isUploading ? (
                       <>
-                        <RefreshCw className="w-3.5 h-3.5 animate-spin" /> Đang tải lên...
-                      </>
+                        <RefreshCw className="w-3.5 h-3.5 animate-spin" /> Đang tải lên... </>
                     ) : (
                       <>
                         <CheckCircle2 className="w-3.5 h-3.5" /> Lưu &amp; Bàn giao vào Drive
@@ -600,15 +594,15 @@ export default function FinalDeliveryModal({
                 {stagedUploads.map((staged, i) => (
                   <div
                     key={i}
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-black/40 border border-white/10 text-xs text-white"
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#F0E7D8] border border-[#221E1A]/10 text-xs text-[#241F1A]"
                   >
-                    <File className="w-3.5 h-3.5 text-[#A7ACD9]" />
+                    <File className="w-3.5 h-3.5 text-[#B24A26]" />
                     <span className="font-medium truncate max-w-[160px]">{staged.name}</span>
-                    <span className="text-[10px] text-slate-400">({formatFileSize(staged.size)})</span>
+                    <span className="text-[10px] text-[#746A5F]">({formatFileSize(staged.size)})</span>
                     <button
                       type="button"
                       onClick={() => handleRemoveStagedFile(i)}
-                      className="text-slate-400 hover:text-rose-400"
+                      className="text-[#746A5F] hover:text-[#A8321C]"
                     >
                       <X className="w-3.5 h-3.5" />
                     </button>
@@ -622,11 +616,10 @@ export default function FinalDeliveryModal({
           {canUploadDeliverables && stagedUploads.length === 0 && (
             <div
               onClick={() => fileInputRef.current?.click()}
-              className="p-3 rounded-2xl border border-dashed border-white/15 hover:border-[#A7ACD9]/50 bg-white/[0.01] hover:bg-white/[0.03] text-center cursor-pointer transition-all"
+              className="p-3 rounded-2xl border border-dashed border-[#221E1A]/10 hover:border-[#B24A26]/50 bg-[#FFFCF6] hover:bg-[#FFFCF6] text-center cursor-pointer transition-all"
             >
-              <p className="text-xs text-slate-400">
-                <span className="text-[#A7ACD9] font-semibold">{commissionStatus === 'Delivered' ? '+ Tải lên gói tệp mới để cập nhật bản bàn giao' : '+ Kéo thả nhiều file gốc vào đây'}</span> hoặc bấm để chọn tệp (PSD, PSB, AI, CLIP, PNG, JPG, WEBP, PDF, ZIP — tổng tối đa 1 GB, không cần tự nén ZIP)
-              </p>
+              <p className="text-xs text-[#746A5F]">
+                <span className="text-[#B24A26] font-semibold">{commissionStatus === 'Delivered' ? '+ Tải lên gói tệp mới để cập nhật bản bàn giao' : '+ Kéo thả nhiều tệp gốc vào đây'}</span> hoặc bấm để chọn tệp (PSD, PSB, AI, CLIP, PNG, JPG, WEBP, PDF, ZIP — tổng tối đa 1 GB, không cần tự nén ZIP) </p>
             </div>
           )}
 
@@ -639,21 +632,21 @@ export default function FinalDeliveryModal({
                 return (
                   <div
                     key={fileItem.id}
-                    className="group bg-[#161928] hover:bg-[#1C2033] border border-white/10 hover:border-[#A7ACD9]/40 rounded-2xl p-4 flex flex-col justify-between transition-all duration-200 shadow-lg relative"
+                    className="group bg-[#FFFCF6] hover:bg-[#FFFCF6] border border-[#221E1A]/10 hover:border-[#B24A26]/40 rounded-2xl p-4 flex flex-col justify-between transition-all duration-200 shadow-lg relative"
                   >
                     {/* Top Tag & Delete (if creator) */}
                     <div className="flex items-start justify-between gap-2 mb-3">
                       <span
                         className={`text-[9px] font-bold tracking-wider uppercase px-2 py-0.5 rounded ${
                           fileItem.type === 'psd'
-                            ? 'bg-sky-500/15 text-sky-400 border border-sky-500/25'
+                            ? 'bg-[#2C6A86]/15 text-[#2C6A86] border border-[#2C6A86]/35'
                             : fileItem.type === 'image'
-                            ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/25'
+                            ? 'bg-[#2F6B63]/15 text-[#2F6B63] border border-[#2F6B63]/35'
                             : fileItem.type === 'zip'
-                            ? 'bg-amber-500/15 text-amber-400 border border-amber-500/25'
+                            ? 'bg-[#8A6A1F]/15 text-[#8A6A1F] border border-[#8A6A1F]/35'
                             : fileItem.type === 'pdf'
-                            ? 'bg-purple-500/15 text-purple-300 border border-purple-500/25'
-                            : 'bg-white/10 text-slate-300'
+                            ? 'bg-[#5F3F86]/15 text-[#5F3F86] border border-[#5F3F86]/35'
+                            : 'bg-[#F0E7D8] text-[#746A5F]'
                         }`}
                       >
                         {fileItem.extension.toUpperCase() || 'FILE'}
@@ -664,7 +657,7 @@ export default function FinalDeliveryModal({
                           type="button"
                           onClick={() => handleDeleteDriveFile(fileItem)}
                           disabled={deletingFileId === fileItem.id || deliverableCount <= 1}
-                          className="opacity-70 group-hover:opacity-100 p-1 text-slate-400 hover:text-rose-400 transition-opacity disabled:opacity-30 disabled:cursor-not-allowed"
+                          className="opacity-70 group-hover:opacity-100 p-1 text-[#746A5F] hover:text-[#A8321C] transition-opacity disabled:opacity-30 disabled:cursor-not-allowed"
                           title={deliverableCount <= 1 ? 'Phải giữ ít nhất 1 tệp; hãy tải tệp mới trước khi xóa' : 'Gỡ tệp này khỏi kho'}
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -675,30 +668,30 @@ export default function FinalDeliveryModal({
                     {/* File Icon & Name */}
                     <div className="space-y-1.5 flex-1">
                       <h4
-                        className="text-white font-bold text-xs md:text-sm line-clamp-2 break-all group-hover:text-[#A7ACD9] transition-colors"
+                        className="text-[#241F1A] font-bold text-xs md:text-sm line-clamp-2 break-all group-hover:text-[#B24A26] transition-colors"
                         title={fileItem.name}
                       >
                         {fileItem.name}
                       </h4>
-                      <p className="text-[11px] text-slate-400">
+                      <p className="text-[11px] text-[#746A5F]">
                         {formatFileSize(fileItem.size)} • {new Date(fileItem.updatedAt).toLocaleDateString('vi-VN')}
                       </p>
                       {fileItem.sha256 && (
-                        <p className="text-[10px] font-mono text-slate-500">
+                        <p className="text-[10px] font-mono text-[#746A5F]">
                           SHA-256: {fileItem.sha256.slice(0, 12)}
                         </p>
                       )}
                     </div>
 
                     {/* Action Button */}
-                    <div className="mt-4 pt-3 border-t border-white/5">
+                    <div className="mt-4 pt-3 border-t border-[#221E1A]/10">
                       {fileItem.isCertificate ? (
                         <button
                           type="button"
                           onClick={() => setShowCertPreview(true)}
-                          className="w-full py-2 px-3 rounded-xl bg-white/[0.08] hover:bg-white/[0.14] text-white border border-white/10 text-xs font-semibold flex items-center justify-center gap-1.5 transition-all"
+                          className="w-full py-2 px-3 rounded-xl bg-[#FFFCF6] hover:bg-[#F0E7D8] text-[#241F1A] border border-[#221E1A]/10 text-xs font-semibold flex items-center justify-center gap-1.5 transition-all"
                         >
-                          <Printer className="w-3.5 h-3.5 text-purple-300" />
+                          <Printer className="w-3.5 h-3.5 text-[#5F3F86]" />
                           Xem &amp; Xuất COA
                         </button>
                       ) : (
@@ -706,7 +699,7 @@ export default function FinalDeliveryModal({
                           type="button"
                           onClick={() => handleDownloadFile(fileItem)}
                           disabled={isDownloadingThis}
-                          className="w-full py-2 px-3 rounded-xl bg-[#A7ACD9] hover:bg-[#B8BCDF] text-[#1F2335] text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-95 disabled:opacity-50"
+                          className="w-full py-2 px-3 rounded-xl bg-[#B24A26] hover:bg-[#8C3718] text-[#F7F2E9] text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-95 disabled:opacity-50"
                         >
                           <Download className="w-3.5 h-3.5" />
                           {isDownloadingThis ? 'Đang tạo liên kết...' : 'Tải xuống'}
@@ -721,9 +714,9 @@ export default function FinalDeliveryModal({
 
           {/* VIEW: LIST VIEW (Drive Explorer Table) */}
           {viewMode === 'list' && (
-            <div className="overflow-x-auto rounded-2xl border border-white/10 bg-[#161928]">
+            <div className="overflow-x-auto rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6]">
               <table className="w-full text-left text-xs">
-                <thead className="bg-[#121524] text-slate-400 uppercase text-[10px] tracking-wider border-b border-white/10">
+                <thead className="bg-[#FFFCF6] text-[#746A5F] uppercase text-[10px] tracking-wider border-b border-[#221E1A]/10">
                   <tr>
                     <th className="py-3 px-4">Tên tệp</th>
                     <th className="py-3 px-4">Loại</th>
@@ -732,23 +725,23 @@ export default function FinalDeliveryModal({
                     <th className="py-3 px-4 text-right">Thao tác</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-white/5">
+                <tbody className="divide-y divide-[#221E1A]/10">
                   {filteredFiles.map((fileItem) => {
                     const isDownloadingThis = downloadingFileId === fileItem.id;
 
                     return (
-                      <tr key={fileItem.id} className="hover:bg-white/[0.02] transition-colors">
-                        <td className="py-3 px-4 font-medium text-white flex items-center gap-2">
-                          <File className="w-4 h-4 text-[#A7ACD9] shrink-0" />
+                      <tr key={fileItem.id} className="hover:bg-[#FFFCF6] transition-colors">
+                        <td className="py-3 px-4 font-medium text-[#241F1A] flex items-center gap-2">
+                          <File className="w-4 h-4 text-[#B24A26] shrink-0" />
                           <span className="truncate max-w-[280px]" title={fileItem.name}>
                             {fileItem.name}
                           </span>
                         </td>
-                        <td className="py-3 px-4 uppercase text-[10px] text-slate-400">
+                        <td className="py-3 px-4 uppercase text-[10px] text-[#746A5F]">
                           {fileItem.extension}
                         </td>
-                        <td className="py-3 px-4 text-slate-300">{formatFileSize(fileItem.size)}</td>
-                        <td className="py-3 px-4 text-slate-400">
+                        <td className="py-3 px-4 text-[#746A5F]">{formatFileSize(fileItem.size)}</td>
+                        <td className="py-3 px-4 text-[#746A5F]">
                           {new Date(fileItem.updatedAt).toLocaleDateString('vi-VN')}
                         </td>
                         <td className="py-3 px-4 text-right">
@@ -757,16 +750,15 @@ export default function FinalDeliveryModal({
                               <button
                                 type="button"
                                 onClick={() => setShowCertPreview(true)}
-                                className="px-3 py-1 rounded-lg bg-white/10 hover:bg-white/15 text-white text-xs font-semibold flex items-center gap-1"
+                                className="px-3 py-1 rounded-lg bg-[#F0E7D8] hover:bg-[#F0E7D8] text-[#241F1A] text-xs font-semibold flex items-center gap-1"
                               >
-                                <Printer className="w-3.5 h-3.5" /> Xuất COA
-                              </button>
+                                <Printer className="w-3.5 h-3.5" /> Xuất COA </button>
                             ) : (
                               <button
                                 type="button"
                                 onClick={() => handleDownloadFile(fileItem)}
                                 disabled={isDownloadingThis}
-                                className="px-3 py-1 rounded-lg bg-[#A7ACD9] hover:bg-[#B8BCDF] text-[#1F2335] text-xs font-bold flex items-center gap-1 disabled:opacity-50"
+                                className="px-3 py-1 rounded-lg bg-[#B24A26] hover:bg-[#8C3718] text-[#F7F2E9] text-xs font-bold flex items-center gap-1 disabled:opacity-50"
                               >
                                 <Download className="w-3.5 h-3.5" />
                                 {isDownloadingThis ? 'Đang tạo...' : 'Tải về'}
@@ -778,7 +770,7 @@ export default function FinalDeliveryModal({
                                 type="button"
                                 onClick={() => handleDeleteDriveFile(fileItem)}
                                 disabled={deletingFileId === fileItem.id || deliverableCount <= 1}
-                                className="p-1 text-slate-400 hover:text-rose-400 disabled:opacity-30 disabled:cursor-not-allowed"
+                                className="p-1 text-[#746A5F] hover:text-[#A8321C] disabled:opacity-30 disabled:cursor-not-allowed"
                                 title={deliverableCount <= 1 ? 'Phải giữ ít nhất 1 tệp; hãy tải tệp mới trước khi xóa' : 'Gỡ tệp này khỏi kho'}
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
@@ -796,30 +788,29 @@ export default function FinalDeliveryModal({
 
           {files.length === 0 ? (
             <div className="py-16 text-center space-y-3">
-              <div className="w-14 h-14 mx-auto rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-500">
+              <div className="w-14 h-14 mx-auto rounded-2xl bg-[#FFFCF6] border border-[#221E1A]/10 flex items-center justify-center text-[#746A5F]">
                 <FolderOpen className="w-7 h-7" />
               </div>
-              <p className="text-sm font-semibold text-slate-200">Kho tệp hiện đang trống</p>
-              <p className="text-xs text-slate-400 max-w-sm mx-auto">
+              <p className="text-sm font-semibold text-[#6E6459]">Kho tệp hiện đang trống</p>
+              <p className="text-xs text-[#746A5F] max-w-sm mx-auto">
                 {isCreator
-                  ? 'Chưa có file nào trong kho. Bấm nút "+ Thêm tệp" hoặc kéo thả file vào khung để tải lên cho khách hàng.'
-                  : 'Họa sĩ chưa tải lên file bàn giao nào cho đơn hàng này.'}
+                  ? 'Chưa có tệp nào trong kho. Bấm nút "+ Thêm tệp" hoặc kéo thả tệp vào khung để tải lên cho khách hàng.'
+                  : 'Họa sĩ chưa tải lên tệp bàn giao nào cho đơn hàng này.'}
               </p>
               {canUploadDeliverables && (
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="mt-2 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#A7ACD9] hover:bg-[#B8BCDF] text-[#1F2335] text-xs font-bold transition-all shadow"
+                  className="mt-2 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#B24A26] hover:bg-[#8C3718] text-[#F7F2E9] text-xs font-bold transition-all shadow"
                 >
-                  <Plus className="w-4 h-4" /> Bắt đầu thêm tệp
-                </button>
+                  <Plus className="w-4 h-4" /> Bắt đầu thêm tệp </button>
               )}
             </div>
           ) : filteredFiles.length === 0 ? (
             <div className="py-12 text-center space-y-2">
-              <FolderOpen className="w-10 h-10 mx-auto text-slate-500" />
-              <p className="text-sm font-semibold text-slate-300">Không tìm thấy tệp phù hợp</p>
-              <p className="text-xs text-slate-500">Hãy thử tìm từ khóa khác hoặc xóa bộ lọc.</p>
+              <FolderOpen className="w-10 h-10 mx-auto text-[#746A5F]" />
+              <p className="text-sm font-semibold text-[#746A5F]">Không tìm thấy tệp phù hợp</p>
+              <p className="text-xs text-[#746A5F]">Hãy thử tìm từ khóa khác hoặc xóa bộ lọc.</p>
             </div>
           ) : null}
 
@@ -835,29 +826,27 @@ export default function FinalDeliveryModal({
             const isExpired = remainingSec === 0;
 
             return (
-              <div className="relative overflow-hidden space-y-2.5 p-3.5 rounded-xl bg-white/[0.03] border border-white/10 text-xs text-slate-400">
+              <div className="relative overflow-hidden space-y-2.5 p-3.5 rounded-xl bg-[#FFFCF6] border border-[#221E1A]/10 text-xs text-[#746A5F]">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                   <div className="flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-sky-400 shrink-0" />
+                    <Clock className="w-4 h-4 text-[#2C6A86] shrink-0" />
                     <span>Mỗi lần tải tệp, hệ thống tạo một liên kết bảo mật có hiệu lực trong 15 phút.</span>
                   </div>
                   {downloadExpiresAt && remainingSec !== null && (
                     <div className="flex items-center gap-2 shrink-0">
                       {isExpired ? (
-                        <span className="inline-flex items-center gap-1.5 rounded-lg border border-rose-400/30 bg-rose-500/10 px-2.5 py-1 text-rose-300 font-medium">
-                          Liên kết đã hết hạn — bấm Tải xuống để tạo lại
-                        </span>
+                        <span className="inline-flex items-center gap-1.5 rounded-lg border border-[#A8321C]/40 bg-[#A8321C]/10 px-2.5 py-1 text-[#A8321C] font-medium"> Liên kết đã hết hạn — bấm Tải xuống để tạo lại </span>
                       ) : (
                         <span
                           className={`inline-flex items-center gap-2 rounded-lg border px-2.5 py-1 font-medium ${
                             isExpiringSoon
-                              ? 'border-amber-400/30 bg-amber-500/10 text-amber-300'
-                              : 'border-emerald-400/30 bg-emerald-500/10 text-emerald-300'
+                              ? 'border-[#8A6A1F]/40 bg-[#8A6A1F]/10 text-[#8A6A1F]'
+                              : 'border-[#2F6B63]/40 bg-[#2F6B63]/10 text-[#2F6B63]'
                           }`}
                         >
                           <span
                             className={`h-2 w-2 rounded-full animate-pulse ${
-                              isExpiringSoon ? 'bg-amber-400' : 'bg-emerald-400'
+                              isExpiringSoon ? 'bg-[#8A6A1F]/10' : 'bg-[#2F6B63]/10'
                             }`}
                           />
                           <span className="font-mono tabular-nums font-bold">
@@ -872,9 +861,8 @@ export default function FinalDeliveryModal({
                   )}
                 </div>
                 {activeDownload && !isExpired && (
-                  <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-white/10 bg-black/25 px-3 py-2 text-[11px]">
-                    <span className="text-slate-300 truncate max-w-[420px]">
-                      Trình duyệt chưa tự tải <strong className="text-white">{activeDownload.fileName}</strong>?
+                  <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-[#221E1A]/10 bg-[#F0E7D8]/25 px-3 py-2 text-[11px]">
+                    <span className="text-[#746A5F] truncate max-w-[420px]"> Trình duyệt chưa tự tải <strong className="text-[#241F1A]">{activeDownload.fileName}</strong>?
                     </span>
                     <div className="flex items-center gap-2 shrink-0">
                       <a
@@ -882,10 +870,8 @@ export default function FinalDeliveryModal({
                         download={activeDownload.fileName}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="rounded-md bg-[#A7ACD9]/20 hover:bg-[#A7ACD9]/30 border border-[#A7ACD9]/40 px-2.5 py-1 font-semibold text-[#C5C9F8] transition-colors"
-                      >
-                        Bấm tải trực tiếp
-                      </a>
+                        className="rounded-md bg-[#B24A26]/20 hover:bg-[#B24A26]/30 border border-[#B24A26]/40 px-2.5 py-1 font-semibold text-[#8C3718] transition-colors"
+                      > Bấm tải trực tiếp </a>
                       <button
                         type="button"
                         onClick={() => {
@@ -894,7 +880,7 @@ export default function FinalDeliveryModal({
                             window.setTimeout(() => setCopiedLink(false), 2000);
                           });
                         }}
-                        className="rounded-md bg-white/5 hover:bg-white/10 border border-white/10 px-2.5 py-1 text-slate-300 transition-colors"
+                        className="rounded-md bg-[#FFFCF6] hover:bg-[#F0E7D8] border border-[#221E1A]/10 px-2.5 py-1 text-[#746A5F] transition-colors"
                       >
                         {copiedLink ? 'Đã copy' : 'Copy link'}
                       </button>
@@ -902,10 +888,10 @@ export default function FinalDeliveryModal({
                   </div>
                 )}
                 {downloadExpiresAt && remainingSec !== null && (
-                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-white/5">
+                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#FFFCF6]">
                     <div
                       className={`h-full transition-[width] duration-1000 ease-linear ${
-                        isExpired ? 'bg-rose-400' : isExpiringSoon ? 'bg-amber-400' : 'bg-emerald-400'
+                        isExpired ? 'bg-[#A8321C]/10' : isExpiringSoon ? 'bg-[#8A6A1F]/10' : 'bg-[#2F6B63]/10'
                       }`}
                       style={{ width: `${pct}%` }}
                     />
@@ -916,16 +902,16 @@ export default function FinalDeliveryModal({
           })()}
 
           {downloadError && (
-            <div className="p-3.5 bg-rose-500/10 border border-rose-500/20 rounded-xl text-xs text-rose-300">
+            <div className="p-3.5 bg-[#A8321C]/10 border border-[#A8321C]/30 rounded-xl text-xs text-[#A8321C]">
               {downloadError}
             </div>
           )}
 
           {/* CREATOR DELIVERABLE NOTICE (distinct from Client warning) */}
           {isCreator && (commissionStatus === 'InProgress' || commissionStatus === 'Delivered') && (
-            <div className="space-y-1.5 border-t border-[#A7ACD9]/25 bg-[#161928]/60 p-4 rounded-2xl text-xs">
-              <p className="font-bold text-[#C5C9F8]">Lưu ý dành cho Họa sĩ (Creator)</p>
-              <p className="text-slate-300 leading-relaxed">
+            <div className="space-y-1.5 border-t border-[#B24A26]/25 bg-[#FFFCF6]/60 p-4 rounded-2xl text-xs">
+              <p className="font-bold text-[#8C3718]">Lưu ý dành cho Họa sĩ</p>
+              <p className="text-[#746A5F] leading-relaxed">
                 {commissionStatus === 'Delivered'
                   ? `Bạn vẫn có thể thêm hoặc gỡ tệp lẻ cho đến khi khách hàng bấm hoàn tất. Mọi thay đổi sẽ tự động cập nhật mã phiên bản bàn giao${manifestVersion ? ` (#${manifestVersion.slice(0, 8)})` : ''} và thông báo cho khách hàng kiểm tra lại — kho tệp sẽ khóa vĩnh viễn ngay khi đơn hoàn tất.`
                   : 'Hãy tải lên đầy đủ các tệp vẽ gốc chất lượng cao (có thể chọn nhiều tệp cùng lúc, không cần tự nén ZIP). Hệ thống tự động kiểm tra chữ ký định dạng và tạo mã kiểm chứng SHA-256 cho từng tệp.'}
@@ -935,36 +921,34 @@ export default function FinalDeliveryModal({
 
           {/* CLIENT ACCEPTANCE WORKFLOW */}
           {!isCreator && commissionStatus === 'Delivered' && (
-            <div className="space-y-3 border-t border-amber-500/25 bg-[#161928]/60 p-4 rounded-2xl">
-              <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-amber-200 space-y-1.5">
-                <p className="font-bold text-amber-300">Lưu ý quan trọng dành cho Khách hàng: Kiểm tra kỹ tệp trước khi xác nhận hoàn tất</p>
-                <p className="text-amber-100/90 leading-relaxed">
-                  Vui lòng tải xuống và mở kiểm tra từng tệp gốc (đúng kích thước, độ phân giải, đầy đủ layer và không bị lỗi/giả mạo). Sau khi bạn bấm hoàn tất, tiền Escrow sẽ được giải ngân cho họa sĩ, kho tệp sẽ khóa chỉnh sửa và giao dịch không thể hoàn tác.
-                </p>
+            <div className="space-y-3 border-t border-[#8A6A1F]/35 bg-[#FFFCF6]/60 p-4 rounded-2xl">
+              <div className="rounded-xl border border-[#8A6A1F]/40 bg-[#8A6A1F]/10 p-3 text-xs text-[#8A6A1F] space-y-1.5">
+                <p className="font-bold text-[#8A6A1F]">Lưu ý quan trọng dành cho Khách hàng: Kiểm tra kỹ tệp trước khi xác nhận hoàn tất</p>
+                <p className="text-[#8A6A1F] leading-relaxed"> Vui lòng tải xuống và mở kiểm tra từng tệp gốc (đúng kích thước, độ phân giải, đầy đủ lớp và không bị lỗi/giả mạo). Sau khi bạn bấm hoàn tất, tiền ký quỹ sẽ được giải ngân cho họa sĩ, kho tệp sẽ khóa chỉnh sửa và giao dịch không thể hoàn tác. </p>
                 {manifestVersion && downloadedVersion !== manifestVersion && (
-                  <p className="font-semibold text-rose-300">
+                  <p className="font-semibold text-[#A8321C]">
                     Bạn chưa tải xuống tệp nào từ phiên bản bàn giao mới nhất (#{manifestVersion.slice(0, 8)}).
                   </p>
                 )}
               </div>
 
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <label className="flex items-start gap-2.5 text-xs text-slate-200 cursor-pointer select-none">
+                <label className="flex items-start gap-2.5 text-xs text-[#6E6459] cursor-pointer select-none">
                   <input
                     type="checkbox"
                     checked={inspectedConfirmed}
                     onChange={(e) => setInspectedConfirmed(e.target.checked)}
-                    className="mt-0.5 h-4 w-4 rounded border-white/20 bg-black/40 accent-emerald-500 shrink-0"
+                    className="mt-0.5 h-4 w-4 rounded border-[#221E1A]/20 bg-[#F0E7D8] accent-[#2F6B63] shrink-0"
                   />
                   <span>
-                    Tôi đã tải xuống, mở kiểm tra kỹ toàn bộ tệp ở phiên bản hiện tại{manifestVersion ? ` (#${manifestVersion.slice(0, 8)})` : ''} và đồng ý giải ngân Escrow để hoàn tất dịch vụ.
+                    Tôi đã tải xuống, mở kiểm tra kỹ toàn bộ tệp ở phiên bản hiện tại{manifestVersion ? ` (#${manifestVersion.slice(0, 8)})` : ''} và đồng ý giải ngân ký quỹ để hoàn tất dịch vụ.
                   </span>
                 </label>
                 <button
                   type="button"
                   onClick={handleCompleteCommission}
                   disabled={isCompleting || !inspectedConfirmed}
-                  className="w-full sm:w-auto px-6 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs md:text-sm flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-500/20 disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
+                  className="w-full sm:w-auto px-6 py-3 rounded-xl bg-[#2F6B63]/12 hover:bg-[#2F6B63]/10 text-[#241F1A] font-bold text-xs md:text-sm flex items-center justify-center gap-2 transition-all shadow-lg shadow-[#2F6B63] disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
                 >
                   <CheckCircle2 className="w-4 h-4" />
                   {isCompleting ? 'Đang hoàn tất...' : 'Xác nhận hoàn tất & Nghiệm thu'}
@@ -974,18 +958,17 @@ export default function FinalDeliveryModal({
           )}
 
           {!isCreator && commissionStatus === 'Completed' && onOpenReviewModal && (
-            <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-white/10">
-              <p className="text-xs text-emerald-400 flex items-center gap-1.5 font-medium">
-                <CheckCircle2 className="w-4 h-4" /> Đơn hàng đã hoàn tất nghiệm thu và lưu trữ an toàn trong Drive.
-              </p>
+            <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-[#221E1A]/10">
+              <p className="text-xs text-[#2F6B63] flex items-center gap-1.5 font-medium">
+                <CheckCircle2 className="w-4 h-4" /> Đơn hàng đã hoàn tất nghiệm thu và lưu trữ an toàn trong Drive. </p>
               {commission?.review ? (
                 <div className="flex items-center gap-2 w-full sm:w-auto">
                   <button
                     type="button"
                     disabled
-                    className="flex-1 sm:flex-none px-4 py-2 rounded-xl border border-white/10 bg-white/5 text-slate-400 font-semibold text-xs md:text-sm flex items-center justify-center gap-2 cursor-not-allowed opacity-75"
+                    className="flex-1 sm:flex-none px-4 py-2 rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] text-[#746A5F] font-semibold text-xs md:text-sm flex items-center justify-center gap-2 cursor-not-allowed opacity-75"
                   >
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                    <CheckCircle2 className="w-4 h-4 text-[#2F6B63]" />
                     Đã đánh giá ({commission.review.rating}★)
                   </button>
                   <button
@@ -994,9 +977,9 @@ export default function FinalDeliveryModal({
                       onClose();
                       onOpenReviewModal();
                     }}
-                    className="flex-1 sm:flex-none px-4 py-2 rounded-xl border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 font-semibold text-xs md:text-sm flex items-center justify-center gap-2 transition-all active:scale-95 shadow-sm"
+                    className="flex-1 sm:flex-none px-4 py-2 rounded-xl border border-[#8A6A1F]/40 bg-[#8A6A1F]/10 hover:bg-[#8A6A1F]/20 text-[#8A6A1F] font-semibold text-xs md:text-sm flex items-center justify-center gap-2 transition-all active:scale-95 shadow-sm"
                   >
-                    🎁 Gửi Tip Creator
+                    🎁 Gửi Tip họa sĩ
                   </button>
                 </div>
               ) : (
@@ -1006,7 +989,7 @@ export default function FinalDeliveryModal({
                     onClose();
                     onOpenReviewModal();
                   }}
-                  className="w-full sm:w-auto px-5 py-2.5 rounded-xl border border-[#A7ACD9]/30 bg-[#A7ACD9]/10 hover:bg-[#A7ACD9]/20 text-[#A7ACD9] font-semibold text-xs md:text-sm flex items-center justify-center gap-2 transition-all active:scale-95"
+                  className="w-full sm:w-auto px-5 py-2.5 rounded-xl border border-[#B24A26]/30 bg-[#B24A26]/10 hover:bg-[#B24A26]/20 text-[#B24A26] font-semibold text-xs md:text-sm flex items-center justify-center gap-2 transition-all active:scale-95"
                 >
                   ⭐ Đánh giá &amp; Tip Creator
                 </button>

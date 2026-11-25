@@ -77,8 +77,8 @@ export function RevenueScreen({ userId }: { userId: string | null }) {
                 onClick={() => setRangeDays(d)}
                 className={`rounded-full px-4 py-1.5 text-xs font-semibold transition ${
                   rangeDays === d
-                    ? 'bg-brand-periwinkle text-brand-navy'
-                    : 'border border-white/10 bg-white/5 text-on-surface-variant hover:bg-white/10'
+                    ? 'bg-brand-periwinkle text-[#FFFCF6]'
+                    : 'border border-[#221E1A]/10 bg-[#FFFCF6] text-on-surface-variant hover:bg-[#F0E7D8]'
                 }`}
               >
                 {d} ngày qua
@@ -88,7 +88,7 @@ export function RevenueScreen({ userId }: { userId: string | null }) {
               type="button"
               onClick={loadData}
               disabled={loading}
-              className="rounded-full border border-white/10 bg-white/5 p-2 text-outline hover:text-white"
+              className="rounded-full border border-[#221E1A]/10 bg-[#FFFCF6] p-2 text-outline hover:text-[#241F1A]"
               title="Làm mới dữ liệu"
             >
               <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
@@ -98,7 +98,7 @@ export function RevenueScreen({ userId }: { userId: string | null }) {
       />
 
       {error && (
-        <div role="alert" className="mb-6 flex items-center gap-2 rounded-2xl border border-red-400/30 bg-red-500/10 p-4 text-sm text-red-200">
+        <div role="alert" className="mb-6 flex items-center gap-2 rounded-2xl border border-[#A8321C]/40 bg-[#A8321C]/10 p-4 text-sm text-[#A8321C]">
           <CircleAlert size={18} className="shrink-0" />
           <span>{error}</span>
         </div>
@@ -117,10 +117,10 @@ export function RevenueScreen({ userId }: { userId: string | null }) {
           <span className="mt-1 block text-xs text-outline">Đã khấu trừ phí nền tảng</span>
         </div>
 
-        <div className="glass-container rounded-3xl border border-white/10 p-5">
+        <div className="glass-container rounded-3xl border border-[#221E1A]/10 p-5">
           <div className="mb-2 flex items-center justify-between text-xs text-on-surface-variant">
             <span>Tổng doanh thu gộp</span>
-            <TrendingUp size={16} className="text-emerald-400" />
+            <TrendingUp size={16} className="text-[#2F6B63]" />
           </div>
           <p className="font-h1 text-2xl font-bold text-on-surface">
             {formatVnd(summary?.grossAmount ?? 0)}
@@ -135,12 +135,12 @@ export function RevenueScreen({ userId }: { userId: string | null }) {
 
         {/* Tiền sàn đang giữ: KHÔNG phải doanh thu, nhưng người bán cần biết tiền đang ở đâu
             (phiên đã chốt nhưng đang chờ giao tranh vật lý hoặc đang khiếu nại). */}
-        <div className="glass-container rounded-3xl border border-amber-400/25 bg-amber-400/5 p-5">
-          <div className="mb-2 flex items-center justify-between text-xs text-amber-300">
+        <div className="glass-container rounded-3xl border border-[#8A6A1F]/35 bg-[#8A6A1F]/5 p-5">
+          <div className="mb-2 flex items-center justify-between text-xs text-[#8A6A1F]">
             <span className="font-semibold">Đang giữ ở sàn</span>
             <ShieldCheck size={16} />
           </div>
-          <p className="font-h1 text-2xl font-bold text-amber-200">
+          <p className="font-h1 text-2xl font-bold text-[#8A6A1F]">
             {formatVnd(summary?.escrowHeldAmount ?? 0)}
           </p>
           <span className="mt-1 block text-xs text-outline">
@@ -150,10 +150,10 @@ export function RevenueScreen({ userId }: { userId: string | null }) {
           </span>
         </div>
 
-        <div className="glass-container rounded-3xl border border-white/10 p-5">
+        <div className="glass-container rounded-3xl border border-[#221E1A]/10 p-5">
           <div className="mb-2 flex items-center justify-between text-xs text-on-surface-variant">
             <span>Đơn hoàn tất</span>
-            <BarChart3 size={16} className="text-sky-400" />
+            <BarChart3 size={16} className="text-[#2C6A86]" />
           </div>
           <p className="font-h1 text-2xl font-bold text-on-surface">
             {summary?.completedOrderCount ?? 0}
@@ -161,10 +161,10 @@ export function RevenueScreen({ userId }: { userId: string | null }) {
           <span className="mt-1 block text-xs text-outline">Hợp đồng và phiên đấu giá</span>
         </div>
 
-        <div className="glass-container rounded-3xl border border-white/10 p-5">
+        <div className="glass-container rounded-3xl border border-[#221E1A]/10 p-5">
           <div className="mb-2 flex items-center justify-between text-xs text-on-surface-variant">
             <span>Giá trị trung bình mỗi đơn</span>
-            <Layers size={16} className="text-amber-400" />
+            <Layers size={16} className="text-[#8A6A1F]" />
           </div>
           <p className="font-h1 text-2xl font-bold text-on-surface">
             {formatVnd(summary?.averageOrderValue ?? 0)}
@@ -175,7 +175,7 @@ export function RevenueScreen({ userId }: { userId: string | null }) {
 
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Biểu đồ chuỗi thời gian (SVG, không cần thư viện chart) */}
-        <section className="glass-container rounded-3xl border border-white/10 p-6 lg:col-span-2">
+        <section className="glass-container rounded-3xl border border-[#221E1A]/10 p-6 lg:col-span-2">
           <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
             <h2 className="font-h1 text-base font-bold">Biến động doanh thu theo thời gian</h2>
             <span className="text-[11px] text-outline">Đường: thu nhập ròng · đưa chuột lên điểm để xem gộp/phí</span>
@@ -184,16 +184,14 @@ export function RevenueScreen({ userId }: { userId: string | null }) {
         </section>
 
         {/* Cơ cấu nguồn thu */}
-        <section className="glass-container rounded-3xl border border-white/10 p-6">
+        <section className="glass-container rounded-3xl border border-[#221E1A]/10 p-6">
           <h2 className="mb-4 font-h1 text-base font-bold">Cơ cấu nguồn thu</h2>
           {breakdown.length === 0 ? (
-            <div className="flex h-56 items-center justify-center text-sm text-outline">
-              Chưa có phân loại nguồn thu.
-            </div>
+            <div className="flex h-56 items-center justify-center text-sm text-outline"> Chưa có phân loại nguồn thu. </div>
           ) : (
             <div className="space-y-4">
               {breakdown.map((b) => (
-                <div key={b.key} className="rounded-2xl border border-white/5 bg-white/[0.02] p-4">
+                <div key={b.key} className="rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] p-4">
                   <div className="flex items-center justify-between text-xs">
                     <span className="font-semibold text-on-surface">
                       {b.label === 'Commission' ? 'Vẽ tranh theo yêu cầu' : b.label === 'Auction' ? 'Đấu giá tác phẩm' : b.label}
@@ -212,14 +210,14 @@ export function RevenueScreen({ userId }: { userId: string | null }) {
       </div>
 
       {/* Danh sách bản chụp sao lưu doanh thu (Snapshots) */}
-      <section className="glass-container mt-8 rounded-3xl border border-white/10 p-6">
+      <section className="glass-container mt-8 rounded-3xl border border-[#221E1A]/10 p-6">
         <h2 className="mb-4 font-h1 text-base font-bold">Lịch sử kết toán doanh thu định kỳ</h2>
         {snapshots.length === 0 ? (
           <p className="text-center text-sm text-outline">Chưa có bản ghi kết toán nào.</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="border-b border-white/10 text-outline">
+              <thead className="border-b border-[#221E1A]/10 text-outline">
                 <tr>
                   <th className="pb-3">Ngày kết toán</th>
                   <th className="pb-3">Phạm vi</th>
@@ -231,9 +229,9 @@ export function RevenueScreen({ userId }: { userId: string | null }) {
                   <th className="pb-3 text-right">Số đơn</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5 font-mono">
+              <tbody className="divide-y divide-[#221E1A]/10 font-mono">
                 {snapshots.map((s) => (
-                  <tr key={s.revenueSnapshotId} className="hover:bg-white/[0.02]">
+                  <tr key={s.revenueSnapshotId} className="hover:bg-[#FFFCF6]">
                     <td className="py-3 text-on-surface">{new Date(s.snapshotDate).toLocaleDateString('vi-VN')}</td>
                     <td className="py-3 text-on-surface-variant">{s.scope}</td>
                     <td className="py-3 text-right text-on-surface">{formatVnd(s.grossAmount)}</td>

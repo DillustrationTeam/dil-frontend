@@ -1,23 +1,24 @@
 'use client';
 
+import { Wordmark } from '@/components/brand/wordmark';
 import Link from 'next/link';
 import React from 'react';
 import { useLanguage } from '@/context/language-context';
 
 export const AUTH_LABEL_CLASS =
-  'block text-[11px] font-semibold uppercase tracking-[0.12em] text-[#C7C5CF]';
+  'block text-[0.8125rem] font-medium text-[#6E6459]';
 
 export const AUTH_INPUT_WRAP_CLASS =
-  'relative flex items-center rounded-xl border border-white/10 bg-[#141724]/90 transition-all duration-200 focus-within:border-[#A7ACD9] focus-within:ring-1 focus-within:ring-[#A7ACD9]';
+  'relative flex items-center rounded-[14px] border border-[#221E1A]/12 bg-[#FFFCF6] transition-all duration-200 focus-within:border-[#B24A26] focus-within:ring-4 focus-within:ring-[#B24A26]/12';
 
 export const AUTH_INPUT_CLASS =
-  'h-12 w-full bg-transparent text-sm text-[#E4E1E5] placeholder:text-[#919099] focus:outline-none disabled:opacity-60';
+  'h-12 w-full bg-transparent text-sm text-[#241F1A] placeholder:text-[#746A5F] focus:outline-none disabled:opacity-60';
 
 export const AUTH_PRIMARY_BTN_CLASS =
-  'flex h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#A7ACD9] px-5 text-sm font-bold text-[#1F2335] shadow-[0_8px_24px_rgba(167,172,217,0.22)] transition-all duration-200 hover:bg-[#c2c7f6] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50';
+  'flex h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-[#B24A26] px-5 text-[0.9375rem] font-semibold text-[#FFFCF6] shadow-[0_16px_28px_-18px_rgba(178,74,38,0.9)] transition-all duration-200 hover:bg-[#8C3718] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50';
 
 export const AUTH_SECONDARY_BTN_CLASS =
-  'flex h-11 w-full cursor-pointer items-center justify-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 text-xs font-semibold text-[#C7C5CF] transition-all hover:bg-white/10 hover:text-white disabled:opacity-50';
+  'flex h-12 w-full cursor-pointer items-center justify-center gap-3 rounded-full border border-[#221E1A]/12 bg-[#FFFCF6] px-4 text-[0.9375rem] font-medium text-[#241F1A] transition-all hover:border-[#B24A26]/45 hover:text-[#8C3718] disabled:opacity-50';
 
 interface AuthShellProps {
   children: React.ReactNode;
@@ -25,53 +26,74 @@ interface AuthShellProps {
 
 /**
  * Khung giao diện đồng bộ cho các màn hình xác thực (/login, /register, /forgot-password, /verify-otp):
- * dùng chung /weblogo.png, hiệu ứng nền glass-container và thanh chân trang tối giản.
+ * dùng logo chữ (Wordmark) và bố cục hai cột như bản redesign.
  */
 export function AuthShell({ children }: AuthShellProps) {
   const { lang } = useLanguage();
   const isEng = lang === 'ENG';
 
-  return (
-    <div className="relative flex min-h-screen w-full flex-col items-center justify-center overflow-hidden bg-[#1F2335] px-4 py-10 text-[#E4E1E5] font-body sm:px-6">
-      {/* Ambient Background Glows */}
-      <div className="pointer-events-none fixed inset-0 -z-0 overflow-hidden" aria-hidden="true">
-        <div className="absolute -left-[12%] -top-[14%] h-[48%] w-[48%] rounded-full bg-[#A7ACD9]/12 blur-[130px]" />
-        <div className="absolute -bottom-[14%] -right-[10%] h-[44%] w-[44%] rounded-full bg-[#c2c7f6]/10 blur-[130px]" />
-      </div>
+  // Ảnh bìa: lấy tác phẩm mới nhất đã duyệt; không có thì dùng nền giấy.
+  const [cover, setCover] = React.useState<string | null>(null);
+  React.useEffect(() => {
+    let active = true;
+    import('@/features/marketplace/services/marketplace.service')
+      .then(({ marketplaceService }) => marketplaceService.getArtworks())
+      .then((items) => {
+        if (!active) return;
+        const approved = items.find((item) => item.moderationStatus === 'Approved' && item.imageUrl);
+        if (approved) setCover(approved.thumbnailUrl || approved.imageUrl);
+      })
+      .catch(() => undefined);
+    return () => {
+      active = false;
+    };
+  }, []);
 
-      <main className="relative z-10 w-full max-w-[480px]">
-        {/* Brand Logo đồng bộ weblogo.png */}
-        <div className="mb-6 flex flex-col items-center text-center">
-          <Link href="/" className="group inline-flex items-center justify-center">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/weblogo.png"
-              alt="dillustration"
-              className="h-14 w-auto object-contain drop-shadow-[0_0_20px_rgba(194,199,246,0.28)] transition-transform duration-200 group-hover:scale-105 sm:h-16"
-            />
-          </Link>
-          <p className="mt-2 text-[11px] font-medium uppercase tracking-[0.2em] text-[#919099]">
-            {isEng ? 'Digital Art Commission & Auction' : 'Nền tảng Commission & Đấu giá tranh số'}
+  return (
+    <div className="auth">
+      {/* Cột trái: tranh + câu dẫn (ẩn dưới 960px) */}
+      <aside className="auth__panel">
+        {cover ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={cover} alt="" aria-hidden="true" />
+        ) : null}
+        <div className="auth__panel-body">
+          <p className="eyebrow">Phòng tranh dilillustration</p>
+          <p className="auth__quote"> Một phòng tranh giữ <em>ánh sáng</em> cho tác phẩm của bạn. </p>
+          <p className="auth__caption">
+            {isEng
+              ? 'Commissions, auctions and the workroom — one account.'
+              : 'Đặt vẽ, đấu giá và phòng làm việc — trong một tài khoản.'}
           </p>
         </div>
+      </aside>
 
-        {/* Auth Card */}
-        <div className="glass-container rounded-[28px] p-7 shadow-2xl sm:p-9">
+      {/* Thanh trên: quay lại + wordmark */}
+      <div className="authbar">
+        <Link href="/" className="authbar__back">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="m12 19-7-7 7-7" />
+            <path d="M19 12H5" />
+          </svg>
+          {isEng ? 'Back to gallery' : 'Về phòng tranh'}
+        </Link>
+        <Wordmark size="lg" href="/" className="authbar__mark" />
+      </div>
+
+      <main className="auth__main">
+        <div className="auth__card">
           {children}
-        </div>
-
-        {/* Minimal Footer */}
-        <footer className="mt-6 flex flex-wrap items-center justify-between gap-3 px-2 text-xs text-[#919099]">
-          <span>© 2026 DILLUSTRATION</span>
-          <div className="flex items-center gap-5">
-            <Link href="/privacy" className="transition-colors hover:text-[#A7ACD9]">
+          <p className="auth__alt text-center text-[0.8125rem] text-[#746A5F]">
+            © 2026 DILLUSTRATION ·{' '}
+            <Link href="/privacy" className="text-[#8C3718] hover:underline">
               {isEng ? 'Privacy' : 'Bảo mật'}
-            </Link>
-            <Link href="/guide" className="transition-colors hover:text-[#A7ACD9]">
+            </Link>{' '}
+            ·{' '}
+            <Link href="/guide" className="text-[#8C3718] hover:underline">
               {isEng ? 'Guide' : 'Hướng dẫn'}
             </Link>
-          </div>
-        </footer>
+          </p>
+        </div>
       </main>
     </div>
   );
@@ -107,7 +129,7 @@ export function GoogleAuthButton({
           d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
         />
         <path
-          fill="#EA4335"
+          fill="#E5D8C2"
           d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
         />
       </svg>

@@ -47,11 +47,11 @@ export function ImageCropModal({
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-4">
-      <div className="w-full max-w-lg rounded-3xl border border-white/10 bg-[#1F2335] p-5">
-        <p className="mb-4 text-sm font-semibold text-white">Cắt ảnh</p>
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#E5D8C2] p-4">
+      <div className="w-full max-w-lg rounded-3xl border border-[#221E1A]/10 bg-[#F7F2E9] p-5">
+        <p className="mb-4 text-sm font-semibold text-[#241F1A]">Cắt ảnh</p>
 
-        <div className="relative h-80 w-full overflow-hidden rounded-2xl bg-black">
+        <div className="relative h-80 w-full overflow-hidden rounded-2xl bg-[#F0E7D8]">
           <Cropper
             image={imageSrc}
             crop={crop}
@@ -69,7 +69,7 @@ export function ImageCropModal({
 
         <div className="mt-4 space-y-3">
           <div className="flex items-center gap-3">
-            <span className="w-12 text-xs text-[#C7C5CF]">Zoom</span>
+            <span className="w-12 text-xs text-[#6E6459]">Zoom</span>
             <input
               type="range"
               min={1}
@@ -81,7 +81,7 @@ export function ImageCropModal({
             />
           </div>
           <div className="flex items-center gap-3">
-            <span className="w-12 text-xs text-[#C7C5CF]">Xoay</span>
+            <span className="w-12 text-xs text-[#6E6459]">Xoay</span>
             <input
               type="range"
               min={0}
@@ -98,15 +98,13 @@ export function ImageCropModal({
           <button
             type="button"
             onClick={onCancel}
-            className="rounded-xl border border-white/10 px-4 py-2 text-sm text-[#C7C5CF] transition hover:border-white/30"
-          >
-            Hủy
-          </button>
+            className="rounded-xl border border-[#221E1A]/10 px-4 py-2 text-sm text-[#6E6459] transition hover:border-[#221E1A]/20"
+          > Hủy </button>
           <button
             type="button"
             onClick={handleConfirm}
             disabled={isProcessing || !croppedAreaPixels}
-            className="rounded-xl bg-[#A7ACD9] px-4 py-2 text-sm font-bold text-[#1F2335] transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
+            className="rounded-xl bg-[#B24A26] px-4 py-2 text-sm font-bold text-[#F7F2E9] transition hover:bg-[#F0E7D8] disabled:cursor-not-allowed disabled:opacity-60"
           >
             {isProcessing ? 'Đang xử lý...' : 'Lưu'}
           </button>

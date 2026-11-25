@@ -4,7 +4,7 @@ import { CreatorsDirectory } from '@/features/marketplace';
 export const metadata: Metadata = {
   title: 'Tìm Họa Sĩ & Đặt Vẽ | dillustration',
   description:
-    'Tìm kiếm và lọc danh sách họa sĩ chuyên về từng danh mục để gửi yêu cầu đặt vẽ commission.',
+    'Tìm kiếm và lọc danh sách họa sĩ chuyên về từng danh mục để gửi yêu cầu đặt vẽ.',
 };
 
 export default async function CreatorsPage({

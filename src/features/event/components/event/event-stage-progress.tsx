@@ -160,32 +160,32 @@ export function EventStageProgress({ event }: EventStageProgressProps) {
   const activeStage = steps.find((s) => s.status === 'active');
 
   return (
-    <section className="rounded-3xl border border-white/10 bg-[#161926]/90 p-6 sm:p-8 backdrop-blur-xl shadow-2xl">
+    <section className="rounded-3xl border border-[#221E1A]/10 bg-[#FFFCF6]/90 p-6 sm:p-8 backdrop-blur-xl shadow-2xl">
       {/* Header Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-6 border-b border-white/10">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-6 border-b border-[#221E1A]/10">
         <div className="flex items-center gap-2.5">
           <Clock size={18} className="text-brand-periwinkle" />
-          <h2 className="font-h1 text-base sm:text-lg font-bold text-white">
+          <h2 className="font-h1 text-base sm:text-lg font-bold text-[#241F1A]">
             {isVie ? 'Lộ trình & Giai đoạn Cuộc thi' : 'Contest Timeline & Stages'}
           </h2>
         </div>
 
         <div className="flex items-center gap-2">
           {activeStage ? (
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/40 bg-emerald-950/70 px-3.5 py-1 text-xs font-bold text-emerald-300 shadow-[0_0_15px_rgba(52,211,153,0.2)]">
-              <span className="size-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-[#2F6B63]/40 bg-[#2F6B63]/20 px-3.5 py-1 text-xs font-bold text-[#2F6B63] shadow-[0_0_15px_rgba(52,211,153,0.2)]">
+              <span className="size-2 rounded-full bg-[#2F6B63]/10 animate-pulse" />
               <span>
                 {isVie ? 'Giai đoạn hiện tại: ' : 'Current Stage: '}
                 {activeStage.name} ({activeStage.statusBadge})
               </span>
             </span>
           ) : announceStatus === 'completed' ? (
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/40 bg-amber-950/70 px-3.5 py-1 text-xs font-bold text-amber-300">
-              <Crown size={13} className="text-amber-400" />
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-[#8A6A1F]/40 bg-[#8A6A1F]/20 px-3.5 py-1 text-xs font-bold text-[#8A6A1F]">
+              <Crown size={13} className="text-[#8A6A1F]" />
               <span>{isVie ? 'Cuộc thi đã kết thúc' : 'Contest Finalized'}</span>
             </span>
           ) : (
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/5 px-3.5 py-1 text-xs text-slate-300">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-[#221E1A]/10 bg-[#FFFCF6] px-3.5 py-1 text-xs text-[#746A5F]">
               <span>{isVie ? 'Cuộc thi sắp diễn ra' : 'Upcoming Contest'}</span>
             </span>
           )}
@@ -196,12 +196,12 @@ export function EventStageProgress({ event }: EventStageProgressProps) {
       <div className="mt-8 pt-4 pb-2 overflow-x-auto">
         <div className="relative min-w-[560px] sm:min-w-full">
           {/* Base Horizontal Track connecting Point 1 (12.5%) to Point 4 (87.5%) */}
-          <div className="absolute top-4 left-[12.5%] right-[12.5%] -translate-y-1/2 h-1 bg-white/10 rounded-full z-0" />
+          <div className="absolute top-4 left-[12.5%] right-[12.5%] -translate-y-1/2 h-1 bg-[#F0E7D8] rounded-full z-0" />
 
           {/* Active Glowing Progress Fill */}
           <div
             style={{ width: `${(overallPercent / 100) * 75}%` }}
-            className="absolute top-4 left-[12.5%] -translate-y-1/2 h-1 bg-gradient-to-r from-brand-periwinkle via-[#c2c7f6] to-amber-400 rounded-full z-0 shadow-[0_0_12px_rgba(167,172,217,0.7)] transition-all duration-700"
+            className="absolute top-4 left-[12.5%] -translate-y-1/2 h-1 bg-gradient-to-r from-brand-periwinkle via-[#8C3718] to-[#8A6A1F] rounded-full z-0 shadow-[0_0_12px_rgba(167,172,217,0.7)] transition-all duration-700"
           />
 
           {/* 4 Equidistant Columns: Each Point and its Content are strictly centered together */}
@@ -217,10 +217,10 @@ export function EventStageProgress({ event }: EventStageProgressProps) {
                     <div
                       className={`size-7 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${
                         isActive
-                          ? 'border-brand-periwinkle bg-[#161926] text-brand-periwinkle shadow-[0_0_18px_rgba(167,172,217,0.9)] scale-110'
+                          ? 'border-brand-periwinkle bg-[#FFFCF6] text-brand-periwinkle shadow-[0_0_18px_rgba(167,172,217,0.9)] scale-110'
                           : isCompleted
-                          ? 'border-emerald-400 bg-emerald-950 text-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.4)]'
-                          : 'border-white/30 bg-[#161926] text-white/40'
+                          ? 'border-[#2F6B63]/30 bg-[#2F6B63]/12 text-[#2F6B63] shadow-[0_0_10px_rgba(52,211,153,0.4)]'
+                          : 'border-[#221E1A]/20 bg-[#FFFCF6] text-[#4A423A]'
                       }`}
                     >
                       {isCompleted ? (
@@ -228,7 +228,7 @@ export function EventStageProgress({ event }: EventStageProgressProps) {
                       ) : isActive ? (
                         <span className="size-2 rounded-full bg-brand-periwinkle animate-ping" />
                       ) : (
-                        <span className="size-1.5 rounded-full bg-white/40" />
+                        <span className="size-1.5 rounded-full bg-[#FFFCF6]" />
                       )}
                     </div>
                   </div>
@@ -240,8 +240,8 @@ export function EventStageProgress({ event }: EventStageProgressProps) {
                         isActive
                           ? 'text-brand-periwinkle'
                           : isCompleted
-                          ? 'text-emerald-400'
-                          : 'text-slate-500'
+                          ? 'text-[#2F6B63]'
+                          : 'text-[#746A5F]'
                       }`}
                     >
                       {step.icon}
@@ -249,10 +249,10 @@ export function EventStageProgress({ event }: EventStageProgressProps) {
                     <h3
                       className={`font-h1 text-sm sm:text-base font-bold transition-colors ${
                         isActive
-                          ? 'text-white'
+                          ? 'text-[#241F1A]'
                           : isCompleted
-                          ? 'text-slate-200'
-                          : 'text-[#8A8FA9]'
+                          ? 'text-[#6E6459]'
+                          : 'text-[#6E6459]'
                       }`}
                     >
                       {step.name}
@@ -265,8 +265,8 @@ export function EventStageProgress({ event }: EventStageProgressProps) {
                       isActive
                         ? 'text-brand-periwinkle'
                         : isCompleted
-                        ? 'text-emerald-300'
-                        : 'text-[#8A8FA9]'
+                        ? 'text-[#2F6B63]'
+                        : 'text-[#6E6459]'
                     }`}
                   >
                     {step.rangeText}
@@ -278,8 +278,8 @@ export function EventStageProgress({ event }: EventStageProgressProps) {
                       isActive
                         ? 'border border-brand-periwinkle/50 bg-brand-periwinkle/20 text-brand-periwinkle animate-pulse'
                         : isCompleted
-                        ? 'border border-emerald-500/30 bg-emerald-950/40 text-emerald-300'
-                        : 'border border-white/10 bg-white/5 text-[#8A8FA9]'
+                        ? 'border border-[#2F6B63]/40 bg-[#2F6B63]/20 text-[#2F6B63]'
+                        : 'border border-[#221E1A]/10 bg-[#FFFCF6] text-[#6E6459]'
                     }`}
                   >
                     {step.statusBadge}

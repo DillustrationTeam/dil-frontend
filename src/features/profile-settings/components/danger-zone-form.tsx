@@ -42,11 +42,11 @@ export function DangerZoneForm() {
     setIsSubmitting(true);
     try {
       await securitySettingsService.deactivateAccount(password);
-      toast.success('Tài khoản đã được vô hiệu hóa.');
+      toast.success('Tài khoản đã được xóa.');
       clearAuth();
       router.push('/login');
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Không thể vô hiệu hóa tài khoản.');
+      toast.error(error instanceof Error ? error.message : 'Không thể xóa tài khoản.');
     } finally {
       setIsSubmitting(false);
     }
@@ -54,29 +54,26 @@ export function DangerZoneForm() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
-      <section className="glass-container space-y-4 rounded-[32px] border border-red-500/20 p-6 md:p-8">
-        <p className="text-xs uppercase tracking-wider text-red-400">Vô hiệu hóa tài khoản</p>
-        <p className="text-sm text-[#C7C5CF]">
-          Hành động này sẽ vô hiệu hóa tài khoản của bạn và đăng xuất khỏi mọi thiết bị. Không thể thực hiện nếu bạn
-          còn đơn commission đang chạy, còn tiền trong ví, hoặc đang có tranh chấp chưa giải quyết.
+      <section className="glass-container space-y-4 rounded-[32px] border border-[#A8321C]/30 p-6 md:p-8">
+        <p className="text-xs uppercase tracking-wider text-[#A8321C]">Xóa tài khoản</p>
+        <p className="text-sm text-[#6E6459]">
+          Hành động này sẽ xóa vĩnh viễn tài khoản của bạn và đăng xuất khỏi mọi thiết bị. Email đăng nhập sẽ được
+          giải phóng để bạn có thể đăng ký lại sau này. Không thể thực hiện nếu bạn còn đơn commission đang chạy,
+          còn tiền trong ví, hoặc đang có tranh chấp chưa giải quyết.
         </p>
         <button
           type="button"
           onClick={() => setIsModalOpen(true)}
-          className="rounded-xl border border-red-500/40 px-4 py-2.5 text-sm font-semibold text-red-400 transition hover:bg-red-500/10"
-        >
-          Vô hiệu hóa tài khoản
-        </button>
+          className="rounded-xl border border-[#A8321C]/40 px-4 py-2.5 text-sm font-semibold text-[#A8321C] transition hover:bg-[#A8321C]/10"
+        > Xóa tài khoản </button>
       </section>
 
       {isModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-4">
-          <div className="w-full max-w-md rounded-3xl border border-red-500/20 bg-[#1F2335] p-6">
-            <p className="text-sm font-bold text-white">Xác nhận vô hiệu hóa tài khoản</p>
-            <p className="mt-2 text-xs text-[#C7C5CF]">
-              Nhập mật khẩu và gõ chữ <span className="font-bold text-white">DELETE</span> để xác nhận. Hành động
-              này không thể tự hoàn tác.
-            </p>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#E5D8C2] p-4">
+          <div className="w-full max-w-md rounded-3xl border border-[#A8321C]/30 bg-[#F7F2E9] p-6">
+            <p className="text-sm font-bold text-[#241F1A]">Xác nhận xóa tài khoản</p>
+            <p className="mt-2 text-xs text-[#6E6459]"> Nhập mật khẩu và gõ chữ <span className="font-bold text-[#241F1A]">DELETE</span> để xác nhận. Hành động
+ này không thể hoàn tác. </p>
 
             <div className="mt-4 space-y-3">
               <div>
@@ -86,11 +83,11 @@ export function DangerZoneForm() {
                   onChange={(event) => setPassword(event.target.value)}
                   onBlur={() => markTouched('password')}
                   placeholder="Mật khẩu"
-                  className={`w-full rounded-xl border bg-white/5 px-4 py-3 text-white outline-none focus:border-red-400 ${
-                    fieldErrors.password ? 'border-red-400' : 'border-white/10'
+                  className={`w-full rounded-xl border bg-[#FFFCF6] px-4 py-3 text-[#241F1A] outline-none focus:border-[#A8321C]/30 ${
+                    fieldErrors.password ? 'border-[#A8321C]/30' : 'border-[#221E1A]/10'
                   }`}
                 />
-                {fieldErrors.password && <p className="mt-1 text-xs text-red-400">{fieldErrors.password}</p>}
+                {fieldErrors.password && <p className="mt-1 text-xs text-[#A8321C]">{fieldErrors.password}</p>}
               </div>
               <div>
                 <input
@@ -98,11 +95,11 @@ export function DangerZoneForm() {
                   onChange={(event) => setConfirmText(event.target.value)}
                   onBlur={() => markTouched('confirmText')}
                   placeholder='Gõ "DELETE" để xác nhận'
-                  className={`w-full rounded-xl border bg-white/5 px-4 py-3 text-white outline-none focus:border-red-400 ${
-                    fieldErrors.confirmText ? 'border-red-400' : 'border-white/10'
+                  className={`w-full rounded-xl border bg-[#FFFCF6] px-4 py-3 text-[#241F1A] outline-none focus:border-[#A8321C]/30 ${
+                    fieldErrors.confirmText ? 'border-[#A8321C]/30' : 'border-[#221E1A]/10'
                   }`}
                 />
-                {fieldErrors.confirmText && <p className="mt-1 text-xs text-red-400">{fieldErrors.confirmText}</p>}
+                {fieldErrors.confirmText && <p className="mt-1 text-xs text-[#A8321C]">{fieldErrors.confirmText}</p>}
               </div>
             </div>
 
@@ -110,15 +107,13 @@ export function DangerZoneForm() {
               <button
                 type="button"
                 onClick={closeModal}
-                className="rounded-xl border border-white/10 px-4 py-2 text-sm text-[#C7C5CF] transition hover:border-white/30"
-              >
-                Hủy
-              </button>
+                className="rounded-xl border border-[#221E1A]/10 px-4 py-2 text-sm text-[#6E6459] transition hover:border-[#221E1A]/20"
+              > Hủy </button>
               <button
                 type="button"
                 onClick={handleDeactivate}
                 disabled={!canConfirm || isSubmitting}
-                className="rounded-xl bg-red-500 px-4 py-2 text-sm font-bold text-white transition hover:bg-red-400 disabled:cursor-not-allowed disabled:opacity-50"
+                className="rounded-xl bg-[#A8321C]/12 px-4 py-2 text-sm font-bold text-[#241F1A] transition hover:bg-[#A8321C]/10 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {isSubmitting ? 'Đang xử lý...' : 'Xóa tài khoản'}
               </button>

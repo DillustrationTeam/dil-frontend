@@ -1,5 +1,7 @@
 export { AuctionListScreen } from './components/auction-list-screen';
 export { AuctionDetailScreen } from './components/auction-detail-screen';
+export { AuctionEditScreen } from './components/auction-edit-screen';
+export { MyPenaltiesScreen } from './components/my-penalties-screen';
 export { AuctionCreateScreen } from './components/auction-create-screen';
 export { AuctionCertificateCard } from './components/auction-certificate-card';
 export { CommercialRightsModal } from './components/commercial-rights-modal';
@@ -7,6 +9,7 @@ export { DeliverablesDownloadModal } from './components/deliverables-download-mo
 export { PhysicalDeliveryCard } from './components/physical-delivery-card';
 export { PhysicalDeliveryManager } from './components/physical-delivery-manager';
 export { AdminDeliveryDashboard } from './components/admin-delivery-dashboard';
+export { AuctionPenaltyConsole } from './components/auction-penalty-console';
 export { MyCollectionScreen } from './components/my-collection-screen';
 export { ArtworkProvenanceCard } from './components/artwork-provenance-card';
 export { auctionService, auctionError, extractAuctionFieldErrors, AuctionConflictError } from './services/auction.service';
@@ -40,5 +43,16 @@ export type {
   ArtworkProvenanceDto,
   ArtworkProvenanceHistoryItemDto,
   CommercialRightsDeedDto,
+  AuctionDeliveryDto,
+  AuctionReceiptDto,
+  AuctionUpdatePayload,
+  CancelAutoBidResult,
+  DisputeMediaUploadResult,
+  AuctionPenaltyAdminDto,
+  AuctionPenaltyRevokeResultDto,
+  AuctionPenaltyFilters,
+  MyAuctionPenaltyDto,
+  MyPenaltySummary,
+  MyPenaltiesResult,
 } from './types/auction.types';
 

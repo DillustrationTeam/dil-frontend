@@ -15,6 +15,7 @@ import {
   FileCheck2,
   Gavel,
   Heart,
+  Eye,
   FileType2,
   LoaderCircle,
   PackageCheck,
@@ -44,7 +45,6 @@ import { CommercialRightsModal } from './commercial-rights-modal';
 import { DeliverablesDownloadModal } from './deliverables-download-modal';
 import { PhysicalDeliveryCard } from './physical-delivery-card';
 import { PageLoader } from '@/features/navigation';
-import { useLanguage } from '@/context/language-context';
 import { auctionStatusLabels, type DeliverableDownloadDto } from '../types/auction.types';
 
 function formatVnd(value: number) {
@@ -86,8 +86,6 @@ function updateBidParticipants(participants: AuctionParticipantDto[] = [], bid: 
 }
 
 export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; userId: string | null }) {
-  const { lang, t } = useLanguage();
-  const isVie = lang === 'VIE';
   const [auction, setAuction] = useState<AuctionDetailDto | null>(null);
   const [bids, setBids] = useState<BidDto[]>([]);
   const [wallet, setWallet] = useState<WalletOverviewDto | null>(null);
@@ -105,6 +103,10 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
   const [isAuto, setIsAuto] = useState<boolean>(false);
   const [maxAutoBid, setMaxAutoBid] = useState<string>('');
   const [activeAutoBidCap, setActiveAutoBidCap] = useState<number | null>(null);
+  const [cancellingAutoBid, setCancellingAutoBid] = useState<boolean>(false);
+  // Phân trang lịch sử đặt giá: `recentBids` của API chi tiết chỉ có 10 lượt gần nhất.
+  const [bidCursor, setBidCursor] = useState<string | null>(null);
+  const [loadingMoreBids, setLoadingMoreBids] = useState<boolean>(false);
   // Mức tối thiểu đang hiển thị trong ô giá — dùng để biết người dùng đã tự sửa ô hay chưa
   // trước khi ghi đè bằng giá mới từ realtime.
   const previousMinimumBidRef = useRef<string>('');
@@ -159,6 +161,7 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
 
       setAuction(detailRes.auction);
       setBids(sortBids(detailRes.recentBids));
+      setBidCursor(null);
       setWatching(detailRes.auction.isWatching);
       if (walletRes) setWallet(walletRes);
 
@@ -286,7 +289,7 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
       return;
     }
     if (isSeller) {
-      setError('Bạn là chủ sở hữu (người bán) của phiên đấu giá này, không thể tự đặt giá cho tác phẩm của mình.');
+      setError('Bạn là chủ sở hữu của phiên đấu giá này, không thể tự đặt giá cho tác phẩm của mình.');
       return;
     }
     if (auction?.auctionStatus !== 'Active') {
@@ -308,8 +311,8 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
       }
       // Backend chỉ yêu cầu trần >= mức tối thiểu, và lượt đặt thực tế luôn là
       // min(trần, mức tối thiểu). Trước đây FE đòi trần > giá đang nhập nên chặn nhầm
-      // trường hợp hợp lệ (trần đúng bằng mức tối thiểu).
-      if (maxNum < amountNum) {
+ // trường hợp hợp lệ (trần đúng bằng mức tối thiểu).
+ if (maxNum < amountNum) {
         setError(`Giá trần tự động (${formatVnd(maxNum)}) phải lớn hơn hoặc bằng mức giá sẽ đặt (${formatVnd(amountNum)}).`);
         return;
       }
@@ -405,6 +408,73 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
       }
     } finally {
       setSubmittingBid(false);
+    }
+  }
+
+  /**
+   * Huỷ đăng ký Auto-bid. Lượt đặt giá đang dẫn đầu vẫn được giữ — chỉ dừng việc tự động
+   * nâng giá khi có người đè, nên phải nói rõ điều đó trước khi người dùng bấm.
+   */
+  async function handleCancelAutoBid() {
+    if (!activeAutoBidCap || cancellingAutoBid) return;
+    if (!confirm(
+      `Huỷ Auto-bid với giá trần ${formatVnd(activeAutoBidCap)}?\n\nLượt đặt giá hiện tại của bạn vẫn được giữ, nhưng hệ thống sẽ KHÔNG tự nâng giá nữa khi có người đè — bạn phải tự đặt giá lại.`,
+    )) return;
+
+    setCancellingAutoBid(true);
+    setError(null);
+    setSuccess(null);
+    try {
+      await auctionService.cancelAutoBid(auctionId);
+      setActiveAutoBidCap(null);
+      setIsAuto(false);
+      setMaxAutoBid('');
+      setSuccess('Đã huỷ Auto-bid. Lượt đặt giá hiện tại của bạn vẫn được giữ nguyên.');
+      await loadDetail({ silent: true });
+    } catch (err: unknown) {
+      setError(auctionError(err));
+    } finally {
+      setCancellingAutoBid(false);
+    }
+  }
+
+  /**
+   * Tải thêm lịch sử đặt giá (API trả theo cursor, mỗi trang 10 lượt).
+   *
+   * Trang đầu của `/bids` trùng đúng 10 lượt `recentBids` đã hiển thị, nên lần bấm đầu tiên
+   * sẽ không thêm dòng nào — vòng lặp dưới đây đi tiếp cho tới khi có lượt mới thật sự.
+   */
+  async function loadMoreBids() {
+    if (loadingMoreBids) return;
+    setLoadingMoreBids(true);
+    setError(null);
+    try {
+      const seen = new Set(bids.map((b) => b.bidId));
+      let cursor = bidCursor ?? undefined;
+      let appended = 0;
+      let next: string | null = bidCursor;
+
+      for (let page = 0; page < 4; page += 1) {
+        const res = await auctionService.bids(auctionId, cursor);
+        const fresh = res.items.filter((b) => !seen.has(b.bidId));
+        fresh.forEach((b) => seen.add(b.bidId));
+        if (fresh.length > 0) {
+          setBids((prev) => sortBids([...prev, ...fresh]));
+          appended += fresh.length;
+        }
+        next = res.nextCursor;
+        cursor = res.nextCursor ?? undefined;
+        if (appended > 0 || !next) break;
+      }
+
+      setBidCursor(next);
+      if (appended === 0) {
+        setSuccess('Đã hiển thị toàn bộ lịch sử đặt giá của phiên này.');
+      }
+    } catch (err: unknown) {
+      setError(auctionError(err));
+    } finally {
+      setLoadingMoreBids(false);
     }
   }
 
@@ -524,24 +594,19 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
   if (loading) {
     return (
       <div className="mx-auto w-full max-w-6xl px-4 py-16">
-        <PageLoader label={isVie ? 'Đang tải thông tin phiên đấu giá…' : 'Loading auction details…'} />
+        <PageLoader label="Đang tải thông tin phiên đấu giá…" />
       </div>
     );
   }
 
   if (!auction) {
     return (
-      <div className="mx-auto w-full max-w-4xl px-4 py-16 text-center text-[var(--ivory)]">
-        <CircleAlert size={44} className="mx-auto mb-3 text-[var(--ash)]" />
-        <h1 className="font-[family-name:var(--font-display)] text-2xl font-medium text-[var(--ivory)]">
-          {isVie ? 'Không tìm thấy phiên đấu giá' : 'Auction session not found'}
-        </h1>
-        <p className="mt-2 text-sm text-[var(--ash)]">
-          {isVie ? 'Phiên đấu giá có thể đã bị xóa hoặc không tồn tại.' : 'This auction session may have been removed or does not exist.'}
-        </p>
-        <Link href="/auctions" className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-[var(--lumen)] hover:underline">
-          <ArrowLeft size={16} /> {isVie ? 'Quay lại danh sách đấu giá' : 'Back to auctions'}
-        </Link>
+      <div className="mx-auto w-full max-w-4xl px-4 py-16 text-center text-on-surface">
+        <CircleAlert size={44} className="mx-auto mb-3 text-outline" />
+        <h1 className="font-h1 text-xl font-bold">Không tìm thấy phiên đấu giá</h1>
+        <p className="mt-2 text-sm text-on-surface-variant">Phiên đấu giá có thể đã bị xóa hoặc không tồn tại.</p>
+        <Link href="/auctions" className="mt-6 inline-flex items-center gap-2 text-sm text-brand-periwinkle hover:underline">
+          <ArrowLeft size={16} /> Quay lại danh sách đấu giá </Link>
       </div>
     );
   }
@@ -563,64 +628,61 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
   const bidAmountNum = Number(bidAmount) || 0;
   const isBalanceShortage = Boolean(wallet && wallet.wallet.balance < bidAmountNum);
   const totalSeconds = isFinished ? 0 : Math.floor(clock.remainingMs / 1000);
+  // Cùng định dạng với thẻ đấu giá ở ngoài danh sách: "17 ngày 03:13:24" (có Ngày)
   const clockUnits = [
-    { label: isVie ? 'Giờ' : 'Hours', value: isFinished ? '00' : Math.floor(totalSeconds / 3600).toString().padStart(2, '0') },
-    { label: isVie ? 'Phút' : 'Minutes', value: isFinished ? '00' : Math.floor((totalSeconds % 3600) / 60).toString().padStart(2, '0') },
-    { label: isVie ? 'Giây' : 'Seconds', value: isFinished ? '00' : (totalSeconds % 60).toString().padStart(2, '0') },
-    { label: 'ms', value: isFinished ? '00' : Math.floor((clock.remainingMs % 1000) / 10).toString().padStart(2, '0') },
+    { label: 'Ngày', value: isFinished ? '00' : Math.floor(totalSeconds / 86400).toString().padStart(2, '0') },
+    { label: 'Giờ', value: isFinished ? '00' : Math.floor((totalSeconds % 86400) / 3600).toString().padStart(2, '0') },
+    { label: 'Phút', value: isFinished ? '00' : Math.floor((totalSeconds % 3600) / 60).toString().padStart(2, '0') },
+    { label: 'Giây', value: isFinished ? '00' : (totalSeconds % 60).toString().padStart(2, '0') },
   ];
   const isUrgent = isLive && !isFinished && clock.remainingMs > 0 && clock.remainingMs <= 5 * 60 * 1000;
 
   return (
-    <div className="mx-auto w-full max-w-[1440px] px-4 py-8 text-[var(--ivory)]">
+    <div className="mx-auto w-full max-w-[1440px] px-4 py-6 text-on-surface">
       <div className="mb-6 flex items-center justify-between">
-        <Link href="/auctions" className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--ash)] transition hover:text-[var(--lumen)]">
-          <ArrowLeft size={16} /> {isVie ? 'Quay lại danh sách đấu giá' : 'Back to auctions'}
-        </Link>
+        <Link href="/auctions" className="inline-flex items-center gap-2 text-sm text-brand-periwinkle hover:underline">
+          <ArrowLeft size={16} /> Quay lại danh sách đấu giá </Link>
         <button
           type="button"
           onClick={handleToggleWatch}
           className={`inline-flex items-center gap-1.5 rounded-full border px-4 py-1.5 text-xs font-semibold transition ${
             watching
-              ? 'border-[var(--cinnabar)] bg-[var(--cinnabar)] text-white shadow-sm'
-              : 'border-[var(--hair-2)] bg-[var(--ink-2)] text-[var(--ivory)] hover:border-[var(--lumen)] hover:text-[var(--lumen)]'
+              ? 'border-brand-periwinkle bg-brand-periwinkle text-[#FFFCF6]'
+              : 'border-[#221E1A]/10 bg-[#FFFCF6] text-on-surface hover:bg-[#F0E7D8]'
           }`}
         >
-          <Heart size={14} className={watching ? 'fill-current text-white' : ''} />
-          {watching ? (isVie ? 'Đang theo dõi' : 'Watching') : (isVie ? 'Theo dõi phiên' : 'Watch auction')}
+          <Heart size={14} className={watching ? 'fill-brand-navy' : ''} />
+          {watching ? 'Đang theo dõi' : 'Theo dõi phiên'}
         </button>
       </div>
 
       {extendedNotice && (
-        <div role="status" className="mb-6 flex items-center gap-2 rounded-2xl border border-[var(--gold)]/30 bg-[var(--gold)]/10 p-4 text-sm text-[var(--gold)] motion-reduce:animate-none animate-bounce">
-          <Clock size={18} className="shrink-0 text-[var(--gold)]" />
+        <div role="status" className="mb-6 flex items-center gap-2 rounded-2xl border border-[#8A6A1F]/40 bg-[#8A6A1F]/15 p-4 text-sm text-[#8A6A1F] motion-reduce:animate-none animate-bounce">
+          <Clock size={18} className="shrink-0 text-[#8A6A1F]" />
           <span>{extendedNotice}</span>
         </div>
       )}
 
       {error && (
-        <div role="alert" className="mb-6 flex items-start gap-2.5 rounded-2xl border border-[var(--cinnabar)]/30 bg-[var(--cinnabar)]/10 p-4 text-sm text-[var(--cinnabar-text)]">
-          <CircleAlert size={18} className="mt-0.5 shrink-0 text-[var(--cinnabar)]" />
+        <div role="alert" className="mb-6 flex items-start gap-2.5 rounded-2xl border border-[#A8321C]/40 bg-[#A8321C]/10 p-4 text-sm text-[#A8321C]">
+          <CircleAlert size={18} className="mt-0.5 shrink-0 text-[#A8321C]" />
           <div className="flex-1">
             <span>{error}</span>
             {error.toLowerCase().includes('số dư') && (
               <div className="mt-2.5 flex items-center gap-2">
                 <Link
                   href="/deposit"
-                  className="inline-flex items-center gap-1.5 rounded-full bg-[var(--lumen)] px-3.5 py-1.5 text-xs font-bold text-white shadow hover:bg-[var(--lumen-hi)] transition"
+                  className="inline-flex items-center gap-1.5 rounded-full bg-brand-periwinkle px-3.5 py-1.5 font-h1 text-xs font-bold text-[#FFFCF6] shadow hover:brightness-110"
                 >
-                  <Wallet size={13} /> {isVie ? 'Nạp thêm tiền vào ví ngay' : 'Deposit now'}
-                </Link>
+                  <Wallet size={13} /> Nạp thêm tiền vào ví ngay </Link>
               </div>
             )}
             {error.toLowerCase().includes('đăng nhập') && (
               <div className="mt-2.5 flex items-center gap-2">
                 <Link
                   href="/login"
-                  className="inline-flex items-center gap-1.5 rounded-full bg-[var(--lumen)] px-3.5 py-1.5 text-xs font-bold text-white shadow hover:bg-[var(--lumen-hi)] transition"
-                >
-                  {isVie ? 'Đăng nhập tài khoản' : 'Sign in'}
-                </Link>
+                  className="inline-flex items-center gap-1.5 rounded-full bg-brand-periwinkle px-3.5 py-1.5 font-h1 text-xs font-bold text-[#FFFCF6] shadow hover:brightness-110"
+                > Đăng nhập tài khoản </Link>
               </div>
             )}
           </div>
@@ -628,7 +690,7 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
       )}
 
       {success && (
-        <div role="status" className="mb-6 flex items-center gap-2 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-sm text-emerald-600 dark:text-emerald-300">
+        <div role="status" className="mb-6 flex items-center gap-2 rounded-2xl border border-[#2F6B63]/40 bg-[#2F6B63]/10 p-4 text-sm text-[#2F6B63]">
           <CheckCircle2 size={18} className="shrink-0" />
           <span>{success}</span>
         </div>
@@ -640,76 +702,48 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
           {/* FE-05 Seller Transparency */}
           <SellerTransparencyCard seller={auction.seller} />
 
-          <div className="overflow-hidden rounded-3xl border border-[var(--hair)] bg-[var(--ink-2)] shadow-sm">
-            <div className="flex items-center justify-between border-b border-[var(--hair)] px-5 py-3 text-[11px]">
-              <span className="rounded-full border border-[var(--hair-2)] bg-[var(--ink-3)] px-3 py-1 font-semibold text-[var(--lumen)]">
-                {isVie ? 'Bản gốc duy nhất' : 'Unique Original'}
-              </span>
-              <span className="rounded-full border border-[var(--hair-2)] bg-[var(--ink-3)] px-3 py-1 font-semibold text-[var(--ash)]">
-                {auction.artwork?.style || (isVie ? 'Kỹ thuật số' : 'Digital')}
+          <div className="glass-container overflow-hidden rounded-3xl border border-[#221E1A]/10 bg-[#F0E7D8]">
+            <div className="flex items-center justify-between border-b border-[#221E1A]/10 px-5 py-3 text-[11px]">
+              <span className="rounded-full border border-brand-periwinkle/30 bg-brand-periwinkle/10 px-3 py-1 font-semibold text-brand-periwinkle"> Bản gốc duy nhất </span>
+              <span className="rounded-full border border-[#2F6B63]/30 bg-[#2F6B63]/10 px-3 py-1 font-semibold text-[#2F6B63]">
+                {auction.artwork?.style || 'Kỹ thuật số'}
               </span>
             </div>
-            <div className="relative aspect-[4/3] w-full bg-[var(--ink-3)]">
+            <div className="relative aspect-[4/3] w-full">
               {auction.artwork?.imageUrl || auction.artwork?.thumbnailUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={auction.artwork.imageUrl || auction.artwork.thumbnailUrl || '/weblogo.png'}
-                  alt={auction.artwork.artworkTitle || (isVie ? 'Tác phẩm' : 'Artwork')}
+                  alt={auction.artwork.artworkTitle || 'Tác phẩm'}
                   className="size-full object-contain"
                 />
               ) : (
-                <div className="flex size-full items-center justify-center text-sm text-[var(--ash)]">
-                  {isVie ? 'Chưa có ảnh tác phẩm' : 'No preview available'}
-                </div>
+                <div className="flex size-full items-center justify-center text-sm text-outline"> Chưa có ảnh tác phẩm </div>
               )}
             </div>
-            <div className="flex items-end justify-between gap-4 border-t border-[var(--hair)] px-5 py-4">
+            <div className="flex items-end justify-between gap-4 border-t border-[#221E1A]/10 px-5 py-4">
               <div className="min-w-0">
-                <h1 className="truncate font-[family-name:var(--font-display)] text-xl font-medium text-[var(--ivory)]">
-                  {auction.artwork?.artworkTitle || (isVie ? 'Tác phẩm nghệ thuật' : 'Artwork')}
-                </h1>
-                <p className="mt-1 text-xs text-[var(--ash)]">
-                  {isVie ? 'Bản quyền thương mại kỹ thuật số' : 'Digital commercial rights included'}
-                </p>
+                <h1 className="truncate font-h1 text-xl font-bold">{auction.artwork?.artworkTitle || 'Tác phẩm nghệ thuật'}</h1>
+                <p className="mt-1 text-xs text-outline">Bản quyền thương mại kỹ thuật số</p>
               </div>
-              <span className="shrink-0 text-right text-[11px] text-[var(--ash)]">
-                {isVie ? 'Mã phiên' : 'Session ID'}<br />
-                <strong className="font-[family-name:var(--font-ui)] tabular-nums text-[var(--ivory)]">#{auction.auctionId.slice(0, 8).toUpperCase()}</strong>
+              <span className="shrink-0 text-right text-[11px] text-outline"> Mã phiên<br />
+                <strong className="font-mono text-on-surface">#{auction.auctionId.slice(0, 8).toUpperCase()}</strong>
               </span>
             </div>
-            <div className="grid gap-2 border-t border-[var(--hair)] px-5 py-4 text-xs sm:grid-cols-2">
-              <p className="flex items-center gap-2">
-                <User size={14} className="shrink-0 text-[var(--lumen)]" />
-                <span className="text-[var(--ash)]">{isVie ? 'Tác giả:' : 'Artist:'}</span> 
-                <strong className="truncate text-[var(--ivory)]">{auction.seller?.fullName || (isVie ? 'Nghệ sĩ ẩn danh' : 'Anonymous Artist')}</strong>
-              </p>
-              <p className="flex items-center gap-2">
-                <CalendarDays size={14} className="shrink-0 text-[var(--lumen)]" />
-                <span className="text-[var(--ash)]">{isVie ? 'Ngày tạo:' : 'Created:'}</span> 
-                <strong className="text-[var(--ivory)]">{auction.artwork?.createdAt ? new Date(auction.artwork.createdAt).toLocaleDateString(isVie ? 'vi-VN' : 'en-US') : (isVie ? 'Chưa cập nhật' : 'N/A')}</strong>
-              </p>
-              <p className="flex items-center gap-2">
-                <FileType2 size={14} className="shrink-0 text-[var(--lumen)]" />
-                <span className="text-[var(--ash)]">{isVie ? 'Định dạng:' : 'Format:'}</span> 
-                <strong className="text-[var(--ivory)]">{[auction.artwork?.fileFormat, auction.artwork?.resolution, formatFileSize(auction.artwork?.fileSizeBytes)].filter(Boolean).join(' · ') || (isVie ? 'Chưa cập nhật' : 'N/A')}</strong>
-              </p>
-              <p className="flex items-center gap-2">
-                <PackageCheck size={14} className="shrink-0 text-[var(--lumen)]" />
-                <span className="text-[var(--ash)]">{isVie ? 'Tệp bàn giao:' : 'Deliverables:'}</span> 
-                <strong className="text-[var(--ivory)]">{isVie ? `${auction.artwork?.deliverableCount ?? 0} tệp tranh gốc` : `${auction.artwork?.deliverableCount ?? 0} original files`}</strong>
-              </p>
+            <div className="grid gap-2 border-t border-[#221E1A]/10 px-5 py-4 text-xs sm:grid-cols-2">
+              <p className="flex items-center gap-2"><User size={14} className="shrink-0 text-brand-periwinkle" /><span className="text-outline">Tác giả:</span> <strong className="truncate">{auction.seller?.fullName || 'Nghệ sĩ ẩn danh'}</strong></p>
+              <p className="flex items-center gap-2"><CalendarDays size={14} className="shrink-0 text-brand-periwinkle" /><span className="text-outline">Ngày tạo:</span> <strong>{auction.artwork?.createdAt ? new Date(auction.artwork.createdAt).toLocaleDateString('vi-VN') : 'Chưa cập nhật'}</strong></p>
+              <p className="flex items-center gap-2"><FileType2 size={14} className="shrink-0 text-brand-periwinkle" /><span className="text-outline">Định dạng:</span> <strong>{[auction.artwork?.fileFormat, auction.artwork?.resolution, formatFileSize(auction.artwork?.fileSizeBytes)].filter(Boolean).join(' · ') || 'Chưa cập nhật'}</strong></p>
+              <p className="flex items-center gap-2"><PackageCheck size={14} className="shrink-0 text-brand-periwinkle" /><span className="text-outline">Tệp bàn giao:</span> <strong>{`${auction.artwork?.deliverableCount ?? 0} tệp tranh gốc`}</strong></p>
             </div>
           </div>
 
-          <section className="rounded-3xl border border-[var(--hair)] bg-[var(--ink-2)] p-5">
+          <section className="glass-container rounded-3xl border border-[#221E1A]/10 p-5">
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="flex items-center gap-2 font-[family-name:var(--font-display)] text-sm font-semibold text-[var(--ivory)]">
-                <Users size={16} className="text-[var(--lumen)]" /> {isVie ? 'Người tham gia' : 'Participants'}
-              </h2>
-              <span className="rounded-full border border-[var(--hair-2)] bg-[var(--ink-3)] px-3 py-1 font-[family-name:var(--font-ui)] text-[10px] font-semibold text-[var(--ivory)]">
-                {isVie
-                  ? `${(auction.participants ?? []).filter((participant) => participant.role === 'Bidder').length} người đã bid`
-                  : `${(auction.participants ?? []).filter((participant) => participant.role === 'Bidder').length} bidder(s)`}
+              <h2 className="flex items-center gap-2 font-h1 text-sm font-bold">
+                <Users size={16} className="text-brand-periwinkle" /> Người tham gia </h2>
+              <span className="rounded-full border border-brand-periwinkle/20 bg-brand-periwinkle/10 px-3 py-1 text-[10px] font-semibold text-brand-periwinkle">
+                {(auction.participants ?? []).filter((participant) => participant.role === 'Bidder').length} người đã bid
               </span>
             </div>
 
@@ -717,17 +751,17 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
               {(auction.participants ?? []).map((participant) => (
                 <div
                   key={`${participant.role}-${participant.userId}`}
-                  className="flex min-w-0 items-center gap-2 rounded-xl border border-[var(--hair)] bg-[var(--ink-3)] px-3 py-2.5"
+                  className="flex min-w-0 items-center gap-2 rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-3 py-2.5"
                 >
-                  <div className={`flex size-8 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${participant.role === 'Seller' ? 'bg-[var(--gold)]/20 text-[var(--gold)]' : 'bg-[var(--lumen)]/15 text-[var(--lumen)]'}`}>
+                  <div className={`flex size-8 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${participant.role === 'Seller' ? 'bg-[#8A6A1F]/15 text-[#8A6A1F]' : 'bg-brand-periwinkle/15 text-brand-periwinkle'}`}>
                     {(participant.fullName || '?').split(' ').map((part) => part[0]).slice(-2).join('').toUpperCase()}
                   </div>
                   <div className="min-w-0">
-                    <p className="truncate text-xs font-semibold text-[var(--ivory)]">{participant.fullName || (isVie ? 'Người dùng ẩn danh' : 'Anonymous User')}</p>
-                    <p className={`truncate text-[10px] ${participant.role === 'Seller' ? 'text-[var(--gold)]' : 'text-[var(--ash)]'}`}>
+                    <p className="truncate text-xs font-semibold">{participant.fullName || 'Người dùng ẩn danh'}</p>
+                    <p className={`truncate text-[10px] ${participant.role === 'Seller' ? 'text-[#8A6A1F]' : 'text-outline'}`}>
                       {participant.role === 'Seller'
-                        ? (isVie ? 'Tác giả' : 'Artist / Seller')
-                        : `Top ${(auction.participants ?? []).filter((item) => item.role !== 'Seller').findIndex((item) => item.userId === participant.userId) + 1} · ${formatVnd(participant.highestBid ?? 0)} · ${participant.bidCount} ${isVie ? 'lượt' : 'bids'}`}
+                        ? 'Tác giả'
+                        : `Top ${(auction.participants ?? []).filter((item) => item.role !== 'Seller').findIndex((item) => item.userId === participant.userId) + 1} · ${formatVnd(participant.highestBid ?? 0)} · ${participant.bidCount} lượt`}
                     </p>
                   </div>
                 </div>
@@ -738,94 +772,93 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
 
         {/* Cột phải: Thông tin đấu giá & Đặt giá */}
         <div className="space-y-4">
-          <section className={`relative overflow-hidden rounded-3xl border p-4 shadow-sm transition-colors duration-500 bg-[var(--ink-2)] ${isFinished ? 'border-[var(--hair)]' : isUrgent ? 'border-[var(--cinnabar)]/60' : 'border-[var(--hair-2)]'}`}>
-            <div className="relative z-10 mb-3 flex items-center justify-between border-b border-[var(--hair)] pb-3">
+          <section className={`glass-container relative overflow-hidden rounded-2xl border p-3 shadow-xl transition-colors duration-500 ${isFinished ? 'border-[#221E1A]/10' : isUrgent ? 'border-[#A8321C]/40 shadow-[#A8321C]' : 'border-[#8A6A1F]/35'}`}>
+            <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[radial-gradient(rgba(167,172,217,0.15)_1px,transparent_1px)] [background-size:12px_12px] opacity-30" />
+            <div className="relative z-10 mb-2 flex items-center justify-between border-b border-[#221E1A]/10 pb-2">
               <div className="flex items-center gap-2">
                 <span className="relative flex size-2.5">
-                  {isLive && !isFinished && <span className={`absolute inline-flex size-full animate-ping rounded-full opacity-75 motion-reduce:animate-none ${isUrgent ? 'bg-[var(--cinnabar)]' : 'bg-emerald-500'}`} />}
-                  <span className={`relative inline-flex size-2.5 rounded-full ${isEnded ? 'bg-[var(--ash)]' : isUrgent ? 'bg-[var(--cinnabar)]' : 'bg-emerald-500'}`} />
+                  {isLive && !isFinished && <span className={`absolute inline-flex size-full animate-ping rounded-full opacity-75 motion-reduce:animate-none ${isUrgent ? 'bg-[#A8321C]/10' : 'bg-[#2F6B63]/10'}`} />}
+                  <span className={`relative inline-flex size-2.5 rounded-full ${isEnded ? 'bg-outline' : isUrgent ? 'bg-[#A8321C]/12' : 'bg-[#2F6B63]/12'}`} />
                 </span>
-                <h2 className={`font-[family-name:var(--font-display)] text-sm font-semibold tracking-wide ${isFinished ? 'text-[var(--ash)]' : isUrgent ? 'text-[var(--cinnabar-text)]' : 'text-[var(--ivory)]'}`}>
+                <h2 className={`text-xs font-bold uppercase tracking-wide ${isFinished ? 'text-[#746A5F]' : isUrgent ? 'text-[#A8321C]' : 'text-on-surface'}`}>
                   {isFinished
                     ? (auction?.auctionStatus === 'Settled'
-                        ? (isVie ? 'Phiên đã chốt' : 'Settled')
+                        ? 'Phiên đã chốt'
                         : auction?.auctionStatus === 'AwaitingPhysical'
-                          ? (isVie ? 'Chờ xác nhận tranh vật lý' : 'Awaiting physical copy')
+                          ? 'Chờ xác nhận tranh vật lý'
                           : auction?.auctionStatus === 'InTransit'
-                            ? (isVie ? 'Đang giao tranh vật lý' : 'Shipping physical copy')
+                            ? 'Đang giao tranh vật lý'
                             : auction?.auctionStatus === 'Completed'
-                              ? (isVie ? 'Giao dịch hoàn tất' : 'Transaction completed')
+                              ? 'Giao dịch hoàn tất'
                               : auction?.auctionStatus === 'Cancelled'
-                                ? (isVie ? 'Phiên đã hủy' : 'Cancelled')
-                                : (isVie ? 'Phiên đã kết thúc' : 'Ended'))
+                                ? 'Phiên đã hủy'
+                                : 'Phiên đã kết thúc')
                     : isEnded
-                      ? (isScheduled ? (isVie ? 'Đang mở...' : 'Opening...') : (isVie ? 'Phiên đã kết thúc' : 'Ended'))
+                      ? (isScheduled ? 'Đang mở...' : 'Phiên đã kết thúc')
                       : isUrgent
-                        ? (isVie ? 'Sắp chốt phiên' : 'Closing soon')
-                        : (isScheduled ? (isVie ? 'Bắt đầu sau' : 'Starts in') : (isVie ? 'Thời gian còn lại' : 'Time remaining'))}
+                        ? 'Sắp chốt phiên'
+                        : (isScheduled ? 'Bắt đầu sau' : 'Thời gian còn lại')}
                 </h2>
               </div>
-              <span className={`rounded-full border px-2.5 py-0.5 font-[family-name:var(--font-ui)] text-[10px] font-semibold ${isUrgent && !isFinished ? 'border-[var(--cinnabar)]/40 bg-[var(--cinnabar)]/10 text-[var(--cinnabar-text)]' : 'border-[var(--hair)] bg-[var(--ink-3)] text-[var(--ash)]'}`}>
+              <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${isUrgent && !isFinished ? 'border-[#A8321C]/40 bg-[#A8321C]/15 text-[#A8321C]' : 'border-[#221E1A]/10 bg-brand-navy/80 text-outline'}`}>
                 {isUrgent && !isFinished ? 'ANTI-SNIPE +3M' : statusLabel}
               </span>
             </div>
 
-            <div className="relative z-10 flex items-start justify-center gap-1.5 sm:gap-2" role="timer" aria-label={isEnded ? (isVie ? 'Phiên đã hết giờ' : 'Session ended') : (isVie ? `Còn lại ${clock.formatted}` : `Remaining ${clock.formatted}`)}>
+            <div className="relative z-10 flex items-start justify-center gap-1 sm:gap-1.5" role="timer" aria-label={isEnded ? 'Phiên đã hết giờ' : `Còn lại ${clock.formatted}`}>
               {clockUnits.map((unit, index) => (
                 <div key={unit.label} className="contents">
-                  {index > 0 && <span aria-hidden="true" className={`pt-2 font-[family-name:var(--font-ui)] text-2xl font-bold sm:text-3xl ${isFinished ? 'text-[var(--ash-dim)]' : isUrgent ? 'text-[var(--cinnabar)]' : 'text-[var(--lumen)]'}`}>:</span>}
+                  {index > 0 && <span aria-hidden="true" className={`pt-2 font-mono text-2xl font-black sm:text-3xl ${isFinished ? 'text-[#241F1A]' : isUrgent ? 'text-[#A8321C]' : 'text-[#8A6A1F]'}`}>:</span>}
                   <div className="flex min-w-0 flex-1 flex-col items-center">
-                    <div className={`relative w-full max-w-24 overflow-hidden rounded-2xl border bg-[var(--ink-3)] px-1 py-2 text-center shadow-inner ${isFinished ? 'border-[var(--hair)]' : isUrgent ? 'border-[var(--cinnabar)]/40' : 'border-[var(--hair-2)]'}`}>
-                      <span className={`relative font-[family-name:var(--font-ui)] text-3xl font-bold leading-none tabular-nums tracking-tight sm:text-4xl ${isFinished ? 'text-[var(--ash)]' : isUrgent ? 'text-[var(--cinnabar)]' : 'text-[var(--ivory)]'}`}>
+                    <div className={`relative w-full max-w-24 overflow-hidden rounded-xl border bg-[#FFFCF6] px-1 py-2 text-center shadow-inner ${isFinished ? 'border-[#221E1A]/10' : isUrgent ? 'border-[#A8321C]/40' : 'border-[#8A6A1F]/35'}`}>
+                      <span aria-hidden="true" className={`absolute inset-0 flex items-center justify-center font-mono text-3xl font-black opacity-10 sm:text-4xl ${isFinished ? 'text-[#241F1A]' : isUrgent ? 'text-[#A8321C]' : 'text-[#8A6A1F]'}`}>88</span>
+                      <span className={`relative font-mono text-3xl font-black leading-none tracking-tight sm:text-4xl ${isFinished ? 'text-[#746A5F]' : isUrgent ? 'text-[#A8321C] drop-shadow-[0_0_8px_rgba(251,113,133,0.65)]' : 'text-[#8A6A1F] drop-shadow-[0_0_8px_rgba(251,191,36,0.55)]'}`}>
                         {unit.value}
                       </span>
                     </div>
-                    <span className="mt-1 text-[9px] font-bold uppercase tracking-wider text-[var(--ash)]">{unit.label}</span>
+                    <span className="mt-1 text-[9px] font-bold uppercase tracking-wider text-outline">{unit.label}</span>
                   </div>
                 </div>
               ))}
             </div>
           </section>
 
-          <section className="rounded-3xl border border-[var(--hair)] bg-[var(--ink-2)] p-5 md:p-6 shadow-sm">
+          <section className="glass-container rounded-3xl border border-[#221E1A]/10 p-5 md:p-6">
             <div className="mb-5 grid gap-3 sm:grid-cols-2">
               {/* FE-04 Realtime Price Animation */}
               <div
                 className={`rounded-2xl border p-4 transition-all duration-500 ${
                   priceFlash
-                    ? 'scale-[1.02] border-[var(--lumen)] bg-[var(--lumen-soft)] motion-reduce:animate-none'
-                    : 'border-[var(--hair)] bg-[var(--ink-3)]'
+                    ? 'scale-[1.02] border-brand-periwinkle bg-brand-periwinkle/25 motion-reduce:animate-none'
+                    : 'border-brand-periwinkle/20 bg-brand-periwinkle/5'
                 }`}
               >
-                <div className="flex items-center justify-between text-xs text-[var(--ash)]">
-                  <span>{isVie ? 'Giá đang dẫn đầu' : 'Leading bid'}</span>
-                  <span className="font-[family-name:var(--font-ui)] tabular-nums">{isVie ? `Bước: +${formatVnd(auction.bidStep)}` : `Step: +${formatVnd(auction.bidStep)}`}</span>
+                <div className="flex items-center justify-between text-xs text-on-surface-variant">
+                  <span>Giá đang dẫn đầu</span>
+                  <span>Bước: +{formatVnd(auction.bidStep)}</span>
                 </div>
-                <p className="mt-2 font-[family-name:var(--font-display)] text-3xl font-medium tabular-nums text-[var(--lumen)]">
+                <p className="mt-2 font-h1 text-3xl font-bold text-brand-periwinkle">
                   {formatVnd(auction.currentPrice)}
                 </p>
-                <p className="mt-2 text-xs text-[var(--ash)] font-[family-name:var(--font-ui)] tabular-nums">
-                  {isVie ? `Khởi điểm: ${formatVnd(auction.startPrice)}` : `Starting: ${formatVnd(auction.startPrice)}`}
-                </p>
+                <p className="mt-2 text-xs text-outline">Khởi điểm: {formatVnd(auction.startPrice)}</p>
                 {auction.finalPrice != null ? (
-                  <p className="mt-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400 font-[family-name:var(--font-ui)] tabular-nums">
-                    {isVie ? `Giá chốt: ${formatVnd(auction.finalPrice)}` : `Final: ${formatVnd(auction.finalPrice)}`}
+                  <p className="mt-1 text-xs font-semibold text-[#2F6B63]">
+                    Giá chốt: {formatVnd(auction.finalPrice)}
                   </p>
                 ) : null}
               </div>
 
               {/* FE-03 Balance Overview */}
               {userId && wallet && (
-                <div className="rounded-2xl border border-[var(--hair)] bg-[var(--ink-3)] p-4 text-xs">
-                  <span className="flex items-center gap-1.5 text-[var(--ash)]">
-                    <Wallet size={14} className="text-[var(--lumen)]" /> {isVie ? 'Số dư ví khả dụng' : 'Available balance'}
-                  </span>
-                  <p className="mt-2 font-[family-name:var(--font-ui)] text-xl font-bold tabular-nums text-[var(--ivory)]">
+                <div className="rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] p-4 text-xs">
+                  <span className="flex items-center gap-1.5 text-outline">
+                    <Wallet size={14} className="text-brand-periwinkle" /> Số dư ví khả dụng </span>
+                  <p className="mt-2 font-mono text-xl font-bold text-[#2F6B63]">
                     {formatVnd(wallet.wallet.balance)}
                   </p>
-                  <div className="mt-3 flex items-center justify-between text-[11px] text-[var(--ash)] font-[family-name:var(--font-ui)] tabular-nums">
-                    <span>{isVie ? 'Tiền đang khóa cọc:' : 'Locked deposit:'}</span>
-                    <span className="font-semibold text-[var(--ivory)]">{formatVnd(wallet.wallet.lockedBalance)}</span>
+                  <div className="mt-3 flex items-center justify-between text-[11px] text-outline">
+                    <span>Tiền đang khóa cọc:</span>
+                    <span className="font-mono">{formatVnd(wallet.wallet.lockedBalance)}</span>
                   </div>
                 </div>
               )}
@@ -833,22 +866,18 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
 
             {/* Winner Badge & Download */}
             {isWinner && hasCompletedDeliveryChoice && (
-              <div className="mb-6 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-5 text-xs text-[var(--ivory)]">
-                <div className="flex items-center gap-2 text-sm font-semibold text-emerald-600 dark:text-emerald-400">
+              <div className="mb-6 rounded-2xl border border-[#2F6B63]/40 bg-[#2F6B63]/10 p-5 text-xs text-[#2F6B63]">
+                <div className="flex items-center gap-2 text-sm font-bold text-[#2F6B63]">
                   <Award size={18} />
-                  <span>{isVie ? 'Chúc mừng! Bạn đã thắng phiên đấu giá này.' : 'Congratulations! You won this auction.'}</span>
+                  <span>Chúc mừng! Bạn đã thắng phiên đấu giá này.</span>
                 </div>
-                <p className="mt-1 text-[var(--ash)]">
-                  {isVie
-                    ? 'Bạn nắm giữ quyền sở hữu độc bản và toàn quyền khai thác thương mại đối với bức tranh này.'
-                    : 'You hold exclusive ownership and full commercial exploitation rights for this artwork.'}
-                </p>
+                <p className="mt-1 text-[#2F6B63]"> Bạn nắm giữ quyền sở hữu độc bản và toàn quyền khai thác thương mại đối với bức tranh này. </p>
 
                 {deliverableInfo && (
-                  <div className="mt-3 rounded-xl border border-[var(--hair)] bg-[var(--ink-3)] p-3 space-y-1 text-[11px] text-[var(--ivory)] font-[family-name:var(--font-ui)]">
-                    <p>• {isVie ? 'Tệp bàn giao:' : 'Deliverable file:'} <span className="font-bold text-[var(--ivory)]">{deliverableInfo.fileName}</span> {deliverableInfo.mimeType ? `(${deliverableInfo.mimeType})` : ''}</p>
-                    {deliverableInfo.certNumber && <p>• {isVie ? 'Mã chứng nhận:' : 'Certificate #:'} <span className="text-[var(--lumen)]">{deliverableInfo.certNumber}</span></p>}
-                    {deliverableInfo.licenseType && <p>• {isVie ? 'Giấy phép:' : 'License:'} <span className="text-[var(--ivory)]">{deliverableInfo.licenseType}</span></p>}
+                  <div className="mt-3 rounded-xl border border-[#2F6B63]/30 bg-[#F0E7D8] p-3 space-y-1 text-[11px] text-[#2F6B63] font-mono">
+                    <p>• Tệp bàn giao: <span className="font-bold text-[#241F1A]">{deliverableInfo.fileName}</span> {deliverableInfo.mimeType ? `(${deliverableInfo.mimeType})` : ''}</p>
+                    {deliverableInfo.certNumber && <p>• Mã chứng nhận: <span className="text-[#2F6B63]">{deliverableInfo.certNumber}</span></p>}
+                    {deliverableInfo.licenseType && <p>• Giấy phép: <span className="text-[#241F1A]">{deliverableInfo.licenseType}</span></p>}
                   </div>
                 )}
 
@@ -857,59 +886,72 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
                     type="button"
                     disabled={downloading}
                     onClick={handleDownloadOriginal}
-                    className="inline-flex items-center gap-1.5 rounded-full bg-[var(--lumen)] px-4 py-2 text-xs font-bold text-white shadow hover:bg-[var(--lumen-hi)] transition disabled:opacity-50"
+                    className="inline-flex items-center gap-1.5 rounded-full bg-[#2F6B63]/10 px-4 py-2 font-h1 font-bold text-[#241F1A] shadow hover:brightness-110 disabled:opacity-50"
                   >
-                    <Download size={14} /> {downloading ? (isVie ? 'Đang tạo liên kết...' : 'Generating link...') : (isVie ? 'Tải xuống tranh gốc' : 'Download original')}
+                    <Download size={14} /> {downloading ? 'Đang tạo liên kết...' : 'Tải xuống tranh gốc'}
                   </button>
 
                   <button
                     type="button"
                     disabled={loadingCert}
                     onClick={handleViewCertificate}
-                    className="inline-flex items-center gap-1.5 rounded-full border border-[var(--hair-2)] bg-[var(--ink-2)] px-4 py-2 text-xs font-bold text-[var(--ivory)] shadow hover:border-[var(--lumen)] hover:text-[var(--lumen)] transition disabled:opacity-50"
+                    className="inline-flex items-center gap-1.5 rounded-full border border-[#2F6B63]/40 bg-[#2F6B63]/20 px-4 py-2 font-h1 font-bold text-[#2F6B63] shadow hover:bg-[#2F6B63]/20 disabled:opacity-50"
                   >
-                    <ShieldCheck size={14} /> {loadingCert ? (isVie ? 'Đang tải chứng nhận...' : 'Loading cert...') : (isVie ? 'Xem Chứng nhận sở hữu' : 'Ownership Certificate')}
+                    <ShieldCheck size={14} /> {loadingCert ? 'Đang tải chứng nhận...' : 'Xem Chứng nhận sở hữu'}
                   </button>
 
                   <button
                     type="button"
                     onClick={() => setShowCommercialDeed(true)}
-                    className="inline-flex items-center gap-1.5 rounded-full border border-[var(--gold)]/40 bg-[var(--gold-soft)] px-4 py-2 text-xs font-bold text-[var(--gold)] shadow hover:bg-[var(--gold)]/20 transition"
+                    className="inline-flex items-center gap-1.5 rounded-full border border-[#8A6A1F]/40 bg-[#8A6A1F]/10 px-4 py-2 font-h1 font-bold text-[#8A6A1F] shadow hover:bg-[#8A6A1F]/20"
                   >
-                    <FileCheck2 size={14} /> {isVie ? 'Giấy bàn giao quyền thương mại' : 'Commercial Rights Deed'}
-                  </button>
+                    <FileCheck2 size={14} /> Giấy bàn giao quyền thương mại </button>
                 </div>
               </div>
             )}
 
             {/* Trạng thái phiên chốt: Chỉ Seller mới có nút xem hợp đồng/chứng chỉ, người lạ chỉ thấy thông báo */}
             {auction.auctionStatus === 'Settled' && !isWinner && (
-              <div className="mb-6 rounded-2xl border border-[var(--hair)] bg-[var(--ink-3)] p-4 text-xs text-[var(--ash)]">
+              <div className="mb-6 rounded-2xl border border-brand-periwinkle/20 bg-brand-periwinkle/5 p-4 text-xs text-on-surface-variant">
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <div className="flex items-center gap-2 font-semibold text-[var(--lumen)]">
+                  <div className="flex items-center gap-2 font-semibold text-brand-periwinkle">
                     <ShieldCheck size={16} />
-                    <span>{isVie ? 'Phiên đấu giá đã chốt quyền sở hữu độc bản' : 'Auction has concluded with verified ownership deed'}</span>
+                    <span>Phiên đấu giá đã chốt quyền sở hữu độc bản</span>
                   </div>
                   {isSeller && (
                     <div className="flex items-center gap-3">
                       <button
                         type="button"
                         onClick={() => setShowCommercialDeed(true)}
-                        className="text-[11px] font-bold text-[var(--gold)] hover:underline cursor-pointer"
-                      >
-                        {isVie ? 'Quyền thương mại' : 'Commercial rights'}
-                      </button>
+                        className="text-[11px] font-bold text-[#8A6A1F] hover:underline cursor-pointer"
+                      > Quyền thương mại </button>
                       <button
                         type="button"
                         disabled={loadingCert}
                         onClick={handleViewCertificate}
-                        className="inline-flex items-center gap-1 text-[11px] font-bold text-[var(--lumen)] hover:underline disabled:opacity-50 cursor-pointer"
+                        className="inline-flex items-center gap-1 text-[11px] font-bold text-brand-periwinkle hover:underline disabled:opacity-50 cursor-pointer"
                       >
-                        {loadingCert ? (isVie ? 'Đang tải...' : 'Loading...') : (isVie ? 'Xem chứng chỉ' : 'View cert')} <ExternalLink size={12} />
+                        {loadingCert ? 'Đang tải...' : 'Xem chứng chỉ'} <ExternalLink size={12} />
                       </button>
                     </div>
                   )}
                 </div>
+              </div>
+            )}
+
+            {/* AUCT-04 — người bán sửa thông số phiên khi phiên chưa mở và chưa có lượt đặt giá */}
+            {isSeller && auction.auctionStatus === 'Scheduled' && auction.bidCount === 0 && (
+              <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#8A6A1F]/35 bg-[#8A6A1F]/10 p-4 text-xs">
+                <div className="flex items-start gap-2 text-[#8A6A1F]">
+                  <CalendarDays size={16} className="mt-0.5 shrink-0 text-[#8A6A1F]" />
+                  <span> Phiên <strong>chưa bắt đầu</strong> và chưa có lượt đặt giá — bạn vẫn sửa được giá khởi điểm,
+ bước giá, giá mua ngay và thời gian. </span>
+                </div>
+                <Link
+                  href={`/auctions/${auctionId}/edit`}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-[#8A6A1F]/40 bg-[#8A6A1F]/10 px-4 py-2 font-h1 text-[11px] font-bold text-[#241F1A] transition hover:brightness-110"
+                >
+                  <RefreshCw size={13} /> Sửa phiên </Link>
               </div>
             )}
 
@@ -925,13 +967,12 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
               <form onSubmit={handlePlaceBid} className="space-y-4">
                 <div>
                   <div className="mb-1.5 flex items-center justify-between text-xs">
-                    <label htmlFor="bid-amount" className="font-semibold text-[var(--ivory)]">
-                      {isVie ? 'Mức giá bạn muốn đặt (₫)' : 'Your bid amount (₫)'}
+                    <label htmlFor="bid-amount" className="font-medium text-on-surface-variant">
+                      Mức giá bạn muốn đặt (₫)
                     </label>
-                    <span className="font-[family-name:var(--font-ui)] tabular-nums text-[11px] text-[var(--ash)]">
-                      {isVie ? `Tối thiểu: ${formatVnd(minimumNextBid)}` : `Min: ${formatVnd(minimumNextBid)}`}
-                    </span>
+                    <span className="text-[11px] text-outline">Tối thiểu: {formatVnd(minimumNextBid)}</span>
                   </div>
+
 
                   <input
                     id="bid-amount"
@@ -940,34 +981,28 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
                     step="any"
                     value={bidAmount}
                     onChange={(e) => setBidAmount(e.target.value)}
-                    className={`w-full rounded-2xl border bg-[var(--ink-3)] px-4 py-3 font-[family-name:var(--font-ui)] text-lg font-bold tabular-nums text-[var(--ivory)] focus:outline-none transition ${
+                    className={`w-full rounded-xl border bg-brand-navy/60 px-4 py-3 font-h1 text-lg font-bold text-on-surface focus:outline-none transition ${
                       bidAmountNum > 0 && (bidAmountNum < minimumNextBid || isBalanceShortage)
-                        ? 'border-[var(--cinnabar)] focus:border-[var(--cinnabar)]'
-                        : 'border-[var(--hair-2)] focus:border-[var(--lumen)]'
+                        ? 'border-[#A8321C]/30 focus:border-[#A8321C]/30'
+                        : 'border-[#221E1A]/10 focus:border-brand-periwinkle'
                     }`}
                   />
                   {bidAmountNum > 0 && bidAmountNum < minimumNextBid && (
-                    <p className="mt-1 text-xs text-[var(--cinnabar-text)]">
-                      {isVie ? `Mức giá đặt chưa đủ! Tối thiểu là ${formatVnd(minimumNextBid)}.` : `Amount too low! Minimum is ${formatVnd(minimumNextBid)}.`}
+                    <p className="mt-1 text-xs text-[#A8321C]">
+                      Mức giá đặt chưa đủ! Tối thiểu là {formatVnd(minimumNextBid)}.
                     </p>
                   )}
                   {auction.buyNowPrice && bidAmountNum >= auction.buyNowPrice && (
-                    <p className="mt-1 text-xs text-[var(--lumen)]">
-                      {isVie
-                        ? `Giá đặt đã chạm mức mua ngay: phiên sẽ chốt ngay ở ${formatVnd(auction.buyNowPrice)}, phần vượt không bị trừ.`
-                        : `Bid meets Buy Now price: session will conclude at ${formatVnd(auction.buyNowPrice)}.`}
+                    <p className="mt-1 text-xs text-brand-periwinkle/90">
+                      Giá đặt đã chạm mức mua ngay: phiên sẽ chốt ngay ở {formatVnd(auction.buyNowPrice)}, phần vượt không bị trừ.
                     </p>
                   )}
                   {isBalanceShortage && (
-                    <p className="mt-1 text-xs text-[var(--cinnabar-text)] flex items-center justify-between">
+                    <p className="mt-1 text-xs text-[#A8321C] flex items-center justify-between">
                       <span>
-                        {isVie
-                          ? `Số dư ví không đủ! Cần ${formatVnd(bidAmountNum)}, hiện có ${formatVnd(wallet?.wallet.balance ?? 0)} (thiếu ${formatVnd(bidAmountNum - (wallet?.wallet.balance ?? 0))}).`
-                          : `Insufficient balance! Needed: ${formatVnd(bidAmountNum)}, current: ${formatVnd(wallet?.wallet.balance ?? 0)}.`}
+                        Số dư ví không đủ! Cần {formatVnd(bidAmountNum)}, hiện có {formatVnd(wallet?.wallet.balance ?? 0)} (thiếu {formatVnd(bidAmountNum - (wallet?.wallet.balance ?? 0))}).
                       </span>
-                      <Link href="/deposit" className="text-[var(--lumen)] underline hover:text-[var(--lumen-hi)] font-semibold ml-1">
-                        {isVie ? 'Nạp tiền' : 'Deposit'}
-                      </Link>
+                      <Link href="/deposit" className="text-brand-periwinkle underline hover:text-[#241F1A] font-semibold ml-1"> Nạp tiền </Link>
                     </p>
                   )}
 
@@ -976,28 +1011,28 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
                     <button
                       type="button"
                       onClick={() => handleChipClick(0)}
-                      className="min-h-11 rounded-xl border border-[var(--hair-2)] bg-[var(--ink-3)] px-2.5 py-1 text-xs font-semibold text-[var(--ivory)] transition hover:border-[var(--lumen)] hover:bg-[var(--lumen-soft)] hover:text-[var(--lumen)] cursor-pointer"
+                      className="min-h-11 rounded-lg border border-[#221E1A]/10 bg-[#FFFCF6] px-2.5 py-1 text-xs font-semibold hover:border-brand-periwinkle hover:bg-brand-periwinkle/10"
                     >
-                      {isVie ? 'Mặc định' : 'Default'} ({formatVnd(minimumNextBid)})
+                      Mặc định ({formatVnd(minimumNextBid)})
                     </button>
                     <button
                       type="button"
                       onClick={() => handleChipClick(1)}
-                      className="min-h-11 rounded-xl border border-[var(--hair-2)] bg-[var(--ink-3)] px-2.5 py-1 text-xs font-semibold text-[var(--ivory)] transition hover:border-[var(--lumen)] hover:bg-[var(--lumen-soft)] hover:text-[var(--lumen)] cursor-pointer"
+                      className="min-h-11 rounded-lg border border-[#221E1A]/10 bg-[#FFFCF6] px-2.5 py-1 text-xs font-semibold hover:border-brand-periwinkle hover:bg-brand-periwinkle/10"
                     >
                       +1 Step
                     </button>
                     <button
                       type="button"
                       onClick={() => handleChipClick(2)}
-                      className="min-h-11 rounded-xl border border-[var(--hair-2)] bg-[var(--ink-3)] px-2.5 py-1 text-xs font-semibold text-[var(--ivory)] transition hover:border-[var(--lumen)] hover:bg-[var(--lumen-soft)] hover:text-[var(--lumen)] cursor-pointer"
+                      className="min-h-11 rounded-lg border border-[#221E1A]/10 bg-[#FFFCF6] px-2.5 py-1 text-xs font-semibold hover:border-brand-periwinkle hover:bg-brand-periwinkle/10"
                     >
                       +2 Step
                     </button>
                     <button
                       type="button"
                       onClick={() => handleChipClick(5)}
-                      className="min-h-11 rounded-xl border border-[var(--hair-2)] bg-[var(--ink-3)] px-2.5 py-1 text-xs font-semibold text-[var(--ivory)] transition hover:border-[var(--lumen)] hover:bg-[var(--lumen-soft)] hover:text-[var(--lumen)] cursor-pointer"
+                      className="min-h-11 rounded-lg border border-[#221E1A]/10 bg-[#FFFCF6] px-2.5 py-1 text-xs font-semibold hover:border-brand-periwinkle hover:bg-brand-periwinkle/10"
                     >
                       +5 Step
                     </button>
@@ -1005,23 +1040,34 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
                 </div>
 
                 {/* FE-08 Auto-bid settings */}
-                <div className="rounded-2xl border border-[var(--hair)] bg-[var(--ink-3)] p-4 text-xs">
+                <div className="rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] p-3 text-xs">
                   {activeAutoBidCap && (
-                    <div className="mb-3 flex items-center justify-between rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-emerald-600 dark:text-emerald-300">
+                    <div className="mb-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-[#2F6B63]/40 bg-[#2F6B63]/10 px-3 py-2 text-[#2F6B63]">
                       <span className="flex items-center gap-2 font-semibold">
                         <LoaderCircle size={14} className="animate-spin motion-reduce:animate-none" aria-hidden="true" />
                         <span>
-                          Auto-bid <span className="font-normal">{isVie ? 'Đang hoạt động' : 'Active'}</span>
+                          Auto-bid <span className="font-normal text-[#2F6B63]">Đang hoạt động</span>
                         </span>
-                        <span className="size-1.5 rounded-full bg-emerald-400 animate-pulse motion-reduce:animate-none" aria-hidden="true" />
+                        <span className="size-1.5 rounded-full bg-[#2F6B63]/10 animate-pulse motion-reduce:animate-none" aria-hidden="true" />
                       </span>
-                      <span className="font-[family-name:var(--font-ui)] tabular-nums">{isVie ? `Trần ${formatVnd(activeAutoBidCap)}` : `Cap ${formatVnd(activeAutoBidCap)}`}</span>
+                      <span className="flex items-center gap-2">
+                        <span className="font-mono">Trần {formatVnd(activeAutoBidCap)}</span>
+                        <button
+                          type="button"
+                          onClick={() => void handleCancelAutoBid()}
+                          disabled={cancellingAutoBid}
+                          className="inline-flex items-center gap-1 rounded-full border border-[#A8321C]/40 bg-[#A8321C]/15 px-2.5 py-1 text-[11px] font-semibold text-[#A8321C] transition hover:bg-[#A8321C]/20 disabled:opacity-50"
+                          title="Dừng tự động nâng giá khi bị đè"
+                        >
+                          <X size={12} /> {cancellingAutoBid ? 'Đang huỷ…' : 'Huỷ Auto-bid'}
+                        </button>
+                      </span>
                     </div>
                   )}
                   <label className="flex cursor-pointer items-center justify-between gap-3">
                     <span>
-                      <span className="block font-semibold text-[var(--ivory)]">{isVie ? 'Đặt giá bằng Auto-bid' : 'Enable Auto-bid'}</span>
-                      <span className="mt-0.5 block text-[11px] text-[var(--ash)]">{isVie ? 'Bật để đăng ký hoặc cập nhật giá trần ở lần đặt giá này.' : 'Toggle to set or update auto-bid max cap.'}</span>
+                      <span className="block font-semibold text-on-surface">Đặt giá bằng Auto-bid</span>
+                      <span className="mt-0.5 block text-[11px] text-outline">Bật để đăng ký hoặc cập nhật giá trần ở lần đặt giá này.</span>
                     </span>
                     <input
                       type="checkbox"
@@ -1029,48 +1075,41 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
                       onChange={(e) => setIsAuto(e.target.checked)}
                       className="peer sr-only"
                     />
-                    <span className="relative h-6 w-11 shrink-0 rounded-full bg-[var(--hair-2)] transition peer-checked:bg-[var(--lumen)] peer-focus-visible:ring-2 peer-focus-visible:ring-[var(--lumen)] after:absolute after:left-1 after:top-1 after:size-4 after:rounded-full after:bg-white after:transition-transform peer-checked:after:translate-x-5" />
+                    <span className="relative h-6 w-11 shrink-0 rounded-full bg-[#F0E7D8] transition peer-checked:bg-brand-periwinkle peer-focus-visible:ring-2 peer-focus-visible:ring-brand-periwinkle/60 after:absolute after:left-1 after:top-1 after:size-4 after:rounded-full after:bg-[#F0E7D8] after:transition-transform peer-checked:after:translate-x-5 peer-checked:after:bg-brand-navy" />
                   </label>
-                  <p className="mt-1 text-[11px] text-[var(--ash)]">
-                    {isVie
-                      ? `Hệ thống sẽ tự động tăng giá theo BidStep (+${formatVnd(auction.bidStep)}) mỗi khi có người đè giá, nhưng không vượt quá mức trần tối đa do bạn cài đặt.`
-                      : `System will auto-increment bids by step (+${formatVnd(auction.bidStep)}) up to your specified cap.`}
+                  <p className="mt-1 text-[11px] text-outline">
+                    Hệ thống sẽ tự động tăng giá theo BidStep (+{formatVnd(auction.bidStep)}) mỗi khi có người đè giá, nhưng không vượt quá mức trần tối đa do bạn cài đặt.
                   </p>
                   {isAuto && (
                     <div className="mt-3">
-                      <label className="mb-1 block text-[var(--ash)] font-medium">{isVie ? 'Giới hạn giá trần tối đa (₫):' : 'Max price ceiling (₫):'}</label>
+                      <label className="mb-1 block text-outline">Giới hạn giá trần tối đa (₫):</label>
                       <input
                         type="number"
                         min={minimumNextBid}
                         value={maxAutoBid}
                         onChange={(e) => setMaxAutoBid(e.target.value)}
-                        placeholder={isVie ? `Tối thiểu ${minimumNextBid}` : `Minimum ${minimumNextBid}`}
-                        className={`w-full rounded-xl border bg-[var(--ink-2)] px-3 py-2 font-[family-name:var(--font-ui)] tabular-nums text-[var(--ivory)] focus:outline-none transition ${
+                        placeholder={`Tối thiểu ${minimumNextBid}`}
+                        className={`w-full rounded-lg border bg-brand-navy px-3 py-2 text-on-surface focus:outline-none transition ${
                           maxAutoBid && (Number(maxAutoBid) < minimumNextBid || Number(maxAutoBid) < bidAmountNum)
-                            ? 'border-[var(--cinnabar)] focus:border-[var(--cinnabar)]'
-                            : 'border-[var(--hair-2)] focus:border-[var(--lumen)]'
+                            ? 'border-[#A8321C]/30 focus:border-[#A8321C]/30'
+                            : 'border-[#221E1A]/10 focus:border-brand-periwinkle'
                         }`}
                       />
                       {maxAutoBid && Number(maxAutoBid) < minimumNextBid && (
-                        <p className="mt-1 text-xs text-[var(--cinnabar-text)]">
-                          {isVie
-                            ? `Giá trần tự động phải lớn hơn hoặc bằng mức giá đặt tối thiểu (${formatVnd(minimumNextBid)}).`
-                            : `Max cap must be at least the minimum next bid (${formatVnd(minimumNextBid)}).`}
+                        <p className="mt-1 text-xs text-[#A8321C]">
+                          Giá trần tự động phải lớn hơn hoặc bằng mức giá đặt tối thiểu ({formatVnd(minimumNextBid)}).
                         </p>
                       )}
                       {maxAutoBid && Number(maxAutoBid) >= minimumNextBid && Number(maxAutoBid) < bidAmountNum && (
-                        <p className="mt-1 text-xs text-[var(--cinnabar-text)]">
-                          {isVie
-                            ? `Giá trần tự động (${formatVnd(Number(maxAutoBid))}) phải lớn hơn hoặc bằng mức giá sẽ đặt (${formatVnd(bidAmountNum)}).`
-                            : `Max cap must be at least your current bid amount.`}
+                        <p className="mt-1 text-xs text-[#A8321C]">
+                          Giá trần tự động ({formatVnd(Number(maxAutoBid))}) phải lớn hơn hoặc bằng mức giá sẽ đặt ({formatVnd(bidAmountNum)}).
                         </p>
                       )}
                       {/* Cảnh báo trước khi bấm: trần chạm giá mua ngay = mua luôn, không đấu giá tiếp. */}
                       {auction.buyNowPrice != null && Number(maxAutoBid) >= auction.buyNowPrice && (
-                        <p className="mt-1 rounded-xl border border-[var(--gold)]/30 bg-[var(--gold-soft)] px-2.5 py-1.5 text-[11px] text-[var(--gold)]">
-                          {isVie
-                            ? `Trần này chạm giá mua ngay (${formatVnd(auction.buyNowPrice)}): khi gửi, hệ thống sẽ hỏi xác nhận và mua ngay tác phẩm ở mức giá đó.`
-                            : `Cap reaches Buy Now (${formatVnd(auction.buyNowPrice)}): confirmation will be requested to buy instantly.`}
+                        <p className="mt-1 rounded-lg border border-[#8A6A1F]/40 bg-[#8A6A1F]/10 px-2 py-1.5 text-[11px] text-[#8A6A1F]">
+                          Trần này chạm giá mua ngay ({formatVnd(auction.buyNowPrice)}): khi gửi, hệ thống sẽ hỏi xác nhận và
+                          mua ngay tác phẩm ở mức giá đó.
                         </p>
                       )}
                     </div>
@@ -1086,19 +1125,17 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
                     bidAmountNum < minimumNextBid ||
                     Boolean(isAuto && (!maxAutoBid || Number(maxAutoBid) < minimumNextBid || Number(maxAutoBid) < bidAmountNum))
                   }
-                  className="w-full rounded-full bg-[var(--lumen)] py-3 text-center text-sm font-bold text-white shadow-md transition hover:bg-[var(--lumen-hi)] disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
+                  className="w-full rounded-full bg-brand-periwinkle py-3 text-center font-h1 text-sm font-bold text-[#FFFCF6] shadow-lg transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <span className="inline-flex items-center gap-2">
                     <Gavel size={16} />{' '}
                     {submittingBid
-                      ? (isVie ? 'Đang xử lý...' : 'Processing...')
+                      ? 'Đang xử lý...'
                       : isBalanceShortage
-                        ? (isVie ? 'Số dư ví không đủ' : 'Insufficient balance')
+                        ? 'Số dư ví không đủ'
                         : isAuto
-                          ? (isVie
-                              ? `${activeAutoBidCap ? 'Cập nhật' : 'Kích hoạt'} Auto-bid · Trần ${formatVnd(Number(maxAutoBid) || 0)}`
-                              : `${activeAutoBidCap ? 'Update' : 'Activate'} Auto-bid · Cap ${formatVnd(Number(maxAutoBid) || 0)}`)
-                          : (isVie ? `Đặt giá ${formatVnd(bidAmountNum)}` : `Place bid ${formatVnd(bidAmountNum)}`)}
+                          ? `${activeAutoBidCap ? 'Cập nhật' : 'Kích hoạt'} Auto-bid · Trần ${formatVnd(Number(maxAutoBid) || 0)}`
+                          : `Đặt giá ${formatVnd(bidAmountNum)}`}
                   </span>
                 </button>
 
@@ -1109,70 +1146,67 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
                       type="button"
                       disabled={buyingNow || isEnded}
                       onClick={handleBuyNow}
-                      className="w-full rounded-full border border-[var(--hair-2)] bg-[var(--ink-3)] py-2.5 text-center text-xs font-bold text-[var(--ivory)] transition hover:border-[var(--lumen)] hover:text-[var(--lumen)] disabled:opacity-50 cursor-pointer"
+                      className="w-full rounded-full border border-brand-periwinkle/40 bg-brand-periwinkle/10 py-2.5 text-center font-h1 text-xs font-bold text-brand-periwinkle transition hover:bg-brand-periwinkle hover:text-[#FFFCF6] disabled:opacity-50"
                     >
                       <span className="inline-flex items-center gap-2">
-                        <Zap size={14} className="text-[var(--gold)]" /> {buyingNow ? (isVie ? 'Đang xử lý...' : 'Processing...') : (isVie ? `Mua ngay với ${formatVnd(auction.buyNowPrice)}` : `Buy now for ${formatVnd(auction.buyNowPrice)}`)}
+                        <Zap size={14} /> {buyingNow ? 'Đang xử lý...' : `Mua ngay với ${formatVnd(auction.buyNowPrice)}`}
                       </span>
                     </button>
                     {wallet && wallet.wallet.balance < auction.buyNowPrice && (
-                      <p className="text-center text-[11px] text-[var(--ash)]">
-                        {isVie
-                          ? `Số dư ví của bạn (${formatVnd(wallet.wallet.balance)}) chưa đủ để Mua ngay (thiếu ${formatVnd(auction.buyNowPrice - wallet.wallet.balance)}).`
-                          : `Insufficient balance for Buy Now.`}
+                      <p className="text-center text-[11px] text-[#8A6A1F]">
+                        Số dư ví của bạn ({formatVnd(wallet.wallet.balance)}) chưa đủ để Mua ngay (thiếu {formatVnd(auction.buyNowPrice - wallet.wallet.balance)}).
                       </p>
                     )}
                   </div>
                 )}
 
                 {/* Dòng ghi chú nhỏ quy chế và điều lệ đấu giá */}
-                <div className="flex items-center justify-center gap-1.5 pt-1 text-center text-[11px] text-[var(--ash)]">
-                  <ShieldCheck size={13} className="text-[var(--lumen)] shrink-0" />
+                <div className="flex items-center justify-center gap-1.5 pt-1 text-center text-[11px] text-outline">
+                  <ShieldCheck size={13} className="text-brand-periwinkle shrink-0" />
                   <span>
-                    {isVie ? 'Bằng việc đặt giá hoặc mua ngay tác phẩm này, bạn đồng ý với ' : 'By placing a bid or buying now, you agree to '}
+                    Bằng việc đặt giá hoặc mua ngay tác phẩm này, bạn đồng ý với{' '}
                     <button
                       type="button"
                       onClick={() => setShowRulesModal(true)}
-                      className="text-[var(--lumen)] font-medium underline decoration-[var(--lumen)]/40 underline-offset-2 hover:text-[var(--lumen-hi)] transition cursor-pointer"
+                      className="text-brand-periwinkle font-medium underline decoration-brand-periwinkle/40 underline-offset-2 hover:text-[#241F1A] transition cursor-pointer"
                     >
-                      {isVie ? 'Quy chế sàn đấu giá & Điều lệ bản quyền' : 'Auction Rules & Copyright Terms'}
+                      Quy chế sàn đấu giá &amp; Điều lệ bản quyền
                     </button>
                     .
                   </span>
                 </div>
               </form>
             ) : isSeller ? (
-              <div className="rounded-2xl border border-[var(--hair)] bg-[var(--ink-3)] p-4 text-center text-xs text-[var(--ash)]">
-                {isVie ? 'Bạn là người tạo phiên đấu giá này nên không thể tham gia đặt giá.' : 'You are the seller of this auction and cannot bid.'}
-              </div>
+              <div className="rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] p-4 text-center text-xs text-outline"> Bạn là người tạo phiên đấu giá này nên không thể tham gia đặt giá. </div>
             ) : (
-              <div className="rounded-2xl border border-[var(--hair)] bg-[var(--ink-3)] p-4 text-center text-xs text-[var(--ash)]">
-                {isVie ? 'Phiên đấu giá hiện tại không ở trạng thái mở để đặt giá.' : 'This auction is not currently open for bidding.'}
-              </div>
+              <div className="rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] p-4 text-center text-xs text-outline"> Phiên đấu giá hiện tại không ở trạng thái mở để đặt giá. </div>
             )}
           </section>
 
           {/* Lịch sử đặt giá gần đây */}
-          <section className="rounded-3xl border border-[var(--hair)] bg-[var(--ink-2)] p-6 shadow-sm">
+          <section className="glass-container rounded-3xl border border-[#221E1A]/10 p-6">
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="font-[family-name:var(--font-display)] text-base font-medium text-[var(--ivory)]">
-                {isVie ? `Lịch sử đặt giá (${auction.bidCount})` : `Bid history (${auction.bidCount})`}
-              </h2>
+              <div className="flex items-center gap-3">
+                <h2 className="font-h1 text-base font-bold">Lịch sử đặt giá ({auction.bidCount})</h2>
+                {/* Cùng số liệu với thẻ ngoài danh sách: "N theo dõi" */}
+                <span className="inline-flex items-center gap-1 text-xs text-outline">
+                  <Eye size={13} />
+                  {auction.watchCount ?? 0} theo dõi
+                </span>
+              </div>
               <button
                 type="button"
                 onClick={() => void loadDetail()}
                 disabled={loading}
-                className="text-xs text-[var(--ash)] hover:text-[var(--lumen)] transition cursor-pointer"
-                title={isVie ? 'Làm mới lịch sử' : 'Refresh history'}
+                className="text-xs text-outline hover:text-[#241F1A]"
+                title="Làm mới lịch sử"
               >
                 <RefreshCw size={13} className={loading ? 'animate-spin' : ''} />
               </button>
             </div>
 
             {bids.length === 0 ? (
-              <p className="py-4 text-center text-xs text-[var(--ash)]">
-                {isVie ? 'Chưa có lượt đặt giá nào. Hãy là người đầu tiên!' : 'No bids yet. Be the first to place a bid!'}
-              </p>
+              <p className="py-4 text-center text-xs text-outline">Chưa có lượt đặt giá nào. Hãy là người đầu tiên!</p>
             ) : (
               <div className="space-y-2.5 max-h-80 overflow-y-auto pr-1">
                 {bids.map((b) => {
@@ -1181,34 +1215,58 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
                   return (
                     <div
                       key={b.bidId}
-                      className={`flex items-center justify-between rounded-xl border p-3 text-xs transition-all duration-300 ${
+                      className={`flex items-center justify-between rounded-xl border p-3 text-xs transition-all duration-500 ${
                         isMine
-                          ? 'border-[var(--lumen)]/40 bg-[var(--lumen-soft)] text-[var(--ivory)] shadow-sm'
+                          ? 'border-[#B24A26] bg-[#B24A26] text-[#F7F2E9] shadow-[0_0_0_1px_rgba(255,255,255,0.2)]'
                           : b.bidStatus === 'Leading'
-                            ? 'border-[var(--hair-2)] bg-[var(--ink-3)]'
-                            : 'border-[var(--hair)] bg-[var(--ink-3)]/60'
-                      } ${isNew ? 'scale-[1.01] ring-1 ring-[var(--lumen)] motion-reduce:transform-none' : ''}`}
+                            ? 'border-brand-periwinkle/30 bg-brand-periwinkle/10'
+                            : 'border-[#221E1A]/10 bg-[#FFFCF6]'
+                      } ${isNew ? 'scale-[1.01] ring-1 ring-[#2F6B63]/30 motion-reduce:transform-none' : ''}`}
                     >
-                      <div className="flex items-center gap-2.5">
-                        <div className={`flex size-7 items-center justify-center rounded-full text-xs font-bold ${isMine ? 'bg-[var(--lumen)] text-white' : 'bg-[var(--hair-2)] text-[var(--ash)]'}`}>
+                      <div className="flex items-center gap-2">
+                        <div className={`flex size-7 items-center justify-center rounded-full ${isMine ? 'bg-brand-navy/15 text-[#241F1A]' : 'bg-[#F0E7D8] text-brand-periwinkle'}`}>
                           <User size={13} />
                         </div>
                         <div>
-                          <p className="font-semibold text-[var(--ivory)]">
-                            {isMine ? (isVie ? 'Bạn' : 'You') : b.bidder?.fullName || (isVie ? 'Người đấu giá' : 'Bidder')} {b.bidStatus === 'Leading' ? (isVie ? '(Dẫn đầu)' : '(Leading)') : ''}
+                          <p className={`font-semibold ${isMine ? 'text-[#241F1A]' : 'text-on-surface'}`}>
+                            {isMine ? 'Bạn' : b.bidder?.fullName || 'Người đấu giá'} {b.bidStatus === 'Leading' ? '(Dẫn đầu)' : ''}
                           </p>
-                          <span className="text-[10px] text-[var(--ash)] font-[family-name:var(--font-ui)] tabular-nums">
-                            {new Date(b.placedAt).toLocaleTimeString(isVie ? 'vi-VN' : 'en-US')}
+                          <span className={`text-[10px] ${isMine ? 'text-[#241F1A]/70' : 'text-outline'}`}>
+                            {new Date(b.placedAt).toLocaleTimeString('vi-VN')}
                           </span>
                         </div>
                       </div>
-                      <span className={`font-[family-name:var(--font-ui)] font-bold tabular-nums ${isMine || b.bidStatus === 'Leading' ? 'text-[var(--lumen)]' : 'text-[var(--ivory)]'}`}>
+                      <span className={`font-mono font-bold ${isMine ? 'text-[#241F1A]' : 'text-brand-periwinkle'}`}>
                         {formatVnd(b.amount)}
                       </span>
                     </div>
                   );
                 })}
               </div>
+            )}
+
+            {/* Tải thêm lịch sử: API chi tiết chỉ trả 10 lượt gần nhất, còn bidCount là tổng thật. */}
+            {auction.bidCount > bids.length && (
+              <div className="mt-3 text-center">
+                <button
+                  type="button"
+                  onClick={() => void loadMoreBids()}
+                  disabled={loadingMoreBids}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-brand-periwinkle/40 bg-brand-periwinkle/10 px-4 py-2 text-[11px] font-semibold text-brand-periwinkle transition hover:bg-brand-periwinkle hover:text-[#FFFCF6] disabled:opacity-50"
+                >
+                  {loadingMoreBids ? (
+                    <LoaderCircle size={12} className="animate-spin motion-reduce:animate-none" />
+                  ) : (
+                    <RefreshCw size={12} />
+                  )}
+                  {loadingMoreBids
+                    ? 'Đang tải thêm…'
+                    : `Xem thêm lượt đặt giá cũ hơn (còn ${Math.max(auction.bidCount - bids.length, 0)})`}
+                </button>
+              </div>
+            )}
+            {bids.length > 0 && auction.bidCount <= bids.length && bids.length > 10 && (
+              <p className="mt-2 text-center text-[10px] text-outline">Đã hiển thị toàn bộ lượt đặt giá của phiên này.</p>
             )}
           </section>
         </div>
@@ -1236,63 +1294,50 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
 
       {/* Cảnh báo: nhận tranh điện tử ngay khi đang chờ giao tranh vật lý */}
       {showDigitalNowWarning && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-md">
-          <div className="w-full max-w-lg rounded-3xl border border-[var(--gold)]/40 bg-[var(--ink-2)] p-6 shadow-2xl text-[var(--ivory)]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#F0E7D8]/85 p-4 backdrop-blur-md">
+          <div className="w-full max-w-lg rounded-3xl border border-[#8A6A1F]/40 bg-[#F7F2E9] p-6 shadow-2xl">
             <div className="flex items-start gap-3">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-[var(--gold)]/30 bg-[var(--gold-soft)] text-[var(--gold)]">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-[#8A6A1F]/40 bg-[#8A6A1F]/15 text-[#8A6A1F]">
                 <AlertTriangle size={22} />
               </div>
               <div>
-                <h3 className="font-[family-name:var(--font-display)] text-base font-medium text-[var(--gold)]">
-                  {isVie ? 'Nhận tranh điện tử ngay?' : 'Receive digital files now?'}
-                </h3>
-                <p className="mt-1 text-xs text-[var(--ash)]">
-                  {isVie ? 'Bạn đang chờ bưu cục giao bản tranh vật lý. Nếu nhận bản điện tử ngay bây giờ:' : 'You are currently awaiting physical delivery. If you accept digital files now:'}
-                </p>
+                <h3 className="font-h1 text-base font-bold text-[#8A6A1F]"> Nhận tranh điện tử ngay? </h3>
+                <p className="mt-1 text-xs text-on-surface-variant"> Bạn đang chờ bưu cục giao bản tranh vật lý. Nếu nhận bản điện tử ngay bây giờ: </p>
               </div>
             </div>
 
-            <ul className="mt-4 space-y-2 rounded-2xl border border-[var(--hair)] bg-[var(--ink-3)] p-4 text-xs text-[var(--ivory)]">
+            <ul className="mt-4 space-y-2 rounded-2xl border border-[#221E1A]/10 bg-[#F0E7D8]/25 p-4 text-xs text-on-surface-variant">
               <li className="flex gap-2">
-                <span className="text-[var(--gold)]">•</span>
-                <span>{isVie ? 'Tiền ký quỹ được ' : 'Escrow funds will be '}<strong className="text-[var(--ivory)]">{isVie ? 'giải ngân ngay cho người bán' : 'immediately released to the seller'}</strong>{isVie ? ', phiên đấu giá đóng lại.' : ', closing the auction.'}</span>
+                <span className="text-[#8A6A1F]">•</span>
+                <span>Tiền ký quỹ được <strong className="text-[#241F1A]">giải ngân ngay cho người bán</strong>, phiên đấu giá đóng lại.</span>
               </li>
               <li className="flex gap-2">
-                <span className="text-[var(--cinnabar)]">•</span>
-                <span>
-                  {isVie ? 'Sàn ' : 'The platform '}
-                  <strong className="text-[var(--ivory)]">{isVie ? 'không còn giữ tiền' : 'will no longer hold funds'}</strong>
-                  {isVie ? ', nên nếu bưu phẩm đến muộn, hư hỏng hoặc không đúng tranh, bạn ' : ', so if the package arrives late or damaged, you '}
-                  <strong className="text-[var(--cinnabar-text)]">{isVie ? 'không được hoàn tiền' : 'cannot claim refund'}</strong>
-                  {isVie ? ' và không mở khiếu nại được nữa.' : ' or open a dispute.'}
-                </span>
+                <span className="text-[#A8321C]">•</span>
+                <span> Sàn <strong className="text-[#241F1A]">không còn giữ tiền</strong>, nên nếu bưu phẩm đến muộn, hư hỏng hoặc
+ không đúng tranh, bạn <strong className="text-[#A8321C]">không được hoàn tiền</strong> và không mở khiếu nại được nữa. </span>
               </li>
               <li className="flex gap-2">
-                <span className="text-emerald-500">•</span>
-                <span>{isVie ? 'Đổi lại bạn nhận ngay bản tranh gốc độ phân giải cao và giấy chứng nhận sở hữu.' : 'In return, you immediately get high-res original files and the ownership certificate.'}</span>
+                <span className="text-[#2F6B63]">•</span>
+                <span>Đổi lại bạn nhận ngay bản tranh gốc độ phân giải cao và giấy chứng nhận sở hữu.</span>
               </li>
             </ul>
 
-            <p className="mt-3 text-[11px] text-[var(--ash)]">
-              {isVie ? 'Nếu muốn giữ quyền khiếu nại bưu phẩm, hãy bấm Huỷ và chờ xác nhận đã nhận tranh vật lý.' : 'If you wish to retain dispute rights, cancel and wait for the physical package.'}
-            </p>
+            <p className="mt-3 text-[11px] text-outline"> Nếu muốn giữ quyền khiếu nại bưu phẩm, hãy bấm Huỷ và chờ xác nhận đã nhận tranh vật lý. </p>
 
-            <div className="mt-5 flex flex-wrap items-center justify-end gap-3 border-t border-[var(--hair)] pt-4">
+            <div className="mt-5 flex flex-wrap items-center justify-end gap-3 border-t border-[#221E1A]/10 pt-4">
               <button
                 type="button"
                 onClick={() => setShowDigitalNowWarning(false)}
                 disabled={acceptingDigital}
-                className="rounded-full border border-[var(--hair-2)] px-4 py-2 text-xs font-semibold text-[var(--ash)] hover:border-[var(--lumen)] hover:text-[var(--lumen)] transition disabled:opacity-50 cursor-pointer"
-              >
-                {isVie ? 'Huỷ, chờ nhận tranh vật lý' : 'Cancel, wait for delivery'}
-              </button>
+                className="rounded-xl px-4 py-2 text-xs font-semibold text-outline hover:text-[#241F1A] transition disabled:opacity-50"
+              > Huỷ, chờ nhận tranh vật lý </button>
               <button
                 type="button"
                 onClick={handleConfirmDigitalNow}
                 disabled={acceptingDigital}
-                className="inline-flex items-center gap-2 rounded-full bg-[var(--lumen)] px-5 py-2 text-xs font-bold text-white shadow-md hover:bg-[var(--lumen-hi)] transition disabled:opacity-50 cursor-pointer"
+                className="inline-flex items-center gap-2 rounded-xl bg-[#8A6A1F]/10 px-5 py-2 text-xs font-bold text-[#241F1A] shadow-md hover:brightness-110 transition disabled:opacity-50"
               >
-                <Download size={14} /> {acceptingDigital ? (isVie ? 'Đang xử lý...' : 'Processing...') : (isVie ? 'Tôi đồng ý, nhận tranh điện tử ngay' : 'I agree, accept digital files now')}
+                <Download size={14} /> {acceptingDigital ? 'Đang xử lý...' : 'Tôi đồng ý, nhận tranh điện tử ngay'}
               </button>
             </div>
           </div>
@@ -1309,95 +1354,70 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
 
       {/* Modal Quy chế sàn đấu giá & Điều lệ bản quyền */}
       {showRulesModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-in fade-in duration-200">
-          <div className="relative w-full max-w-lg rounded-3xl border border-[var(--hair)] bg-[var(--ink-2)] p-6 shadow-2xl backdrop-blur-2xl text-[var(--ivory)] space-y-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#E5D8C2] backdrop-blur-md p-4 animate-in fade-in duration-200">
+          <div className="relative w-full max-w-lg rounded-3xl border border-[#221E1A]/10 bg-[#F7F2E9]/95 p-6 shadow-2xl backdrop-blur-2xl text-on-surface space-y-4">
             <button
               type="button"
               onClick={() => setShowRulesModal(false)}
-              className="absolute right-5 top-5 rounded-full p-1.5 text-[var(--ash)] hover:bg-[var(--ink-3)] hover:text-[var(--ivory)] transition cursor-pointer"
-              aria-label={isVie ? 'Đóng' : 'Close'}
+              className="absolute right-5 top-5 rounded-full p-1.5 text-outline hover:bg-[#F0E7D8] hover:text-[#241F1A] transition cursor-pointer"
+              aria-label="Đóng"
             >
               <X size={18} />
             </button>
 
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--lumen-soft)] text-[var(--lumen)]">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-periwinkle/15 text-brand-periwinkle">
                 <ShieldCheck size={22} />
               </div>
               <div>
-                <h3 className="font-[family-name:var(--font-display)] text-base font-medium text-[var(--ivory)]">
-                  {isVie ? 'Quy chế sàn & Điều lệ bản quyền' : 'Auction Platform Rules & Copyright Policy'}
-                </h3>
-                <p className="text-[11px] text-[var(--ash)]">
-                  {isVie ? 'Quy định giao dịch đấu giá minh bạch trên Dillustration' : 'Transparent auction trading terms on Dillustration'}
-                </p>
+                <h3 className="font-h1 text-base font-bold text-[#241F1A]">Quy chế sàn &amp; Điều lệ bản quyền</h3>
+                <p className="text-[11px] text-outline">Quy định giao dịch đấu giá minh bạch trên Dillustration</p>
               </div>
             </div>
 
-            <div className="space-y-3 pt-1 text-xs text-[var(--ivory)] leading-relaxed">
-              <div className="flex items-start gap-2.5 rounded-xl border border-[var(--hair)] bg-[var(--ink-3)] p-3">
-                <CheckCircle2 size={16} className="text-emerald-500 shrink-0 mt-0.5" />
+            <div className="space-y-3 pt-1 text-xs text-on-surface leading-relaxed">
+              <div className="flex items-start gap-2.5 rounded-xl border border-[#221E1A]/10 bg-[#F0E7D8] p-3">
+                <CheckCircle2 size={16} className="text-[#2F6B63] shrink-0 mt-0.5" />
                 <div>
-                  <strong className="text-[var(--ivory)]">{isVie ? 'Ký quỹ tự động & Hoàn cọc 100% (Escrow):' : 'Automated Escrow & 100% Refund:'}</strong>
-                  <p className="text-[var(--ash)] mt-0.5">
-                    {isVie
-                      ? 'Khi bạn đặt giá, số tiền cọc tương ứng được tạm khóa trong ví. Nếu có người trả giá cao hơn, tiền cọc của bạn lập tức được tự động mở khóa hoàn trả 100% về ví ngay tức thì (không giam tiền).'
-                      : 'When you place a bid, deposit funds are temporarily reserved in escrow. If outbid, 100% of the funds are unlocked immediately back to your wallet.'}
+                  <strong className="text-[#241F1A]">Ký quỹ tự động &amp; Hoàn cọc 100% (Escrow):</strong>
+                  <p className="text-outline mt-0.5"> Khi bạn đặt giá, số tiền cọc tương ứng được tạm khóa trong ví. Nếu có người trả giá cao hơn, tiền cọc của bạn lập tức được tự động mở khóa hoàn trả 100% về ví ngay tức thì (không giam tiền). </p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-2.5 rounded-xl border border-[#221E1A]/10 bg-[#F0E7D8] p-3">
+                <CheckCircle2 size={16} className="text-[#2F6B63] shrink-0 mt-0.5" />
+                <div>
+                  <strong className="text-[#241F1A]">Quyền sở hữu &amp; khai thác thương mại 100% cho Người thắng:</strong>
+                  <p className="text-outline mt-0.5"> Người thắng phiên nhận quyền tài sản độc quyền đối với bức tranh: toàn quyền khai thác hình ảnh tranh để sinh lời (in ấn tranh, trưng bày, quảng cáo), quyền niêm yết bán lại thứ cấp, tải tệp tranh gốc chất lượng cao và Giấy chứng nhận độc bản. </p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-2.5 rounded-xl border border-[#8A6A1F]/40 bg-[#8A6A1F]/10 p-3">
+                <ShieldCheck size={16} className="text-[#8A6A1F] shrink-0 mt-0.5" />
+                <div>
+                  <strong className="text-[#8A6A1F]">Bảo hộ Quyền nhân thân cho Họa sĩ gốc:</strong>
+                  <p className="text-[#241F1A]/90 mt-0.5"> Theo Luật Sở hữu trí tuệ, danh tính Họa sĩ sáng tác gốc là bất biến và vĩnh viễn không thay đổi qua mọi đời chủ sở hữu. </p>
+                  <p className="text-outline mt-0.5"> Người thắng phiên sở hữu quyền thương mại nhưng <strong className="text-[#8A6A1F]">tuyệt đối không được mạo danh mình là tác giả sáng tác ra tác phẩm</strong>.
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-start gap-2.5 rounded-xl border border-[var(--hair)] bg-[var(--ink-3)] p-3">
-                <CheckCircle2 size={16} className="text-emerald-500 shrink-0 mt-0.5" />
+              <div className="flex items-start gap-2.5 rounded-xl border border-[#221E1A]/10 bg-[#F0E7D8] p-3">
+                <CheckCircle2 size={16} className="text-brand-periwinkle shrink-0 mt-0.5" />
                 <div>
-                  <strong className="text-[var(--ivory)]">{isVie ? 'Quyền sở hữu & khai thác thương mại 100% cho Người thắng:' : 'Full Ownership & Commercial Rights for Winner:'}</strong>
-                  <p className="text-[var(--ash)] mt-0.5">
-                    {isVie
-                      ? 'Người thắng phiên nhận quyền tài sản độc quyền đối với bức tranh: toàn quyền khai thác hình ảnh tranh để sinh lời (in ấn tranh, trưng bày, quảng cáo), quyền niêm yết bán lại thứ cấp, tải tệp tranh gốc chất lượng cao và Giấy chứng nhận độc bản.'
-                      : 'The winner receives exclusive commercial rights to reproduce, display, and merchandise the artwork, along with the authentic certificate of ownership.'}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-2.5 rounded-xl border border-[var(--gold)]/30 bg-[var(--gold-soft)] p-3">
-                <ShieldCheck size={16} className="text-[var(--gold)] shrink-0 mt-0.5" />
-                <div>
-                  <strong className="text-[var(--gold)]">{isVie ? 'Bảo hộ Quyền nhân thân cho Họa sĩ gốc:' : 'Moral Rights Protection for the Original Artist:'}</strong>
-                  <p className="text-[var(--ivory)] mt-0.5">
-                    {isVie
-                      ? 'Theo Luật Sở hữu trí tuệ, danh tính Họa sĩ sáng tác gốc là bất biến và vĩnh viễn không thay đổi qua mọi đời chủ sở hữu.'
-                      : 'Under Intellectual Property Law, moral attribution of the original creator is perpetual and immutable.'}
-                  </p>
-                  <p className="text-[var(--ash)] mt-0.5">
-                    {isVie
-                      ? 'Người thắng phiên sở hữu quyền thương mại nhưng '
-                      : 'The winner holds commercial exploitation rights but '}
-                    <strong className="text-[var(--gold)]">{isVie ? 'tuyệt đối không được mạo danh mình là tác giả sáng tác ra tác phẩm' : 'cannot claim false authorship'}</strong>.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-2.5 rounded-xl border border-[var(--hair)] bg-[var(--ink-3)] p-3">
-                <CheckCircle2 size={16} className="text-[var(--lumen)] shrink-0 mt-0.5" />
-                <div>
-                  <strong className="text-[var(--ivory)]">{isVie ? 'Tính ràng buộc của lệnh đặt giá:' : 'Binding Commitment of Bids:'}</strong>
-                  <p className="text-[var(--ash)] mt-0.5">
-                    {isVie
-                      ? 'Lệnh đặt giá hoặc mua ngay một khi đã xác nhận thành công là cam kết thanh toán hợp lệ, không thể tự ý hủy ngang giữa chừng và chỉ được giải phóng khi có người trả giá cao hơn.'
-                      : 'Bids and Buy Now actions are legally binding commitments that cannot be retracted unless superseded by a higher bid.'}
-                  </p>
+                  <strong className="text-[#241F1A]">Tính ràng buộc của lệnh đặt giá:</strong>
+                  <p className="text-outline mt-0.5"> Lệnh đặt giá hoặc mua ngay một khi đã xác nhận thành công là cam kết thanh toán hợp lệ, không thể tự ý hủy ngang giữa chừng và chỉ được giải phóng khi có người trả giá cao hơn. </p>
                 </div>
               </div>
             </div>
 
-            <div className="flex justify-end pt-2 border-t border-[var(--hair)]">
+            <div className="flex justify-end pt-2 border-t border-[#221E1A]/10">
               <button
                 type="button"
                 onClick={() => setShowRulesModal(false)}
-                className="rounded-full bg-[var(--lumen)] px-5 py-2 text-xs font-bold text-white hover:bg-[var(--lumen-hi)] transition cursor-pointer"
+                className="rounded-full bg-brand-periwinkle px-5 py-2 text-xs font-bold text-[#FFFCF6] hover:brightness-110 transition cursor-pointer"
               >
-                {isVie ? 'Đã hiểu & Đóng' : 'Understood & Close'}
-              </button>
+                Đã hiểu &amp; Đóng </button>
             </div>
           </div>
         </div>
@@ -1406,40 +1426,31 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
       {/* Xác nhận mua ngay bằng Auto-bid: trần >= giá mua ngay thì hệ thống chốt phiên
           ngay ở giá mua ngay (không đấu giá tiếp). Tiền ra khỏi ví ngay, không hoàn tác. */}
       {showAutoBuyConfirm && auction?.buyNowPrice && pendingAutoBuy && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#E5D8C2] p-4">
           <div
             role="dialog"
             aria-modal="true"
             aria-labelledby="auto-buy-confirm-title"
-            className="w-full max-w-md space-y-4 rounded-3xl border border-[var(--hair)] bg-[var(--ink-2)] p-6 shadow-2xl text-[var(--ivory)]"
+            className="w-full max-w-md space-y-4 rounded-2xl border border-[#8A6A1F]/40 bg-brand-navy p-6 shadow-2xl"
           >
             <div className="flex items-start gap-3">
-              <Gavel size={20} className="mt-0.5 shrink-0 text-[var(--gold)]" />
+              <Gavel size={20} className="mt-0.5 shrink-0 text-[#8A6A1F]" />
               <div className="space-y-1">
-                <h3 id="auto-buy-confirm-title" className="font-[family-name:var(--font-display)] text-base font-medium text-[var(--ivory)]">
-                  {isVie ? 'Xác nhận mua ngay bằng Auto-bid' : 'Confirm Buy Now via Auto-bid'}
-                </h3>
-                <p className="text-xs text-[var(--ash)] font-[family-name:var(--font-ui)] tabular-nums">
-                  {isVie
-                    ? `Giá trần bạn đặt (${formatVnd(pendingAutoBuy.cap)}) đã chạm hoặc vượt giá mua ngay (${formatVnd(auction.buyNowPrice)}).`
-                    : `Your cap (${formatVnd(pendingAutoBuy.cap)}) meets or exceeds Buy Now price (${formatVnd(auction.buyNowPrice)}).`}
+                <h3 id="auto-buy-confirm-title" className="font-h1 text-base font-bold text-[#241F1A]"> Xác nhận mua ngay bằng Auto-bid </h3>
+                <p className="text-xs text-outline">
+                  Giá trần bạn đặt ({formatVnd(pendingAutoBuy.cap)}) đã chạm hoặc vượt giá mua ngay
+                  ({formatVnd(auction.buyNowPrice)}).
                 </p>
               </div>
             </div>
 
-            <div className="rounded-2xl border border-[var(--gold)]/30 bg-[var(--gold-soft)] p-3 text-xs text-[var(--ivory)] space-y-1.5 font-[family-name:var(--font-ui)] tabular-nums">
+            <div className="rounded-xl border border-[#8A6A1F]/40 bg-[#8A6A1F]/10 p-3 text-xs text-[#8A6A1F] space-y-1.5">
               <p>
-                {isVie
-                  ? 'Theo quy chế, khi trần auto-bid chạm giá mua ngay thì hệ thống '
-                  : 'Under auction rules, when cap meets Buy Now, system will '}
-                <strong className="text-[var(--gold)]">{isVie ? `mua ngay tác phẩm ở ${formatVnd(auction.buyNowPrice)}` : `purchase immediately at ${formatVnd(auction.buyNowPrice)}`}</strong>:
-                {isVie ? ' phiên kết thúc ngay, không đấu giá tiếp.' : ' concluding the auction session.'}
-              </p>
-              <p>
-                {isVie ? 'Số tiền ' : 'The amount of '}
-                <strong className="text-[var(--gold)]">{formatVnd(auction.buyNowPrice)}</strong>
-                {isVie ? ' được trừ từ ví khả dụng và giữ ở sàn theo quy trình giao nhận. Lệnh này không huỷ được sau khi xác nhận.' : ' will be debited from your wallet into escrow. This cannot be undone.'}
-              </p>
+                Theo quy chế, khi trần auto-bid chạm giá mua ngay thì hệ thống{' '}
+                <strong className="text-[#8A6A1F]">mua ngay tác phẩm ở {formatVnd(auction.buyNowPrice)}</strong> cho bạn:
+ phiên kết thúc ngay, không đấu giá tiếp. </p>
+              <p> Số tiền <strong className="text-[#8A6A1F]">{formatVnd(auction.buyNowPrice)}</strong> được trừ từ ví khả dụng
+ và giữ ở sàn theo quy trình giao nhận. Lệnh này không huỷ được sau khi xác nhận. </p>
             </div>
 
             <div className="flex justify-end gap-2 pt-1">
@@ -1449,10 +1460,8 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
                   setShowAutoBuyConfirm(false);
                   setPendingAutoBuy(null);
                 }}
-                className="rounded-full border border-[var(--hair-2)] px-4 py-2 text-xs font-semibold text-[var(--ash)] hover:border-[var(--lumen)] hover:text-[var(--lumen)] transition cursor-pointer"
-              >
-                {isVie ? 'Huỷ, để tôi chỉnh lại' : 'Cancel, let me adjust'}
-              </button>
+                className="rounded-full border border-[#221E1A]/10 px-4 py-2 text-xs font-semibold text-[#241F1A]/80 hover:bg-[#FFFCF6] transition"
+              > Huỷ, để tôi chỉnh lại </button>
               <button
                 type="button"
                 disabled={submittingBid}
@@ -1464,9 +1473,9 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
                     await submitBid(pending.amount, pending.cap);
                   }
                 }}
-                className="rounded-full bg-[var(--gold)] px-4 py-2 text-xs font-bold text-white hover:brightness-110 disabled:opacity-50 transition cursor-pointer"
+                className="rounded-full bg-[#8A6A1F]/10 px-4 py-2 text-xs font-bold text-[#241F1A] hover:brightness-110 disabled:opacity-50 transition"
               >
-                {submittingBid ? (isVie ? 'Đang xử lý...' : 'Processing...') : (isVie ? `Xác nhận mua ngay ${formatVnd(auction.buyNowPrice)}` : `Confirm Buy Now ${formatVnd(auction.buyNowPrice)}`)}
+                {submittingBid ? 'Đang xử lý...' : `Xác nhận mua ngay ${formatVnd(auction.buyNowPrice)}`}
               </button>
             </div>
           </div>

@@ -51,14 +51,14 @@ export function ModeratorDecisionCard({
           value={decisionNotes}
           onChange={(e) => setDecisionNotes(e.target.value)}
           placeholder={isVie ? 'Nhập căn cứ chi tiết, tham chiếu bằng chứng và các điều khoản xử lý...' : 'Enter detailed rationale, evidence reference, and resolution terms...'}
-          className="w-full rounded-xl border border-white/10 bg-[#090b12]/70 text-white p-3.5 text-sm focus:outline-none focus:border-brand-periwinkle focus:ring-1 focus:ring-brand-periwinkle/30 transition-all resize-y"
+          className="w-full rounded-xl border border-[#221E1A]/10 bg-[#E5D8C2]/70 text-[#241F1A] p-3.5 text-sm focus:outline-none focus:border-brand-periwinkle focus:ring-1 focus:ring-brand-periwinkle/30 transition-all resize-y"
         />
 
         <div className="flex flex-wrap items-center justify-end gap-2.5 mt-2">
           <button
             type="button"
             onClick={handleReject}
-            className="px-4 py-2.5 rounded-xl bg-[#e598ad]/15 hover:bg-[#e598ad]/25 text-[#f2b3c4] border border-[#e598ad]/30 text-sm font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+            className="px-4 py-2.5 rounded-xl bg-[#A8321C]/15 hover:bg-[#A8321C]/25 text-[#f2b3c4] border border-[#A8321C]/30 text-sm font-bold transition-all flex items-center gap-1.5 cursor-pointer"
           >
             <XCircle className="w-4 h-4" />
             {isVie ? 'Bác bỏ khiếu nại' : 'Reject Appeal'}
@@ -66,7 +66,7 @@ export function ModeratorDecisionCard({
           <button
             type="button"
             onClick={handleApprove}
-            className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#a7acd9] to-[#7fd5e8] text-brand-navy font-bold text-sm hover:brightness-110 transition-all shadow-[0_0_20px_rgba(167,172,217,0.3)] flex items-center gap-1.5 cursor-pointer"
+            className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#B24A26] to-[#2F6B63] text-[#241F1A] font-bold text-sm hover:brightness-110 transition-all shadow-[0_0_20px_rgba(167,172,217,0.3)] flex items-center gap-1.5 cursor-pointer"
           >
             <CheckCircle className="w-4 h-4" />
             {isVie ? 'Chấp thuận xử lý' : 'Approve Resolution'}

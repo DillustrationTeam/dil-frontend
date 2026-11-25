@@ -53,39 +53,39 @@ export function HeadJuryProgressTab({
   return (
     <section className="space-y-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <article className="p-5 rounded-2xl bg-white/[0.03] border border-white/10 backdrop-blur-xl relative overflow-hidden">
-          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#A7ACD9] via-[#7FD5E8] to-transparent opacity-75" />
-          <span className="text-[11px] uppercase tracking-wider text-[#9695a1]">
+        <article className="p-5 rounded-2xl bg-[#FFFCF6] border border-[#221E1A]/10 backdrop-blur-xl relative overflow-hidden">
+          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#B24A26] via-[#2F6B63] to-transparent opacity-75" />
+          <span className="text-[11px] uppercase tracking-wider text-[#746A5F]">
             {isVie ? 'Tổng bài dự thi' : 'Total Submissions'}
           </span>
-          <strong className="block mt-1 font-sora text-2xl sm:text-3xl font-bold text-white">
+          <strong className="block mt-1 font-sora text-2xl sm:text-3xl font-bold text-[#241F1A]">
             {totalSubmissions}
           </strong>
         </article>
-        <article className="p-5 rounded-2xl bg-white/[0.03] border border-white/10 backdrop-blur-xl relative overflow-hidden">
-          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-emerald-400 via-teal-300 to-transparent opacity-75" />
-          <span className="text-[11px] uppercase tracking-wider text-[#9695a1]">
+        <article className="p-5 rounded-2xl bg-[#FFFCF6] border border-[#221E1A]/10 backdrop-blur-xl relative overflow-hidden">
+          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#2F6B63] via-[#2F6B63] to-transparent opacity-75" />
+          <span className="text-[11px] uppercase tracking-wider text-[#746A5F]">
             {isVie ? 'Đã chấm đầy đủ' : 'Fully Graded'}
           </span>
-          <strong className="block mt-1 font-sora text-2xl sm:text-3xl font-bold text-emerald-400">
+          <strong className="block mt-1 font-sora text-2xl sm:text-3xl font-bold text-[#2F6B63]">
             {fullyGradedCount}
           </strong>
         </article>
-        <article className="p-5 rounded-2xl bg-white/[0.03] border border-white/10 backdrop-blur-xl relative overflow-hidden">
-          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-amber-400 via-orange-300 to-transparent opacity-75" />
-          <span className="text-[11px] uppercase tracking-wider text-[#9695a1]">
+        <article className="p-5 rounded-2xl bg-[#FFFCF6] border border-[#221E1A]/10 backdrop-blur-xl relative overflow-hidden">
+          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#8A6A1F] via-[#B24A26] to-transparent opacity-75" />
+          <span className="text-[11px] uppercase tracking-wider text-[#746A5F]">
             {isVie ? 'Giám khảo hoàn tất' : 'Juries Completed'}
           </span>
-          <strong className="block mt-1 font-sora text-2xl sm:text-3xl font-bold text-amber-300">
+          <strong className="block mt-1 font-sora text-2xl sm:text-3xl font-bold text-[#8A6A1F]">
             {completedJuries} / {totalJuries}
           </strong>
         </article>
-        <article className="p-5 rounded-2xl bg-white/[0.03] border border-white/10 backdrop-blur-xl relative overflow-hidden">
-          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-rose-400 via-pink-300 to-transparent opacity-75" />
-          <span className="text-[11px] uppercase tracking-wider text-[#9695a1]">
+        <article className="p-5 rounded-2xl bg-[#FFFCF6] border border-[#221E1A]/10 backdrop-blur-xl relative overflow-hidden">
+          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#A8321C] via-[#A8321C] to-transparent opacity-75" />
+          <span className="text-[11px] uppercase tracking-wider text-[#746A5F]">
             {isVie ? 'Cờ tranh chấp / Lệch điểm' : 'Dispute Flags'}
           </span>
-          <strong className="block mt-1 font-sora text-2xl sm:text-3xl font-bold text-rose-400">
+          <strong className="block mt-1 font-sora text-2xl sm:text-3xl font-bold text-[#A8321C]">
             {anomalyFlagsCount}
           </strong>
         </article>
@@ -93,10 +93,10 @@ export function HeadJuryProgressTab({
 
       <section className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-xl font-bold font-sora text-white">
+          <h2 className="text-xl font-bold font-sora text-[#241F1A]">
             {isVie ? 'Tiến độ từng Giám khảo' : 'Jury Panel Individual Progress'}
           </h2>
-          <span className="w-fit rounded-full border border-[#A7ACD9]/30 bg-[#A7ACD9]/15 px-3 py-1 text-xs font-bold text-[#A7ACD9]">
+          <span className="w-fit rounded-full border border-[#B24A26]/30 bg-[#B24A26]/15 px-3 py-1 text-xs font-bold text-[#B24A26]">
             {juryList.filter((j) => j.isCompleted).length} / {juryList.length} {isVie ? 'Giám khảo hoàn tất' : 'Juries Completed'}
           </span>
         </div>
@@ -121,16 +121,16 @@ export function HeadJuryProgressTab({
 
             <div className="overflow-y-auto max-h-[380px] sm:max-h-[410px] pr-1 custom-scrollbar">
               <table className="w-full border-collapse text-left text-xs">
-                <thead className="sticky top-0 z-10 bg-[#161926] shadow-sm">
-                  <tr className="border-b border-white/10 text-[#858694] uppercase font-semibold text-[10px]">
+                <thead className="sticky top-0 z-10 bg-[#FFFCF6] shadow-sm">
+                  <tr className="border-b border-[#221E1A]/10 text-[#746A5F] uppercase font-semibold text-[10px]">
                     <th className="py-2.5 px-3">{isVie ? 'Giám khảo' : 'Jury'}</th>
                     <th className="py-2.5 px-3 w-[55%]">{isVie ? 'Tiến độ' : 'Progress'}</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-white/5">
+                <tbody className="divide-y divide-[#221E1A]/10">
                   {filteredJuryList.length === 0 ? (
                     <tr>
-                      <td colSpan={2} className="py-8 text-center text-[#9695a1]">
+                      <td colSpan={2} className="py-8 text-center text-[#746A5F]">
                         {isVie ? 'Không tìm thấy giám khảo phù hợp tiêu chí.' : 'No jury members found matching criteria.'}
                       </td>
                     </tr>
@@ -145,28 +145,28 @@ export function HeadJuryProgressTab({
                             setJuryScoreFilter('all');
                           }}
                           className={`cursor-pointer transition-colors ${
-                            isActive ? 'bg-[#A7ACD9]/15' : 'hover:bg-white/[0.04]'
+                            isActive ? 'bg-[#B24A26]/15' : 'hover:bg-[#FFFCF6]'
                           }`}
                         >
-                          <td className={`py-3 px-3 ${isActive ? 'border-l-2 border-[#A7ACD9]' : 'border-l-2 border-transparent'}`}>
-                            <span className="block font-semibold text-white truncate">{j.name}</span>
-                            <span className="block text-[10px] text-[#9695a1] font-mono mt-0.5">
+                          <td className={`py-3 px-3 ${isActive ? 'border-l-2 border-[#B24A26]' : 'border-l-2 border-transparent'}`}>
+                            <span className="block font-semibold text-[#241F1A] truncate">{j.name}</span>
+                            <span className="block text-[10px] text-[#746A5F] font-mono mt-0.5">
                               {j.completedCount} / {j.totalAssigned}
                             </span>
                           </td>
                           <td className="py-3 px-3">
                             <div className="flex items-center gap-2">
-                              <div className="flex-1 bg-white/10 h-1.5 rounded-full overflow-hidden">
+                              <div className="flex-1 bg-[#F0E7D8] h-1.5 rounded-full overflow-hidden">
                                 <div
                                   className={`h-full rounded-full transition-all ${
-                                    j.isCompleted ? 'bg-emerald-400' : 'bg-gradient-to-r from-[#A7ACD9] to-[#7FD5E8]'
+                                    j.isCompleted ? 'bg-[#2F6B63]/10' : 'bg-gradient-to-r from-[#B24A26] to-[#2F6B63]'
                                   }`}
                                   style={{ width: `${j.gradedPercent}%` }}
                                 />
                               </div>
                               <span
                                 className={`w-10 text-right font-mono font-bold ${
-                                  j.isCompleted ? 'text-emerald-400' : 'text-[#A7ACD9]'
+                                  j.isCompleted ? 'text-[#2F6B63]' : 'text-[#B24A26]'
                                 }`}
                               >
                                 {j.gradedPercent}%
@@ -182,19 +182,19 @@ export function HeadJuryProgressTab({
             </div>
 
             {/* Overall judging progress */}
-            <div className="mt-4 pt-4 border-t border-white/10 space-y-2">
+            <div className="mt-4 pt-4 border-t border-[#221E1A]/10 space-y-2">
               <div className="flex items-center justify-between text-xs">
-                <span className="font-sora font-semibold text-white">
+                <span className="font-sora font-semibold text-[#241F1A]">
                   {isVie ? 'Tiến độ toàn bộ hội đồng' : 'Overall Judging Progress'}
                 </span>
-                <span className="font-mono text-[#9695a1]">
+                <span className="font-mono text-[#746A5F]">
                   {overallJuryProgress.completed} / {overallJuryProgress.total} ·{' '}
-                  <strong className="text-[#A7ACD9]">{overallJuryProgress.percent}%</strong>
+                  <strong className="text-[#B24A26]">{overallJuryProgress.percent}%</strong>
                 </span>
               </div>
-              <div className="w-full bg-white/10 h-2.5 rounded-full overflow-hidden">
+              <div className="w-full bg-[#F0E7D8] h-2.5 rounded-full overflow-hidden">
                 <div
-                  className="h-full rounded-full bg-gradient-to-r from-[#A7ACD9] to-[#c2c7f6] transition-all"
+                  className="h-full rounded-full bg-gradient-to-r from-[#B24A26] to-[#8C3718] transition-all"
                   style={{ width: `${overallJuryProgress.percent}%` }}
                 />
               </div>
@@ -204,15 +204,15 @@ export function HeadJuryProgressTab({
           {/* Right: Selected jury's scoring list */}
           <div className="glass-container rounded-2xl p-5 lg:col-span-7">
             {!selectedJury ? (
-              <p className="py-16 text-center text-sm text-[#9695a1]">
+              <p className="py-16 text-center text-sm text-[#746A5F]">
                 {isVie ? 'Chọn một thành viên giám khảo để xem các bài chấm của họ.' : 'Select a jury member to view their scoring.'}
               </p>
             ) : (
               <div className="space-y-4">
-                <div className="flex flex-col gap-2 border-b border-white/10 pb-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex flex-col gap-2 border-b border-[#221E1A]/10 pb-4 sm:flex-row sm:items-center sm:justify-between">
                   <div>
-                    <h3 className="font-sora text-lg font-bold text-white">{selectedJury.name}</h3>
-                    <p className="text-xs text-[#9695a1]">
+                    <h3 className="font-sora text-lg font-bold text-[#241F1A]">{selectedJury.name}</h3>
+                    <p className="text-xs text-[#746A5F]">
                       {selectedJury.completedCount} / {selectedJury.totalAssigned}{' '}
                       {isVie ? 'bài dự thi được phân công đã chấm' : 'assigned entries scored'}
                     </p>
@@ -220,8 +220,8 @@ export function HeadJuryProgressTab({
                   <span
                     className={`w-fit rounded-full border px-3 py-1 text-xs font-bold ${
                       selectedJury.isCompleted
-                        ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
-                        : 'bg-amber-500/15 text-amber-300 border-amber-500/30'
+                        ? 'bg-[#2F6B63]/15 text-[#2F6B63] border-[#2F6B63]/40'
+                        : 'bg-[#8A6A1F]/15 text-[#8A6A1F] border-[#8A6A1F]/40'
                     }`}
                   >
                     {selectedJury.isCompleted ? (isVie ? 'Đã hoàn tất' : 'Completed') : (isVie ? 'Đang thực hiện' : 'In Progress')}
@@ -243,30 +243,30 @@ export function HeadJuryProgressTab({
                 {/* List */}
                 <ul className="space-y-2 overflow-y-auto max-h-[460px] pr-1.5 custom-scrollbar">
                   {filteredJuryAssignments.length === 0 ? (
-                    <li className="py-8 text-center text-xs text-[#9695a1]">
+                    <li className="py-8 text-center text-xs text-[#746A5F]">
                       {isVie ? 'Không có bài thi nào trong bộ lọc này.' : 'No entries in this filter.'}
                     </li>
                   ) : (
                     filteredJuryAssignments.map((item) => (
                       <li
                         key={item.id}
-                        className="flex items-center justify-between gap-3 p-3 rounded-xl border border-white/10 bg-white/[0.02]"
+                        className="flex items-center justify-between gap-3 p-3 rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6]"
                       >
                         <div className="min-w-0 flex-1">
-                          <strong className="block text-xs sm:text-sm font-semibold text-[#e4e1e5] truncate">
+                          <strong className="block text-xs sm:text-sm font-semibold text-[#241F1A] truncate">
                             {item.title}
                           </strong>
-                          <small className="block text-[11px] text-[#9695a1] mt-0.5 truncate">
+                          <small className="block text-[11px] text-[#746A5F] mt-0.5 truncate">
                             {item.code} · {item.category}
                           </small>
                         </div>
                         {item.isCompleted ? (
-                          <span className="shrink-0 flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-[10px] font-semibold">
+                          <span className="shrink-0 flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#2F6B63]/15 border border-[#2F6B63]/40 text-[#2F6B63] text-[10px] font-semibold">
                             <Check className="w-3 h-3" />
                             {isVie ? 'Đã chấm' : 'Completed'}
                           </span>
                         ) : (
-                          <span className="shrink-0 flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[10px] font-semibold">
+                          <span className="shrink-0 flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#8A6A1F]/10 border border-[#8A6A1F]/30 text-[#8A6A1F] text-[10px] font-semibold">
                             <Clock className="w-3 h-3" />
                             {isVie ? 'Chưa chấm' : 'Not Completed'}
                           </span>

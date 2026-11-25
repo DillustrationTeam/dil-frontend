@@ -138,7 +138,7 @@ export const securitySettingsService = {
     try {
       await apiClient.post<ApiResponse<{ message: string }>>('/auth/me/deactivate', { password });
     } catch (err) {
-      throw new Error(getApiErrorMessage(err, 'Không thể vô hiệu hóa tài khoản.'));
+      throw new Error(getApiErrorMessage(err, 'Không thể xóa tài khoản.'));
     }
   },
 

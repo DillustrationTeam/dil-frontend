@@ -25,7 +25,7 @@ export function DisputesStats({
       label: isVie ? 'Tranh chấp mở' : 'Open Disputes',
       value: openCount,
       icon: AlertCircle,
-      color: 'text-amber-300',
+      color: 'text-[#8A6A1F]',
     },
     {
       label: isVie ? 'Ưu tiên cao' : 'High Priority',
@@ -37,7 +37,7 @@ export function DisputesStats({
       label: isVie ? 'Đã giải quyết' : 'Resolved',
       value: resolvedCount,
       icon: CheckCircle2,
-      color: 'text-emerald-300',
+      color: 'text-[#2F6B63]',
     },
     {
       label: isVie ? 'Quá hạn' : 'Overdue',
@@ -56,7 +56,7 @@ export function DisputesStats({
             key={idx}
             className="glass-container rounded-2xl p-5 relative overflow-hidden flex flex-col justify-between"
           >
-            <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-brand-periwinkle via-[#e598ad] to-transparent opacity-75" />
+            <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-brand-periwinkle via-[#A8321C] to-transparent opacity-75" />
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-outline uppercase tracking-wider">
                 {stat.label}

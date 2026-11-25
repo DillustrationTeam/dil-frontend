@@ -156,15 +156,14 @@ export function AiChatScreen({ userId }: { userId: string | null }) {
        co lại theo nội dung (hội thoại rỗng ⇒ khung chat hẹp hơn hẳn). */
     <div className="mx-auto flex h-[calc(100vh-5rem)] w-full max-w-6xl gap-4 px-4 py-4 text-on-surface">
       {/* Cột danh sách hội thoại bên trái */}
-      <aside className="glass-container hidden w-72 flex-col rounded-3xl border border-white/10 p-4 md:flex">
+      <aside className="glass-container hidden w-72 flex-col rounded-3xl border border-[#221E1A]/10 p-4 md:flex">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="font-h1 text-sm font-bold flex items-center gap-1.5">
-            <Sparkles size={16} className="text-brand-periwinkle" /> Lịch sử trợ lý
-          </h2>
+            <Sparkles size={16} className="text-brand-periwinkle" /> Lịch sử trợ lý </h2>
           <button
             type="button"
             onClick={handleCreateNewConvo}
-            className="rounded-full bg-brand-periwinkle/15 p-1.5 text-brand-periwinkle hover:bg-brand-periwinkle hover:text-brand-navy"
+            className="rounded-full bg-brand-periwinkle/15 p-1.5 text-brand-periwinkle hover:bg-brand-periwinkle hover:text-[#FFFCF6]"
             title="Cuộc trò chuyện mới"
           >
             <Plus size={15} />
@@ -185,7 +184,7 @@ export function AiChatScreen({ userId }: { userId: string | null }) {
                   className={`w-full text-left rounded-2xl p-3 transition ${
                     isSelected
                       ? 'border border-brand-periwinkle/40 bg-brand-periwinkle/15 text-brand-periwinkle font-semibold'
-                      : 'border border-white/5 bg-white/[0.02] text-on-surface-variant hover:bg-white/5 hover:text-on-surface'
+                      : 'border border-[#221E1A]/10 bg-[#FFFCF6] text-on-surface-variant hover:bg-[#FFFCF6] hover:text-on-surface'
                   }`}
                 >
                   <p className="line-clamp-1">{c.topic || 'Tư vấn nghệ thuật'}</p>
@@ -198,40 +197,35 @@ export function AiChatScreen({ userId }: { userId: string | null }) {
           )}
         </div>
 
-        <div className="mt-3 border-t border-white/10 pt-3 text-[11px] text-outline">
+        <div className="mt-3 border-t border-[#221E1A]/10 pt-3 text-[11px] text-outline">
           <Link href="/wallet" className="flex items-center gap-1 text-brand-periwinkle hover:underline">
-            <ArrowLeft size={13} /> Quay lại ví cá nhân
-          </Link>
+            <ArrowLeft size={13} /> Quay lại ví cá nhân </Link>
         </div>
       </aside>
 
       {/* Vùng tương tác chính */}
-      <main className="glass-container flex flex-1 flex-col overflow-hidden rounded-3xl border border-white/10 p-5">
+      <main className="glass-container flex flex-1 flex-col overflow-hidden rounded-3xl border border-[#221E1A]/10 p-5">
         {/* Thanh công cụ tab */}
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-3">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-[#221E1A]/10 pb-3">
           <div className="flex gap-2 text-xs">
             <button
               type="button"
               onClick={() => setActiveTab('chat')}
               className={`rounded-full px-4 py-1.5 font-semibold transition ${
                 activeTab === 'chat'
-                  ? 'bg-brand-periwinkle text-brand-navy'
-                  : 'text-on-surface-variant hover:bg-white/5 hover:text-on-surface'
+                  ? 'bg-brand-periwinkle text-[#FFFCF6]'
+                  : 'text-on-surface-variant hover:bg-[#FFFCF6] hover:text-on-surface'
               }`}
-            >
-              Hỏi đáp & Trợ lý thông minh
-            </button>
+            > Hỏi đáp & Trợ lý thông minh </button>
             <button
               type="button"
               onClick={() => setActiveTab('risk')}
               className={`rounded-full px-4 py-1.5 font-semibold transition ${
                 activeTab === 'risk'
-                  ? 'bg-brand-periwinkle text-brand-navy'
-                  : 'text-on-surface-variant hover:bg-white/5 hover:text-on-surface'
+                  ? 'bg-brand-periwinkle text-[#FFFCF6]'
+                  : 'text-on-surface-variant hover:bg-[#FFFCF6] hover:text-on-surface'
               }`}
-            >
-              Dự báo rủi ro thời hạn đơn vẽ
-            </button>
+            > Dự báo rủi ro thời hạn đơn vẽ </button>
           </div>
 
           <span className="flex items-center gap-1 text-xs text-outline">
@@ -240,7 +234,7 @@ export function AiChatScreen({ userId }: { userId: string | null }) {
         </div>
 
         {error && (
-          <div role="alert" className="mb-3 flex items-center gap-2 rounded-2xl border border-red-400/30 bg-red-500/10 p-3 text-xs text-red-200">
+          <div role="alert" className="mb-3 flex items-center gap-2 rounded-2xl border border-[#A8321C]/40 bg-[#A8321C]/10 p-3 text-xs text-[#A8321C]">
             <CircleAlert size={14} className="shrink-0" />
             <span>{error}</span>
           </div>
@@ -259,10 +253,8 @@ export function AiChatScreen({ userId }: { userId: string | null }) {
                     <Sparkles size={24} />
                   </div>
                   <h3 className="font-h1 text-base font-bold">Trợ lý hướng dẫn Dillustration</h3>
-                  <p className="mx-auto mt-1 max-w-sm text-xs text-on-surface-variant">
-                    Chỉ hỗ trợ cách dùng nền tảng: ký quỹ, mở phiên đấu giá, đặt vẽ, ví, nạp rút tiền và khiếu nại.
-                    Câu hỏi ngoài phạm vi (toán, nấu ăn, lập trình...) sẽ được từ chối.
-                  </p>
+                  <p className="mx-auto mt-1 max-w-sm text-xs text-on-surface-variant"> Chỉ hỗ trợ cách dùng nền tảng: ký quỹ, mở phiên đấu giá, đặt vẽ, ví, nạp rút tiền và khiếu nại.
+ Câu hỏi ngoài phạm vi (toán, nấu ăn, lập trình...) sẽ được từ chối. </p>
 
                   {/* Gợi ý câu hỏi nhanh */}
                   <div className="mt-6 grid max-w-md gap-2 sm:grid-cols-2">
@@ -271,7 +263,7 @@ export function AiChatScreen({ userId }: { userId: string | null }) {
                         key={i}
                         type="button"
                         onClick={() => handleSendMessage(q)}
-                        className="rounded-2xl border border-white/10 bg-white/[0.02] p-3 text-left text-xs text-on-surface-variant transition hover:border-brand-periwinkle/30 hover:bg-brand-periwinkle/5 hover:text-brand-periwinkle"
+                        className="rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] p-3 text-left text-xs text-on-surface-variant transition hover:border-brand-periwinkle/30 hover:bg-brand-periwinkle/5 hover:text-brand-periwinkle"
                       >
                         {q}
                       </button>
@@ -295,8 +287,8 @@ export function AiChatScreen({ userId }: { userId: string | null }) {
                       <div
                         className={`max-w-[85%] rounded-2xl p-4 text-xs leading-relaxed shadow-sm ${
                           isUser
-                            ? 'bg-brand-periwinkle text-brand-navy rounded-tr-none'
-                            : 'border border-white/10 bg-white/5 text-on-surface rounded-tl-none'
+                            ? 'bg-brand-periwinkle text-[#FFFCF6] rounded-tr-none'
+                            : 'border border-[#221E1A]/10 bg-[#FFFCF6] text-on-surface rounded-tl-none'
                         }`}
                       >
                         {isUser ? (
@@ -306,13 +298,13 @@ export function AiChatScreen({ userId }: { userId: string | null }) {
                         )}
 
                         {!isUser && (
-                          <div className="mt-3 flex items-center justify-between border-t border-white/10 pt-2 text-[10px] text-outline">
+                          <div className="mt-3 flex items-center justify-between border-t border-[#221E1A]/10 pt-2 text-[10px] text-outline">
                             <span>Phản hồi hữu ích?</span>
                             <div className="flex items-center gap-2">
                               <button
                                 type="button"
                                 onClick={() => handleFeedback(m.aiMessageId, true)}
-                                className={`rounded p-1 hover:text-white ${m.helpful === true ? 'text-emerald-400 font-bold' : ''}`}
+                                className={`rounded p-1 hover:text-[#241F1A] ${m.helpful === true ? 'text-[#2F6B63] font-bold' : ''}`}
                                 title="Hữu ích"
                               >
                                 <ThumbsUp size={13} />
@@ -320,7 +312,7 @@ export function AiChatScreen({ userId }: { userId: string | null }) {
                               <button
                                 type="button"
                                 onClick={() => handleFeedback(m.aiMessageId, false)}
-                                className={`rounded p-1 hover:text-white ${m.helpful === false ? 'text-red-400 font-bold' : ''}`}
+                                className={`rounded p-1 hover:text-[#241F1A] ${m.helpful === false ? 'text-[#A8321C] font-bold' : ''}`}
                                 title="Chưa hữu ích"
                               >
                                 <ThumbsDown size={13} />
@@ -331,7 +323,7 @@ export function AiChatScreen({ userId }: { userId: string | null }) {
                       </div>
 
                       {isUser && (
-                        <div className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-white/10 text-on-surface">
+                        <div className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-[#F0E7D8] text-on-surface">
                           <User size={16} />
                         </div>
                       )}
@@ -352,12 +344,12 @@ export function AiChatScreen({ userId }: { userId: string | null }) {
                 value={inputPrompt}
                 onChange={(e) => setInputPrompt(e.target.value)}
                 placeholder="Hỏi cách sử dụng Dillustration (đấu giá, ký quỹ, nạp tiền...)"
-                className="flex-1 rounded-2xl border border-white/15 bg-brand-navy/80 px-4 py-3 text-xs text-on-surface placeholder:text-outline focus:border-brand-periwinkle focus:outline-none"
+                className="flex-1 rounded-2xl border border-[#221E1A]/10 bg-brand-navy/80 px-4 py-3 text-xs text-on-surface placeholder:text-outline focus:border-brand-periwinkle focus:outline-none"
               />
               <button
                 type="submit"
                 disabled={!inputPrompt.trim() || sending}
-                className="flex size-11 items-center justify-center rounded-2xl bg-brand-periwinkle text-brand-navy shadow-md transition hover:brightness-110 disabled:opacity-50"
+                className="flex size-11 items-center justify-center rounded-2xl bg-brand-periwinkle text-[#FFFCF6] shadow-md transition hover:brightness-110 disabled:opacity-50"
                 title="Gửi câu hỏi"
               >
                 <Send size={16} />
@@ -369,11 +361,9 @@ export function AiChatScreen({ userId }: { userId: string | null }) {
         {/* Nội dung Tab Rủi ro hạn chót (Deadline Risk) */}
         {activeTab === 'risk' && (
           <div className="flex-1 overflow-y-auto space-y-6 pr-1">
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-xs text-on-surface-variant">
+            <div className="rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] p-4 text-xs text-on-surface-variant">
               <p className="font-semibold text-brand-periwinkle">Tính năng giám sát tiến độ thông minh (UC50):</p>
-              <p className="mt-1">
-                Hệ thống áp dụng AI phân tích nhịp độ trao đổi, số lần chỉnh sửa bản thảo và khoảng thời gian còn lại để đưa ra cảnh báo sớm nếu đơn hàng có nguy cơ trễ hạn.
-              </p>
+              <p className="mt-1"> Hệ thống áp dụng AI phân tích nhịp độ trao đổi, số lần chỉnh sửa bản thảo và khoảng thời gian còn lại để đưa ra cảnh báo sớm nếu đơn hàng có nguy cơ trễ hạn. </p>
             </div>
 
             <form onSubmit={handleAnalyzeRisk} className="flex flex-wrap items-center gap-3">
@@ -382,47 +372,47 @@ export function AiChatScreen({ userId }: { userId: string | null }) {
                 required
                 value={commissionIdInput}
                 onChange={(e) => setCommissionIdInput(e.target.value)}
-                placeholder="Nhập mã đơn đặt vẽ (Commission ID)"
-                className="flex-1 min-w-[240px] rounded-xl border border-white/15 bg-brand-navy/80 px-4 py-2.5 font-mono text-xs text-on-surface focus:border-brand-periwinkle focus:outline-none"
+                placeholder="Nhập mã đơn đặt vẽ"
+                className="flex-1 min-w-[240px] rounded-xl border border-[#221E1A]/10 bg-brand-navy/80 px-4 py-2.5 font-mono text-xs text-on-surface focus:border-brand-periwinkle focus:outline-none"
               />
               <button
                 type="submit"
                 disabled={analyzingRisk}
-                className="rounded-full bg-brand-periwinkle px-5 py-2.5 font-h1 text-xs font-bold text-brand-navy shadow hover:brightness-110 disabled:opacity-50"
+                className="rounded-full bg-brand-periwinkle px-5 py-2.5 font-h1 text-xs font-bold text-[#FFFCF6] shadow hover:brightness-110 disabled:opacity-50"
               >
                 {analyzingRisk ? 'Đang phân tích...' : 'Kiểm tra rủi ro'}
               </button>
             </form>
 
             {riskData && (
-              <div className="space-y-4 rounded-3xl border border-white/10 bg-white/[0.02] p-6">
+              <div className="space-y-4 rounded-3xl border border-[#221E1A]/10 bg-[#FFFCF6] p-6">
                 <div className="flex items-center justify-between">
                   <h3 className="font-h1 text-base font-bold">Kết quả đánh giá tiến độ</h3>
                   <span className={`rounded-full px-3 py-1 font-mono text-xs font-bold ${
                     riskData.riskLevel === 'critical'
-                      ? 'bg-red-500/20 text-red-300 border border-red-500/40'
+                      ? 'bg-[#A8321C]/20 text-[#A8321C] border border-[#A8321C]/40'
                       : riskData.riskLevel === 'high'
-                      ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
-                      : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                      ? 'bg-[#8A6A1F]/20 text-[#8A6A1F] border border-[#8A6A1F]/40'
+                      : 'bg-[#2F6B63]/20 text-[#2F6B63] border border-[#2F6B63]/40'
                   }`}>
                     Mức rủi ro: {riskData.riskLevel === 'critical' ? 'Nghiêm trọng' : riskData.riskLevel === 'high' ? 'Cao' : riskData.riskLevel === 'medium' ? 'Trung bình' : 'An toàn'}
                   </span>
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-3">
-                  <div className="rounded-2xl border border-white/5 bg-white/5 p-4 text-xs">
+                  <div className="rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] p-4 text-xs">
                     <span className="text-outline">Điểm số rủi ro trễ hẹn</span>
                     <p className="mt-1 font-h1 text-2xl font-bold text-brand-periwinkle">
                       {Math.round(riskData.riskScore)} / 100
                     </p>
                   </div>
-                  <div className="rounded-2xl border border-white/5 bg-white/5 p-4 text-xs">
+                  <div className="rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] p-4 text-xs">
                     <span className="text-outline">Thời hạn cam kết</span>
                     <p className="mt-1 font-semibold text-on-surface">
                       {riskData.deadline ? new Date(riskData.deadline).toLocaleDateString('vi-VN') : 'Chưa thiết lập'}
                     </p>
                   </div>
-                  <div className="rounded-2xl border border-white/5 bg-white/5 p-4 text-xs">
+                  <div className="rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] p-4 text-xs">
                     <span className="text-outline">Giai đoạn hiện tại</span>
                     <p className="mt-1 font-semibold text-on-surface">
                       Cột mốc #{riskData.currentStage}
@@ -432,11 +422,11 @@ export function AiChatScreen({ userId }: { userId: string | null }) {
 
                 {/* Danh sách nhắc nhở */}
                 {riskData.reminders && riskData.reminders.length > 0 && (
-                  <div className="mt-4 border-t border-white/10 pt-4">
+                  <div className="mt-4 border-t border-[#221E1A]/10 pt-4">
                     <h4 className="mb-2 text-xs font-bold text-on-surface-variant">Lịch nhắc nhở tự động</h4>
                     <div className="space-y-2">
                       {riskData.reminders.map((r) => (
-                        <div key={r.deadlineReminderId} className="flex items-center justify-between rounded-xl border border-white/5 bg-white/5 p-3 text-xs">
+                        <div key={r.deadlineReminderId} className="flex items-center justify-between rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] p-3 text-xs">
                           <span className="flex items-center gap-1.5">
                             <Clock size={13} className="text-brand-periwinkle" />
                             Nhắc vào: {new Date(r.remindAt).toLocaleString('vi-VN')}

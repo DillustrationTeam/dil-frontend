@@ -30,10 +30,10 @@ export function AiMarkdown({ content }: AiMarkdownProps) {
     parts.push(
       <div
         key={`code-${blockKey++}`}
-        className="my-3 overflow-hidden rounded-2xl border border-white/10 bg-[#13141f]"
+        className="my-3 overflow-hidden rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6]"
       >
         {language && (
-          <div className="flex items-center justify-between border-b border-white/10 bg-white/[0.03] px-3 py-1.5 font-mono text-[11px] text-brand-periwinkle">
+          <div className="flex items-center justify-between border-b border-[#221E1A]/10 bg-[#FFFCF6] px-3 py-1.5 font-mono text-[11px] text-brand-periwinkle">
             <span>{language}</span>
           </div>
         )}
@@ -94,7 +94,7 @@ function renderRegularMarkdown(text: string): React.ReactNode[] {
     }
     if (trimmed.startsWith('## ')) {
       elements.push(
-        <h2 key={`h2-${lineIdx}`} className="font-h1 text-base font-bold text-white mt-5 mb-2 border-b border-white/10 pb-1">
+        <h2 key={`h2-${lineIdx}`} className="font-h1 text-base font-bold text-[#241F1A] mt-5 mb-2 border-b border-[#221E1A]/10 pb-1">
           {renderInlineFormatting(trimmed.slice(3))}
         </h2>
       );
@@ -103,7 +103,7 @@ function renderRegularMarkdown(text: string): React.ReactNode[] {
     }
     if (trimmed.startsWith('# ')) {
       elements.push(
-        <h1 key={`h1-${lineIdx}`} className="font-h1 text-lg font-bold text-white mt-5 mb-2 border-b border-white/10 pb-1.5">
+        <h1 key={`h1-${lineIdx}`} className="font-h1 text-lg font-bold text-[#241F1A] mt-5 mb-2 border-b border-[#221E1A]/10 pb-1.5">
           {renderInlineFormatting(trimmed.slice(2))}
         </h1>
       );
@@ -113,7 +113,7 @@ function renderRegularMarkdown(text: string): React.ReactNode[] {
 
     // Đường kẻ ngang: ---
     if (trimmed === '---' || trimmed === '***') {
-      elements.push(<hr key={`hr-${lineIdx}`} className="my-3 border-white/10" />);
+      elements.push(<hr key={`hr-${lineIdx}`} className="my-3 border-[#221E1A]/10" />);
       lineIdx++;
       continue;
     }
@@ -228,7 +228,7 @@ function renderInlineFormatting(text: string): React.ReactNode {
   return parts.map((part, index) => {
     if (part.startsWith('**') && part.endsWith('**') && part.length >= 4) {
       return (
-        <strong key={index} className="font-bold text-white">
+        <strong key={index} className="font-bold text-[#241F1A]">
           {part.slice(2, -2)}
         </strong>
       );
@@ -244,7 +244,7 @@ function renderInlineFormatting(text: string): React.ReactNode {
       return (
         <code
           key={index}
-          className="rounded-md border border-white/10 bg-black/30 px-1.5 py-0.5 font-mono text-[11px] text-brand-periwinkle"
+          className="rounded-md border border-[#221E1A]/10 bg-[#F0E7D8] px-1.5 py-0.5 font-mono text-[11px] text-brand-periwinkle"
         >
           {part.slice(1, -1)}
         </code>
@@ -286,15 +286,15 @@ function renderTable(tableLines: string[], key: string): React.ReactNode {
     alignments[index] === 'center' ? 'text-center' : alignments[index] === 'right' ? 'text-right' : 'text-left';
 
   return (
-    <div key={key} className="my-3 overflow-x-auto rounded-2xl border border-white/10">
+    <div key={key} className="my-3 overflow-x-auto rounded-2xl border border-[#221E1A]/10">
       <table className="w-full min-w-[20rem] border-collapse text-xs">
         <thead>
-          <tr className="bg-white/[0.05]">
+          <tr className="bg-[#FFFCF6]">
             {headers.map((header, columnIndex) => (
               <th
                 key={columnIndex}
                 scope="col"
-                className={`border-b border-white/15 px-3 py-2 font-bold text-brand-periwinkle ${alignClass(columnIndex)}`}
+                className={`border-b border-[#221E1A]/10 px-3 py-2 font-bold text-brand-periwinkle ${alignClass(columnIndex)}`}
               >
                 {renderInlineFormatting(header)}
               </th>
@@ -303,12 +303,12 @@ function renderTable(tableLines: string[], key: string): React.ReactNode {
         </thead>
         <tbody>
           {bodyRows.map((row, rowIndex) => (
-            <tr key={rowIndex} className={rowIndex % 2 === 1 ? 'bg-white/[0.02]' : undefined}>
+            <tr key={rowIndex} className={rowIndex % 2 === 1 ? 'bg-[#FFFCF6]' : undefined}>
               {/* Ô thiếu thì để trống, ô thừa thì cắt bỏ — luôn khớp số cột tiêu đề. */}
               {headers.map((_, columnIndex) => (
                 <td
                   key={columnIndex}
-                  className={`border-b border-white/5 px-3 py-2 align-top text-on-surface ${alignClass(columnIndex)}`}
+                  className={`border-b border-[#221E1A]/10 px-3 py-2 align-top text-on-surface ${alignClass(columnIndex)}`}
                 >
                   {renderInlineFormatting(row[columnIndex] ?? '')}
                 </td>

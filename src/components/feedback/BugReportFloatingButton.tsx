@@ -112,12 +112,12 @@ export function BugReportFloatingButton() {
           <div
             role="menu"
             aria-label={isEng ? 'Select interface language' : 'Chọn ngôn ngữ hiển thị'}
-            className="fixed bottom-[128px] right-[68px] z-50 w-44 overflow-hidden rounded-2xl border border-[var(--hair-2)] bg-[var(--ink-2)] p-2 shadow-2xl backdrop-blur-2xl sm:right-[72px]"
+            className="fixed bottom-40 right-[76px] z-50 w-44 overflow-hidden rounded-2xl border border-[#221E1A]/10 border-t-white/25 bg-[#FFFCF6]/95 p-1.5 text-[#241F1A] shadow-[0_14px_34px_rgba(0,0,0,0.45)] backdrop-blur-2xl sm:right-[84px]"
           >
-            <p className="px-2.5 pb-1 pt-1 text-[9px] font-bold uppercase tracking-widest text-[var(--ash)] font-[family-name:var(--font-ui)]">
+            <p className="px-2.5 pb-1 pt-1 text-[10px] font-bold uppercase tracking-widest text-[#746A5F]">
               {isEng ? 'Language' : 'Ngôn ngữ'}
             </p>
-            <div className="space-y-1 mt-1">
+            <div className="space-y-1">
               {LANGUAGE_OPTIONS.map((option) => {
                 const active = lang === option.code;
                 return (
@@ -127,23 +127,19 @@ export function BugReportFloatingButton() {
                     role="menuitemradio"
                     aria-checked={active}
                     onClick={() => handleSelectLanguage(option.code)}
-                    className={`group flex w-full cursor-pointer items-center justify-between rounded-xl px-2.5 py-1.5 text-xs font-medium transition-colors ${
+                    className={`flex w-full cursor-pointer items-center justify-between rounded-xl px-2.5 py-2 text-xs font-medium transition-colors ${
                       active
-                        ? 'bg-[var(--ink-3)] text-[var(--lumen)] font-semibold'
-                        : 'text-[var(--ivory)] hover:bg-[var(--ink-3)] hover:text-[var(--lumen)]'
+                        ? 'border border-[#B24A26]/35 bg-[#B24A26]/18 text-[#241F1A]'
+                        : 'text-[#6E6459] hover:bg-[#FFFCF6] hover:text-[#241F1A]'
                     }`}
                   >
                     <span className="flex items-center gap-2">
-                      <span className={`rounded-md border px-1.5 py-0.5 text-[9px] font-bold ${
-                        active
-                          ? 'border-[var(--lumen)]/30 bg-[var(--lumen-soft)] text-[var(--lumen)]'
-                          : 'border-[var(--hair)] bg-[var(--ink-3)] text-[var(--ash)]'
-                      }`}>
+                      <span className="rounded-md border border-[#221E1A]/10 bg-[#FFFCF6] px-1.5 py-0.5 text-[10px] font-bold text-[#8C3718]">
                         {option.short}
                       </span>
                       <span>{option.label}</span>
                     </span>
-                    {active && <Check className="h-3.5 w-3.5 text-[var(--lumen)]" aria-hidden />}
+                    {active && <Check className="h-3.5 w-3.5 text-[#8C3718]" aria-hidden />}
                   </button>
                 );
               })}
@@ -162,10 +158,10 @@ export function BugReportFloatingButton() {
               : `Ngôn ngữ: Tiếng Việt (${lang}). Bấm để chọn ngôn ngữ`
           }
           title={isEng ? 'Switch language (VIE / ENG)' : 'Chọn ngôn ngữ (VIE / ENG)'}
-          className="fixed bottom-[128px] right-5 z-40 flex size-10 cursor-pointer flex-col items-center justify-center gap-0.5 rounded-full border border-[var(--hair-2)] bg-[var(--ink-2)] text-[var(--ivory)] shadow-md backdrop-blur-xl transition-all hover:scale-105 hover:border-[var(--lumen)] hover:bg-[var(--ink-3)] active:scale-95 sm:right-6"
+          className="fixed bottom-40 right-5 z-40 flex size-12 cursor-pointer flex-col items-center justify-center gap-0.5 rounded-full border border-[#221E1A]/10 border-t-white/25 bg-[#F0E7D8]/90 text-[#8C3718] shadow-[0_10px_30px_rgba(0,0,0,0.35)] backdrop-blur-xl transition-all hover:scale-105 hover:border-[#B24A26]/45 hover:bg-[#F7F2E9] hover:text-[#8C3718] active:scale-95 sm:right-7"
         >
-          <Languages className="h-4 w-4 text-[var(--ivory)]" aria-hidden />
-          <span className="text-[8px] font-extrabold leading-none tracking-wider text-[var(--ivory)] font-[family-name:var(--font-ui)]">
+          <Languages className="h-4 w-4" aria-hidden />
+          <span className="text-[9px] font-extrabold leading-none tracking-wider text-[#241F1A]">
             {lang === 'VIE' ? 'VI' : 'EN'}
           </span>
         </button>
@@ -177,9 +173,9 @@ export function BugReportFloatingButton() {
         onClick={() => setIsOpen(true)}
         aria-label={isEng ? 'Report an issue or contact support' : 'Báo cáo sự cố hoặc gửi hỗ trợ'}
         title={isEng ? 'Report an issue or contact support' : 'Báo cáo sự cố hoặc gửi hỗ trợ'}
-        className="fixed bottom-[76px] right-5 z-40 flex size-10 cursor-pointer items-center justify-center rounded-full border border-[var(--hair-2)] bg-[var(--ink-2)] text-[var(--ivory)] shadow-md backdrop-blur-xl transition-all hover:scale-105 hover:border-[var(--lumen)] hover:bg-[var(--ink-3)] active:scale-95 sm:right-6"
+        className="fixed bottom-24 right-5 z-40 flex size-12 cursor-pointer items-center justify-center rounded-full border border-[#221E1A]/10 border-t-white/25 bg-[#F0E7D8]/90 text-[#8C3718] shadow-[0_10px_30px_rgba(0,0,0,0.35)] backdrop-blur-xl transition-all hover:scale-105 hover:border-[#B24A26]/45 hover:bg-[#F7F2E9] hover:text-[#8C3718] active:scale-95 sm:right-7"
       >
-        <Bug className="h-4 w-4 text-[var(--ivory)]" aria-hidden />
+        <Bug className="h-5 w-5" aria-hidden />
       </button>
 
       {isOpen && (
@@ -188,30 +184,30 @@ export function BugReportFloatingButton() {
           aria-modal="true"
           aria-labelledby="bug-report-modal-title"
           onClick={() => setIsOpen(false)}
-          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/75 p-4 backdrop-blur-md"
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#F0E7D8]/75 p-4 backdrop-blur-md"
         >
           <div
             onClick={(event) => event.stopPropagation()}
-            className="relative w-full max-w-md overflow-hidden rounded-2xl border border-[var(--hair-2)] bg-[var(--ink-2)] p-6 text-[var(--ivory)] shadow-2xl backdrop-blur-2xl sm:p-7"
+            className="relative w-full max-w-md overflow-hidden rounded-3xl border border-[#221E1A]/10 border-t-white/20 bg-[#FFFCF6]/95 p-6 text-[#241F1A] shadow-2xl backdrop-blur-2xl sm:p-7"
           >
             <button
               type="button"
               onClick={() => setIsOpen(false)}
               aria-label={isEng ? 'Close bug report dialog' : 'Đóng hộp thoại báo lỗi'}
-              className="absolute right-4 top-4 rounded-xl p-2 text-[var(--ash)] transition-colors hover:bg-[var(--ink-3)] hover:text-[var(--lumen)]"
+              className="absolute right-4 top-4 rounded-full p-2 text-[#746A5F] transition-colors hover:bg-[#F0E7D8] hover:text-[#241F1A]"
             >
               <X className="h-4 w-4" aria-hidden />
             </button>
 
             <div className="flex items-start gap-3 pr-8">
-              <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[var(--ink-3)] text-[var(--lumen)]">
-                <Bug className="h-5 w-5 text-[var(--lumen)]" aria-hidden />
+              <div className="flex size-10 shrink-0 items-center justify-center rounded-2xl border border-[#B24A26]/30 bg-[#B24A26]/15 text-[#8C3718]">
+                <Bug className="h-5 w-5" aria-hidden />
               </div>
               <div>
-                <h3 id="bug-report-modal-title" className="font-[family-name:var(--font-display)] text-lg font-bold text-[var(--ivory)]">
+                <h3 id="bug-report-modal-title" className="font-h1 text-lg font-bold text-[#241F1A]">
                   {isEng ? 'Support & Issue Report' : 'Hỗ trợ & Báo cáo sự cố'}
                 </h3>
-                <p className="mt-0.5 text-xs text-[var(--ash)]">
+                <p className="mt-0.5 text-xs text-[#6E6459]">
                   {isEng
                     ? 'Send feedback so the DILLUSTRATION team can inspect and resolve it quickly.'
                     : 'Gửi phản hồi để đội ngũ DILLUSTRATION kiểm tra và xử lý nhanh chóng.'}
@@ -221,7 +217,7 @@ export function BugReportFloatingButton() {
 
             <form onSubmit={handleSubmit} className="mt-5 space-y-4">
               <div>
-                <label htmlFor="bug-report-title" className="text-xs font-semibold text-[var(--ivory)]">
+                <label htmlFor="bug-report-title" className="text-xs font-semibold text-[#6E6459]">
                   {isEng ? 'Issue Title' : 'Tiêu đề sự cố'}
                 </label>
                 <input
@@ -230,12 +226,12 @@ export function BugReportFloatingButton() {
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder={isEng ? 'e.g. Cannot click the Place Bid button' : 'Ví dụ: Không bấm được nút Đặt giá'}
-                  className="mt-1.5 w-full rounded-xl border border-[var(--hair-2)] bg-[var(--ink-3)] px-4 py-2.5 text-sm text-[var(--ivory)] placeholder:text-[var(--ash)] outline-none transition-colors focus:border-[var(--lumen)]"
+                  className="mt-1.5 w-full rounded-2xl border border-[#221E1A]/10 bg-[#F7F2E9]/80 px-4 py-2.5 text-sm text-[#241F1A] placeholder:text-[#746A5F] outline-none transition-colors focus:border-[#B24A26]"
                 />
               </div>
 
               <div>
-                <label htmlFor="bug-report-description" className="text-xs font-semibold text-[var(--ivory)]">
+                <label htmlFor="bug-report-description" className="text-xs font-semibold text-[#6E6459]">
                   {isEng ? 'Detailed Description' : 'Mô tả chi tiết'}
                 </label>
                 <textarea
@@ -249,12 +245,12 @@ export function BugReportFloatingButton() {
                       ? 'Describe the steps you performed and any error message displayed...'
                       : 'Mô tả cụ thể thao tác bạn vừa thực hiện và lỗi hiển thị...'
                   }
-                  className="mt-1.5 w-full rounded-xl border border-[var(--hair-2)] bg-[var(--ink-3)] px-4 py-2.5 text-sm text-[var(--ivory)] placeholder:text-[var(--ash)] outline-none transition-colors focus:border-[var(--lumen)]"
+                  className="mt-1.5 w-full rounded-2xl border border-[#221E1A]/10 bg-[#F7F2E9]/80 px-4 py-2.5 text-sm text-[#241F1A] placeholder:text-[#746A5F] outline-none transition-colors focus:border-[#B24A26]"
                 />
               </div>
 
               <div>
-                <label htmlFor="bug-report-email" className="text-xs font-semibold text-[var(--ivory)]">
+                <label htmlFor="bug-report-email" className="text-xs font-semibold text-[#6E6459]">
                   {isEng ? 'Your Email (optional)' : 'Email của bạn (tùy chọn)'}
                 </label>
                 <input
@@ -267,7 +263,7 @@ export function BugReportFloatingButton() {
                       ? 'To receive a reply once the issue is resolved'
                       : 'Để nhận phản hồi khi sự cố được khắc phục'
                   }
-                  className="mt-1.5 w-full rounded-xl border border-[var(--hair-2)] bg-[var(--ink-3)] px-4 py-2.5 text-sm text-[var(--ivory)] placeholder:text-[var(--ash)] outline-none transition-colors focus:border-[var(--lumen)]"
+                  className="mt-1.5 w-full rounded-2xl border border-[#221E1A]/10 bg-[#F7F2E9]/80 px-4 py-2.5 text-sm text-[#241F1A] placeholder:text-[#746A5F] outline-none transition-colors focus:border-[#B24A26]"
                 />
               </div>
 
@@ -275,17 +271,17 @@ export function BugReportFloatingButton() {
                 <button
                   type="button"
                   onClick={() => setIsOpen(false)}
-                  className="rounded-full px-4 py-2 text-xs font-semibold text-[var(--ash)] transition-colors hover:bg-[var(--ink-3)] hover:text-[var(--ivory)]"
+                  className="rounded-full px-4 py-2 text-xs font-semibold text-[#6E6459] transition-colors hover:bg-[#FFFCF6] hover:text-[#241F1A]"
                 >
                   {isEng ? 'Cancel' : 'Hủy'}
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex items-center gap-2 rounded-full bg-[var(--lumen)] px-5 py-2.5 text-xs font-bold text-white transition hover:bg-[var(--lumen-hi)] disabled:opacity-50"
+                  className="flex items-center gap-2 rounded-full bg-[#B24A26] px-5 py-2.5 text-xs font-bold text-[#F7F2E9] transition hover:bg-[#8C3718] disabled:opacity-50"
                 >
-                  {loading ? <Loader2 className="h-4 w-4 animate-spin text-white" /> : <Send className="h-4 w-4 text-white" />}
-                  <span className="text-white">{isEng ? 'Submit Report' : 'Gửi báo cáo'}</span>
+                  {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                  <span>{isEng ? 'Submit Report' : 'Gửi báo cáo'}</span>
                 </button>
               </div>
             </form>

@@ -1,11 +1,12 @@
 import { BugReportFloatingButton } from '@/components/feedback/BugReportFloatingButton';
 import { FloatingUtilitiesDock } from '@/components/feedback/FloatingUtilitiesDock';
 import type { Metadata } from "next";
-import { Be_Vietnam_Pro, Space_Grotesk } from "next/font/google";
+import { Be_Vietnam_Pro, Fraunces, Playfair_Display } from "next/font/google";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { LanguageProvider } from "@/context/language-context";
 import { AiAssistantLauncher } from "@/features/navigation";
 import { AppToaster } from "@/components/hover-fade-toast";
+import { ScrollProgress } from "@/components/motion";
 import "./globals.css";
 import "./globals-redesign.css";
 
@@ -13,25 +14,41 @@ const GOOGLE_CLIENT_ID =
   process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "1234567890-dummyid.apps.googleusercontent.com";
 
 /**
- * Font tiêu đề: Be Vietnam Pro — bộ glyph tiếng Việt đầy đủ (subset `vietnamese`).
+ * Font tiêu đề: Fraunces — serif high-contrast có trục optical size.
  *
- * VÌ SAO đổi khỏi Sora: Sora KHÔNG có subset tiếng Việt, chỉ có latin + latin-ext.
- * Các ký tự như ẩ ở ữ ạ (U+1EA0–U+1EF9) không nằm trong hai subset đó nên trình duyệt
- * phải fallback từng ký tự sang font hệ thống → chữ có dấu bị lệch nét, sai weight,
- * đúng như lỗi hiển thị trước đây. Space Grotesk thì vẫn giữ cho phần body vì đã có
- * subset tiếng Việt.
+ * Chọn theo hệ "INK & VERMILION" của `Docs/UI-UX/dillustration-redesign.html`:
+ * ở cỡ 68px nét mảnh như chữ in letterpress, ở cỡ 17px nét dày lên nên caption
+ * vẫn đọc được. Subset `vietnamese` có sẵn nên chữ ẩ ữ ạ không rơi về font hệ thống
+ * (đúng lỗi Sora trước đây). Fraunces là variable font: không truyền `weight`,
+ * chỉ khai báo trục `opsz` để next/font sinh đúng @font-face.
  */
-const headingFont = Be_Vietnam_Pro({
+const headingFont = Fraunces({
   subsets: ["latin", "vietnamese"],
-  weight: ["400", "500", "600", "700", "800", "900"],
+  axes: ["opsz"],
   variable: "--font-heading",
   display: "swap",
 });
 
-const bodyFont = Space_Grotesk({
+/**
+ * Font UI: Inter — grotesque trung tính, số tabular, tốt ở 14–16px.
+ * Cũng có subset `vietnamese`. Đây là mặt chữ đứng sau Fraunces, không tranh chỗ.
+ */
+const bodyFont = Be_Vietnam_Pro({
   subsets: ["latin", "vietnamese"],
-  weight: ["300", "400", "500", "700"],
+  weight: ["300", "400", "500", "600"],
   variable: "--font-body-grotesk",
+  display: "swap",
+});
+
+/**
+ * Wordmark: Playfair Display italic — serif tương phản cao, dáng nghiêng gần với
+ * logo gốc (chữ thường, ascender cao, chấm son bên phải).
+ */
+const wordmarkFont = Playfair_Display({
+  subsets: ["latin"],
+  style: ["italic"],
+  weight: ["500", "600", "700"],
+  variable: "--font-wordmark",
   display: "swap",
 });
 
@@ -49,20 +66,22 @@ export default function RootLayout({
     <html
       lang="vi"
       data-theme="paper"
-      className={`h-full antialiased ${headingFont.variable} ${bodyFont.variable}`}
+      suppressHydrationWarning
+      className={`h-full antialiased ${headingFont.variable} ${bodyFont.variable} ${wordmarkFont.variable}`}
     >
       <head>
-        { }
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=Karla:ital,wght@0,300..700;1,400&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap"
+        {/* Theme: chạy TRƯỚC khi paint để không nháy nền sáng rồi mới tối */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "(function(){try{var t=localStorage.getItem('dil-theme');if(t==='ink'||t==='paper'){document.documentElement.dataset.theme=t;}}catch(e){}})();",
+          }}
         />
       </head>
-      <body className="min-h-full flex flex-col bg-[var(--ink)] text-[var(--ivory)] font-[family-name:var(--font-ui)]">
+      <body className="min-h-full flex flex-col text-[#241F1A]">
         <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
           <LanguageProvider>
+            <ScrollProgress />
             {children}
             <FloatingUtilitiesDock>
               <AiAssistantLauncher />

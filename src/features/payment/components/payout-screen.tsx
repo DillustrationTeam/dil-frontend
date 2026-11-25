@@ -17,8 +17,15 @@ const bankSchema = z.object({
   isDefault: z.boolean(),
 });
 
+// Ngưỡng CHẶN khi gửi: backend (CreatePayoutRequestCommand.MinPayoutAmount) chấp nhận từ
+// 2.000 ₫, nên form phải cho bấm rút từ mốc đó — trước đây form chặn cứng 50.000 ₫ nên
+// người dùng nhập 2.000 ₫ vẫn không bấm được nút.
+const MIN_PAYOUT_AMOUNT = 2_000;
+// Nhãn hiển thị vẫn giữ 50.000 ₫ theo yêu cầu sản phẩm: chỉ là chữ gợi ý, KHÔNG dùng để chặn.
+const MIN_PAYOUT_HINT = 'Tối thiểu 50.000 ₫';
+
 const payoutSchema = z.object({
-  amount: z.number().min(50000, 'Số tiền rút tối thiểu là 50.000 ₫.'),
+  amount: z.number().min(MIN_PAYOUT_AMOUNT, 'Số tiền rút phải từ 2.000 ₫ trở lên.'),
   bankAccountId: z.string().uuid('Vui lòng chọn tài khoản nhận tiền.'),
   note: z.string().max(500, 'Ghi chú tối đa 500 ký tự.'),
 });
@@ -28,13 +35,13 @@ function formatVnd(value: number) {
 }
 
 const statusMap: Record<string, { text: string; color: string }> = {
-  Pending: { text: 'Chờ xử lý', color: 'border-amber-400/30 bg-amber-500/10 text-amber-300' },
-  Approved: { text: 'Đã duyệt', color: 'border-sky-400/30 bg-sky-500/10 text-sky-300' },
-  Processing: { text: 'Đang chuyển khoản', color: 'border-blue-400/30 bg-blue-500/10 text-blue-300' },
-  Processed: { text: 'Thành công', color: 'border-emerald-400/30 bg-emerald-500/10 text-emerald-300' },
-  Completed: { text: 'Thành công', color: 'border-emerald-400/30 bg-emerald-500/10 text-emerald-300' },
-  Rejected: { text: 'Bị từ chối', color: 'border-red-400/30 bg-red-500/10 text-red-300' },
-  Cancelled: { text: 'Đã hủy', color: 'border-white/20 bg-white/5 text-outline' },
+  Pending: { text: 'Chờ xử lý', color: 'border-[#8A6A1F]/40 bg-[#8A6A1F]/10 text-[#8A6A1F]' },
+  Approved: { text: 'Đã duyệt', color: 'border-[#2C6A86]/40 bg-[#2C6A86]/10 text-[#2C6A86]' },
+  Processing: { text: 'Đang chuyển khoản', color: 'border-[#2C5A86]/40 bg-[#2C5A86]/10 text-[#2C5A86]' },
+  Processed: { text: 'Thành công', color: 'border-[#2F6B63]/40 bg-[#2F6B63]/10 text-[#2F6B63]' },
+  Completed: { text: 'Thành công', color: 'border-[#2F6B63]/40 bg-[#2F6B63]/10 text-[#2F6B63]' },
+  Rejected: { text: 'Bị từ chối', color: 'border-[#A8321C]/40 bg-[#A8321C]/10 text-[#A8321C]' },
+  Cancelled: { text: 'Đã hủy', color: 'border-[#221E1A]/20 bg-[#FFFCF6] text-outline' },
 };
 
 export function PayoutScreen({ userId }: { userId: string | null }) {
@@ -170,22 +177,21 @@ export function PayoutScreen({ userId }: { userId: string | null }) {
             type="button"
             onClick={loadData}
             disabled={loading}
-            className="flex h-11 items-center gap-2 rounded-full border border-white/15 px-5 text-sm hover:border-brand-periwinkle/50 hover:bg-white/5 disabled:opacity-50"
+            className="flex h-11 items-center gap-2 rounded-full border border-[#221E1A]/10 px-5 text-sm hover:border-brand-periwinkle/50 hover:bg-[#FFFCF6] disabled:opacity-50"
           >
-            <RefreshCw size={15} className={loading ? 'animate-spin' : ''} /> Làm mới
-          </button>
+            <RefreshCw size={15} className={loading ? 'animate-spin' : ''} /> Làm mới </button>
         }
       />
 
       {error && (
-        <div role="alert" className="mb-6 flex items-center gap-2 rounded-2xl border border-red-400/30 bg-red-500/10 p-4 text-sm text-red-200">
+        <div role="alert" className="mb-6 flex items-center gap-2 rounded-2xl border border-[#A8321C]/40 bg-[#A8321C]/10 p-4 text-sm text-[#A8321C]">
           <CircleAlert size={18} className="shrink-0" />
           <span>{error}</span>
         </div>
       )}
 
       {success && (
-        <div role="status" className="mb-6 flex items-center gap-2 rounded-2xl border border-emerald-400/30 bg-emerald-500/10 p-4 text-sm text-emerald-200">
+        <div role="status" className="mb-6 flex items-center gap-2 rounded-2xl border border-[#2F6B63]/40 bg-[#2F6B63]/10 p-4 text-sm text-[#2F6B63]">
           <CheckCircle2 size={18} className="shrink-0" />
           <span>{success}</span>
         </div>
@@ -194,20 +200,19 @@ export function PayoutScreen({ userId }: { userId: string | null }) {
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
           {/* Khối tạo yêu cầu rút */}
-          <section className="glass-container rounded-3xl border border-white/10 p-6 md:p-8">
+          <section className="glass-container rounded-3xl border border-[#221E1A]/10 p-6 md:p-8">
             <h2 className="mb-4 font-h1 text-lg font-bold">Tạo yêu cầu rút tiền</h2>
 
             {banks.length === 0 ? (
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-6 text-center text-sm">
+              <div className="rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] p-6 text-center text-sm">
                 <Building2 size={36} className="mx-auto mb-2 text-outline" />
                 <p className="text-on-surface-variant">Bạn chưa có tài khoản ngân hàng nào để nhận tiền.</p>
                 <button
                   type="button"
                   onClick={() => setShowAddBank(true)}
-                  className="mt-4 inline-flex items-center gap-2 rounded-full bg-brand-periwinkle px-4 py-2 font-h1 text-xs font-bold text-brand-navy"
+                  className="mt-4 inline-flex items-center gap-2 rounded-full bg-brand-periwinkle px-4 py-2 font-h1 text-xs font-bold text-[#FFFCF6]"
                 >
-                  <Plus size={14} /> Thêm tài khoản ngân hàng
-                </button>
+                  <Plus size={14} /> Thêm tài khoản ngân hàng </button>
               </div>
             ) : (
               <form onSubmit={handleRequestPayout} className="space-y-4">
@@ -220,7 +225,7 @@ export function PayoutScreen({ userId }: { userId: string | null }) {
                         className={`flex cursor-pointer items-center justify-between rounded-2xl border p-4 transition ${
                           selectedBankId === b.bankAccountId
                             ? 'border-brand-periwinkle bg-brand-periwinkle/10 text-on-surface'
-                            : 'border-white/10 bg-white/5 hover:border-white/20'
+                            : 'border-[#221E1A]/10 bg-[#FFFCF6] hover:border-[#221E1A]/20'
                         }`}
                       >
                         <div className="flex items-center gap-3">
@@ -238,9 +243,7 @@ export function PayoutScreen({ userId }: { userId: string | null }) {
                           </div>
                         </div>
                         {b.isDefault && (
-                          <span className="rounded-full border border-brand-periwinkle/30 bg-brand-periwinkle/10 px-2.5 py-0.5 text-[11px] text-brand-periwinkle">
-                            Mặc định
-                          </span>
+                          <span className="rounded-full border border-brand-periwinkle/30 bg-brand-periwinkle/10 px-2.5 py-0.5 text-[11px] text-brand-periwinkle"> Mặc định </span>
                         )}
                       </label>
                     ))}
@@ -251,20 +254,19 @@ export function PayoutScreen({ userId }: { userId: string | null }) {
                   <div className="mb-2 flex items-center justify-between">
                     <label htmlFor="payout-amount" className="text-xs font-medium text-on-surface-variant">Số tiền muốn rút (₫)</label>
                     {wallet && (
-                      <span className="text-xs text-outline">
-                        Khả dụng: <strong className="text-brand-periwinkle">{formatVnd(wallet.wallet.balance)}</strong>
+                      <span className="text-xs text-outline"> Khả dụng: <strong className="text-brand-periwinkle">{formatVnd(wallet.wallet.balance)}</strong>
                       </span>
                     )}
                   </div>
                   <input
                     id="payout-amount"
                     type="number"
-                    min="50000"
+                    min={MIN_PAYOUT_AMOUNT}
                     step="1000"
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
-                    placeholder="Tối thiểu 50.000 ₫"
-                    className="w-full rounded-xl border border-white/15 bg-brand-navy/60 px-4 py-3 font-h1 text-lg font-semibold text-on-surface placeholder:text-outline focus:border-brand-periwinkle focus:outline-none"
+                    placeholder={MIN_PAYOUT_HINT}
+                    className="w-full rounded-xl border border-[#221E1A]/10 bg-brand-navy/60 px-4 py-3 font-h1 text-lg font-semibold text-on-surface placeholder:text-outline focus:border-brand-periwinkle focus:outline-none"
                   />
                 </div>
 
@@ -277,18 +279,16 @@ export function PayoutScreen({ userId }: { userId: string | null }) {
                     onChange={(e) => setNote(e.target.value)}
                     maxLength={500}
                     placeholder="Ví dụ: Rút tiền vẽ tranh tháng 10"
-                    className="w-full rounded-xl border border-white/15 bg-brand-navy/60 px-4 py-2.5 text-sm text-on-surface placeholder:text-outline focus:border-brand-periwinkle focus:outline-none"
+                    className="w-full rounded-xl border border-[#221E1A]/10 bg-brand-navy/60 px-4 py-2.5 text-sm text-on-surface placeholder:text-outline focus:border-brand-periwinkle focus:outline-none"
                   />
                 </div>
 
-                <div className="rounded-xl border border-white/5 bg-white/[0.02] p-3 text-xs text-outline">
-                  Thời gian giải ngân thông thường từ 1-24 giờ làm việc. Phí rút tiền: Miễn phí.
-                </div>
+                <div className="rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] p-3 text-xs text-outline"> Thời gian giải ngân thông thường từ 1-24 giờ làm việc. Phí rút tiền: Miễn phí. </div>
 
                 <button
                   type="submit"
-                  disabled={submitting || !amount || Number(amount) < 50000}
-                  className="w-full rounded-full bg-brand-periwinkle py-3 text-center font-h1 text-sm font-bold text-brand-navy shadow-lg transition hover:brightness-110 disabled:opacity-50"
+                  disabled={submitting || !amount || Number(amount) < MIN_PAYOUT_AMOUNT}
+                  className="w-full rounded-full bg-brand-periwinkle py-3 text-center font-h1 text-sm font-bold text-[#FFFCF6] shadow-lg transition hover:brightness-110 disabled:opacity-50"
                 >
                   {submitting ? 'Đang gửi yêu cầu...' : 'Gửi yêu cầu rút tiền'}
                 </button>
@@ -297,14 +297,14 @@ export function PayoutScreen({ userId }: { userId: string | null }) {
           </section>
 
           {/* Lịch sử rút tiền */}
-          <section className="glass-container rounded-3xl border border-white/10 p-6 md:p-8">
+          <section className="glass-container rounded-3xl border border-[#221E1A]/10 p-6 md:p-8">
             <h2 className="mb-4 font-h1 text-lg font-bold">Lịch sử yêu cầu rút tiền</h2>
             {payouts.length === 0 ? (
               <p className="py-6 text-center text-sm text-outline">Chưa có yêu cầu rút tiền nào.</p>
             ) : (
-              <div className="divide-y divide-white/5">
+              <div className="divide-y divide-[#221E1A]/10">
                 {payouts.map((p) => {
-                  const s = statusMap[p.payoutStatus] || { text: p.payoutStatus, color: 'border-white/10 bg-white/5 text-outline' };
+                  const s = statusMap[p.payoutStatus] || { text: p.payoutStatus, color: 'border-[#221E1A]/10 bg-[#FFFCF6] text-outline' };
                   return (
                     <div key={p.payoutRequestId} className="flex flex-wrap items-center justify-between gap-3 py-4 text-sm">
                       <div>
@@ -318,7 +318,7 @@ export function PayoutScreen({ userId }: { userId: string | null }) {
                           {p.payoutNote || 'Yêu cầu rút tiền'} · Tạo lúc {new Date(p.createdAt).toLocaleString('vi-VN')}
                         </p>
                         {p.rejectReason && (
-                          <p className="mt-1 text-xs text-red-300">Lý do từ chối: {p.rejectReason}</p>
+                          <p className="mt-1 text-xs text-[#A8321C]">Lý do từ chối: {p.rejectReason}</p>
                         )}
                       </div>
                     </div>
@@ -331,16 +331,15 @@ export function PayoutScreen({ userId }: { userId: string | null }) {
 
         {/* Cột phải: Quản lý ngân hàng */}
         <div className="space-y-6">
-          <section className="glass-container rounded-3xl border border-white/10 p-6">
+          <section className="glass-container rounded-3xl border border-[#221E1A]/10 p-6">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="font-h1 text-base font-bold">Tài khoản ngân hàng</h2>
               <button
                 type="button"
                 onClick={() => setShowAddBank(!showAddBank)}
-                className="inline-flex items-center gap-1 rounded-full border border-white/15 px-3 py-1 text-xs text-brand-periwinkle hover:bg-white/10"
+                className="inline-flex items-center gap-1 rounded-full border border-[#221E1A]/10 px-3 py-1 text-xs text-brand-periwinkle hover:bg-[#F0E7D8]"
               >
-                <Plus size={14} /> Thêm
-              </button>
+                <Plus size={14} /> Thêm </button>
             </div>
 
             {showAddBank && (
@@ -353,7 +352,7 @@ export function PayoutScreen({ userId }: { userId: string | null }) {
                     required
                     value={bankForm.bankName}
                     onChange={(e) => setBankForm({ ...bankForm, bankName: e.target.value })}
-                    className="w-full rounded-lg border border-white/10 bg-brand-navy px-3 py-2 text-on-surface"
+                    className="w-full rounded-lg border border-[#221E1A]/10 bg-brand-navy px-3 py-2 text-on-surface"
                     placeholder="VD: MB Bank"
                   />
                 </div>
@@ -364,7 +363,7 @@ export function PayoutScreen({ userId }: { userId: string | null }) {
                     required
                     value={bankForm.accountNumber}
                     onChange={(e) => setBankForm({ ...bankForm, accountNumber: e.target.value })}
-                    className="w-full rounded-lg border border-white/10 bg-brand-navy px-3 py-2 font-mono text-on-surface"
+                    className="w-full rounded-lg border border-[#221E1A]/10 bg-brand-navy px-3 py-2 font-mono text-on-surface"
                     placeholder="VD: 0123456789"
                   />
                 </div>
@@ -375,7 +374,7 @@ export function PayoutScreen({ userId }: { userId: string | null }) {
                     required
                     value={bankForm.accountHolder}
                     onChange={(e) => setBankForm({ ...bankForm, accountHolder: e.target.value.toUpperCase() })}
-                    className="w-full rounded-lg border border-white/10 bg-brand-navy px-3 py-2 text-on-surface"
+                    className="w-full rounded-lg border border-[#221E1A]/10 bg-brand-navy px-3 py-2 text-on-surface"
                     placeholder="VD: NGUYEN VAN A"
                   />
                 </div>
@@ -383,24 +382,20 @@ export function PayoutScreen({ userId }: { userId: string | null }) {
                   <button
                     type="button"
                     onClick={() => setShowAddBank(false)}
-                    className="rounded-full px-3 py-1 text-outline hover:text-white"
-                  >
-                    Hủy
-                  </button>
+                    className="rounded-full px-3 py-1 text-outline hover:text-[#241F1A]"
+                  > Hủy </button>
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="rounded-full bg-brand-periwinkle px-4 py-1 font-bold text-brand-navy"
-                  >
-                    Lưu
-                  </button>
+                    className="rounded-full bg-brand-periwinkle px-4 py-1 font-bold text-[#FFFCF6]"
+                  > Lưu </button>
                 </div>
               </form>
             )}
 
             <div className="space-y-3">
               {banks.map((b) => (
-                <div key={b.bankAccountId} className="flex items-center justify-between rounded-2xl border border-white/5 bg-white/[0.02] p-3 text-xs">
+                <div key={b.bankAccountId} className="flex items-center justify-between rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] p-3 text-xs">
                   <div>
                     <p className="font-semibold text-on-surface">{b.bankName}</p>
                     <p className="font-mono text-outline">{b.accountNumberMasked} · {b.accountHolder}</p>
@@ -408,7 +403,7 @@ export function PayoutScreen({ userId }: { userId: string | null }) {
                   <button
                     type="button"
                     onClick={() => handleDeleteBank(b.bankAccountId)}
-                    className="text-outline hover:text-red-300"
+                    className="text-outline hover:text-[#A8321C]"
                     title="Xóa tài khoản này"
                   >
                     <Trash2 size={15} />

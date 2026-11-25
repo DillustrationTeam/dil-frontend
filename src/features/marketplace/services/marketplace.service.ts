@@ -109,6 +109,46 @@ export const marketplaceService = {
     return getData(response);
   },
 
+  /**
+   * Phân trang THẬT: server cắt dữ liệu và trả `meta.totalCount / totalPages`.
+   * Dùng cho /explore — trước đây tải hết rồi tự slice ở client nên phân trang chỉ để trang trí.
+   */
+  async getArtworksPage(params?: {
+    page?: number;
+    pageSize?: number;
+    search?: string;
+    categoryId?: string;
+  }): Promise<{
+    items: MarketplaceArtwork[];
+    page: number;
+    pageSize: number;
+    totalCount: number;
+    totalPages: number;
+  }> {
+    const pageSize = params?.pageSize ?? 12;
+    const page = params?.page ?? 1;
+    const response = await apiClient.get<ApiResponse<MarketplaceArtwork[]>>('/artworks', {
+      params: {
+        page,
+        pageSize,
+        search: params?.search?.trim() || undefined,
+        categoryId: params?.categoryId || undefined,
+      },
+    });
+    const items = getData(response);
+    const meta = response.data.meta as
+      | { page?: number; pageSize?: number; totalCount?: number; totalPages?: number }
+      | undefined;
+    const totalCount = meta?.totalCount ?? items.length;
+    return {
+      items,
+      page: meta?.page ?? page,
+      pageSize: meta?.pageSize ?? pageSize,
+      totalCount,
+      totalPages: meta?.totalPages ?? Math.max(1, Math.ceil(totalCount / pageSize)),
+    };
+  },
+
   async getArtworkById(id: string): Promise<MarketplaceArtwork> {
     const response = await apiClient.get<ApiResponse<MarketplaceArtwork>>(`/artworks/${id}`);
     return getData(response);

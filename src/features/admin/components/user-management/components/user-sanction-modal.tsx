@@ -102,14 +102,14 @@ export function UserSanctionModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-fadeIn">
-      <div className="bg-[#161926] border border-white/15 rounded-[28px] max-w-lg w-full p-6 space-y-5 shadow-2xl relative">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#F0E7D8]/75 backdrop-blur-md animate-fadeIn">
+      <div className="bg-[#FFFCF6] border border-[#221E1A]/10 rounded-[28px] max-w-lg w-full p-6 space-y-5 shadow-2xl relative">
         {/* Close Button */}
         <button
           type="button"
           onClick={onClose}
           disabled={isSubmitting}
-          className="absolute top-5 right-5 p-1.5 rounded-full bg-white/5 hover:bg-white/10 text-[#8A8FA9] hover:text-white transition-colors cursor-pointer"
+          className="absolute top-5 right-5 p-1.5 rounded-full bg-[#FFFCF6] hover:bg-[#F0E7D8] text-[#6E6459] hover:text-[#241F1A] transition-colors cursor-pointer"
         >
           <X className="w-4 h-4" />
         </button>
@@ -119,10 +119,10 @@ export function UserSanctionModal({
           <div
             className={`w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 border ${
               actionType === 'Unban'
-                ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+                ? 'bg-[#2F6B63]/20 text-[#2F6B63] border-[#2F6B63]/40'
                 : actionType === 'Warn'
-                ? 'bg-amber-500/20 text-amber-300 border-amber-500/30'
-                : 'bg-red-500/20 text-red-300 border-red-500/30'
+                ? 'bg-[#8A6A1F]/20 text-[#8A6A1F] border-[#8A6A1F]/40'
+                : 'bg-[#A8321C]/20 text-[#A8321C] border-[#A8321C]/40'
             }`}
           >
             {actionType === 'Unban' ? (
@@ -134,25 +134,25 @@ export function UserSanctionModal({
             )}
           </div>
           <div>
-            <h3 className="text-lg font-bold text-white font-h1">
+            <h3 className="text-lg font-bold text-[#241F1A] font-h1">
               {actionType === 'Unban'
                 ? (isVie ? 'Gỡ bỏ Chế tài & Mở khóa Người dùng' : 'Lift Sanctions & Unlock User')
                 : (isVie ? 'Áp dụng Chế tài & Xử lý Vi phạm' : 'Apply Sanction & Penalty')}
             </h3>
-            <p className="text-xs text-[#8A8FA9]">
+            <p className="text-xs text-[#6E6459]">
               {isVie ? 'Tài khoản áp dụng:' : 'Target Account:'}{' '}
-              <span className="text-white font-bold">@{user.userName}</span> ({user.email})
+              <span className="text-[#241F1A] font-bold">@{user.userName}</span> ({user.email})
             </p>
           </div>
         </div>
 
         {/* Target User Current State Card */}
-        <div className="p-3.5 rounded-2xl bg-black/40 border border-white/5 flex items-center justify-between text-xs">
+        <div className="p-3.5 rounded-2xl bg-[#F0E7D8] border border-[#221E1A]/10 flex items-center justify-between text-xs">
           <div>
-            <span className="text-[#8A8FA9]">{isVie ? 'Trạng thái hiện tại:' : 'Current Status:'}</span>
+            <span className="text-[#6E6459]">{isVie ? 'Trạng thái hiện tại:' : 'Current Status:'}</span>
             <span
               className={`ml-2 font-bold ${
-                user.isLockedOut ? 'text-red-400' : 'text-emerald-400'
+                user.isLockedOut ? 'text-[#A8321C]' : 'text-[#2F6B63]'
               }`}
             >
               {user.isLockedOut
@@ -161,8 +161,8 @@ export function UserSanctionModal({
             </span>
           </div>
           <div>
-            <span className="text-[#8A8FA9]">{isVie ? 'Vai trò:' : 'Roles:'}</span>
-            <span className="ml-1 text-white font-semibold">{user.roles.join(', ')}</span>
+            <span className="text-[#6E6459]">{isVie ? 'Vai trò:' : 'Roles:'}</span>
+            <span className="ml-1 text-[#241F1A] font-semibold">{user.roles.join(', ')}</span>
           </div>
         </div>
 
@@ -170,17 +170,17 @@ export function UserSanctionModal({
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Action Type Tabs */}
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-[#8A8FA9]">
-              {isVie ? 'Hình thức Xử lý Kỷ luật' : 'Action Type'} <span className="text-red-400">*</span>
+            <label className="text-xs font-semibold text-[#6E6459]">
+              {isVie ? 'Hình thức Xử lý Kỷ luật' : 'Action Type'} <span className="text-[#A8321C]">*</span>
             </label>
-            <div className="grid grid-cols-4 gap-1.5 p-1 rounded-xl bg-black/40 border border-white/10">
+            <div className="grid grid-cols-4 gap-1.5 p-1 rounded-xl bg-[#F0E7D8] border border-[#221E1A]/10">
               <button
                 type="button"
                 onClick={() => handleActionTypeChange('Warn')}
                 className={`py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
                   actionType === 'Warn'
-                    ? 'bg-amber-500 text-black shadow-md'
-                    : 'text-[#8A8FA9] hover:text-white'
+                    ? 'bg-[#8A6A1F]/12 text-[#F7F2E9] shadow-md'
+                    : 'text-[#6E6459] hover:text-[#241F1A]'
                 }`}
               >
                 {isVie ? 'Cảnh cáo' : 'Warn'}
@@ -190,8 +190,8 @@ export function UserSanctionModal({
                 onClick={() => handleActionTypeChange('Suspend')}
                 className={`py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
                   actionType === 'Suspend'
-                    ? 'bg-red-500 text-white shadow-md'
-                    : 'text-[#8A8FA9] hover:text-white'
+                    ? 'bg-[#A8321C]/12 text-[#241F1A] shadow-md'
+                    : 'text-[#6E6459] hover:text-[#241F1A]'
                 }`}
               >
                 {isVie ? 'Tạm khóa' : 'Suspend'}
@@ -201,8 +201,8 @@ export function UserSanctionModal({
                 onClick={() => handleActionTypeChange('Ban')}
                 className={`py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
                   actionType === 'Ban'
-                    ? 'bg-red-700 text-white shadow-md'
-                    : 'text-[#8A8FA9] hover:text-white'
+                    ? 'bg-[#A8321C]/12 text-[#241F1A] shadow-md'
+                    : 'text-[#6E6459] hover:text-[#241F1A]'
                 }`}
               >
                 {isVie ? 'Cấm vĩnh viễn' : 'Ban'}
@@ -218,8 +218,8 @@ export function UserSanctionModal({
                 }
                 className={`py-2 text-xs font-bold rounded-lg transition-all ${
                   actionType === 'Unban'
-                    ? 'bg-emerald-500 text-black shadow-md'
-                    : 'text-[#8A8FA9] hover:text-white'
+                    ? 'bg-[#2F6B63]/12 text-[#F7F2E9] shadow-md'
+                    : 'text-[#6E6459] hover:text-[#241F1A]'
                 } ${!user.isLockedOut ? 'opacity-30 cursor-not-allowed' : 'cursor-pointer'}`}
               >
                 {isVie ? 'Gỡ phạt' : 'Unban'}
@@ -229,13 +229,13 @@ export function UserSanctionModal({
 
           {/* Duration Selector (Only if ActionType = 'Suspend') */}
           {actionType === 'Suspend' && (
-            <div className="space-y-2 p-3.5 rounded-2xl bg-red-500/5 border border-red-500/20">
+            <div className="space-y-2 p-3.5 rounded-2xl bg-[#A8321C]/5 border border-[#A8321C]/30">
               <div className="flex items-center justify-between">
-                <label className="text-xs font-semibold text-red-300 flex items-center gap-1.5">
+                <label className="text-xs font-semibold text-[#A8321C] flex items-center gap-1.5">
                   <Clock className="w-3.5 h-3.5" />
                   {isVie ? 'Thời hạn tạm khóa' : 'Suspension Duration'}
                 </label>
-                <span className="text-xs font-bold text-white font-mono">
+                <span className="text-xs font-bold text-[#241F1A] font-mono">
                   {isVie ? `${durationDays} Ngày` : `${durationDays} Day${durationDays > 1 ? 's' : ''}`}
                 </span>
               </div>
@@ -248,8 +248,8 @@ export function UserSanctionModal({
                     onClick={() => handleDurationPreset(preset.days)}
                     className={`py-1.5 px-2 rounded-xl text-xs font-semibold border transition-all ${
                       durationDays === preset.days && !customDays
-                        ? 'bg-red-500/30 text-white border-red-500/60'
-                        : 'bg-black/30 text-[#8A8FA9] border-white/10 hover:text-white'
+                        ? 'bg-[#A8321C]/20 text-[#241F1A] border-[#A8321C]/40'
+                        : 'bg-[#F0E7D8] text-[#6E6459] border-[#221E1A]/10 hover:text-[#241F1A]'
                     }`}
                   >
                     {preset.label}
@@ -258,7 +258,7 @@ export function UserSanctionModal({
               </div>
 
               <div className="flex items-center gap-2 pt-1">
-                <span className="text-[11px] text-[#8A8FA9]">
+                <span className="text-[11px] text-[#6E6459]">
                   {isVie ? 'Số ngày tùy chỉnh:' : 'Custom days:'}
                 </span>
                 <input
@@ -268,7 +268,7 @@ export function UserSanctionModal({
                   placeholder={isVie ? 'Ví dụ: 21' : 'e.g. 21'}
                   value={customDays}
                   onChange={(e) => handleCustomDaysChange(e.target.value)}
-                  className="w-24 px-3 py-1 bg-black/40 rounded-lg border border-white/10 text-white text-xs focus:outline-none focus:border-red-400"
+                  className="w-24 px-3 py-1 bg-[#F0E7D8] rounded-lg border border-[#221E1A]/10 text-[#241F1A] text-xs focus:outline-none focus:border-[#A8321C]/30"
                 />
               </div>
             </div>
@@ -276,8 +276,8 @@ export function UserSanctionModal({
 
           {/* Action Explanations */}
           {actionType === 'Ban' && (
-            <div className="p-3 rounded-xl bg-red-950/40 border border-red-600/40 text-xs text-red-200 flex items-start gap-2">
-              <Ban className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+            <div className="p-3 rounded-xl bg-[#A8321C]/20 border border-[#A8321C]/40 text-xs text-[#A8321C] flex items-start gap-2">
+              <Ban className="w-4 h-4 text-[#A8321C] shrink-0 mt-0.5" />
               <span>
                 {isVie
                   ? 'Cấm vĩnh viễn sẽ hạn chế hoàn toàn người dùng này truy cập các tính năng, tạo đơn vẽ hoặc đăng nhập vào hệ thống.'
@@ -287,8 +287,8 @@ export function UserSanctionModal({
           )}
 
           {actionType === 'Warn' && (
-            <div className="p-3 rounded-xl bg-amber-950/40 border border-amber-600/40 text-xs text-amber-200 flex items-start gap-2">
-              <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+            <div className="p-3 rounded-xl bg-[#8A6A1F]/20 border border-[#8A6A1F]/40 text-xs text-[#8A6A1F] flex items-start gap-2">
+              <AlertTriangle className="w-4 h-4 text-[#8A6A1F] shrink-0 mt-0.5" />
               <span>
                 {isVie
                   ? 'Thông báo cảnh cáo chính thức sẽ được ghi vào nhật ký xử phạt của người dùng mà không khóa tài khoản.'
@@ -298,8 +298,8 @@ export function UserSanctionModal({
           )}
 
           {actionType === 'Unban' && (
-            <div className="p-3 rounded-xl bg-emerald-950/40 border border-emerald-600/40 text-xs text-emerald-200 flex items-start gap-2">
-              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+            <div className="p-3 rounded-xl bg-[#2F6B63]/20 border border-[#2F6B63]/40 text-xs text-[#2F6B63] flex items-start gap-2">
+              <CheckCircle2 className="w-4 h-4 text-[#2F6B63] shrink-0 mt-0.5" />
               <span>
                 {isVie
                   ? `Thao tác này sẽ gỡ bỏ hạn chế khóa và khôi phục trạng thái hoạt động cho @${user.userName}.`
@@ -310,11 +310,11 @@ export function UserSanctionModal({
 
           {/* Violation Reason Input */}
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-[#8A8FA9] flex justify-between">
+            <label className="text-xs font-semibold text-[#6E6459] flex justify-between">
               <span>
-                {isVie ? 'Lý do Xử phạt / Vi phạm' : 'Violation / Action Reason'} <span className="text-red-400">*</span>
+                {isVie ? 'Lý do Xử phạt / Vi phạm' : 'Violation / Action Reason'} <span className="text-[#A8321C]">*</span>
               </span>
-              <span className="text-[11px] text-[#8A8FA9] font-normal">
+              <span className="text-[11px] text-[#6E6459] font-normal">
                 {reason.length}/300
               </span>
             </label>
@@ -329,7 +329,7 @@ export function UserSanctionModal({
                   ? 'Chi tiết điều khoản vi phạm hoặc căn cứ áp dụng biện pháp này...'
                   : 'Detail the policy clause violated or rationale for this action...'
               }
-              className="w-full px-3.5 py-2.5 bg-black/40 rounded-xl border border-white/10 text-white placeholder-[#8A8FA9]/60 text-xs focus:outline-none focus:border-red-400/80 transition-colors resize-none"
+              className="w-full px-3.5 py-2.5 bg-[#F0E7D8] rounded-xl border border-[#221E1A]/10 text-[#241F1A] placeholder-[#6E6459]/60 text-xs focus:outline-none focus:border-[#A8321C]/40 transition-colors resize-none"
             />
           </div>
 
@@ -339,7 +339,7 @@ export function UserSanctionModal({
               type="button"
               onClick={onClose}
               disabled={isSubmitting}
-              className="px-4 py-2.5 rounded-xl text-xs font-bold text-[#8A8FA9] hover:text-white hover:bg-white/5 transition-colors cursor-pointer"
+              className="px-4 py-2.5 rounded-xl text-xs font-bold text-[#6E6459] hover:text-[#241F1A] hover:bg-[#FFFCF6] transition-colors cursor-pointer"
             >
               {isVie ? 'Hủy' : 'Cancel'}
             </button>
@@ -349,10 +349,10 @@ export function UserSanctionModal({
               disabled={isSubmitting || !reason.trim()}
               className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all shadow-lg cursor-pointer flex items-center gap-2 ${
                 actionType === 'Unban'
-                  ? 'bg-emerald-500 hover:bg-emerald-400 text-black'
+                  ? 'bg-[#2F6B63]/12 hover:bg-[#2F6B63]/10 text-[#F7F2E9]'
                   : actionType === 'Warn'
-                  ? 'bg-amber-500 hover:bg-amber-400 text-black'
-                  : 'bg-red-500 hover:bg-red-400 text-white shadow-red-500/20'
+                  ? 'bg-[#8A6A1F]/12 hover:bg-[#8A6A1F]/10 text-[#F7F2E9]'
+                  : 'bg-[#A8321C]/12 hover:bg-[#A8321C]/10 text-[#241F1A] shadow-[#A8321C]'
               } disabled:opacity-50 disabled:cursor-not-allowed`}
             >
               {isSubmitting ? (

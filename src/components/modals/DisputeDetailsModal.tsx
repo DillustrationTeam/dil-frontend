@@ -56,20 +56,20 @@ function getStatusMeta(status?: string) {
   if (normalized === 'resolved') {
     return {
       label: 'Đã giải quyết',
-      badgeClass: 'border-emerald-400/30 bg-emerald-400/15 text-emerald-200',
+      badgeClass: 'border-[#2F6B63]/40 bg-[#2F6B63]/15 text-[#2F6B63]',
       isResolved: true,
     };
   }
   if (normalized === 'underreview' || normalized === 'investigating') {
     return {
       label: 'Đang xem xét',
-      badgeClass: 'border-sky-400/30 bg-sky-400/15 text-sky-200',
+      badgeClass: 'border-[#2C6A86]/40 bg-[#2C6A86]/15 text-[#2C6A86]',
       isResolved: false,
     };
   }
   return {
     label: status === 'Open' ? 'Chờ xử lý' : status || 'Chờ xử lý',
-    badgeClass: 'border-amber-300/30 bg-amber-300/15 text-amber-200',
+    badgeClass: 'border-[#8A6A1F]/40 bg-[#8A6A1F]/15 text-[#8A6A1F]',
     isResolved: false,
   };
 }
@@ -116,7 +116,7 @@ export default function DisputeDetailsModal({
       return `Khách hàng (@${commission.clientName || 'Client'})`;
     }
     if (commission) {
-      return `Họa sĩ (@${commission.creatorName || 'Creator'})`;
+      return `Họa sĩ (${commission.creatorName || 'chưa rõ'})`;
     }
     return `ID #${dispute.raisedById.slice(0, 8).toUpperCase()}`;
   })();
@@ -129,7 +129,7 @@ export default function DisputeDetailsModal({
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-[60] flex items-center justify-center bg-[#F0E7D8]/75 p-4 backdrop-blur-sm"
       role="presentation"
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) onClose();
@@ -139,17 +139,15 @@ export default function DisputeDetailsModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby="dispute-details-title"
-        className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-[#1E2536] bg-[#161927] text-white shadow-2xl"
+        className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-[#F0E7D8] bg-[#FFFCF6] text-[#241F1A] shadow-2xl"
       >
-        <header className="sticky top-0 z-10 flex items-start justify-between gap-4 border-b border-[#1E2536] bg-[#161927]/95 px-6 py-4 backdrop-blur-sm">
+        <header className="sticky top-0 z-10 flex items-start justify-between gap-4 border-b border-[#F0E7D8] bg-[#FFFCF6]/95 px-6 py-4 backdrop-blur-sm">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-amber-300">
-                <Scale className="h-3.5 w-3.5" />
-                Hồ sơ tranh chấp
-              </span>
+              <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#8A6A1F]">
+                <Scale className="h-3.5 w-3.5" /> Hồ sơ tranh chấp </span>
               {dispute?.id && (
-                <span className="font-mono text-[11px] text-slate-400">
+                <span className="font-mono text-[11px] text-[#746A5F]">
                   #DSP-{dispute.id.slice(0, 8).toUpperCase()}
                 </span>
               )}
@@ -157,10 +155,10 @@ export default function DisputeDetailsModal({
                 {statusMeta.label}
               </span>
             </div>
-            <h2 id="dispute-details-title" className="mt-1.5 truncate font-h1 text-base font-bold text-white">
+            <h2 id="dispute-details-title" className="mt-1.5 truncate font-h1 text-base font-bold text-[#241F1A]">
               {commission?.title || `Commission #${commissionId.slice(0, 8).toUpperCase()}`}
             </h2>
-            <p className="mt-0.5 text-xs text-slate-400">
+            <p className="mt-0.5 text-xs text-[#746A5F]">
               Mã đơn: #CMD-{commissionId.slice(0, 8).toUpperCase()}
             </p>
           </div>
@@ -168,17 +166,17 @@ export default function DisputeDetailsModal({
             type="button"
             onClick={onClose}
             aria-label="Đóng hồ sơ tranh chấp"
-            className="rounded-lg p-1.5 text-slate-400 transition hover:bg-white/5 hover:text-white"
+            className="rounded-lg p-1.5 text-[#746A5F] transition hover:bg-[#FFFCF6] hover:text-[#241F1A]"
           >
             <X className="h-4 w-4" />
           </button>
         </header>
 
-        <div className="divide-y divide-[#1E2536]">
+        <div className="divide-y divide-[#F0E7D8]">
           {loading ? (
-            <p className="py-12 text-center text-sm text-slate-400">Đang tải hồ sơ tranh chấp…</p>
+            <p className="py-12 text-center text-sm text-[#746A5F]">Đang tải hồ sơ tranh chấp…</p>
           ) : error ? (
-            <p role="alert" className="flex items-center justify-center gap-2 py-10 text-sm text-rose-300">
+            <p role="alert" className="flex items-center justify-center gap-2 py-10 text-sm text-[#A8321C]">
               <AlertCircle className="h-4 w-4" />
               {error}
             </p>
@@ -192,17 +190,17 @@ export default function DisputeDetailsModal({
                       <span
                         className={`flex size-6 shrink-0 items-center justify-center rounded-full text-[11px] font-bold ${
                           step.done
-                            ? 'bg-emerald-400/20 text-emerald-300'
+                            ? 'bg-[#2F6B63]/20 text-[#2F6B63]'
                             : step.active
-                              ? 'bg-amber-300/20 text-amber-200 ring-1 ring-amber-300/50'
-                              : 'bg-white/5 text-slate-500'
+                              ? 'bg-[#8A6A1F]/20 text-[#8A6A1F] ring-1 ring-[#8A6A1F]/40'
+                              : 'bg-[#FFFCF6] text-[#746A5F]'
                         }`}
                       >
                         {step.done ? '✓' : index + 1}
                       </span>
                       <span
                         className={`text-xs font-medium ${
-                          step.done ? 'text-emerald-200' : step.active ? 'text-amber-100 font-semibold' : 'text-slate-500'
+                          step.done ? 'text-[#2F6B63]' : step.active ? 'text-[#8A6A1F] font-semibold' : 'text-[#746A5F]'
                         }`}
                       >
                         {step.label}
@@ -215,27 +213,21 @@ export default function DisputeDetailsModal({
               {/* Thông tin tổng quan */}
               <dl className="grid gap-4 px-6 py-4 text-sm sm:grid-cols-3">
                 <div>
-                  <dt className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
-                    <UserCheck className="h-3.5 w-3.5 text-[#A7ACD9]" />
-                    Người khiếu nại
-                  </dt>
-                  <dd className="mt-1 text-xs font-semibold text-white">{raisedByLabel}</dd>
+                  <dt className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-[#746A5F]">
+                    <UserCheck className="h-3.5 w-3.5 text-[#B24A26]" /> Người khiếu nại </dt>
+                  <dd className="mt-1 text-xs font-semibold text-[#241F1A]">{raisedByLabel}</dd>
                 </div>
                 <div>
-                  <dt className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
-                    <Clock3 className="h-3.5 w-3.5 text-[#A7ACD9]" />
-                    Thời gian gửi
-                  </dt>
-                  <dd className="mt-1 text-xs font-semibold text-white">
+                  <dt className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-[#746A5F]">
+                    <Clock3 className="h-3.5 w-3.5 text-[#B24A26]" /> Thời gian gửi </dt>
+                  <dd className="mt-1 text-xs font-semibold text-[#241F1A]">
                     {new Date(dispute.createdAt).toLocaleString('vi-VN')}
                   </dd>
                 </div>
                 <div>
-                  <dt className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
-                    <ShieldAlert className="h-3.5 w-3.5 text-amber-300" />
-                    Ký quỹ tạm giữ
-                  </dt>
-                  <dd className="mt-1 text-xs font-bold text-amber-200">
+                  <dt className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-[#746A5F]">
+                    <ShieldAlert className="h-3.5 w-3.5 text-[#8A6A1F]" /> Ký quỹ tạm giữ </dt>
+                  <dd className="mt-1 text-xs font-bold text-[#8A6A1F]">
                     {commission?.escrowHeldAmount != null
                       ? formatMoney(commission.escrowHeldAmount)
                       : 'Đang tạm khóa'}
@@ -246,24 +238,22 @@ export default function DisputeDetailsModal({
               {/* Lý do & mô tả chi tiết */}
               <div className="space-y-2.5 px-6 py-5">
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <h3 className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-400">
-                    <FileText className="h-3.5 w-3.5 text-[#A7ACD9]" />
-                    Nội dung khiếu nại
-                  </h3>
+                  <h3 className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#746A5F]">
+                    <FileText className="h-3.5 w-3.5 text-[#B24A26]" /> Nội dung khiếu nại </h3>
                   {category && (
-                    <span className="rounded-md border border-rose-400/25 bg-rose-400/10 px-2.5 py-0.5 text-[11px] font-semibold text-rose-200">
+                    <span className="rounded-md border border-[#A8321C]/35 bg-[#A8321C]/10 px-2.5 py-0.5 text-[11px] font-semibold text-[#A8321C]">
                       {category}
                     </span>
                   )}
                 </div>
-                <p className="whitespace-pre-wrap rounded-xl bg-white/[0.03] p-4 text-sm leading-6 text-slate-100">
+                <p className="whitespace-pre-wrap rounded-xl bg-[#FFFCF6] p-4 text-sm leading-6 text-[#6E6459]">
                   {detail || dispute.reason}
                 </p>
               </div>
 
               {/* Bằng chứng */}
               <div className="space-y-3 px-6 py-5">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-[#746A5F]">
                   Bằng chứng đính kèm ({evidenceUrls.length})
                 </h3>
                 {evidenceUrls.length > 0 ? (
@@ -276,16 +266,14 @@ export default function DisputeDetailsModal({
                             href={url}
                             target="_blank"
                             rel="noreferrer"
-                            className="group relative overflow-hidden rounded-xl border border-white/10 bg-black/30"
+                            className="group relative overflow-hidden rounded-xl border border-[#221E1A]/10 bg-[#F0E7D8]"
                           >
                             <img
                               src={url}
                               alt="Bằng chứng tranh chấp"
                               className="h-28 w-full object-cover transition group-hover:scale-105"
                             />
-                            <span className="absolute bottom-1.5 right-1.5 rounded-md bg-black/70 px-1.5 py-0.5 text-[10px] text-white">
-                              Mở ảnh
-                            </span>
+                            <span className="absolute bottom-1.5 right-1.5 rounded-md bg-[#E5D8C2] px-1.5 py-0.5 text-[10px] text-[#241F1A]"> Mở ảnh </span>
                           </a>
                         ))}
                       </div>
@@ -300,7 +288,7 @@ export default function DisputeDetailsModal({
                                 href={url}
                                 target="_blank"
                                 rel="noreferrer"
-                                className="inline-flex max-w-full items-center gap-2 break-all text-xs text-[#C5C9F8] underline hover:text-white"
+                                className="inline-flex max-w-full items-center gap-2 break-all text-xs text-[#8C3718] underline hover:text-[#241F1A]"
                               >
                                 <span>{url}</span>
                                 <ExternalLink className="h-3.5 w-3.5 shrink-0" />
@@ -311,66 +299,61 @@ export default function DisputeDetailsModal({
                     )}
                   </div>
                 ) : (
-                  <p className="text-xs text-slate-400">
-                    Chưa có tệp/liên kết bằng chứng đính kèm. Trọng tài vẫn có thể đối chiếu lịch sử chat và các bản WIP trong Workroom.
-                  </p>
+                  <p className="text-xs text-[#746A5F]"> Chưa có tệp/liên kết bằng chứng đính kèm. Trọng tài vẫn có thể đối chiếu lịch sử trò chuyện và các bản WIP trong phòng làm việc. </p>
                 )}
               </div>
 
               {/* Phán quyết hoặc thông báo trạng thái chờ */}
               {dispute.resolution || statusMeta.isResolved || dispute.adminNote ? (
-                <div className="space-y-2.5 bg-emerald-400/[0.04] px-6 py-5">
-                  <h3 className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-emerald-300">
+                <div className="space-y-2.5 bg-[#2F6B63]/10/[0.04] px-6 py-5">
+                  <h3 className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#2F6B63]">
                     <CheckCircle2 className="h-4 w-4" />
                     Kết quả xử lý &amp; Phán quyết trọng tài
                   </h3>
                   {dispute.resolution && (
-                    <p className="text-sm font-semibold text-white">Quyết định: {dispute.resolution}</p>
+                    <p className="text-sm font-semibold text-[#241F1A]">Quyết định: {dispute.resolution}</p>
                   )}
                   {dispute.adminNote && (
-                    <p className="whitespace-pre-wrap rounded-xl border border-white/10 bg-black/20 p-3 text-sm text-slate-200">
-                      <strong className="text-white">Ghi chú phán quyết:</strong> {dispute.adminNote}
+                    <p className="whitespace-pre-wrap rounded-xl border border-[#221E1A]/10 bg-[#F0E7D8] p-3 text-sm text-[#6E6459]">
+                      <strong className="text-[#241F1A]">Ghi chú phán quyết:</strong> {dispute.adminNote}
                     </p>
                   )}
-                  <div className="flex flex-wrap gap-4 pt-1 text-xs text-slate-300">
+                  <div className="flex flex-wrap gap-4 pt-1 text-xs text-[#746A5F]">
                     {dispute.clientRefundAmount != null && (
                       <span>
                         Hoàn khách:{' '}
-                        <strong className="text-white">{formatMoney(dispute.clientRefundAmount)}</strong>
+                        <strong className="text-[#241F1A]">{formatMoney(dispute.clientRefundAmount)}</strong>
                       </span>
                     )}
                     {dispute.artistPayAmount != null && (
                       <span>
-                        Creator nhận:{' '}
-                        <strong className="text-white">{formatMoney(dispute.artistPayAmount)}</strong>
+                        Họa sĩ nhận:{' '}
+                        <strong className="text-[#241F1A]">{formatMoney(dispute.artistPayAmount)}</strong>
                       </span>
                     )}
                     {dispute.resolvedAt && (
-                      <span className="text-slate-400">
+                      <span className="text-[#746A5F]">
                         Giải quyết lúc: {new Date(dispute.resolvedAt).toLocaleString('vi-VN')}
                       </span>
                     )}
                   </div>
                 </div>
               ) : (
-                <div className="bg-amber-300/[0.05] px-6 py-4 text-xs leading-5 text-amber-100/90">
-                  <strong>Trạng thái bảo vệ Escrow:</strong> Tiền ký quỹ đang được hệ thống tạm khóa an toàn. Trọng tài sàn sẽ xem xét lịch sử trao đổi, tiến độ các mốc và bằng chứng liên quan trước khi đưa ra phán quyết cuối cùng.
-                </div>
+                <div className="bg-[#8A6A1F]/10/[0.05] px-6 py-4 text-xs leading-5 text-[#8A6A1F]">
+                  <strong>Trạng thái bảo vệ ký quỹ:</strong> Tiền ký quỹ đang được hệ thống tạm khóa an toàn. Trọng tài sàn sẽ xem xét lịch sử trao đổi, tiến độ các mốc và bằng chứng liên quan trước khi đưa ra phán quyết cuối cùng. </div>
               )}
             </>
           ) : (
-            <p className="py-10 text-center text-sm text-slate-400">Đơn này chưa có hồ sơ tranh chấp.</p>
+            <p className="py-10 text-center text-sm text-[#746A5F]">Đơn này chưa có hồ sơ tranh chấp.</p>
           )}
         </div>
 
-        <footer className="flex justify-end border-t border-[#1E2536] px-6 py-3.5">
+        <footer className="flex justify-end border-t border-[#F0E7D8] px-6 py-3.5">
           <button
             type="button"
             onClick={onClose}
-            className="rounded-xl border border-white/15 px-4 py-2 text-xs font-semibold text-slate-200 transition hover:bg-white/5"
-          >
-            Đóng
-          </button>
+            className="rounded-xl border border-[#221E1A]/10 px-4 py-2 text-xs font-semibold text-[#6E6459] transition hover:bg-[#FFFCF6]"
+          > Đóng </button>
         </footer>
       </section>
     </div>

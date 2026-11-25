@@ -7,73 +7,73 @@ import { useLanguage } from '@/context/language-context';
 import { apiClient } from '@/lib/api-client';
 import type { ApiResponse } from '@/types/api.types';
 import { normalizeEventStatus, type EventListItemDto } from '@/features/event/types/event.types';
+import type { MarketplaceArtwork } from '../services/marketplace.service';
 
-function EventStatusBadge({ status, isVie }: { status: string | number; isVie: boolean }) {
+interface SpotlightArtwork extends MarketplaceArtwork {
+  eventId?: string;
+  eventTitle?: string;
+}
+
+function EventStatusPill({ status, isVie }: { status: string | number; isVie: boolean }) {
   const s = normalizeEventStatus(status);
-  if (s === 'Upcoming') {
+  if (s === 'Upcoming')
     return (
-      <span className="badge badge--soon">
+      <span className="inline-flex items-center gap-1.5 rounded-full border border-[#2C6A86]/40 bg-[#2C6A86]/20 px-2.5 py-0.5 text-xs font-medium text-[#2C6A86]">
         {isVie ? 'Chờ mở nộp bài' : 'Upcoming'}
       </span>
     );
-  }
-  if (s === 'Open') {
+  if (s === 'Open')
     return (
-      <span className="badge badge--live">
-        <span className="dot dot--pulse" />
+      <span className="inline-flex items-center gap-1.5 rounded-full border border-[#2F6B63]/40 bg-[#2F6B63]/20 px-2.5 py-0.5 text-xs font-medium text-[#2F6B63]">
+        <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#2F6B63]/10" />
         {isVie ? 'Đang diễn ra' : 'Submissions Open'}
       </span>
     );
-  }
-  if (s === 'Judging') {
+  if (s === 'Judging')
     return (
-      <span className="badge badge--info">
+      <span className="inline-flex items-center gap-1.5 rounded-full border border-[#8A6A1F]/40 bg-[#8A6A1F]/20 px-2.5 py-0.5 text-xs font-medium text-[#8A6A1F]">
         {isVie ? 'Chấm điểm' : 'Judging Phase'}
       </span>
     );
-  }
   return (
-    <span className="badge badge--done">
+    <span className="inline-flex items-center gap-1.5 rounded-full border border-[#221E1A]/10 bg-[#FFFCF6] px-2.5 py-0.5 text-xs font-medium text-[#746A5F]">
       {isVie ? 'Đã kết thúc' : 'Ended'}
     </span>
   );
-}
-
-function getEventEyebrow(status: string | number, isVie: boolean): string {
-  const s = normalizeEventStatus(status);
-  if (s === 'Open') return isVie ? 'Đang mở nhận bài' : 'Open call';
-  if (s === 'Upcoming') return isVie ? 'Sắp diễn ra' : 'Upcoming call';
-  if (s === 'Judging') return isVie ? 'Đang chấm điểm' : 'In judging';
-  return isVie ? 'Sự kiện đã qua' : 'Past event';
 }
 
 export function SectionEventSpotlight() {
   const { lang } = useLanguage();
   const isVie = lang === 'VIE';
   const [events, setEvents] = useState<EventListItemDto[]>([]);
+  const [artworks, setArtworks] = useState<SpotlightArtwork[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let active = true;
 
-    apiClient
-      .get<ApiResponse<{ items: EventListItemDto[]; totalCount: number }>>('/events', {
-        params: { page: 1, pageSize: 3 },
-      })
-      .then((r) => {
-        if (!active) return;
-        const list =
-          r.data.data?.items ??
-          (Array.isArray(r.data.data) ? (r.data.data as unknown as EventListItemDto[]) : []);
-        setEvents(list.slice(0, 3));
-      })
-      .catch(() => {
-        if (!active) return;
-        setEvents([]);
-      })
-      .finally(() => {
-        if (active) setLoading(false);
-      });
+    Promise.all([
+      apiClient
+        .get<ApiResponse<{ items: EventListItemDto[]; totalCount: number }>>('/events', {
+          params: { page: 1, pageSize: 4 },
+        })
+        .then((r) => {
+          const list = r.data.data?.items ?? (Array.isArray(r.data.data) ? (r.data.data as unknown as EventListItemDto[]) : []);
+          return list;
+        })
+        .catch(() => [] as EventListItemDto[]),
+
+      apiClient
+        .get<ApiResponse<MarketplaceArtwork[]>>('/artworks', { params: { page: 1, pageSize: 6 } })
+        .then((r) => r.data.data ?? [])
+        .catch(() => [] as MarketplaceArtwork[]),
+    ]).then(([evts, arts]) => {
+      if (!active) return;
+      setEvents(evts.slice(0, 3));
+      const approved = (arts as MarketplaceArtwork[]).filter((a) => a.moderationStatus === 'Approved' && a.imageUrl);
+      setArtworks(approved.slice(0, 6));
+      setLoading(false);
+    });
 
     return () => {
       active = false;
@@ -83,138 +83,121 @@ export function SectionEventSpotlight() {
   if (loading) {
     return (
       <section className="py-14">
-        <div className="mb-6 h-7 w-56 animate-pulse rounded-xl bg-[var(--ink-2)]" />
-        <div className="evt-grid">
-          <div className="h-72 animate-pulse rounded-[var(--r-lg)] border border-[var(--hair)] bg-[var(--ink-2)]" />
-          <div className="evt__side">
-            <div className="h-72 animate-pulse rounded-[var(--r-lg)] border border-[var(--hair)] bg-[var(--ink-2)]" />
-            <div className="h-72 animate-pulse rounded-[var(--r-lg)] border border-[var(--hair)] bg-[var(--ink-2)]" />
-          </div>
+        <div className="mb-6 h-7 w-56 animate-pulse rounded-xl bg-[#F0E7D8]" />
+        <div className="grid gap-4 lg:grid-cols-3">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-52 animate-pulse rounded-2xl bg-[#FFFCF6]" />
+          ))}
         </div>
       </section>
     );
   }
 
-  const primaryEvent = events[0];
-  const secondaryEvents = events.slice(1, 3);
-
   return (
     <section className="py-14" aria-labelledby="event-spotlight-title">
       {/* Header */}
-      <div className="section-head">
+      <div className="mb-8 flex items-end justify-between">
         <div>
-          <p className="eyebrow">Events &amp; Art</p>
-          <h2 id="event-spotlight-title" className="font-[family-name:var(--font-display)] font-medium text-[var(--ivory)]">
-            {isVie ? 'Sự kiện nổi bật' : 'Featured Events'}
+          <p className="text-xs uppercase tracking-[0.2em] text-[#B24A26]">Events &amp; Art</p>
+          <h2 id="event-spotlight-title" className="mt-1 font-h1 text-2xl font-bold text-[#241F1A]">
+            {isVie ? 'Sự kiện nổi bật & Tuyển chọn' : 'Featured Events & Curations'}
           </h2>
-          <p className="font-[family-name:var(--font-ui)]">
+          <p className="mt-1 text-sm text-[#6E6459]">
             {isVie
-              ? 'Các cuộc thi sáng tác và tuyển chọn cộng đồng đang diễn ra.'
-              : 'Community-spotlighted art competitions and open calls.'}
+              ? 'Những tác phẩm & cuộc thi nghệ thuật đang thu hút cộng đồng.'
+              : 'Community-spotlighted art competitions and curated illustrations.'}
           </p>
         </div>
-        <Link href="/events" className="link-more">
-          {isVie ? 'Tất cả sự kiện →' : 'All events →'}
+        <Link href="/events" className="text-sm text-[#B24A26] hover:underline">
+          {isVie ? 'Tất cả sự kiện →' : 'All Events →'}
         </Link>
       </div>
 
-      {!primaryEvent ? (
-        <p className="rounded-2xl border border-dashed border-[var(--hair)] p-8 text-center text-sm text-[var(--ash)]">
-          {isVie ? 'Chưa có sự kiện nào.' : 'No events available.'}
-        </p>
-      ) : (
-        <div className={secondaryEvents.length > 0 ? 'evt-grid' : 'grid grid-cols-1'}>
-          <article className="evt">
-            <div className="evt__art bg-[var(--ink-3)]">
-              {primaryEvent.bannerUrl ? (
-                <div className="pic">
+      <div className="grid gap-6 lg:grid-cols-5">
+        {/* Events column */}
+        <div className="space-y-4 lg:col-span-2">
+          {events.length === 0 && (
+            <p className="rounded-2xl border border-dashed border-[#221E1A]/10 p-8 text-center text-sm text-[#746A5F]">
+              {isVie ? 'Chưa có sự kiện nào.' : 'No events available.'}
+            </p>
+          )}
+          {events.map((evt) => (
+            <Link
+              key={evt.id}
+              href={`/events/${evt.id}`}
+              className="group relative flex overflow-hidden rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] transition hover:border-[#B24A26]/50"
+            >
+              {evt.bannerUrl && (
+                <div className="relative h-28 w-28 shrink-0 bg-[#FFFCF6]">
                   <Image
-                    src={primaryEvent.bannerUrl}
-                    alt={primaryEvent.title}
+                    src={evt.bannerUrl}
+                    alt={evt.title}
                     fill
                     unoptimized
-                    className="object-cover"
+                    className="object-cover transition-transform group-hover:scale-105"
                   />
                 </div>
-              ) : null}
-              <EventStatusBadge status={primaryEvent.status} isVie={isVie} />
-            </div>
-            <div className="evt__body">
-              <p className="eyebrow">{getEventEyebrow(primaryEvent.status, isVie)}</p>
-              <h3 className="font-[family-name:var(--font-display)] font-medium text-[var(--ivory)]">
-                {primaryEvent.title}
-              </h3>
-              {primaryEvent.description && (
-                <p className="line-clamp-3">{primaryEvent.description}</p>
               )}
-              <div className="evt__facts">
-                <span className="tag">
-                  {isVie ? `${primaryEvent.submissionCount} bài dự thi` : `${primaryEvent.submissionCount} entries`}
-                </span>
-                <span className="tag">
-                  {new Date(primaryEvent.submissionEndAt) > new Date()
-                    ? `${isVie ? 'Hết hạn' : 'Closes'} ${new Date(primaryEvent.submissionEndAt).toLocaleDateString(isVie ? 'vi-VN' : 'en-US')}`
-                    : isVie
-                      ? 'Đã đóng nhận bài'
-                      : 'Submissions closed'}
-                </span>
-                {primaryEvent.prize && (
-                  <span className="tag truncate max-w-[14rem]">{primaryEvent.prize}</span>
-                )}
+              <div className="flex flex-col justify-between gap-2 p-4">
+                <div>
+                  <EventStatusPill status={evt.status} isVie={isVie} />
+                  <h3 className="mt-2 line-clamp-2 text-sm font-semibold text-[#241F1A]">{evt.title}</h3>
+                </div>
+                <p className="text-xs text-[#746A5F]">
+                  {isVie ? `${evt.submissionCount} bài dự thi` : `${evt.submissionCount} submissions`} ·{' '}
+                  {new Date(evt.submissionEndAt) > new Date()
+                    ? `${isVie ? 'Hết hạn' : 'Closes'} ${new Date(evt.submissionEndAt).toLocaleDateString(isVie ? 'vi-VN' : 'en-US')}`
+                    : isVie ? 'Đã kết thúc nhận bài' : 'Submissions closed'}
+                </p>
               </div>
-              <Link className="btn btn--outline btn--sm" href={`/events/${primaryEvent.id}`}>
-                {isVie ? 'Xem thể lệ →' : 'Read the brief →'}
-              </Link>
-            </div>
-          </article>
+            </Link>
+          ))}
 
-          {secondaryEvents.length > 0 && (
-            <div className="evt__side">
-              {secondaryEvents.map((evt) => (
+          <Link
+            href="/events"
+            className="flex items-center justify-center gap-2 rounded-2xl border border-dashed border-[#221E1A]/10 py-4 text-sm text-[#B24A26] hover:border-[#B24A26]/40 hover:bg-[#FFFCF6]"
+          >
+            {isVie ? 'Xem tất cả sự kiện →' : 'Explore all events →'}
+          </Link>
+        </div>
+
+        {/* Featured artworks grid */}
+        <div className="lg:col-span-3">
+          <p className="mb-3 text-xs font-medium uppercase tracking-widest text-[#746A5F]">
+            {isVie ? 'Tác phẩm tuyển chọn' : 'Featured Artworks'}
+          </p>
+          {artworks.length === 0 ? (
+            <p className="rounded-2xl border border-dashed border-[#221E1A]/10 p-8 text-center text-sm text-[#746A5F]">
+              {isVie ? 'Chưa có tác phẩm.' : 'No artworks available.'}
+            </p>
+          ) : (
+            <div className="grid grid-cols-3 gap-3">
+              {artworks.map((art, i) => (
                 <Link
-                  key={evt.id}
-                  href={`/events/${evt.id}`}
-                  className="group flex flex-col overflow-hidden rounded-[var(--r-lg)] border border-[var(--hair)] bg-[var(--ink-2)] transition hover:border-[var(--hair-2)] hover:shadow-lg"
+                  key={art.id}
+                  href={`/artworks/${art.id}`}
+                  scroll={false}
+                  className={`group relative overflow-hidden rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] transition hover:border-[#B24A26]/50 ${
+                    i === 0 ? 'col-span-2 row-span-2 aspect-square' : 'aspect-square'
+                  }`}
                 >
-                  <div className="relative aspect-[4/3] w-full overflow-hidden bg-[var(--ink-3)]">
-                    {evt.bannerUrl && (
-                      <Image
-                        src={evt.bannerUrl}
-                        alt={evt.title}
-                        fill
-                        unoptimized
-                        className="object-cover transition-transform duration-300 group-hover:scale-105"
-                      />
-                    )}
-                    <div className="absolute left-3 top-3 z-[2]">
-                      <EventStatusBadge status={evt.status} isVie={isVie} />
-                    </div>
-                  </div>
-                  <div className="flex flex-1 flex-col justify-between gap-3 p-4">
-                    <div>
-                      <h3 className="line-clamp-2 font-[family-name:var(--font-display)] text-base font-medium leading-snug text-[var(--ivory)] transition-colors group-hover:text-[var(--lumen)]">
-                        {evt.title}
-                      </h3>
-                    </div>
-                    <div className="evt__facts">
-                      <span className="tag">
-                        {isVie ? `${evt.submissionCount} bài dự thi` : `${evt.submissionCount} entries`}
-                      </span>
-                      <span className="tag">
-                        {new Date(evt.submissionEndAt) > new Date()
-                          ? `${isVie ? 'Hết hạn' : 'Closes'} ${new Date(evt.submissionEndAt).toLocaleDateString(isVie ? 'vi-VN' : 'en-US')}`
-                          : isVie
-                            ? 'Đã đóng'
-                            : 'Closed'}
-                      </span>
-                    </div>
+                  <Image
+                    src={art.thumbnailUrl || art.imageUrl}
+                    alt={art.title}
+                    fill
+                    unoptimized
+                    className="object-cover transition-transform group-hover:scale-105"
+                  />
+                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#F7F2E9]/80 to-transparent p-3 opacity-0 transition-opacity group-hover:opacity-100">
+                    <p className="line-clamp-1 text-xs font-semibold text-[#241F1A]">{art.title}</p>
+                    <p className="text-[10px] text-[#241F1A]/70">{art.creatorName || 'Dillustration Creator'}</p>
                   </div>
                 </Link>
               ))}
             </div>
           )}
         </div>
-      )}
+      </div>
     </section>
   );
 }

@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Award, CheckCircle, ChevronDown, ChevronUp, Star, User } from 'lucide-react';
-import { useLanguage } from '@/context/language-context';
 import { auctionService } from '../services/auction.service';
 import type { SellerStatisticsDto } from '../types/auction.types';
 
@@ -20,8 +19,6 @@ function formatPercent(value: number): string {
 }
 
 export function SellerTransparencyCard({ seller }: SellerTransparencyProps) {
-  const { lang, t } = useLanguage();
-  const isVie = lang === 'VIE';
   const [stats, setStats] = useState<SellerStatisticsDto | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -49,7 +46,7 @@ export function SellerTransparencyCard({ seller }: SellerTransparencyProps) {
       } catch (err: unknown) {
         if (isMounted) {
           console.warn('[FE-05] Seller statistics fetch warning:', err);
-          setError(isVie ? 'Không tải được thống kê người bán' : 'Could not load seller statistics');
+          setError('Không tải được thống kê người bán (Thiếu ID hoặc API chưa sẵn sàng)');
         }
       } finally {
         if (isMounted) setLoading(false);
@@ -60,13 +57,11 @@ export function SellerTransparencyCard({ seller }: SellerTransparencyProps) {
       isMounted = false;
       controller.abort();
     };
-  }, [seller?.userId, seller?.creatorProfileId, isVie]);
+  }, [seller?.userId, seller?.creatorProfileId]);
 
   if (!seller) {
     return (
-      <div className="rounded-2xl border border-[var(--hair)] bg-[var(--ink-2)] p-4 text-xs text-[var(--ash)]">
-        {isVie ? 'Thông tin người bán không khả dụng.' : 'Seller information not available.'}
-      </div>
+      <div className="rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] p-4 text-xs text-outline"> Thông tin người bán không khả dụng. </div>
     );
   }
 
@@ -75,89 +70,82 @@ export function SellerTransparencyCard({ seller }: SellerTransparencyProps) {
   const profileHref = seller.creatorProfileId ? `/creators/${seller.creatorProfileId}` : null;
 
   return (
-    <div className="rounded-3xl border border-[var(--hair)] bg-[var(--ink-2)] p-5 text-[var(--ivory)] transition-all">
-      <div className={`flex items-center justify-between gap-3 ${expanded ? 'border-b border-[var(--hair)] pb-3' : ''}`}>
+    <div className="glass-container rounded-3xl border border-[#221E1A]/10 p-5 text-on-surface">
+      <div className={`flex items-center justify-between gap-3 ${expanded ? 'border-b border-[#221E1A]/10 pb-3' : ''}`}>
         <div className="flex items-center gap-3">
-          <div className="flex size-10 items-center justify-center rounded-full bg-[var(--ink-3)] text-[var(--lumen)] font-bold">
+          <div className="flex size-10 items-center justify-center rounded-full bg-brand-periwinkle/20 text-brand-periwinkle font-bold">
             <User size={20} />
           </div>
           <div>
-            <h3 className="font-[family-name:var(--font-display)] text-base font-medium text-[var(--ivory)]">
-              {seller.fullName || (isVie ? 'Nghệ sĩ ẩn danh' : 'Anonymous Artist')}
+            <h3 className="font-h1 text-sm font-bold text-on-surface">
+              {seller.fullName || 'Nghệ sĩ ẩn danh'}
             </h3>
-            <span className="text-[11px] text-[var(--ash)]">{isVie ? 'Người tạo phiên đấu giá' : 'Auction Creator'}</span>
+            <span className="text-[11px] text-outline">Người tạo phiên đấu giá</span>
           </div>
         </div>
         <div className="flex items-center gap-2">
           {profileHref ? (
             <Link
               href={profileHref}
-              className="rounded-full border border-[var(--hair-2)] bg-[var(--ink-3)] px-3.5 py-1.5 text-xs font-semibold text-[var(--ivory)] transition hover:border-[var(--lumen)] hover:text-[var(--lumen)]"
+              className="rounded-full border border-brand-periwinkle/30 bg-brand-periwinkle/10 px-3 py-2 text-xs font-semibold text-brand-periwinkle transition hover:bg-brand-periwinkle hover:text-[#FFFCF6]"
             >
-              {isVie ? 'Xem profile' : 'View profile'}
+              Xem profile
             </Link>
           ) : (
             <span
-              title={isVie ? 'Người bán chưa tạo hồ sơ Creator nên chưa có trang profile.' : 'Seller has not created a Creator profile yet.'}
-              className="cursor-not-allowed rounded-full border border-[var(--hair)] bg-[var(--ink-3)]/50 px-3.5 py-1.5 text-xs font-semibold text-[var(--ash)]"
-            >
-              {isVie ? 'Chưa có hồ sơ' : 'No profile'}
-            </span>
+              title="Người bán chưa tạo hồ sơ họa sĩ nên chưa có trang profile."
+              className="cursor-not-allowed rounded-full border border-[#221E1A]/10 bg-[#FFFCF6] px-3 py-2 text-xs font-semibold text-outline"
+            > Chưa có hồ sơ </span>
           )}
           <button
             type="button"
             onClick={() => setExpanded((value) => !value)}
             aria-expanded={expanded}
-            className="inline-flex min-h-8 items-center gap-1 rounded-full border border-[var(--hair-2)] bg-[var(--ink-3)] px-3 text-xs font-semibold text-[var(--ivory)] hover:border-[var(--lumen)] hover:text-[var(--lumen)] transition cursor-pointer"
+            className="inline-flex min-h-9 items-center gap-1 rounded-full border border-[#221E1A]/10 bg-[#FFFCF6] px-3 text-xs font-semibold text-on-surface-variant hover:bg-[#F0E7D8]"
           >
-            {expanded ? (isVie ? 'Thu gọn' : 'Collapse') : (isVie ? 'Chi tiết' : 'Details')}
+            {expanded ? 'Thu gọn' : 'Chi tiết'}
             {expanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
           </button>
         </div>
       </div>
 
-      {expanded && (
-        <div className="mt-4 grid grid-cols-2 gap-3 text-xs">
-          <div className="rounded-xl border border-[var(--hair)] bg-[var(--ink-3)] p-3">
-            <span className="flex items-center gap-1 text-[11px] text-[var(--ash)]">
-              <CheckCircle size={12} className="text-emerald-500" /> {isVie ? 'Tỷ lệ hoàn thành' : 'Completion Rate'}
-            </span>
-            <p className="mt-1 font-[family-name:var(--font-ui)] text-sm font-bold tabular-nums text-[var(--ivory)]">
-              {loading ? '...' : stats ? formatPercent(stats.commissionCompletionRate) : '—'}
-            </p>
-          </div>
-
-          <div className="rounded-xl border border-[var(--hair)] bg-[var(--ink-3)] p-3">
-            <span className="flex items-center gap-1 text-[11px] text-[var(--ash)]">
-              <Award size={12} className="text-[var(--lumen)]" /> {isVie ? 'Đấu giá thành công' : 'Successful Auctions'}
-            </span>
-            <p className="mt-1 font-[family-name:var(--font-ui)] text-sm font-bold tabular-nums text-[var(--ivory)]">
-              {loading ? '...' : stats ? `${stats.successfulAuctionCount} ${isVie ? 'phiên' : 'sessions'}` : '—'}
-            </p>
-          </div>
-
-          <div className="rounded-xl border border-[var(--hair)] bg-[var(--ink-3)] p-3">
-            <span className="flex items-center gap-1 text-[11px] text-[var(--ash)]">
-              <Star size={12} className="text-[var(--gold)] fill-[var(--gold)]" /> {isVie ? 'Đánh giá trung bình' : 'Average Rating'}
-            </span>
-            <p className="mt-1 font-[family-name:var(--font-ui)] text-sm font-bold tabular-nums text-[var(--ivory)]">
-              {loading ? '...' : stats ? `${stats.averageRating.toFixed(1)} / 5.0` : '—'}
-            </p>
-          </div>
-
-          <div className="rounded-xl border border-[var(--hair)] bg-[var(--ink-3)] p-3">
-            <span className="flex items-center gap-1 text-[11px] text-[var(--ash)]">
-              {isVie ? 'Tổng số đánh giá' : 'Total Reviews'}
-            </span>
-            <p className="mt-1 font-[family-name:var(--font-ui)] text-sm font-bold tabular-nums text-[var(--ivory)]">
-              {loading ? '...' : stats ? `${stats.reviewCount} ${isVie ? 'đánh giá' : 'reviews'}` : '—'}
-            </p>
-          </div>
+      {expanded && <div className="mt-4 grid grid-cols-2 gap-3 text-xs">
+        <div className="rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] p-2.5">
+          <span className="flex items-center gap-1 text-[11px] text-outline">
+            <CheckCircle size={12} className="text-[#2F6B63]" /> Tỷ lệ hoàn thành </span>
+          <p className="mt-1 font-mono text-sm font-bold text-on-surface">
+            {loading ? '...' : stats ? formatPercent(stats.commissionCompletionRate) : '—'}
+          </p>
         </div>
-      )}
+
+        <div className="rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] p-2.5">
+          <span className="flex items-center gap-1 text-[11px] text-outline">
+            <Award size={12} className="text-brand-periwinkle" /> Đấu giá thành công </span>
+          <p className="mt-1 font-mono text-sm font-bold text-on-surface">
+            {loading ? '...' : stats ? `${stats.successfulAuctionCount} phiên` : '—'}
+          </p>
+        </div>
+
+        <div className="rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] p-2.5">
+          <span className="flex items-center gap-1 text-[11px] text-outline">
+            <Star size={12} className="text-[#8A6A1F] fill-[#8A6A1F]" /> Đánh giá trung bình </span>
+          <p className="mt-1 font-mono text-sm font-bold text-on-surface">
+            {loading ? '...' : stats ? `${stats.averageRating.toFixed(1)} / 5.0` : '—'}
+          </p>
+        </div>
+
+        <div className="rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] p-2.5">
+          <span className="flex items-center gap-1 text-[11px] text-outline">
+            Total Reviews
+          </span>
+          <p className="mt-1 font-mono text-sm font-bold text-on-surface">
+            {loading ? '...' : stats ? `${stats.reviewCount} đánh giá` : '—'}
+          </p>
+        </div>
+      </div>}
 
       {expanded && error && (
-        <p className="mt-2 text-[10px] text-amber-500/90 italic">
+        <p className="mt-2 text-[10px] text-[#8A6A1F] italic">
           * {error}
         </p>
       )}

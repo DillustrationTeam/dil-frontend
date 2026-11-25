@@ -1,20 +1,28 @@
-/* Font được self-host qua `next/font/google` trong layout.tsx (biến --font-heading /
-   --font-body-grotesk). KHÔNG dùng @import Google Fonts ở đây nữa:
-   - Import qua CSS không kèm subset `vietnamese` nên chữ có dấu rơi về font hệ thống,
-     ra đúng lỗi "字体" lệch nét (Sora không có subset tiếng Việt).
-   - Self-host cắt được request bên thứ ba, không FOUT, không phụ thuộc mạng. */
+/* ============================================================
+   dilillustration — global stylesheet (INK & VERMILION)
+   Font self-host qua `next/font/google` trong layout.tsx:
+   - Fraunces  → --font-heading      (display, subset vietnamese)
+   - Inter     → --font-body-grotesk (UI,      subset vietnamese)
+   Không @import Google Fonts ở đây: import qua CSS không kèm subset
+   `vietnamese` nên chữ có dấu rơi về font hệ thống và bị lệch nét.
+   ============================================================ */
 @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
 @import "tailwindcss";
+@import "../styles/gallery.css";
 
 :root {
-  --brand-navy: #1F2335;
-  --brand-periwinkle: #A7ACD9;
-  --background: #131316;
-  --surface: #1F2335;
-  --surface-container: #1F1F22;
-  --on-surface: #E4E1E5;
-  --on-surface-variant: #C7C5CF;
-  --outline: #919099;
+  /* ---- legacy token names, remapped onto the paper palette ----
+     Giữ nguyên tên cũ để hàng trăm component Tailwind đang dùng
+     (`bg-brand-navy`, `text-on-surface`, `text-brand-periwinkle`…)
+     tự đổi màu mà không phải sửa từng file. */
+  --brand-navy: #F7F2E9;
+  --brand-periwinkle: #b24a26;
+  --background: #F7F2E9;
+  --surface: #fffcf6;
+  --surface-container: #f0e7d8;
+  --on-surface: #241f1a;
+  --on-surface-variant: #5a5147;
+  --outline: #655c52;
 
   /* Fallback tiếng Việt đầy đủ: nếu font web chưa tải xong, hệ điều hành vẫn có đủ glyph
      có dấu nên không bị lệch nét giữa chữ thường và chữ có dấu. */
@@ -22,35 +30,37 @@
 }
 
 @theme {
-  --color-brand-navy: #1F2335;
-  --color-brand-periwinkle: #A7ACD9;
-  --color-surface-container: #1F1F22;
-  --color-on-surface: #E4E1E5;
-  --color-on-surface-variant: #C7C5CF;
-  --color-outline: #919099;
-  --font-h1: var(--font-heading), var(--font-stack-fallback);
-  --font-body: var(--font-body-grotesk), var(--font-stack-fallback);
-}
+  /* legacy names */
+  --color-brand-navy: #F7F2E9;
+  --color-brand-periwinkle: #b24a26;
+  --color-surface-container: #f0e7d8;
+  --color-on-surface: #241f1a;
+  --color-on-surface-variant: #5d554b;
+  --color-outline: #5d554b;
 
-/* Gi? n?n t?i v? ch? s?ng khi tr?nh duy?t autofill tr?n dark theme */
-html.dark input:-webkit-autofill,
-html.dark input:-webkit-autofill:hover,
-html.dark input:-webkit-autofill:focus,
-html.dark textarea:-webkit-autofill {
-  -webkit-text-fill-color: #e4e1e5 !important;
-  -webkit-box-shadow: 0 0 0 1000px #141724 inset !important;
-  box-shadow: 0 0 0 1000px #141724 inset !important;
-  caret-color: #e4e1e5;
-  color-scheme: dark;
-  transition: background-color 9999s ease-out 0s;
+  /* ink & vermilion names for new markup */
+  --color-paper: #F7F2E9;
+  --color-paper-2: #fffcf6;
+  --color-paper-3: #f0e7d8;
+  --color-ivory: #241f1a;
+  --color-ash: #5d554b;
+  --color-ash-dim: #635b51;
+  --color-lumen: #b24a26;
+  --color-lumen-hi: #8c3718;
+  --color-cinnabar: #a8321c;
+  --color-gold: #E5D8C2;
+  --color-petrol: #2f6b63;
+  --color-hair: rgba(34, 30, 26, 0.11);
+  --color-hair-2: rgba(34, 30, 26, 0.22);
+
+  --font-h1: var(--font-heading), Fraunces, Georgia, serif;
+  --font-body: var(--font-body-grotesk), Inter, var(--font-stack-fallback);
+  --font-display: var(--font-heading), Fraunces, Georgia, serif;
+  --font-ui: var(--font-body-grotesk), Inter, var(--font-stack-fallback);
 }
 
 body {
-  background: radial-gradient(circle at 50% 15%, #181b29 0%, #0d0e15 100%);
-  color: #E4E1E5;
   font-family: var(--font-body-grotesk), var(--font-stack-fallback);
-  overflow-x: hidden;
-  min-height: 100vh;
 }
 
 h1,
@@ -71,227 +81,6 @@ h6,
   font-family: var(--font-body-grotesk), var(--font-stack-fallback) !important;
 }
 
-.glass-container {
-  position: relative;
-  background: transparent; /* Để nền trong suốt, nhường chỗ cho lớp ::before */
-  
-  /* Viền và bóng đổ nằm ở đây để transition mượt mà không làm lỗi blur */
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-top: 1px solid rgba(255, 255, 255, 0.18);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25), 
-              0 0 20px rgba(167, 172, 217, 0.04);
-  
-  overflow: hidden; /* Tránh tràn viền */
-  transition: border-color 0.25s ease, box-shadow 0.25s ease;
-}
-
-/* Đưa backdrop-filter và background vào lớp giả định dạng "cố định" */
-.glass-container::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: rgba(255, 255, 255, 0.025);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  z-index: -1;
-  pointer-events: none;
-  
-  /* Ép GPU render ổn định cho lớp kính */
-  transform: translateZ(0);
-}
-
-/* Hiệu ứng khi di chuột vào khối kính */
-.glass-container:hover {
-  border-color: rgba(167, 172, 217, 0.2);
-  border-top-color: rgba(167, 172, 217, 0.35);
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.35), 
-              0 0 25px rgba(167, 172, 217, 0.12);
-}
-
-.periwinkle-glow:focus-within {
-  box-shadow: 0 0 15px rgba(167, 172, 217, 0.3);
-  border-color: #A7ACD9;
-}
-
-.primary-glow:hover {
-  box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
-}
-
-.commission-primary {
-  background: #A7ACD9;
-  color: #1F2335;
-  font-weight: 700;
-  transition: background-color 150ms ease, box-shadow 150ms ease;
-}
-
-.commission-primary:hover:not(:disabled) {
-  background: #c2c7f6;
-  box-shadow: 0 0 18px rgba(167, 172, 217, 0.25);
-}
-
-.commission-primary:focus-visible {
-  outline: 2px solid #fff;
-  outline-offset: 2px;
-}
-
-.floating-bg {
-  filter: blur(80px);
-  z-index: -1;
-  opacity: 0.15;
-}
-
-.watermark {
-  opacity: 0.03;
-  pointer-events: none;
-  user-select: none;
-  font-family: var(--font-heading), var(--font-stack-fallback);
-  font-weight: 800;
-}
-
-.material-symbols-outlined {
-  font-family: 'Material Symbols Outlined', sans-serif;
-  font-weight: normal;
-  font-style: normal;
-  line-height: 1;
-  letter-spacing: normal;
-  text-transform: none;
-  display: inline-block;
-  white-space: nowrap;
-  word-wrap: normal;
-  direction: ltr;
-  -webkit-font-smoothing: antialiased;
-  font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
-}
-
-/* Custom Scrollbar Styling - Đồng bộ màu nền dự án */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: #131316;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #32364f;
-  border-radius: 9999px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #484d6e;
-}
-
-::-webkit-scrollbar-corner {
-  background: #131316;
-}
-
-* {
-  scrollbar-width: thin;
-  scrollbar-color: #32364f #131316;
-}
-
-/* Light Theme Mode Overrides */
-html.light,
-html.light body {
-  background-color: #f1f5f9 !important;
-  background-image: none !important;
-  color: #0f172a !important;
-}
-
-html.light div,
-html.light main,
-html.light aside,
-html.light header,
-html.light nav,
-html.light footer {
-  color: #0f172a;
-}
-
-/* Hard override for dark background utilities in light mode */
-html.light [class*="bg-[#1F2335]"],
-html.light [class*="bg-[#161926]"],
-html.light [class*="bg-[#131316]"],
-html.light [class*="bg-[#181b29]"],
-html.light [class*="bg-[#1b1b1e]"],
-html.light .bg-brand-navy {
-  background-color: #f8fafc !important;
-  color: #0f172a !important;
-}
-
-html.light header[class*="bg-[#1F2335]"],
-html.light aside[class*="bg-[#1F2335]"] {
-  background-color: #ffffff !important;
-  border-color: #e2e8f0 !important;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05) !important;
-}
-
-/* Glass containers & card backgrounds in light mode */
-html.light .glass-container,
-html.light [class*="bg-white/5"],
-html.light [class*="bg-white/10"],
-html.light [class*="bg-white/[0.02]"],
-html.light [class*="bg-white/[0.03]"],
-html.light [class*="bg-white/[0.05]"] {
-  background-color: #ffffff !important;
-  border-color: #e2e8f0 !important;
-  color: #0f172a !important;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04) !important;
-}
-
-/* Text colors in light mode */
-html.light [class*="text-white"],
-html.light [class*="text-[#e4e1e5]"],
-html.light [class*="text-[#E4E1E5]"],
-html.light .text-on-surface {
-  color: #0f172a !important;
-}
-
-html.light [class*="text-[#919099]"],
-html.light [class*="text-[#c7c5cf]"],
-html.light [class*="text-[#C7C5CF]"],
-html.light .text-on-surface-variant,
-html.light .text-outline,
-html.light .text-slate-300,
-html.light .text-slate-400 {
-  color: #475569 !important;
-}
-
-/* Borders in light mode */
-html.light [class*="border-white/"] {
-  border-color: #e2e8f0 !important;
-}
-
-/* Input fields & Textareas in light mode */
-html.light input,
-html.light textarea,
-html.light select {
-  background-color: #ffffff !important;
-  color: #0f172a !important;
-  border-color: #cbd5e1 !important;
-}
-
-html.light input::placeholder,
-html.light textarea::placeholder {
-  color: #94a3b8 !important;
-}
-
-/* Dropdown menus & Floating modals in light mode */
-html.light .shadow-2xl,
-html.light [role="dialog"] {
-  background-color: #ffffff !important;
-  border-color: #cbd5e1 !important;
-  color: #0f172a !important;
-}
-
-html.light ::-webkit-scrollbar-track {
-  background: #f1f5f9;
-}
-
-html.light ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-}
-
 /* react-hot-toast tự đặt pointer-events: auto cứng trên div nội dung của nó, nên chỉ set
    pointer-events: none trên div bọc ngoài (hover-fade-toast.tsx) là không đủ — ép xuống
    toàn bộ phần tử con bằng !important để click thật sự xuyên qua được nút phía sau. */
@@ -310,20 +99,6 @@ html.light ::-webkit-scrollbar-thumb {
   }
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
 .animate-fadeIn {
   animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
-
-
-

@@ -18,10 +18,10 @@ export function ModerationQuickNav() {
   return (
     <nav
       aria-label="Screen Navigator"
-      className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 bg-[#0f1017]/95 backdrop-blur-xl border border-white/20 p-2.5 sm:p-3 rounded-full shadow-[0_10px_30px_rgba(0,0,0,0.8)] flex items-center gap-3 text-xs max-w-5xl w-[92%] mx-auto justify-between px-4 sm:px-6"
+      className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 bg-[#FFFCF6]/95 backdrop-blur-xl border border-[#221E1A]/20 p-2.5 sm:p-3 rounded-full shadow-[0_10px_30px_rgba(0,0,0,0.8)] flex items-center gap-3 text-xs max-w-5xl w-[92%] mx-auto justify-between px-4 sm:px-6"
     >
-      <div className="flex items-center gap-2 font-bold font-h1 text-[#C5C9F8] shrink-0">
-        <Compass className="w-4 h-4 text-[#C5C9F8]" />
+      <div className="flex items-center gap-2 font-bold font-h1 text-[#8C3718] shrink-0">
+        <Compass className="w-4 h-4 text-[#8C3718]" />
         <span className="hidden sm:inline">Screen Navigator</span>
       </div>
 
@@ -32,8 +32,8 @@ export function ModerationQuickNav() {
             href={s.href}
             className={`px-3 py-1 rounded-full font-bold whitespace-nowrap transition-all ${
               s.active
-                ? 'bg-red-500 text-black shadow-[0_0_12px_rgba(239,68,68,0.5)]'
-                : 'bg-white/10 hover:bg-white/20 text-white'
+                ? 'bg-[#A8321C]/12 text-[#F7F2E9] shadow-[0_0_12px_rgba(239,68,68,0.5)]'
+                : 'bg-[#F0E7D8] hover:bg-[#F0E7D8] text-[#241F1A]'
             }`}
           >
             {s.label}

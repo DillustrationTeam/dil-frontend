@@ -7,137 +7,102 @@ import { useLanguage } from '@/context/language-context';
 import { auctionService, auctionError } from '../services/auction.service';
 import { useAuctionClock } from '../hooks/use-auction-clock';
 import { auctionStatusLabels, type AuctionFilters, type AuctionListItemDto } from '../types/auction.types';
+import { Magnetic, Reveal, Words } from '@/components/motion';
 
 function formatVnd(value: number) {
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 }).format(value);
 }
 
-const statusLabelsByLang: Record<string, { VIE: string; ENG: string }> = {
-  Active: { VIE: 'Đang diễn ra', ENG: 'Live' },
-  Scheduled: { VIE: 'Sắp diễn ra', ENG: 'Upcoming' },
-  Ended: { VIE: 'Đã kết thúc', ENG: 'Ended' },
-  Settled: { VIE: 'Đã chốt (File số)', ENG: 'Settled (Digital file)' },
-  Cancelled: { VIE: 'Đã hủy', ENG: 'Cancelled' },
-  Expired: { VIE: 'Hết hạn thanh toán', ENG: 'Payment expired' },
-  AwaitingPhysical: { VIE: 'Chờ xác nhận tranh vật lý', ENG: 'Awaiting physical copy' },
-  InTransit: { VIE: 'Đang giao tranh vật lý', ENG: 'Shipping physical copy' },
-  Completed: { VIE: 'Hoàn tất giao dịch', ENG: 'Completed' },
-  Disputed: { VIE: 'Đang khiếu nại', ENG: 'Disputed' },
-};
+/** Ba trạng thái thị giác của một phiên: đang chạy, sắp mở, đã khép. */
+function statusTone(status: string): string {
+  if (status === 'Active') return 'acard__status--live';
+  if (status === 'Scheduled') return 'acard__status--soon';
+  return 'acard__status--ended';
+}
 
-function AuctionCard({ item }: { item: AuctionListItemDto }) {
+function AuctionCard({ item, index }: { item: AuctionListItemDto; index: number }) {
   const { lang, t } = useLanguage();
-  const isVie = lang === 'VIE';
   const isScheduled = item.auctionStatus === 'Scheduled';
   const isFinished = ['Settled', 'Ended', 'Cancelled', 'Expired', 'AwaitingPhysical', 'InTransit', 'Completed', 'Disputed'].includes(item.auctionStatus);
   const targetTime = isScheduled ? item.startAt : item.endAt;
   const clock = useAuctionClock({ endAt: targetTime });
   const hasEnded = isFinished || (!isScheduled && clock.isEnded);
   const displayStatus = (!isFinished && hasEnded && item.auctionStatus === 'Active') ? 'Ended' : item.auctionStatus;
-  
-  const statusConfig = statusLabelsByLang[displayStatus];
-  const statusText = hasEnded && item.auctionStatus === 'Active'
-    ? (isVie ? 'Chờ chốt kết quả' : 'Awaiting results')
-    : statusConfig
-      ? (isVie ? statusConfig.VIE : statusConfig.ENG)
-      : (auctionStatusLabels[displayStatus] || displayStatus);
-
-  const actionText = hasEnded || item.auctionStatus === 'Settled'
-    ? (isVie ? 'Xem kết quả' : 'View result')
-    : (isVie ? 'Xem phiên đấu giá' : 'View auction');
+  const statusText = t(hasEnded && item.auctionStatus === 'Active'
+    ? 'Chờ chốt kết quả'
+    : auctionStatusLabels[displayStatus] || displayStatus);
+  const actionText = t(hasEnded || item.auctionStatus === 'Settled' ? 'Xem kết quả' : 'Xem phiên đấu giá');
+  const isLive = displayStatus === 'Active' && !hasEnded;
 
   return (
-    <article className="group flex min-h-full flex-col justify-between overflow-hidden rounded-3xl border border-[var(--hair)] bg-[var(--ink-2)] transition-all duration-300 hover:-translate-y-1 hover:border-[var(--hair-2)] hover:shadow-xl">
-      <div>
-        {/* Khung ảnh tác phẩm */}
-        <div className="relative aspect-[5/4] w-full overflow-hidden bg-[var(--ink-3)]">
-          {item.artwork?.thumbnailUrl || item.artwork?.imageUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={item.artwork.thumbnailUrl || item.artwork.imageUrl || '/weblogo.png'}
-              alt={item.artwork.artworkTitle || t('Tranh đấu giá')}
-              className="size-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.035]"
-            />
-          ) : (
-            <div className="flex size-full items-center justify-center text-xs text-[var(--ash)]">
-              {t('Chưa có ảnh xem trước')}
-            </div>
-          )}
-          <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[var(--ink-2)]/90 to-transparent" aria-hidden="true" />
-
-          {/* Tags in top-right corner: status tag on top, physical copy tag underneath */}
-          <div className="absolute right-2.5 top-2.5 z-10 flex flex-col items-end gap-1.5 pointer-events-none">
-            <span className="rounded-full border border-[var(--hair)] bg-[var(--ink-2)]/90 px-3 py-1 font-[family-name:var(--font-ui)] text-[11px] font-semibold text-[var(--lumen)] shadow-sm backdrop-blur-md">
-              {statusText}
-            </span>
+    <Reveal delay={Math.min(index, 8) * 45}>
+      <article className={`acard h-full ${isLive ? 'beam' : ''}`}>
+        <div>
+          {/* Khung ảnh tác phẩm */}
+          <div className="acard__media">
+            {item.artwork?.thumbnailUrl || item.artwork?.imageUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={item.artwork.thumbnailUrl || item.artwork.imageUrl || '/weblogo.png'}
+                alt={item.artwork.artworkTitle || t('Tranh đấu giá')}
+              />
+            ) : (
+              <div className="grid size-full place-items-center text-xs text-[#746A5F]">
+                {t('Chưa có ảnh xem trước')}
+              </div>
+            )}
+            <span className={`acard__status ${statusTone(displayStatus)}`}>{statusText}</span>
             {item.hasPhysicalCopy && (
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--gold)]/30 bg-[var(--ink-2)]/90 px-2.5 py-1 font-[family-name:var(--font-ui)] text-[11px] font-bold text-[var(--gold)] shadow-md backdrop-blur-md">
-                <Frame size={13} className="shrink-0 text-[var(--gold)]" aria-hidden />
-                <span>{isVie ? 'Bản vật lý' : 'Physical copy'}</span>
+              <span className="acard__physical">
+                <Frame aria-hidden /> {t('Có bản vật lý')}
               </span>
             )}
-          </div>
-
-          {/* Clock pill matching dillustration-redesign.html .bid-card__clock / .acard__clock using Karla font */}
-          <span className="absolute bottom-3 left-3 z-10 inline-flex items-center gap-1.5 rounded-full border border-[var(--hair-2)] bg-[var(--ink-2)]/95 px-2.5 py-1 font-[family-name:var(--font-ui)] text-[11px] font-medium tabular-nums text-[var(--ivory)] backdrop-blur-md shadow-md">
-            <Clock size={12} className="text-[var(--ash)]" />
-            <span>
+            <span className="acard__clock">
+              <Clock aria-hidden />
               {isFinished
-                ? (item.auctionStatus === 'Settled'
-                    ? (isVie ? 'Đã chốt' : 'Settled')
-                    : item.auctionStatus === 'Cancelled'
-                      ? (isVie ? 'Đã hủy' : 'Cancelled')
-                      : (isVie ? 'Đã kết thúc' : 'Ended'))
-                : isScheduled 
-                  ? (clock.isEnded ? (isVie ? 'Đang mở...' : 'Opening...') : clock.formatted)
-                  : (clock.isEnded ? (isVie ? 'Đã kết thúc' : 'Ended') : clock.formatted)}
+                ? (item.auctionStatus === 'Settled' ? t('Đã chốt') : item.auctionStatus === 'Cancelled' ? t('Đã hủy') : t('Đã kết thúc'))
+                : isScheduled
+                  ? (clock.isEnded ? t('Đang mở...') : clock.formatted)
+                  : (clock.isEnded ? t('Đã kết thúc') : clock.formatted)}
             </span>
-          </span>
-        </div>
+          </div>
 
-        {/* Thông tin chi tiết */}
-        <div className="p-6 pb-5">
-          <h3 className="line-clamp-1 font-[family-name:var(--font-display)] text-lg font-medium text-[var(--ivory)] transition-colors group-hover:text-[var(--lumen)]">
-            {item.artwork?.artworkTitle || t('Tác phẩm độc bản')}
-          </h3>
-          <p className="mt-1 text-xs text-[var(--ash)]">
-            {item.artwork?.style || t('Kỹ thuật số')} · {t('Bản gốc được xác thực')}
-          </p>
+          {/* Thông tin chi tiết */}
+          <div className="acard__body">
+            <h3 className="acard__title">{item.artwork?.artworkTitle || t('Tác phẩm độc bản')}</h3>
+            <p className="acard__sub">
+              {item.artwork?.style || t('Kỹ thuật số')} · {t('Bản gốc được xác thực')}
+            </p>
 
-          <div className="mt-5 flex items-end justify-between border-t border-[var(--hair)] pt-4">
-            <div>
-              <span className="text-[11px] font-medium tracking-wide text-[var(--ash)]">{t('Giá hiện tại')}</span>
-              <p className="mt-1 font-[family-name:var(--font-display)] text-xl font-medium tabular-nums text-[var(--lumen)]">
-                {formatVnd(item.currentPrice)}
-              </p>
-            </div>
-            <div className="space-y-1 text-right text-xs text-[var(--ash)]">
-              <span className="block font-medium text-[var(--ivory)]">
-                {lang === 'VIE' ? `${item.bidCount} lượt trả giá` : `${item.bidCount} bid${item.bidCount === 1 ? '' : 's'}`}
-              </span>
-              <span className="inline-flex items-center gap-1.5 text-[11px]">
-                <Eye size={12} /> {lang === 'VIE' ? `${item.watchCount} người theo dõi` : `${item.watchCount} watcher${item.watchCount === 1 ? '' : 's'}`}
-              </span>
+            <div className="acard__meta">
+              <div>
+                <span className="acard__label">{t('Giá hiện tại')}</span>
+                <span className="acard__price">{formatVnd(item.currentPrice)}</span>
+              </div>
+              <div className="acard__counts">
+                <span>
+                  <Gavel aria-hidden />
+                  {lang === 'VIE' ? `${item.bidCount} lượt trả giá` : `${item.bidCount} bid${item.bidCount === 1 ? '' : 's'}`}
+                </span>
+                <span>
+                  <Eye aria-hidden />
+                  {lang === 'VIE' ? `${item.watchCount} theo dõi` : `${item.watchCount} watcher${item.watchCount === 1 ? '' : 's'}`}
+                </span>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div className="px-6 pb-6">
-        <Link
-          href={`/auctions/${item.auctionId}`}
-          className="flex w-full items-center justify-between rounded-2xl border border-[var(--hair-2)] bg-[var(--ink-3)] px-4 py-3 text-sm font-semibold text-[var(--ivory)] transition-all duration-200 hover:border-[var(--lumen)] hover:bg-[var(--lumen)] hover:text-white active:scale-[0.98]"
-        >
-          <span>{actionText}</span> <ArrowUpRight size={16} />
+        <Link href={`/auctions/${item.auctionId}`} className="acard__cta">
+          {actionText} <ArrowUpRight aria-hidden />
         </Link>
-      </div>
-    </article>
+      </article>
+    </Reveal>
   );
 }
 
 export function AuctionListScreen({ userId }: { userId: string | null }) {
-  const { t, lang } = useLanguage();
-  const isVie = lang === 'VIE';
+  const { t } = useLanguage();
   const [auctions, setAuctions] = useState<AuctionListItemDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -189,155 +154,138 @@ export function AuctionListScreen({ userId }: { userId: string | null }) {
     : auctions;
 
   return (
-    <main className="min-h-screen bg-[var(--ink)] px-4 pb-20 pt-8 text-[var(--ivory)] sm:px-6 lg:px-10">
-      <div className="mx-auto max-w-7xl space-y-8">
-        {/* Tiêu đề & Nút tạo */}
-        <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
-          <div>
-            <p className="eyebrow">{isVie ? 'Đấu giá tuyển chọn' : 'Curated auctions'}</p>
-            <h1 className="mt-2 font-[family-name:var(--font-display)] text-3xl font-medium text-[var(--ivory)] sm:text-4xl">
-              {isVie ? 'Đấu giá tác phẩm nghệ thuật' : 'Bid on original artwork'}
-            </h1>
-            <p className="mt-2 max-w-2xl text-sm text-[var(--ash)] font-[family-name:var(--font-ui)]">
-              {isVie
-                ? 'Theo dõi phiên đấu giá, sở hữu tác phẩm độc bản. Minh bạch và bảo chứng trên Dillustration.'
-                : 'Follow auction sessions and collect one-of-a-kind originals with verified authenticity.'}
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            {userId && (
-              <Link
-                href="/auctions/create"
-                className="inline-flex items-center gap-2 rounded-full bg-[var(--lumen)] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[var(--lumen-hi)]"
-              >
-                <Plus size={16} className="text-white" />
-                <span className="text-white">{isVie ? 'Đăng tác phẩm đấu giá' : 'Post auction'}</span>
+    <div className="wrap page">
+      {/* Tiêu đề & Nút tạo */}
+      <header className="page-head">
+        <div>
+          <p className="eyebrow">{t('Đấu giá tuyển chọn')}</p>
+          <h1>
+            <Words>{t('Đấu giá tác phẩm nghệ thuật')}</Words>
+          </h1>
+          <p className="page-head__sub">
+            {t('Theo dõi phiên đấu giá, sở hữu tác phẩm độc bản.')}
+          </p>
+        </div>
+        <div className="page-head__actions">
+          {userId && (
+            <Magnetic>
+              <Link href="/auctions/create" className="btn btn--primary">
+                <Plus size={17} aria-hidden /> {t('Đăng tác phẩm đấu giá')}
               </Link>
-            )}
+            </Magnetic>
+          )}
+          <button
+            type="button"
+            onClick={() => loadAuctions(true)}
+            disabled={loading}
+            className="icon-btn"
+            title={t('Làm mới danh sách')}
+            aria-label={t('Làm mới danh sách')}
+          >
+            <RefreshCw size={15} className={loading ? 'animate-spin' : ''} />
+          </button>
+        </div>
+      </header>
+
+      {/* Thanh bộ lọc */}
+      <div className="filterbar">
+        <div className="filterbar__tabs" role="tablist" aria-label={t('Trạng thái phiên đấu giá')}>
+          {[
+            { label: 'Đang diễn ra', value: 'Active' },
+            { label: 'Sắp diễn ra', value: 'Scheduled' },
+            { label: 'Đã hoàn tất', value: 'Settled' },
+            { label: 'Tất cả trạng thái', value: '' },
+          ].map((tab) => (
             <button
+              key={tab.value}
               type="button"
-              onClick={() => loadAuctions(true)}
-              disabled={loading}
-              className="flex size-10 items-center justify-center rounded-full border border-[var(--hair-2)] bg-[var(--ink-2)] text-[var(--ivory)] transition hover:border-[var(--lumen)] hover:bg-[var(--ink-3)] active:scale-95 disabled:opacity-50"
-              title={isVie ? 'Làm mới danh sách' : 'Refresh auctions'}
+              role="tab"
+              aria-selected={status === tab.value}
+              onClick={() => setStatus(tab.value)}
+              className="fpill"
             >
-              <RefreshCw size={15} className={loading ? 'animate-spin' : ''} />
+              {t(tab.label)}
             </button>
-          </div>
+          ))}
         </div>
 
-        {/* Thanh bộ lọc */}
-        <div className="flex flex-wrap items-center justify-between gap-4 border-y border-[var(--hair)] py-4">
-          <div className="flex flex-wrap gap-2 text-xs" role="tablist" aria-label="Auction state filter">
-            {[
-              { label: isVie ? 'Đang diễn ra' : 'Live', value: 'Active' },
-              { label: isVie ? 'Sắp diễn ra' : 'Scheduled', value: 'Scheduled' },
-              { label: isVie ? 'Đã hoàn tất' : 'Settled', value: 'Settled' },
-              { label: isVie ? 'Tất cả trạng thái' : 'All states', value: '' },
-            ].map((tab) => (
-              <button
-                key={tab.value}
-                type="button"
-                role="tab"
-                aria-selected={status === tab.value}
-                onClick={() => setStatus(tab.value)}
-                className={`rounded-full px-4 py-2 text-xs font-semibold transition cursor-pointer ${
-                  status === tab.value
-                    ? 'border border-[var(--ivory)] bg-[var(--ivory)] text-[var(--ink)] shadow-sm'
-                    : 'border border-[var(--hair)] bg-[var(--ink-2)] text-[var(--ash)] hover:border-[var(--hair-2)] hover:text-[var(--ivory)]'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
+        <div className="filterbar__tools">
+          <div className="input-wrap">
+            <Search aria-hidden />
+            <input
+              type="text"
+              value={keyword}
+              onChange={(e) => setKeyword(e.target.value)}
+              placeholder={t('Tìm theo tên tranh...')}
+              aria-label={t('Tìm theo tên tranh')}
+              className="input min-h-11 w-56 text-sm"
+            />
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="relative">
-              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--lumen)]" />
-              <input
-                type="text"
-                value={keyword}
-                onChange={(e) => setKeyword(e.target.value)}
-                placeholder={isVie ? 'Tìm theo tên tranh...' : 'Search by title...'}
-                className="w-56 rounded-full border border-[var(--hair-2)] bg-[var(--ink-2)] py-2 pl-9 pr-4 text-xs text-[var(--ivory)] placeholder:text-[var(--ash)] focus:border-[var(--lumen)] focus:outline-none"
-              />
-            </div>
-
-            <select
-              value={sort}
-              onChange={(e) => setSort(e.target.value)}
-              className="rounded-full border border-[var(--hair-2)] bg-[var(--ink-2)] px-4 py-2 text-xs font-medium text-[var(--ivory)] focus:border-[var(--lumen)] focus:outline-none"
-            >
-              <option value="ending_soon" className="bg-[var(--ink-2)] text-[var(--ivory)]">{isVie ? 'Sắp kết thúc' : 'Ending soon'}</option>
-              <option value="price_desc" className="bg-[var(--ink-2)] text-[var(--ivory)]">{isVie ? 'Giá cao nhất' : 'Highest price'}</option>
-              <option value="price_asc" className="bg-[var(--ink-2)] text-[var(--ivory)]">{isVie ? 'Giá thấp nhất' : 'Lowest price'}</option>
-              <option value="newest" className="bg-[var(--ink-2)] text-[var(--ivory)]">{isVie ? 'Mới nhất' : 'Newest'}</option>
-            </select>
-          </div>
+          <select
+            value={sort}
+            onChange={(e) => setSort(e.target.value)}
+            aria-label={t('Sắp xếp')}
+            className="input"
+          >
+            <option value="ending_soon">{t('Sắp kết thúc')}</option>
+            <option value="price_desc">{t('Giá cao nhất')}</option>
+            <option value="price_asc">{t('Giá thấp nhất')}</option>
+            {/* Không có option "Nhiều lượt đặt giá": backend chưa hỗ trợ sort theo bidCount,
+                chọn xong thứ tự không đổi nên gây hiểu nhầm là bộ lọc hỏng. */}
+            <option value="newest">{t('Mới nhất')}</option>
+          </select>
         </div>
-
-        {error && (
-          <div role="alert" className="rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-200">
-            {error}
-          </div>
-        )}
-
-        {/* Grid danh sách */}
-        {loading ? (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div key={i} className="h-96 animate-pulse rounded-3xl border border-[var(--hair)] bg-[var(--ink-2)]" />
-            ))}
-          </div>
-        ) : filteredAuctions.length === 0 ? (
-          <div className="rounded-3xl border border-dashed border-[var(--hair-2)] bg-[var(--ink-2)]/50 p-16 text-center space-y-3">
-            <Gavel size={44} className="mx-auto text-[var(--lumen)] opacity-80" />
-            <h2 className="font-[family-name:var(--font-display)] text-lg font-medium text-[var(--ivory)]">
-              {isVie ? 'Không tìm thấy phiên đấu giá nào' : 'No auction sessions found'}
-            </h2>
-            <p className="text-xs text-[var(--ash)]">
-              {isVie
-                ? 'Hãy thử thay đổi bộ lọc trạng thái hoặc mở phiên đấu giá mới ngay hôm nay.'
-                : 'Try changing the status filter or create a new auction session.'}
-            </p>
-            {userId && (
-              <Link
-                href="/auctions/create"
-                className="mt-4 inline-flex items-center gap-2 rounded-full bg-[var(--lumen)] px-5 py-2.5 text-xs font-bold text-white transition hover:bg-[var(--lumen-hi)]"
-              >
-                <Plus size={14} className="text-white" />
-                <span className="text-white">{isVie ? 'Mở phiên đấu giá mới' : 'Open a new session'}</span>
-              </Link>
-            )}
-          </div>
-        ) : (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {filteredAuctions.map((item) => (
-              <AuctionCard key={item.auctionId} item={item} />
-            ))}
-          </div>
-        )}
-
-        {/* Phân trang xem thêm */}
-        {nextCursor && (
-          <div className="mt-10 text-center">
-            <button
-              type="button"
-              disabled={loadingMore}
-              onClick={() => {
-                setLoadingMore(true);
-                loadAuctions(false);
-              }}
-              className="rounded-full border border-[var(--hair-2)] bg-[var(--ink-2)] px-6 py-2.5 text-xs font-semibold text-[var(--ivory)] transition hover:border-[var(--lumen)] hover:text-[var(--lumen)] disabled:opacity-50"
-            >
-              {loadingMore
-                ? (isVie ? 'Đang tải thêm...' : 'Loading more...')
-                : (isVie ? 'Tải thêm phiên đấu giá' : 'Load more auctions')}
-            </button>
-          </div>
-        )}
       </div>
-    </main>
+
+      {error && (
+        <div role="alert" className="mb-6 rounded-2xl border border-[#A8321C]/30 bg-[#A8321C]/10 p-4 text-sm text-[#A8321C]">
+          {error}
+        </div>
+      )}
+
+      {/* Grid danh sách */}
+      {loading ? (
+        <div className="auction-grid" aria-busy="true" aria-live="polite">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <div key={i} className="skeleton h-[26rem]" />
+          ))}
+        </div>
+      ) : filteredAuctions.length === 0 ? (
+        <div className="empty">
+          <Gavel size={44} className="empty__art" aria-hidden />
+          <h2>{t('Không tìm thấy phiên đấu giá nào')}</h2>
+          <p>{t('Hãy thử thay đổi bộ lọc trạng thái hoặc mở phiên đấu giá mới ngay hôm nay.')}</p>
+          <div className="empty__actions">
+            <Link href="/auctions/create" className="btn btn--primary btn--sm">
+              <Plus size={14} aria-hidden /> {t('Mở phiên đấu giá mới')}
+            </Link>
+          </div>
+        </div>
+      ) : (
+        <div className="auction-grid">
+          {filteredAuctions.map((item, index) => (
+            <AuctionCard key={item.auctionId} item={item} index={index} />
+          ))}
+        </div>
+      )}
+
+      {/* Phân trang xem thêm */}
+      {nextCursor && (
+        <div className="loadmore">
+          <button
+            type="button"
+            disabled={loadingMore}
+            onClick={() => {
+              setLoadingMore(true);
+              loadAuctions(false);
+            }}
+            className="btn btn--outline"
+          >
+            {t(loadingMore ? 'Đang tải thêm...' : 'Tải thêm phiên đấu giá')}
+          </button>
+        </div>
+      )}
+    </div>
   );
 }

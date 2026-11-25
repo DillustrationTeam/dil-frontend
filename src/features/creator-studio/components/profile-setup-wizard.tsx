@@ -111,8 +111,8 @@ export function ProfileSetupWizard() {
   return (
     <div className="glass-container rounded-[32px] p-6 md:p-8 max-w-3xl mx-auto">
       <div className="mb-8">
-        <p className="text-xs uppercase tracking-[0.2em] text-[#A7ACD9]">Profile setup</p>
-        <h1 className="font-h1 text-3xl font-bold text-white mt-3">Create your creator storefront</h1>
+        <p className="text-xs uppercase tracking-[0.2em] text-[#B24A26]">Profile setup</p>
+        <h1 className="font-h1 text-3xl font-bold text-[#241F1A] mt-3">Create your creator storefront</h1>
       </div>
 
       <div className="mb-8 flex gap-3">
@@ -122,17 +122,17 @@ export function ProfileSetupWizard() {
 
           return (
             <div key={step.key} className="flex-1">
-              <div className="mb-2 flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-[#C7C5CF]">
+              <div className="mb-2 flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-[#6E6459]">
                 <span
                   className={`flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-bold ${
-                    isActive ? 'bg-[#A7ACD9] text-[#1F2335]' : isDone ? 'bg-[#A7ACD9]/30 text-white' : 'bg-white/5 text-[#C7C5CF]'
+                    isActive ? 'bg-[#B24A26] text-[#F7F2E9]' : isDone ? 'bg-[#B24A26]/30 text-[#241F1A]' : 'bg-[#FFFCF6] text-[#6E6459]'
                   }`}
                 >
                   {index + 1}
                 </span>
                 {step.label}
               </div>
-              <div className={`h-1 rounded-full ${isDone || isActive ? 'bg-[#A7ACD9]' : 'bg-white/10'}`} />
+              <div className={`h-1 rounded-full ${isDone || isActive ? 'bg-[#B24A26]' : 'bg-[#F0E7D8]'}`} />
             </div>
           );
         })}
@@ -142,52 +142,52 @@ export function ProfileSetupWizard() {
         {currentStep.key === 'bio' && (
           <>
             <div className="space-y-2">
-              <label className="text-xs uppercase tracking-wider text-[#C7C5CF]">Display name</label>
+              <label className="text-xs uppercase tracking-wider text-[#6E6459]">Display name</label>
               <input
                 value={form.displayName}
                 onChange={(event) => updateField('displayName', event.target.value)}
-                className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none focus:border-[#A7ACD9]"
+                className="w-full rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-4 py-3 text-[#241F1A] outline-none focus:border-[#B24A26]"
                 placeholder="Etherea Vox"
               />
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs uppercase tracking-wider text-[#C7C5CF]">Headline</label>
+              <label className="text-xs uppercase tracking-wider text-[#6E6459]">Headline</label>
               <input
                 value={form.headline}
                 onChange={(event) => updateField('headline', event.target.value)}
-                className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none focus:border-[#A7ACD9]"
+                className="w-full rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-4 py-3 text-[#241F1A] outline-none focus:border-[#B24A26]"
                 placeholder="Fantasy illustrator crafting cinematic worlds"
               />
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs uppercase tracking-wider text-[#C7C5CF]">Bio</label>
+              <label className="text-xs uppercase tracking-wider text-[#6E6459]">Bio</label>
               <textarea
                 value={form.bio}
                 onChange={(event) => updateField('bio', event.target.value)}
-                className="min-h-[150px] w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none focus:border-[#A7ACD9]"
+                className="min-h-[150px] w-full rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-4 py-3 text-[#241F1A] outline-none focus:border-[#B24A26]"
                 placeholder="Tell collectors about your art direction, process, and inspiration."
               />
             </div>
 
             <div className="grid md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label className="text-xs uppercase tracking-wider text-[#C7C5CF]">Specialties</label>
+                <label className="text-xs uppercase tracking-wider text-[#6E6459]">Specialties</label>
                 <input
                   value={form.specialties}
                   onChange={(event) => updateField('specialties', event.target.value)}
-                  className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none focus:border-[#A7ACD9]"
+                  className="w-full rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-4 py-3 text-[#241F1A] outline-none focus:border-[#B24A26]"
                   placeholder="Character design, fantasy, anime"
                 />
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs uppercase tracking-wider text-[#C7C5CF]">Location</label>
+                <label className="text-xs uppercase tracking-wider text-[#6E6459]">Location</label>
                 <input
                   value={form.location}
                   onChange={(event) => updateField('location', event.target.value)}
-                  className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none focus:border-[#A7ACD9]"
+                  className="w-full rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-4 py-3 text-[#241F1A] outline-none focus:border-[#B24A26]"
                   placeholder="Ho Chi Minh City"
                 />
               </div>
@@ -197,24 +197,24 @@ export function ProfileSetupWizard() {
 
         {currentStep.key === 'ratecard' && (
           <>
-            <p className="rounded-xl border border-[#A7ACD9]/30 bg-[#A7ACD9]/10 p-4 text-sm text-[#C7C5CF]">Sau khi tạo hồ sơ, bạn sẽ cấu hình gói giá và các cột mốc tại màn Rate Card.</p>
+            <p className="rounded-xl border border-[#B24A26]/30 bg-[#B24A26]/10 p-4 text-sm text-[#6E6459]">Sau khi tạo hồ sơ, bạn sẽ cấu hình gói giá và các cột mốc tại màn Rate Card.</p>
 
             <div className="space-y-2">
-              <label className="text-xs uppercase tracking-wider text-[#C7C5CF]">Portfolio URL</label>
+              <label className="text-xs uppercase tracking-wider text-[#6E6459]">Portfolio URL</label>
               <input
                 value={form.websiteUrl}
                 onChange={(event) => updateField('websiteUrl', event.target.value)}
-                className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none focus:border-[#A7ACD9]"
+                className="w-full rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-4 py-3 text-[#241F1A] outline-none focus:border-[#B24A26]"
                 placeholder="https://yourstudio.example"
               />
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs uppercase tracking-wider text-[#C7C5CF]">Banner URL</label>
+              <label className="text-xs uppercase tracking-wider text-[#6E6459]">Banner URL</label>
               <input
                 value={form.bannerUrl}
                 onChange={(event) => updateField('bannerUrl', event.target.value)}
-                className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none focus:border-[#A7ACD9]"
+                className="w-full rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-4 py-3 text-[#241F1A] outline-none focus:border-[#B24A26]"
                 placeholder="https://images.example.com/banner.jpg"
               />
             </div>
@@ -223,31 +223,31 @@ export function ProfileSetupWizard() {
 
         {currentStep.key === 'slot' && (
           <>
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+            <div className="rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] p-4">
               <div className="mb-4 flex items-center justify-between gap-4">
                 <div>
-                  <p className="font-semibold text-white">Accepting commissions</p>
-                  <p className="text-sm text-[#C7C5CF]">Toggle to let clients see your open slots.</p>
+                  <p className="font-semibold text-[#241F1A]">Accepting commissions</p>
+                  <p className="text-sm text-[#6E6459]">Toggle to let clients see your open slots.</p>
                 </div>
                 <button
                   type="button"
                   aria-checked={form.isAcceptingOrders}
                   role="switch"
                   onClick={() => updateField('isAcceptingOrders', !form.isAcceptingOrders)}
-                  className={`relative h-7 w-12 rounded-full transition ${form.isAcceptingOrders ? 'bg-[#A7ACD9]' : 'bg-white/10'}`}
+                  className={`relative h-7 w-12 rounded-full transition ${form.isAcceptingOrders ? 'bg-[#B24A26]' : 'bg-[#F0E7D8]'}`}
                 >
                   <span
-                    className={`absolute top-1 h-5 w-5 rounded-full bg-white transition ${form.isAcceptingOrders ? 'left-6' : 'left-1'}`}
+                    className={`absolute top-1 h-5 w-5 rounded-full bg-[#F0E7D8] transition ${form.isAcceptingOrders ? 'left-6' : 'left-1'}`}
                   />
                 </button>
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs uppercase tracking-wider text-[#C7C5CF]">Available slot note</label>
+                <label className="text-xs uppercase tracking-wider text-[#6E6459]">Available slot note</label>
                 <textarea
                   value={form.availability}
                   onChange={(event) => updateField('availability', event.target.value)}
-                  className="min-h-[120px] w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none focus:border-[#A7ACD9]"
+                  className="min-h-[120px] w-full rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-4 py-3 text-[#241F1A] outline-none focus:border-[#B24A26]"
                   placeholder="Open for 3 new commissions this month"
                 />
               </div>
@@ -261,7 +261,7 @@ export function ProfileSetupWizard() {
           type="button"
           onClick={previousStep}
           disabled={stepIndex === 0}
-          className="rounded-xl border border-white/10 px-4 py-2 text-sm text-white disabled:cursor-not-allowed disabled:opacity-40"
+          className="rounded-xl border border-[#221E1A]/10 px-4 py-2 text-sm text-[#241F1A] disabled:cursor-not-allowed disabled:opacity-40"
         >
           Previous
         </button>
@@ -270,7 +270,7 @@ export function ProfileSetupWizard() {
           <button
             type="button"
             onClick={nextStep}
-            className="rounded-xl bg-[#A7ACD9] px-5 py-2.5 text-sm font-bold text-[#1F2335]"
+            className="rounded-xl bg-[#B24A26] px-5 py-2.5 text-sm font-bold text-[#F7F2E9]"
           >
             Continue
           </button>
@@ -279,7 +279,7 @@ export function ProfileSetupWizard() {
             type="button"
             onClick={handleSubmit}
             disabled={isSubmitting}
-            className="rounded-xl bg-[#A7ACD9] px-5 py-2.5 text-sm font-bold text-[#1F2335] disabled:cursor-not-allowed disabled:opacity-60"
+            className="rounded-xl bg-[#B24A26] px-5 py-2.5 text-sm font-bold text-[#F7F2E9] disabled:cursor-not-allowed disabled:opacity-60"
           >
             {isSubmitting ? 'Saving...' : 'Finish setup'}
           </button>

@@ -24,17 +24,25 @@ import {
   User,
   X,
 } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { useLanguage } from '@/context/language-context';
 import { clientOwnedArtworksService } from '../../services/client-owned-artworks.service';
+import { auctionService } from '@/features/auction/services/auction.service';
+import type { AuctionCertificateDto } from '@/features/auction/types/auction.types';
+import { AuctionCertificateCard } from '@/features/auction/components/auction-certificate-card';
+import { OwnedArtworkCertificate } from './owned-artwork-certificate';
 import type {
   OwnedArtworkDto,
   OwnedArtworkFilterType,
   OwnedArtworkSortType,
   OwnedArtworkSourceType,
 } from '../../types/owned-artwork.types';
-import { auctionService, auctionError } from '@/features/auction/services/auction.service';
-import type { AuctionCertificateDto } from '@/features/auction/types/auction.types';
-import { AuctionCertificateCard } from '@/features/auction/components/auction-certificate-card';
+/**
+ * KHÔNG gọi `GET /auctions/{id}/certificate` từ đây nữa.
+ * Bản ghi owned-artwork trả `sourceId` TRÙNG `id` của tác phẩm, nên endpoint
+ * auction luôn 404 (đã đo: /auctions/dafd4258-…/certificate → 404). Chứng nhận
+ * hiển thị từ chính dữ liệu bản ghi (`certificateNumber`), không cần mạng.
+ */
 
 
 /// Ảnh dự phòng khi API trả về chuỗi rỗng ở thumbnailUrl/imageUrl.
@@ -64,6 +72,44 @@ function formatDate(isoString?: string) {
   }
 }
 
+/** Chữ cái đầu của tên họa sĩ, dùng khi hồ sơ chưa có ảnh đại diện. */
+function initialsOf(name?: string | null) {
+  const parts = (name || '').trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return '?';
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
+}
+
+/**
+ * `exclusiveBadge` là chuỗi tiếng Anh do server trả (`Exclusive Owner`).
+ * Việt hoá ở tầng hiển thị, không sửa dữ liệu — cùng cách với `style-labels.ts`.
+ */
+const EXCLUSIVE_LABELS: Record<string, { vi: string; en: string }> = {
+  'Exclusive Owner': { vi: 'Chủ sở hữu độc bản', en: 'Exclusive owner' },
+  '1/1': { vi: 'Độc bản 1/1', en: 'One of one' },
+};
+
+function exclusiveLabel(raw: string, lang: string) {
+  const entry = EXCLUSIVE_LABELS[raw.trim()];
+  if (!entry) return raw;
+  return lang === 'VIE' ? entry.vi : entry.en;
+}
+
+/** `sourceType` từ server là tiếng Anh (`Auction` / `Commission` / `Trade`). */
+function sourceLabel(type: OwnedArtworkSourceType, lang: string) {
+  if (lang !== 'VIE') return type;
+  switch (type) {
+    case 'Auction':
+      return 'Đấu giá';
+    case 'Commission':
+      return 'Đơn đặt vẽ';
+    case 'Trade':
+      return 'Trao đổi';
+    default:
+      return type;
+  }
+}
+
 export function OwnedArtworksScreen() {
   const { t, lang } = useLanguage();
   const [artworks, setArtworks] = useState<OwnedArtworkDto[]>([]);
@@ -77,10 +123,10 @@ export function OwnedArtworksScreen() {
 
   // Lightbox Preview Modal
   const [lightboxArtwork, setLightboxArtwork] = useState<OwnedArtworkDto | null>(null);
-
-  // Auction Certificate Modal
+  const [certArtwork, setCertArtwork] = useState<OwnedArtworkDto | null>(null);
   const [selectedCert, setSelectedCert] = useState<AuctionCertificateDto | null>(null);
   const [loadingCertId, setLoadingCertId] = useState<string | null>(null);
+
 
   const fetchArtworks = async () => {
     try {
@@ -150,14 +196,33 @@ export function OwnedArtworksScreen() {
       });
   }, [artworks, sourceFilter, searchQuery, sortBy]);
 
+  /**
+   * Mở chứng nhận.
+   *
+   * 1. Tác phẩm mua qua phiên đấu giá → gọi `/auctions/{auctionId}/certificate` để lấy
+   *    tờ chứng nhận đầy đủ (QR tra cứu, chữ ký SHA-256, phạm vi giấy phép). Đây là
+   *    bản đầy đủ duy nhất hệ thống thực sự phát hành.
+   * 2. Không có phiên đấu giá (chuyển nhượng nội bộ / đơn đặt vẽ) → hiện tờ chứng nhận
+   *    mỏng dựng từ chính bản ghi, thay vì báo lỗi 404.
+   */
   const handleOpenCertificate = async (item: OwnedArtworkDto) => {
-    if (item.sourceType !== 'Auction' || !item.sourceId) return;
+    if (!item.certificateNumber) {
+      toast.error('Tác phẩm này chưa có số chứng nhận.');
+      return;
+    }
+    const auctionId = item.sourceType === 'Auction' ? item.sourceId : null;
+    const hasAuction = Boolean(auctionId) && auctionId !== item.id;
+    if (!hasAuction) {
+      setCertArtwork(item);
+      return;
+    }
     try {
       setLoadingCertId(item.id);
-      const cert = await auctionService.getCertificate(item.sourceId);
+      const cert = await auctionService.getCertificate(auctionId as string);
       setSelectedCert(cert);
-    } catch (err) {
-      alert(auctionError(err) || 'Không thể tải chứng nhận quyền sở hữu.');
+    } catch {
+      // Không lấy được bản đầy đủ (không phải chủ sở hữu / chưa phát hành) → bản mỏng.
+      setCertArtwork(item);
     } finally {
       setLoadingCertId(null);
     }
@@ -167,22 +232,22 @@ export function OwnedArtworksScreen() {
     switch (sourceType) {
       case 'Auction':
         return (
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/60 bg-amber-500/20 px-3 py-1 text-[11px] font-bold text-amber-300 backdrop-blur-md shadow-[0_0_12px_rgba(245,158,11,0.2)]">
-            <Crown size={12} className="text-amber-400" />
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-[#8A6A1F]/45 bg-[#FFFCF6] px-2.5 py-1 text-[11px] font-semibold text-[#8A6A1F] shadow-sm">
+            <Crown size={12} aria-hidden />
             {lang === 'VIE' ? 'Đấu giá' : 'Auction Exclusive'}
           </span>
         );
       case 'Commission':
         return (
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-sky-400/60 bg-sky-500/20 px-3 py-1 text-[11px] font-bold text-sky-300 backdrop-blur-md shadow-[0_0_12px_rgba(56,189,248,0.2)]">
-            <FolderKanban size={12} className="text-sky-400" />
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-[#2C6A86]/45 bg-[#FFFCF6] px-2.5 py-1 text-[11px] font-semibold text-[#2C6A86] shadow-sm">
+            <FolderKanban size={12} aria-hidden />
             {lang === 'VIE' ? 'Đơn vẽ hoàn tất' : 'Commission Deliverable'}
           </span>
         );
       case 'Trade':
         return (
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-purple-400/60 bg-purple-500/20 px-3 py-1 text-[11px] font-bold text-purple-300 backdrop-blur-md shadow-[0_0_12px_rgba(168,85,247,0.2)]">
-            <ArrowLeftRight size={12} className="text-purple-400" />
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-[#5F3F86]/45 bg-[#FFFCF6] px-2.5 py-1 text-[11px] font-semibold text-[#5F3F86] shadow-sm">
+            <ArrowLeftRight size={12} aria-hidden />
             {lang === 'VIE' ? 'Trao đổi nghệ thuật' : 'Art Trade Exchange'}
           </span>
         );
@@ -192,506 +257,369 @@ export function OwnedArtworksScreen() {
   };
 
   return (
-    <div className="space-y-6 pb-12">
-      {/* Header Banner */}
-      <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-r from-brand-navy via-[#1F2335]/90 to-purple-950/40 p-6 sm:p-8 backdrop-blur-xl">
-        <div className="absolute -right-16 -top-16 size-64 rounded-full bg-brand-periwinkle/10 blur-3xl pointer-events-none" />
-        <div className="absolute right-32 -bottom-20 size-48 rounded-full bg-purple-500/10 blur-3xl pointer-events-none" />
+    <div className="wrap page">
+      {/* ─── HEADER ─────────────────────────────────────────── */}
+      <header className="page-head">
+        <div>
+          <p className="eyebrow">{lang === 'VIE' ? 'Kho tác phẩm của bạn' : 'Your art vault'}</p>
+          <h1>{lang === 'VIE' ? 'Tác phẩm đã sở hữu' : 'Owned artworks'}</h1>
+          <p className="page-head__sub">
+            {lang === 'VIE'
+              ? 'Tác phẩm số bạn sở hữu hợp pháp: phiên đấu giá đã chốt, đặt vẽ đã bàn giao, và các đợt trao đổi hoàn tất.'
+              : 'Digital works you legally own — settled auctions, delivered commissions and finalized trades.'}
+          </p>
+        </div>
+        <div className="page-head__actions">
+          <button type="button" onClick={fetchArtworks} className="btn btn--outline btn--sm" disabled={loading}>
+            <RefreshCw size={14} className={loading ? 'animate-spin' : ''} aria-hidden /> {t('Làm mới')}
+          </button>
+          <Link href="/explore" className="btn btn--primary btn--sm">
+            {lang === 'VIE' ? 'Khám phá sàn tranh' : 'Explore market'}
+          </Link>
+        </div>
+      </header>
 
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-amber-400/40 bg-amber-400/10 px-3.5 py-1 text-xs font-bold text-amber-300">
-              <Sparkles size={14} className="text-amber-400" />
-              {lang === 'VIE' ? 'KHO TÁC PHẨM CLIENT' : 'CLIENT ART VAULT'}
-            </div>
-            <h1 className="mt-3 font-h1 text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-              {lang === 'VIE' ? 'Tác phẩm đã sở hữu' : 'Owned Artworks'}
-            </h1>
-            <p className="mt-2 text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed">
-              {lang === 'VIE'
-                ? 'Tổng hợp tất cả tác phẩm số bạn đã sở hữu hợp pháp từ các phiên đấu giá độc bản, đơn đặt vẽ (Commission) hoàn tất, và các đợt trao đổi nghệ thuật (Art Trade).'
-                : 'All digital artworks you legally own across settled auctions, completed commissions, and finalized art trades.'}
-            </p>
-          </div>
+      {/* ─── STATS ──────────────────────────────────────────── */}
+      <p className="statsline">
+        <span>
+          <b>{filteredArtworks.length}</b>{lang === 'VIE' ? 'tác phẩm' : 'artworks'}
+        </span>
+        <span>
+          <b>{filteredArtworks.filter((a) => a.sourceType === 'Auction').length}</b>
+          {lang === 'VIE' ? 'từ đấu giá' : 'from auctions'}
+        </span>
+        <span>
+          <b>{filteredArtworks.filter((a) => a.exclusiveBadge).length}</b>
+          {lang === 'VIE' ? 'độc bản' : 'exclusive'}
+        </span>
+      </p>
 
-          <div className="flex flex-wrap items-center gap-2 shrink-0">
+      {/* ─── FILTERBAR ──────────────────────────────────────── */}
+      <div className="filterbar mt-6">
+        <div className="filterbar__tabs" role="tablist" aria-label={t('Nguồn sở hữu')}>
+          {([
+            { key: 'ALL', vi: 'Tất cả', en: 'All' },
+            { key: 'Auction', vi: 'Đấu giá', en: 'Auctions' },
+            { key: 'Commission', vi: 'Commission', en: 'Commissions' },
+            { key: 'Trade', vi: 'Trao đổi', en: 'Trades' },
+          ] as const).map((tab) => (
             <button
-              onClick={fetchArtworks}
-              className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-2.5 text-xs font-semibold text-slate-300 hover:text-white hover:bg-white/10 transition"
-              title="Làm mới"
+              key={tab.key}
+              type="button"
+              role="tab"
+              aria-selected={sourceFilter === tab.key}
+              onClick={() => setSourceFilter(tab.key)}
+              className="fpill"
             >
-              <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
-              {lang === 'VIE' ? 'Làm mới' : 'Refresh'}
+              {lang === 'VIE' ? tab.vi : tab.en}
             </button>
-            <Link
-              href="/collections"
-              className="inline-flex items-center gap-2 rounded-2xl border border-amber-400/30 bg-amber-400/10 px-4 py-2.5 text-xs font-semibold text-amber-300 hover:bg-amber-400/20 transition"
-            >
-              <Crown size={14} />
-              {lang === 'VIE' ? 'Kho tranh đấu giá' : 'Auction Vault'}
-            </Link>
-          </div>
+          ))}
         </div>
 
-        {/* Quick Stats Grid */}
-        <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-3 pt-6 border-t border-white/10">
-          <div className="rounded-2xl border border-white/5 bg-white/[0.03] p-3.5">
-            <span className="text-[11px] font-medium text-slate-400 block">
-              {lang === 'VIE' ? 'Tổng tác phẩm' : 'Total Owned'}
-            </span>
-            <span className="text-xl sm:text-2xl font-black text-white font-mono mt-0.5 block">
-              {stats.total}
-            </span>
+        <div className="filterbar__tools">
+          <div className="input-wrap">
+            <Search aria-hidden />
+            <input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder={lang === 'VIE' ? 'Tìm tên tác phẩm hoặc họa sĩ…' : 'Search title or artist…'}
+              aria-label={t('Tìm tác phẩm')}
+              className="input min-h-11 w-60 py-2 pl-9 text-sm"
+            />
           </div>
-          <div className="rounded-2xl border border-amber-500/20 bg-amber-500/5 p-3.5">
-            <span className="text-[11px] font-medium text-amber-300/80 block flex items-center gap-1.5">
-              <Crown size={12} className="text-amber-400" />
-              {lang === 'VIE' ? 'Từ Đấu giá' : 'Auctions'}
-            </span>
-            <span className="text-xl sm:text-2xl font-black text-amber-300 font-mono mt-0.5 block">
-              {stats.auctions}
-            </span>
-          </div>
-          <div className="rounded-2xl border border-sky-500/20 bg-sky-500/5 p-3.5">
-            <span className="text-[11px] font-medium text-sky-300/80 block flex items-center gap-1.5">
-              <FolderKanban size={12} className="text-sky-400" />
-              {lang === 'VIE' ? 'Từ Commissions' : 'Commissions'}
-            </span>
-            <span className="text-xl sm:text-2xl font-black text-sky-300 font-mono mt-0.5 block">
-              {stats.commissions}
-            </span>
-          </div>
-          <div className="rounded-2xl border border-purple-500/20 bg-purple-500/5 p-3.5">
-            <span className="text-[11px] font-medium text-purple-300/80 block flex items-center gap-1.5">
-              <ArrowLeftRight size={12} className="text-purple-400" />
-              {lang === 'VIE' ? 'Từ Art Trade' : 'Art Trades'}
-            </span>
-            <span className="text-xl sm:text-2xl font-black text-purple-300 font-mono mt-0.5 block">
-              {stats.trades}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Filter and Search Bar */}
-      <div className="rounded-2xl border border-white/10 bg-[#1F2335]/70 backdrop-blur-lg p-4 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
-        {/* Search input */}
-        <div className="relative flex-1">
-          <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder={
-              lang === 'VIE'
-                ? 'Tìm theo tên tranh, họa sĩ, số chứng nhận...'
-                : 'Search by artwork title, artist, certificate...'
-            }
-            className="w-full rounded-xl border border-white/10 bg-white/5 py-2.5 pl-10 pr-4 text-xs text-white placeholder-slate-400 focus:border-brand-periwinkle focus:outline-none focus:ring-1 focus:ring-brand-periwinkle transition"
-          />
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
-            >
-              <X size={14} />
-            </button>
-          )}
-        </div>
-
-        {/* Source Pills Filter */}
-        <div className="flex flex-wrap items-center gap-1.5">
-          {(
-            [
-              { key: 'ALL', labelVi: 'Tất cả', labelEn: 'All' },
-              { key: 'Auction', labelVi: 'Đấu giá', labelEn: 'Auctions' },
-              { key: 'Commission', labelVi: 'Commissions', labelEn: 'Commissions' },
-              { key: 'Trade', labelVi: 'Trao đổi', labelEn: 'Trades' },
-            ] as const
-          ).map((tab) => {
-            const active = sourceFilter === tab.key;
-            return (
-              <button
-                key={tab.key}
-                onClick={() => setSourceFilter(tab.key)}
-                className={`rounded-xl px-3.5 py-2 text-xs font-semibold transition ${
-                  active
-                    ? 'bg-brand-periwinkle text-brand-navy shadow-[0_0_12px_rgba(167,172,217,0.3)]'
-                    : 'bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white'
-                }`}
-              >
-                {lang === 'VIE' ? tab.labelVi : tab.labelEn}
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Sort Dropdown */}
-        <div className="flex items-center gap-2 shrink-0">
-          <ArrowUpDown size={14} className="text-slate-400" />
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as OwnedArtworkSortType)}
-            aria-label={lang === 'VIE' ? 'Sắp xếp theo' : 'Sort by'}
-            className="rounded-xl border border-white/10 bg-[#171926] px-3 py-2 text-xs text-white focus:border-brand-periwinkle focus:outline-none"
+            aria-label={t('Sắp xếp')}
+            className="input min-h-11 text-sm"
           >
             <option value="NEWEST">{lang === 'VIE' ? 'Mới nhất' : 'Newest'}</option>
             <option value="OLDEST">{lang === 'VIE' ? 'Cũ nhất' : 'Oldest'}</option>
-            <option value="PRICE_HIGH">{lang === 'VIE' ? 'Giá cao nhất' : 'Highest Price'}</option>
-            <option value="PRICE_LOW">{lang === 'VIE' ? 'Giá thấp nhất' : 'Lowest Price'}</option>
-            <option value="TITLE_AZ">{lang === 'VIE' ? 'Tên A - Z' : 'Title A - Z'}</option>
+            <option value="PRICE_HIGH">{lang === 'VIE' ? 'Giá cao → thấp' : 'Price high → low'}</option>
+            <option value="PRICE_LOW">{lang === 'VIE' ? 'Giá thấp → cao' : 'Price low → high'}</option>
+            <option value="TITLE_AZ">{lang === 'VIE' ? 'Tên A → Z' : 'Title A → Z'}</option>
           </select>
         </div>
       </div>
 
-      {/* Loading state */}
-      {loading && (
-        <div className="py-24 text-center">
-          <RefreshCw size={24} className="mx-auto mb-3 animate-spin text-brand-periwinkle" />
-          <p className="text-xs text-slate-400">
-            {lang === 'VIE'
-              ? 'Đang đồng bộ kho tác phẩm sở hữu...'
-              : 'Synchronizing your owned artworks...'}
-          </p>
-        </div>
-      )}
-
-      {/* Error state */}
-      {error && !loading && (
-        <div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-6 text-center text-xs text-red-300">
-          <p>{error}</p>
-          <button
-            onClick={fetchArtworks}
-            className="mt-3 rounded-xl bg-red-500/20 px-4 py-2 font-semibold text-red-200 hover:bg-red-500/30"
-          >
-            {lang === 'VIE' ? 'Thử lại' : 'Retry'}
-          </button>
-        </div>
-      )}
-
-      {/* Empty State */}
-      {!loading && !error && filteredArtworks.length === 0 && (
-        <div className="rounded-3xl border border-white/10 bg-white/[0.02] py-20 text-center px-4">
-          <div className="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-white/5 border border-white/10 text-slate-400">
-            <Layers size={28} />
-          </div>
-          <h3 className="font-h1 text-base sm:text-lg font-bold text-white">
-            {lang === 'VIE' ? 'Chưa tìm thấy tác phẩm sở hữu nào' : 'No owned artworks found'}
-          </h3>
-          <p className="mt-1.5 text-xs text-slate-400 max-w-md mx-auto">
-            {searchQuery || sourceFilter !== 'ALL'
-              ? lang === 'VIE'
-                ? 'Không có kết quả phù hợp với bộ lọc hiện tại. Thử xóa tìm kiếm hoặc đổi tiêu chí lọc.'
-                : 'No results match your current filter. Try adjusting your search query.'
-              : lang === 'VIE'
-                ? 'Khi bạn thắng đấu giá, hoàn tất đơn đặt vẽ Commission, hoặc hoàn thành trao đổi Art Trade, tác phẩm sẽ tự động lưu trữ tại đây.'
-                : 'Artworks you acquire via auctions, completed commissions, or art trades will appear here.'}
-          </p>
-
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-            <Link
-              href="/auctions"
-              className="inline-flex items-center gap-2 rounded-full border border-amber-400/40 bg-amber-400/10 px-5 py-2.5 text-xs font-semibold text-amber-300 hover:bg-amber-400/20 transition"
-            >
-              <Gavel size={14} />
-              {lang === 'VIE' ? 'Tham gia Đấu giá' : 'Explore Auctions'}
-            </Link>
-            <Link
-              href="/client/commissions"
-              className="inline-flex items-center gap-2 rounded-full border border-sky-400/40 bg-sky-400/10 px-5 py-2.5 text-xs font-semibold text-sky-300 hover:bg-sky-400/20 transition"
-            >
-              <FolderKanban size={14} />
-              {lang === 'VIE' ? 'Xem Commissions' : 'My Commissions'}
-            </Link>
-            <Link
-              href="/art-trades"
-              className="inline-flex items-center gap-2 rounded-full border border-purple-400/40 bg-purple-400/10 px-5 py-2.5 text-xs font-semibold text-purple-300 hover:bg-purple-400/20 transition"
-            >
-              <ArrowLeftRight size={14} />
-              {lang === 'VIE' ? 'Khám phá Art Trade' : 'Art Trade Hub'}
-            </Link>
-          </div>
-        </div>
-      )}
-
-      {/* Artworks Grid */}
-      {!loading && !error && filteredArtworks.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredArtworks.map((item) => (
-            <article
-              key={`${item.sourceType}-${item.id}`}
-              className="group flex flex-col justify-between overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] transition-all duration-300 hover:border-brand-periwinkle/40 hover:shadow-[0_0_25px_rgba(167,172,217,0.12)]"
-            >
-              <div>
-                {/* Artwork Image Container with Lightbox Trigger */}
-                <div
-                  className="relative aspect-[4/5] w-full overflow-hidden bg-black/40 cursor-pointer"
-                  onClick={() => setLightboxArtwork(item)}
-                >
-                  <Image
-                    src={item.thumbnailUrl || item.imageUrl || FALLBACK_IMAGE}
-                    alt={item.title}
-                    fill
-                    unoptimized
-                    className="object-cover transition duration-300 group-hover:scale-105"
-                  />
-
-                  {/* Gradient Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 pointer-events-none" />
-
-                  {/* Source Badge (Top-left) */}
-                  <div className="absolute top-3 left-3 z-10">{getSourceBadge(item.sourceType)}</div>
-
-                  {/* Lightbox Zoom Icon (Top-right) */}
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setLightboxArtwork(item);
-                    }}
-                    className="absolute top-3 right-3 z-10 flex size-8 items-center justify-center rounded-full bg-black/60 text-white/80 backdrop-blur-md transition hover:bg-white hover:text-brand-navy shadow-md"
-                    title={lang === 'VIE' ? 'Phóng to ảnh' : 'Zoom image'}
-                  >
-                    <Maximize2 size={13} />
-                  </button>
-
-                  {/* Certificate Number Pill (Bottom-right if present) */}
-                  {item.certificateNumber && (
-                    <div className="absolute bottom-3 right-3 z-10 inline-flex items-center gap-1 rounded-full bg-black/70 border border-white/20 px-2.5 py-1 text-[10px] font-mono text-amber-300 backdrop-blur-md">
-                      <FileCheck2 size={11} />
-                      {item.certificateNumber}
-                    </div>
-                  )}
-                </div>
-
-                {/* Info Section */}
-                <div className="p-4 space-y-3">
-                  <div>
-                    <h3 className="font-h1 text-sm font-bold text-white line-clamp-1 group-hover:text-brand-periwinkle transition">
-                      {item.title}
-                    </h3>
-
-                    {/* Creator info */}
-                    <div className="mt-1.5 flex items-center gap-2 text-xs text-slate-300">
-                      {item.creatorAvatarUrl ? (
-                        <div className="relative size-5 rounded-full overflow-hidden border border-white/20">
-                          <Image
-                            src={item.creatorAvatarUrl}
-                            alt={item.creatorName}
-                            fill
-                            unoptimized
-                            className="object-cover"
-                          />
-                        </div>
-                      ) : (
-                        <div className="flex size-5 items-center justify-center rounded-full bg-brand-periwinkle/20 text-brand-periwinkle text-[10px] font-bold">
-                          {item.creatorName ? item.creatorName.charAt(0).toUpperCase() : 'A'}
-                        </div>
-                      )}
-                      <span className="truncate">{item.creatorName}</span>
-                    </div>
-                  </div>
-
-                  {/* Financial & Date Metadata box */}
-                  <div className="rounded-2xl border border-white/5 bg-black/25 p-3 grid grid-cols-2 gap-2 text-xs">
-                    <div>
-                      <span className="text-[10px] text-slate-400 block">
-                        {item.sourceType === 'Trade'
-                          ? lang === 'VIE'
-                            ? 'Hình thức'
-                            : 'Type'
-                          : lang === 'VIE'
-                            ? 'Giá sở hữu'
-                            : 'Acquired Value'}
-                      </span>
-                      <strong className="font-mono text-amber-300 font-bold block truncate">
-                        {item.price ? formatVnd(item.price) : lang === 'VIE' ? 'Trao đổi' : 'Exchanged'}
-                      </strong>
-                    </div>
-
-                    <div>
-                      <span className="text-[10px] text-slate-400 block">
-                        {lang === 'VIE' ? 'Ngày sở hữu' : 'Acquired Date'}
-                      </span>
-                      <strong className="text-white text-[11px] font-mono block">
-                        {formatDate(item.acquiredAt)}
-                      </strong>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Action Buttons Footer */}
-              <div className="p-4 pt-0 space-y-2">
-                <div className="flex items-center gap-2">
-                  {/* Download unwatermarked original if available */}
-                  {item.downloadUrl && (
-                    <a
-                      href={item.downloadUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 py-2 text-xs font-semibold text-emerald-300 hover:bg-emerald-500/20 transition"
-                      title={lang === 'VIE' ? 'Tải tác phẩm gốc' : 'Download original artwork'}
-                    >
-                      <Download size={13} />
-                      {lang === 'VIE' ? 'Tải tranh gốc' : 'Download'}
-                    </a>
-                  )}
-
-                  {/* Auction Certificate Modal button */}
-                  {item.sourceType === 'Auction' && (
-                    <button
-                      onClick={() => handleOpenCertificate(item)}
-                      disabled={loadingCertId === item.id}
-                      className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-amber-400/40 bg-amber-400/10 py-2 text-xs font-semibold text-amber-300 hover:bg-amber-400/20 transition disabled:opacity-50"
-                      title={lang === 'VIE' ? 'Chứng chỉ' : 'Certificate'}
-                    >
-                      {loadingCertId === item.id ? (
-                        <RefreshCw size={13} className="animate-spin" />
-                      ) : (
-                        <FileCheck2 size={13} />
-                      )}
-                      {lang === 'VIE' ? 'Chứng nhận' : 'Certificate'}
-                    </button>
-                  )}
-
-                  {/* Link to Source Context */}
-                  {item.sourceDetailUrl && (
-                    <Link
-                      href={item.sourceDetailUrl}
-                      className="inline-flex items-center justify-center rounded-xl border border-white/10 bg-white/5 p-2 text-slate-300 hover:text-white hover:bg-white/10 transition"
-                      title={
-                        item.sourceType === 'Commission'
-                          ? lang === 'VIE'
-                            ? 'Vào phòng vẽ'
-                            : 'Open Workroom'
-                          : item.sourceType === 'Trade'
-                            ? lang === 'VIE'
-                              ? 'Xem giao dịch trao đổi'
-                              : 'Open Trade Details'
-                            : lang === 'VIE'
-                              ? 'Xem chi tiết tác phẩm'
-                              : 'Open Artwork'
-                      }
-                    >
-                      <ExternalLink size={14} />
-                    </Link>
-                  )}
-                </div>
-              </div>
-            </article>
+      {/* ─── GRID ───────────────────────────────────────────── */}
+      {loading ? (
+        <div className="wall wall--grid" aria-busy="true">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className="skeleton aspect-square rounded-2xl" />
           ))}
         </div>
+      ) : error ? (
+        <div className="empty">
+          <h3>{error}</h3>
+          <div className="empty__actions">
+            <button type="button" onClick={fetchArtworks} className="btn btn--primary btn--sm">
+              {t('Thử lại')}
+            </button>
+          </div>
+        </div>
+      ) : filteredArtworks.length === 0 ? (
+        <div className="empty">
+          <Layers size={40} className="empty__art" aria-hidden />
+          <h3>{lang === 'VIE' ? 'Chưa có tác phẩm nào' : 'No artworks yet'}</h3>
+          <p>
+            {lang === 'VIE'
+              ? 'Thắng một phiên đấu giá, hoàn tất một đặt vẽ hoặc một đợt trao đổi — tác phẩm sẽ xuất hiện ở đây.'
+              : 'Win an auction, finish a commission or complete a trade — the work will appear here.'}
+          </p>
+          <div className="empty__actions">
+            <Link href="/auctions" className="btn btn--primary btn--sm">
+              <Gavel size={14} aria-hidden /> {lang === 'VIE' ? 'Vào sàn đấu giá' : 'Browse auctions'}
+            </Link>
+            <Link href="/explore" className="btn btn--outline btn--sm">
+              {lang === 'VIE' ? 'Khám phá sàn tranh' : 'Explore market'}
+            </Link>
+          </div>
+        </div>
+      ) : (
+        <div className="wall wall--grid">
+          {filteredArtworks.map((artwork) => {
+            const price = formatVnd(artwork.price);
+            return (
+              <article key={artwork.id} className="art-card">
+                <button
+                  type="button"
+                  onClick={() => setLightboxArtwork(artwork)}
+                  className="art-card__frame block w-full text-left"
+                  aria-label={`Xem ${artwork.title}`}
+                >
+                  <div className="art-card__img">
+                    <Image
+                      src={artwork.thumbnailUrl || artwork.imageUrl || FALLBACK_IMAGE}
+                      alt={artwork.title}
+                      fill
+                      unoptimized
+                      sizes="(max-width: 640px) 50vw, (max-width: 1280px) 33vw, 25vw"
+                      className="object-cover object-center"
+                    />
+                  </div>
+                  <span className="absolute left-3 top-3 z-10">{getSourceBadge(artwork.sourceType)}</span>
+                  <span className="art-card__zoom" aria-hidden="true">
+                    <Maximize2 size={16} />
+                  </span>
+                </button>
+
+                <div className="art-card__meta">
+                  <span className="art-card__title">{artwork.title}</span>
+
+                  {/* Họa sĩ */}
+                  <div className="mt-1 flex items-center gap-2">
+                    <span className="grid h-6 w-6 shrink-0 place-items-center overflow-hidden rounded-full border border-[#221E1A]/10 bg-[#F0E7D8] text-[10px] font-semibold text-[#8C3718]">
+                      {artwork.creatorAvatarUrl ? (
+                        <Image
+                          src={artwork.creatorAvatarUrl}
+                          alt=""
+                          width={24}
+                          height={24}
+                          unoptimized
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        initialsOf(artwork.creatorName)
+                      )}
+                    </span>
+                    <span className="truncate text-[0.8125rem] text-[#6E6459]">
+                      {artwork.creatorName || '—'}
+                    </span>
+                  </div>
+
+                  {/* Hai dữ kiện của quyền sở hữu */}
+                  <div className="mt-2 grid grid-cols-2 gap-2 rounded-xl border border-[#221E1A]/10 bg-[#F0E7D8]/60 px-3 py-2">
+                    <div className="min-w-0">
+                      <span className="block text-[10px] uppercase tracking-wide text-[#746A5F]">
+                        {lang === 'VIE' ? 'Giá sở hữu' : 'Price paid'}
+                      </span>
+                      <b className="block truncate text-[0.8125rem] font-bold tabular-nums text-[#241F1A]">
+                        {price ?? '—'}
+                      </b>
+                    </div>
+                    <div className="min-w-0">
+                      <span className="block text-[10px] uppercase tracking-wide text-[#746A5F]">
+                        {lang === 'VIE' ? 'Ngày sở hữu' : 'Acquired'}
+                      </span>
+                      <b className="block truncate text-[0.8125rem] font-bold tabular-nums text-[#241F1A]">
+                        {formatDate(artwork.acquiredAt)}
+                      </b>
+                    </div>
+                  </div>
+
+                  {/* Quyền độc bản: để dưới hộp dữ kiện, không phủ lên nhãn nguồn */}
+                  {artwork.exclusiveBadge ? (
+                    <span className="mt-1.5 inline-flex max-w-full items-center gap-1 rounded-full border border-[#8A6A1F]/40 bg-[#8A6A1F]/10 px-2 py-0.5 text-[10px] font-semibold text-[#8A6A1F]">
+                      <Crown size={10} className="shrink-0" aria-hidden />
+                      <span className="min-w-0 truncate">{exclusiveLabel(artwork.exclusiveBadge, lang)}</span>
+                    </span>
+                  ) : null}
+
+                  {/* Hành động: tải bản gốc · chứng nhận · nguồn */}
+                  <div className="mt-2 flex items-center gap-2">
+                    {artwork.downloadUrl ? (
+                      <a
+                        href={artwork.downloadUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex min-w-0 flex-1 items-center justify-center gap-1.5 rounded-xl border border-[#2F6B63]/45 bg-[#2F6B63]/10 px-3 py-2 text-[0.75rem] font-semibold text-[#2F6B63] transition hover:bg-[#2F6B63]/20"
+                      >
+                        <Download size={13} aria-hidden />
+                        <span className="whitespace-nowrap">{lang === 'VIE' ? 'Tải gốc' : 'Download'}</span>
+                      </a>
+                    ) : (
+                      <span className="inline-flex min-w-0 flex-1 items-center justify-center gap-1.5 rounded-xl border border-[#221E1A]/10 px-3 py-2 text-[0.75rem] text-[#746A5F]">
+                        <span className="whitespace-nowrap">{lang === 'VIE' ? 'Chưa có tệp' : 'No file yet'}</span>
+                      </span>
+                    )}
+
+                    {artwork.certificateNumber ? (
+                      <button
+                        type="button"
+                        onClick={() => void handleOpenCertificate(artwork)}
+                        disabled={loadingCertId === artwork.id}
+                        title={`Chứng nhận ${artwork.certificateNumber}`}
+                        className="inline-flex min-w-0 flex-1 items-center justify-center gap-1.5 rounded-xl border border-[#8A6A1F]/45 bg-[#8A6A1F]/10 px-3 py-2 text-[0.75rem] font-semibold text-[#8A6A1F] transition hover:bg-[#8A6A1F]/20"
+                      >
+                        {loadingCertId === artwork.id ? (
+                          <RefreshCw size={13} className="animate-spin" aria-hidden />
+                        ) : (
+                          <FileCheck2 size={13} aria-hidden />
+                        )}
+                        <span className="whitespace-nowrap">{lang === 'VIE' ? 'Chứng nhận' : 'Certificate'}</span>
+                      </button>
+                    ) : null}
+
+                    {artwork.sourceDetailUrl ? (
+                      <a
+                        href={artwork.sourceDetailUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        aria-label={`Xem chi tiết nguồn của ${artwork.title}`}
+                        title={lang === 'VIE' ? 'Xem chi tiết nguồn' : 'View source'}
+                        className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-[#221E1A]/15 bg-[#FFFCF6] text-[#6E6459] transition hover:border-[#B24A26]/40 hover:text-[#241F1A]"
+                      >
+                        <ExternalLink size={14} aria-hidden />
+                      </a>
+                    ) : null}
+                  </div>
+                </div>
+              </article>
+            );
+          })}
+        </div>
       )}
 
-      {/* Lightbox Zoom Modal */}
-      {lightboxArtwork && (
+            {selectedCert ? (
+        <AuctionCertificateCard certificate={selectedCert} onClose={() => setSelectedCert(null)} />
+      ) : null}
+
+      {certArtwork ? (
+        <OwnedArtworkCertificate
+          artwork={certArtwork}
+          sourceLabel={sourceLabel(certArtwork.sourceType, lang)}
+          lang={lang}
+          onClose={() => setCertArtwork(null)}
+        />
+      ) : null}
+
+{/* ─── LIGHTBOX ───────────────────────────────────────── */}
+      {lightboxArtwork ? (
         <div
+          className="fixed inset-0 z-[300] grid place-items-center bg-[#221E1A]/70 p-4 backdrop-blur-md"
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-xl p-4 sm:p-8 animate-fadeIn"
-          onClick={() => setLightboxArtwork(null)}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setLightboxArtwork(null);
+          }}
         >
-          <div
-            className="relative flex flex-col max-h-[95vh] max-w-5xl w-full rounded-3xl border border-white/15 bg-[#171926]/95 overflow-hidden shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Lightbox Header */}
-            <div className="flex items-center justify-between border-b border-white/10 p-4 sm:px-6">
-              <div className="flex items-center gap-3">
-                {getSourceBadge(lightboxArtwork.sourceType)}
-                <h3 className="font-h1 text-sm sm:text-base font-bold text-white line-clamp-1">
-                  {lightboxArtwork.title}
-                </h3>
-              </div>
-
-              <div className="flex items-center gap-2">
-                {lightboxArtwork.downloadUrl && (
-                  <a
-                    href={lightboxArtwork.downloadUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-500/40 bg-emerald-500/20 px-3 py-1.5 text-xs font-semibold text-emerald-300 hover:bg-emerald-500/30 transition"
-                  >
-                    <Download size={13} />
-                    {lang === 'VIE' ? 'Tải ảnh gốc' : 'Download Full'}
-                  </a>
-                )}
-                <button
-                  onClick={() => setLightboxArtwork(null)}
-                  className="flex size-8 items-center justify-center rounded-full bg-white/10 text-slate-300 hover:bg-white/20 hover:text-white transition"
-                  title="Đóng"
-                >
-                  <X size={16} />
-                </button>
-              </div>
-            </div>
-
-            {/* Lightbox Image Body */}
-            <div className="relative flex-1 min-h-[50vh] sm:min-h-[65vh] w-full bg-black/60 flex items-center justify-center p-4">
-              <Image
+          <div className="relative grid max-h-[92dvh] w-full max-w-[1100px] overflow-hidden rounded-[24px] bg-[#FFFCF6] shadow-[0_44px_90px_-44px_rgba(58,42,26,0.7)] lg:grid-cols-[minmax(0,auto)_20rem]">
+            <div className="grid place-items-center bg-[#F0E7D8] p-2">
+              {/* Ảnh tự quyết chiều rộng khung: không còn mảng nền trống khi tranh dọc */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
                 src={lightboxArtwork.imageUrl || lightboxArtwork.thumbnailUrl || FALLBACK_IMAGE}
                 alt={lightboxArtwork.title}
-                fill
-                unoptimized
-                className="object-contain"
+                className="max-h-[86dvh] w-auto max-w-full object-contain"
+                draggable={false}
               />
             </div>
+            <div className="flex flex-col gap-4 overflow-y-auto p-6">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <h2 className="font-[family-name:var(--font-display)] text-xl leading-snug text-[#241F1A]">
+                    {lightboxArtwork.title}
+                  </h2>
+                  <p className="mt-1 text-sm text-[#6E6459]">{lightboxArtwork.creatorName}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setLightboxArtwork(null)}
+                  aria-label="Đóng"
+                  className="icon-btn shrink-0"
+                >
+                  <X size={16} aria-hidden />
+                </button>
+              </div>
 
-            {/* Lightbox Footer Details */}
-            <div className="border-t border-white/10 p-4 sm:px-6 flex flex-wrap items-center justify-between gap-4 text-xs text-slate-300 bg-white/[0.02]">
-              <div className="flex items-center gap-4">
-                <span className="flex items-center gap-1.5">
-                  <User size={13} className="text-brand-periwinkle" />
-                  {lang === 'VIE' ? 'Tác giả:' : 'Creator:'}{' '}
-                  <strong className="text-white">{lightboxArtwork.creatorName}</strong>
-                </span>
-
-                <span className="flex items-center gap-1.5">
-                  <Calendar size={13} className="text-slate-400" />
-                  {lang === 'VIE' ? 'Sở hữu từ:' : 'Acquired:'}{' '}
-                  <strong className="text-white font-mono">
-                    {formatDate(lightboxArtwork.acquiredAt)}
-                  </strong>
-                </span>
-
-                {lightboxArtwork.price ? (
-                  <span className="font-mono text-amber-300 font-bold">
-                    {formatVnd(lightboxArtwork.price)}
-                  </span>
+              <div className="kv">
+                <div>
+                  <span>{lang === 'VIE' ? 'Nguồn' : 'Source'}</span>
+                  <b>{sourceLabel(lightboxArtwork.sourceType, lang)}</b>
+                </div>
+                <div>
+                  <span>{lang === 'VIE' ? 'Ngày sở hữu' : 'Acquired'}</span>
+                  <b>{formatDate(lightboxArtwork.acquiredAt)}</b>
+                </div>
+                <div>
+                  <span>{lang === 'VIE' ? 'Giá' : 'Price'}</span>
+                  <b>{formatVnd(lightboxArtwork.price) ?? '—'}</b>
+                </div>
+                {lightboxArtwork.certificateNumber ? (
+                  <div>
+                    <span>{lang === 'VIE' ? 'Chứng nhận' : 'Certificate'}</span>
+                    <b>{lightboxArtwork.certificateNumber}</b>
+                  </div>
                 ) : null}
               </div>
 
-              {lightboxArtwork.sourceDetailUrl && (
-                <Link
-                  href={lightboxArtwork.sourceDetailUrl}
-                  className="inline-flex items-center gap-1 text-brand-periwinkle hover:underline font-semibold"
-                >
-                  {lightboxArtwork.sourceType === 'Commission'
-                    ? lang === 'VIE'
-                      ? 'Xem Workroom'
-                      : 'Open Workroom'
-                    : lightboxArtwork.sourceType === 'Trade'
-                      ? lang === 'VIE'
-                        ? 'Chi tiết Art Trade'
-                        : 'Trade Details'
-                      : lang === 'VIE'
-                        ? 'Chi tiết đấu giá'
-                        : 'Auction Details'}
-                  <ExternalLink size={12} />
-                </Link>
-              )}
+              <div className="mt-auto grid gap-2">
+                {lightboxArtwork.certificateNumber ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const item = lightboxArtwork;
+                      setLightboxArtwork(null);
+                      void handleOpenCertificate(item);
+                    }}
+                    className="btn btn--outline btn--block btn--sm"
+                  >
+                    <FileCheck2 size={14} aria-hidden /> {lang === 'VIE' ? 'Xem chứng nhận' : 'View certificate'}
+                  </button>
+                ) : null}
+                {lightboxArtwork.downloadUrl ? (
+                  <a
+                    href={lightboxArtwork.downloadUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="btn btn--primary btn--block btn--sm"
+                  >
+                    <Download size={14} aria-hidden /> {lang === 'VIE' ? 'Tải tác phẩm' : 'Download'}
+                  </a>
+                ) : null}
+                {lightboxArtwork.sourceDetailUrl ? (
+                  <Link href={lightboxArtwork.sourceDetailUrl} className="btn btn--outline btn--block btn--sm">
+                    {lang === 'VIE' ? 'Xem chi tiết nguồn' : 'View source'} <ExternalLink size={13} aria-hidden />
+                  </Link>
+                ) : null}
+              </div>
             </div>
           </div>
         </div>
-      )}
+      ) : null}
 
-      {/* Auction Certificate Modal Card */}
-      {selectedCert && (
-        <AuctionCertificateCard
-          certificate={selectedCert}
-          onClose={() => setSelectedCert(null)}
-        />
-      )}
+      {/* ─── CERTIFICATE MODAL ──────────────────────────────── */}
     </div>
   );
 }

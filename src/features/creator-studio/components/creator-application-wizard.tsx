@@ -1,9 +1,9 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { Pencil } from 'lucide-react';
+import { Check, CircleAlert, Loader2, Pencil, Plus, ShieldCheck, Upload, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useCloudinaryUpload } from '@/features/creator-studio/hooks/use-cloudinary-upload';
 import { creatorApplicationService } from '@/features/creator-studio/services/creator-application.service';
@@ -53,8 +53,14 @@ const primaryStyleSuggestions = [
   'Furry / Anthro',
 ];
 
+const primaryActionClass =
+  'min-h-11 rounded-xl bg-[#B24A26] px-5 py-2.5 text-sm font-bold text-[#F7F2E9] transition-[background-color,box-shadow,opacity] duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white';
+const primaryActionReadyClass = 'hover:bg-[#8C3718] hover:shadow-[0_0_18px_rgba(167,172,217,0.25)]';
+const primaryActionWaitingClass = 'cursor-not-allowed opacity-50';
+
+// Focus ô nhập dùng cùng "Periwinkle focus glow" với ô upload (DESIGN.md) thay vì chỉ đổi màu viền 1px.
 const inputClass =
-  'w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none focus:border-[#A7ACD9]';
+  'w-full min-w-0 rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-4 py-3 text-[#241F1A] outline-none transition-[border-color,box-shadow] duration-150 placeholder:text-[#6E6459] focus:border-[#B24A26] focus-visible:shadow-[0_0_15px_rgba(167,172,217,0.3)]';
 
 function ImageUploadSlot({
   label,
@@ -68,30 +74,34 @@ function ImageUploadSlot({
   onSelectFile: (file: File) => void;
 }) {
   const inputId = `upload-${label.replace(/\s+/g, '-').toLowerCase()}`;
+  const labelId = `${inputId}-label`;
 
   return (
     <div className="space-y-2">
-      <label className="text-xs uppercase tracking-wider text-[#C7C5CF]">{label}</label>
+      <label id={labelId} htmlFor={inputId} className="text-xs uppercase tracking-wider text-[#6E6459]">
+        {label} <span aria-hidden="true" className="text-[#A8321C]">*</span>
+      </label>
+      {/* Input file dùng sr-only (không phải hidden) để vẫn nhận focus bằng Tab và đọc được
+          bằng screen reader; khung dropzone sáng viền periwinkle khi input được focus bàn phím. */}
       <label
         htmlFor={inputId}
-        className="relative flex aspect-[16/10] w-full cursor-pointer items-center justify-center overflow-hidden rounded-xl border border-dashed border-white/20 bg-white/5 transition hover:border-[#A7ACD9]"
+        aria-busy={isUploading}
+        className="relative flex aspect-[2/1] w-full sm:aspect-[16/10] cursor-pointer items-center justify-center overflow-hidden rounded-xl border border-dashed border-[#221E1A]/20 bg-[#FFFCF6] transition hover:border-[#B24A26] has-[:focus-visible]:border-solid has-[:focus-visible]:border-[#B24A26] has-[:focus-visible]:shadow-[0_0_15px_rgba(167,172,217,0.3)]"
       >
         {value ? (
           <Image src={value} alt={label} fill unoptimized className="object-cover" />
         ) : (
-          <div className="flex flex-col items-center gap-2 text-[#C7C5CF]">
-            <span className="material-symbols-outlined text-3xl">
-              {isUploading ? 'progress_activity' : 'upload'}
-            </span>
+          <div className="flex flex-col items-center gap-2 text-[#6E6459]">
+            {isUploading ? <Loader2 className="animate-spin" size={28} aria-hidden /> : <Upload size={28} aria-hidden />}
             <span className="text-xs">{isUploading ? 'Uploading...' : 'Click to upload'}</span>
           </div>
         )}
         {value && !isUploading && (
           <span
             title="Nhấn vào ảnh để chọn ảnh khác"
-            className="absolute bottom-2 right-2 flex items-center gap-1.5 rounded-full bg-black/50 px-3 py-1.5 text-white/80 opacity-80 backdrop-blur-sm transition hover:opacity-100"
+            className="absolute bottom-2 right-2 flex items-center gap-1.5 rounded-full bg-[#E5D8C2] px-3 py-1.5 text-[#241F1A]/80 opacity-80 backdrop-blur-sm transition hover:opacity-100"
           >
-            <Pencil className="h-4 w-4" />
+            <Pencil aria-hidden="true" className="h-4 w-4" />
             <span className="text-xs font-medium">Chỉnh sửa</span>
           </span>
         )}
@@ -99,7 +109,9 @@ function ImageUploadSlot({
           id={inputId}
           type="file"
           accept="image/*"
-          className="hidden"
+          aria-labelledby={labelId}
+          aria-required="true"
+          className="sr-only"
           disabled={isUploading}
           onChange={(event) => {
             const file = event.target.files?.[0];
@@ -125,6 +137,8 @@ export function CreatorApplicationWizard({
   const [stepIndex, setStepIndex] = useState(0);
   const [form, setForm] = useState<WizardFormState>({ ...defaultValues, ...initialValues });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  // Lỗi của bước hiện tại, hiển thị ngay trong form (cạnh nút hành động) thay vì toast góc màn hình.
+  const [stepError, setStepError] = useState<string | null>(null);
 
   const idFrontUpload = useCloudinaryUpload('creator-applications/id-proof');
   const idBackUpload = useCloudinaryUpload('creator-applications/id-proof');
@@ -149,6 +163,15 @@ export function CreatorApplicationWizard({
 
     return true;
   }, [currentStep.key, form]);
+
+  // Xoá lỗi khi người dùng đã điền đủ bước hoặc chuyển sang bước khác.
+  useEffect(() => {
+    if (canContinue) setStepError(null);
+  }, [canContinue]);
+
+  useEffect(() => {
+    setStepError(null);
+  }, [stepIndex]);
 
   const handleIdFrontUpload = async (file: File) => {
     const url = await idFrontUpload.upload(file);
@@ -228,7 +251,7 @@ export function CreatorApplicationWizard({
 
   const nextStep = () => {
     if (!canContinue) {
-      toast.error('Please complete this step before continuing.');
+      setStepError('Please complete this step before continuing.');
       return;
     }
 
@@ -246,11 +269,11 @@ export function CreatorApplicationWizard({
   const handleSubmit = async () => {
     if (!canContinue) {
       if (!form.primaryStyle.trim()) {
-        toast.error('Vui lòng chọn hoặc nhập phong cách vẽ chính.');
+        setStepError('Vui lòng chọn hoặc nhập phong cách vẽ chính.');
       } else if (!form.speedpaintVideoUrls.some((link) => link.trim().length > 0)) {
-        toast.error('Vui lòng cung cấp link video speedpaint minh chứng.');
+        setStepError('Vui lòng cung cấp link video speedpaint minh chứng.');
       } else {
-        toast.error('Please complete this step before continuing.');
+        setStepError('Please complete this step before continuing.');
       }
       return;
     }
@@ -280,7 +303,12 @@ export function CreatorApplicationWizard({
       } else {
         await creatorApplicationService.submitApplication(payload);
         toast.success('Application submitted! Our moderators will review it soon.');
-        router.push('/');
+        // Trang cha truyền onDone để ở lại và hiện banner "đang chờ duyệt"; nơi khác vẫn về trang chủ.
+        if (onDone) {
+          onDone();
+        } else {
+          router.push('/');
+        }
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unable to submit your application.';
@@ -291,50 +319,58 @@ export function CreatorApplicationWizard({
   };
 
   return (
-    <div className="glass-container rounded-[32px] p-6 md:p-8 max-w-3xl mx-auto">
+    <div className="glass-container mx-auto max-w-3xl rounded-[28px] p-4 sm:rounded-[32px] sm:p-6 md:p-8">
       <div className="mb-8 flex items-start justify-between gap-4">
         <div>
-          <p className="text-xs uppercase tracking-[0.2em] text-[#A7ACD9]">
-            {mode === 'edit' ? 'Sửa đơn Creator' : 'Become a creator'}
+          <p className="text-xs uppercase tracking-[0.2em] text-[#B24A26]">
+            {mode === 'edit' ? 'Sửa đơn họa sĩ' : 'Become a creator'}
           </p>
-          <h1 className="font-h1 text-3xl font-bold text-white mt-3">
-            {mode === 'edit' ? 'Cập nhật đơn của bạn' : 'Đăng ký trở thành Creator'}
+          <h1 className="font-h1 text-3xl font-bold text-[#241F1A] mt-3">
+            {mode === 'edit' ? 'Cập nhật đơn của bạn' : 'Đăng ký trở thành họa sĩ'}
           </h1>
-          <p className="mt-2 text-sm text-[#C7C5CF]">
+          <p className="mt-2 text-pretty text-sm text-[#6E6459]">
             {mode === 'edit'
               ? 'Cập nhật lại thông tin đơn — đơn sẽ được đưa lại vào hàng chờ duyệt.'
-              : 'Hoàn thành 3 bước để gửi đơn xác minh. Moderator sẽ xét duyệt và cấp quyền Creator sau khi đơn được chấp thuận.'}
+              : 'Hoàn thành 3 bước để gửi đơn xác minh. kiểm duyệt viên sẽ xét duyệt và cấp quyền họa sĩ sau khi đơn được chấp thuận.'}
           </p>
         </div>
         {mode === 'edit' && onDone && (
           <button
             type="button"
             onClick={onDone}
-            className="shrink-0 rounded-xl border border-white/10 px-4 py-2 text-sm text-[#C7C5CF] hover:text-white"
-          >
-            Hủy
-          </button>
+            className="min-h-11 shrink-0 rounded-xl border border-[#221E1A]/10 px-4 py-2 text-sm text-[#6E6459] transition-colors hover:bg-[#FFFCF6] hover:text-[#241F1A] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#B24A26]"
+          > Hủy </button>
         )}
       </div>
 
-      <div className="mb-8 flex gap-3">
+      <div className="mb-8 flex gap-2 sm:gap-3">
         {steps.map((step, index) => {
           const isActive = index === stepIndex;
           const isDone = index < stepIndex;
 
           return (
-            <div key={step.key} className="flex-1">
-              <div className="mb-2 flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-[#C7C5CF]">
+            <div key={step.key} className="min-w-0 flex-1" aria-current={isActive ? 'step' : undefined}>
+              <div
+                className={`mb-2 flex items-center gap-2 text-[11px] uppercase leading-tight tracking-[0.12em] sm:text-xs sm:tracking-[0.16em] ${
+                  isActive ? 'text-[#241F1A]' : 'text-[#6E6459]'
+                }`}
+              >
+                {/* shrink-0: giữ huy hiệu tròn 24px, không bị bóp méo khi nhãn dài trên màn hình hẹp. */}
                 <span
-                  className={`flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-bold ${
-                    isActive ? 'bg-[#A7ACD9] text-[#1F2335]' : isDone ? 'bg-[#A7ACD9]/30 text-white' : 'bg-white/5 text-[#C7C5CF]'
+                  className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-bold ${
+                    isActive ? 'bg-[#B24A26] text-[#F7F2E9]' : isDone ? 'bg-[#B24A26]/30 text-[#241F1A]' : 'bg-[#FFFCF6] text-[#6E6459]'
                   }`}
                 >
-                  {index + 1}
+                  {isDone ? (
+                    <Check size={14} aria-hidden />
+                  ) : (
+                    index + 1
+                  )}
                 </span>
-                {step.label}
+                {/* Trên mobile chỉ hiện nhãn của bước đang làm; các bước khác vẫn đọc được bằng screen reader. */}
+                <span className={isActive ? 'min-w-0' : 'max-sm:sr-only'}>{step.label}</span>
               </div>
-              <div className={`h-1 rounded-full ${isDone || isActive ? 'bg-[#A7ACD9]' : 'bg-white/10'}`} />
+              <div className={`h-1 rounded-full ${isDone || isActive ? 'bg-[#B24A26]' : 'bg-[#F0E7D8]'}`} />
             </div>
           );
         })}
@@ -343,9 +379,17 @@ export function CreatorApplicationWizard({
       <div className="space-y-6">
         {currentStep.key === 'identity' && (
           <>
-            <p className="text-sm text-[#C7C5CF]">
-              Tải lên ảnh CCCD/CMND để xác minh danh tính. Thông tin chỉ dùng để duyệt hồ sơ, không hiển thị công khai.
-            </p>
+            {/* Khoảnh khắc nhạy cảm nhất của luồng: đóng khung câu cam kết quyền riêng tư (giữ nguyên chữ)
+                trong một panel periwinkle có icon khiên để người dùng thấy rõ dữ liệu được bảo vệ. */}
+            <div className="flex items-start gap-3.5 rounded-2xl border border-[#B24A26]/25 border-t-[#B24A26]/40 bg-[#B24A26]/[0.06] p-4 shadow-[0_0_20px_rgba(167,172,217,0.06)]">
+              <span
+                aria-hidden="true"
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#B24A26]/15 text-[#B24A26]"
+              >
+                <ShieldCheck size={16} aria-hidden />
+              </span>
+              <p className="pt-0.5 text-sm leading-relaxed text-[#241F1A]"> Tải lên ảnh CCCD/CMND để xác minh danh tính. Thông tin chỉ dùng để duyệt hồ sơ, không hiển thị công khai. </p>
+            </div>
             <div className="grid gap-6 md:grid-cols-2">
               <ImageUploadSlot
                 label="Mặt trước CCCD/CMND"
@@ -366,12 +410,20 @@ export function CreatorApplicationWizard({
         {currentStep.key === 'portfolio' && (
           <>
             <div className="space-y-3">
-              <label className="text-xs uppercase tracking-wider text-[#C7C5CF]">
+              <label
+                id="portfolio-links-label"
+                htmlFor="portfolio-link-0"
+                className="text-xs uppercase tracking-wider text-[#6E6459]"
+              >
                 Link Behance / ArtStation / Portfolio site
               </label>
               {form.portfolioLinks.map((link, index) => (
                 <div key={index} className="flex gap-2">
                   <input
+                    id={`portfolio-link-${index}`}
+                    aria-labelledby="portfolio-links-label"
+                    type="url"
+                    inputMode="url"
                     value={link}
                     onChange={(event) => updatePortfolioLink(index, event.target.value)}
                     className={inputClass}
@@ -381,10 +433,10 @@ export function CreatorApplicationWizard({
                     <button
                       type="button"
                       onClick={() => removePortfolioLink(index)}
-                      className="rounded-xl border border-white/10 px-3 text-[#C7C5CF] hover:border-red-400 hover:text-red-400"
+                      className="min-h-11 min-w-11 shrink-0 rounded-xl border border-[#221E1A]/10 px-3 text-[#6E6459] hover:border-[#A8321C]/30 hover:text-[#A8321C]"
                       aria-label="Remove link"
                     >
-                      <span className="material-symbols-outlined text-lg">close</span>
+                      <X size={18} aria-hidden />
                     </button>
                   )}
                 </div>
@@ -392,47 +444,58 @@ export function CreatorApplicationWizard({
               <button
                 type="button"
                 onClick={addPortfolioLink}
-                className="text-xs font-semibold text-[#A7ACD9] hover:underline"
-              >
-                + Thêm link khác
-              </button>
+                className="-ml-2 inline-flex min-h-11 items-center rounded-lg px-2 text-xs font-semibold text-[#B24A26] hover:underline focus-visible:outline-2 focus-visible:outline-[#B24A26]"
+              > + Thêm link khác </button>
             </div>
 
             <div className="space-y-3">
-              <label className="text-xs uppercase tracking-wider text-[#C7C5CF]">
-                Upload sản phẩm mẫu (bắt buộc, có thể chọn nhiều ảnh)
+              <label
+                id="upload-portfolio-sample-label"
+                htmlFor="upload-portfolio-sample"
+                className="text-xs uppercase tracking-wider text-[#6E6459]"
+              >
+                Upload sản phẩm mẫu (bắt buộc, có thể chọn nhiều ảnh){' '}
+                <span aria-hidden="true" className="text-[#A8321C]">*</span>
               </label>
               <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
                 {form.portfolioUploads.map((url) => (
-                  <div key={url} className="group relative aspect-square overflow-hidden rounded-xl border border-white/10">
+                  <div key={url} className="group relative aspect-square overflow-hidden rounded-xl border border-[#221E1A]/10">
                     <Image src={url} alt="Portfolio sample" fill unoptimized className="object-cover" />
+                    {/* Luôn có trong DOM để Tab tới được; chỉ ẩn bằng opacity trên thiết bị có hover,
+                        hiện sẵn trên màn hình cảm ứng và khi được focus bàn phím. */}
                     <button
                       type="button"
                       onClick={() => removePortfolioUpload(url)}
-                      className="absolute right-1 top-1 hidden h-6 w-6 items-center justify-center rounded-full bg-black/70 text-white group-hover:flex"
+                      className="absolute right-1 top-1 flex h-8 w-8 items-center justify-center rounded-full bg-[#E5D8C2] text-[#241F1A] opacity-100 transition-opacity focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#B24A26] [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100 [@media(hover:hover)]:focus-visible:opacity-100"
                       aria-label="Remove sample"
                     >
-                      <span className="material-symbols-outlined text-sm">close</span>
+                      <X size={14} aria-hidden />
                     </button>
                   </div>
                 ))}
                 <label
                   htmlFor="upload-portfolio-sample"
-                  className="flex aspect-square cursor-pointer items-center justify-center rounded-xl border border-dashed border-white/20 bg-white/5 text-[#C7C5CF] transition hover:border-[#A7ACD9]"
+                  aria-busy={portfolioUpload.isUploading}
+                  className="flex aspect-square cursor-pointer items-center justify-center rounded-xl border border-dashed border-[#221E1A]/20 bg-[#FFFCF6] text-[#6E6459] transition hover:border-[#B24A26] has-[:focus-visible]:border-solid has-[:focus-visible]:border-[#B24A26] has-[:focus-visible]:text-[#B24A26] has-[:focus-visible]:shadow-[0_0_15px_rgba(167,172,217,0.3)]"
                 >
-                  <span className="material-symbols-outlined text-2xl">
-                    {portfolioUpload.isUploading ? 'progress_activity' : 'add'}
-                  </span>
+                  {portfolioUpload.isUploading ? <Loader2 className="animate-spin" size={22} aria-hidden /> : <Plus size={22} aria-hidden />}
                   <input
                     id="upload-portfolio-sample"
                     type="file"
                     accept="image/*"
-                    className="hidden"
+                    multiple
+                    aria-labelledby="upload-portfolio-sample-label"
+                    aria-required="true"
+                    className="sr-only"
                     disabled={portfolioUpload.isUploading}
-                    onChange={(event) => {
-                      const file = event.target.files?.[0];
-                      if (file) handlePortfolioFileUpload(file);
+                    onChange={async (event) => {
+                      // Cho chọn nhiều ảnh trong một lần (đúng như nhãn "có thể chọn nhiều ảnh");
+                      // tải tuần tự để hook upload xử lý từng file và báo lỗi riêng từng ảnh.
+                      const files = Array.from(event.target.files ?? []);
                       event.target.value = '';
+                      for (const file of files) {
+                        await handlePortfolioFileUpload(file);
+                      }
                     }}
                   />
                 </label>
@@ -444,10 +507,11 @@ export function CreatorApplicationWizard({
         {currentStep.key === 'style' && (
           <>
             <div className="space-y-2">
-              <label className="text-xs uppercase tracking-wider text-[#C7C5CF]">
-                Phong cách chính <span className="text-red-400">*</span>
+              <label htmlFor="primary-style" className="text-xs uppercase tracking-wider text-[#6E6459]"> Phong cách chính <span aria-hidden="true" className="text-[#A8321C]">*</span>
               </label>
               <input
+                id="primary-style"
+                aria-required="true"
                 value={form.primaryStyle}
                 onChange={(event) => updatePrimaryStyle(event.target.value)}
                 className={inputClass}
@@ -462,12 +526,20 @@ export function CreatorApplicationWizard({
             </div>
 
             <div className="space-y-3">
-              <label className="text-xs uppercase tracking-wider text-[#C7C5CF]">
-                Link video Speedpaint (minh chứng vẽ tay) <span className="text-red-400">*</span>
+              <label
+                id="speedpaint-links-label"
+                htmlFor="speedpaint-link-0"
+                className="text-xs uppercase tracking-wider text-[#6E6459]"
+              > Link video Speedpaint (minh chứng vẽ tay) <span aria-hidden="true" className="text-[#A8321C]">*</span>
               </label>
               {form.speedpaintVideoUrls.map((link, index) => (
                 <div key={index} className="flex gap-2">
                   <input
+                    id={`speedpaint-link-${index}`}
+                    aria-labelledby="speedpaint-links-label"
+                    aria-required={index === 0 ? 'true' : undefined}
+                    type="url"
+                    inputMode="url"
                     value={link}
                     onChange={(event) => updateSpeedpaintLink(index, event.target.value)}
                     className={inputClass}
@@ -477,10 +549,10 @@ export function CreatorApplicationWizard({
                     <button
                       type="button"
                       onClick={() => removeSpeedpaintLink(index)}
-                      className="rounded-xl border border-white/10 px-3 text-[#C7C5CF] hover:border-red-400 hover:text-red-400"
+                      className="min-h-11 min-w-11 shrink-0 rounded-xl border border-[#221E1A]/10 px-3 text-[#6E6459] hover:border-[#A8321C]/30 hover:text-[#A8321C]"
                       aria-label="Remove link"
                     >
-                      <span className="material-symbols-outlined text-lg">close</span>
+                      <X size={18} aria-hidden />
                     </button>
                   )}
                 </div>
@@ -488,12 +560,23 @@ export function CreatorApplicationWizard({
               <button
                 type="button"
                 onClick={addSpeedpaintLink}
-                className="text-xs font-semibold text-[#A7ACD9] hover:underline"
-              >
-                + Thêm link khác
-              </button>
+                className="-ml-2 inline-flex min-h-11 items-center rounded-lg px-2 text-xs font-semibold text-[#B24A26] hover:underline focus-visible:outline-2 focus-visible:outline-[#B24A26]"
+              > + Thêm link khác </button>
             </div>
           </>
+        )}
+      </div>
+
+      {/* Vùng lỗi luôn có trong DOM (role="alert") để screen reader đọc ngay khi nội dung xuất hiện. */}
+      <div role="alert" aria-live="assertive">
+        {stepError && (
+          <p
+            id="wizard-step-error"
+            className="mt-6 flex items-start gap-2.5 rounded-xl border border-[#A8321C]/40 bg-[#A8321C]/10 px-4 py-3 text-sm text-[#A8321C]"
+          >
+            <CircleAlert size={18} className="text-[#A8321C]" aria-hidden />
+            <span>{stepError}</span>
+          </p>
         )}
       </div>
 
@@ -502,16 +585,19 @@ export function CreatorApplicationWizard({
           type="button"
           onClick={previousStep}
           disabled={stepIndex === 0}
-          className="rounded-xl border border-white/10 px-4 py-2 text-sm text-white disabled:cursor-not-allowed disabled:opacity-40"
+          className="min-h-11 rounded-xl border border-[#221E1A]/10 px-4 py-2 text-sm text-[#241F1A] transition-colors hover:bg-[#FFFCF6] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#B24A26] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent"
         >
           Previous
         </button>
 
+        {/* Nút chính mờ đi (aria-disabled) khi bước chưa đủ nhưng vẫn bấm được để hiện lỗi cụ thể. */}
         {stepIndex < steps.length - 1 ? (
           <button
             type="button"
             onClick={nextStep}
-            className="rounded-xl bg-[#A7ACD9] px-5 py-2.5 text-sm font-bold text-[#1F2335]"
+            aria-disabled={!canContinue}
+            aria-describedby={stepError ? 'wizard-step-error' : undefined}
+            className={`${primaryActionClass} ${canContinue ? primaryActionReadyClass : primaryActionWaitingClass}`}
           >
             Continue
           </button>
@@ -520,7 +606,9 @@ export function CreatorApplicationWizard({
             type="button"
             onClick={handleSubmit}
             disabled={isSubmitting}
-            className="rounded-xl bg-[#A7ACD9] px-5 py-2.5 text-sm font-bold text-[#1F2335] disabled:cursor-not-allowed disabled:opacity-60"
+            aria-disabled={!canContinue}
+            aria-describedby={stepError ? 'wizard-step-error' : undefined}
+            className={`${primaryActionClass} ${canContinue ? primaryActionReadyClass : primaryActionWaitingClass} disabled:cursor-not-allowed disabled:opacity-60`}
           >
             {isSubmitting ? 'Submitting...' : mode === 'edit' ? 'Save changes' : 'Submit application'}
           </button>
