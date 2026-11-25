@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { useEffect, useState } from 'react';
 import { ArtworkScanPanel } from '@/features/artwork-ai';
@@ -42,6 +42,8 @@ function ModerationMetadataEditor({
   categories: CategoryDto[];
   onSave: (artworkId: string, payload: { categoryId?: string | null; tags?: string[] }) => Promise<boolean>;
 }) {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
   const [categoryId, setCategoryId] = useState<string>(artwork.categoryId ?? '');
   const [tags, setTags] = useState<string[]>(() => artwork.tags.map((t) => t.name));
   const [tagInput, setTagInput] = useState('');
@@ -73,7 +75,7 @@ function ModerationMetadataEditor({
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-[#8C3718]">
           <Tags className="w-3.5 h-3.5 text-[#B24A26]" />
-          <span>Phân loại Danh mục &amp; Tag con</span>
+          <span>{isVie ? 'Phân loại Danh mục & Tag con' : 'Category & Sub-Tags'}</span>
         </div>
         <button
           type="button"
@@ -82,17 +84,19 @@ function ModerationMetadataEditor({
           className="inline-flex items-center gap-1.5 rounded-xl bg-[#B24A26] hover:bg-[#8C3718] px-3 py-1.5 text-[11px] font-bold text-[#F7F2E9] transition disabled:opacity-50 cursor-pointer"
         >
           <Save className="w-3 h-3" />
-          <span>{saving ? 'Đang lưu...' : 'Lưu phân loại'}</span>
+          <span>{saving ? (isVie ? 'Đang lưu...' : 'Saving...') : (isVie ? 'Lưu phân loại' : 'Save Category & Tags')}</span>
         </button>
       </div>
 
       <div className="space-y-2.5 text-xs">
-        <label className="block text-[11px] text-[#6E6459]"> Danh mục lớn (Category) <select
+        <label className="block text-[11px] text-[#6E6459]">
+          {isVie ? 'Danh mục lớn (Category)' : 'Category'}
+          <select
             value={categoryId}
             onChange={(e) => setCategoryId(e.target.value)}
             className="mt-1 w-full rounded-xl border border-[#221E1A]/10 bg-[#F0E7D8] px-3 py-2 text-xs text-[#241F1A] outline-none focus:border-[#B24A26]"
           >
-            <option value="">-- Chưa chọn danh mục --</option>
+            <option value="">{isVie ? '-- Chưa chọn danh mục --' : '-- Select a category --'}</option>
             {categories.map((cat) => (
               <option key={cat.id} value={cat.id}>
                 {cat.name}
@@ -102,7 +106,9 @@ function ModerationMetadataEditor({
         </label>
 
         <div>
-          <span className="block text-[11px] text-[#6E6459] mb-1">Tag con ({tags.length}/10)</span>
+          <span className="block text-[11px] text-[#6E6459] mb-1">
+            {isVie ? `Tag con (${tags.length}/10)` : `Sub-tags (${tags.length}/10)`}
+          </span>
           <div className="flex gap-1.5">
             <input
               value={tagInput}
@@ -113,14 +119,14 @@ function ModerationMetadataEditor({
                   handleAddTag();
                 }
               }}
-              placeholder="Thêm tag mới..."
+              placeholder={isVie ? 'Thêm tag mới...' : 'Add new tag...'}
               className="min-w-0 flex-1 rounded-xl border border-[#221E1A]/10 bg-[#F0E7D8] px-3 py-1.5 text-xs text-[#241F1A] outline-none focus:border-[#B24A26]"
             />
             <button
               type="button"
               onClick={handleAddTag}
               className="inline-flex items-center justify-center rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] hover:bg-[#F0E7D8] px-2.5 text-[#B24A26] cursor-pointer"
-              aria-label="Thêm tag"
+              aria-label={isVie ? 'Thêm tag' : 'Add tag'}
             >
               <Plus className="w-3.5 h-3.5" />
             </button>

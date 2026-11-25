@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { Palette, Gavel, ArrowLeftRight } from 'lucide-react';
+import { useLanguage } from '@/context/language-context';
 import {
   AdminAuctionMetricsDto,
   AdminCommissionMetricsDto,
@@ -29,6 +30,8 @@ export function CommissionBreakdownCard({
   auctionMetrics,
   tradeMetrics,
 }: LifecycleBreakdownCardProps) {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
   const [activeTab, setActiveTab] = useState<'commission' | 'auction' | 'trade'>('commission');
 
   // Use either nested object or direct numbers for Commissions
@@ -62,8 +65,12 @@ export function CommissionBreakdownCard({
       {/* Header with Title and Switcher Tabs */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#221E1A]/10 pb-4">
         <div>
-          <h3 className="font-h1 font-bold text-[#241F1A] text-base"> Phân bổ trạng thái giao dịch </h3>
-          <p className="text-[11px] text-[#6E6459]">Tỷ lệ phân bổ theo trạng thái vòng đời</p>
+          <h3 className="font-h1 font-bold text-[#241F1A] text-base">
+            {isVie ? 'Phân bổ trạng thái giao dịch' : 'Transaction Lifecycle Breakdown'}
+          </h3>
+          <p className="text-[11px] text-[#6E6459]">
+            {isVie ? 'Tỷ lệ phân bổ theo trạng thái vòng đời' : 'Distribution by lifecycle status'}
+          </p>
         </div>
 
         {/* Tab Switcher Pills */}
@@ -78,7 +85,7 @@ export function CommissionBreakdownCard({
             }`}
           >
             <Palette className="w-3.5 h-3.5" />
-            <span>Đơn đặt vẽ</span>
+            <span>{isVie ? 'Đơn đặt vẽ' : 'Commissions'}</span>
             <span className="text-[10px] opacity-80 font-mono">({totalComm})</span>
           </button>
 
@@ -92,7 +99,7 @@ export function CommissionBreakdownCard({
             }`}
           >
             <Gavel className="w-3.5 h-3.5" />
-            <span>Đơn đấu giá</span>
+            <span>{isVie ? 'Đơn đấu giá' : 'Auctions'}</span>
             <span className="text-[10px] opacity-80 font-mono">({totalAuct})</span>
           </button>
 
@@ -106,7 +113,7 @@ export function CommissionBreakdownCard({
             }`}
           >
             <ArrowLeftRight className="w-3.5 h-3.5" />
-            <span>Trao đổi tranh</span>
+            <span>{isVie ? 'Trao đổi tranh' : 'Art Trades'}</span>
             <span className="text-[10px] opacity-80 font-mono">({totalTr})</span>
           </button>
         </div>
@@ -118,7 +125,7 @@ export function CommissionBreakdownCard({
           {/* Completed */}
           <div className="space-y-1.5">
             <div className="flex justify-between text-xs font-medium">
-              <span className="text-[#241F1A]"> Đã hoàn tất & Giải ngân (<strong className="font-h1 font-bold text-[#2F6B63]">{completedComm}</strong>)
+              <span className="text-[#241F1A]"> {isVie ? 'Đã hoàn tất & Giải ngân' : 'Completed & Released'} (<strong className="font-h1 font-bold text-[#2F6B63]">{completedComm}</strong>)
               </span>
               <span className="text-[#2F6B63] font-h1 font-extrabold text-sm">
                 {calcPct(completedComm, totalComm)}%
@@ -135,7 +142,7 @@ export function CommissionBreakdownCard({
           {/* In Progress */}
           <div className="space-y-1.5">
             <div className="flex justify-between text-xs font-medium">
-              <span className="text-[#241F1A]"> Đang thực hiện ký quỹ (<strong className="font-h1 font-bold text-[#8A6A1F]">{inProgressComm}</strong>)
+              <span className="text-[#241F1A]"> {isVie ? 'Đang thực hiện ký quỹ' : 'In Progress (Escrow)'} (<strong className="font-h1 font-bold text-[#8A6A1F]">{inProgressComm}</strong>)
               </span>
               <span className="text-[#8A6A1F] font-h1 font-extrabold text-sm">
                 {calcPct(inProgressComm, totalComm)}%
@@ -153,7 +160,7 @@ export function CommissionBreakdownCard({
           {pendingComm > 0 && (
             <div className="space-y-1.5">
               <div className="flex justify-between text-xs font-medium">
-                <span className="text-[#241F1A]"> Chờ họa sĩ nhận đơn (<strong className="font-h1 font-bold text-[#2C5A86]">{pendingComm}</strong>)
+                <span className="text-[#241F1A]"> {isVie ? 'Chờ họa sĩ nhận đơn' : 'Pending Acceptance'} (<strong className="font-h1 font-bold text-[#2C5A86]">{pendingComm}</strong>)
                 </span>
                 <span className="text-[#2C5A86] font-h1 font-extrabold text-sm">
                   {calcPct(pendingComm, totalComm)}%
@@ -171,7 +178,7 @@ export function CommissionBreakdownCard({
           {/* Disputed */}
           <div className="space-y-1.5">
             <div className="flex justify-between text-xs font-medium">
-              <span className="text-[#241F1A]"> Tranh chấp cần phân xử (<strong className="font-h1 font-bold text-[#A8321C]">{disputedComm}</strong>)
+              <span className="text-[#241F1A]"> {isVie ? 'Tranh chấp cần phân xử' : 'Disputed (Needs Ruling)'} (<strong className="font-h1 font-bold text-[#A8321C]">{disputedComm}</strong>)
               </span>
               <span className="text-[#A8321C] font-h1 font-extrabold text-sm">
                 {calcPct(disputedComm, totalComm)}%
@@ -193,7 +200,7 @@ export function CommissionBreakdownCard({
           {/* Active Bidding */}
           <div className="space-y-1.5">
             <div className="flex justify-between text-xs font-medium">
-              <span className="text-[#241F1A]"> Đang diễn ra đấu giá (<strong className="font-h1 font-bold text-[#2F6B63]">{activeAuct}</strong>)
+              <span className="text-[#241F1A]"> {isVie ? 'Đang diễn ra đấu giá' : 'Active Bidding'} (<strong className="font-h1 font-bold text-[#2F6B63]">{activeAuct}</strong>)
               </span>
               <span className="text-[#2F6B63] font-h1 font-extrabold text-sm">
                 {calcPct(activeAuct, totalAuct)}%
@@ -210,7 +217,7 @@ export function CommissionBreakdownCard({
           {/* Settled / Completed */}
           <div className="space-y-1.5">
             <div className="flex justify-between text-xs font-medium">
-              <span className="text-[#241F1A]"> Đã chốt & Hoàn tất (<strong className="font-h1 font-bold text-[#5F3F86]">{completedAuct}</strong>)
+              <span className="text-[#241F1A]"> {isVie ? 'Đã chốt & Hoàn tất' : 'Settled & Completed'} (<strong className="font-h1 font-bold text-[#5F3F86]">{completedAuct}</strong>)
               </span>
               <span className="text-[#5F3F86] font-h1 font-extrabold text-sm">
                 {calcPct(completedAuct, totalAuct)}%
@@ -227,7 +234,7 @@ export function CommissionBreakdownCard({
           {/* Scheduled / Upcoming */}
           <div className="space-y-1.5">
             <div className="flex justify-between text-xs font-medium">
-              <span className="text-[#241F1A]"> Sắp diễn ra (<strong className="font-h1 font-bold text-[#2C5A86]">{scheduledAuct}</strong>)
+              <span className="text-[#241F1A]"> {isVie ? 'Sắp diễn ra' : 'Scheduled'} (<strong className="font-h1 font-bold text-[#2C5A86]">{scheduledAuct}</strong>)
               </span>
               <span className="text-[#2C5A86] font-h1 font-extrabold text-sm">
                 {calcPct(scheduledAuct, totalAuct)}%
@@ -244,7 +251,7 @@ export function CommissionBreakdownCard({
           {/* Disputed */}
           <div className="space-y-1.5">
             <div className="flex justify-between text-xs font-medium">
-              <span className="text-[#241F1A]"> Tranh chấp bưu phẩm (<strong className="font-h1 font-bold text-[#A8321C]">{disputedAuct}</strong>)
+              <span className="text-[#241F1A]"> {isVie ? 'Tranh chấp bưu phẩm' : 'Shipping Disputed'} (<strong className="font-h1 font-bold text-[#A8321C]">{disputedAuct}</strong>)
               </span>
               <span className="text-[#A8321C] font-h1 font-extrabold text-sm">
                 {calcPct(disputedAuct, totalAuct)}%
@@ -262,7 +269,7 @@ export function CommissionBreakdownCard({
           {cancelledAuct > 0 && (
             <div className="space-y-1.5">
               <div className="flex justify-between text-xs font-medium">
-                <span className="text-[#241F1A]"> Đã huỷ / Quá hạn (<strong className="font-h1 font-bold text-[#746A5F]">{cancelledAuct}</strong>)
+                <span className="text-[#241F1A]"> {isVie ? 'Đã huỷ / Quá hạn' : 'Cancelled / Expired'} (<strong className="font-h1 font-bold text-[#746A5F]">{cancelledAuct}</strong>)
                 </span>
                 <span className="text-[#746A5F] font-h1 font-extrabold text-sm">
                   {calcPct(cancelledAuct, totalAuct)}%
@@ -285,7 +292,7 @@ export function CommissionBreakdownCard({
           {/* In Progress */}
           <div className="space-y-1.5">
             <div className="flex justify-between text-xs font-medium">
-              <span className="text-[#241F1A]"> Đang vẽ & Nộp tranh (<strong className="font-h1 font-bold text-[#2C6A86]">{inProgressTr}</strong>)
+              <span className="text-[#241F1A]"> {isVie ? 'Đang vẽ & Nộp tranh' : 'In Progress & Submitting'} (<strong className="font-h1 font-bold text-[#2C6A86]">{inProgressTr}</strong>)
               </span>
               <span className="text-[#2C6A86] font-h1 font-extrabold text-sm">
                 {calcPct(inProgressTr, totalTr)}%
@@ -302,7 +309,7 @@ export function CommissionBreakdownCard({
           {/* Completed */}
           <div className="space-y-1.5">
             <div className="flex justify-between text-xs font-medium">
-              <span className="text-[#241F1A]"> Hoàn tất thành công (<strong className="font-h1 font-bold text-[#2F6B63]">{completedTr}</strong>)
+              <span className="text-[#241F1A]"> {isVie ? 'Hoàn tất thành công' : 'Completed'} (<strong className="font-h1 font-bold text-[#2F6B63]">{completedTr}</strong>)
               </span>
               <span className="text-[#2F6B63] font-h1 font-extrabold text-sm">
                 {calcPct(completedTr, totalTr)}%
@@ -319,7 +326,7 @@ export function CommissionBreakdownCard({
           {/* Proposed */}
           <div className="space-y-1.5">
             <div className="flex justify-between text-xs font-medium">
-              <span className="text-[#241F1A]"> Chờ phản hồi đề xuất (<strong className="font-h1 font-bold text-[#8A6A1F]">{proposedTr}</strong>)
+              <span className="text-[#241F1A]"> {isVie ? 'Chờ phản hồi đề xuất' : 'Proposed (Awaiting Reply)'} (<strong className="font-h1 font-bold text-[#8A6A1F]">{proposedTr}</strong>)
               </span>
               <span className="text-[#8A6A1F] font-h1 font-extrabold text-sm">
                 {calcPct(proposedTr, totalTr)}%
@@ -336,7 +343,7 @@ export function CommissionBreakdownCard({
           {/* Disputed */}
           <div className="space-y-1.5">
             <div className="flex justify-between text-xs font-medium">
-              <span className="text-[#241F1A]"> Đang tranh chấp khiếu nại (<strong className="font-h1 font-bold text-[#A8321C]">{disputedTr}</strong>)
+              <span className="text-[#241F1A]"> {isVie ? 'Đang tranh chấp khiếu nại' : 'Disputed'} (<strong className="font-h1 font-bold text-[#A8321C]">{disputedTr}</strong>)
               </span>
               <span className="text-[#A8321C] font-h1 font-extrabold text-sm">
                 {calcPct(disputedTr, totalTr)}%
@@ -354,7 +361,7 @@ export function CommissionBreakdownCard({
           {cancelledTr > 0 && (
             <div className="space-y-1.5">
               <div className="flex justify-between text-xs font-medium">
-                <span className="text-[#241F1A]"> Đã huỷ / Từ chối (<strong className="font-h1 font-bold text-[#746A5F]">{cancelledTr}</strong>)
+                <span className="text-[#241F1A]"> {isVie ? 'Đã huỷ / Từ chối' : 'Cancelled / Rejected'} (<strong className="font-h1 font-bold text-[#746A5F]">{cancelledTr}</strong>)
                 </span>
                 <span className="text-[#746A5F] font-h1 font-extrabold text-sm">
                   {calcPct(cancelledTr, totalTr)}%

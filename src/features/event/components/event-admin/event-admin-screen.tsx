@@ -246,7 +246,7 @@ export function EventAdminScreen() {
         <div className="glass-container rounded-[24px] p-5 space-y-2 shadow-lg border border-[#221E1A]/10">
           <div className="flex items-center justify-between">
             <span className="text-[10px] text-[#6E6459] font-bold uppercase tracking-wider font-h1">
-              TOTAL CONTESTS & EVENTS
+              {isVie ? 'TỔNG CUỘC THI & SỰ KIỆN' : 'TOTAL CONTESTS & EVENTS'}
             </span>
             <div className="p-1.5 rounded-lg bg-[#8C3718]/10 text-[#8C3718]">
               <Trophy className="w-4 h-4" />
@@ -256,14 +256,16 @@ export function EventAdminScreen() {
             {stats.totalEventsCount || events.length}
           </h3>
           <p className="text-[11px] text-[#6E6459]">
-            <span className="font-h1 font-bold text-[#241F1A]/90">{stats.openEventsCount}</span> Đang mở nhận bài thi </p>
+            <span className="font-h1 font-bold text-[#241F1A]/90">{stats.openEventsCount}</span>{' '}
+            {isVie ? 'Đang mở nhận bài thi' : 'Open for submissions'}
+          </p>
         </div>
 
         {/* Card 2: Open Submissions */}
         <div className="glass-container rounded-[24px] p-5 space-y-2 shadow-lg border border-[#221E1A]/10">
           <div className="flex items-center justify-between">
             <span className="text-[10px] text-[#6E6459] font-bold uppercase tracking-wider font-h1">
-              TOTAL SUBMISSIONS
+              {isVie ? 'TỔNG BÀI DỰ THI' : 'TOTAL SUBMISSIONS'}
             </span>
             <div className="p-1.5 rounded-lg bg-[#2F6B63]/10 text-[#2F6B63]">
               <Layers className="w-4 h-4" />
@@ -272,14 +274,16 @@ export function EventAdminScreen() {
           <h3 className="font-h1 text-2xl font-extrabold text-[#2F6B63] tracking-tight">
             {stats.totalSubmissionsCount}
           </h3>
-          <p className="text-[11px] text-[#6E6459]"> Bài dự thi đã nộp trên toàn sàn </p>
+          <p className="text-[11px] text-[#6E6459]">
+            {isVie ? 'Bài dự thi đã nộp trên toàn sàn' : 'Total submissions across platform'}
+          </p>
         </div>
 
         {/* Card 3: Prize Pool */}
         <div className="glass-container rounded-[24px] p-5 space-y-2 shadow-lg border border-[#221E1A]/10">
           <div className="flex items-center justify-between">
             <span className="text-[10px] text-[#6E6459] font-bold uppercase tracking-wider font-h1">
-              TOTAL PRIZE POOL
+              {isVie ? 'TỔNG GIẢI THƯỞNG' : 'TOTAL PRIZE POOL'}
             </span>
             <div className="p-1.5 rounded-lg bg-[#8A6A1F]/10 text-[#8A6A1F]">
               <Trophy className="w-4 h-4 text-[#8A6A1F]" />
@@ -288,14 +292,16 @@ export function EventAdminScreen() {
           <h3 className="font-h1 text-2xl font-extrabold text-[#8A6A1F] tracking-tight">
             {stats.formattedTotalPrizePool || '0 ₫'}
           </h3>
-          <p className="text-[11px] text-[#8A6A1F] font-medium"> Quỹ giải thưởng cam kết bảo chứng </p>
+          <p className="text-[11px] text-[#8A6A1F] font-medium">
+            {isVie ? 'Quỹ giải thưởng cam kết bảo chứng' : 'Escrow-backed committed prize pool'}
+          </p>
         </div>
 
         {/* Card 4: Open Disputes / Jury Pending */}
         <div className="glass-container rounded-[24px] p-5 space-y-2 shadow-lg border border-[#221E1A]/10">
           <div className="flex items-center justify-between">
             <span className="text-[10px] text-[#6E6459] font-bold uppercase tracking-wider font-h1">
-              DISPUTES & FLAGS
+              {isVie ? 'KHIẾU NẠI & CỜ BÁO' : 'DISPUTES & FLAGS'}
             </span>
             <div className="p-1.5 rounded-lg bg-[#A8321C]/10 text-[#A8321C]">
               <AlertTriangle className="w-4 h-4" />
@@ -306,9 +312,13 @@ export function EventAdminScreen() {
           </h3>
           <p className="text-[11px] text-[#6E6459]">
             {openDisputesCount > 0 ? (
-              <span className="text-[#A8321C] font-medium">Khiếu nại bài thi cần phân xử</span>
+              <span className="text-[#A8321C] font-medium">
+                {isVie ? 'Khiếu nại bài thi cần phân xử' : 'Submission disputes pending ruling'}
+              </span>
             ) : (
-              <span className="text-[#2F6B63] font-medium">Không có tranh chấp tồn đọng</span>
+              <span className="text-[#2F6B63] font-medium">
+                {isVie ? 'Không có tranh chấp tồn đọng' : 'No pending disputes'}
+              </span>
             )}
           </p>
         </div>

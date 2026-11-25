@@ -15,6 +15,7 @@ import {
   DisputeArbitrationDetailDto,
   ResolveDisputeArbitrationRequest,
 } from '@/features/admin/types/dispute-arbitration.types';
+import { useLanguage } from '@/context/language-context';
 
 interface DisputeSettlementFormProps {
   dispute: DisputeArbitrationDetailDto;
@@ -27,6 +28,8 @@ export function DisputeSettlementForm({
   isSubmitting,
   onResolve,
 }: DisputeSettlementFormProps) {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
   const isResolved = dispute.status === 'Resolved';
   const totalEscrow = dispute.escrowHeldAmount ?? dispute.finalPrice;
   const totalSettledAmount =
@@ -180,7 +183,9 @@ export function DisputeSettlementForm({
         <div className="space-y-4 bg-[#F0E7D8] p-5 rounded-2xl border border-[#221E1A]/10">
           <div className="flex items-center justify-between">
             <span className="text-[10px] text-[#6E6459] font-bold uppercase tracking-wider block">
-              {isResolved ? 'SETTLEMENT RESULT' : `ESCROW REFUND SPLIT (${totalEscrow.toLocaleString('vi-VN')} VND)`}
+              {isResolved
+                ? (isVie ? 'KẾT QUẢ PHÂN XỬ' : 'SETTLEMENT RESULT')
+                : (isVie ? `CHIA KÝ QUỸ (${totalEscrow.toLocaleString('vi-VN')} VND)` : `ESCROW REFUND SPLIT (${totalEscrow.toLocaleString('vi-VN')} VND)`)}
             </span>
             <span className="text-[10px] font-mono text-[#5F3F86] font-bold bg-[#5F3F86]/10 px-2 py-0.5 rounded border border-[#5F3F86]/40">
               {clientRefundPercent}% / {100 - clientRefundPercent}%
@@ -192,19 +197,19 @@ export function DisputeSettlementForm({
             <div className="space-y-0.5">
               <div className="text-[10px] text-[#2F6B63] font-bold flex items-center gap-1">
                 <span className="w-2 h-2 rounded-full bg-[#2F6B63]/10 inline-block" />
-                Client Refund ({clientRefundPercent}%)
+                {isVie ? `Hoàn Khách (${clientRefundPercent}%)` : `Client Refund (${clientRefundPercent}%)`}
               </div>
               <div className="font-mono text-base font-bold text-[#241F1A]">
                 {clientAmount.toLocaleString('vi-VN')} ₫
               </div>
               <div className="text-[10px] text-[#6E6459] truncate">
-                To @{dispute.client.userName}
+                {isVie ? `Tới @${dispute.client.userName}` : `To @${dispute.client.userName}`}
               </div>
             </div>
 
             <div className="space-y-0.5 text-right">
               <div className="text-[10px] text-[#8C3718] font-bold flex items-center justify-end gap-1">
-                Creator Payout ({100 - clientRefundPercent}%)
+                {isVie ? `Trả Họa sĩ (${100 - clientRefundPercent}%)` : `Creator Payout (${100 - clientRefundPercent}%)`}
                 <span className="w-2 h-2 rounded-full bg-[#8C3718] inline-block" />
               </div>
               <div className="font-mono text-base font-bold text-[#241F1A]">
@@ -212,11 +217,13 @@ export function DisputeSettlementForm({
               </div>
               {!isResolved && platformFee > 0 && (
                 <div className="text-[10px] text-[#8A6A1F] font-medium">
-                  (Đã trừ 10% phí: {platformFee.toLocaleString('vi-VN')} ₫)
+                  {isVie
+                    ? `(Đã trừ 10% phí: ${platformFee.toLocaleString('vi-VN')} ₫)`
+                    : `(After 10% fee: ${platformFee.toLocaleString('vi-VN')} ₫)`}
                 </div>
               )}
               <div className="text-[10px] text-[#6E6459] truncate">
-                To @{dispute.creator.userName}
+                {isVie ? `Tới @${dispute.creator.userName}` : `To @${dispute.creator.userName}`}
               </div>
             </div>
           </div>

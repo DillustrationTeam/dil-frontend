@@ -1657,6 +1657,9 @@ export const engToVieMap: Record<string, string> = {
   '· already released, so the parcel is no longer protected': '· đã giải ngân trước, không còn bảo vệ bưu phẩm',
   '· full refund, no fee deducted': '· hoàn toàn bộ, không trừ phí',
   '· no fee deducted': '· chưa trừ phí',
+  'Auction Exclusive': 'Đấu giá',
+  'Commission Deliverable': 'Đơn vẽ hoàn tất',
+  'Art Trade Exchange': 'Trao đổi nghệ thuật',
 };
 
 export const engToVieRegex: Array<{ pattern: RegExp; replacement: string }> = [

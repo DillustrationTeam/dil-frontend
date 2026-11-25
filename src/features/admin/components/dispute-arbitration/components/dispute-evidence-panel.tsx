@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { DisputeArbitrationDetailDto } from '@/features/admin/types/dispute-arbitration.types';
 import { aiService } from '@/features/ai-assistant/services/ai.service';
+import { useLanguage } from '@/context/language-context';
 
 export interface DisputeEvidencePanelProps {
   dispute: DisputeArbitrationDetailDto;
@@ -27,6 +28,8 @@ function formatCurrency(amount: number): string {
 }
 
 export function DisputeEvidencePanel({ dispute }: DisputeEvidencePanelProps) {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
   const [aiSummary, setAiSummary] = useState<string | null>(null);
   const [loadingAi, setLoadingAi] = useState(false);
   const [aiError, setAiError] = useState<string | null>(null);
@@ -131,11 +134,11 @@ export function DisputeEvidencePanel({ dispute }: DisputeEvidencePanelProps) {
                 CL
               </div>
               <span className="font-bold text-[#2F6B63] text-xs">
-                Client Claim (@{dispute.client.userName}):
+                {isVie ? `Khiếu nại của Khách (@${dispute.client.userName}):` : `Client Claim (@${dispute.client.userName}):`}
               </span>
               {isClientRaiser && (
                 <span className="text-[9px] px-1.5 py-0.2 rounded bg-[#2F6B63]/20 text-[#2F6B63] font-bold uppercase">
-                  Filer
+                  {isVie ? 'Người nộp' : 'Filer'}
                 </span>
               )}
             </div>
@@ -156,11 +159,11 @@ export function DisputeEvidencePanel({ dispute }: DisputeEvidencePanelProps) {
                 CR
               </div>
               <span className="font-bold text-[#8A6A1F] text-xs">
-                Creator Claim (@{creatorUserDisplay}):
+                {isVie ? `Phản hồi của Họa sĩ (@${creatorUserDisplay}):` : `Creator Claim (@${creatorUserDisplay}):`}
               </span>
               {!isClientRaiser && (
                 <span className="text-[9px] px-1.5 py-0.2 rounded bg-[#8A6A1F]/20 text-[#8A6A1F] font-bold uppercase">
-                  Filer
+                  {isVie ? 'Người nộp' : 'Filer'}
                 </span>
               )}
             </div>
@@ -181,10 +184,10 @@ export function DisputeEvidencePanel({ dispute }: DisputeEvidencePanelProps) {
         <div className="flex items-center justify-between">
           <label className="text-xs font-bold text-[#241F1A] flex items-center gap-1.5">
             <MessageSquare className="w-3.5 h-3.5 text-[#B24A26]" />
-            Workroom Chat History Snapshot
+            {isVie ? 'Bản lưu lịch sử trao đổi phòng làm việc' : 'Workroom Chat History Snapshot'}
           </label>
           <span className="text-[10px] text-[#6E6459]">
-            {dispute.chatSnapshot.length} captured messages
+            {isVie ? `${dispute.chatSnapshot.length} tin nhắn đã lưu` : `${dispute.chatSnapshot.length} captured messages`}
           </span>
         </div>
 

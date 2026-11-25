@@ -3,12 +3,15 @@
 import React, { useMemo, useState } from 'react';
 import { ChevronLeft, ChevronRight, RotateCcw, Calendar } from 'lucide-react';
 import { AdminDailyRevenueDto } from '@/features/admin/types/admin.types';
+import { useLanguage } from '@/context/language-context';
 
 interface RevenueTrendChartProps {
   revenueTrend?: AdminDailyRevenueDto[];
 }
 
 export function RevenueTrendChart({ revenueTrend }: RevenueTrendChartProps) {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
   // Navigation offset: 0 = latest window, 1 = shifted 1 month back, 2 = shifted 2 months back, etc.
   const [offsetMonths, setOffsetMonths] = useState(0);
 
@@ -62,7 +65,9 @@ export function RevenueTrendChart({ revenueTrend }: RevenueTrendChartProps) {
     const formatMonthYear = (d: Date) =>
       isNaN(d.getTime())
         ? ''
-        : `T${d.getMonth() + 1}/${d.getFullYear()}`;
+        : isVie
+        ? `T${d.getMonth() + 1}/${d.getFullYear()}`
+        : `${d.toLocaleString('en-US', { month: 'short' })} ${d.getFullYear()}`;
 
     const label = `${formatMonthYear(firstDate)} - ${formatMonthYear(lastDate)}`;
 
@@ -71,7 +76,9 @@ export function RevenueTrendChart({ revenueTrend }: RevenueTrendChartProps) {
       const dateObj = new Date(`${key}-01T00:00:00`);
       const monthLabel = isNaN(dateObj.getTime())
         ? key
-        : `Tháng ${dateObj.getMonth() + 1}`;
+        : isVie
+        ? `Tháng ${dateObj.getMonth() + 1}`
+        : dateObj.toLocaleString('en-US', { month: 'short' });
       const yearLabel = isNaN(dateObj.getTime()) ? '' : `'${String(dateObj.getFullYear()).slice(2)}`;
       const isLast = idx === arr.length - 1;
       const heightPx =
@@ -100,7 +107,7 @@ export function RevenueTrendChart({ revenueTrend }: RevenueTrendChartProps) {
       periodLabel: label,
       totalPeriodRevenue: periodSum,
     };
-  }, [revenueTrend, offsetMonths]);
+  }, [revenueTrend, offsetMonths, isVie]);
 
   const handlePrevPeriod = () => {
     setOffsetMonths((prev) => prev + 1);
@@ -120,10 +127,12 @@ export function RevenueTrendChart({ revenueTrend }: RevenueTrendChartProps) {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#221E1A]/10 pb-4">
         <div>
           <div className="flex items-center gap-2">
-            <h3 className="font-h1 font-bold text-[#241F1A] text-base"> Xu hướng doanh thu sàn </h3>
+            <h3 className="font-h1 font-bold text-[#241F1A] text-base">
+              {isVie ? 'Xu hướng doanh thu sàn' : 'Platform Revenue Trend'}
+            </h3>
           </div>
           <p className="text-[11px] text-[#6E6459] mt-0.5">
-            Tổng thu giai đoạn:{' '}
+            {isVie ? 'Tổng thu giai đoạn:' : 'Period Total:'}{' '}
             <strong className="text-[#2F6B63] font-h1 font-bold">
               {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(totalPeriodRevenue)}
             </strong>
@@ -136,7 +145,7 @@ export function RevenueTrendChart({ revenueTrend }: RevenueTrendChartProps) {
             <button
               type="button"
               onClick={handleResetLatest}
-              title="Về giai đoạn gần nhất"
+              title={isVie ? 'Về giai đoạn gần nhất' : 'Reset to latest period'}
               className="p-1.5 rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] hover:bg-[#F0E7D8] text-[#6E6459] hover:text-[#241F1A] transition cursor-pointer text-xs"
             >
               <RotateCcw className="w-3.5 h-3.5" />
@@ -147,7 +156,7 @@ export function RevenueTrendChart({ revenueTrend }: RevenueTrendChartProps) {
             <button
               type="button"
               onClick={handlePrevPeriod}
-              title="Lùi 1 tháng"
+              title={isVie ? 'Lùi 1 tháng' : 'Previous month'}
               className="p-1 rounded-lg hover:bg-[#F0E7D8] text-[#6E6459] hover:text-[#241F1A] transition cursor-pointer active:scale-95"
             >
               <ChevronLeft className="w-4 h-4" />
@@ -162,7 +171,7 @@ export function RevenueTrendChart({ revenueTrend }: RevenueTrendChartProps) {
               type="button"
               onClick={handleNextPeriod}
               disabled={offsetMonths <= 0}
-              title="Tiến 1 tháng"
+              title={isVie ? 'Tiến 1 tháng' : 'Next month'}
               className="p-1 rounded-lg hover:bg-[#F0E7D8] text-[#6E6459] hover:text-[#241F1A] transition cursor-pointer active:scale-95 disabled:opacity-30 disabled:pointer-events-none"
             >
               <ChevronRight className="w-4 h-4" />

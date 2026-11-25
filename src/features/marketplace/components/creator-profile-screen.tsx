@@ -165,10 +165,10 @@ export function CreatorProfileScreen({ id }: { id: string }) {
 
   return (
     <ProfileLayout name={profile.displayName} bannerUrl={profile.bannerUrl} sidebar={<div>
-      <p className="text-xs uppercase tracking-wider text-[#B24A26]">Creator profile</p>
+      <p className="text-xs uppercase tracking-wider text-[#B24A26]">Hồ sơ họa sĩ</p>
       <h1 className="mt-2 break-words font-h1 text-3xl font-bold text-[#241F1A]">{profile.displayName}</h1>
-      <p className="mt-2 text-sm text-[#6E6459]">{profile.headline || 'Digital artist'}</p>
-      <div className="mt-5 flex items-center justify-between text-sm"><span>{profile.followerCount} người theo dõi</span><span>★ {profile.ratingAverage.toFixed(1)}</span></div>
+      <p className="mt-2 text-sm text-[#6E6459]">{profile.headline || 'Họa sĩ kỹ thuật số'}</p>
+      <div className="mt-5 flex items-center justify-between text-sm"><span>{profile.followerCount} <span>người theo dõi</span></span><span>★ {profile.ratingAverage.toFixed(1)}</span></div>
       {isOwnProfile ? (
         <Link href="/creator/profile/edit" className="mt-5 inline-flex w-full justify-center rounded-xl border border-[#221E1A]/10 px-4 py-2.5 text-sm text-[#241F1A]"> Chỉnh sửa hồ sơ </Link>
       ) : (

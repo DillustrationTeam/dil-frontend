@@ -169,8 +169,7 @@ export function CreatorApplicationReviewPanel() {
     <div className="mx-auto max-w-7xl">
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-xs uppercase tracking-[0.2em] text-[#A8321C]">{isVie ? 'Quản trị · SCR-21' : 'Admin · SCR-21'}</p>
-          <h1 className="font-h1 mt-2 text-2xl font-extrabold text-[#241F1A]">
+          <h1 className="font-h1 text-2xl font-extrabold text-[#241F1A]">
             {isVie ? 'Kiểm duyệt & Xác minh Hồ sơ Họa sĩ' : 'Creator Verification & Application Queue'}
           </h1>
         </div>

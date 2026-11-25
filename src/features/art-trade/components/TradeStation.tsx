@@ -1552,7 +1552,7 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
           <div className="glass-panel p-5 rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] flex flex-col justify-between">
             <div className="flex items-center justify-between mb-3">
               <span className="text-xs font-semibold text-brand-periwinkle">
-                {trade.initiator.fullName}&apos;s Confirmation
+                {isVie ? `Xác nhận của ${trade.initiator.fullName}` : `${trade.initiator.fullName}'s Confirmation`}
               </span>
               {trade.isInitiatorConfirmed ? (
                 <span className="text-xs text-[#2F6B63] font-semibold flex items-center gap-1">
@@ -1613,7 +1613,7 @@ export function TradeStation({ tradeId, initialData }: TradeStationProps) {
           <div className="glass-panel p-5 rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] flex flex-col justify-between">
             <div className="flex items-center justify-between mb-3">
               <span className="text-xs font-semibold text-[#6E6459]">
-                {trade.receiver.fullName}&apos;s Confirmation
+                {isVie ? `Xác nhận của ${trade.receiver.fullName}` : `${trade.receiver.fullName}'s Confirmation`}
               </span>
               {trade.isReceiverConfirmed ? (
                 <span className="text-xs text-[#2F6B63] font-semibold flex items-center gap-1">

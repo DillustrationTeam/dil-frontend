@@ -412,7 +412,7 @@ export function TradeOperationsConsole() {
         <div className="glass-container rounded-[24px] p-5 space-y-2 shadow-lg border border-[#221E1A]/10">
           <div className="flex items-center justify-between">
             <span className="text-[10px] text-[#6E6459] font-bold uppercase tracking-wider font-h1">
-              TOTAL SESSIONS
+              {isEng ? 'TOTAL SESSIONS' : 'TỔNG SỐ PHIÊN'}
             </span>
             <div className="p-1.5 rounded-lg bg-[#8C3718]/10 text-[#8C3718]">
               <ArrowLeftRight className="w-4 h-4" />
@@ -430,7 +430,7 @@ export function TradeOperationsConsole() {
         <div className="glass-container rounded-[24px] p-5 space-y-2 shadow-lg border border-[#221E1A]/10">
           <div className="flex items-center justify-between">
             <span className="text-[10px] text-[#6E6459] font-bold uppercase tracking-wider font-h1">
-              IN PROGRESS SESSIONS
+              {isEng ? 'IN PROGRESS SESSIONS' : 'PHIÊN ĐANG THỰC HIỆN'}
             </span>
             <div className="p-1.5 rounded-lg bg-[#2C6A86]/10 text-[#2C6A86]">
               <Clock className="w-4 h-4" />
@@ -448,7 +448,7 @@ export function TradeOperationsConsole() {
         <div className="glass-container rounded-[24px] p-5 space-y-2 shadow-lg border border-[#221E1A]/10">
           <div className="flex items-center justify-between">
             <span className="text-[10px] text-[#6E6459] font-bold uppercase tracking-wider font-h1">
-              COMPLETED TRADES
+              {isEng ? 'COMPLETED TRADES' : 'GIAO DỊCH HOÀN TẤT'}
             </span>
             <div className="p-1.5 rounded-lg bg-[#2F6B63]/10 text-[#2F6B63]">
               <CheckCircle2 className="w-4 h-4" />
@@ -466,7 +466,7 @@ export function TradeOperationsConsole() {
         <div className="glass-container rounded-[24px] p-5 space-y-2 shadow-lg border border-[#221E1A]/10">
           <div className="flex items-center justify-between">
             <span className="text-[10px] text-[#6E6459] font-bold uppercase tracking-wider font-h1">
-              DISPUTES & CLAIMS
+              {isEng ? 'DISPUTES & CLAIMS' : 'TRANH CHẤP & KHIẾU NẠI'}
             </span>
             <div className="p-1.5 rounded-lg bg-[#A8321C]/10 text-[#A8321C]">
               <ShieldAlert className="w-4 h-4" />
@@ -488,7 +488,7 @@ export function TradeOperationsConsole() {
         <div className="glass-container rounded-[24px] p-5 space-y-2 shadow-lg border border-[#221E1A]/10">
           <div className="flex items-center justify-between">
             <span className="text-[10px] text-[#6E6459] font-bold uppercase tracking-wider font-h1">
-              CANCELLED / REJECTED
+              {isEng ? 'CANCELLED / REJECTED' : 'ĐÃ HỦY / TỪ CHỐI'}
             </span>
             <div className="p-1.5 rounded-lg bg-[#E5D8C2] text-[#746A5F]">
               <XCircle className="w-4 h-4" />

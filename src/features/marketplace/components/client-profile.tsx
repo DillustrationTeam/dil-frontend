@@ -131,7 +131,7 @@ export function ClientProfile({ id }: { id: string }) {
 
               <div className="mt-3 flex items-center gap-1.5 text-sm text-[#6E6459]">
                 <Users className="h-4 w-4" />
-                <span>{following.length} Following</span>
+                <span><strong className="text-[#241F1A]">{following.length}</strong> Đang theo dõi</span>
               </div>
             </div>
 

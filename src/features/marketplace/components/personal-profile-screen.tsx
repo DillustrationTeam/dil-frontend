@@ -186,7 +186,7 @@ export function PersonalProfileScreen() {
         className="flex items-center gap-1.5 text-sm text-[#6E6459] transition hover:text-[#241F1A]"
       >
         <Users size={15} className="text-[#B24A26]" />
-        <span><strong className="text-[#241F1A]">{following.length}</strong> Following</span>
+        <span><strong className="text-[#241F1A]">{following.length}</strong> Đang theo dõi</span>
       </button>
       <button
         type="button"
@@ -194,7 +194,7 @@ export function PersonalProfileScreen() {
         className="flex items-center gap-1.5 text-sm text-[#6E6459] transition hover:text-[#241F1A]"
       >
         <Users size={15} className="text-[#B24A26]" />
-        <span><strong className="text-[#241F1A]">{followers.length}</strong> Followers</span>
+        <span><strong className="text-[#241F1A]">{followers.length}</strong> Người theo dõi</span>
       </button>
     </div>
 
