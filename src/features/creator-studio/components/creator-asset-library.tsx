@@ -10,6 +10,7 @@ import { getApiErrorMessage } from '@/lib/api-error';
 import { creatorProfileService } from '../services/creator-profile.service';
 import type { CreatorAssetDto } from '../types/creator-profile.types';
 import { assetDetails, assetMessage, assetSchema, type AssetDraft } from '../utils/creator-assets';
+import { SkeletonCardGrid } from '@/components/feedback/skeleton';
 
 const types = [['Pose', 'Pose mẫu'], ['Palette', 'Bảng màu'], ['Preset', 'Presets'], ['Ref', 'Tài liệu tham khảo']] as const;
 const fieldClass = 'w-full rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] p-3 text-sm text-[#241F1A]';
@@ -151,7 +152,12 @@ export function CreatorAssetLibrary({ onSelect, commissionId }: { onSelect?: (bo
     <p className="text-sm text-[#6E6459]">Lưu pose tham chiếu, bảng màu và công thức preset để dùng lại. {onSelect ? 'Chọn tài nguyên để chèn vào tin nhắn; bấm Gửi khi bạn sẵn sàng.' : 'Trong phòng làm việc, chọn Thư viện tài nguyên để chia sẻ với khách.'}</p>
     <div className="flex flex-wrap gap-2" role="tablist" aria-label="Loại tài nguyên">{types.map(([value, label]) => <button role="tab" aria-selected={type === value} key={value} onClick={() => { setType(value); setConfirmDelete(null); }} type="button"
       className={`rounded-full px-4 py-2 text-sm ${type === value ? 'bg-[#B24A26] text-[#F7F2E9]' : 'bg-[#FFFCF6] text-[#6E6459]'}`}>{label} ({assets.filter(a => matchesScope(a, value)).length})</button>)}</div>
-    {loading ? <p role="status" className="text-[#6E6459]">Đang tải thư viện…</p> : error ? <div role="alert" className="text-[#A8321C]">{error} <button onClick={() => { setLoading(true); setReload(n => n + 1); }} className="underline">Thử lại</button></div> : <>
+    {loading ? (
+        <div role="status" aria-busy="true">
+          <span className="sr-only">Đang tải thư viện…</span>
+          <SkeletonCardGrid count={6} className="xl:grid-cols-3" />
+        </div>
+      ) : error ? <div role="alert" className="text-[#A8321C]">{error} <button onClick={() => { setLoading(true); setReload(n => n + 1); }} className="underline">Thử lại</button></div> : <>
       {!onSelect && <button onClick={() => setEditor({ asset: null, type })} type="button" className="flex items-center gap-2 rounded-xl border border-[#B24A26]/40 px-4 py-3 text-[#B24A26]"><Plus size={18} />Thêm {types.find(t => t[0] === type)?.[1]}</button>}
       {!visible.length && <p className="rounded-2xl border border-dashed border-[#221E1A]/10 p-8 text-center text-sm text-[#6E6459]">Chưa có tài nguyên trong mục này. {onSelect ? 'Thêm tài nguyên trong họa sĩ xưởng vẽ.' : 'Tạo tài nguyên đầu tiên để sử dụng lại.'}</p>}
       <div className={`grid gap-4 ${onSelect ? 'sm:grid-cols-2' : 'sm:grid-cols-2 lg:grid-cols-3'}`}>{visible.map(asset => <article key={asset.id} className="glass-container min-w-0 rounded-3xl border border-[#221E1A]/10 p-4">

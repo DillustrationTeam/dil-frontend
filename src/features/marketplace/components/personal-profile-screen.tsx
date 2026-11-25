@@ -32,6 +32,7 @@ import {
   FollowedCreatorDto,
   FollowerUserDto,
 } from '../types/client-profile.types';
+import { SignInRequired } from '@/components/feedback/sign-in-required';
 import { Collections } from './collections';
 import { ProfileLayout, ProfileTabs } from './profile-layout';
 import {
@@ -153,7 +154,13 @@ export function PersonalProfileScreen() {
   }
 
   if (!authenticated || !user) {
-    return <div className="py-20 text-center"><h1 className="font-h1 text-2xl">Hồ sơ của bạn</h1><Link href="/login" className="mt-4 inline-block text-[#B24A26]">Đăng nhập để xem hồ sơ</Link></div>;
+    return (
+      <SignInRequired
+        title="Đăng nhập để xem hồ sơ của bạn"
+        description="Điểm uy tín, đánh giá và danh sách người theo dõi gắn với tài khoản cá nhân nên cần đăng nhập."
+        fullPage
+      />
+    );
   }
 
   const averageRating = reviews.length > 0 ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length : null;

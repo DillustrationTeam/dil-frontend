@@ -395,18 +395,18 @@ export default function LoginPage() {
 
             {/* Dev-only: bấm vào mới xổ ra, điền nhanh tài khoản seed theo role */}
             {process.env.NODE_ENV !== 'production' && (
-              <details className="rounded-[10px] border border-dashed border-[#221E1A]/22 px-3.5 py-3 text-[0.8125rem] text-[#5D554B] [&[open]_summary]:mb-3 [&[open]_summary]:text-[#241F1A]">
-                <summary className="flex cursor-pointer list-none items-center gap-1.5 font-medium text-[#635B51] transition-colors hover:text-[#241F1A] [&::-webkit-details-marker]:hidden">
+              <details className="devbox">
+                <summary>
                   <Info className="h-3.5 w-3.5 shrink-0" aria-hidden />
                   {isEng ? 'Test mode (development only)' : 'Chế độ test (chỉ môi trường dev)'}
                 </summary>
-                <div className="flex flex-wrap gap-2">
+                <div className="devbox__grid">
                   {seedAccounts.map((account) => (
                     <button
                       key={account.email}
                       type="button"
                       onClick={() => fillSeedAccount(account)}
-                      className="min-h-9 min-w-[5rem] flex-1 cursor-pointer rounded-[10px] border border-[#221E1A]/22 px-2 text-[0.8125rem] font-medium text-[#241F1A] transition-colors hover:border-[#B24A26] hover:bg-[#B24A26]/10 hover:text-[#8C3718]"
+                      
                     >
                       {account.label}
                     </button>

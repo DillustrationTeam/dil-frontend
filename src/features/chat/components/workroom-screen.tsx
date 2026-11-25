@@ -1,6 +1,7 @@
 'use client';
 
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useLanguage } from '@/context/language-context';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { z } from 'zod';
@@ -108,6 +109,8 @@ function resolveAttachmentUrl(url?: string | null): string {
 }
 
 export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: string | null }) {
+  const { lang } = useLanguage();
+  const isEng = lang === 'ENG';
   const [room, setRoom] = useState<ChatRoomDto | null>(null);
   const [messages, setMessages] = useState<ChatMessageDto[]>([]);
   const [loading, setLoading] = useState(true);
@@ -1418,7 +1421,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                         )}
                         <div className="truncate">
                           <p className="font-semibold text-on-surface truncate text-xs">{selectedFile.name}</p>
-                          <p className="text-[10px] text-outline">{(selectedFile.size / 1024 / 1024).toFixed(2)} MB · Sẵn sàng gửi</p>
+                          <p className="text-[10px] text-outline">{(selectedFile.size / 1024 / 1024).toFixed(2)} MB · {isEng ? 'ready to send' : 'Sẵn sàng gửi'}</p>
                         </div>
                       </div>
                       <button type="button" onClick={clearSelectedFile} className="rounded-full bg-[#F0E7D8] p-1 text-outline hover:text-[#241F1A] shrink-0">
@@ -1441,7 +1444,11 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                   {showAssetPicker && isCreator && !isChatDisabled && <CreatorAssetPicker commissionId={room.commissionId} onClose={() => setShowAssetPicker(false)} onSelect={body => {
                     const combined = [inputBody, body].filter(Boolean).join('\n\n');
                     const parsed = workroomMessageSchema.safeParse(combined);
-                    if (!parsed.success) { setError('Nội dung tài nguyên và tin nhắn vượt 4000 ký tự. Hãy rút gọn ghi chú trước khi chèn.'); setShowAssetPicker(false); return; }
+                    if (!parsed.success) { setError(
+                isEng
+                  ? 'Asset content plus your message exceeds 4000 characters. Shorten the note before inserting.'
+                  : 'Nội dung tài nguyên và tin nhắn vượt 4000 ký tự. Hãy rút gọn ghi chú trước khi chèn.',
+              ); setShowAssetPicker(false); return; }
                     setInputBody(parsed.data); setShowAssetPicker(false);
                   }} />}
                   <form onSubmit={handleSendMessage} className="flex items-center gap-2">
@@ -1449,7 +1456,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                     <button
                       type="button"
                       onClick={() => setShowDisputeModal(true)}
-                      title="Gửi khiếu nại tranh chấp với Trọng tài sàn"
+                      title={isEng ? 'File a dispute with the platform arbitrator' : 'Gửi khiếu nại tranh chấp với Trọng tài sàn'}
                       className="group relative flex size-10 shrink-0 items-center justify-center border border-[#8A6A1F]/40 bg-[#FFFCF6] hover:bg-[#E5D8C2] hover:border-[#8A6A1F]/30 text-[#8A6A1F] transition shadow-md [clip-path:polygon(10px_0,100%_0,100%_100%,0_100%,0_10px)]"
                     >
                       <Scale size={18} className="text-[#8A6A1F] group-hover:scale-110 transition-transform" />
@@ -1460,17 +1467,17 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                       disabled={uploading || isChatDisabled}
                       onClick={() => fileInputRef.current?.click()}
                       className="flex size-10 shrink-0 items-center justify-center border border-[#221E1A]/10 bg-[#FFFCF6] text-outline hover:text-brand-periwinkle hover:border-brand-periwinkle/40 transition disabled:opacity-50 [clip-path:polygon(6px_0,100%_0,100%_calc(100%-6px),calc(100%-6px)_100%,0_100%,0_6px)]"
-                      title="Đính kèm tệp phác thảo"
+                      title={isEng ? 'Attach a draft file' : 'Đính kèm tệp phác thảo'}
                     >
                       <Paperclip size={16} className={uploading ? 'animate-spin' : ''} />
                     </button>
 
                     {isCreator && <button type="button" disabled={sending || uploading || isChatDisabled} onClick={() => setShowAssetPicker(true)}
-                      title="Thư viện tài nguyên" aria-label="Thư viện tài nguyên" className="flex size-10 shrink-0 items-center justify-center border border-[#221E1A]/10 bg-[#FFFCF6] text-[#B24A26] disabled:opacity-50"><FolderOpen size={16} /></button>}
+                      title={isEng ? 'Asset library' : 'Thư viện tài nguyên'} aria-label={isEng ? 'Asset library' : 'Thư viện tài nguyên'} className="flex size-10 shrink-0 items-center justify-center border border-[#221E1A]/10 bg-[#FFFCF6] text-[#B24A26] disabled:opacity-50"><FolderOpen size={16} /></button>}
 
                     <textarea
                       rows={2}
-                      aria-label="Nội dung tin nhắn"
+                      aria-label={isEng ? 'Message content' : 'Nội dung tin nhắn'}
                       maxLength={4000}
                       disabled={isChatDisabled}
                       value={inputBody}
@@ -1484,7 +1491,15 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                           event.currentTarget.form?.requestSubmit();
                         }
                       }}
-                      placeholder={isChatDisabled ? 'Phòng trao đổi đã đóng.' : 'Nhập tin nhắn hoặc trao đổi với đối tác...'}
+                      placeholder={
+                        isChatDisabled
+                          ? isEng
+                            ? 'This room is closed.'
+                            : 'Phòng trao đổi đã đóng.'
+                          : isEng
+                            ? 'Type a message or discuss with your partner…'
+                            : 'Nhập tin nhắn hoặc trao đổi với đối tác...'
+                      }
                       className="min-w-0 max-h-40 flex-1 resize-y border border-[#221E1A]/10 bg-[#F0E7D8] px-3.5 py-2.5 text-xs text-on-surface placeholder:text-outline focus:border-brand-periwinkle focus:outline-none disabled:opacity-50 [clip-path:polygon(8px_0,100%_0,100%_calc(100%-8px),calc(100%-8px)_100%,0_100%,0_8px)]"
                     />
 
@@ -1492,12 +1507,14 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                       type="submit"
                       disabled={(!inputBody.trim() && !selectedFile) || sending || uploading || isChatDisabled}
                       className="commission-primary flex size-10 shrink-0 items-center justify-center font-bold shadow-md transition disabled:opacity-50 [clip-path:polygon(0_0,calc(100%-6px)_0,100%_6px,100%_100%,6px_100%,0_calc(100%-6px))]"
-                      title="Gửi tin nhắn"
+                      title={isEng ? 'Send message' : 'Gửi tin nhắn'}
                     >
                       {sending || uploading ? <RefreshCw size={15} className="animate-spin" /> : <Send size={15} />}
                     </button>
                   </form>
-                  <p className="mt-1 text-right text-[10px] text-outline">Enter để gửi · Shift+Enter để xuống dòng</p>
+                  <p className="mt-1 text-right text-[10px] text-outline">
+                    {isEng ? 'Enter to send · Shift+Enter for a new line' : 'Enter để gửi · Shift+Enter để xuống dòng'}
+                  </p>
                 </div>
                   </div>
                 )}

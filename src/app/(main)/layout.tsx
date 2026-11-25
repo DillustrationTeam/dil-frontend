@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import TopNavbar from '@/components/navigation/TopNavbar';
 import CollapsibleSidebar from '@/components/navigation/CollapsibleSidebar';
 import { useAuthStore } from '@/store/use-auth-store';
+import { SignInRequired } from '@/components/feedback/sign-in-required';
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -14,6 +15,8 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   const pathname = usePathname();
   const router = useRouter();
   const isCreator = useAuthStore(state => state.roles.some(role => role.toLowerCase() === 'creator'));
+  const authenticated = useAuthStore((state) => state.isAuthenticated);
+  const hasHydrated = useAuthStore((state) => state.hasHydrated);
   const activeRole = pathname?.startsWith('/creator/') ? 'creator' : currentRole;
   const isProfilePage = pathname === '/profile' || pathname?.startsWith('/creators/');
 
@@ -42,6 +45,46 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
       window.removeEventListener('keydown', onKeyDown);
     };
   }, [isNavOpen]);
+
+  // Khu vực này (client/creator/wallet/profile/workroom/collections…) đọc toàn API riêng tư.
+  // Chặn ở layout để khách không thấy shell của thành viên và không bắn 401 vào console.
+  // Trong lúc đọc lại phiên từ localStorage: hiện khung xương thay vì trang trắng,
+  // để người dùng thấy phản hồi ngay chứ không tưởng app bị treo.
+  if (!hasHydrated) {
+    return (
+      <div className="min-h-[100dvh] bg-[#F7F2E9] p-4 sm:p-6" aria-busy="true" aria-live="polite">
+        <span className="sr-only">Đang khôi phục phiên đăng nhập…</span>
+        <div className="flex items-center gap-3">
+          <div className="skeleton h-9 w-40 rounded-full" />
+          <div className="skeleton ml-auto h-9 w-9 rounded-full" />
+          <div className="skeleton h-9 w-9 rounded-full" />
+        </div>
+        <div className="mt-6 grid gap-4 lg:grid-cols-[16.5rem_1fr]">
+          <div className="hidden space-y-3 lg:block">
+            {Array.from({ length: 7 }).map((_, index) => (
+              <div key={index} className="skeleton h-8 w-full" />
+            ))}
+          </div>
+          <div className="space-y-4">
+            <div className="skeleton h-3 w-24" />
+            <div className="skeleton h-8 w-1/2 max-w-sm" />
+            <div className="skeleton h-64 w-full" style={{ borderRadius: 16 }} />
+          </div>
+        </div>
+      </div>
+    );
+  }
+  if (!authenticated) {
+    return (
+      <div className="min-h-[100dvh] bg-[#F7F2E9] text-[#241F1A]">
+        <SignInRequired
+          fullPage
+          title="Đăng nhập để mở không gian làm việc"
+          description="Đơn vẽ, bộ sưu tập, ví và phòng làm việc đều gắn với tài khoản của bạn — đăng nhập để tiếp tục."
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="shell flex min-h-[100dvh] flex-col bg-[#F7F2E9] text-[#241F1A]">

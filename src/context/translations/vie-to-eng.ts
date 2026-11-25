@@ -2130,6 +2130,35 @@ export const extraVieToEngMap: Record<string, string> = {
   '% · đã dùng': '% · used',
   'Bước: +': 'Bid step: +',
   'Phiên tôi đang theo dõi (': 'Auctions I\'m watching (',
+
+  // Đợt 14: modal duyệt milestone, ghim/redline, phòng làm việc
+  'Chưa có bản xem trước.': 'No preview available yet.',
+  'Góp ý chỉnh sửa từ khách hàng:': 'Revision feedback from the client:',
+  'Đang chờ khách hàng duyệt bản vẽ.': 'Waiting for the client to review the artwork.',
+  'Yêu cầu chỉnh sửa (Có Redline)': 'Request changes (with Redline)',
+  'Chưa ưng ý? Bạn có thể khoanh vùng, ghim điểm trực tiếp lên tranh và yêu cầu họa sĩ chỉnh sửa.': 'Not happy yet? Draw regions, pin spots right on the artwork and ask the artist to revise.',
+  'Mở Redline Canvas & Góp ý': 'Open Redline canvas & feedback',
+  'Đã hết lượt sửa miễn phí': 'No free revisions left',
+  'AI Chuẩn hóa danh mục cần kiểm': 'AI-structure the checklist',
+  'Đang chuẩn hóa…': 'Structuring…',
+  'Gửi yêu cầu sửa': 'Send revision request',
+  'Quay lại': 'Back',
+  'Nộp bản chỉnh sửa mới': 'Submit new revision',
+  'Bút đỏ': 'Red pen',
+  'Thêm ghi chú': 'Add note',
+  'Thêm ghi chú lên tranh': 'Add note on artwork',
+  'Chỉnh sửa ghi chú': 'Edit note',
+  'Ví dụ: [Điểm 1]: Chỉnh lại ánh sáng phần tóc cho mềm hơn...': 'Example: [Pin 1]: soften the lighting on the hair…',
+  'Vui lòng nhập nội dung góp ý cần chỉnh sửa.': 'Please enter what needs to be revised.',
+  'Gửi yêu cầu chỉnh sửa thất bại. Có thể bạn đã vượt quá số lần sửa tối đa.': 'Failed to send the revision request. You may have exceeded the maximum number of revisions.',
+  ' trên tranh. Bấm nút Redline ở góc dưới để bật/tắt xem điểm ghim.': ' on the artwork. Use the Redline button at the bottom to toggle pinned spots.',
+  ' vị trí': ' spots',
+  'Đặt lại 100%': 'Reset to 100%',
+  'Bấm lên tranh để đánh dấu điểm cần chỉnh sửa': 'Click the artwork to pin a spot to revise',
+  'Vẽ nét đỏ khoanh vùng lên tranh': 'Draw red marks to circle areas to revise',
+  'Hoàn tác nét vẽ / ghim gần nhất': 'Undo the last stroke / pin',
+  'Xóa tất cả nét vẽ & ghim': 'Clear all strokes & pins',
+  'Chờ khách hàng nạp ký quỹ cho mốc này': 'Waiting for the client to fund escrow for this milestone',
 };
 
 export const extraVieToEngRegex: Array<{ pattern: RegExp; replacement: string }> = [
@@ -2285,4 +2314,12 @@ export const extraVieToEngRegex: Array<{ pattern: RegExp; replacement: string }>
   // Đợt 13: /creator/dashboard — thẻ số dư ký quỹ
   { pattern: /^Trong đó đóng băng do khiếu nại: (.+)$/i, replacement: 'Of which frozen for disputes: $1' },
   { pattern: /^Trong đó đóng băng do khiếu nại$/i, replacement: 'Of which frozen for disputes' },
+
+  // Đợt 14: chuỗi có số trong modal duyệt milestone / nút tải phác thảo
+  { pattern: /^Tải phác thảo Mốc #(\d+)$/i, replacement: 'Upload sketch · Milestone #$1' },
+  { pattern: /^Chờ ký quỹ Mốc #(\d+)$/i, replacement: 'Escrow pending · Milestone #$1' },
+  { pattern: /^Điểm (\d+) \(Bấm để xóa điểm\)$/i, replacement: 'Pin $1 (click to remove)' },
+  { pattern: /^Điểm (\d+)$/i, replacement: 'Pin $1' },
+  { pattern: /^Số lần sửa còn lại: (\d+) \/ (\d+)$/i, replacement: 'Revisions left: $1 / $2' },
+  { pattern: /^\* Khách có ghim$/i, replacement: '* Client pinned' },
 ];

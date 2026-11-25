@@ -61,7 +61,15 @@ export default function CreatorRateCardPage() {
 
   return <main className="mx-auto w-full max-w-4xl space-y-7 px-2 py-6 sm:px-6">
     <header className="space-y-2 text-center"><p className="text-xs font-bold uppercase tracking-widest text-[#B24A26]">CREATOR STUDIO</p><h1 className="font-h1 text-3xl font-extrabold text-[#241F1A]">Rate Card & Milestones</h1><p className="text-xs text-[#6E6459]">Bạn định giá và chia tiền theo cột mốc. khách hàng chỉ chọn gói, không sửa các mốc này.</p></header>
-    {loading ? <p className="text-center text-sm text-[#746A5F]">Đang tải bảng giá…</p> : <div className="space-y-5">{!hasProfile && <Link href="/creator-setup" className="inline-block text-xs text-[#8C3718] underline">Tạo hồ sơ họa sĩ</Link>}{packages.map((item, packageIndex) => <section key={item.id} className="space-y-5 rounded-[28px] border border-[#221E1A]/10 bg-[#FFFCF6]/85 p-5 sm:p-8">
+    {loading ? (
+      <div aria-busy="true" aria-live="polite">
+        <span className="sr-only">Đang tải bảng giá…</span>
+        <div className="grid gap-4 md:grid-cols-2">
+          <div className="skeleton h-40 w-full" style={{ borderRadius: 16 }} />
+          <div className="skeleton h-40 w-full" style={{ borderRadius: 16 }} />
+        </div>
+      </div>
+    ) : <div className="space-y-5">{!hasProfile && <Link href="/creator-setup" className="inline-block text-xs text-[#8C3718] underline">Tạo hồ sơ họa sĩ</Link>}{packages.map((item, packageIndex) => <section key={item.id} className="space-y-5 rounded-[28px] border border-[#221E1A]/10 bg-[#FFFCF6]/85 p-5 sm:p-8">
       <div className="flex items-center justify-between gap-3"><h2 className="font-h1 text-lg font-bold text-[#241F1A]">Gói {packageIndex + 1}</h2><button type="button" onClick={() => setPackages(current => current.filter(entry => entry.id !== item.id))} className="text-xs text-[#A8321C]">Xóa gói</button></div>
       <div className="space-y-2"><label className={label} htmlFor={`package-name-${item.id}`}>PACKAGE NAME</label><input id={`package-name-${item.id}`} className={field} value={item.name} onChange={event => updatePackage(item.id, { name: event.target.value })} placeholder="Ví dụ: Minh họa nhân vật" /></div>
       <div className="space-y-2"><label className={label} htmlFor={`package-description-${item.id}`}>DESCRIPTION</label><textarea id={`package-description-${item.id}`} className={field} rows={2} value={item.description ?? ''} onChange={event => updatePackage(item.id, { description: event.target.value })} placeholder="Phạm vi và quyền sử dụng" /></div>

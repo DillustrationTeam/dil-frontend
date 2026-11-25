@@ -287,7 +287,16 @@ export function BiddingDashboardScreen({ initialTab = 'all' }: { initialTab?: Da
 
   if (!authReady) {
     return (
-      <div className="mx-auto w-full max-w-4xl px-4 py-16 text-center text-on-surface-variant"> Đang tải phiên đấu giá của bạn… </div>
+      <div className="mx-auto w-full max-w-4xl px-4 py-10" aria-busy="true" aria-live="polite">
+        <span className="sr-only">Đang tải phiên đấu giá của bạn…</span>
+        <div className="skeleton h-3 w-24" />
+        <div className="skeleton mt-4 h-8 w-1/2 max-w-sm" />
+        <div className="mt-6 space-y-3">
+          <div className="skeleton h-24 w-full" style={{ borderRadius: 16 }} />
+          <div className="skeleton h-24 w-full" style={{ borderRadius: 16 }} />
+          <div className="skeleton h-24 w-full" style={{ borderRadius: 16 }} />
+        </div>
+      </div>
     );
   }
 
