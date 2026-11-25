@@ -83,6 +83,7 @@ export interface CreatorTermsDto {
   cancellationPolicy?: string | null;
   extended?: CreatorExtendedTermsDto | null;
   updatedAt?: string | null;
+  allowAiReferenceSketch?: boolean;
 }
 
 export interface UpdateCreatorTermsRequest {
@@ -90,6 +91,7 @@ export interface UpdateCreatorTermsRequest {
   revisionPolicy?: string | null;
   cancellationPolicy?: string | null;
   extended?: CreatorExtendedTermsDto | null;
+  allowAiReferenceSketch: boolean;
 }
 
 export interface AutoReplySettingDto {

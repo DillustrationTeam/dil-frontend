@@ -82,6 +82,9 @@ export interface Commission {
   creatorTermsSnapshot?: CreatorTermsDto | null;
   milestones?: Milestone[];
   referenceImages?: string[];
+  aiReferenceImages?: AiReferenceImageSummary[];
+  isFreestyle?: boolean;
+  layoutHint?: string | null;
   review?: Review | null;
   dispute?: Dispute | null;
   createdAt: string;
@@ -105,6 +108,12 @@ export interface Dispute {
 
 export type CommissionDispute = Dispute;
 
+export interface AiReferenceImageSummary {
+  url: string;
+  labelVi: string;
+  labelEn: string;
+}
+
 export interface RespondToCommissionPayload {
   action: 'Accept' | 'Reject' | 'Negotiate';
   negotiatePrice?: number;
@@ -123,6 +132,9 @@ export interface CreateCommissionPayload {
   description: string;
   deadlineAt?: string;
   referenceImages?: string[];
+  aiReferenceImageIds?: string[];
+  isFreestyle?: boolean;
+  layoutHint?: string;
 }
 
 export interface Review {

@@ -8,18 +8,22 @@ interface PolicyParametersGridProps {
   milestoneDays: number;
   revisionLimit: number;
   presignedUrlMinutes: number;
+  aiSketchLimit: number;
   onMilestoneDaysChange: (value: number) => void;
   onRevisionLimitChange: (value: number) => void;
   onPresignedUrlMinutesChange: (value: number) => void;
+  onAiSketchLimitChange: (value: number) => void;
 }
 
 export function PolicyParametersGrid({
   milestoneDays,
   revisionLimit,
   presignedUrlMinutes,
+  aiSketchLimit,
   onMilestoneDaysChange,
   onRevisionLimitChange,
   onPresignedUrlMinutesChange,
+  onAiSketchLimitChange,
 }: PolicyParametersGridProps) {
   const { lang } = useLanguage();
   const isVie = lang === 'VIE';
@@ -52,6 +56,18 @@ export function PolicyParametersGrid({
     }
   };
 
+  const handleAiSketchLimitIncrement = () => {
+    if (aiSketchLimit < 10) {
+      onAiSketchLimitChange(aiSketchLimit + 1);
+    }
+  };
+
+  const handleAiSketchLimitDecrement = () => {
+    if (aiSketchLimit > 1) {
+      onAiSketchLimitChange(aiSketchLimit - 1);
+    }
+  };
+
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-2">
@@ -61,7 +77,7 @@ export function PolicyParametersGrid({
         </h3>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
         {/* 1. Milestone Auto-Approval Timeline */}
         <div className="space-y-2 bg-[#F0E7D8] p-5 rounded-2xl border border-[#221E1A]/10 flex flex-col justify-between">
           <div>
@@ -186,6 +202,62 @@ export function PolicyParametersGrid({
                 </option>
               ))}
             </select>
+          </div>
+        </div>
+
+        {/* 4. AI Reference Sketch Generation Limit */}
+        <div className="space-y-2 bg-[#F0E7D8] p-5 rounded-2xl border border-[#221E1A]/10 flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <label
+                htmlFor="ai-sketch-limit-input"
+                className="block font-bold text-[#241F1A] text-xs font-h1"
+              >
+                {isVie ? 'Giới hạn lượt sketch AI' : 'AI Sketch Generation Limit'}
+              </label>
+              <span className="px-1.5 py-0.5 rounded text-[9px] font-mono bg-brand-periwinkle/20 text-brand-periwinkle border border-brand-periwinkle/40">
+                {isVie ? '/ 24 giờ' : '/ 24h'}
+              </span>
+            </div>
+            <p className="text-[10px] text-[#6E6459] mb-3 leading-relaxed">
+              {isVie
+                ? 'Số lượt khách được sinh ảnh AI phác thảo bố cục mỗi (khách, creator) trong 24 giờ.'
+                : 'Number of AI layout sketch generations allowed per (client, creator) pair per 24 hours.'}
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleAiSketchLimitDecrement}
+              disabled={aiSketchLimit <= 1}
+              className="w-10 h-11 rounded-xl bg-[#FFFCF6] border border-[#221E1A]/10 text-[#241F1A] font-bold hover:bg-[#F0E7D8] flex items-center justify-center transition-colors disabled:opacity-40 cursor-pointer"
+            >
+              -
+            </button>
+
+            <input
+              id="ai-sketch-limit-input"
+              type="number"
+              min="1"
+              max="10"
+              value={aiSketchLimit}
+              onChange={(e) =>
+                onAiSketchLimitChange(
+                  Math.max(1, Math.min(10, parseInt(e.target.value, 10) || 1))
+                )
+              }
+              className="flex-1 px-4 py-3 rounded-xl bg-[#FFFCF6] border border-[#221E1A]/10 text-[#241F1A] text-center font-mono font-bold text-sm focus:border-[#A8321C]/30 focus:outline-none"
+            />
+
+            <button
+              type="button"
+              onClick={handleAiSketchLimitIncrement}
+              disabled={aiSketchLimit >= 10}
+              className="w-10 h-11 rounded-xl bg-[#FFFCF6] border border-[#221E1A]/10 text-[#241F1A] font-bold hover:bg-[#F0E7D8] flex items-center justify-center transition-colors disabled:opacity-40 cursor-pointer"
+            >
+              +
+            </button>
           </div>
         </div>
       </div>
