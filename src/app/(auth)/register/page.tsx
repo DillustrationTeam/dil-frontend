@@ -293,7 +293,7 @@ export default function RegisterPage() {
         />
       ) : (
         <>
-          <header className="mb-7">
+          <header className="mb-6">
             <h1 className="font-h1 text-2xl font-bold text-[#241F1A] sm:text-3xl">
               {isEng ? 'Create Account' : 'Tạo tài khoản'}
             </h1>
@@ -304,7 +304,7 @@ export default function RegisterPage() {
             </p>
           </header>
 
-          <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>
+          <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
             {/* Full Name */}
             <div className="space-y-1.5">
               <label className={AUTH_LABEL_CLASS} htmlFor="fullName">
@@ -497,7 +497,7 @@ export default function RegisterPage() {
             </button>
           </form>
 
-          <div className="mt-7 space-y-5 border-t border-[#221E1A]/10 pt-6">
+          <div className="mt-6 space-y-4 border-t border-[#221E1A]/10 pt-5">
             <div className="flex items-center gap-4">
               <div className="h-px flex-1 bg-[#F0E7D8]" />
               <span className="text-[10px] uppercase tracking-widest text-[#746A5F]">

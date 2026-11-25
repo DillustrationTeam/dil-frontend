@@ -39,6 +39,9 @@ export function PublicHeader() {
   const [searchQuery, setSearchQuery] = useState('');
   const [suggestions, setSuggestions] = useState<SearchSuggestionsDto>({ categories: [], tags: [] });
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  // Mobile (< lg): chỉ hiện nút kính lúp; bấm mới xổ thanh tìm kiếm xuống.
+  const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
+  const mobileSearchInputRef = useRef<HTMLInputElement | null>(null);  const desktopSearchInputRef = useRef<HTMLInputElement | null>(null);
   // Trang chủ mở bằng hero tràn viền: nav ẩn cho tới khi cuộn (PASS 19 của bản redesign).
   const isHome = pathname === '/';
   const headerRef = useRef<HTMLElement | null>(null);
@@ -86,11 +89,40 @@ export function PublicHeader() {
     };
   }, [searchQuery, isSearchOpen, searchFocused]);
 
+  /** Một nút kính lúp dùng chung: mobile mở drawer, desktop duỗi ô nhập inline. */
+  const handleToggleSearch = () => {
+    const open = !(isSearchOpen || isMobileSearchOpen);
+    setIsSearchOpen(open);
+    setIsMobileSearchOpen(open);
+    if (!open) setSearchFocused(false);
+  };
+
   const handleSearchSubmit = (event: React.FormEvent) => {
     event.preventDefault();
     setIsSearchOpen(false);
+    setIsMobileSearchOpen(false);
     router.push(`/explore?q=${encodeURIComponent(searchQuery.trim())}`);
   };
+
+  // Mở thanh tìm kiếm: focus ô nhập tương ứng (mobile: drawer, desktop: ô duỗi); Esc đóng lại.
+  useEffect(() => {
+    if (!isSearchOpen && !isMobileSearchOpen) return;
+    const id = window.setTimeout(() => {
+      if (isSearchOpen) desktopSearchInputRef.current?.focus();
+      else mobileSearchInputRef.current?.focus();
+    }, 140);
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return;
+      setIsSearchOpen(false);
+      setIsMobileSearchOpen(false);
+      setSearchFocused(false);
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => {
+      window.clearTimeout(id);
+      window.removeEventListener('keydown', onKeyDown);
+    };
+  }, [isSearchOpen, isMobileSearchOpen]);
 
   const isAdmin = roles.some((r) => ['administrator', 'admin', 'moderator'].includes(r.toLowerCase()));
 
@@ -141,20 +173,22 @@ export function PublicHeader() {
         {/* Right: Search + Auth */}
         <div className="header__tail">
           <ThemeToggle className="hidden sm:grid" />
-          {/* Ô tìm kiếm inline hiện ở màn hình rộng (>= 2xl / 1536px) để không chèn menu */}
-          <form className="relative hidden shrink-0 2xl:block" onSubmit={handleSearchSubmit}>
-            <div className="input-wrap">
-              <Search aria-hidden />
-              <input
-                className="input min-h-10 w-56 rounded-full py-2 pl-9 text-sm 2xl:w-64"
-                placeholder={t('Tìm kiếm...')}
-                type="text"
-                aria-label={t('Tìm tác phẩm hoặc tác giả')}
-                value={searchQuery}
-                onFocus={() => setSearchFocused(true)}
-                onBlur={() => window.setTimeout(() => setSearchFocused(false), 160)}
-                onChange={(event) => setSearchQuery(event.target.value)}
-              />
+          {/* Desktop (>= lg): MỘT nút kính lúp; bấm mới duỗi ô nhập ra */}
+          <div className={`dsearch hidden lg:flex${isSearchOpen ? ' is-open' : ''}`}>
+            <form className="dsearch__form relative" onSubmit={handleSearchSubmit}>
+              <div className="input-wrap">
+                <Search aria-hidden />
+                <input
+                  ref={desktopSearchInputRef}
+                  className="input min-h-10 w-full rounded-full py-2 pl-9 text-sm"
+                  type="text"
+                  aria-label={t('Tìm tác phẩm hoặc tác giả')}
+                  value={searchQuery}
+                  onFocus={() => setSearchFocused(true)}
+                  onBlur={() => window.setTimeout(() => setSearchFocused(false), 160)}
+                  onChange={(event) => setSearchQuery(event.target.value)}
+                  tabIndex={isSearchOpen ? 0 : -1}
+                />
             </div>
             {searchFocused && (suggestions.categories.length > 0 || suggestions.tags.length > 0) && (
               <div className="absolute right-0 z-50 mt-2 w-80 space-y-2.5 rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] p-3 shadow-[0_30px_60px_-40px_rgba(74,52,30,0.8)]">
@@ -206,17 +240,22 @@ export function PublicHeader() {
                 )}
               </div>
             )}
-          </form>
-
-          {/* Nút mở thanh tìm kiếm cho màn hình lg..xl (1024px..1535px) */}
+            </form>
+          </div>
+          {/* MỘT nút kính lúp cho mọi bề rộng: mobile xổ drawer, desktop duỗi ô nhập inline */}
           <button
             type="button"
-            onClick={() => setIsSearchOpen((prev) => !prev)}
-            aria-expanded={isSearchOpen}
-            aria-label={isSearchOpen ? t('Đóng tìm kiếm') : t('Mở tìm kiếm')}
-            className="icon-btn hidden lg:grid 2xl:hidden"
+            onClick={handleToggleSearch}
+            aria-expanded={isSearchOpen || isMobileSearchOpen}
+            aria-controls="mobile-search"
+            aria-label={isSearchOpen || isMobileSearchOpen ? t('Đóng tìm kiếm') : t('Mở tìm kiếm')}
+            className={`icon-btn msearch-toggle${isSearchOpen || isMobileSearchOpen ? ' is-open' : ''}`}
           >
-            {isSearchOpen ? <X className="h-4 w-4" aria-hidden /> : <Search className="h-4 w-4" aria-hidden />}
+            {isSearchOpen || isMobileSearchOpen ? (
+              <X className="h-4 w-4" aria-hidden />
+            ) : (
+              <Search className="h-4 w-4" aria-hidden />
+            )}
           </button>
 
           {/* Menu cho < lg: nav desktop bị ẩn nên cần một cửa vào khác */}
@@ -312,22 +351,26 @@ export function PublicHeader() {
         </div>
       )}
 
-      {/* Thanh tìm kiếm hàng dưới: luôn hiện trên mobile (< lg), hoặc xổ khi bấm icon kính lúp trên lg..xl */}
-      <form
-        className={`${isSearchOpen ? 'flex' : 'flex lg:hidden'} wrap gap-2 pb-3 2xl:hidden`}
-        onSubmit={handleSearchSubmit}
-      >
-        <input
-          aria-label={t('Tìm tác phẩm hoặc tác giả')}
-          value={searchQuery}
-          onChange={(event) => setSearchQuery(event.target.value)}
-          placeholder={t('Tìm tên tranh hoặc tác giả…')}
-          className="input min-h-10 min-w-0 flex-1 rounded-full px-4 text-sm"
-        />
-        <button type="submit" className="btn btn--primary btn--sm">
-          {t('Tìm kiếm')}
-        </button>
-      </form>
+
+      {/* Mobile (< lg): thanh tìm kiếm xổ xuống có animation */}
+      <div className={`wrap msearch-drawer lg:hidden 2xl:hidden${isMobileSearchOpen ? ' is-open' : ''}`} id="mobile-search">
+        <div className="msearch-drawer__inner">
+          <form className="flex items-center gap-2" onSubmit={handleSearchSubmit}>
+            <input
+              ref={mobileSearchInputRef}
+              aria-label={t('Tìm tác phẩm hoặc tác giả')}
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+              placeholder={t('Tìm tên tranh hoặc tác giả…')}
+              className="input min-h-10 min-w-0 flex-1 rounded-full px-4 text-sm"
+              tabIndex={isMobileSearchOpen ? 0 : -1}
+            />
+            <button type="submit" className="btn btn--primary btn--sm" tabIndex={isMobileSearchOpen ? 0 : -1}>
+              {t('Tìm kiếm')}
+            </button>
+          </form>
+        </div>
+      </div>
     </header>
   );
 }

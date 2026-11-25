@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 
 import { CountUp, Reveal } from '@/components/motion';
-import { heroSession } from './hero-session';
+import { decideHeroMode } from './hero-session';
 import { apiClient } from '@/lib/api-client';
 import type { ApiResponse } from '@/types/api.types';
 import type { EventListItemDto } from '@/features/event/types/event.types';
@@ -317,38 +317,18 @@ export function LiveHomeGallery() {
       raf = requestAnimationFrame(update);
     };
 
-    // Điều hướng nội bộ quay lại trang chủ: vào thẳng dạng card, không bung full màn.
-    // Chỉ một lần mount đầu tiên của phiên (tức là vừa reload vào `/`) mới chạy full màn.
-    if (heroSession.entered) {
+    // Quyết định vào dạng card hay full màn cho CẢ chu kỳ mount này.
+    // - Vừa reload vào `/` (cờ `entered` còn false)  -> full màn, cuộn mới co.
+    // - Quay lại từ route khác (đã `entered`)         -> vào thẳng card.
+    // - React StrictMode (dev) chạy effect 2 lần liền (mount -> cleanup -> mount);
+    //   lần thứ hai phải DÙNG LẠI quyết định của lần đầu, không tự quyết lại, nếu không
+    //   lần đầu bị bỏ full màn còn lần quay lại lại bị bung full màn.
+    if (decideHeroMode(performance.now()) === 'locked') {
       lock();
-      /* Chặn khôi phục scroll của trình duyệt/Next: đặt manual + chỉ reset trong 300ms
-         đầu (Next restore trong vài frame). Không dùng interval dài — nó kéo người
-         dùng về đầu trang khi họ vừa cuộn xuống, đúng cảm giác "khựng". */
-      const previousRestoration = window.history.scrollRestoration;
-      window.history.scrollRestoration = 'manual';
-
-      let userMoved = false;
-      const markMoved = () => {
-        userMoved = true;
-      };
-      const gestures: Array<keyof WindowEventMap> = ['wheel', 'touchstart', 'touchmove', 'keydown', 'pointerdown'];
-      gestures.forEach((name) => window.addEventListener(name, markMoved, { passive: true, once: true }));
-
-      const top = () => {
-        if (!userMoved && window.scrollY !== 0) window.scrollTo(0, 0);
-      };
-      top();
-      requestAnimationFrame(top);
-      const timers = [60, 160, 300].map((delay) => window.setTimeout(top, delay));
-
       return () => {
-        timers.forEach((timer) => window.clearTimeout(timer));
-        gestures.forEach((name) => window.removeEventListener(name, markMoved));
-        window.history.scrollRestoration = previousRestoration;
         document.documentElement.classList.remove('hero-locked', 'hero-contracted');
       };
     }
-    heroSession.entered = true;
 
     update();
     window.addEventListener('scroll', onScroll, { passive: true });

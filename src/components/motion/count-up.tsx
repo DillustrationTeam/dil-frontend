@@ -20,11 +20,16 @@ const defaultFormat = (value: number) =>
  *
  * Con số phải là *số thật* đúng tới khung hình cuối, và phải đứng yên ngay khi
  * người dùng bật giảm chuyển động.
+ *
+ * Không được kẹt ở 0:
+ * - `value` đổi sau khi dữ liệu về (0 -> 12) thì effect chạy lại và đếm lại từ đầu;
+ * - phần tử đã nằm trong khung nhìn lúc mount thì đếm ngay, không chờ observer;
+ * - observer không bắn callback (layout đổi, HMR, phần tử ngoài khung nhìn) thì vẫn
+ *   có lưới an toàn chạy sau 1s để con số ra đúng.
  */
 export function CountUp({ value, format = defaultFormat, duration = 1400, className = '' }: CountUpProps) {
   const ref = useRef<HTMLSpanElement | null>(null);
   const [shown, setShown] = useState(value);
-  const started = useRef(false);
 
   useEffect(() => {
     const node = ref.current;
@@ -39,11 +44,14 @@ export function CountUp({ value, format = defaultFormat, duration = 1400, classN
       return;
     }
 
-    setShown(0);
     let raf = 0;
     let cancelled = false;
+    let kicked = false;
 
     const run = () => {
+      if (kicked || cancelled) return;
+      kicked = true;
+
       const start = performance.now();
       const tick = (now: number) => {
         if (cancelled) return;
@@ -57,21 +65,29 @@ export function CountUp({ value, format = defaultFormat, duration = 1400, classN
       raf = requestAnimationFrame(tick);
     };
 
+    setShown(0);
+
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
-          if (!entry.isIntersecting || started.current) continue;
-          started.current = true;
+          if (!entry.isIntersecting) continue;
           run();
-          observer.unobserve(entry.target);
+          observer.disconnect();
         }
       },
       { threshold: 0.3 },
     );
     observer.observe(node);
 
+    // Đã nằm trong khung nhìn thì chạy ngay, không chờ callback của observer.
+    const rect = node.getBoundingClientRect();
+    if (rect.top < window.innerHeight && rect.bottom > 0) run();
+
+    const safety = window.setTimeout(run, 1000);
+
     return () => {
       cancelled = true;
+      window.clearTimeout(safety);
       cancelAnimationFrame(raf);
       observer.disconnect();
     };

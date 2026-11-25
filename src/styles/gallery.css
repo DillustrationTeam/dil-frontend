@@ -132,10 +132,14 @@ h1, h2, h3, h4, .font-h1 {
   color: var(--ivory);
 }
 
-:focus-visible {
-  outline: 2px solid var(--lumen);
-  outline-offset: 3px;
-  border-radius: 3px;
+/* Đặt trong @layer base để utility Tailwind ghi đè được.
+   Trước đây rule này nằm ngoài layer nên luôn thắng focus:outline-none của Tailwind, làm ô input có khung bọc tự vẽ ring bị viền kép (viền cam của khung + outline cam 2px của chính input). */
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--lumen);
+    outline-offset: 3px;
+    border-radius: 3px;
+  }
 }
 
 /* thin warm scrollbar */
@@ -2196,9 +2200,12 @@ html.hero-locked .header--overlay > * {
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  padding: clamp(4.5rem, 9vh, 5.5rem) var(--gutter) clamp(1.5rem, 5vw, 3rem);
+  /* Nhịp dọc siết lại để cả form + dòng "Đăng ký ngay / Đăng nhập" ở cuối card
+     vẫn nằm trong màn hình ở màn 1366×768 và 1536×776 (trước đây link cuối bị cắt
+     mà scrollbar lại bị ẩn). */
+  padding: clamp(3.25rem, 6.5vh, 4.5rem) var(--gutter) clamp(1rem, 2.5vw, 2rem);
 }
-.auth__card { width: 100%; max-width: 26rem; margin-block: auto; display: grid; gap: 1.5rem; }
+.auth__card { width: 100%; max-width: 26rem; margin-block: auto; display: grid; gap: 1.25rem; }
 
 .authbar {
   position: fixed;
@@ -3111,10 +3118,29 @@ body,
     min-height: 0;
     display: flex;
     flex-direction: column;
-    border-radius: 24px;
+    border-radius: 0;
     background: var(--ink-2);
     box-shadow: var(--shadow-card);
     overflow: hidden;
+  }
+  /* Trạng thái khoá (is-locked) ở desktop đặt chiều cao cố định cho khung; trên mobile
+     khung phải cao theo nội dung, nếu không khối chữ trong hero bị cắt cụt. */
+  .home-view .hero.is-locked .hero__frame {
+    height: auto;
+    border-radius: 0;
+  }
+  .home-view .hero.is-locked .hero__stage {
+    padding-top: 0;
+    padding-bottom: 0.5rem;
+  }
+  /* Bỏ khoảng trắng chết dưới đáy card trên mobile (base cộng thêm theo --hp). */
+  .home-view .hero__body { padding-bottom: 1.25rem; }
+  /* Rule desktop `.hero.is-locked { height: 100dvh }` không được áp lên mobile:
+     nội dung hero (ảnh + chữ + nút + dải thumb) cao hơn 100dvh nên tràn ra ngoài,
+     đè lên khối số liệu bên dưới. Mobile để hero cao theo nội dung. */
+  .home-view .hero.is-locked {
+    height: auto;
+    margin-top: 0;
   }
 
   /* slide: chỉ bản active tham gia layout */
@@ -3678,4 +3704,77 @@ html[data-theme="ink"] [class*="text-[#3F382F]/"] { color: var(--body) !importan
 [class*="rounded-t-"], [class*="rounded-b-"], [class*="rounded-l-"], [class*="rounded-r-"],
 [class*="rounded-tl-"], [class*="rounded-tr-"], [class*="rounded-bl-"], [class*="rounded-br-"] {
   border-radius: 16px !important;
+}
+
+/* ============================================================
+   MOBILE SEARCH — nút kính lúp, bấm mới xổ thanh tìm kiếm xuống
+   ============================================================ */
+.msearch-toggle {
+  transition:
+    transform var(--dur-2) var(--ease-out),
+    border-color var(--dur-2),
+    color var(--dur-2),
+    background var(--dur-2);
+}
+.msearch-toggle:hover { transform: scale(1.06); }
+.msearch-toggle.is-open {
+  transform: rotate(90deg);
+  border-color: var(--lumen);
+  color: var(--lumen-hi);
+}
+.msearch-toggle:active { transform: scale(0.94); }
+
+/* Không đặt `display` ngoài layer: rule ngoài layer sẽ đè `lg:hidden`/`2xl:hidden`
+   của Tailwind (utility nằm trong @layer). Vì vậy chỉ bật grid dưới breakpoint lg. */
+.msearch-drawer {
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transform: translateY(-8px);
+  padding-bottom: 0;
+  transition:
+    grid-template-rows 0.38s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.24s var(--ease-out),
+    transform 0.38s cubic-bezier(0.16, 1, 0.3, 1),
+    padding-bottom 0.38s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.msearch-drawer__inner { overflow: hidden; min-height: 0; }
+.msearch-drawer.is-open {
+  grid-template-rows: 1fr;
+  opacity: 1;
+  transform: none;
+  padding-bottom: 0.75rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .msearch-toggle,
+  .msearch-drawer { transition: none; }
+  .msearch-toggle.is-open { transform: none; }
+}
+@media (max-width: 1023px) {
+  .msearch-drawer { display: grid; }
+}
+/* ============================================================
+   DESKTOP SEARCH — ô nhập duỗi ra khi bấm kính lúp
+   ============================================================ */
+.dsearch { align-items: center; }
+.dsearch__form {
+  width: 0;
+  opacity: 0;
+  transform: translateX(-6px);
+  pointer-events: none;
+  overflow: hidden;
+  transition:
+    width 0.38s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.22s var(--ease-out),
+    transform 0.38s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.dsearch.is-open .dsearch__form {
+  width: min(22rem, 32vw);
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+  overflow: visible;
+}
+@media (prefers-reduced-motion: reduce) {
+  .dsearch__form { transition: none; }
 }
