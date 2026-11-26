@@ -88,6 +88,22 @@ export function usePlatformFee() {
         return false;
       }
 
+      if (
+        payload.aiReferenceSketchDiscountPercent < 0 ||
+        payload.aiReferenceSketchDiscountPercent > 30
+      ) {
+        toast.error('AI reference sketch discount must be between 0% and 30%.');
+        return false;
+      }
+
+      if (
+        payload.aiReferenceSketchMaxGenerationsPerWindow < 1 ||
+        payload.aiReferenceSketchMaxGenerationsPerWindow > 10
+      ) {
+        toast.error('AI reference sketch generation limit must be between 1 and 10 per 24h.');
+        return false;
+      }
+
       dispatch({ type: 'UPDATE_POLICY_REQUEST' });
 
       try {

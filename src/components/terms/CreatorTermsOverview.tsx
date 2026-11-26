@@ -98,6 +98,7 @@ export function normalizeCreatorTerms(terms?: CreatorTermsDto | null): {
   commercialLicenseMultiplier: number;
   extended: CreatorExtendedTermsDto;
   updatedAt?: string | null;
+  allowAiReferenceSketch: boolean;
 } {
   const customClauses: CreatorCustomClauseDto[] = Array.isArray(terms?.extended?.customClauses)
     ? terms!.extended!.customClauses
@@ -123,6 +124,7 @@ export function normalizeCreatorTerms(terms?: CreatorTermsDto | null): {
       customClauses,
     },
     updatedAt: terms?.updatedAt ?? null,
+    allowAiReferenceSketch: terms?.allowAiReferenceSketch ?? false,
   };
 }
 

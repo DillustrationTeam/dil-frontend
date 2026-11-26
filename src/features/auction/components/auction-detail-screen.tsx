@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
+import { localizeStyle } from '@/features/marketplace/utils/style-labels';
 import {
   AlertTriangle,
   ArrowLeft,
@@ -706,7 +707,7 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
             <div className="flex items-center justify-between border-b border-[#221E1A]/10 px-5 py-3 text-[11px]">
               <span className="rounded-full border border-brand-periwinkle/30 bg-brand-periwinkle/10 px-3 py-1 font-semibold text-brand-periwinkle"> Bản gốc duy nhất </span>
               <span className="rounded-full border border-[#2F6B63]/30 bg-[#2F6B63]/10 px-3 py-1 font-semibold text-[#2F6B63]">
-                {auction.artwork?.style || 'Kỹ thuật số'}
+                {auction.artwork?.style ? localizeStyle(auction.artwork.style) : 'Kỹ thuật số'}
               </span>
             </div>
             <div className="relative aspect-[4/3] w-full">
@@ -743,7 +744,7 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
               <h2 className="flex items-center gap-2 font-h1 text-sm font-bold">
                 <Users size={16} className="text-brand-periwinkle" /> Người tham gia </h2>
               <span className="rounded-full border border-brand-periwinkle/20 bg-brand-periwinkle/10 px-3 py-1 text-[10px] font-semibold text-brand-periwinkle">
-                {(auction.participants ?? []).filter((participant) => participant.role === 'Bidder').length} người đã bid
+                {(auction.participants ?? []).filter((participant) => participant.role === 'Bidder').length} người đã đặt giá
               </span>
             </div>
 
@@ -808,11 +809,11 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
             <div className="relative z-10 flex items-start justify-center gap-1 sm:gap-1.5" role="timer" aria-label={isEnded ? 'Phiên đã hết giờ' : `Còn lại ${clock.formatted}`}>
               {clockUnits.map((unit, index) => (
                 <div key={unit.label} className="contents">
-                  {index > 0 && <span aria-hidden="true" className={`pt-2 font-mono text-2xl font-black sm:text-3xl ${isFinished ? 'text-[#241F1A]' : isUrgent ? 'text-[#A8321C]' : 'text-[#8A6A1F]'}`}>:</span>}
+                  {index > 0 && <span aria-hidden="true" className={`pt-2 font-[family-name:var(--font-ui)] text-2xl font-black sm:text-3xl ${isFinished ? 'text-[#241F1A]' : isUrgent ? 'text-[#A8321C]' : 'text-[#8A6A1F]'}`}>:</span>}
                   <div className="flex min-w-0 flex-1 flex-col items-center">
                     <div className={`relative w-full max-w-24 overflow-hidden rounded-xl border bg-[#FFFCF6] px-1 py-2 text-center shadow-inner ${isFinished ? 'border-[#221E1A]/10' : isUrgent ? 'border-[#A8321C]/40' : 'border-[#8A6A1F]/35'}`}>
-                      <span aria-hidden="true" className={`absolute inset-0 flex items-center justify-center font-mono text-3xl font-black opacity-10 sm:text-4xl ${isFinished ? 'text-[#241F1A]' : isUrgent ? 'text-[#A8321C]' : 'text-[#8A6A1F]'}`}>88</span>
-                      <span className={`relative font-mono text-3xl font-black leading-none tracking-tight sm:text-4xl ${isFinished ? 'text-[#746A5F]' : isUrgent ? 'text-[#A8321C] drop-shadow-[0_0_8px_rgba(251,113,133,0.65)]' : 'text-[#8A6A1F] drop-shadow-[0_0_8px_rgba(251,191,36,0.55)]'}`}>
+                      <span aria-hidden="true" className={`absolute inset-0 flex items-center justify-center font-[family-name:var(--font-ui)] tabular-nums text-3xl font-black tracking-[0.08em] opacity-10 sm:text-4xl ${isFinished ? 'text-[#241F1A]' : isUrgent ? 'text-[#A8321C]' : 'text-[#8A6A1F]'}`}>88</span>
+                      <span className={`relative font-[family-name:var(--font-ui)] tabular-nums text-3xl font-black leading-none tracking-[0.08em] sm:text-4xl ${isFinished ? 'text-[#746A5F]' : isUrgent ? 'text-[#A8321C] drop-shadow-[0_0_8px_rgba(251,113,133,0.65)]' : 'text-[#8A6A1F] drop-shadow-[0_0_8px_rgba(251,191,36,0.55)]'}`}>
                         {unit.value}
                       </span>
                     </div>
@@ -853,12 +854,12 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
                 <div className="rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] p-4 text-xs">
                   <span className="flex items-center gap-1.5 text-outline">
                     <Wallet size={14} className="text-brand-periwinkle" /> Số dư ví khả dụng </span>
-                  <p className="mt-2 font-mono text-xl font-bold text-[#2F6B63]">
+                  <p className="mt-2 font-h1 text-xl font-bold text-[#2F6B63]">
                     {formatVnd(wallet.wallet.balance)}
                   </p>
-                  <div className="mt-3 flex items-center justify-between text-[11px] text-outline">
+                  <div className="mt-3 flex items-center justify-between text-xs text-outline">
                     <span>Tiền đang khóa cọc:</span>
-                    <span className="font-mono">{formatVnd(wallet.wallet.lockedBalance)}</span>
+                    <span>{formatVnd(wallet.wallet.lockedBalance)}</span>
                   </div>
                 </div>
               )}

@@ -612,11 +612,12 @@ function Terms() {
   const [commercial, setCommercial] = useState("1.5");
   const [extended, setExtended] = useState(DEFAULT_EXTENDED_TERMS);
   const [draftClauses, setDraftClauses] = useState<DraftClause[]>([]);
+  const [allowAiReferenceSketch, setAllowAiReferenceSketch] = useState(false);
   const [updatedAt, setUpdatedAt] = useState<string | null>(null);
   const [savedSnapshot, setSavedSnapshot] = useState<string | null>(null);
-  const savedTermsRef = useRef<{ commercial: string; extended: typeof DEFAULT_EXTENDED_TERMS; clauses: DraftClause[] } | null>(null);
+  const savedTermsRef = useRef<{ commercial: string; extended: typeof DEFAULT_EXTENDED_TERMS; clauses: DraftClause[]; allowAiReferenceSketch: boolean } | null>(null);
 
-  const toSnapshot = (mult: string, ext: typeof DEFAULT_EXTENDED_TERMS, clauses: DraftClause[]) =>
+  const toSnapshot = (mult: string, ext: typeof DEFAULT_EXTENDED_TERMS, clauses: DraftClause[], allowAi: boolean) =>
     JSON.stringify({
       mult: mult.trim(),
       willDraw: (ext.willDraw ?? "").trim(),
@@ -628,6 +629,7 @@ function Terms() {
       prohibitAiTraining: Boolean(ext.prohibitAiTraining),
       prohibitResale: Boolean(ext.prohibitResale),
       clauses: clauses.map((c) => ({ title: c.title.trim(), content: c.content.trim() })),
+      allowAiReferenceSketch: Boolean(allowAi),
     });
 
   const applyNormalized = useCallback((norm: ReturnType<typeof normalizeCreatorTerms>) => {
@@ -640,9 +642,10 @@ function Terms() {
     setCommercial(multStr);
     setExtended(norm.extended);
     setDraftClauses(clauses);
+    setAllowAiReferenceSketch(norm.allowAiReferenceSketch);
     setUpdatedAt(norm.updatedAt ?? null);
-    savedTermsRef.current = { commercial: multStr, extended: norm.extended, clauses };
-    setSavedSnapshot(toSnapshot(multStr, norm.extended, clauses));
+    savedTermsRef.current = { commercial: multStr, extended: norm.extended, clauses, allowAiReferenceSketch: norm.allowAiReferenceSketch };
+    setSavedSnapshot(toSnapshot(multStr, norm.extended, clauses, norm.allowAiReferenceSketch));
   }, []);
 
   const loadState = useCallback(async () => {
@@ -682,7 +685,7 @@ function Terms() {
   const canEdit = !loading && !loadError;
   const parsedMultiplier = Number(commercial);
   const multiplierValid = commercial.trim() !== "" && Number.isFinite(parsedMultiplier) && parsedMultiplier >= 1 && parsedMultiplier <= 10;
-  const currentSnapshot = toSnapshot(commercial, extended, draftClauses);
+  const currentSnapshot = toSnapshot(commercial, extended, draftClauses, allowAiReferenceSketch);
   const isDirty = Boolean(savedSnapshot && currentSnapshot !== savedSnapshot);
 
   const clauseErrorAt = (c: DraftClause): string | null => {
@@ -741,6 +744,7 @@ function Terms() {
     setCommercial(saved.commercial);
     setExtended(saved.extended);
     setDraftClauses(saved.clauses);
+    setAllowAiReferenceSketch(saved.allowAiReferenceSketch);
     setPendingPresetIdx(null);
     setSaveError(null);
   };
@@ -784,6 +788,7 @@ function Terms() {
         revisionPolicy: null,
         cancellationPolicy: null,
         extended: payloadExtended,
+        allowAiReferenceSketch,
       });
       applyNormalized(normalizeCreatorTerms(saved));
       toast.success(`Đã lưu điều khoản & bản quyền (v${saved.extended?.version ?? extended.version}).`);
@@ -794,7 +799,7 @@ function Terms() {
     } finally {
       setSaving(false);
     }
-  }, [canEdit, saving, multiplierValid, hasInvalidClause, extended, draftClauses, parsedMultiplier, applyNormalized]);
+  }, [canEdit, saving, multiplierValid, hasInvalidClause, extended, draftClauses, parsedMultiplier, allowAiReferenceSketch, applyNormalized]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -1026,6 +1031,16 @@ function Terms() {
               className="mt-2 min-h-24 w-full rounded-2xl border border-[#A8321C]/30 bg-[#FFFCF6] p-3 text-sm text-[#241F1A] outline-none focus:border-[#A8321C]/40 disabled:opacity-50"
             />
           </label>
+
+          <div className="mt-5 divide-y divide-[#221E1A]/10 border-t border-[#221E1A]/10 pt-2">
+            <Toggle
+              label="Cho phép khách dùng AI phác thảo reference / Allow clients to use AI reference sketches"
+              description="Khách có thể bấm nút AI để sinh ảnh phác thảo bố cục dựa trên brief, trước khi gửi đơn. / Clients can generate a layout sketch from their brief before submitting the order."
+              checked={allowAiReferenceSketch}
+              disabled={!canEdit}
+              onChange={setAllowAiReferenceSketch}
+            />
+          </div>
 
           <label className="mt-5 block text-sm text-[#6E6459]">
             Lưu ý &amp; hạn chế sử dụng

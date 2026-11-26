@@ -243,6 +243,14 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
   const activeRole: 'client' | 'creator' = isCreator ? 'creator' : 'client';
   const commissionStatus: CommissionStatus = commission?.status ?? 'InProgress';
 
+  // Kho tham khảo (Reference Board) — gộp ảnh khách tự upload/link VÀ ảnh AI phác thảo bố cục
+  // mà khách đã chọn khi đặt đơn, để kho tham khảo trong workroom hiện đủ, không thiếu ảnh AI.
+  const referenceItems = useMemo(() => {
+    const uploaded = (commission?.referenceImages ?? []).map((url) => ({ url, label: null as string | null, isAi: false }));
+    const ai = (commission?.aiReferenceImages ?? []).map((img) => ({ url: img.url, label: img.labelVi, isAi: true }));
+    return [...uploaded, ...ai];
+  }, [commission?.referenceImages, commission?.aiReferenceImages]);
+
   const acceptedTermsVersion = currentMemberRole === 'client'
     ? commission?.clientTermsVersion
     : currentMemberRole === 'creator'
@@ -919,7 +927,7 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                 {/* Smart Tooltip khi ở dạng thu gọn (khi bị khuất/hẹp lề) */}
                 {!hasRightSpace && (
                   <div className="absolute right-full mr-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none bg-[#FFFCF6]/95 border border-[#2C6A86]/40 text-[#2C6A86] text-xs font-bold px-2.5 py-1 rounded-lg shadow-2xl backdrop-blur-md whitespace-nowrap z-50">
-                    Ảnh &amp; Tài liệu tham khảo ({commission?.referenceImages?.length ?? 0})
+                    Ảnh &amp; Tài liệu tham khảo ({referenceItems.length})
                   </div>
                 )}
               </button>
@@ -2067,22 +2075,43 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                             </h4>
                           </div>
                           <span className="text-[10px] font-mono text-outline">
-                            {(commission?.referenceImages?.length ?? 0)} tài liệu
+                            {referenceItems.length} tài liệu
                           </span>
                         </div>
 
-                        {(commission?.referenceImages?.length ?? 0) > 0 ? (
+                        {referenceItems.length > 0 ? (
                           <div className="space-y-3">
                             <p className="text-[11px] text-on-surface-variant">
                               Ảnh mẫu &amp; tài liệu tham khảo đính kèm cho dự án.
                             </p>
 
                             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-                              {commission?.referenceImages?.map((url, idx) => {
+                              {referenceItems.map((item, idx) => {
+                                const { url, label, isAi } = item;
                                 const isImg = isPortfolioImageUrl(url) || /\.(png|jpe?g|webp|gif|avif)(\?|$)/i.test(url);
                                 const isPdf = /\.pdf(\?|$)/i.test(url);
                                 const isDrive = url.includes('drive.google.com') || url.includes('docs.google.com');
                                 const isPinterest = url.includes('pinterest.com') || url.includes('pin.it');
+
+                                if (isAi) {
+                                  return (
+                                    <div
+                                      key={idx}
+                                      onClick={() => setActiveLightboxUrl(resolveAttachmentUrl(url))}
+                                      className="group relative h-28 w-full overflow-hidden rounded-md bg-[#F0E7D8] cursor-pointer"
+                                    >
+                                      <span className="absolute left-1.5 top-1.5 z-10 rounded-full bg-brand-periwinkle px-1.5 py-0.5 text-[9px] font-bold text-[#FFFCF6] shadow">
+                                        AI
+                                      </span>
+                                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                                      <img
+                                        src={resolveAttachmentUrl(url)}
+                                        alt={label || `AI Ref #${idx + 1}`}
+                                        className="h-full w-full object-cover group-hover:scale-[1.02] transition-transform"
+                                      />
+                                    </div>
+                                  );
+                                }
 
                                 return (
                                   <div
@@ -2487,16 +2516,41 @@ export function WorkroomScreen({ roomId, userId }: { roomId: string; userId: str
                 </div>
 
                 <div className="mt-4 flex-1 overflow-y-auto pr-1">
-                  {(commission?.referenceImages?.length ?? 0) === 0 ? (
+                  {referenceItems.length === 0 ? (
                     <div className="flex flex-col items-center justify-center rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] p-8 text-center">
                       <ImageIcon className="mb-2 h-8 w-8 text-[#746A5F]" />
                       <p className="text-xs font-semibold text-[#746A5F]"> Đơn hàng này chưa có ảnh hoặc tài liệu tham khảo. </p>
                     </div>
                   ) : (
                   <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                    {commission?.referenceImages?.map((url, idx) => {
+                    {referenceItems.map((item, idx) => {
+                      const { url, label, isAi } = item;
                       const isPdf = /\.pdf(\?|$)/i.test(url);
                       const isImg = !isPdf && (isPortfolioImageUrl(url) || /\.(png|jpe?g|webp|gif|avif)(\?|$)/i.test(url));
+
+                      if (isAi) {
+                        return (
+                          <div
+                            key={idx}
+                            onClick={() => {
+                              setShowQuickRefDrawer(false);
+                              setActiveLightboxUrl(resolveAttachmentUrl(url));
+                            }}
+                            className="group relative h-32 w-full overflow-hidden rounded-md bg-[#F0E7D8] cursor-pointer"
+                          >
+                            <span className="absolute left-1.5 top-1.5 z-10 rounded-full bg-brand-periwinkle px-1.5 py-0.5 text-[9px] font-bold text-[#FFFCF6] shadow">
+                              AI
+                            </span>
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={resolveAttachmentUrl(url)}
+                              alt={label || `AI Ref #${idx + 1}`}
+                              className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                            />
+                          </div>
+                        );
+                      }
+
                       return (
                         <div
                           key={idx}

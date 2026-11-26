@@ -38,7 +38,6 @@ function contains(artwork: MarketplaceArtwork, value: string) {
   if (!normalized) return true;
   const haystack = [
     artwork.title,
-    artwork.description,
     artwork.creatorName,
     artwork.categoryName,
     artwork.style,
@@ -857,14 +856,14 @@ export function ArtDiscovery({
               <button
                 key={tab}
                 onClick={() => setFeedTab(tab)}
-                className={`rounded-full px-4 py-2 text-sm transition ${
+                className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-4 py-2 text-sm transition ${
                   feedTab === tab
                     ? 'bg-[#B24A26] font-semibold text-[#F7F2E9]'
                     : 'text-[#6E6459] hover:text-[#241F1A]'
                 }`}
               >
-                {tab === 'recommended' && <Sparkles className="mr-1 inline h-3.5 w-3.5" />}
-                {label}
+                {tab === 'recommended' && <Sparkles className="h-3.5 w-3.5 shrink-0" aria-hidden />}
+                <span>{label}</span>
               </button>
             ))}
           </div>

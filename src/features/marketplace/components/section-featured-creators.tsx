@@ -6,7 +6,20 @@ import { Star, Users, Layers } from 'lucide-react';
 import type { RelatedCreatorDto } from '../services/marketplace.service';
 import { marketplaceService } from '../services/marketplace.service';
 
-function CreatorAvatar({ name, size = 48 }: { name: string; size?: number }) {
+function CreatorAvatar({ name, avatarUrl, size = 48 }: { name: string; avatarUrl?: string | null; size?: number }) {
+  if (avatarUrl) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={avatarUrl}
+        alt={name}
+        width={size}
+        height={size}
+        className="shrink-0 rounded-full object-cover"
+        style={{ width: size, height: size }}
+      />
+    );
+  }
   const initials = name
     .split(' ')
     .slice(-2)
@@ -82,7 +95,7 @@ export function SectionFeaturedCreators() {
                 </span>
               )}
 
-              <CreatorAvatar name={creator.displayName} size={52} />
+              <CreatorAvatar name={creator.displayName} avatarUrl={creator.avatarUrl ?? creator.bannerUrl} size={52} />
 
               <h3 className="mt-3 line-clamp-1 font-semibold text-[#241F1A] group-hover:text-[#B24A26]">
                 {creator.displayName}

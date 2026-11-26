@@ -81,7 +81,7 @@ export function DisputeQueueTable({
   const getPriorityBadge = (priority: string) => {
     switch (priority) {
       case 'High':
-        return 'bg-[#A8321C]/20 text-[#f2b3c4] border-[#A8321C]/30';
+        return 'bg-[#A8321C]/20 text-[#A8321C] border-[#A8321C]/40';
       case 'Medium':
         return 'bg-[#8A6A1F]/20 text-[#8A6A1F] border-[#8A6A1F]/40';
       case 'Low':
@@ -190,7 +190,7 @@ export function DisputeQueueTable({
                           {formatDisputeCode(item.id)}
                         </span>
                         {item.priority === 'High' && (
-                          <AlertTriangle className="w-3.5 h-3.5 text-[#f2b3c4]" />
+                          <AlertTriangle className="w-3.5 h-3.5 text-[#A8321C]" />
                         )}
                       </div>
                       <span className="text-[10px] text-[#6E6459] block mt-0.5">

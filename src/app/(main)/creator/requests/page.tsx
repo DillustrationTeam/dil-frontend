@@ -523,9 +523,16 @@ export default function CreatorRequestsPage() {
                         · {isEng ? 'Submitted' : 'Đã nộp'} {formatSubmittedAt(selectedRequest.createdAt, isEng)}
                       </p>
                     </div>
-                    <span className="w-fit rounded-full bg-[#B24A26]/15 px-3 py-1 text-xs font-bold text-[#A8321C]">
-                      {isEng ? 'Ready for review' : 'Chờ bạn xem xét'}
-                    </span>
+                    <div className="flex flex-col items-end gap-1.5">
+                      <span className="w-fit rounded-full bg-[#B24A26]/15 px-3 py-1 text-xs font-bold text-[#A8321C]">
+                        {isEng ? 'Ready for review' : 'Chờ bạn xem xét'}
+                      </span>
+                      {selectedRequest.isFreestyle && (
+                        <span className="w-fit rounded-full bg-[#2F6B63]/15 px-3 py-1 text-xs font-bold text-[#2F6B63]">
+                          {isEng ? 'Client lets you freestyle' : 'Khách để creator tự freestyle'}
+                        </span>
+                      )}
+                    </div>
                   </header>
 
                   <div className="space-y-6 py-6">
@@ -581,6 +588,41 @@ export default function CreatorRequestsPage() {
                               </div>
                             );
                           })}
+                        </div>
+                      </div>
+                    )}
+
+                    {(selectedRequest.aiReferenceImages?.length ?? 0) > 0 && (
+                      <div>
+                        <p className="mb-2 text-[11px] font-bold uppercase tracking-wider text-[#746A5F]">
+                          {isEng ? 'AI layout suggestions' : 'AI gợi ý bố cục'} ({selectedRequest.aiReferenceImages?.length})
+                        </p>
+                        {selectedRequest.layoutHint && (
+                          <p className="mb-2 text-xs text-[#746A5F]">
+                            {isEng ? 'Client layout hint:' : 'Gợi ý bố cục của khách:'}{' '}
+                            <span className="italic">{selectedRequest.layoutHint}</span>
+                          </p>
+                        )}
+                        <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+                          {selectedRequest.aiReferenceImages?.map((img, idx) => (
+                            <div key={idx} className="group relative overflow-hidden rounded-lg border border-[#F0E7D8] bg-[#FFFCF6] p-2">
+                              <button
+                                type="button"
+                                onClick={() => setLightboxUrl(img.url)}
+                                className="relative block h-24 w-full overflow-hidden rounded cursor-pointer"
+                                title={isEng ? 'Preview AI sketch' : 'Xem ảnh phác thảo AI'}
+                              >
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img src={img.url} alt={`AI #${idx + 1}`} className="h-full w-full object-cover transition-transform group-hover:scale-105" />
+                                <div className="absolute inset-0 flex items-center justify-center bg-[#F0E7D8]/35 opacity-0 transition-opacity group-hover:opacity-100">
+                                  <Maximize2 className="h-4 w-4 text-[#241F1A]" />
+                                </div>
+                              </button>
+                              <p className="mt-1.5 line-clamp-2 text-[11px] text-[#746A5F]">
+                                {isEng ? img.labelEn : img.labelVi}
+                              </p>
+                            </div>
+                          ))}
                         </div>
                       </div>
                     )}

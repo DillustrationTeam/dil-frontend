@@ -79,6 +79,7 @@ export interface RelatedCreatorDto {
   followerCount: number;
   availableSlots: number;
   bannerUrl?: string | null;
+  avatarUrl?: string | null;
   categories?: { id: string; name: string; slug: string }[];
 }
 

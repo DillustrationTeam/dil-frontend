@@ -143,7 +143,7 @@ export function InviteJuryCard({
       </div>
 
       {/* Role to Invite Toggle */}
-      <div className="rounded-xl border border-[#221E1A]/10 bg-[#E5D8C2]/60 p-2.5 flex flex-col gap-1.5">
+      <div className="rounded-xl border border-[#221E1A]/10 bg-[#E5D8C2] p-2.5 flex flex-col gap-1.5">
         <span className="text-[10px] font-bold uppercase tracking-wider text-[#746A5F]">
           {isVie ? 'Vai trò mời' : 'Invitation Role'}
         </span>
@@ -192,7 +192,7 @@ export function InviteJuryCard({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder={isVie ? 'Tìm theo tên, username hoặc email...' : 'Search name, username or email...'}
-            className="w-full h-9 pl-8 pr-8 rounded-xl border border-[#221E1A]/10 bg-[#E5D8C2]/70 text-xs text-[#241F1A] placeholder:text-[#746A5F] focus:outline-none focus:border-brand-periwinkle focus:ring-1 focus:ring-brand-periwinkle/30 transition-all"
+            className="w-full h-9 pl-8 pr-8 rounded-xl border border-[#221E1A]/10 bg-[#E5D8C2] text-xs text-[#241F1A] placeholder:text-[#746A5F] focus:outline-none focus:border-brand-periwinkle focus:ring-1 focus:ring-brand-periwinkle/30 transition-all"
           />
           {search && (
             <button
@@ -252,7 +252,7 @@ export function InviteJuryCard({
             return (
               <div
                 key={candidate.userId}
-                className="rounded-xl border border-[#221E1A]/10 bg-[#E5D8C2]/60 p-3 flex flex-col gap-2 hover:border-[#221E1A]/20 transition-colors"
+                className="rounded-xl border border-[#221E1A]/10 bg-[#E5D8C2] p-3 flex flex-col gap-2 hover:border-[#221E1A]/20 transition-colors"
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0 flex-1">
