@@ -4,10 +4,13 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { addonService, addonAllows, addonStage, addonMoney, addonSchema, type CreatorAddon, type CommissionAddon } from '@/services/addon.service';
 import { commissionService } from '@/services/commission.service';
 import { extractErrorMessage } from '@/lib/api-client';
+import { useLanguage } from '@/context/language-context';
 import type { Commission } from '@/types/commission.types';
 
 export function WorkroomAddons({ commission, isCreator, onUpdated, onPresenceChanged }: { commission: Commission; isCreator: boolean; onUpdated: (value: Commission) => void; onPresenceChanged: (present: boolean) => void }) {
   const [items, setItems] = useState<CommissionAddon[]>([]);
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
   const [options, setOptions] = useState<CreatorAddon[]>([]);
   const [selected, setSelected] = useState('');
   const [title, setTitle] = useState('');
@@ -57,7 +60,7 @@ export function WorkroomAddons({ commission, isCreator, onUpdated, onPresenceCha
     </article>)}
     {error && <p role="alert" className="text-[#A8321C]">{error}</p>}
     <dialog ref={dialog} aria-labelledby="addon-dialog-title" className="m-auto w-[min(92vw,480px)] rounded-3xl border border-[#221E1A]/20 bg-[#F7F2E9] p-6 text-[#241F1A] backdrop:bg-[#E5D8C2]" onCancel={e => { if (busy) e.preventDefault(); }}>
-      <h2 id="addon-dialog-title" className="font-h1 text-lg">Đề xuất phụ phí · {stage}</h2>
+      <h2 id="addon-dialog-title" className="font-h1 text-lg">{isVie ? 'Đề xuất phụ phí' : 'Propose an add-on'} · {stage}</h2>
       <form className="mt-4 space-y-3" onSubmit={async e => {
         e.preventDefault(); setError('');
         const option = eligible.find(a => a.id === selected);
@@ -69,15 +72,19 @@ export function WorkroomAddons({ commission, isCreator, onUpdated, onPresenceCha
         catch (cause) { setError(extractErrorMessage(cause, 'Không gửi được đề xuất.')); }
         finally { setBusy(false); }
       }}>
-        <label className="block text-xs">Phụ phí được phép tại mốc hiện tại<select className={field} value={selected} onChange={e => setSelected(e.target.value)} disabled={busy}><option value="">{isCreator ? 'Nhập phụ phí phát sinh' : 'Chọn phụ phí'}</option>{eligible.map(a => <option key={a.id} value={a.id}>{a.title} · {addonMoney(a.price)} · +{a.extendDays} ngày</option>)}</select></label>
+        <label className="block text-xs">{isVie ? 'Phụ phí được phép tại mốc hiện tại' : 'Add-ons allowed at this milestone'}<select className={field} value={selected} onChange={e => setSelected(e.target.value)} disabled={busy}><option value="">{isCreator ? (isVie ? 'Nhập phụ phí phát sinh' : 'Enter a custom add-on') : (isVie ? 'Chọn phụ phí' : 'Select an add-on')}</option>{eligible.map(a => <option key={a.id} value={a.id}>{a.title} · {addonMoney(a.price)} · +{a.extendDays} {isVie ? 'ngày' : 'days'}</option>)}</select></label>
         {!selected && isCreator && <>
-          <label className="block text-xs">Tên món<input className={field} required maxLength={200} value={title} onChange={e => setTitle(e.target.value)} disabled={busy} /></label>
-          <label className="block text-xs">Số tiền VND<input className={field} type="number" required min={1} step={1} value={price} onChange={e => setPrice(e.target.value)} disabled={busy} /></label>
-          <label className="block text-xs">Số ngày gia hạn<input className={field} type="number" required min={0} max={365} step={1} value={days} onChange={e => setDays(e.target.value)} disabled={busy} /></label>
-          <p className="text-xs text-[#B24A26]">{stage === 'Sketch' ? 'Cho phép thay đổi bố cục.' : stage === 'Lineart' ? 'Chỉ biến thể nhỏ; không thêm người hoặc đổi bối cảnh.' : 'Chỉ hậu kỳ, tệp, bản quyền; không thay đổi người, cảnh hoặc bố cục.'}</p>
+          <label className="block text-xs">{isVie ? 'Tên món' : 'Item name'}<input className={field} required maxLength={200} value={title} onChange={e => setTitle(e.target.value)} disabled={busy} /></label>
+          <label className="block text-xs">{isVie ? 'Số tiền VND' : 'Amount (VND)'}<input className={field} type="number" required min={1} step={1} value={price} onChange={e => setPrice(e.target.value)} disabled={busy} /></label>
+          <label className="block text-xs">{isVie ? 'Số ngày gia hạn' : 'Extension days'}<input className={field} type="number" required min={0} max={365} step={1} value={days} onChange={e => setDays(e.target.value)} disabled={busy} /></label>
+          <p className="text-xs text-[#B24A26]">{stage === 'Sketch'
+            ? (isVie ? 'Cho phép thay đổi bố cục.' : 'Allows layout changes.')
+            : stage === 'Lineart'
+              ? (isVie ? 'Chỉ biến thể nhỏ; không thêm người hoặc đổi bối cảnh.' : 'Minor variations only; no added characters or background changes.')
+              : (isVie ? 'Chỉ hậu kỳ, tệp, bản quyền; không thay đổi người, cảnh hoặc bố cục.' : 'Post-processing, files, and licensing only; no changes to characters, scene, or layout.')}</p>
         </>}
         {error && <p role="alert" className="text-sm text-[#A8321C]">{error}</p>}
-        <div className="flex gap-3"><button disabled={busy} className="rounded-xl bg-[#B24A26] px-4 py-2 text-[#F7F2E9] disabled:opacity-40">{busy ? 'Đang gửi…' : 'Gửi đề xuất'}</button><button type="button" disabled={busy} onClick={() => dialog.current?.close()}>Đóng</button></div>
+        <div className="flex gap-3"><button disabled={busy} className="rounded-xl bg-[#B24A26] px-4 py-2 text-[#F7F2E9] disabled:opacity-40">{busy ? (isVie ? 'Đang gửi…' : 'Sending…') : (isVie ? 'Gửi đề xuất' : 'Send proposal')}</button><button type="button" disabled={busy} onClick={() => dialog.current?.close()}>{isVie ? 'Đóng' : 'Close'}</button></div>
       </form>
     </dialog>
   </div>;

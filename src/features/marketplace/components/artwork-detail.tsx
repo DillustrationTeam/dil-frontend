@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { createPortal } from 'react-dom';
 import { localizeStyle } from '../utils/style-labels';
@@ -422,7 +422,7 @@ function ArtworkDetailContent({
                 <button
                   disabled={submitting}
                   aria-label="Gửi bình luận"
-                  className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#8C3718] text-[#FFFCF6] transition hover:bg-[#c5c8f5] disabled:opacity-50"
+                  className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#A8321C] text-[#FFFCF6] transition-colors hover:bg-[#8C3718] disabled:opacity-50 [html[data-theme=ink]_&]:text-[#f08a6e] [html[data-theme=ink]_&]:hover:brightness-125"
                 >
                   <Send className="h-4 w-4" />
                 </button>
@@ -585,7 +585,7 @@ function ArtworkDetailContent({
                     type="button"
                     disabled={!canCommission}
                     onClick={() => setIsCommissionOpen(true)}
-                    className="inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-[10px] bg-[#8C3718] px-3 text-[13px] font-semibold tabular-nums text-[#FFFCF6] transition hover:bg-[#c5c8f5] disabled:cursor-not-allowed disabled:opacity-50"
+                    className="inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-[10px] bg-[#A8321C] px-3 text-[13px] font-semibold tabular-nums text-[#FFFCF6] transition-colors hover:bg-[#8C3718] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#A8321C] disabled:cursor-not-allowed disabled:opacity-50 [html[data-theme=ink]_&]:text-[#f08a6e] [html[data-theme=ink]_&]:hover:brightness-125"
                   >
                     <span>
                       {creatorProfile?.isAcceptingOrders === false
@@ -605,7 +605,7 @@ function ArtworkDetailContent({
                 type="button"
                 disabled={creatorProfile?.isAcceptingOrders === false}
                 onClick={() => setIsCommissionOpen(true)}
-                className="inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-[10px] bg-[#8C3718] px-4 text-[13px] font-semibold text-[#FFFCF6] transition hover:bg-[#c5c8f5] disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-[10px] bg-[#A8321C] px-4 text-[13px] font-semibold text-[#FFFCF6] transition-colors hover:bg-[#8C3718] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#A8321C] disabled:cursor-not-allowed disabled:opacity-50 [html[data-theme=ink]_&]:text-[#f08a6e] [html[data-theme=ink]_&]:hover:brightness-125"
               >
                 <span>
                   {creatorProfile?.isAcceptingOrders === false

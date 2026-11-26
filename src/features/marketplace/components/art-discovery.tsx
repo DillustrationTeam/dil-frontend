@@ -13,6 +13,7 @@ import {
 } from '../services/categories.service';
 import { ArtworkDetailModal } from './artwork-detail';
 import { SkeletonCardGrid } from '@/components/feedback/skeleton';
+import { useLanguage } from '@/context/language-context';
 
 type FeedTab = 'recommended' | 'following';
 type SortKey = 'newest' | 'views' | 'price-asc' | 'price-desc';
@@ -101,6 +102,8 @@ function ImageSearchModal({
   onSelectArtwork: (id: string) => void;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
   const [preview, setPreview] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
 
@@ -140,7 +143,7 @@ function ImageSearchModal({
       className="fixed inset-0 z-[70] flex items-center justify-center bg-[#FFFCF6]/80 p-4 backdrop-blur-sm"
       role="dialog"
       aria-modal="true"
-      aria-label="Tìm kiếm bằng hình ảnh"
+      aria-label={isVie ? 'Tìm kiếm bằng hình ảnh' : 'Visual image search'}
     >
       <div className="max-h-[92vh] w-full max-w-4xl overflow-y-auto rounded-[32px] border border-[#221E1A]/10 bg-[#FFFCF6] p-5 shadow-2xl md:p-8">
         <div className="mb-6 flex items-start justify-between gap-4">
@@ -148,13 +151,17 @@ function ImageSearchModal({
             <p className="text-xs font-semibold uppercase tracking-[.18em] text-[#B24A26]">
               AI Visual Search
             </p>
-            <h2 className="mt-2 font-h1 text-2xl font-bold text-[#241F1A]"> Tìm phong cách bằng hình ảnh </h2>
-            <p className="mt-2 text-sm text-[#6E6459]"> Tải ảnh tham khảo để khám phá các tác phẩm có phong cách tương đồng. </p>
+            <h2 className="mt-2 font-h1 text-2xl font-bold text-[#241F1A]"> {isVie ? 'Tìm phong cách bằng hình ảnh' : 'Search style by image'} </h2>
+            <p className="mt-2 text-sm text-[#6E6459]">
+              {isVie
+                ? 'Tải ảnh tham khảo để khám phá các tác phẩm có phong cách tương đồng.'
+                : 'Upload a reference image to explore artworks with similar styles.'}
+            </p>
           </div>
           <button
             onClick={onClose}
             className="rounded-full p-2 text-[#6E6459] hover:bg-[#F0E7D8] hover:text-[#241F1A]"
-            aria-label="Đóng"
+            aria-label={isVie ? 'Đóng' : 'Close'}
           >
             <X />
           </button>
@@ -170,7 +177,7 @@ function ImageSearchModal({
           className={`relative flex min-h-52 w-full flex-col items-center justify-center overflow-hidden rounded-3xl border border-dashed p-6 transition ${
             isDragging
               ? 'border-[#B24A26] bg-[#B24A26]/15'
-              : 'border-[#221E1A]/20 bg-[#FFFCF6] hover:border-[#B24A26]/70'
+              : 'border-[#221E1A]/20 bg-[#FFFCF6] hover:border-[#B24A26]/70 [html[data-theme=ink]_&]:border-[#f4f1ea]/20'
           }`}
         >
           {preview ? (
@@ -182,10 +189,12 @@ function ImageSearchModal({
               className="object-cover opacity-65"
             />
           ) : null}
-          <span className="relative z-10 rounded-2xl bg-[#B24A26]/20 p-4">
-            <Upload className="h-7 w-7 text-[#D7DBFF]" />
+          <span className="relative z-10 rounded-2xl border border-[#221E1A]/10 bg-[#F0E7D8] p-4">
+            <Upload className="h-7 w-7 text-[#A8321C]" />
           </span>
-          <span className="relative z-10 mt-4 text-sm font-semibold text-[#241F1A]"> Kéo thả ảnh vào đây hoặc chọn ảnh </span>
+          <span className="relative z-10 mt-4 text-sm font-semibold text-[#241F1A]">
+            {isVie ? 'Kéo thả ảnh vào đây hoặc chọn ảnh' : 'Drag & drop image here or browse file'}
+          </span>
           <span className="relative z-10 mt-1 text-xs text-[#6E6459]">
             PNG, JPG, WEBP · tối đa 10 MB
           </span>
@@ -201,8 +210,8 @@ function ImageSearchModal({
           <div className="mt-7">
             <div className="mb-4 flex items-center gap-2">
               <Sparkles className="h-4 w-4 text-[#B24A26]" />
-              <h3 className="font-h1 text-lg font-semibold text-[#241F1A]">Tác phẩm gợi ý</h3>
-              <span className="text-xs text-[#6E6459]">{resultItems.length} kết quả tương đồng</span>
+              <h3 className="font-h1 text-lg font-semibold text-[#241F1A]">{isVie ? 'Tác phẩm gợi ý' : 'Suggested artworks'}</h3>
+              <span className="text-xs text-[#6E6459]">{resultItems.length} {isVie ? 'kết quả tương đồng' : 'matching results'}</span>
             </div>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
               {resultItems.slice(0, 8).map((artwork) => (
@@ -249,6 +258,8 @@ export function ArtDiscovery({
   initialSort?: string;
 }) {
   const [artworks, setArtworks] = useState<MarketplaceArtwork[]>([]);
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
   const [categories, setCategories] = useState<CategoryDto[]>([]);
   const [followingArtworks, setFollowingArtworks] = useState<MarketplaceArtwork[]>([]);
   const [featuredBanners, setFeaturedBanners] = useState<
@@ -648,7 +659,7 @@ export function ArtDiscovery({
                   setQuery(event.target.value);
                   setSearchFocused(true);
                 }}
-                placeholder="Tìm tác phẩm, danh mục, #tag hoặc tên nghệ sĩ..."
+                placeholder={isVie ? 'Tìm tác phẩm, danh mục, #tag hoặc tên nghệ sĩ...' : 'Search artworks, categories, #tags, or artists...'}
                 className="w-full bg-transparent text-sm text-[#241F1A] outline-none placeholder:text-[#746A5F]"
               />
               {query && (
@@ -670,7 +681,7 @@ export function ArtDiscovery({
                     <div>
                       <p className="mb-2 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[#B24A26]">
                         <Palette className="h-3 w-3" />
-                        <span>Danh mục lớn</span>
+                        <span>{isVie ? 'Danh mục lớn' : 'Categories'}</span>
                       </p>
                       <div className="flex flex-wrap gap-1.5">
                         {suggestions.categories.map((cat) => (
@@ -682,7 +693,7 @@ export function ArtDiscovery({
                               setQuery('');
                               setSearchFocused(false);
                             }}
-                            className="rounded-full border border-[#B24A26]/35 bg-[#B24A26]/15 px-3 py-1 text-xs font-semibold text-[#E1E4FF] hover:bg-[#B24A26]/25 cursor-pointer"
+                            className="rounded-full border border-[#B24A26]/35 bg-[#B24A26]/10 px-3 py-1 text-xs font-semibold text-[#A8321C] hover:bg-[#B24A26]/20 cursor-pointer"
                           >
                             {localizeStyle(cat.name)}
                           </button>
@@ -695,7 +706,7 @@ export function ArtDiscovery({
                     <div>
                       <p className="mb-2 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[#B24A26]">
                         <Tag className="h-3 w-3" />
-                        <span>Tag con phổ biến</span>
+                        <span>{isVie ? 'Tag con phổ biến' : 'Popular sub-tags'}</span>
                       </p>
                       <div className="flex flex-wrap gap-1.5">
                         {suggestions.tags.map((t) => (
@@ -728,9 +739,9 @@ export function ArtDiscovery({
                 : 'border-[#221E1A]/10 bg-[#FFFCF6] text-[#6E6459] hover:border-[#B24A26]/60'
             }`}
           >
-            <SlidersHorizontal className="h-4 w-4" /> Bộ lọc </button>
+            <SlidersHorizontal className="h-4 w-4" /> {isVie ? 'Bộ lọc' : 'Filters'} </button>
 
-          <label className="sr" htmlFor="explore-sort">Sắp xếp tác phẩm</label>
+          <label className="sr" htmlFor="explore-sort">{isVie ? 'Sắp xếp tác phẩm' : 'Sort artworks'}</label>
           <select
             id="explore-sort"
             value={sort}
@@ -739,7 +750,7 @@ export function ArtDiscovery({
           >
             {SORTS.map((option) => (
               <option key={option.value} value={option.value}>
-                {option.label}
+                {isVie ? option.label : option.en}
               </option>
             ))}
           </select>
@@ -748,14 +759,14 @@ export function ArtDiscovery({
         {/* Active tag pill */}
         {selectedTag && (
           <div className="mb-4 flex items-center gap-2 text-xs">
-            <span className="text-[#746A5F]">Đang lọc theo tag:</span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-[#B24A26]/40 bg-[#B24A26]/15 px-3 py-1 font-semibold text-[#E1E4FF]">
+            <span className="text-[#746A5F]">{isVie ? 'Đang lọc theo tag:' : 'Filtering by tag:'}</span>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-[#B24A26]/40 bg-[#B24A26]/10 px-3 py-1 font-semibold text-[#A8321C]">
               #{selectedTag}
               <button
                 type="button"
                 onClick={() => setSelectedTag('')}
                 className="hover:text-[#241F1A] cursor-pointer"
-                aria-label="Xóa lọc tag"
+                aria-label={isVie ? 'Xóa lọc tag' : 'Clear tag filter'}
               >
                 <X className="h-3.5 w-3.5" />
               </button>
@@ -767,56 +778,66 @@ export function ArtDiscovery({
           <section className="glass-container mb-8 rounded-3xl p-5">
             <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
               <div>
-                <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-[#B24A26]"> Khoảng giá </p>
+                <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-[#B24A26]"> {isVie ? 'Khoảng giá' : 'Price range'} </p>
                 <div className="flex gap-2">
                   <input
-                    aria-label="Giá tối thiểu"
+                    aria-label={isVie ? 'Giá tối thiểu' : 'Minimum price'}
                     type="number"
                     value={minPrice}
                     onChange={(e) => setMinPrice(e.target.value)}
-                    placeholder="Từ"
+                    placeholder={isVie ? 'Từ' : 'Min'}
                     className="min-w-0 rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-3 py-2 text-xs outline-none focus:border-[#B24A26]"
                   />
                   <input
-                    aria-label="Giá tối đa"
+                    aria-label={isVie ? 'Giá tối đa' : 'Maximum price'}
                     type="number"
                     value={maxPrice}
                     onChange={(e) => setMaxPrice(e.target.value)}
-                    placeholder="Đến"
+                    placeholder={isVie ? 'Đến' : 'Max'}
                     className="min-w-0 rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-3 py-2 text-xs outline-none focus:border-[#B24A26]"
                   />
                 </div>
               </div>
               <div>
-                <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-[#B24A26]"> Đánh giá </p>
+                <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-[#B24A26]"> {isVie ? 'Đánh giá' : 'Rating'} </p>
                 <select
                   value={minRating}
                   onChange={(e) => setMinRating(Number(e.target.value))}
                   className="w-full rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-3 py-2 text-xs outline-none"
                 >
-                  <option value={0}>Tất cả đánh giá</option>
-                  <option value={4}>4★ trở lên</option>
-                  <option value={4.5}>4.5★ trở lên</option>
+                  <option value={0}>{isVie ? 'Tất cả đánh giá' : 'All ratings'}</option>
+                  <option value={4}>{isVie ? '4★ trở lên' : '4★ and above'}</option>
+                  <option value={4.5}>{isVie ? '4.5★ trở lên' : '4.5★ and above'}</option>
                 </select>
               </div>
-              <label className="flex cursor-pointer items-center gap-3 pt-6 text-sm text-[#6E6459]" title="Slot = số đơn họa sĩ còn nhận thêm trong tháng. Bật để chỉ xem họa sĩ đang nhận đơn.">
+              <label
+                className="flex cursor-pointer items-center gap-3 pt-6 text-sm text-[#6E6459]"
+                title={isVie
+                  ? 'Slot = số đơn họa sĩ còn nhận thêm trong tháng. Bật để chỉ xem họa sĩ đang nhận đơn.'
+                  : 'Slots = additional orders the artist can still take this month. Enable to only see artists currently accepting orders.'}
+              >
                 <input
                   checked={onlyOpenSlots}
                   onChange={(event) => setOnlyOpenSlots(event.target.checked)}
                   type="checkbox"
                   className="h-4 w-4 accent-[#B24A26]"
-                /> họa sĩ còn lượt </label>
+                /> {isVie ? 'họa sĩ còn lượt' : 'artists with open slots'} </label>
               <div>
-                <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-[#B24A26]"> Bản quyền <span className="ml-1.5 font-normal normal-case tracking-normal text-[#635b51]" title="Cá nhân = dùng phi thương mại (in treo nhà, quà tặng, học tập). Thương mại = được dùng trong sản phẩm/dịch vụ bán ra."> (cá nhân / thương mại) </span>
+                <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-[#B24A26]"> {isVie ? 'Bản quyền' : 'Licensing'} <span
+                    className="ml-1.5 font-normal normal-case tracking-normal text-[#635b51]"
+                    title={isVie
+                      ? 'Cá nhân = dùng phi thương mại (in treo nhà, quà tặng, học tập). Thương mại = được dùng trong sản phẩm/dịch vụ bán ra.'
+                      : 'Personal = non-commercial use (home prints, gifts, study). Commercial = use in products/services you sell.'}
+                  > {isVie ? '(cá nhân / thương mại)' : '(personal / commercial)'} </span>
                 </p>
                 <select
                   value={license}
                   onChange={(event) => setLicense(event.target.value as License)}
                   className="w-full rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-3 py-2 text-xs outline-none"
                 >
-                  <option value="all">Tất cả</option>
-                  <option value="personal">Cá nhân</option>
-                  <option value="commercial">Thương mại</option>
+                  <option value="all">{isVie ? 'Tất cả' : 'All'}</option>
+                  <option value="personal">{isVie ? 'Cá nhân' : 'Personal'}</option>
+                  <option value="commercial">{isVie ? 'Thương mại' : 'Commercial'}</option>
                 </select>
               </div>
             </div>
@@ -827,9 +848,9 @@ export function ArtDiscovery({
           <div className="flex rounded-full bg-[#FFFCF6] p-1">
             {(
               [
-                ['recommended', 'Dành cho bạn'],
+                ['recommended', isVie ? 'Dành cho bạn' : 'For you'],
                 ...(followingArtworks.length > 0
-                  ? ([['following', 'Đang theo dõi']] as const)
+                  ? ([['following', isVie ? 'Đang theo dõi' : 'Following']] as const)
                   : []),
               ] as const
             ).map(([tab, label]) => (
@@ -849,20 +870,30 @@ export function ArtDiscovery({
           </div>
           <p className="text-sm text-[#6E6459]">
             {sort === 'newest' ? (
-              <>{totalCount} tác phẩm phù hợp · trang {currentPage}/{totalPages}</>
+              isVie
+                ? <>{totalCount} tác phẩm phù hợp · trang {currentPage}/{totalPages}</>
+                : <>{totalCount} matching artworks · page {currentPage}/{totalPages}</>
             ) : (
-              <>
-                Sắp theo {SORTS.find((option) => option.value === sort)?.label.toLowerCase()} trong{' '}
-                {displayed.length} tác phẩm đã tải
-                {serverTotalCount > displayed.length ? ` (sàn có ${serverTotalCount})` : ''}
-              </>
+              isVie ? (
+                <>
+                  Sắp theo {SORTS.find((option) => option.value === sort)?.label.toLowerCase()} trong{' '}
+                  {displayed.length} tác phẩm đã tải
+                  {serverTotalCount > displayed.length ? ` (sàn có ${serverTotalCount})` : ''}
+                </>
+              ) : (
+                <>
+                  Sorted by {SORTS.find((option) => option.value === sort)?.en.toLowerCase()} across{' '}
+                  {displayed.length} loaded artworks
+                  {serverTotalCount > displayed.length ? ` (${serverTotalCount} on the marketplace)` : ''}
+                </>
+              )
             )}
           </p>
         </div>
 
         {loading ? (
           <div aria-busy="true" aria-live="polite">
-            <span className="sr-only">Đang tải chợ tranh…</span>
+            <span className="sr-only">{isVie ? 'Đang tải chợ tranh…' : 'Loading marketplace…'}</span>
             <SkeletonCardGrid count={8} />
           </div>
         ) : displayed.length ? (
@@ -874,8 +905,8 @@ export function ArtDiscovery({
           </div>
 
           {totalPages > 1 && (
-            <nav className="mt-8 flex flex-wrap items-center justify-center gap-2" aria-label="Phân trang">
-              <button type="button" className="btn btn--outline btn--sm" disabled={currentPage === 1} onClick={() => { setPage((v) => Math.max(1, v - 1)); window.scrollTo({ top: 300, behavior: 'smooth' }); }}>Trước</button>
+            <nav className="mt-8 flex flex-wrap items-center justify-center gap-2" aria-label={isVie ? 'Phân trang' : 'Pagination'}>
+              <button type="button" className="btn btn--outline btn--sm" disabled={currentPage === 1} onClick={() => { setPage((v) => Math.max(1, v - 1)); window.scrollTo({ top: 300, behavior: 'smooth' }); }}>{isVie ? 'Trước' : 'Previous'}</button>
               {Array.from({ length: totalPages }).map((_, n) => (
                 <button
                   key={n}
@@ -887,17 +918,17 @@ export function ArtDiscovery({
                   {n + 1}
                 </button>
               ))}
-              <button type="button" className="btn btn--outline btn--sm" disabled={currentPage === totalPages} onClick={() => { setPage((v) => Math.min(totalPages, v + 1)); window.scrollTo({ top: 300, behavior: 'smooth' }); }}>Sau</button>
+              <button type="button" className="btn btn--outline btn--sm" disabled={currentPage === totalPages} onClick={() => { setPage((v) => Math.min(totalPages, v + 1)); window.scrollTo({ top: 300, behavior: 'smooth' }); }}>{isVie ? 'Sau' : 'Next'}</button>
             </nav>
           )}
           </>
         ) : (
           <div className="empty">
-            <h3>Chưa tìm thấy tác phẩm phù hợp</h3>
+            <h3>{isVie ? 'Chưa tìm thấy tác phẩm phù hợp' : 'No matching artworks found'}</h3>
             <button
               onClick={clearAllFilters}
               className="mt-3 text-sm text-[#B24A26] hover:underline"
-            > Xóa bộ lọc </button>
+            > {isVie ? 'Xóa bộ lọc' : 'Clear filters'} </button>
           </div>
         )}
       </div>

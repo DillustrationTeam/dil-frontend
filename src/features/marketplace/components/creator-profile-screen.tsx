@@ -23,7 +23,7 @@ function formatTimestamp(dateStr?: string | null) {
 import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { Package, Sparkles, ChevronLeft, ChevronRight, X, Clock, Star, ArrowUpDown, Gavel, ArrowLeftRight } from 'lucide-react';
+import { Package, Sparkles, ChevronLeft, ChevronRight, X, Clock, Star, ArrowUpDown, Gavel, ArrowLeftRight, UserMinus } from 'lucide-react';
 import CreateCommissionModal from '@/components/modals/CreateCommissionModal';
 import { useAuthStore } from '@/store/use-auth-store';
 import { creatorRateCardService, getPackageSlotInfo, type RateCardPackage } from '@/features/creator-studio/services/creator-rate-card.service';
@@ -32,6 +32,7 @@ import { CreatorTermsOverview } from '@/components/terms/CreatorTermsOverview';
 import type { ArtworkDto, CreatorProfileDto, CreatorTermsDto } from '@/features/creator-studio/types/creator-profile.types';
 import { marketplaceService, type CreatorReviewDto } from '@/features/marketplace/services/marketplace.service';
 import { commissionService } from '@/services/commission.service';
+import { useLanguage } from '@/context/language-context';
 import { ProfileLayout, ProfileTabs } from './profile-layout';
 
 type Tab = 'portfolio' | 'rates' | 'reviews' | 'terms';
@@ -40,6 +41,8 @@ export function CreatorProfileScreen({ id }: { id: string }) {
 
   const currentUserId = useAuthStore((state) => state.user?.id);
   const authenticated = useAuthStore((state) => state.isAuthenticated);
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
   const [profile, setProfile] = useState<CreatorProfileDto | null>(null);
   const [artworks, setArtworks] = useState<ArtworkDto[]>([]);
   const [rates, setRates] = useState<RateCardPackage[]>([]);
@@ -47,6 +50,8 @@ export function CreatorProfileScreen({ id }: { id: string }) {
   const [terms, setTerms] = useState<CreatorTermsDto | null>(null);
   const [following, setFollowing] = useState(false);
   const [busy, setBusy] = useState(false);
+  /** Hộp thoại xác nhận trước khi hủy theo dõi (Following → Follow). */
+  const [unfollowConfirmOpen, setUnfollowConfirmOpen] = useState(false);
   const [loadedId, setLoadedId] = useState<string | null>(null);
   const [tab, setTab] = useState<Tab>('portfolio');
   type ReviewFilter = 'all' | '5' | '4' | '3' | '2' | '1' | 'with-reply';
@@ -153,6 +158,22 @@ export function CreatorProfileScreen({ id }: { id: string }) {
     }
   };
 
+  /** Hủy theo dõi chỉ chạy sau khi người dùng xác nhận trong hộp thoại. */
+  const confirmUnfollow = async () => {
+    await toggleFollow();
+    setUnfollowConfirmOpen(false);
+  };
+
+  // Escape đóng hộp thoại xác nhận hủy theo dõi
+  useEffect(() => {
+    if (!unfollowConfirmOpen) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setUnfollowConfirmOpen(false);
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [unfollowConfirmOpen]);
+
   if (loadedId !== id) return <div className="min-h-[70vh] bg-[#F7F2E9] p-12 text-center text-[#6E6459]">Đang tải hồ sơ nghệ sĩ…</div>;
   if (!profile) return <div className="min-h-[70vh] bg-[#F7F2E9] p-12 text-center text-[#6E6459]">Không tìm thấy hồ sơ nghệ sĩ.</div>;
 
@@ -165,12 +186,12 @@ export function CreatorProfileScreen({ id }: { id: string }) {
 
   return (
     <ProfileLayout name={profile.displayName} bannerUrl={profile.bannerUrl} sidebar={<div>
-      <p className="text-xs uppercase tracking-wider text-[#B24A26]">Hồ sơ họa sĩ</p>
+      <p className="text-xs uppercase tracking-wider text-[#B24A26]">{isVie ? 'Hồ sơ họa sĩ' : 'Creator Profile'}</p>
       <h1 className="mt-2 break-words font-h1 text-3xl font-bold text-[#241F1A]">{profile.displayName}</h1>
-      <p className="mt-2 text-sm text-[#6E6459]">{profile.headline || 'Họa sĩ kỹ thuật số'}</p>
-      <div className="mt-5 flex items-center justify-between text-sm"><span>{profile.followerCount} <span>người theo dõi</span></span><span>★ {profile.ratingAverage.toFixed(1)}</span></div>
+      <p className="mt-2 text-sm text-[#6E6459]">{profile.headline || (isVie ? 'Họa sĩ kỹ thuật số' : 'Digital artist')}</p>
+      <div className="mt-5 flex items-center justify-between text-sm"><span>{profile.followerCount} <span>{isVie ? 'người theo dõi' : 'followers'}</span></span><span>★ {profile.ratingAverage.toFixed(1)}</span></div>
       {isOwnProfile ? (
-        <Link href="/creator/profile/edit" className="mt-5 inline-flex w-full justify-center rounded-xl border border-[#221E1A]/10 px-4 py-2.5 text-sm text-[#241F1A]"> Chỉnh sửa hồ sơ </Link>
+        <Link href="/creator/profile/edit" className="mt-5 inline-flex w-full justify-center rounded-xl border border-[#221E1A]/10 px-4 py-2.5 text-sm text-[#241F1A]"> {isVie ? 'Chỉnh sửa hồ sơ' : 'Edit profile'} </Link>
       ) : (
         <div className="mt-5 space-y-2">
           {authenticated ? (
@@ -178,27 +199,92 @@ export function CreatorProfileScreen({ id }: { id: string }) {
               type="button"
               disabled={busy}
               aria-pressed={following}
-              onClick={() => void toggleFollow()}
-              className="w-full rounded-xl bg-[#B24A26] px-4 py-2.5 text-sm font-semibold text-[#F7F2E9] disabled:opacity-50 cursor-pointer transition hover:bg-[#8C3718]"
+              onClick={() => {
+                if (following) {
+                  setUnfollowConfirmOpen(true);
+                  return;
+                }
+                void toggleFollow();
+              }}
+              className={`w-full rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors cursor-pointer disabled:opacity-50 ${
+                following
+                  ? 'border border-[#A8321C] bg-[#FFFCF6] text-[#A8321C] hover:bg-[#A8321C]/10'
+                  : 'bg-[#A8321C] text-[#FFFCF6] hover:bg-[#8C3718] [html[data-theme=ink]_&]:text-[#f08a6e] [html[data-theme=ink]_&]:hover:brightness-125'
+              }`}
             >
-              {busy ? 'Đang cập nhật…' : following ? 'Đang theo dõi' : 'Theo dõi'}
+              {busy
+                ? (isVie ? 'Đang cập nhật…' : 'Updating…')
+                : following
+                  ? (isVie ? 'Đang theo dõi' : 'Following')
+                  : (isVie ? 'Theo dõi' : 'Follow')}
             </button>
           ) : (
             <Link
               href="/login"
               className="inline-flex w-full justify-center rounded-xl bg-[#B24A26] px-4 py-2.5 text-sm font-semibold text-[#F7F2E9]"
-            > Đăng nhập để theo dõi </Link>
+            > {isVie ? 'Đăng nhập để theo dõi' : 'Sign in to follow'} </Link>
           )}
 
           <Link
             href={`/art-trades/create?receiverId=${profile.userId}&name=${encodeURIComponent(profile.displayName)}`}
             className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-[#B24A26]/30 bg-[#B24A26]/10 hover:bg-[#B24A26]/20 text-[#B24A26] hover:text-[#241F1A] px-4 py-2.5 text-xs font-semibold uppercase tracking-wider transition cursor-pointer"
           >
-            <ArrowLeftRight className="w-3.5 h-3.5" /> Đề nghị trao đổi tranh </Link>
+            <ArrowLeftRight className="w-3.5 h-3.5" /> {isVie ? 'Đề nghị trao đổi tranh' : 'Propose art trade'} </Link>
         </div>
       )}
       {profile.bio && <p className="mt-5 whitespace-pre-line break-words text-sm leading-6 text-[#6E6459]">{profile.bio}</p>}
       {profile.specialties && <p className="mt-4 text-xs text-[#746A5F]">{profile.specialties}</p>}
+
+      {/* Hộp thoại xác nhận hủy theo dõi (Following → Follow) */}
+      {unfollowConfirmOpen && (
+        <div
+          className="fixed inset-0 z-[140] flex items-center justify-center bg-[#14110E]/50 p-4"
+          role="presentation"
+          onClick={() => setUnfollowConfirmOpen(false)}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="unfollow-dialog-title"
+            aria-describedby="unfollow-dialog-desc"
+            className="w-full max-w-sm rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] p-5 text-left shadow-2xl"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="flex items-start gap-3">
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[#A8321C]/10 text-[#A8321C]">
+                <UserMinus className="size-4" aria-hidden />
+              </span>
+              <div className="min-w-0">
+                <h2 id="unfollow-dialog-title" className="font-h1 text-base font-bold text-[#241F1A]">
+                  {isVie ? `Hủy theo dõi ${profile.displayName}?` : `Unfollow ${profile.displayName}?`}
+                </h2>
+                <p id="unfollow-dialog-desc" className="mt-1 text-xs leading-5 text-[#6E6459]">
+                  {isVie
+                    ? 'Tác phẩm mới của họa sĩ sẽ không còn xuất hiện trong mục “Đang theo dõi” của bạn.'
+                    : 'New artworks from this creator will no longer appear in your “Following” feed.'}
+                </p>
+              </div>
+            </div>
+            <div className="mt-4 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setUnfollowConfirmOpen(false)}
+                className="rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-4 py-2 text-xs font-semibold text-[#241F1A] transition-colors hover:bg-[#F0E7D8]"
+              >
+                {isVie ? 'Giữ theo dõi' : 'Keep following'}
+              </button>
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => void confirmUnfollow()}
+                className="rounded-xl bg-[#A8321C] px-4 py-2 text-xs font-bold text-[#FFFCF6] transition-colors hover:bg-[#8C3718] disabled:opacity-50 [html[data-theme=ink]_&]:text-[#f08a6e] [html[data-theme=ink]_&]:hover:brightness-125"
+              >
+                {busy ? (isVie ? 'Đang hủy…' : 'Unfollowing…') : (isVie ? 'Hủy theo dõi' : 'Unfollow')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>}>
       <ProfileTabs tabs={tabs} value={tab} onChange={setTab} />
       <div className="mt-6">
@@ -554,13 +640,13 @@ export function CreatorProfileScreen({ id }: { id: string }) {
                   {/* Filter Pills */}
                   <div className="flex flex-wrap items-center gap-1.5">
                     {[
-                      { key: 'all', label: `Tất cả (${totalReviewCount})` },
+                      { key: 'all', label: `${isVie ? 'Tất cả' : 'All'} (${totalReviewCount})` },
                       { key: '5', label: `5★ (${starCounts[5]})` },
                       { key: '4', label: `4★ (${starCounts[4]})` },
                       { key: '3', label: `3★ (${starCounts[3]})` },
                       { key: '2', label: `2★ (${starCounts[2]})` },
                       { key: '1', label: `1★ (${starCounts[1]})` },
-                      { key: 'with-reply', label: `💬 Phản hồi (${countWithReply})` },
+                      { key: 'with-reply', label: `💬 ${isVie ? 'Phản hồi' : 'Replied'} (${countWithReply})` },
                     ].map(({ key, label }) => {
                       const isActive = reviewFilter === key;
                       return (
@@ -583,16 +669,16 @@ export function CreatorProfileScreen({ id }: { id: string }) {
                   {/* Sorting Dropdown */}
                   <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
                     <span className="text-[11px] text-[#746A5F] flex items-center gap-1">
-                      <ArrowUpDown size={12} className="text-[#B24A26]" /> Sắp xếp: </span>
+                      <ArrowUpDown size={12} className="text-[#B24A26]" /> {isVie ? 'Sắp xếp:' : 'Sort by:'} </span>
                     <select
                       value={reviewSort}
                       onChange={(e) => handleSortChange(e.target.value as ReviewSort)}
                       className="bg-[#F0E7D8] border border-[#221E1A]/10 rounded-xl px-2.5 py-1.5 text-xs text-[#241F1A] focus:outline-none focus:border-[#B24A26] cursor-pointer"
                     >
-                      <option value="newest" className="bg-[#FFFCF6] text-[#241F1A]">Mới nhất</option>
-                      <option value="oldest" className="bg-[#FFFCF6] text-[#241F1A]">Cũ nhất</option>
-                      <option value="rating-desc" className="bg-[#FFFCF6] text-[#241F1A]">Đánh giá cao nhất</option>
-                      <option value="rating-asc" className="bg-[#FFFCF6] text-[#241F1A]">Đánh giá thấp nhất</option>
+                      <option value="newest" className="bg-[#FFFCF6] text-[#241F1A]">{isVie ? 'Mới nhất' : 'Newest'}</option>
+                      <option value="oldest" className="bg-[#FFFCF6] text-[#241F1A]">{isVie ? 'Cũ nhất' : 'Oldest'}</option>
+                      <option value="rating-desc" className="bg-[#FFFCF6] text-[#241F1A]">{isVie ? 'Đánh giá cao nhất' : 'Highest rated'}</option>
+                      <option value="rating-asc" className="bg-[#FFFCF6] text-[#241F1A]">{isVie ? 'Đánh giá thấp nhất' : 'Lowest rated'}</option>
                     </select>
                   </div>
                 </div>
@@ -601,7 +687,7 @@ export function CreatorProfileScreen({ id }: { id: string }) {
                 {(availablePackages.length > 0 || auctionReviewCount > 0) && (
                   <div className="pt-3 border-t border-[#221E1A]/10 flex flex-wrap items-center gap-2">
                     <span className="text-xs text-[#746A5F] font-semibold flex items-center gap-1.5 mr-1">
-                      <Package size={13} className="text-[#B24A26]" /> Nguồn: </span>
+                      <Package size={13} className="text-[#B24A26]" /> {isVie ? 'Nguồn:' : 'Source:'} </span>
 
                     <button
                       type="button"
@@ -612,7 +698,7 @@ export function CreatorProfileScreen({ id }: { id: string }) {
                           : 'bg-[#FFFCF6] border-[#221E1A]/10 text-[#746A5F] hover:border-[#221E1A]/20 hover:text-[#241F1A]'
                       }`}
                     >
-                      Tất cả đánh giá (${totalReviewCount})
+                      {isVie ? `Tất cả đánh giá (${totalReviewCount})` : `All reviews (${totalReviewCount})`}
                     </button>
 
                     {auctionReviewCount > 0 && (
@@ -625,7 +711,7 @@ export function CreatorProfileScreen({ id }: { id: string }) {
                             : 'bg-[#FFFCF6] border-[#221E1A]/10 text-[#746A5F] hover:border-[#221E1A]/20 hover:text-[#241F1A]'
                         }`}
                       >
-                        <Gavel size={11} /> Đấu giá ({auctionReviewCount})
+                        <Gavel size={11} /> {isVie ? 'Đấu giá' : 'Auctions'} ({auctionReviewCount})
                       </button>
                     )}
 

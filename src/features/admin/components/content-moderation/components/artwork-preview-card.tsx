@@ -213,7 +213,11 @@ export function ArtworkPreviewCard({ artwork }: ArtworkPreviewCardProps) {
             }`}
           >
             <Bot className="w-3 h-3" />
-            <span>{artwork.isAiGenerated ? 'Được đánh dấu là ảnh AI' : 'Chưa đánh dấu là ảnh AI'}</span>
+            <span>
+              {artwork.isAiGenerated
+                ? (isVie ? 'Được đánh dấu là ảnh AI' : 'Flagged as AI-generated')
+                : (isVie ? 'Chưa đánh dấu là ảnh AI' : 'Not flagged as AI')}
+            </span>
           </span>
         </div>
       </div>

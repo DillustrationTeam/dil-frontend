@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { X, AlertTriangle, Info, CheckCircle2 } from 'lucide-react';
 import { commissionService } from '@/services/commission.service';
+import { useLanguage } from '@/context/language-context';
 import type { Commission } from '@/types/commission.types';
 
 interface CancelRefundModalProps {
@@ -23,6 +24,8 @@ export default function CancelRefundModal({
   onSuccess,
 }: CancelRefundModalProps) {
   const [reason, setReason] = useState('');
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
   const [details, setDetails] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -120,12 +123,12 @@ export default function CancelRefundModal({
                   onChange={(event) => setReason(event.target.value)}
                   className="w-full p-3 bg-[#FFFCF6] rounded-xl text-xs text-[#241F1A] focus:outline-none transition-all border border-[#221E1A]/10 focus:border-[#B24A26] focus:ring-1 focus:ring-[#B24A26]"
                 >
-                  <option value="" disabled className="bg-[#FFFCF6] text-[#746A5F]">Chọn lý do hủy đơn...</option>
-                  <option value="Creator unresponsive" className="bg-[#FFFCF6] text-[#241F1A] py-2">Họa sĩ không phản hồi</option>
-                  <option value="Missed deadline" className="bg-[#FFFCF6] text-[#241F1A] py-2">Họa sĩ đã quá hạn hoàn thành</option>
-                  <option value="Quality issues" className="bg-[#FFFCF6] text-[#241F1A] py-2">Chất lượng không đạt yêu cầu hoặc không đúng thỏa thuận</option>
-                  <option value="Mutual agreement" className="bg-[#FFFCF6] text-[#241F1A] py-2">Hai bên đồng ý hủy đơn</option>
-                  <option value="Other" className="bg-[#FFFCF6] text-[#241F1A] py-2">Lý do khác</option>
+                  <option value="" disabled className="bg-[#FFFCF6] text-[#746A5F]">{isVie ? 'Chọn lý do hủy đơn...' : 'Select a cancellation reason...'}</option>
+                  <option value="Creator unresponsive" className="bg-[#FFFCF6] text-[#241F1A] py-2">{isVie ? 'Họa sĩ không phản hồi' : 'Creator is unresponsive'}</option>
+                  <option value="Missed deadline" className="bg-[#FFFCF6] text-[#241F1A] py-2">{isVie ? 'Họa sĩ đã quá hạn hoàn thành' : 'Creator missed the deadline'}</option>
+                  <option value="Quality issues" className="bg-[#FFFCF6] text-[#241F1A] py-2">{isVie ? 'Chất lượng không đạt yêu cầu hoặc không đúng thỏa thuận' : 'Quality does not meet requirements or the agreement'}</option>
+                  <option value="Mutual agreement" className="bg-[#FFFCF6] text-[#241F1A] py-2">{isVie ? 'Hai bên đồng ý hủy đơn' : 'Both parties agreed to cancel'}</option>
+                  <option value="Other" className="bg-[#FFFCF6] text-[#241F1A] py-2">{isVie ? 'Lý do khác' : 'Other reason'}</option>
                 </select>
               </div>
 

@@ -6,6 +6,7 @@ import { ArrowLeft, CheckCircle2, CircleAlert, Plus, RefreshCw, Tag, Trash2 } fr
 import { paymentService } from '../services/payment.service';
 import type { VoucherDto, VoucherRequest } from '../types/payment.types';
 import { VoucherApplyPanel } from './voucher-apply-panel';
+import { useLanguage } from '@/context/language-context';
 import { PageLoader } from '@/features/navigation';
 
 function formatVnd(value: number) {
@@ -13,6 +14,8 @@ function formatVnd(value: number) {
 }
 
 export function VoucherScreen({ userId, mode = 'client' }: { userId: string | null; mode?: 'client' | 'creator' }) {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
   const [vouchers, setVouchers] = useState<VoucherDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -197,8 +200,8 @@ export function VoucherScreen({ userId, mode = 'client' }: { userId: string | nu
                 onChange={(e) => setCreateForm({ ...createForm, discountType: e.target.value as 'Percent' | 'Fixed' })}
                 className="w-full rounded-xl border border-[#221E1A]/10 bg-brand-navy px-3 py-2 text-on-surface"
               >
-                <option value="Percent">Theo phần trăm (%)</option>
-                <option value="Fixed">Số tiền cố định (₫)</option>
+                <option value="Percent">{isVie ? 'Theo phần trăm (%)' : 'Percentage (%)'}</option>
+                <option value="Fixed">{isVie ? 'Số tiền cố định (₫)' : 'Fixed amount (₫)'}</option>
               </select>
             </div>
             <div>

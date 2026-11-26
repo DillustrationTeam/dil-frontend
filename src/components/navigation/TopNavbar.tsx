@@ -1,9 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
 import {
-  Search,
   Palette,
   Briefcase,
   ShieldCheck,
@@ -42,7 +41,6 @@ export default function TopNavbar<T extends string = string>({
   adminBadgeText,
   className = '',
 }: TopNavbarProps<T>) {
-  const [searchQuery, setSearchQuery] = useState('');
   const { user, roles } = useAuthStore();
   const router = useRouter();
   const { t } = useLanguage();
@@ -75,24 +73,6 @@ export default function TopNavbar<T extends string = string>({
             </button>
           )}
           <Wordmark size="md" />
-
-          {/* Quick Search Input */}
-          <div className="input-wrap hidden w-64 md:flex lg:w-80">
-            <Search aria-hidden />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter') {
-                  router.push(`/explore?q=${encodeURIComponent(searchQuery.trim())}`);
-                }
-              }}
-              aria-label={t('Tìm tác phẩm hoặc tác giả')}
-              placeholder={t('Search artworks, creators...')}
-              className="input min-h-9 rounded-full py-2 pl-9 text-xs"
-            />
-          </div>
         </div>
 
         {/* Right: Role Switcher, Quick Create, Notifications, Profile */}

@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { X, ShieldAlert, AlertCircle, CheckCircle2, Link as LinkIcon } from 'lucide-react';
 import { commissionService } from '@/services/commission.service';
 import { extractErrorMessage } from '@/lib/api-client';
+import { useLanguage } from '@/context/language-context';
 
 interface RaiseDisputeModalProps {
   isOpen: boolean;
@@ -19,6 +20,8 @@ export default function RaiseDisputeModal({
   onSuccess,
 }: RaiseDisputeModalProps) {
   const [reasonCategory, setReasonCategory] = useState('');
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
   const [details, setDetails] = useState('');
   const [evidenceUrlInput, setEvidenceUrlInput] = useState('');
   const [reasonError, setReasonError] = useState<string | null>(null);
@@ -118,13 +121,13 @@ export default function RaiseDisputeModal({
                       : 'border border-[#221E1A]/10 focus:border-[#B24A26] focus:ring-1 focus:ring-[#B24A26]'
                   }`}
                 >
-                  <option value="" disabled className="bg-[#FFFCF6] text-[#746A5F]">Chọn lý do khiếu nại...</option>
-                  <option value="Họa sĩ vi phạm cam kết / đề bài" className="bg-[#FFFCF6] text-[#241F1A] py-2">Họa sĩ vẽ không đúng thỏa thuận đề bài ban đầu</option>
-                  <option value="Trễ hạn chót (Missed hạn chót)" className="bg-[#FFFCF6] text-[#241F1A] py-2">Quá hạn chót hoàn thành mà không có thỏa thuận</option>
-                  <option value="Nghi vấn AI / Chất lượng kém" className="bg-[#FFFCF6] text-[#241F1A] py-2">Nghi vấn tác phẩm sử dụng AI hoặc kém chất lượng</option>
-                  <option value="Không thống nhất được mốc nghiệm thu" className="bg-[#FFFCF6] text-[#241F1A] py-2">Bất đồng ý kiến không thể duyệt/sửa mốc phác thảo</option>
-                  <option value="Khách hàng yêu cầu vượt phạm vi hợp đồng" className="bg-[#FFFCF6] text-[#241F1A] py-2">Khách hàng đòi hỏi yêu cầu ngoài thỏa thuận ban đầu</option>
-                  <option value="Lý do khác" className="bg-[#FFFCF6] text-[#241F1A] py-2">Lý do khác</option>
+                  <option value="" disabled className="bg-[#FFFCF6] text-[#746A5F]">{isVie ? 'Chọn lý do khiếu nại...' : 'Select a dispute reason...'}</option>
+                  <option value="Họa sĩ vi phạm cam kết / đề bài" className="bg-[#FFFCF6] text-[#241F1A] py-2">{isVie ? 'Họa sĩ vẽ không đúng thỏa thuận đề bài ban đầu' : "Creator's work does not match the original brief"}</option>
+                  <option value="Trễ hạn chót (Missed hạn chót)" className="bg-[#FFFCF6] text-[#241F1A] py-2">{isVie ? 'Quá hạn chót hoàn thành mà không có thỏa thuận' : 'Deadline passed without an agreed extension'}</option>
+                  <option value="Nghi vấn AI / Chất lượng kém" className="bg-[#FFFCF6] text-[#241F1A] py-2">{isVie ? 'Nghi vấn tác phẩm sử dụng AI hoặc kém chất lượng' : 'Suspected AI-generated or low-quality artwork'}</option>
+                  <option value="Không thống nhất được mốc nghiệm thu" className="bg-[#FFFCF6] text-[#241F1A] py-2">{isVie ? 'Bất đồng ý kiến không thể duyệt/sửa mốc phác thảo' : 'Unable to agree on approving or revising the sketch milestone'}</option>
+                  <option value="Khách hàng yêu cầu vượt phạm vi hợp đồng" className="bg-[#FFFCF6] text-[#241F1A] py-2">{isVie ? 'Khách hàng đòi hỏi yêu cầu ngoài thỏa thuận ban đầu' : 'Client requested work beyond the original agreement'}</option>
+                  <option value="Lý do khác" className="bg-[#FFFCF6] text-[#241F1A] py-2">{isVie ? 'Lý do khác' : 'Other reason'}</option>
                 </select>
               </div>
 
