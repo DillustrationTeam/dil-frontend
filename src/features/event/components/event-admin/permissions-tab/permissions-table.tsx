@@ -96,7 +96,7 @@ export function PermissionsTable({ members, onUpdateRole, onRemoveMember, isJudg
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search jury member by name or email..."
-            className="w-full h-10 pl-10 pr-9 bg-[#E5D8C2]/80 border border-[#221E1A]/10 rounded-xl text-xs text-[#241F1A] placeholder:text-[#746A5F] focus:outline-none focus:border-brand-periwinkle focus:ring-1 focus:ring-brand-periwinkle/30 transition-all"
+            className="w-full h-10 pl-10 pr-9 bg-[#E5D8C2] border border-[#221E1A]/10 rounded-xl text-xs text-[#241F1A] placeholder:text-[#746A5F] focus:outline-none focus:border-brand-periwinkle focus:ring-1 focus:ring-brand-periwinkle/30 transition-all"
           />
           {searchQuery && (
             <button
@@ -115,7 +115,7 @@ export function PermissionsTable({ members, onUpdateRole, onRemoveMember, isJudg
           <select
             value={roleFilter}
             onChange={(e) => setRoleFilter(e.target.value as 'All' | 'Head Jury' | 'Jury')}
-            className="h-10 px-3.5 pr-8 bg-[#E5D8C2]/80 border border-[#221E1A]/10 rounded-xl text-xs text-[#241F1A] focus:outline-none focus:border-brand-periwinkle focus:ring-1 focus:ring-brand-periwinkle/30 transition-all cursor-pointer font-medium"
+            className="h-10 px-3.5 pr-8 bg-[#E5D8C2] border border-[#221E1A]/10 rounded-xl text-xs text-[#241F1A] focus:outline-none focus:border-brand-periwinkle focus:ring-1 focus:ring-brand-periwinkle/30 transition-all cursor-pointer font-medium"
           >
             <option value="All" className="bg-[#FFFCF6]">{isVie ? 'Tất cả vai trò' : 'All Roles'}</option>
             <option value="Head Jury" className="bg-[#FFFCF6]">{isVie ? 'Trưởng ban' : 'Head Jury'}</option>

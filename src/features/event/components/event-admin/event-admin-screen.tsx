@@ -403,7 +403,7 @@ export function EventAdminScreen() {
           <button
             type="button"
             onClick={() => setActiveTab('disputes')}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-[#8A6A1F]/10 px-3.5 py-2 text-xs font-bold text-[#241F1A] transition hover:bg-[#8A6A1F]/10 cursor-pointer shrink-0"
+            className="admin-dispute-queue-btn inline-flex items-center gap-1.5 rounded-xl border border-[#8A6A1F]/35 bg-[#8A6A1F]/20 px-3.5 py-2 text-xs font-bold text-[#241F1A] transition hover:bg-[#8A6A1F]/30 cursor-pointer shrink-0"
           >
             <span>{isVie ? 'Mở hàng đợi khiếu nại' : 'Open Dispute Queue'}</span>
             <ArrowRight className="w-3.5 h-3.5" />
@@ -424,7 +424,7 @@ export function EventAdminScreen() {
                   value={keyword}
                   onChange={(e) => setKeyword(e.target.value)}
                   placeholder="Search contests..."
-                  className="w-full h-10 pl-9 pr-4 bg-[#E5D8C2]/70 border border-[#221E1A]/10 rounded-xl text-xs text-[#241F1A] text-[#746A5F] focus:outline-none focus:border-brand-periwinkle"
+                  className="w-full h-10 pl-9 pr-4 bg-[#E5D8C2] border border-[#221E1A]/10 rounded-xl text-xs text-[#241F1A] text-[#746A5F] focus:outline-none focus:border-brand-periwinkle"
                 />
               </div>
 
@@ -436,7 +436,7 @@ export function EventAdminScreen() {
                     setStatus(e.target.value);
                     setPage(1);
                   }}
-                  className="h-10 px-3.5 bg-[#E5D8C2]/70 border border-[#221E1A]/10 rounded-xl text-xs text-[#241F1A] focus:outline-none focus:border-brand-periwinkle cursor-pointer"
+                  className="h-10 px-3.5 bg-[#E5D8C2] border border-[#221E1A]/10 rounded-xl text-xs text-[#241F1A] focus:outline-none focus:border-brand-periwinkle cursor-pointer"
                 >
                   <option value="" className="bg-[#F7F2E9]">All Statuses</option>
                   <option value="Upcoming" className="bg-[#F7F2E9]">Waiting to Open</option>
@@ -453,7 +453,7 @@ export function EventAdminScreen() {
                     setSortBy(e.target.value as EventSortOption);
                     setPage(1);
                   }}
-                  className="h-10 px-3.5 bg-[#E5D8C2]/70 border border-[#221E1A]/10 rounded-xl text-xs text-[#241F1A] focus:outline-none focus:border-brand-periwinkle cursor-pointer"
+                  className="h-10 px-3.5 bg-[#E5D8C2] border border-[#221E1A]/10 rounded-xl text-xs text-[#241F1A] focus:outline-none focus:border-brand-periwinkle cursor-pointer"
                 >
                   <option value="latest" className="bg-[#F7F2E9]">Latest Created</option>
                   <option value="title_asc" className="bg-[#F7F2E9]">Title (A-Z)</option>

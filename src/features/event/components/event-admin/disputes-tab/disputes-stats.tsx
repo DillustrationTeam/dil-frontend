@@ -56,7 +56,7 @@ export function DisputesStats({
             key={idx}
             className="glass-container rounded-2xl p-5 relative overflow-hidden flex flex-col justify-between"
           >
-            <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-brand-periwinkle via-[#A8321C] to-transparent opacity-75" />
+            <div className="admin-stat-top-glow absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-brand-periwinkle via-[#A8321C] to-transparent opacity-75" />
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-outline uppercase tracking-wider">
                 {stat.label}

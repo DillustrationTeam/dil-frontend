@@ -699,73 +699,62 @@ export function LiveHomeGallery() {
                   </span>
                 </div>
                 <div className="evt__body">
+                  <p className="eyebrow">{eventPhaseOf(spotlightEvent)}</p>
                   <h3 className="evt__title">{spotlightEvent.title}</h3>
                   <p className="evt__desc">
-                    {spotlightEvent.description?.slice(0, 180) ||
+                    {spotlightEvent.description?.slice(0, 140) ||
                       'Một lời mời mở: gửi tác phẩm, chờ hội đồng chấm, và mở cửa phòng tranh.'}
                   </p>
 
                   <ul className="evt__facts">
-                    <li className="evt__fact">
-                      <Images aria-hidden /> {`${spotlightEvent.submissionCount} bài dự thi`}
+                    <li className="evt__fact inline-flex items-center gap-1.5 rounded-full border border-[#221E1A]/12 bg-[#F7F2E9]/70 px-2.5 py-1 text-xs text-[#6E6459]">
+                      <Images size={13} aria-hidden /> {`${spotlightEvent.submissionCount} bài dự thi`}
                     </li>
-                    <li className="evt__fact">
-                      <Clock aria-hidden /> {`Đóng ${fmtDate(spotlightEvent.submissionEndAt)}`}
+                    <li className="evt__fact inline-flex items-center gap-1.5 rounded-full border border-[#221E1A]/12 bg-[#F7F2E9]/70 px-2.5 py-1 text-xs text-[#6E6459]">
+                      <Clock size={13} aria-hidden /> {`Đóng ${fmtDate(spotlightEvent.submissionEndAt)}`}
                     </li>
                   </ul>
-
-                  {spotlightEvent.prize ? (
-                    <div className="evt__prize">
-                      <p className="evt__prize-label">
-                        <Trophy aria-hidden /> Giải thưởng
-                      </p>
-                      <ul className="evt__prize-list">
-                        {spotlightEvent.prize
-                          .split('·')
-                          .map((item) => item.trim())
-                          .filter(Boolean)
-                          .map((item) => (
-                            <li key={item}>{item}</li>
-                          ))}
-                      </ul>
-                    </div>
-                  ) : null}
 
                   <Link href={`/events/${spotlightEvent.id}`} className="btn btn--outline btn--sm evt__cta">
                     Đọc thể lệ <ArrowUpRight aria-hidden />
                   </Link>
                 </div>
               </article>
-              {/* Hai sự kiện còn lại, không phải tranh — mỗi thẻ dẫn tới /events/{id} */}
+              {/* Hai sự kiện còn lại — cùng dáng thẻ vuông ArtCard như bản thiết kế */}
               <div className="evt__side">
-                <p className="eyebrow evt__side-label">Sự kiện khác trên sàn</p>
                 {events.slice(1, 3).map((event) => (
-                  <Link key={event.id} href={`/events/${event.id}`} className="evt-mini">
-                    <span className="evt-mini__art">
-                      {event.bannerUrl ? (
-                        <Image
-                          src={event.bannerUrl}
-                          alt=""
-                          fill
-                          unoptimized
-                          sizes="(max-width: 900px) 50vw, 20vw"
-                          className="object-cover"
-                        />
-                      ) : (
-                        <span className="skeleton block h-full w-full" aria-hidden="true" />
-                      )}
-                      <span className="badge badge--soon evt-mini__badge">
-                        {eventPhaseOf(event)}
-                      </span>
-                    </span>
-                    <span className="evt-mini__body">
-                      <span className="evt-mini__title">{event.title}</span>
-                      <span className="evt-mini__meta">
-                        {`${event.submissionCount} bài · ${
-                          new Date(event.submissionEndAt).getTime() < Date.now() ? 'đã đóng' : 'đóng'
-                        } ${fmtDate(event.submissionEndAt)}`}
-                      </span>
-                    </span>
+                  <Link
+                    key={event.id}
+                    href={`/events/${event.id}`}
+                    className="art-card"
+                    style={{ display: 'block' }}
+                  >
+                    <div className="art-card__frame" style={{ aspectRatio: '5 / 4' }}>
+                      <div className="art-card__img">
+                        {event.bannerUrl ? (
+                          <Image
+                            src={event.bannerUrl}
+                            alt={event.title}
+                            fill
+                            unoptimized
+                            sizes="(max-width: 900px) 50vw, 20vw"
+                            className="object-cover"
+                          />
+                        ) : (
+                          <div className="skeleton h-full w-full" aria-hidden="true" />
+                        )}
+                      </div>
+                    </div>
+                    <div className="art-card__meta">
+                      <span className="art-card__title truncate">{event.title}</span>
+                      <div className="art-card__sub">
+                        <span>
+                          {`${event.submissionCount} bài · ${
+                            new Date(event.submissionEndAt).getTime() < Date.now() ? 'đã đóng' : 'đóng'
+                          } ${fmtDate(event.submissionEndAt)}`}
+                        </span>
+                      </div>
+                    </div>
                   </Link>
                 ))}
               </div>
@@ -964,7 +953,7 @@ export function LiveHomeGallery() {
                           alt=""
                           fill
                           unoptimized
-                          sizes="3rem"
+                          sizes="4rem"
                           className="object-cover"
                         />
                       ) : null}

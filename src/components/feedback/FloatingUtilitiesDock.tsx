@@ -75,7 +75,7 @@ export function FloatingUtilitiesDock({ children }: { children: ReactNode }) {
           title={isEng ? 'Hide floating tools' : 'Ẩn công cụ nổi'}
           className="fixed bottom-[216px] right-7 z-40 flex size-8 cursor-pointer items-center justify-center rounded-full border border-[#221E1A]/10 bg-[#FFFCF6]/92 text-[#746A5F] shadow-[0_10px_28px_-18px_rgba(74,52,30,0.85)] backdrop-blur-xl transition-all hover:scale-105 hover:border-[#B24A26]/45 hover:bg-[#FFFCF6] hover:text-[#B24A26] active:scale-95 sm:right-9"
         >
-          <EyeOff className="h-3.5 w-3.5" aria-hidden />
+          <EyeOff className="h-4 w-4 text-[var(--ivory)]" aria-hidden />
         </button>
       )}
     </>

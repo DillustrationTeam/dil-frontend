@@ -11,6 +11,7 @@ import {
   Loader2,
   Plus,
   RefreshCw,
+  Search,
   Tag,
   Trash2,
   X,
@@ -37,7 +38,10 @@ export function CategoryManagementConsole() {
   const isVie = lang === 'VIE';
 
   const [categories, setCategories] = useState<CategoryDto[]>([]);
+  const [categorySearch, setCategorySearch] = useState('');
+  const [categoryStatusFilter, setCategoryStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
   const [trendingTags, setTrendingTags] = useState<TrendingTagDto[]>([]);
+  const [tagSearch, setTagSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
 
@@ -157,6 +161,24 @@ export function CategoryManagementConsole() {
     });
   };
 
+  const filteredCategories = useMemo(() => {
+    const q = categorySearch.trim().toLowerCase();
+    return categories.filter((cat) => {
+      if (categoryStatusFilter === 'active' && !cat.isActive) return false;
+      if (categoryStatusFilter === 'inactive' && cat.isActive) return false;
+      if (q && !cat.name.toLowerCase().includes(q) && !cat.slug.toLowerCase().includes(q)) {
+        return false;
+      }
+      return true;
+    });
+  }, [categories, categorySearch, categoryStatusFilter]);
+
+  const filteredTrendingTags = useMemo(() => {
+    const q = tagSearch.trim().toLowerCase().replace(/^#+/, '');
+    if (!q) return trendingTags;
+    return trendingTags.filter((t) => t.name.toLowerCase().includes(q));
+  }, [trendingTags, tagSearch]);
+
   const selectedTags = useMemo(
     () => trendingTags.filter((t) => selectedTagIds.includes(t.tagId)),
     [trendingTags, selectedTagIds]
@@ -268,16 +290,51 @@ export function CategoryManagementConsole() {
 
       {/* Section 1: Broad Categories */}
       <section className="glass-container bg-[#FFFCF6]/85 backdrop-blur-[32px] border border-[#221E1A]/10 rounded-[28px] p-6 space-y-4">
-        <div className="flex items-center justify-between border-b border-[#221E1A]/10 pb-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#221E1A]/10 pb-3">
           <div>
             <h2 className="font-h1 text-base font-bold text-[#241F1A]">
-              {isVie ? `Danh mục lớn (${categories.length})` : `Broad Categories (${categories.length})`}
+              {isVie ? `Danh mục lớn (${filteredCategories.length}/${categories.length})` : `Broad Categories (${filteredCategories.length}/${categories.length})`}
             </h2>
             <p className="text-xs text-[#6E6459]">
               {isVie
                 ? 'Khuyến nghị duy trì 6–8 danh mục cốt lõi để AI Auto-Tagging và bộ lọc hoạt động chính xác.'
                 : 'Recommended: keep 6–8 core categories so AI Auto-Tagging and filters work accurately.'}
             </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="relative flex-1 sm:w-60 sm:flex-initial">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#746A5F]" />
+              <input
+                type="text"
+                value={categorySearch}
+                onChange={(e) => setCategorySearch(e.target.value)}
+                placeholder={isVie ? 'Tìm theo tên hoặc slug...' : 'Search by name or slug...'}
+                aria-label={isVie ? 'Tìm danh mục theo tên hoặc slug' : 'Search categories by name or slug'}
+                className="admin-cat-control w-full rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] py-1.5 pl-8 pr-7 text-xs text-[#241F1A] placeholder:text-[#746A5F] outline-none focus:border-[#B24A26]"
+              />
+              {categorySearch && (
+                <button
+                  type="button"
+                  onClick={() => setCategorySearch('')}
+                  aria-label={isVie ? 'Xóa tìm kiếm' : 'Clear search'}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-[#746A5F] hover:text-[#241F1A] cursor-pointer"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              )}
+            </div>
+
+            <select
+              value={categoryStatusFilter}
+              onChange={(e) => setCategoryStatusFilter(e.target.value as 'all' | 'active' | 'inactive')}
+              aria-label={isVie ? 'Lọc theo trạng thái' : 'Filter by status'}
+              className="admin-cat-control rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-3 py-1.5 text-xs text-[#241F1A] outline-none focus:border-[#B24A26] cursor-pointer"
+            >
+              <option value="all">{isVie ? 'Tất cả trạng thái' : 'All statuses'}</option>
+              <option value="active">{isVie ? 'Đang bật' : 'Active'}</option>
+              <option value="inactive">{isVie ? 'Tạm ẩn' : 'Hidden'}</option>
+            </select>
           </div>
         </div>
 
@@ -289,6 +346,10 @@ export function CategoryManagementConsole() {
         ) : categories.length === 0 ? (
           <p className="py-10 text-center text-xs text-[#6E6459]">
             {isVie ? 'Chưa có danh mục nào.' : 'No categories yet.'}
+          </p>
+        ) : filteredCategories.length === 0 ? (
+          <p className="py-10 text-center text-xs text-[#6E6459]">
+            {isVie ? 'Không tìm thấy danh mục phù hợp.' : 'No matching categories found.'}
           </p>
         ) : (
           <div className="overflow-x-auto">
@@ -305,7 +366,7 @@ export function CategoryManagementConsole() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#221E1A]/10 text-[#241F1A]/90">
-                {categories.map((cat) => (
+                {filteredCategories.map((cat) => (
                   <tr key={cat.id} className="hover:bg-[#FFFCF6] transition">
                     <td className="py-3 px-3 font-mono text-[#B24A26]">#{cat.displayOrder}</td>
                     <td className="py-3 px-3 font-bold text-[#241F1A]">{cat.name}</td>
@@ -360,7 +421,7 @@ export function CategoryManagementConsole() {
           <div>
             <h2 className="font-h1 text-base font-bold text-[#241F1A] flex items-center gap-2">
               <Tag className="w-4 h-4 text-[#B24A26]" />
-              <span>Trending Tags ({trendingTags.length})</span>
+              <span>Trending Tags ({filteredTrendingTags.length}/{trendingTags.length})</span>
             </h2>
             <p className="text-xs text-[#6E6459]">
               {isVie
@@ -368,6 +429,29 @@ export function CategoryManagementConsole() {
                 : 'Monitor sub-tags with the most artworks to merge duplicates or promote them into broad categories.'}
             </p>
           </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="relative flex-1 sm:w-56 sm:flex-initial">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#746A5F]" />
+              <input
+                type="text"
+                value={tagSearch}
+                onChange={(e) => setTagSearch(e.target.value)}
+                placeholder={isVie ? 'Tìm tag...' : 'Search tags...'}
+                aria-label={isVie ? 'Tìm trending tag' : 'Search trending tags'}
+                className="admin-cat-control w-full rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] py-1.5 pl-8 pr-7 text-xs text-[#241F1A] placeholder:text-[#746A5F] outline-none focus:border-[#B24A26]"
+              />
+              {tagSearch && (
+                <button
+                  type="button"
+                  onClick={() => setTagSearch('')}
+                  aria-label={isVie ? 'Xóa tìm kiếm' : 'Clear search'}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-[#746A5F] hover:text-[#241F1A] cursor-pointer"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              )}
+            </div>
 
           {selectedTagIds.length > 0 && (
             <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-[#B24A26]/35 bg-[#B24A26]/10 px-3 py-2 text-xs">
@@ -407,6 +491,7 @@ export function CategoryManagementConsole() {
               </button>
             </div>
           )}
+          </div>
         </div>
 
         {loading ? (
@@ -417,9 +502,13 @@ export function CategoryManagementConsole() {
           <p className="py-10 text-center text-xs text-[#6E6459]">
             {isVie ? 'Chưa có tag nào được gắn trên tác phẩm.' : 'No tags attached to artworks yet.'}
           </p>
+        ) : filteredTrendingTags.length === 0 ? (
+          <p className="py-10 text-center text-xs text-[#6E6459]">
+            {isVie ? 'Không tìm thấy tag phù hợp.' : 'No matching tags found.'}
+          </p>
         ) : (
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {trendingTags.map((tag) => {
+            {filteredTrendingTags.map((tag) => {
               const checked = selectedTagIds.includes(tag.tagId);
               return (
                 <div

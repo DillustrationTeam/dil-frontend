@@ -11,8 +11,9 @@ import {
 } from '../services/marketplace.service';
 import { categoriesService, type CategoryDto } from '../services/categories.service';
 
-/** DB chưa có cột avatarUrl → dùng bannerUrl, không có thì sinh avatar từ tên. */
-function avatarFor(creator: { displayName: string; bannerUrl?: string | null }) {
+/** Ưu tiên avatarUrl từ User, fallback bannerUrl rồi mới sinh avatar từ tên. */
+function avatarFor(creator: { displayName: string; avatarUrl?: string | null; bannerUrl?: string | null }) {
+  if (creator.avatarUrl) return creator.avatarUrl;
   if (creator.bannerUrl) return creator.bannerUrl;
   const seed = encodeURIComponent(creator.displayName || 'creator');
   return `https://api.dicebear.com/9.x/notionists/svg?seed=${seed}&backgroundColor=f0e7d8,e5d8c2`;
@@ -126,7 +127,7 @@ export function CreatorsDirectory({ initialCategory = '' }: { initialCategory?: 
           </div>
           <Link
             href="/explore"
-            className="inline-flex items-center gap-2 rounded-full border border-[#221E1A]/10 bg-[#FFFCF6] px-5 py-2.5 text-sm font-medium text-[#A8321C] transition hover:border-[#B24A26]/50 hover:text-[#241F1A]"
+            className="inline-flex items-center gap-2 rounded-full border border-[#221E1A]/10 bg-[#FFFCF6] px-5 py-2.5 text-sm font-medium text-[#B24A26] transition hover:border-[#B24A26]/50 hover:text-[#241F1A]"
           >
             <Palette className="h-4 w-4 text-[#B24A26]" />
             <span>Khám phá tác phẩm</span>
@@ -189,7 +190,7 @@ export function CreatorsDirectory({ initialCategory = '' }: { initialCategory?: 
             />
           </div>
 
-          <label className="inline-flex cursor-pointer items-center gap-2.5 rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] px-4 py-3 text-xs font-semibold text-[#A8321C]">
+          <label className="inline-flex cursor-pointer items-center gap-2.5 rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] px-4 py-3 text-xs font-semibold text-[#B24A26]">
             <input
               type="checkbox"
               checked={onlyOpenSlots}
@@ -226,7 +227,7 @@ export function CreatorsDirectory({ initialCategory = '' }: { initialCategory?: 
             {creators.map((creator) => (
               <article
                 key={creator.id}
-                className="flex flex-col justify-between overflow-hidden rounded-3xl border border-[#221E1A]/10 bg-[#FFFCF6]/85 p-5 transition hover:-translate-y-0.5 hover:border-[#B24A26]/50"
+                className="creator-dir-card flex flex-col justify-between overflow-hidden rounded-3xl border border-[#221E1A]/10 bg-[#FFFCF6]/85 p-5 transition hover:-translate-y-0.5 hover:border-[#B24A26]/50"
               >
                 <div className="space-y-4">
                   <div className="flex items-start gap-3.5">
@@ -259,7 +260,7 @@ export function CreatorsDirectory({ initialCategory = '' }: { initialCategory?: 
                       {creator.categories.map((cat) => (
                         <span
                           key={cat.id}
-                          className="rounded-full border border-[#B24A26]/30 bg-[#B24A26]/15 px-2.5 py-0.5 text-[11px] font-semibold text-[#A8321C]"
+                          className="creator-dir-cat-pill rounded-full border border-[#B24A26]/30 bg-[#B24A26]/15 px-2.5 py-0.5 text-[11px] font-semibold text-[#A8321C]"
                         >
                           {localizeStyle(cat.name)}
                         </span>
@@ -267,7 +268,7 @@ export function CreatorsDirectory({ initialCategory = '' }: { initialCategory?: 
                     </div>
                   )}
 
-                  <div className="flex flex-wrap items-center justify-between gap-2 border-t border-[#221E1A]/10 pt-3 text-xs text-[#6E6459]">
+                  <div className="creator-dir-divider flex flex-wrap items-center justify-between gap-2 border-t border-[#221E1A]/10 pt-3 text-xs text-[#6E6459]">
                     <div className="flex items-center gap-3">
                       <span className="inline-flex items-center gap-1 font-semibold text-[#8A6A1F]">
                         <Star className="h-3.5 w-3.5 fill-current" />
@@ -285,7 +286,7 @@ export function CreatorsDirectory({ initialCategory = '' }: { initialCategory?: 
                       className={`rounded-full border px-2.5 py-0.5 text-[10px] font-bold ${
                         creator.availableSlots > 0
                           ? 'border-[#2F6B63]/40 bg-[#2F6B63]/15 text-[#2F6B63]'
-                          : 'border-[#221E1A]/10 bg-[#FFFCF6] text-[#746A5F]'
+                          : 'creator-dir-busy border-[#221E1A]/10 bg-[#FFFCF6] text-[#746A5F]'
                       }`}
                     >
                       {creator.availableSlots > 0
@@ -325,7 +326,7 @@ export function CreatorsDirectory({ initialCategory = '' }: { initialCategory?: 
 
                 <Link
                   href={`/creators/${creator.id}`}
-                  className="mt-5 inline-flex items-center justify-center gap-2 rounded-2xl bg-[#B24A26] px-4 py-2.5 text-xs font-bold text-[#F7F2E9] transition hover:bg-[#8C3718]"
+                  className="btn btn--primary btn--sm mt-5 w-full justify-center"
                 >
                   <span>Xem hồ sơ &amp; Đặt vẽ</span>
                   <ArrowRight className="h-3.5 w-3.5" />

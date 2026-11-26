@@ -40,7 +40,7 @@ export function PublishChecklistAside({
     (checklist.headJurySignOff || isAwardAllocationsConfirmed);
 
   return (
-    <aside className="glass-container p-6 rounded-2xl space-y-4 lg:sticky lg:top-24">
+    <aside className="glass-container p-6 rounded-2xl space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-bold font-sora text-[#241F1A]">
           {isVie ? 'Danh mục kiểm toán công bố' : 'Release Audit Checklist'}

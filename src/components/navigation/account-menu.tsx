@@ -112,7 +112,11 @@ export function AccountMenu({ variant = 'app' }: { variant?: 'app' | 'public' })
             onClick={close}
             className="flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-[13px] font-medium text-[#241F1A] transition-colors hover:bg-[#F0E7D8] focus-visible:bg-[#F0E7D8] focus-visible:outline-none"
           >
-            {isAdmin ? <ShieldCheck size={14} aria-hidden /> : <LayoutDashboard size={14} aria-hidden />}
+            {isAdmin ? (
+              <ShieldCheck size={14} className="text-[#B24A26]" aria-hidden />
+            ) : (
+              <LayoutDashboard size={14} className="text-[#B24A26]" aria-hidden />
+            )}
             {studioLabel}
           </Link>
 

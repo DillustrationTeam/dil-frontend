@@ -57,6 +57,7 @@
   --font-body: var(--font-body-grotesk), Inter, var(--font-stack-fallback);
   --font-display: var(--font-heading), Fraunces, Georgia, serif;
   --font-ui: var(--font-body-grotesk), Inter, var(--font-stack-fallback);
+  --font-mono: var(--font-body-grotesk), Inter, var(--font-stack-fallback);
 }
 
 body {
@@ -78,6 +79,10 @@ h6,
 }
 
 .font-body {
+  font-family: var(--font-body-grotesk), var(--font-stack-fallback) !important;
+}
+
+.font-mono {
   font-family: var(--font-body-grotesk), var(--font-stack-fallback) !important;
 }
 

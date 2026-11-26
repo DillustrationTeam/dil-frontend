@@ -5,6 +5,18 @@
  * Keep keys to unambiguous UI labels so user-generated artwork titles or handles are not altered.
  */
 export const engToVieMap: Record<string, string> = {
+    'Explore the market': 'Khám phá thị trường',
+    'View live auctions': 'Xem đấu giá',
+    'All events': 'Tất cả sự kiện',
+    'sessions settled': 'phiên giao dịch hoàn tất',
+    'active creators': 'họa sĩ hoạt động',
+    'approved works': 'tác phẩm đã duyệt',
+    'Featured Artworks': 'Tác phẩm tuyển chọn',
+    'Featured Events & Curations': 'Sự kiện nổi bật & Tuyển chọn',
+    'The Dillustration Gallery': 'Thư viện Dillustration',
+    'The dilillustration gallery': 'Thư viện Dillustration',
+    'Browse by Category': 'Khám phá theo danh mục lớn',
+    'Works on the floor': 'Tác phẩm trong gallery',
   // Navigation & Shared UI
   'Guide': 'Hướng dẫn',
   'Admin Center': 'Quản trị',
@@ -28,6 +40,7 @@ export const engToVieMap: Record<string, string> = {
   'Search artworks, creators...': 'Tìm tác phẩm, họa sĩ...',
   'Guest': 'Khách',
   'No email': 'Chưa có email',
+  'Sign Out': 'Đăng xuất',
   'Signed out successfully.': 'Đã đăng xuất thành công.',
   'Platform Control': 'Điều hành nền tảng',
   'Platform Overview': 'Tổng quan nền tảng',
@@ -1660,6 +1673,7 @@ export const engToVieMap: Record<string, string> = {
   'Auction Exclusive': 'Đấu giá',
   'Commission Deliverable': 'Đơn vẽ hoàn tất',
   'Art Trade Exchange': 'Trao đổi nghệ thuật',
+  'Watercolor': 'Màu nước',
 };
 
 export const engToVieRegex: Array<{ pattern: RegExp; replacement: string }> = [

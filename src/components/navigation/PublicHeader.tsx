@@ -148,7 +148,7 @@ export function PublicHeader() {
           </Link>
 
           <div className="nav">
-            {PUBLIC_NAV.map((item) => (
+            {PUBLIC_NAV.slice(0, 4).map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
@@ -158,7 +158,7 @@ export function PublicHeader() {
               </Link>
             ))}
 
-            {/* Mục thứ 6 — chỉ hiện với Creator đã đăng nhập (xem showTradeEntry). */}
+            {/* Chỉ hiện với Creator đã đăng nhập (đứng trước Hướng dẫn). */}
             {showTradeEntry && (
               <Link
                 href="/art-trades/create"
@@ -167,11 +167,21 @@ export function PublicHeader() {
                 {t('Trao đổi')}
               </Link>
             )}
+
+            {PUBLIC_NAV.slice(4).map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                aria-current={item.match(pathname) ? 'page' : undefined}
+              >
+                {t(item.label)}
+              </Link>
+            ))}
           </div>
         </div>
 
         {/* Right: Search + Auth */}
-        <div className="header__tail">
+        <div className="header__tail min-w-0">
           <ThemeToggle className="hidden sm:grid" />
           {/* Desktop (>= lg): MỘT nút kính lúp; bấm mới duỗi ô nhập ra */}
           <div className={`dsearch hidden lg:flex${isSearchOpen ? ' is-open' : ''}`}>
@@ -265,7 +275,7 @@ export function PublicHeader() {
             aria-expanded={isMenuOpen}
             aria-controls="public-mobile-nav"
             aria-label={isMenuOpen ? t('Đóng menu') : t('Mở menu')}
-            className="icon-btn mnav-trigger"
+            className="icon-btn burger mnav-trigger lg:!hidden"
           >
             {isMenuOpen ? <X className="h-4 w-4" aria-hidden /> : <Menu className="h-4 w-4" aria-hidden />}
           </button>
@@ -308,7 +318,7 @@ export function PublicHeader() {
       {/* Menu mobile: cùng 5 mục với nav desktop + cửa vào Trao đổi */}
       {isMenuOpen && (
         <div className="mnav" id="public-mobile-nav">
-          {PUBLIC_NAV.map((item) => (
+          {PUBLIC_NAV.slice(0, 4).map((item) => (
             <Link
               key={item.href}
               href={item.href}
@@ -323,6 +333,16 @@ export function PublicHeader() {
               {t('Trao đổi tác phẩm')} <ChevronRight aria-hidden />
             </Link>
           )}
+          {PUBLIC_NAV.slice(4).map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              aria-current={item.match(pathname) ? 'page' : undefined}
+              onClick={() => setIsMenuOpen(false)}
+            >
+              {t(item.label)} <ChevronRight aria-hidden />
+            </Link>
+          ))}
 
           {/* Sáng / tối: trên mobile nút ở header bị ẩn nên đặt ở đây */}
           <button

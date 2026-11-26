@@ -324,8 +324,8 @@ export function DisputeInspectionPanel({
                     <div className="flex items-center gap-2 font-bold">
                       {dispute.status === 'Rejected' ? (
                         <>
-                          <XCircle className="w-4 h-4 shrink-0 text-[#746A5F]" />
-                          <span className="text-[#6E6459]">{isVie ? 'Tranh chấp đã bị bác bỏ (Từ chối báo cáo)' : 'Dispute Dismissed (Report Rejected)'}</span>
+                          <XCircle className="w-4 h-4 shrink-0 text-[#241F1A]" />
+                          <span className="text-[#241F1A]">{isVie ? 'Tranh chấp đã bị bác bỏ (Từ chối báo cáo)' : 'Dispute Dismissed (Report Rejected)'}</span>
                         </>
                       ) : (
                         <>
@@ -337,7 +337,7 @@ export function DisputeInspectionPanel({
                       )}
                     </div>
                     {dispute.note && (
-                      <p className="text-[#D6D9FF] text-[11px] leading-relaxed pl-6">
+                      <p className="text-[#241F1A] text-[11px] leading-relaxed pl-6">
                         <strong>{isVie ? 'Ghi chú chính thức:' : 'Official Note:'}</strong> {dispute.note}
                       </p>
                     )}
@@ -350,7 +350,7 @@ export function DisputeInspectionPanel({
                 )}
 
                 {/* 3 Ruling Actions Grid */}
-                <div className={`grid grid-cols-1 sm:grid-cols-3 gap-2.5 ${isResolved ? 'opacity-60 pointer-events-none cursor-not-allowed' : ''}`}>
+                <div className={`grid grid-cols-1 sm:grid-cols-3 gap-2.5 ${isResolved ? 'pointer-events-none cursor-not-allowed' : ''}`}>
                   {/* Option 1: Dismiss Appeal */}
                   <button
                     type="button"
@@ -423,7 +423,7 @@ export function DisputeInspectionPanel({
                     value={isResolved ? dispute.note || '' : moderatorNote}
                     onChange={(e) => setModeratorNote(e.target.value)}
                     placeholder={isVie ? 'Nhập kết quả xác minh, trích dẫn thể lệ và giải trình chính thức...' : 'Enter verified findings, citation of rules, and official justification...'}
-                    className={`w-full rounded-xl border border-[#221E1A]/10 bg-[#E5D8C2]/80 text-[#241F1A] p-3.5 text-xs focus:outline-none focus:border-brand-periwinkle focus:ring-1 focus:ring-brand-periwinkle/30 transition-all resize-y leading-relaxed ${
+                    className={`w-full rounded-xl border border-[#221E1A]/10 bg-[#E5D8C2] text-[#241F1A] placeholder:text-[#746A5F] p-3.5 text-xs focus:outline-none focus:border-brand-periwinkle focus:ring-1 focus:ring-brand-periwinkle/30 transition-all resize-y leading-relaxed ${
                       isResolved ? 'opacity-60 cursor-not-allowed' : ''
                     }`}
                     required={!isResolved}

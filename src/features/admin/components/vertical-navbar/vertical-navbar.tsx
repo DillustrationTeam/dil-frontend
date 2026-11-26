@@ -262,7 +262,7 @@ export function VerticalNavbar({
               isCollapsed ? 'justify-center p-2' : ''
             }`}
           >
-            <div className="w-8 h-8 rounded-xl bg-[#B24A26]/20 text-[#B24A26] font-bold flex items-center justify-center font-sora text-xs border border-[#B24A26]/30 shrink-0 select-none shadow-[0_0_12px_rgba(167,172,217,0.15)]">
+            <div className="admin-nav-avatar w-8 h-8 rounded-xl bg-[#B24A26]/20 text-[#B24A26] font-bold flex items-center justify-center font-sora text-xs border border-[#B24A26]/30 shrink-0 select-none shadow-[0_0_12px_rgba(167,172,217,0.15)]">
               {displayInitials}
             </div>
             {!isCollapsed && (
@@ -311,7 +311,7 @@ export function VerticalNavbar({
                     onClick={() => onItemClick?.(item)}
                     className={`relative flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-sora font-medium transition-all group ${
                       active
-                        ? 'bg-[#B24A26]/20 text-[#241F1A] border border-[#B24A26]/40 shadow-[0_0_15px_rgba(167,172,217,0.2)]'
+                        ? 'admin-nav-item-active bg-[#B24A26]/20 text-[#241F1A] border border-[#B24A26]/40 shadow-[0_0_15px_rgba(167,172,217,0.2)]'
                         : 'text-[#746A5F] hover:text-[#241F1A] hover:bg-[#FFFCF6] border border-transparent'
                     } ${isCollapsed ? 'justify-center px-0' : ''}`}
                     title={isCollapsed ? t(item.label) : undefined}
@@ -322,7 +322,7 @@ export function VerticalNavbar({
                       <span
                         className={`w-4 h-4 shrink-0 transition-colors ${
                           active
-                            ? 'text-[#B24A26]'
+                            ? 'admin-nav-item-active-icon text-[#B24A26]'
                             : 'text-[#746A5F] group-hover:text-[#241F1A]'
                         }`}
                       >
@@ -393,7 +393,7 @@ export function VerticalNavbar({
               <button
                 type="button"
                 onClick={handleLogout}
-                className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-sora text-[#A8321C] hover:text-[#A8321C] hover:bg-[#A8321C]/10 transition-colors text-left cursor-pointer ${
+                className={`admin-nav-exit w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-sora text-[#A8321C] hover:text-[#A8321C] hover:bg-[#A8321C]/10 transition-colors text-left cursor-pointer ${
                   isCollapsed ? 'justify-center px-0' : ''
                 }`}
                 title={isCollapsed ? t('Exit Console') : undefined}

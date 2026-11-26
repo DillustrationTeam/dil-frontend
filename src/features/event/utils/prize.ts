@@ -13,7 +13,7 @@ export interface PrizeTier {
   amount: string | null;
 }
 
-const SEPARATOR = /\s*[·•|;\n]\s*/;
+const SEPARATOR = /\s*[·•|;\n]\s*|(?<=(?:vnđ|vnd|đ))\s*,\s*/i;
 /** Số tiền đứng ở CUỐI mẩu (tránh cắt câu "30.000.000đ + buổi trưng bày"). */
 const TRAILING_AMOUNT = /^(.*?)[\s,–-]*([\d][\d.,]*\s*(?:vnđ|vnd|đ|d))\s*$/i;
 /** Mọi số tiền trong mẩu */

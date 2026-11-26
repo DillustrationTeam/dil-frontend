@@ -176,7 +176,7 @@ export function UserTable({
                     onClick={() => onInspect(user.id)}
                     className={`cursor-pointer transition-colors duration-150 ${
                       isSelected
-                        ? 'bg-[#A8321C]/15 border-l-4 border-l-red-500'
+                        ? 'admin-user-row-selected bg-[#A8321C]/15 border-l-4 border-l-red-500'
                         : 'hover:bg-[#FFFCF6]'
                     }`}
                   >
