@@ -338,11 +338,10 @@ export function CreatorAddonManager({ packages }: Props) {
                   key={status}
                   type="button"
                   onClick={() => setListFilterStatus(status)}
-                  className={`rounded-lg px-2.5 py-1 font-medium transition ${
-                    listFilterStatus === status
+                  className={`rounded-lg px-2.5 py-1 font-medium transition ${listFilterStatus === status
                       ? 'bg-[#B24A26] text-[#F7F2E9] font-bold shadow'
                       : 'text-[#746A5F] hover:text-[#241F1A]'
-                  }`}
+                    }`}
                 >
                   {status === 'All' ? 'Tất cả' : status === 'Active' ? 'Đang bật' : 'Tạm tắt'}
                 </button>
@@ -365,11 +364,10 @@ export function CreatorAddonManager({ packages }: Props) {
                   key={id}
                   type="button"
                   onClick={() => setListFilterStage(id as StageCategory)}
-                  className={`rounded-xl px-3 py-1.5 font-medium whitespace-nowrap transition ${
-                    isActive
+                  className={`rounded-xl px-3 py-1.5 font-medium whitespace-nowrap transition ${isActive
                       ? 'bg-[#F0E7D8] text-[#241F1A] font-bold border border-[#221E1A]/20'
                       : 'text-[#746A5F] hover:text-[#6E6459] hover:bg-[#FFFCF6] border border-transparent'
-                  }`}
+                    }`}
                 >
                   {label}
                 </button>
@@ -419,13 +417,12 @@ export function CreatorAddonManager({ packages }: Props) {
                 return (
                   <div
                     key={item.id}
-                    className={`rounded-2xl border transition p-4 ${
-                      isCurrentEditing
+                    className={`rounded-2xl border transition p-4 ${isCurrentEditing
                         ? 'border-[#B24A26] border-l-4 border-l-[#B24A26] bg-[#FFFCF6] shadow-lg ring-1 ring-[#B24A26]'
                         : item.isActive
-                        ? 'border-[#221E1A]/10 bg-[#F0E7D8]/80 hover:border-[#221E1A]/20'
-                        : 'border-[#221E1A]/10 bg-[#FFFCF6]/50 opacity-60'
-                    }`}
+                          ? 'border-[#221E1A]/10 bg-[#F0E7D8]/80 hover:border-[#221E1A]/20'
+                          : 'border-[#221E1A]/10 bg-[#FFFCF6]/50 opacity-60'
+                      }`}
                   >
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                       {/* Left: Addon Info */}
@@ -486,11 +483,10 @@ export function CreatorAddonManager({ packages }: Props) {
                             type="button"
                             onClick={() => toggleItemActive(item)}
                             title={item.isActive ? 'Bấm để tắt phụ phí' : 'Bấm để bật phụ phí'}
-                            className={`flex items-center gap-1 rounded-xl px-2.5 py-1.5 text-xs font-semibold transition ${
-                              item.isActive
+                            className={`flex items-center gap-1 rounded-xl px-2.5 py-1.5 text-xs font-semibold transition ${item.isActive
                                 ? 'bg-[#2F6B63]/15 border border-[#2F6B63]/40 text-[#2F6B63] hover:bg-[#2F6B63]/20'
                                 : 'bg-[#FFFCF6] border border-[#221E1A]/10 text-[#746A5F] hover:text-[#241F1A]'
-                            }`}
+                              }`}
                           >
                             {item.isActive ? (
                               <>
@@ -558,33 +554,30 @@ export function CreatorAddonManager({ packages }: Props) {
                 <button
                   type="button"
                   onClick={() => setPresetTab('Sketch')}
-                  className={`rounded-md py-1 font-semibold transition ${
-                    presetTab === 'Sketch'
+                  className={`rounded-md py-1 font-semibold transition ${presetTab === 'Sketch'
                       ? 'bg-[#B24A26] text-[#F7F2E9] shadow'
                       : 'text-[#746A5F] hover:text-[#241F1A]'
-                  }`}
+                    }`}
                 >
                   Phác thảo ({presetsByStage.Sketch.length})
                 </button>
                 <button
                   type="button"
                   onClick={() => setPresetTab('Lineart')}
-                  className={`rounded-md py-1 font-semibold transition ${
-                    presetTab === 'Lineart'
+                  className={`rounded-md py-1 font-semibold transition ${presetTab === 'Lineart'
                       ? 'bg-[#B24A26] text-[#F7F2E9] shadow'
                       : 'text-[#746A5F] hover:text-[#241F1A]'
-                  }`}
+                    }`}
                 >
                   Lineart ({presetsByStage.Lineart.length})
                 </button>
                 <button
                   type="button"
                   onClick={() => setPresetTab('Final')}
-                  className={`rounded-md py-1 font-semibold transition ${
-                    presetTab === 'Final'
+                  className={`rounded-md py-1 font-semibold transition ${presetTab === 'Final'
                       ? 'bg-[#B24A26] text-[#F7F2E9] shadow'
                       : 'text-[#746A5F] hover:text-[#241F1A]'
-                  }`}
+                    }`}
                 >
                   Hoàn thiện ({presetsByStage.Final.length})
                 </button>
@@ -600,17 +593,15 @@ export function CreatorAddonManager({ packages }: Props) {
                       type="button"
                       disabled={busy}
                       onClick={() => handleSelectPreset(p)}
-                      className={`w-full flex items-center justify-between rounded-xl px-2.5 py-1.5 text-left text-xs transition ${
-                        isSelected
+                      className={`w-full flex items-center justify-between rounded-xl px-2.5 py-1.5 text-left text-xs transition ${isSelected
                           ? 'bg-[#B24A26] text-[#F7F2E9] font-bold shadow'
                           : 'bg-[#FFFCF6] text-[#746A5F] hover:bg-[#FFFCF6] hover:text-[#241F1A]'
-                      }`}
+                        }`}
                     >
                       <span className="truncate">{p.title}</span>
                       <span
-                        className={`text-[10px] shrink-0 font-mono ${
-                          isSelected ? 'text-[#F7F2E9] font-bold' : 'text-[#B24A26]'
-                        }`}
+                        className={`text-[10px] shrink-0 font-mono ${isSelected ? 'text-[#F7F2E9] font-bold' : 'text-[#B24A26]'
+                          }`}
                       >
                         {isSelected ? <Check className="h-3 w-3 stroke-[3]" /> : '+ Áp dụng'}
                       </span>
@@ -670,11 +661,10 @@ export function CreatorAddonManager({ packages }: Props) {
                             );
                           }
                         }}
-                        className={`rounded-xl px-2.5 py-2 text-left text-xs transition flex items-center justify-between ${
-                          isChecked
+                        className={`rounded-xl px-2.5 py-2 text-left text-xs transition flex items-center justify-between ${isChecked
                             ? 'bg-[#B24A26] text-[#F7F2E9] font-bold shadow'
                             : 'bg-[#FFFCF6] border border-[#221E1A]/10 text-[#746A5F] hover:text-[#241F1A] hover:bg-[#FFFCF6]'
-                        }`}
+                          }`}
                       >
                         <span className="truncate">{label}</span>
                         {isChecked && <Check className="h-3 w-3 stroke-[3] shrink-0" />}
@@ -694,7 +684,7 @@ export function CreatorAddonManager({ packages }: Props) {
                       className={inputClass}
                       type="number"
                       min={1}
-                      step={1000}
+                      step={1}
                       value={price}
                       onChange={(e) => setPrice(e.target.value)}
                       placeholder="100000"
@@ -713,11 +703,10 @@ export function CreatorAddonManager({ packages }: Props) {
                           key={quickPrice}
                           type="button"
                           onClick={() => setPrice(quickPrice.toString())}
-                          className={`rounded-lg px-2 py-0.5 text-[10px] font-medium transition ${
-                            isSelected
+                          className={`rounded-lg px-2 py-0.5 text-[10px] font-medium transition ${isSelected
                               ? 'bg-[#B24A26] text-[#F7F2E9] font-bold shadow'
                               : 'bg-[#FFFCF6] text-[#746A5F] hover:text-[#241F1A] hover:bg-[#F0E7D8]'
-                          }`}
+                            }`}
                         >
                           {quickPrice >= 1000000
                             ? `${quickPrice / 1000000}Tr`
