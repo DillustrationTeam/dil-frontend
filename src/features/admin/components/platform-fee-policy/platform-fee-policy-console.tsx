@@ -7,6 +7,7 @@ import { usePlatformFee } from '@/features/admin/hooks/use-platform-fee';
 import {
   PolicyHeader,
   FeeRateSliderCard,
+  AiReferenceDiscountSliderCard,
   PolicyParametersGrid,
   PolicyFormActionBar,
 } from './components';
@@ -83,14 +84,22 @@ export function PlatformFeePolicyConsole() {
             onChange={(val) => setFieldValue('platformFeePercent', val)}
           />
 
-          {/* Section: Escrow Policy Parameters (3 Column Grid) */}
+          {/* Section: AI Reference Sketch Discount Slider */}
+          <AiReferenceDiscountSliderCard
+            discountPercent={formValues.aiReferenceSketchDiscountPercent}
+            onChange={(val) => setFieldValue('aiReferenceSketchDiscountPercent', val)}
+          />
+
+          {/* Section: Escrow Policy Parameters (4 Column Grid) */}
           <PolicyParametersGrid
             milestoneDays={formValues.milestoneAutoApprovalDays}
             revisionLimit={formValues.defaultFreeRevisionLimit}
             presignedUrlMinutes={formValues.presignedUrlExpirationMinutes}
+            aiSketchLimit={formValues.aiReferenceSketchMaxGenerationsPerWindow}
             onMilestoneDaysChange={(val) => setFieldValue('milestoneAutoApprovalDays', val)}
             onRevisionLimitChange={(val) => setFieldValue('defaultFreeRevisionLimit', val)}
             onPresignedUrlMinutesChange={(val) => setFieldValue('presignedUrlExpirationMinutes', val)}
+            onAiSketchLimitChange={(val) => setFieldValue('aiReferenceSketchMaxGenerationsPerWindow', val)}
           />
 
           {/* Section: Save Changes Action */}

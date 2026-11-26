@@ -64,7 +64,7 @@ export function platformFeeReducer(
       };
 
     case 'GET_POLICY_SUCCESS': {
-      const { platformFeePercent, milestoneAutoApprovalDays, defaultFreeRevisionLimit, presignedUrlExpirationMinutes } = action.payload;
+      const { platformFeePercent, milestoneAutoApprovalDays, defaultFreeRevisionLimit, presignedUrlExpirationMinutes, aiReferenceSketchDiscountPercent, aiReferenceSketchMaxGenerationsPerWindow } = action.payload;
       return {
         ...state,
         policy: {
@@ -78,6 +78,8 @@ export function platformFeeReducer(
             milestoneAutoApprovalDays,
             defaultFreeRevisionLimit,
             presignedUrlExpirationMinutes,
+            aiReferenceSketchDiscountPercent,
+            aiReferenceSketchMaxGenerationsPerWindow,
           },
           isDirty: false,
         },
@@ -103,7 +105,7 @@ export function platformFeeReducer(
       };
 
     case 'UPDATE_POLICY_SUCCESS': {
-      const { platformFeePercent, milestoneAutoApprovalDays, defaultFreeRevisionLimit, presignedUrlExpirationMinutes } = action.payload;
+      const { platformFeePercent, milestoneAutoApprovalDays, defaultFreeRevisionLimit, presignedUrlExpirationMinutes, aiReferenceSketchDiscountPercent, aiReferenceSketchMaxGenerationsPerWindow } = action.payload;
       return {
         ...state,
         policy: {
@@ -116,6 +118,8 @@ export function platformFeeReducer(
             milestoneAutoApprovalDays,
             defaultFreeRevisionLimit,
             presignedUrlExpirationMinutes,
+            aiReferenceSketchDiscountPercent,
+            aiReferenceSketchMaxGenerationsPerWindow,
           },
           isDirty: false,
         },
@@ -157,6 +161,8 @@ export function platformFeeReducer(
             milestoneAutoApprovalDays: source.milestoneAutoApprovalDays,
             defaultFreeRevisionLimit: source.defaultFreeRevisionLimit,
             presignedUrlExpirationMinutes: source.presignedUrlExpirationMinutes,
+            aiReferenceSketchDiscountPercent: source.aiReferenceSketchDiscountPercent,
+            aiReferenceSketchMaxGenerationsPerWindow: source.aiReferenceSketchMaxGenerationsPerWindow,
           },
           isDirty: false,
         },

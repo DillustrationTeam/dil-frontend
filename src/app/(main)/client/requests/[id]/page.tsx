@@ -266,6 +266,41 @@ export default function ClientRequestPage() {
           </div>
         )}
 
+        {(commission.aiReferenceImages?.length ?? 0) > 0 && (
+          <div className="mt-4 rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] p-5">
+            <p className="text-xs font-semibold uppercase tracking-wider text-[#746A5F]">
+              {isEng ? 'AI layout suggestions' : 'AI gợi ý bố cục'} ({commission.aiReferenceImages?.length})
+            </p>
+            {commission.layoutHint && (
+              <p className="mt-1 text-xs text-[#746A5F]">
+                {isEng ? 'Your layout hint:' : 'Gợi ý bố cục của bạn:'}{' '}
+                <span className="italic">{commission.layoutHint}</span>
+              </p>
+            )}
+            <div className="mt-3 grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+              {commission.aiReferenceImages?.map((img, idx) => (
+                <div key={idx} className="group relative overflow-hidden rounded-lg border border-[#221E1A]/10 bg-[#F0E7D8] p-2">
+                  <button
+                    type="button"
+                    onClick={() => setLightboxUrl(img.url)}
+                    className="relative block h-24 w-full overflow-hidden rounded cursor-pointer"
+                    title={isEng ? 'Preview AI sketch' : 'Xem ảnh phác thảo AI'}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={img.url} alt={`AI #${idx + 1}`} className="h-full w-full object-cover transition-transform group-hover:scale-105" />
+                    <div className="absolute inset-0 flex items-center justify-center bg-[#F0E7D8]/35 opacity-0 transition-opacity group-hover:opacity-100">
+                      <Maximize2 className="h-4 w-4 text-[#241F1A]" />
+                    </div>
+                  </button>
+                  <p className="mt-1.5 line-clamp-2 text-[11px] text-[#746A5F]">
+                    {isEng ? img.labelEn : img.labelVi}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {milestones.length > 0 && (
           <div className="mt-4 rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] p-5">
             <p className="text-xs font-semibold uppercase tracking-wider text-[#746A5F]">

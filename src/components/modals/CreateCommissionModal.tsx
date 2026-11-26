@@ -7,7 +7,9 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { X, AlertCircle, Sparkles, Loader2, Check, RefreshCw, Dice5, UploadCloud, Link2, Plus, FolderOpen } from 'lucide-react';
+import { HubConnectionBuilder, LogLevel } from '@microsoft/signalr';
+import { X, AlertCircle, Sparkles, Loader2, Check, RefreshCw, Dice5, UploadCloud, Link2, Plus, FolderOpen, Maximize2 } from 'lucide-react';
+import ReferenceLightboxModal from '@/components/modals/ReferenceLightboxModal';
 import { aiService } from '@/features/ai-assistant/services/ai.service';
 import { commissionService } from '@/services/commission.service';
 import { validateReferenceFile, validateReferenceLink, type ReferenceType } from '@/lib/validation/link-validator';
@@ -15,8 +17,19 @@ import { creatorRateCardService, getPackageSlotInfo, RateCardPackage } from '@/f
 import { creatorProfileService } from '@/features/creator-studio/services/creator-profile.service';
 import { CreatorTermsOverview } from '@/components/terms/CreatorTermsOverview';
 import { CreatorTermsDto } from '@/features/creator-studio/types/creator-profile.types';
-import { extractErrorMessage } from '@/lib/api-client';
+import { aiReferenceSketchService } from '@/features/commission/services/ai-reference-sketch.service';
+import type { LayoutHintDto, ReferenceSketchGenerationDto, ReferenceSketchImageDto, ReferenceSketchProgressEvent, ReferenceSketchQuotaDto, ReferenceSketchStatus } from '@/features/commission/types/ai-reference-sketch.types';
+import { notificationHubUrl } from '@/features/notification/services/notification-hub';
+import { extractErrorMessage, ensureFreshAccessToken } from '@/lib/api-client';
 import { acquireBodyScrollLock } from '@/lib/body-scroll-lock';
+
+const AI_SKETCH_STAGE_LABELS: Record<string, string> = {
+  policy_check: 'Đang kiểm tra yêu cầu…',
+  writing_prompt: 'Đang lên phương án bố cục…',
+  generating: 'Đang phác thảo…',
+  done: 'Hoàn tất',
+};
+const aiSketchStageLabel = (stage: string | null) => (stage ? AI_SKETCH_STAGE_LABELS[stage] ?? 'Đang xử lý…' : 'Đang xử lý…');
 
 const schema = z.object({
   title: z.string().trim().min(1, 'Nhập tên dự án.').max(200, 'Tên dự án quá dài (tối đa 200 ký tự).'),
@@ -49,6 +62,28 @@ export default function CreateCommissionModal({ creatorId, creatorName, onClose,
   const [aiSuggestion, setAiSuggestion] = useState<string | null>(null);
   const [isRandomIdea, setIsRandomIdea] = useState(false);
 
+  // AI phác thảo bố cục reference (AI Reference Sketch) — docs/ai-reference/PLAN.md
+  const [layoutHint, setLayoutHint] = useState('');
+  const [isFreestyle, setIsFreestyle] = useState(false);
+  const [quota, setQuota] = useState<ReferenceSketchQuotaDto | null>(null);
+  const [quotaError, setQuotaError] = useState<string | null>(null);
+  const [starting, setStarting] = useState(false);
+  const [generationId, setGenerationId] = useState<string | null>(null);
+  const [genStatus, setGenStatus] = useState<ReferenceSketchStatus | null>(null);
+  const [genStage, setGenStage] = useState<string | null>(null);
+  const [genPercent, setGenPercent] = useState(0);
+  const [genError, setGenError] = useState<string | null>(null);
+  const [genBlockReason, setGenBlockReason] = useState<{ vi: string; en: string } | null>(null);
+  const [aiImages, setAiImages] = useState<ReferenceSketchImageDto[]>([]);
+  const [aiPreview, setAiPreview] = useState<{ url: string; label: string } | null>(null);
+  const [selectedAiImageIds, setSelectedAiImageIds] = useState<string[]>([]);
+  const [layoutHints, setLayoutHints] = useState<LayoutHintDto[] | null>(null);
+  const [hintsLoading, setHintsLoading] = useState(false);
+  const [hintsError, setHintsError] = useState<string | null>(null);
+  const generationIdRef = useRef<string | null>(null);
+  const lastAiEventAtRef = useRef(0);
+  const aiPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
   // States & handlers cho Tệp & Liên kết tham khảo (Reference Materials / Ref)
   interface ReferenceItem {
     id: string;
@@ -68,8 +103,8 @@ export default function CreateCommissionModal({ creatorId, creatorName, onClose,
     const files = Array.from(e.target.files || []);
     if (!files.length) return;
 
-    if (referenceItems.length + files.length > 10) {
-      setLinkError('Chỉ được đính kèm tối đa 10 tệp/liên kết tham chiếu cho một đơn vẽ.');
+    if (referenceItems.length + selectedAiImageIds.length + files.length > 10) {
+      setLinkError('Chỉ được đính kèm tối đa 10 tệp/liên kết tham chiếu (kể cả ảnh AI đã chọn) cho một đơn vẽ.');
       if (fileInputRef.current) fileInputRef.current.value = '';
       return;
     }
@@ -118,8 +153,8 @@ export default function CreateCommissionModal({ creatorId, creatorName, onClose,
     const trimmed = linkInput.trim();
     if (!trimmed) return;
 
-    if (referenceItems.length >= 10) {
-      setLinkError('Chỉ được đính kèm tối đa 10 tệp/liên kết tham chiếu.');
+    if (referenceItems.length + selectedAiImageIds.length >= 10) {
+      setLinkError('Chỉ được đính kèm tối đa 10 tệp/liên kết tham chiếu (kể cả ảnh AI đã chọn).');
       return;
     }
 
@@ -151,7 +186,7 @@ export default function CreateCommissionModal({ creatorId, creatorName, onClose,
     setReferenceItems((prev) => prev.filter((item) => item.id !== id));
   };
 
-  const { register, handleSubmit, setValue, getValues, formState: { errors } } = useForm<Form>({
+  const { register, handleSubmit, setValue, getValues, watch, formState: { errors } } = useForm<Form>({
     resolver: zodResolver(schema),
     defaultValues: { title: '', description: '', deadlineAt: '', voucherCode: '' },
   });
@@ -161,10 +196,21 @@ export default function CreateCommissionModal({ creatorId, creatorName, onClose,
   const [addonIds, setAddonIds] = useState<string[]>([]);
   const availableAddons = addons.filter(a => a.isActive && (!a.packageId || a.packageId === selectedPackageId) && selectedPackage?.milestones.some(m => addonAllows(a.allowedMilestone, addonStage(m.sequence, selectedPackage.milestones.length))));
   const selectedAddons = availableAddons.filter(a => addonIds.includes(a.id));
-  const estimatedTotal = (selectedPackage?.price ?? 0) * multiplier + selectedAddons.reduce((sum, a) => sum + a.price, 0);
-  const milestoneEstimate = (stage: RateCardPackage['milestones'][number]) => stage.price * multiplier + selectedAddons
+  // Giảm giá AI phác thảo (docs/ai-reference/PLAN.md T12) — chỉ áp dụng khi không freestyle và đã
+  // chọn ≥1 ảnh AI, khớp đúng điều kiện server dùng ở CommissionService.CreateCommissionAsync.
+  // Addon KHÔNG bị giảm (cộng sau, giống cách server xử lý) nên không nhân aiDiscountFactor vào đó.
+  const aiDiscountApplies = !isFreestyle && selectedAiImageIds.length > 0 && (quota?.discountPercent ?? 0) > 0;
+  const aiDiscountFactor = aiDiscountApplies ? 1 - (quota!.discountPercent / 100) : 1;
+  const estimatedTotal = (selectedPackage?.price ?? 0) * multiplier * aiDiscountFactor + selectedAddons.reduce((sum, a) => sum + a.price, 0);
+  const milestoneEstimate = (stage: RateCardPackage['milestones'][number]) => stage.price * multiplier * aiDiscountFactor + selectedAddons
     .filter(addon => selectedPackage?.milestones.find(m => addonAllows(addon.allowedMilestone, addonStage(m.sequence, selectedPackage.milestones.length)))?.sequence === stage.sequence)
     .reduce((sum, addon) => sum + addon.price, 0);
+
+  const refreshAiQuota = () => {
+    aiReferenceSketchService.getQuota(creatorId)
+      .then((data) => { setQuota(data); setQuotaError(null); })
+      .catch((cause) => setQuotaError(cause instanceof Error ? cause.message : 'Không tải được lượt AI phác thảo bố cục.'));
+  };
 
   useEffect(() => {
     addonService.creator(creatorId).then(items => { setAddons(items); setAddonIds([]); }).catch(() => setError('Không tải được phụ phí của họa sĩ.'));
@@ -173,9 +219,86 @@ export default function CreateCommissionModal({ creatorId, creatorName, onClose,
       .finally(() => setLoadingPackages(false));
     creatorProfileService.getTerms(creatorId).then((data) => { setTerms(data); setError((prev) => prev.includes('điều khoản') ? '' : prev); })
       .catch((cause) => setError(extractErrorMessage(cause, 'Không tải được điều khoản của họa sĩ.')));
+    refreshAiQuota();
   }, [creatorId]);
 
-  const closeDialog = useEffectEvent(() => { if (!busy) onClose(); });
+  useEffect(() => { generationIdRef.current = generationId; }, [generationId]);
+
+  const stopAiPolling = () => {
+    if (aiPollRef.current) { clearInterval(aiPollRef.current); aiPollRef.current = null; }
+  };
+
+  const mergeAiImages = (prev: ReferenceSketchImageDto[], incoming: ReferenceSketchImageDto[]) => {
+    const byId = new Map(prev.map((img) => [img.id, img]));
+    for (const img of incoming) byId.set(img.id, img);
+    return Array.from(byId.values());
+  };
+
+  const applyAiProgress = (
+    status: ReferenceSketchStatus,
+    stage: string | null,
+    percent: number,
+    images: ReferenceSketchImageDto[] | null,
+    error: string | null,
+    blockReasonVi: string | null,
+    blockReasonEn: string | null,
+  ) => {
+    setGenStatus(status);
+    setGenStage(stage);
+    setGenPercent(percent);
+    if (status === 'Blocked') {
+      setGenBlockReason({ vi: blockReasonVi || '', en: blockReasonEn || '' });
+      stopAiPolling();
+    } else if (status === 'Failed') {
+      setGenError(error || 'Không sinh được ảnh phác thảo. Vui lòng thử lại.');
+      stopAiPolling();
+    } else if (status === 'Succeeded') {
+      if (images) setAiImages((prev) => mergeAiImages(prev, images));
+      stopAiPolling();
+      refreshAiQuota();
+    }
+  };
+
+  const startAiPolling = (id: string) => {
+    stopAiPolling();
+    aiPollRef.current = setInterval(() => {
+      if (Date.now() - lastAiEventAtRef.current < 5000) return;
+      aiReferenceSketchService.getGeneration(id)
+        .then((dto: ReferenceSketchGenerationDto) => {
+          lastAiEventAtRef.current = Date.now();
+          applyAiProgress(dto.status, null, dto.percent, dto.images, dto.error, dto.blockReasonVi, dto.blockReasonEn);
+        })
+        .catch(() => undefined);
+    }, 3000);
+  };
+
+  useEffect(() => {
+    const hubUrl = notificationHubUrl();
+    if (!hubUrl) return;
+
+    const connection = new HubConnectionBuilder()
+      .withUrl(hubUrl, { accessTokenFactory: () => ensureFreshAccessToken() })
+      .withAutomaticReconnect()
+      .configureLogging(LogLevel.Warning)
+      .build();
+
+    connection.on('AiReferenceSketchProgress', (evt: ReferenceSketchProgressEvent) => {
+      if (evt.generationId !== generationIdRef.current) return;
+      lastAiEventAtRef.current = Date.now();
+      const status: ReferenceSketchStatus = evt.stage === 'blocked' ? 'Blocked' : evt.stage === 'failed' ? 'Failed' : evt.stage === 'done' ? 'Succeeded' : 'Running';
+      applyAiProgress(status, evt.stage, evt.percent, evt.images, evt.error, evt.blockReasonVi, evt.blockReasonEn);
+    });
+
+    const startPromise = connection.start().then(() => connection.invoke('Subscribe')).catch(() => undefined);
+
+    return () => {
+      void startPromise.finally(() => connection.stop().catch(() => undefined));
+      stopAiPolling();
+    };
+  }, []);
+
+  // Escape while the AI sketch preview is open only closes the preview, not the whole form.
+  const closeDialog = useEffectEvent(() => { if (!busy && !aiPreview) onClose(); });
   useEffect(() => {
     const releaseScrollLock = acquireBodyScrollLock();
     const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
@@ -193,6 +316,101 @@ export default function CreateCommissionModal({ creatorId, creatorName, onClose,
     window.addEventListener('keydown', onKeyDown);
     return () => { releaseScrollLock(); window.removeEventListener('keydown', onKeyDown); if (previousFocus?.isConnected) previousFocus.focus({ preventScroll: true }); };
   }, []);
+
+  const briefValue = watch('description') ?? '';
+  const briefLength = briefValue.trim().length;
+  const quotaRemaining = quota ? Math.max(quota.limit - quota.used, 0) : 0;
+  const aiGenerationInFlight = genStatus === 'Pending' || genStatus === 'Running';
+  const aiDisabledReason: string | null = isFreestyle
+    ? null
+    : aiGenerationInFlight
+      ? 'Đang sinh ảnh, vui lòng đợi hoàn tất.'
+      : !quota
+        ? (quotaError ?? 'Đang tải thông tin lượt AI phác thảo…')
+        : !quota.enabled
+          ? 'Họa sĩ chưa cho phép dùng AI phác thảo bố cục cho đơn này.'
+          : briefLength < 30
+            ? 'Nhập mô tả yêu cầu tối thiểu 30 ký tự để dùng AI phác thảo.'
+            : quotaRemaining <= 0
+              ? 'Đã dùng hết lượt AI phác thảo trong 24 giờ. Vui lòng thử lại sau.'
+              : null;
+  const canUseAi = !aiDisabledReason;
+
+  // Nút "🎲 Gợi ý bố cục độc đáo" — điều kiện bật giống nút ✨ nhưng KHÔNG tính lượt sinh ảnh
+  // (3 lượt/24h chỉ tính cho sinh ảnh), nên không gate theo quotaRemaining/aiGenerationInFlight.
+  const hintsDisabledReason: string | null = isFreestyle
+    ? null
+    : !quota
+      ? (quotaError ?? 'Đang tải thông tin lượt AI phác thảo…')
+      : !quota.enabled
+        ? 'Họa sĩ chưa cho phép dùng AI phác thảo bố cục cho đơn này.'
+        : briefLength < 30
+          ? 'Nhập mô tả yêu cầu tối thiểu 30 ký tự để dùng gợi ý bố cục.'
+          : null;
+  const canUseHints = !hintsDisabledReason;
+
+  const handleSuggestLayoutHints = async () => {
+    if (!canUseHints || hintsLoading) return;
+    setHintsLoading(true);
+    setHintsError(null);
+    try {
+      const { hints } = await aiReferenceSketchService.suggestLayoutHints({
+        creatorProfileId: creatorId,
+        brief: briefValue.trim(),
+        currentHint: layoutHint.trim() || undefined,
+      });
+      setLayoutHints(hints);
+    } catch (err) {
+      setHintsError(err instanceof Error ? err.message : 'Không tạo được gợi ý bố cục.');
+    } finally {
+      setHintsLoading(false);
+    }
+  };
+
+  const handleStartAiGeneration = async () => {
+    if (!canUseAi || starting) return;
+    setStarting(true);
+    setGenError(null);
+    setGenBlockReason(null);
+    try {
+      const { generationId: newId } = await aiReferenceSketchService.startGeneration({
+        creatorProfileId: creatorId,
+        brief: briefValue.trim(),
+        layoutHint: layoutHint.trim() || undefined,
+      });
+      generationIdRef.current = newId;
+      lastAiEventAtRef.current = Date.now();
+      setGenerationId(newId);
+      setGenStatus('Pending');
+      setGenStage('policy_check');
+      setGenPercent(0);
+      startAiPolling(newId);
+    } catch (cause) {
+      setGenError(cause instanceof Error ? cause.message : 'Không khởi tạo được lượt sinh ảnh phác thảo.');
+    } finally {
+      setStarting(false);
+    }
+  };
+
+  const handleFreestyleToggle = (checked: boolean) => {
+    setIsFreestyle(checked);
+    if (checked) {
+      setSelectedAiImageIds([]);
+      setLayoutHints(null);
+      setHintsError(null);
+    }
+  };
+
+  const toggleAiImage = (id: string) => {
+    setSelectedAiImageIds((prev) => {
+      if (prev.includes(id)) return prev.filter((x) => x !== id);
+      if (referenceItems.length + prev.length >= 10) {
+        setLinkError('Tổng ảnh tham khảo (tải lên + AI) tối đa 10 mục.');
+        return prev;
+      }
+      return [...prev, id];
+    });
+  };
 
   const handleAiBriefHelper = async (random: boolean = false) => {
     const currentTitle = getValues('title');
@@ -250,6 +468,9 @@ export default function CreateCommissionModal({ creatorId, creatorName, onClose,
         voucherCode: values.voucherCode || undefined,
         deadlineAt: values.deadlineAt ? new Date(values.deadlineAt).toISOString() : undefined,
         referenceImages: refUrls,
+        aiReferenceImageIds: isFreestyle ? undefined : selectedAiImageIds,
+        isFreestyle,
+        layoutHint: layoutHint.trim() || undefined,
       });
       onClose();
       router.push(`/client/requests/${created.id}`);
@@ -455,7 +676,7 @@ export default function CreateCommissionModal({ creatorId, creatorName, onClose,
                 <p className="mt-0.5 text-[11px] text-[#6E6459]"> Đính kèm ảnh mẫu hoặc liên kết tham khảo cho họa sĩ. </p>
               </div>
               <span className="shrink-0 whitespace-nowrap text-[10px] font-mono font-bold text-[#746A5F]">
-                {referenceItems.length}/10 tệp
+                {referenceItems.length + selectedAiImageIds.length}/10 tệp
               </span>
             </div>
 
@@ -472,7 +693,7 @@ export default function CreateCommissionModal({ creatorId, creatorName, onClose,
                 />
                 <button
                   type="button"
-                  disabled={busy || isUploadingFile || referenceItems.length >= 10}
+                  disabled={busy || isUploadingFile || referenceItems.length + selectedAiImageIds.length >= 10}
                   onClick={() => fileInputRef.current?.click()}
                   className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-[#221E1A]/20 bg-[#FFFCF6] px-4 py-3 text-xs font-semibold text-[#6E6459] transition hover:border-[#B24A26] hover:bg-[#B24A26]/10 disabled:opacity-45"
                 >
@@ -507,7 +728,7 @@ export default function CreateCommissionModal({ creatorId, creatorName, onClose,
                 </div>
                 <button
                   type="button"
-                  disabled={busy || !linkInput.trim() || referenceItems.length >= 10}
+                  disabled={busy || !linkInput.trim() || referenceItems.length + selectedAiImageIds.length >= 10}
                   onClick={handleAddLink}
                   title="Thêm liên kết"
                   className="shrink-0 rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-3.5 py-3 text-xs font-bold text-[#241F1A] transition hover:bg-[#F0E7D8] disabled:opacity-40"
@@ -568,6 +789,179 @@ export default function CreateCommissionModal({ creatorId, creatorName, onClose,
                   </div>
                 ))}
               </div>
+            )}
+          </div>
+
+          {/* AI PHÁC THẢO BỐ CỤC REFERENCE (AI REFERENCE SKETCH) */}
+          <div className="space-y-3 rounded-2xl border border-brand-periwinkle/25 bg-[#FFFCF6] p-4">
+            <div>
+              <label className={label}>AI PHÁC THẢO BỐ CỤC (KHÔNG BẮT BUỘC)</label>
+              <p className="mt-0.5 text-[11px] text-[#6E6459]">AI gợi ý 2 phương án dáng · góc máy · bố cục từ mô tả yêu cầu — chỉ để tham khảo, không phải ảnh hoàn chỉnh.</p>
+            </div>
+
+            <label className="flex items-start gap-2.5 rounded-xl border border-[#221E1A]/10 bg-[#F0E7D8]/40 p-3 text-xs cursor-pointer">
+              <input type="checkbox" className="mt-0.5" checked={isFreestyle} onChange={(e) => handleFreestyleToggle(e.target.checked)} />
+              <span>
+                <strong className="text-[#241F1A]">Để creator tự freestyle</strong>
+                <span className="block text-[11px] text-[#6E6459]">Creator tự quyết định dáng/bố cục, không cần ảnh AI phác thảo.</span>
+              </span>
+            </label>
+
+            {!isFreestyle && (
+              <>
+                <div>
+                  <div className="flex items-center justify-between gap-2">
+                    <label className={label} htmlFor="commission-layout-hint">GỢI Ý BỐ CỤC (KHÔNG BẮT BUỘC, TỐI ĐA 300 KÝ TỰ)</label>
+                    <button
+                      type="button"
+                      disabled={!canUseHints || hintsLoading}
+                      onClick={() => void handleSuggestLayoutHints()}
+                      title={hintsDisabledReason ?? 'Sinh 3 gợi ý bố cục độc đáo bằng AI'}
+                      className="inline-flex shrink-0 items-center gap-1 rounded-lg border border-brand-periwinkle/30 bg-brand-periwinkle/10 hover:bg-brand-periwinkle/20 px-2 py-1 text-[11px] font-semibold text-brand-periwinkle transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                    >
+                      {hintsLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <span>🎲</span>}
+                      <span>Gợi ý bố cục độc đáo</span>
+                    </button>
+                  </div>
+                  <textarea
+                    id="commission-layout-hint"
+                    rows={2}
+                    maxLength={300}
+                    value={layoutHint}
+                    onChange={(e) => setLayoutHint(e.target.value)}
+                    placeholder="VD: nhân vật đứng nghiêng 3/4, cận mặt, phông nền đơn giản…"
+                    className={field}
+                  />
+                  <p className="mt-1 text-right text-[10px] text-[#746A5F]">{layoutHint.length}/300</p>
+
+                  {hintsError && (
+                    <p role="alert" className="mt-1.5 flex items-center gap-1.5 text-xs text-[#A8321C]"><AlertCircle className="w-3.5 h-3.5 shrink-0" /> {hintsError}</p>
+                  )}
+
+                  {layoutHints && layoutHints.length > 0 && (
+                    <div className="mt-2 space-y-2">
+                      <div className="grid gap-2 sm:grid-cols-3">
+                        {layoutHints.map((hint, idx) => (
+                          <button
+                            key={idx}
+                            type="button"
+                            onClick={() => setLayoutHint(hint.textVi.slice(0, 300))}
+                            title="Dùng gợi ý này cho ô Gợi ý bố cục"
+                            className="rounded-xl border border-[#221E1A]/10 bg-[#F0E7D8]/40 hover:border-brand-periwinkle/40 hover:bg-brand-periwinkle/10 p-2.5 text-left transition-all active:scale-95 cursor-pointer"
+                          >
+                            <span className="block text-[10px] font-bold uppercase tracking-wide text-brand-periwinkle">{hint.technique}</span>
+                            <span className="mt-1 block text-[11px] leading-relaxed text-[#241F1A]">{hint.textVi}</span>
+                          </button>
+                        ))}
+                      </div>
+                      <button
+                        type="button"
+                        disabled={!canUseHints || hintsLoading}
+                        onClick={() => void handleSuggestLayoutHints()}
+                        className="inline-flex items-center gap-1.5 rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] hover:bg-[#F0E7D8] hover:border-[#221E1A]/20 px-3 py-1.5 text-xs font-semibold text-[#6E6459] hover:text-[#241F1A] transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
+                      >
+                        {hintsLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
+                        <span>Gợi ý khác</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex flex-wrap items-center gap-3">
+                  <button
+                    type="button"
+                    disabled={!canUseAi || starting}
+                    onClick={() => void handleStartAiGeneration()}
+                    title={aiDisabledReason ?? 'Sinh 2 phương án phác thảo bố cục bằng AI'}
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-brand-periwinkle hover:brightness-110 px-4 py-2.5 text-xs font-bold text-[#FFFCF6] shadow-md transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                  >
+                    {starting || aiGenerationInFlight ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <span>✨</span>}
+                    <span>AI phác thảo bố cục</span>
+                  </button>
+                  <span className="text-[11px] font-semibold text-[#6E6459]">
+                    {quota ? `Còn ${quotaRemaining}/${quota.limit} lượt` : 'Đang tải lượt…'}
+                  </span>
+                  {aiDisabledReason && <span className="text-[11px] text-[#A8321C]">{aiDisabledReason}</span>}
+                </div>
+
+                {quota && quota.discountPercent > 0 && (
+                  <p className="text-[11px] font-semibold text-[#2F6B63]">
+                    Gắn ảnh AI phác thảo làm reference được giảm {quota.discountPercent}% giá đơn.
+                  </p>
+                )}
+
+                {aiGenerationInFlight && (
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {[0, 1].map((idx) => (
+                      <div key={idx} className="rounded-xl border border-[#221E1A]/10 bg-[#F0E7D8]/40 p-3">
+                        <div className="h-24 animate-pulse rounded-lg bg-[#221E1A]/10" />
+                        <p className="mt-2 text-[11px] font-semibold text-[#6E6459]">{aiSketchStageLabel(genStage)}</p>
+                        <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-[#221E1A]/10">
+                          <div className="h-full bg-brand-periwinkle transition-all" style={{ width: `${genPercent}%` }} />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {genStatus === 'Blocked' && genBlockReason && (
+                  <p role="alert" className="flex items-center gap-1.5 rounded-xl border border-[#A8321C]/30 bg-[#A8321C]/10 px-3 py-2 text-xs text-[#A8321C]">
+                    <AlertCircle className="h-3.5 w-3.5 shrink-0" /> {genBlockReason.vi || genBlockReason.en}
+                  </p>
+                )}
+
+                {genStatus === 'Failed' && genError && (
+                  <p role="alert" className="flex items-center gap-1.5 rounded-xl border border-[#A8321C]/30 bg-[#A8321C]/10 px-3 py-2 text-xs text-[#A8321C]">
+                    <AlertCircle className="h-3.5 w-3.5 shrink-0" /> {genError}
+                  </p>
+                )}
+
+                {aiImages.length > 0 && (
+                  <div>
+                    <div className="flex items-center justify-between gap-2">
+                      <label className={label}>ẢNH AI ĐÃ SINH — CHỌN ĐỂ DÙNG LÀM REFERENCE</label>
+                      <span className="shrink-0 text-[10px] font-mono font-bold text-[#746A5F]">{selectedAiImageIds.length} đã chọn</span>
+                    </div>
+                    <div className="mt-2 grid grid-cols-2 gap-2.5 sm:grid-cols-3">
+                      {aiImages.map((img) => {
+                        const selected = selectedAiImageIds.includes(img.id);
+                        return (
+                          <div key={img.id} className="relative">
+                            <button
+                              type="button"
+                              onClick={() => toggleAiImage(img.id)}
+                              aria-pressed={selected}
+                              className={`group relative w-full overflow-hidden rounded-xl border p-1 text-left transition cursor-pointer ${selected ? 'border-brand-periwinkle ring-2 ring-brand-periwinkle/40' : 'border-[#221E1A]/10 hover:border-[#221E1A]/25'}`}
+                            >
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img
+                                src={img.url}
+                                alt={img.labelVi}
+                                draggable={false}
+                                onContextMenu={(e) => e.preventDefault()}
+                                className="h-24 w-full rounded-lg object-cover"
+                              />
+                              <span className={`absolute right-1.5 top-1.5 flex h-5 w-5 items-center justify-center rounded-full border ${selected ? 'border-brand-periwinkle bg-brand-periwinkle text-[#FFFCF6]' : 'border-[#221E1A]/20 bg-[#FFFCF6]/90 text-transparent'}`}>
+                                <Check className="h-3 w-3" />
+                              </span>
+                              <p className="mt-1 truncate px-1 text-[10px] font-semibold text-[#241F1A]">{img.labelVi}</p>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setAiPreview({ url: img.url, label: img.labelVi })}
+                              aria-label={`Xem ảnh lớn: ${img.labelVi}`}
+                              title="Xem ảnh lớn"
+                              className="absolute left-2.5 top-2.5 flex h-7 w-7 items-center justify-center rounded-full border border-[#221E1A]/15 bg-[#FFFCF6]/90 text-[#241F1A] shadow-sm transition hover:bg-[#FFFCF6]"
+                            >
+                              <Maximize2 className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </div>
 
@@ -658,6 +1052,9 @@ export default function CreateCommissionModal({ creatorId, creatorName, onClose,
                   <div className="mt-4 space-y-1 border-t border-[#221E1A]/10 pt-3 text-xs">
                     <p className="flex justify-between text-[#746A5F]"><span>Giá gói</span><span>{money(selectedPackage.price)}</span></p>
                     <p className="flex justify-between text-[#746A5F]"><span>Hệ số bản quyền</span><span>× {multiplier}</span></p>
+                    {aiDiscountApplies && (
+                      <p className="flex justify-between text-[#2F6B63]"><span>Giảm giá ảnh AI phác thảo</span><span>-{quota!.discountPercent}%</span></p>
+                    )}
                     <p className="flex justify-between font-bold text-[#241F1A]"><span>Tổng dự kiến</span><span>{money(estimatedTotal)}</span></p>
                     {estimatedTotal >= 2_000_000 && <p className="pt-1 text-[11px] text-[#B24A26]">Đơn từ 2.000.000đ chỉ cần ký quỹ trước Mốc #1 ({money(milestoneEstimate(selectedPackage.milestones[0]))}) khi bắt đầu.</p>}
                   </div>
@@ -688,6 +1085,13 @@ export default function CreateCommissionModal({ creatorId, creatorName, onClose,
           )}
         </div>
       </div>
+      <ReferenceLightboxModal
+        url={aiPreview?.url ?? null}
+        title={aiPreview ? `AI phác thảo · ${aiPreview.label}` : undefined}
+        allowDownload={false}
+        elevated
+        onClose={() => setAiPreview(null)}
+      />
     </div>
   );
 }
