@@ -37,7 +37,6 @@ function contains(artwork: MarketplaceArtwork, value: string) {
   if (!normalized) return true;
   const haystack = [
     artwork.title,
-    artwork.description,
     artwork.creatorName,
     artwork.categoryName,
     artwork.style,
