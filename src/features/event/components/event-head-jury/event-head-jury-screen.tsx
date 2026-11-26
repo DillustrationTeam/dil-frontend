@@ -892,7 +892,7 @@ export function EventHeadJuryScreen({ eventId }: EventHeadJuryScreenProps) {
             </div>
           )}
 
-          <div className="p-4 border border-[#B24A26]/30 rounded-2xl bg-[#B24A26]/10 text-xs sm:text-sm text-[#c8cbed] flex items-start gap-3">
+          <div className="p-4 border border-[#B24A26]/30 rounded-2xl bg-[#B24A26]/10 text-xs sm:text-sm text-[#241F1A] flex items-start gap-3">
             <Info className="w-5 h-5 text-[#B24A26] shrink-0 mt-0.5" />
             <div>
               <strong>{isVie ? 'Thẩm quyền của Trưởng ban giám khảo:' : 'Head Jury Authority:'}</strong>{' '}

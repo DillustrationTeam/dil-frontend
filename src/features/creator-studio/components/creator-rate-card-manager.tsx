@@ -25,6 +25,7 @@ import { creatorProfileService } from '@/features/creator-studio/services/creato
 import { categoriesService, type CategoryDto } from '@/features/marketplace/services/categories.service';
 import type { ArtworkDto } from '@/features/creator-studio/types/creator-profile.types';
 import { extractErrorMessage } from '@/lib/api-client';
+import { useLanguage } from '@/context/language-context';
 import {
   creatorRateCardService,
   RateCardPackage,
@@ -67,6 +68,8 @@ const inputBase =
 const labelBase = 'block text-[11px] font-medium text-[#746A5F] mb-1';
 
 export function CreatorRateCardManager() {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
   const [tab, setTab] = useState<'packages' | 'addons'>('packages');
   const [packages, setPackages] = useState<RateCardPackage[]>([]);
   const [categories, setCategories] = useState<CategoryDto[]>([]);
@@ -587,7 +590,7 @@ export function CreatorRateCardManager() {
                           });
                         }}
                       >
-                        <option value="">-- Không gắn danh mục cụ thể --</option>
+                        <option value="">{isVie ? '-- Không gắn danh mục cụ thể --' : '-- No specific category --'}</option>
                         {categories.map((cat) => (
                           <option key={cat.id} value={cat.id}>
                             {cat.name}

@@ -5,6 +5,7 @@ import { ArtworkMetadataAssistant, ArtworkScanPanel } from '@/features/artwork-a
 import { ChangeEvent, FormEvent, useCallback, useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useLanguage } from '@/context/language-context';
 import toast from 'react-hot-toast';
 import {
   AlertCircle,
@@ -122,6 +123,8 @@ function LicenseRow({ title, detail, value }: { title: string; detail: string; v
 }
 
 function Artworks() {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
   const inputRef = useRef<HTMLInputElement>(null);
   const editImageInputRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string | null>(null);
@@ -368,7 +371,7 @@ function Artworks() {
                 onChange={(event) => setCategoryId(event.target.value)}
                 className="mt-2 w-full rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] px-4 py-3 text-[#241F1A] outline-none focus:border-[#B24A26]"
               >
-                <option value="">-- Chọn danh mục chính của tác phẩm --</option>
+                <option value="">{isVie ? '-- Chọn danh mục chính của tác phẩm --' : '-- Select the artwork main category --'}</option>
                 {categories.map((cat) => (
                   <option key={cat.id} value={cat.id}>
                     {cat.name}
@@ -425,22 +428,22 @@ function Artworks() {
       <section className="glass-container rounded-[28px] p-5 sm:p-7">
         <div className="flex flex-col gap-4 border-b border-[#221E1A]/10 pb-5 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h2 className="font-h1 text-xl font-semibold text-[#241F1A]">Hồ sơ tác phẩm của bạn</h2>
-            <p className="mt-1 text-sm text-[#6E6459]">{artworks.length} tác phẩm</p>
+            <h2 className="font-h1 text-xl font-semibold text-[#241F1A]">{isVie ? 'Hồ sơ tác phẩm của bạn' : 'Your artwork portfolio'}</h2>
+            <p className="mt-1 text-sm text-[#6E6459]">{artworks.length} {isVie ? 'tác phẩm' : 'artworks'}</p>
           </div>
           <div className="grid gap-2 sm:grid-cols-[minmax(220px,1fr)_170px]">
-            <input value={artworkSearch} onChange={(event) => setArtworkSearch(event.target.value)} placeholder="Tìm tên, mô tả hoặc tag" className="rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-3 py-2 text-sm text-[#241F1A] outline-none focus:border-[#B24A26]" />
+            <input value={artworkSearch} onChange={(event) => setArtworkSearch(event.target.value)} placeholder={isVie ? 'Tìm tên, mô tả hoặc tag' : 'Search title, description, or tag'} className="rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-3 py-2 text-sm text-[#241F1A] outline-none focus:border-[#B24A26]" />
             <select value={artworkStatus} onChange={(event) => setArtworkStatus(event.target.value)} className="rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-3 py-2 text-sm text-[#241F1A] outline-none">
-              <option value="All">Mọi trạng thái</option>
-              <option value="Pending">Đang duyệt</option>
-              <option value="Approved">Đã duyệt</option>
-              <option value="Flagged">Bị gắn cờ</option>
-              <option value="Rejected">Bị từ chối</option>
-              <option value="Hidden">Đã ẩn</option>
+              <option value="All">{isVie ? 'Mọi trạng thái' : 'All statuses'}</option>
+              <option value="Pending">{isVie ? 'Đang duyệt' : 'Pending review'}</option>
+              <option value="Approved">{isVie ? 'Đã duyệt' : 'Approved'}</option>
+              <option value="Flagged">{isVie ? 'Bị gắn cờ' : 'Flagged'}</option>
+              <option value="Rejected">{isVie ? 'Bị từ chối' : 'Rejected'}</option>
+              <option value="Hidden">{isVie ? 'Đã ẩn' : 'Hidden'}</option>
             </select>
           </div>
         </div>
-        {loadingArtworks ? <p className="py-10 text-center text-sm text-[#6E6459]">Đang tải hồ sơ tác phẩm...</p> : artworks.length === 0 ? <p className="py-10 text-center text-sm text-[#6E6459]">Chưa có tác phẩm phù hợp.</p> : (
+        {loadingArtworks ? <p className="py-10 text-center text-sm text-[#6E6459]">{isVie ? 'Đang tải hồ sơ tác phẩm...' : 'Loading artwork portfolio...'}</p> : artworks.length === 0 ? <p className="py-10 text-center text-sm text-[#6E6459]">{isVie ? 'Chưa có tác phẩm phù hợp.' : 'No matching artworks.'}</p> : (
           <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {artworks.map((artwork) => (
               <article key={artwork.id} className="overflow-hidden rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6]">
@@ -451,7 +454,7 @@ function Artworks() {
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <h3 className="truncate text-sm font-semibold text-[#241F1A]">{artwork.title}</h3>
-                      <p className="mt-1 text-xs text-[#B24A26]">{artwork.moderationStatus} · {artwork.viewCount} lượt xem</p>
+                      <p className="mt-1 text-xs text-[#B24A26]">{artwork.moderationStatus} · {artwork.viewCount} {isVie ? 'lượt xem' : 'views'}</p>
                       {(artwork.categoryName || artwork.style) && (
                         <span className="mt-1.5 inline-block rounded-full bg-[#B24A26]/15 border border-[#B24A26]/30 px-2 py-0.5 text-[10px] font-semibold text-[#8C3718]">
                           {artwork.categoryName || artwork.style}
@@ -485,12 +488,12 @@ function Artworks() {
           <button type="button" onClick={() => editImageInputRef.current?.click()} className="relative flex h-44 w-full items-center justify-center overflow-hidden rounded-xl border border-dashed border-[#221E1A]/10 bg-[#F0E7D8] text-xs text-[#241F1A] hover:border-[#B24A26]/60">{editingImagePreview ? <Image src={editingImagePreview} alt="Ảnh artwork mới" fill unoptimized className="object-contain" /> : <span>Chọn ảnh thay thế</span>}<span className="absolute bottom-2 right-2 rounded-lg bg-[#E5D8C2] px-2 py-1">Thay ảnh</span></button>
           <input ref={editImageInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={chooseEditImage} className="hidden" />
           <label className="block text-sm text-[#6E6459]">Tiêu đề<input value={editTitle} onChange={(event) => setEditTitle(event.target.value)} maxLength={200} required className="mt-1.5 w-full rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-3 py-2.5 text-[#241F1A] outline-none focus:border-[#B24A26]" /></label>
-          <label className="block text-sm text-[#6E6459]"> Danh mục lớn <select
+          <label className="block text-sm text-[#6E6459]"> {isVie ? 'Danh mục lớn' : 'Main category'} <select
               value={editCategoryId}
               onChange={(event) => setEditCategoryId(event.target.value)}
               className="mt-1.5 w-full rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-3 py-2.5 text-[#241F1A] outline-none focus:border-[#B24A26]"
             >
-              <option value="">-- Giữ nguyên hoặc chọn danh mục --</option>
+              <option value="">{isVie ? '-- Giữ nguyên hoặc chọn danh mục --' : '-- Keep current or pick a category --'}</option>
               {categories.map((cat) => (
                 <option key={cat.id} value={cat.id}>
                   {cat.name}
@@ -1318,6 +1321,8 @@ function AiRules() {
 }
 
 function Waitlist() {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
   const [commissions, setCommissions] = useState<Commission[]>([]);
   const [status, setStatus] = useState<'All' | CommissionStatus>('All');
   const [search, setSearch] = useState('');
@@ -1341,6 +1346,16 @@ function Waitlist() {
     const matchesSearch = !term || `${commission.title} ${commission.clientName ?? ''} ${commission.clientId}`.toLocaleLowerCase().includes(term);
     return matchesStatus && matchesSearch;
   });
+  const COMMISSION_STATUS_EN: Record<CommissionStatus, string> = {
+    PendingAcceptance: 'Pending acceptance',
+    InProgress: 'In progress',
+    Negotiating: 'Negotiating',
+    SubmittedFinal: 'Final under review',
+    Delivered: 'Delivered',
+    Completed: 'Completed',
+    Cancelled: 'Cancelled',
+    Disputed: 'Disputed',
+  };
   const statusLabels: Record<CommissionStatus, string> = {
     PendingAcceptance: 'Chờ chấp nhận',
     InProgress: 'Đang thực hiện',
@@ -1395,26 +1410,26 @@ function Waitlist() {
     <Shell view="waitlist">
       <section className="overflow-hidden rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6]">
         <div className="grid gap-3 border-b border-[#221E1A]/10 p-4 xl:grid-cols-[minmax(220px,1fr)_220px_auto] xl:items-center">
-          <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Tìm tên khách hoặc đặt vẽ" className="rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-3 py-2.5 text-sm text-[#241F1A] outline-none focus:border-[#B24A26]" />
+          <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder={isVie ? 'Tìm tên khách hoặc đặt vẽ' : 'Search client or commission'} className="rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-3 py-2.5 text-sm text-[#241F1A] outline-none focus:border-[#B24A26]" />
           <select value={status} onChange={(event) => setStatus(event.target.value as 'All' | CommissionStatus)} className="rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-3 py-2.5 text-sm text-[#241F1A] outline-none">
-            <option value="All">Tất cả trạng thái</option>
-            {(Object.keys(statusLabels) as CommissionStatus[]).map((value) => <option key={value} value={value}>{statusLabels[value]}</option>)}
+            <option value="All">{isVie ? 'Tất cả trạng thái' : 'All statuses'}</option>
+            {(Object.keys(statusLabels) as CommissionStatus[]).map((value) => <option key={value} value={value}>{isVie ? statusLabels[value] : COMMISSION_STATUS_EN[value]}</option>)}
           </select>
-          <div className="inline-flex w-fit rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] p-1" role="group" aria-label="Chế độ hiển thị waitlist">
-            <button type="button" aria-pressed={view === 'table'} onClick={() => setView('table')} className={`inline-flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium ${view === 'table' ? 'bg-[#B24A26] text-[#F7F2E9]' : 'text-[#6E6459] hover:text-[#241F1A]'}`}><List className="h-4 w-4" />Bảng</button>
-            <button type="button" aria-pressed={view === 'calendar'} onClick={() => setView('calendar')} className={`inline-flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium ${view === 'calendar' ? 'bg-[#B24A26] text-[#F7F2E9]' : 'text-[#6E6459] hover:text-[#241F1A]'}`}><CalendarDays className="h-4 w-4" />Lịch tháng</button>
+          <div className="inline-flex w-fit rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] p-1" role="group" aria-label={isVie ? 'Chế độ hiển thị waitlist' : 'Waitlist display mode'}>
+            <button type="button" aria-pressed={view === 'table'} onClick={() => setView('table')} className={`inline-flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium ${view === 'table' ? 'bg-[#B24A26] text-[#F7F2E9]' : 'text-[#6E6459] hover:text-[#241F1A]'}`}><List className="h-4 w-4" />{isVie ? 'Bảng' : 'Table'}</button>
+            <button type="button" aria-pressed={view === 'calendar'} onClick={() => setView('calendar')} className={`inline-flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium ${view === 'calendar' ? 'bg-[#B24A26] text-[#F7F2E9]' : 'text-[#6E6459] hover:text-[#241F1A]'}`}><CalendarDays className="h-4 w-4" />{isVie ? 'Lịch tháng' : 'Month calendar'}</button>
           </div>
         </div>
-        {loading ? <p className="py-12 text-center text-sm text-[#6E6459]">Đang tải đặt vẽ...</p> : error ? <p className="py-12 text-center text-sm text-[#ff9aa2]">{error}</p> : visibleCommissions.length === 0 ? <p className="py-12 text-center text-sm text-[#6E6459]">Không có đặt vẽ phù hợp.</p> : (
+        {loading ? <p className="py-12 text-center text-sm text-[#6E6459]">{isVie ? 'Đang tải đặt vẽ...' : 'Loading commissions...'}</p> : error ? <p className="py-12 text-center text-sm text-[#ff9aa2]">{error}</p> : visibleCommissions.length === 0 ? <p className="py-12 text-center text-sm text-[#6E6459]">{isVie ? 'Không có đặt vẽ phù hợp.' : 'No matching commissions.'}</p> : (
           view === 'table' ? <div className="overflow-x-auto">
             <table className="w-full min-w-[1040px] text-left text-sm">
-              <thead className="border-b border-[#221E1A]/10 bg-[#FFFCF6] text-[11px] uppercase tracking-wide text-[#746A5F]"><tr><th className="px-4 py-3 font-medium">Khách hàng</th><th className="px-4 py-3 font-medium">Commission</th><th className="px-4 py-3 font-medium">Trạng thái</th><th className="px-4 py-3 font-medium">Hạn hoàn thành</th><th className="px-4 py-3 font-medium">Thanh toán</th><th className="px-4 py-3 font-medium">Ghi chú</th></tr></thead>
+              <thead className="border-b border-[#221E1A]/10 bg-[#FFFCF6] text-[11px] uppercase tracking-wide text-[#746A5F]"><tr><th className="px-4 py-3 font-medium">{isVie ? 'Khách hàng' : 'Client'}</th><th className="px-4 py-3 font-medium">Commission</th><th className="px-4 py-3 font-medium">{isVie ? 'Trạng thái' : 'Status'}</th><th className="px-4 py-3 font-medium">{isVie ? 'Hạn hoàn thành' : 'Deadline'}</th><th className="px-4 py-3 font-medium">{isVie ? 'Thanh toán' : 'Payment'}</th><th className="px-4 py-3 font-medium">{isVie ? 'Ghi chú' : 'Notes'}</th></tr></thead>
               <tbody className="divide-y divide-[#221E1A]/10">{visibleCommissions.map((commission) => {
                 const percent = transactionPercent(commission);
                 return <tr key={commission.id} className="align-top hover:bg-[#FFFCF6]">
                   <td className="px-4 py-3.5"><p className="font-medium text-[#241F1A]">{commission.clientName || `Client ${commission.clientId.slice(0, 8)}`}</p><p className="mt-1 font-mono text-[10px] text-[#746A5F]">#{commission.id.slice(0, 8).toUpperCase()}</p></td>
                   <td className="px-4 py-3.5"><Link href={`/workroom/${commission.id}`} className="font-medium text-[#A8321C] hover:text-[#241F1A]">{commission.title}<ChevronRight className="ml-1 inline h-3.5 w-3.5" /></Link></td>
-                  <td className="px-4 py-3.5"><span className={`inline-flex rounded-full px-2.5 py-1 text-xs ${statusColors[commission.status]}`}>{statusLabels[commission.status]}</span>{commission.status === 'InProgress' ? <p className="mt-1 text-[10px] text-[#746A5F]">Stage {commission.currentStage}</p> : null}</td>
+                  <td className="px-4 py-3.5"><span className={`inline-flex rounded-full px-2.5 py-1 text-xs ${statusColors[commission.status]}`}>{isVie ? statusLabels[commission.status] : COMMISSION_STATUS_EN[commission.status]}</span>{commission.status === 'InProgress' ? <p className="mt-1 text-[10px] text-[#746A5F]">Stage {commission.currentStage}</p> : null}</td>
                   <td className="px-4 py-3.5 text-[#6E6459]">{commission.deadlineAt ? new Date(commission.deadlineAt).toLocaleDateString('vi-VN', { month: 'long', day: 'numeric', year: 'numeric' }) : '—'}</td>
                   <td className="px-4 py-3.5"><span className="inline-flex rounded-md bg-[#A8321C]/15 px-2 py-1 text-xs font-medium text-[#A8321C]">{percent}%</span><p className="mt-1 text-[10px] text-[#746A5F]">{money((commission.escrowHeldAmount ?? 0) + (commission.disbursedAmount ?? 0))} / {money(commission.finalPrice || commission.totalPrice || commission.price || 0)}</p></td>
                   <td className="max-w-[240px] px-4 py-3.5 text-xs leading-5 text-[#6E6459]"><p className="line-clamp-2" title={commission.description || ''}>{commission.description || '—'}</p></td>

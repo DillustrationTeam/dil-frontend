@@ -75,18 +75,21 @@ export function ModerationDecisionForm({
     }
   };
 
+  // Nền đặc (solid) ở theme paper; ở theme ink (html[data-theme="ink"]) gallery.css
+  // tự map bg-[#2F6B63] → --petrol-soft (nền nhạt), nên chữ phải đổi sang token sáng
+  // tương ứng, nếu không sẽ ra chữ trắng trên nền nhạt = không đọc được.
   const getActionButtonStyle = () => {
     switch (selectedAction) {
       case 'approve':
-        return 'bg-[#2F6B63]/10 hover:bg-[#2F6B63]/10 text-[#F7F2E9] shadow-[0_0_20px_rgba(52,211,153,0.3)]';
+        return 'bg-[#2F6B63] hover:brightness-110 text-[#FFFCF6] border border-[#2F6B63] shadow-sm [html[data-theme=ink]_&]:text-[#7fd1be]';
       case 'reject':
-        return 'bg-[#A8321C]/12 hover:bg-[#A8321C]/10 text-[#241F1A] shadow-[0_0_20px_rgba(239,68,68,0.4)]';
+        return 'bg-[#A8321C] hover:brightness-110 text-[#FFFCF6] border border-[#A8321C] shadow-sm [html[data-theme=ink]_&]:text-[#f08a6e]';
       case 'hide':
-        return 'bg-[#8A6A1F]/10 hover:bg-[#8A6A1F]/10 text-[#F7F2E9] shadow-[0_0_20px_rgba(251,191,36,0.3)]';
+        return 'bg-[#8A6A1F] hover:brightness-110 text-[#FFFCF6] border border-[#8A6A1F] shadow-sm [html[data-theme=ink]_&]:text-[#c9a96a]';
       case 'flag_ai':
-        return 'bg-[#5F3F86]/12 hover:bg-[#5F3F86]/10 text-[#241F1A] shadow-[0_0_20px_rgba(168,85,247,0.3)]';
+        return 'bg-[#5F3F86] hover:brightness-110 text-[#FFFCF6] border border-[#5F3F86] shadow-sm [html[data-theme=ink]_&]:text-[#cbd0f2]';
       default:
-        return 'bg-[#2F6B63]/10 hover:bg-[#2F6B63]/10 text-[#F7F2E9]';
+        return 'bg-[#2F6B63] hover:brightness-110 text-[#FFFCF6] border border-[#2F6B63] shadow-sm [html[data-theme=ink]_&]:text-[#7fd1be]';
     }
   };
 
@@ -219,7 +222,7 @@ export function ModerationDecisionForm({
 
       {/* Action Button & Confirmation Step */}
       {confirming ? (
-        <div className="p-3.5 rounded-xl bg-[#E5D8C2] border border-[#8A6A1F]/40 space-y-3">
+        <div className="p-3.5 rounded-xl bg-[#F0E7D8] border border-[#8A6A1F] space-y-3">
           <p className="text-[#241F1A] text-xs font-semibold">
             {isVie ? 'Xác nhận thực hiện hành động ' : 'Confirm executing action '}
             <strong className="text-[#8A6A1F] uppercase">{selectedAction}</strong>{' '}
@@ -248,7 +251,7 @@ export function ModerationDecisionForm({
               type="button"
               disabled={isSubmitting}
               onClick={() => setConfirming(false)}
-              className="px-4 py-2.5 bg-[#F0E7D8] hover:bg-[#F0E7D8] text-[#241F1A] font-bold rounded-xl text-xs transition-all cursor-pointer"
+              className="px-4 py-2.5 bg-[#FFFCF6] hover:bg-[#F0E7D8] text-[#241F1A] font-bold rounded-xl text-xs border border-[#221E1A]/15 transition-colors cursor-pointer disabled:opacity-50"
             >
               {isVie ? 'Hủy' : 'Cancel'}
             </button>

@@ -23,6 +23,7 @@ import type { Commission, CommissionStatus } from '@/types/commission.types';
 import { Reveal } from '@/components/motion';
 
 import { extractErrorMessage } from '@/lib/api-client';
+import { useLanguage } from '@/context/language-context';
 
 /** Trạng thái KHÔNG còn phòng làm việc hoạt động (chưa nhận đơn / đã huỷ). */
 const NO_WORKROOM_STATUSES: CommissionStatus[] = ['PendingAcceptance', 'Negotiating'];
@@ -99,6 +100,8 @@ export function WorkroomListScreen({ userId }: { userId: string | null }) {
   const [deadlineFilter, setDeadlineFilter] = useState<DeadlineFilterKey>('all');
   const [sortBy, setSortBy] = useState<SortKey>('newest');
   const [keyword, setKeyword] = useState('');
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
 
   const load = useCallback(async () => {
     if (!userId) return;
@@ -371,8 +374,8 @@ export function WorkroomListScreen({ userId }: { userId: string | null }) {
             <input
               value={keyword}
               onChange={(event) => setKeyword(event.target.value)}
-              placeholder="Tìm theo tên đơn, mã hoặc đối tác…"
-              aria-label="Tìm phòng làm việc"
+              placeholder={isVie ? 'Tìm theo tên đơn, mã hoặc đối tác…' : 'Search by order, code, or partner…'}
+              aria-label={isVie ? 'Tìm phòng làm việc' : 'Search workrooms'}
               className="input min-h-11 text-sm"
             />
           </div>
@@ -380,37 +383,37 @@ export function WorkroomListScreen({ userId }: { userId: string | null }) {
 
         <div className="room-filters room-filters--low">
           <select
-            aria-label="Lọc theo vai trò"
+            aria-label={isVie ? 'Lọc theo vai trò' : 'Filter by role'}
             value={roleFilter}
             onChange={(event) => setRoleFilter(event.target.value as RoleFilterKey)}
             className="input"
           >
-            <option value="all">Tất cả vai trò</option>
-            <option value="Client">Bạn là Khách hàng</option>
-            <option value="Creator">Bạn là Họa sĩ</option>
+            <option value="all">{isVie ? 'Tất cả vai trò' : 'All roles'}</option>
+            <option value="Client">{isVie ? 'Bạn là Khách hàng' : 'You are the Client'}</option>
+            <option value="Creator">{isVie ? 'Bạn là Họa sĩ' : 'You are the Creator'}</option>
           </select>
 
           <select
-            aria-label="Lọc theo hạn chót và ký quỹ"
+            aria-label={isVie ? 'Lọc theo hạn chót và ký quỹ' : 'Filter by deadline and escrow'}
             value={deadlineFilter}
             onChange={(event) => setDeadlineFilter(event.target.value as DeadlineFilterKey)}
             className="input"
           >
-            <option value="all">Mọi hạn chót</option>
-            <option value="overdue">Quá hạn</option>
-            <option value="due_soon">Sắp đến hạn (≤ 3 ngày)</option>
-            <option value="escrow">Đang có ký quỹ</option>
+            <option value="all">{isVie ? 'Mọi hạn chót' : 'All deadlines'}</option>
+            <option value="overdue">{isVie ? 'Quá hạn' : 'Overdue'}</option>
+            <option value="due_soon">{isVie ? 'Sắp đến hạn (≤ 3 ngày)' : 'Due soon (≤ 3 days)'}</option>
+            <option value="escrow">{isVie ? 'Đang có ký quỹ' : 'Escrow funded'}</option>
           </select>
 
           <select
-            aria-label="Sắp xếp phòng làm việc"
+            aria-label={isVie ? 'Sắp xếp phòng làm việc' : 'Sort workrooms'}
             value={sortBy}
             onChange={(event) => setSortBy(event.target.value as SortKey)}
             className="input"
           >
-            <option value="newest">Mới nhất</option>
-            <option value="deadline">Hạn chót gần nhất</option>
-            <option value="escrow">Ký quỹ cao nhất</option>
+            <option value="newest">{isVie ? 'Mới nhất' : 'Newest'}</option>
+            <option value="deadline">{isVie ? 'Hạn chót gần nhất' : 'Closest deadline'}</option>
+            <option value="escrow">{isVie ? 'Ký quỹ cao nhất' : 'Highest escrow'}</option>
           </select>
 
           {(filter !== 'all' || roleFilter !== 'all' || deadlineFilter !== 'all' || sortBy !== 'newest' || keyword.trim() !== '') && (
@@ -424,7 +427,7 @@ export function WorkroomListScreen({ userId }: { userId: string | null }) {
                 setKeyword('');
               }}
               className="btn btn--ghost btn--sm"
-            > Xoá bộ lọc </button>
+            > {isVie ? 'Xoá bộ lọc' : 'Clear filters'} </button>
           )}
         </div>
 

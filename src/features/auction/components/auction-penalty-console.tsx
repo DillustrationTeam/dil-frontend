@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useLanguage } from '@/context/language-context';
 import {
   AlertTriangle,
   Ban,
@@ -39,6 +40,8 @@ function formatDate(value?: string | null) {
  * tạo nhầm — người bán bị oan phải chịu phụ phí/khoá bán cho tới khi hết hạn.
  */
 export function AuctionPenaltyConsole() {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
   const [items, setItems] = useState<AuctionPenaltyAdminDto[]>([]);
   const [cursor, setCursor] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -167,35 +170,35 @@ export function AuctionPenaltyConsole() {
 
       <div className="mb-5 flex flex-wrap items-end gap-4 rounded-3xl border border-[#221E1A]/10 bg-[#FFFCF6] p-4 text-xs">
         <label className="block">
-          <span className="mb-1 block text-outline">Trạng thái</span>
+          <span className="mb-1 block text-outline">{isVie ? 'Trạng thái' : 'Status'}</span>
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
             className="rounded-xl border border-[#221E1A]/10 bg-brand-navy px-3 py-2 text-on-surface focus:border-brand-periwinkle focus:outline-none"
           >
-            <option value="">Tất cả</option>
-            <option value="Active">Đang hiệu lực</option>
-            <option value="Consumed">Đã chạy xong</option>
-            <option value="Revoked">Đã thu hồi</option>
+            <option value="">{isVie ? 'Tất cả' : 'All'}</option>
+            <option value="Active">{isVie ? 'Đang hiệu lực' : 'Active'}</option>
+            <option value="Consumed">{isVie ? 'Đã chạy xong' : 'Consumed'}</option>
+            <option value="Revoked">{isVie ? 'Đã thu hồi' : 'Revoked'}</option>
           </select>
         </label>
 
         <label className="block">
-          <span className="mb-1 block text-outline">Mức phạt tối thiểu</span>
+          <span className="mb-1 block text-outline">{isVie ? 'Mức phạt tối thiểu' : 'Minimum level'}</span>
           <select
             value={minLevel}
             onChange={(e) => setMinLevel(e.target.value)}
             className="rounded-xl border border-[#221E1A]/10 bg-brand-navy px-3 py-2 text-on-surface focus:border-brand-periwinkle focus:outline-none"
           >
-            <option value="">Tất cả</option>
-            <option value="3">Từ L3 (có phụ phí)</option>
-            <option value="5">L5 (khoá bán)</option>
+            <option value="">{isVie ? 'Tất cả' : 'All'}</option>
+            <option value="3">{isVie ? 'Từ L3 (có phụ phí)' : 'From L3 (surcharge)'}</option>
+            <option value="5">{isVie ? 'L5 (khoá bán)' : 'L5 (listing block)'}</option>
           </select>
         </label>
 
         <span className="ml-auto inline-flex items-center gap-2 rounded-full border border-[#8A6A1F]/40 bg-[#8A6A1F]/10 px-3 py-1.5 font-semibold text-[#8A6A1F]">
-          <ShieldAlert size={13} /> {activeCount} đang hiệu lực
-          {consumedCount > 0 && <span className="text-outline">· {consumedCount} đã chạy xong</span>}
+          <ShieldAlert size={13} /> {activeCount} {isVie ? 'đang hiệu lực' : 'active'}
+          {consumedCount > 0 && <span className="text-outline">· {consumedCount} {isVie ? 'đã chạy xong' : 'consumed'}</span>}
         </span>
       </div>
 

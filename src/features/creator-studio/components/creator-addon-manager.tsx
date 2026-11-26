@@ -9,6 +9,7 @@ import {
 } from '@/services/addon.service';
 import { creatorProfileService } from '../services/creator-profile.service';
 import { extractErrorMessage } from '@/lib/api-client';
+import { useLanguage } from '@/context/language-context';
 import type { RateCardPackage } from '../services/creator-rate-card.service';
 import {
   Edit2,
@@ -34,6 +35,8 @@ interface Props {
 type StageCategory = 'All' | 'Sketch' | 'Lineart' | 'Final' | 'Any';
 
 export function CreatorAddonManager({ packages }: Props) {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
   const [items, setItems] = useState<CreatorAddon[]>([]);
   const [presets, setPresets] = useState<AddonPreset[]>([]);
   const [profileId, setProfileId] = useState('');
@@ -758,7 +761,7 @@ export function CreatorAddonManager({ packages }: Props) {
                   onChange={(e) => setPackageId(e.target.value)}
                   disabled={busy}
                 >
-                  <option value="">Tất cả gói dịch vụ</option>
+                  <option value="">{isVie ? 'Tất cả gói dịch vụ' : 'All service packages'}</option>
                   {packages.map((p) => (
                     <option key={p.id} value={p.id}>
                       {p.name}
