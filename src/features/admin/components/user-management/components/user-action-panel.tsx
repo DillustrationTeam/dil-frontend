@@ -199,10 +199,10 @@ export function UserActionPanel({
                 <button
                   type="button"
                   onClick={() => handleActionTypeChange('Warn')}
-                  className={`py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+                  className={`py-2 text-xs font-bold rounded-lg transition-colors cursor-pointer ${
                     actionType === 'Warn'
-                      ? 'bg-[#8A6A1F]/12 text-[#F7F2E9] shadow-md'
-                      : 'text-[#6E6459] hover:text-[#241F1A]'
+                      ? 'sanction-theme-warn'
+                      : 'text-[#6E6459] hover:text-[#241F1A] border border-transparent'
                   }`}
                 >
                   {isVie ? 'Cảnh cáo' : 'Warn'}
@@ -210,10 +210,10 @@ export function UserActionPanel({
                 <button
                   type="button"
                   onClick={() => handleActionTypeChange('Suspend')}
-                  className={`py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+                  className={`py-2 text-xs font-bold rounded-lg transition-colors cursor-pointer ${
                     actionType === 'Suspend'
-                      ? 'bg-[#A8321C]/12 text-[#241F1A] shadow-md'
-                      : 'text-[#6E6459] hover:text-[#241F1A]'
+                      ? 'sanction-theme-suspend'
+                      : 'text-[#6E6459] hover:text-[#241F1A] border border-transparent'
                   }`}
                 >
                   {isVie ? 'Tạm khóa' : 'Suspend'}
@@ -221,10 +221,10 @@ export function UserActionPanel({
                 <button
                   type="button"
                   onClick={() => handleActionTypeChange('Ban')}
-                  className={`py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+                  className={`py-2 text-xs font-bold rounded-lg transition-colors cursor-pointer ${
                     actionType === 'Ban'
-                      ? 'bg-[#A8321C]/12 text-[#241F1A] shadow-md'
-                      : 'text-[#6E6459] hover:text-[#241F1A]'
+                      ? 'sanction-theme-ban'
+                      : 'text-[#6E6459] hover:text-[#241F1A] border border-transparent'
                   }`}
                 >
                   {isVie ? 'Cấm vĩnh viễn' : 'Ban'}
@@ -238,10 +238,10 @@ export function UserActionPanel({
                       ? (isVie ? 'Tài khoản đang hoạt động (không bị khóa)' : 'Account is active (not locked out)')
                       : undefined
                   }
-                  className={`py-2 text-xs font-bold rounded-lg transition-all ${
+                  className={`py-2 text-xs font-bold rounded-lg transition-colors ${
                     actionType === 'Unban'
-                      ? 'bg-[#2F6B63]/12 text-[#F7F2E9] shadow-md'
-                      : 'text-[#6E6459] hover:text-[#241F1A]'
+                      ? 'sanction-theme-unban'
+                      : 'text-[#6E6459] hover:text-[#241F1A] border border-transparent'
                   } ${!user.isLockedOut ? 'opacity-30 cursor-not-allowed' : 'cursor-pointer'}`}
                 >
                   {isVie ? 'Gỡ phạt' : 'Unban'}
@@ -357,12 +357,14 @@ export function UserActionPanel({
             <button
               type="submit"
               disabled={isSanctionSubmitting || !reason.trim()}
-              className={`w-full py-2.5 rounded-xl text-xs font-bold transition-all shadow-lg cursor-pointer flex items-center justify-center gap-2 ${
+              className={`w-full py-2.5 rounded-xl text-xs font-bold transition-colors cursor-pointer flex items-center justify-center gap-2 ${
                 actionType === 'Unban'
-                  ? 'bg-[#2F6B63]/12 hover:bg-[#2F6B63]/10 text-[#F7F2E9]'
+                  ? 'sanction-theme-unban'
                   : actionType === 'Warn'
-                  ? 'bg-[#8A6A1F]/12 hover:bg-[#8A6A1F]/10 text-[#F7F2E9]'
-                  : 'bg-[#A8321C]/12 hover:bg-[#A8321C]/10 text-[#241F1A] shadow-[#A8321C]'
+                  ? 'sanction-theme-warn'
+                  : actionType === 'Suspend'
+                  ? 'sanction-theme-suspend'
+                  : 'sanction-theme-ban'
               } disabled:opacity-50 disabled:cursor-not-allowed`}
             >
               {isSanctionSubmitting ? (

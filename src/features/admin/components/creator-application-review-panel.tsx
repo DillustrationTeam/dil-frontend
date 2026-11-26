@@ -475,7 +475,7 @@ export function CreatorApplicationReviewPanel() {
                           type="button"
                           onClick={handleApprove}
                           disabled={isSubmitting}
-                          className="flex-1 rounded-2xl bg-[#2F6B63]/10 py-3.5 text-sm font-extrabold text-[#F7F2E9] transition hover:bg-[#2F6B63]/10 disabled:opacity-60"
+                          className="app-review-approve flex-1 rounded-2xl border border-[#166534] bg-[#2F6B63]/15 py-3.5 text-sm font-extrabold text-[#166534] transition hover:bg-[#2F6B63]/25 disabled:opacity-60 cursor-pointer"
                         >
                           {isVie ? '✓ Phê duyệt & Cấp quyền Họa sĩ' : '✓ Approve & Grant Creator Role'}
                         </button>
@@ -483,7 +483,7 @@ export function CreatorApplicationReviewPanel() {
                           type="button"
                           onClick={() => setPendingAction('more-proof')}
                           disabled={isSubmitting}
-                          className="rounded-2xl border border-[#8A6A1F]/40 bg-[#8A6A1F]/20 px-5 py-3.5 text-sm font-bold text-[#8A6A1F] hover:bg-[#8A6A1F]/20 disabled:opacity-60"
+                          className="app-review-proof rounded-2xl border border-[#8A6A1F]/45 bg-[#8A6A1F]/20 px-5 py-3.5 text-sm font-bold text-[#6F5314] transition hover:bg-[#8A6A1F]/30 disabled:opacity-60 cursor-pointer"
                         >
                           {isVie ? 'Yêu cầu thêm minh chứng' : 'Request Additional Proof'}
                         </button>
@@ -491,7 +491,7 @@ export function CreatorApplicationReviewPanel() {
                           type="button"
                           onClick={() => setPendingAction('reject')}
                           disabled={isSubmitting}
-                          className="rounded-2xl border border-[#A8321C]/40 bg-[#A8321C]/20 px-5 py-3.5 text-sm font-bold text-[#A8321C] hover:bg-[#A8321C]/20 disabled:opacity-60"
+                          className="app-review-reject rounded-2xl border border-[#A8321C]/45 bg-[#A8321C]/20 px-5 py-3.5 text-sm font-bold text-[#8F2916] transition hover:bg-[#A8321C]/30 disabled:opacity-60 cursor-pointer"
                         >
                           {isVie ? 'Từ chối' : 'Reject'}
                         </button>

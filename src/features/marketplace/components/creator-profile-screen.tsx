@@ -164,7 +164,7 @@ export function CreatorProfileScreen({ id }: { id: string }) {
   ];
 
   return (
-    <ProfileLayout name={profile.displayName} bannerUrl={profile.bannerUrl} sidebar={<div>
+    <ProfileLayout name={profile.displayName} bannerUrl={profile.bannerUrl} avatarUrl={profile.avatarUrl} sidebar={<div>
       <p className="text-xs uppercase tracking-wider text-[#B24A26]">Hồ sơ họa sĩ</p>
       <h1 className="mt-2 break-words font-h1 text-3xl font-bold text-[#241F1A]">{profile.displayName}</h1>
       <p className="mt-2 text-sm text-[#6E6459]">{profile.headline || 'Họa sĩ kỹ thuật số'}</p>
@@ -192,9 +192,9 @@ export function CreatorProfileScreen({ id }: { id: string }) {
 
           <Link
             href={`/art-trades/create?receiverId=${profile.userId}&name=${encodeURIComponent(profile.displayName)}`}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-[#B24A26]/30 bg-[#B24A26]/10 hover:bg-[#B24A26]/20 text-[#B24A26] hover:text-[#241F1A] px-4 py-2.5 text-xs font-semibold uppercase tracking-wider transition cursor-pointer"
+            className="creator-trade-btn inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition cursor-pointer"
           >
-            <ArrowLeftRight className="w-3.5 h-3.5" /> Đề nghị trao đổi tranh </Link>
+            <ArrowLeftRight className="w-4 h-4" /> Đề nghị trao đổi tranh </Link>
         </div>
       )}
       {profile.bio && <p className="mt-5 whitespace-pre-line break-words text-sm leading-6 text-[#6E6459]">{profile.bio}</p>}

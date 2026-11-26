@@ -1673,6 +1673,7 @@ export const engToVieMap: Record<string, string> = {
   'Auction Exclusive': 'Đấu giá',
   'Commission Deliverable': 'Đơn vẽ hoàn tất',
   'Art Trade Exchange': 'Trao đổi nghệ thuật',
+  'Watercolor': 'Màu nước',
 };
 
 export const engToVieRegex: Array<{ pattern: RegExp; replacement: string }> = [

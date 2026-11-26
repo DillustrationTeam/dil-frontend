@@ -8,7 +8,6 @@ import { AiAssistantLauncher } from "@/features/navigation";
 import { AppToaster } from "@/components/hover-fade-toast";
 import { ScrollProgress } from "@/components/motion";
 import "./globals.css";
-import "./globals-redesign.css";
 
 const GOOGLE_CLIENT_ID =
   process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "1234567890-dummyid.apps.googleusercontent.com";

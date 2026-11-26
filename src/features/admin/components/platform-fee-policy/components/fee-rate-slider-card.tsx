@@ -44,7 +44,7 @@ export function FeeRateSliderCard({
           <span className="text-xs text-[#6E6459] uppercase font-semibold tracking-wider">
             {isVie ? 'Mức phí hiện tại:' : 'Current Rate:'}
           </span>
-          <span className="px-4 py-2 rounded-xl bg-[#2F6B63]/20 border border-[#2F6B63]/40 text-[#2F6B63] font-mono font-extrabold text-xl shadow-[0_0_15px_rgba(52,211,153,0.2)]">
+          <span className="px-4 py-2 rounded-xl bg-[#2F6B63]/20 border border-[#2F6B63]/40 text-[#2F6B63] font-[family-name:var(--font-ui)] tabular-nums font-extrabold text-xl shadow-[0_0_15px_rgba(52,211,153,0.2)]">
             {feePercent.toFixed(1)}%
           </span>
         </div>
@@ -64,7 +64,7 @@ export function FeeRateSliderCard({
         />
 
         {/* Slider scale markers */}
-        <div className="flex justify-between text-[10px] text-[#6E6459] font-mono px-1">
+        <div className="flex justify-between text-[10px] text-[#6E6459] font-[family-name:var(--font-ui)] tabular-nums px-1">
           <span>5.0% ({isVie ? 'Tối thiểu' : 'Min'})</span>
           <span>7.5%</span>
           <span className="text-[#4A423A] font-bold">10.0% ({isVie ? 'Mặc định' : 'Default'})</span>

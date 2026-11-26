@@ -182,7 +182,7 @@ export function UserDetailCard({ user }: UserDetailCardProps) {
             <span className="text-[10px] text-[#6E6459] uppercase font-bold">
               {isVie ? 'Số dư khả dụng' : 'Available Balance'}
             </span>
-            <p className="text-lg font-bold text-[#241F1A] font-mono">
+            <p className="text-lg font-bold text-[#241F1A] font-h1">
               {formatVnd(user.wallet?.balance ?? 0)}
             </p>
           </div>
@@ -190,7 +190,7 @@ export function UserDetailCard({ user }: UserDetailCardProps) {
             <span className="text-[10px] text-[#6E6459] uppercase font-bold">
               {isVie ? 'Tạm giữ / Ký quỹ' : 'Locked / Escrow'}
             </span>
-            <p className="text-lg font-bold text-[#8A6A1F] font-mono">
+            <p className="text-lg font-bold text-[#8A6A1F] font-h1">
               {formatVnd(user.wallet?.lockedBalance ?? 0)}
             </p>
           </div>

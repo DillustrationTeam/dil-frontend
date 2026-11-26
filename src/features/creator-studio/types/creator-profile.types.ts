@@ -8,6 +8,7 @@ export interface CreatorProfileDto {
   location?: string | null;
   websiteUrl?: string | null;
   bannerUrl?: string | null;
+  avatarUrl?: string | null;
   isAcceptingOrders: boolean;
   isApproved: boolean;
   ratingAverage: number;

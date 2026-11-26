@@ -106,7 +106,7 @@ export function PolicyParametersGrid({
               >
                 {isVie ? 'Chỉnh sửa miễn phí' : 'Free Revision Limit'}
               </label>
-              <span className="px-1.5 py-0.5 rounded text-[9px] font-mono bg-[#8A6A1F]/20 text-[#8A6A1F] border border-[#8A6A1F]/40">
+              <span className="px-1.5 py-0.5 rounded text-[9px] font-[family-name:var(--font-ui)] bg-[#8A6A1F]/20 text-[#8A6A1F] border border-[#8A6A1F]/40">
                 {isVie ? 'Quy tắc hoa hồng' : 'Commission Rule'}
               </span>
             </div>
@@ -162,7 +162,7 @@ export function PolicyParametersGrid({
               >
                 {isVie ? 'Hạn liên kết tải an toàn' : 'Presigned URL Expiry'}
               </label>
-              <span className="px-1.5 py-0.5 rounded text-[9px] font-mono bg-[#5F3F86]/20 text-[#5F3F86] border border-[#5F3F86]/40">
+              <span className="px-1.5 py-0.5 rounded text-[9px] font-[family-name:var(--font-ui)] bg-[#5F3F86]/20 text-[#5F3F86] border border-[#5F3F86]/40">
                 BR-39
               </span>
             </div>

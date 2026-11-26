@@ -20,7 +20,7 @@ import {
 import { adminDisputeService } from '@/features/admin/services/dispute.service';
 import { useLanguage } from '@/context/language-context';
 import { eventService } from '../../../services/event.service';
-import type { EventListItemDto } from '../../../types/event.types';
+import { normalizeEventStatus, type EventListItemDto } from '../../../types/event.types';
 import type {
   SubmissionDisputeDto,
   SubmissionDisputeStatus,
@@ -62,11 +62,13 @@ export function DisputesTab() {
       : allEvents.find((e) => matchesEventId(e.id, selectedEventId));
 
   // Check if judging phase has started / active
+  const selectedStatus =
+    selectedEvent && selectedEvent.id !== 'all' ? normalizeEventStatus(selectedEvent.status) : null;
   const isJudgingPhaseActive =
     selectedEvent && selectedEvent.id !== 'all'
-      ? selectedEvent.status === 'Judging' ||
-      selectedEvent.status === 'Ended' ||
-      (selectedEvent.judgingStartAt ? new Date() >= new Date(selectedEvent.judgingStartAt) : false)
+      ? selectedStatus === 'Judging' ||
+        selectedStatus === 'Ended' ||
+        (selectedEvent.judgingStartAt ? new Date() >= new Date(selectedEvent.judgingStartAt) : false)
       : false;
 
   // 1. Fetch available events for contest selection
@@ -331,7 +333,7 @@ export function DisputesTab() {
               setPage(1);
             }}
             placeholder={isVie ? 'Tìm tranh chấp theo mã đơn, tiêu đề hoặc lý do...' : 'Search dispute by case ID, title, or reason...'}
-            className="w-full h-10 pl-10 pr-9 bg-[#E5D8C2]/80 border border-[#221E1A]/10 rounded-xl text-xs text-[#241F1A] placeholder:text-[#746A5F] focus:outline-none focus:border-brand-periwinkle focus:ring-1 focus:ring-brand-periwinkle/30 transition-all font-body"
+            className="w-full h-10 pl-10 pr-9 bg-[#E5D8C2] border border-[#221E1A]/10 rounded-xl text-xs text-[#241F1A] placeholder:text-[#746A5F] focus:outline-none focus:border-brand-periwinkle focus:ring-1 focus:ring-brand-periwinkle/30 transition-all font-body"
           />
           {searchQuery && (
             <button
@@ -352,7 +354,7 @@ export function DisputesTab() {
               setStatusFilter(e.target.value as SubmissionDisputeStatus);
               setPage(1);
             }}
-            className="w-full h-10 px-3 pr-8 bg-[#E5D8C2]/80 border border-[#221E1A]/10 rounded-xl text-xs text-[#241F1A] focus:outline-none focus:border-brand-periwinkle focus:ring-1 focus:ring-brand-periwinkle/30 transition-all cursor-pointer font-medium"
+            className="w-full h-10 px-3 pr-8 bg-[#E5D8C2] border border-[#221E1A]/10 rounded-xl text-xs text-[#241F1A] focus:outline-none focus:border-brand-periwinkle focus:ring-1 focus:ring-brand-periwinkle/30 transition-all cursor-pointer font-medium"
           >
             <option value="All" className="bg-[#FFFCF6]">{isVie ? 'Tất cả trạng thái' : 'All Statuses'}</option>
             <option value="Pending" className="bg-[#FFFCF6]">{isVie ? 'Chờ xử lý' : 'Pending'}</option>

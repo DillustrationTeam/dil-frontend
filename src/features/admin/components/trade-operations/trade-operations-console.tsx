@@ -32,6 +32,7 @@ import {
   XCircle,
 } from 'lucide-react';
 import { useLanguage } from '@/context/language-context';
+import { parseNoteWithAttachments } from '@/features/art-trade/utils/trade-attachment.utils';
 import { tradeOperationsService } from '../../services/trade-operations.service';
 import {
   AdminTradeListMeta,
@@ -508,21 +509,19 @@ export function TradeOperationsConsole() {
         <button
           type="button"
           onClick={() => setActiveTab('trades')}
-          className={`px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer flex items-center gap-2 ${
-            activeTab === 'trades'
+          className={`px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer flex items-center gap-2 ${activeTab === 'trades'
               ? 'bg-brand-periwinkle text-[#FFFCF6] shadow-[inset_0_1px_0_rgba(255,255,255,0.5),0_0_20px_rgba(167,172,217,0.25)]'
               : 'text-[#746A5F] hover:text-[#241F1A] hover:bg-[#FFFCF6]'
-          }`}
+            }`}
         >
           <Layers size={14} />
           <span>{isEng ? 'Trade Management' : 'Quản lý Giao dịch'}</span>
           {tradeMeta.totalCount > 0 && (
             <span
-              className={`rounded-full px-2 py-0.5 text-[10px] font-mono font-bold ${
-                activeTab === 'trades'
+              className={`rounded-full px-2 py-0.5 text-[10px] font-mono font-bold ${activeTab === 'trades'
                   ? 'bg-brand-navy/20 text-[#241F1A]'
                   : 'bg-[#F0E7D8] text-[#746A5F]'
-              }`}
+                }`}
             >
               {tradeMeta.totalCount}
             </span>
@@ -532,11 +531,10 @@ export function TradeOperationsConsole() {
         <button
           type="button"
           onClick={() => setActiveTab('disputes')}
-          className={`px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer flex items-center gap-2 ${
-            activeTab === 'disputes'
+          className={`px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer flex items-center gap-2 ${activeTab === 'disputes'
               ? 'bg-brand-periwinkle text-[#FFFCF6] shadow-[inset_0_1px_0_rgba(255,255,255,0.5),0_0_20px_rgba(167,172,217,0.25)]'
               : 'text-[#746A5F] hover:text-[#241F1A] hover:bg-[#FFFCF6]'
-          }`}
+            }`}
         >
           <ShieldAlert
             size={14}
@@ -545,11 +543,10 @@ export function TradeOperationsConsole() {
           <span>{isEng ? 'Dispute Resolution' : 'Giải quyết Tranh chấp'}</span>
           {disputeMeta.totalCount > 0 && (
             <span
-              className={`rounded-full px-2 py-0.5 text-[10px] font-mono font-bold ${
-                activeTab === 'disputes'
+              className={`rounded-full px-2 py-0.5 text-[10px] font-mono font-bold ${activeTab === 'disputes'
                   ? 'bg-brand-navy/20 text-[#241F1A]'
                   : 'bg-[#A8321C]/20 text-[#A8321C]'
-              }`}
+                }`}
             >
               {disputeMeta.totalCount}
             </span>
@@ -954,19 +951,18 @@ export function TradeOperationsConsole() {
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#221E1A]/10 pb-4">
                     <div className="flex flex-wrap items-center gap-2.5">
                       <span
-                        className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ${
-                          item.status === 'Pending'
+                        className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ${item.status === 'Pending'
                             ? 'bg-[#A8321C]/20 text-[#A8321C] border-[#A8321C]/40 animate-pulse'
                             : 'bg-[#2F6B63]/20 text-[#2F6B63] border-[#2F6B63]/40'
-                        }`}
+                          }`}
                       >
                         {item.status === 'Pending'
                           ? isEng
                             ? 'Pending Arbitration'
                             : 'Chờ phân xử'
                           : isEng
-                          ? 'Resolved'
-                          : 'Đã phân xử'}
+                            ? 'Resolved'
+                            : 'Đã phân xử'}
                       </span>
 
                       {/* Violation Category Pill */}
@@ -988,8 +984,8 @@ export function TradeOperationsConsole() {
                             ? `Trade: "${item.tradeTitle}"`
                             : `Giao dịch: "${item.tradeTitle}"`
                           : isEng
-                          ? `Trade Code #${item.artTradeId.substring(0, 8)}`
-                          : `Mã trao đổi #${item.artTradeId.substring(0, 8)}`}
+                            ? `Trade Code #${item.artTradeId.substring(0, 8)}`
+                            : `Mã trao đổi #${item.artTradeId.substring(0, 8)}`}
                       </h3>
                       <button
                         onClick={() => handleCopy(item.artTradeId)}
@@ -1153,7 +1149,7 @@ export function TradeOperationsConsole() {
               {/* Side A vs Side B Visual Comparison */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Side A */}
-                <div className="rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] p-4 space-y-3">
+                <div className="min-w-0 rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] p-4 space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-brand-periwinkle uppercase tracking-wider">
                       {isEng ? 'Side A (Initiator)' : 'Side A (Khởi tạo)'}
@@ -1182,13 +1178,35 @@ export function TradeOperationsConsole() {
                     )}
                   </div>
 
-                  <div className="text-xs space-y-1 text-[#746A5F]">
-                    <div>
-                      {isEng ? 'Drawing Request: ' : 'Yêu cầu vẽ: '}
-                      <strong className="text-[#241F1A]">
-                        {inspectingTrade.initiatorRequestNote || (isEng ? 'None' : 'Không có')}
-                      </strong>
-                    </div>
+                  <div className="text-xs space-y-1 text-[#746A5F] min-w-0">
+                    {(() => {
+                      const parsed = parseNoteWithAttachments(inspectingTrade.initiatorRequestNote);
+                      return (
+                        <div className="space-y-1.5">
+                          <div className="break-words">
+                            {isEng ? 'Drawing Request: ' : 'Yêu cầu vẽ: '}
+                            <strong className="text-[#241F1A] break-words">
+                              {parsed.text || (isEng ? 'None' : 'Không có')}
+                            </strong>
+                          </div>
+                          {parsed.images.length > 0 && (
+                            <div className="flex flex-wrap gap-1.5 pt-0.5">
+                              {parsed.images.map((imgUrl, idx) => (
+                                <button
+                                  key={`${imgUrl}-${idx}`}
+                                  type="button"
+                                  onClick={() => setLightboxUrl(imgUrl)}
+                                  className="relative h-12 w-12 overflow-hidden rounded-lg border border-[#221E1A]/15 bg-[#F0E7D8] hover:border-brand-periwinkle transition cursor-pointer"
+                                  title={isEng ? 'View reference image' : 'Xem ảnh tham khảo'}
+                                >
+                                  <Image src={imgUrl} alt={`Ref ${idx + 1}`} fill unoptimized className="object-cover" />
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
                     <div>
                       {isEng ? 'Submitted At: ' : 'Thời điểm nộp: '}
                       <span className="font-mono text-[#8A6A1F]">
@@ -1203,15 +1221,15 @@ export function TradeOperationsConsole() {
                             ? 'Confirmed'
                             : 'Đã xác nhận'
                           : isEng
-                          ? 'Pending'
-                          : 'Chưa'}
+                            ? 'Pending'
+                            : 'Chưa'}
                       </span>
                     </div>
                   </div>
                 </div>
 
                 {/* Side B */}
-                <div className="rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] p-4 space-y-3">
+                <div className="min-w-0 rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] p-4 space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-[#5F3F86] uppercase tracking-wider">
                       {isEng ? 'Side B (Partner)' : 'Side B (Đối tác)'}
@@ -1240,13 +1258,35 @@ export function TradeOperationsConsole() {
                     )}
                   </div>
 
-                  <div className="text-xs space-y-1 text-[#746A5F]">
-                    <div>
-                      {isEng ? 'Drawing Request: ' : 'Yêu cầu vẽ: '}
-                      <strong className="text-[#241F1A]">
-                        {inspectingTrade.receiverRequestNote || (isEng ? 'None' : 'Không có')}
-                      </strong>
-                    </div>
+                  <div className="text-xs space-y-1 text-[#746A5F] min-w-0">
+                    {(() => {
+                      const parsed = parseNoteWithAttachments(inspectingTrade.receiverRequestNote);
+                      return (
+                        <div className="space-y-1.5">
+                          <div className="break-words">
+                            {isEng ? 'Drawing Request: ' : 'Yêu cầu vẽ: '}
+                            <strong className="text-[#241F1A] break-words">
+                              {parsed.text || (isEng ? 'None' : 'Không có')}
+                            </strong>
+                          </div>
+                          {parsed.images.length > 0 && (
+                            <div className="flex flex-wrap gap-1.5 pt-0.5">
+                              {parsed.images.map((imgUrl, idx) => (
+                                <button
+                                  key={`${imgUrl}-${idx}`}
+                                  type="button"
+                                  onClick={() => setLightboxUrl(imgUrl)}
+                                  className="relative h-12 w-12 overflow-hidden rounded-lg border border-[#221E1A]/15 bg-[#F0E7D8] hover:border-brand-periwinkle transition cursor-pointer"
+                                  title={isEng ? 'View reference image' : 'Xem ảnh tham khảo'}
+                                >
+                                  <Image src={imgUrl} alt={`Ref ${idx + 1}`} fill unoptimized className="object-cover" />
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
                     <div>
                       {isEng ? 'Submitted At: ' : 'Thời điểm nộp: '}
                       <span className="font-mono text-[#8A6A1F]">
@@ -1261,8 +1301,8 @@ export function TradeOperationsConsole() {
                             ? 'Confirmed'
                             : 'Đã xác nhận'
                           : isEng
-                          ? 'Pending'
-                          : 'Chưa'}
+                            ? 'Pending'
+                            : 'Chưa'}
                       </span>
                     </div>
                   </div>
@@ -1387,8 +1427,8 @@ export function TradeOperationsConsole() {
                     ? 'Processing...'
                     : 'Đang xử lý...'
                   : isEng
-                  ? 'Confirm Cancellation'
-                  : 'Xác nhận Hủy giao dịch'}
+                    ? 'Confirm Cancellation'
+                    : 'Xác nhận Hủy giao dịch'}
               </button>
             </div>
           </div>
@@ -1494,11 +1534,10 @@ export function TradeOperationsConsole() {
               ].map((opt) => (
                 <label
                   key={opt.id}
-                  className={`block rounded-2xl border p-3 cursor-pointer transition ${
-                    resolutionChoice === opt.id
+                  className={`block rounded-2xl border p-3 cursor-pointer transition ${resolutionChoice === opt.id
                       ? 'border-[#A8321C]/30 bg-[#A8321C]/10 text-[#241F1A]'
                       : 'border-[#221E1A]/10 bg-[#FFFCF6] text-[#746A5F] hover:bg-[#FFFCF6]'
-                  }`}
+                    }`}
                 >
                   <div className="flex items-center gap-2">
                     <input
@@ -1551,8 +1590,8 @@ export function TradeOperationsConsole() {
                     ? 'Arbitrating...'
                     : 'Đang phân xử...'
                   : isEng
-                  ? 'Issue Verdict'
-                  : 'Ban hành Phán quyết'}
+                    ? 'Issue Verdict'
+                    : 'Ban hành Phán quyết'}
               </button>
             </div>
           </div>
