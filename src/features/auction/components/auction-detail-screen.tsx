@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { localizeStyle } from '@/features/marketplace/utils/style-labels';
+import { RiskDetailStrip } from './risk-detail-strip';
+import { SimilarAuctionsRail } from './similar-auctions-rail';
 import {
   AlertTriangle,
   ArrowLeft,
@@ -663,6 +665,9 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
           <span>{extendedNotice}</span>
         </div>
       )}
+
+      {/* Chỉ hiện với Administrator/Moderator: API trả 403 nên component tự ẩn */}
+      <RiskDetailStrip auctionId={auctionId} />
 
       {error && (
         <div role="alert" className="mb-6 flex items-start gap-2.5 rounded-2xl border border-[#A8321C]/40 bg-[#A8321C]/10 p-4 text-sm text-[#A8321C]">
@@ -1482,6 +1487,7 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
           </div>
         </div>
       )}
+      <SimilarAuctionsRail auctionId={auctionId} />
     </div>
   );
 }
