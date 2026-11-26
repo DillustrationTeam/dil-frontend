@@ -3,6 +3,7 @@ import { apiClient } from '@/lib/api-client';
 import { ApiResponse } from '@/types/api.types';
 import { getApiErrorMessage } from '@/lib/api-error';
 import { CloudinaryUploadSignature } from '@/features/creator-studio/types/upload.types';
+import { finishUpload, trackUpload } from '@/components/feedback/upload-progress';
 
 export const uploadService = {
   async getUploadSignature(folder: string, transformation?: string): Promise<CloudinaryUploadSignature> {
@@ -42,15 +43,25 @@ export const uploadService = {
       formData.append('transformation', signature.transformation);
     }
 
+    // Gọi thẳng Cloudinary (domain khác, không qua apiClient — không cần JWT) nên phải
+    // báo tiến trình thủ công cho thanh upload dùng chung.
+    const tracker = trackUpload('/uploads/cloudinary');
+
     try {
-      // Gọi thẳng Cloudinary (domain khác, không qua apiClient — không cần JWT).
       const response = await axios.post<{ secure_url: string }>(
         `https://api.cloudinary.com/v1_1/${signature.cloudName}/image/upload`,
-        formData
+        formData,
+        {
+          onUploadProgress: (event) => {
+            tracker.onProgress({ loaded: event.loaded, total: event.total });
+          },
+        },
       );
 
+      finishUpload(tracker.id);
       return response.data.secure_url;
     } catch (err) {
+      finishUpload(tracker.id);
       const axiosError = err as AxiosError<{ error?: { message?: string } }>;
       const cloudinaryMessage = axiosError.response?.data?.error?.message;
       throw new Error(cloudinaryMessage ? `Cloudinary: ${cloudinaryMessage}` : 'Upload lên Cloudinary thất bại.');

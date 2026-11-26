@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { X, Upload, FileImage, CheckCircle2, ShieldAlert } from 'lucide-react';
 import { commissionService } from '@/services/commission.service';
 import { extractErrorMessage } from '@/lib/api-client';
@@ -32,6 +32,17 @@ export default function SubmitMilestoneModal({
   const [uploaded, setUploaded] = useState(false);
   const [error, setError] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+  // Ảnh xem trước: object URL chỉ sống trong phiên modal, thu hồi khi đổi tệp hoặc đóng.
+  const previewUrl = useMemo(
+    () => (file && file.type.startsWith('image/') ? URL.createObjectURL(file) : null),
+    [file],
+  );
+  useEffect(() => {
+    return () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+    };
+  }, [previewUrl]);
+
 
   if (!isOpen) return null;
 
@@ -97,7 +108,7 @@ export default function SubmitMilestoneModal({
                 onDragOver={(e) => e.preventDefault()}
                 onDrop={handleDrop}
                 onClick={() => fileInputRef.current?.click()}
-                className="border-2 border-dashed border-[#221E1A]/20 hover:border-[#3B4C86]/40 bg-[#FFFCF6] rounded-2xl p-6 text-center transition-all cursor-pointer"
+                className="flex min-h-[168px] flex-col items-center justify-center border-2 border-dashed border-[#221E1A]/20 hover:border-[#3B4C86]/40 bg-[#FFFCF6] rounded-2xl p-6 text-center transition-all cursor-pointer"
               >
                 <input
                   type="file"
@@ -107,11 +118,17 @@ export default function SubmitMilestoneModal({
                   accept="image/jpeg,image/png"
                 />
                 {file ? (
-                  <div className="text-[#2F6B63]">
-                    <FileImage className="w-8 h-8 mx-auto mb-2" />
-                    <p className="text-xs font-semibold">{file.name}</p>
-                    <p className="text-[11px] text-[#746A5F] mt-1">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
-                  </div>
+                  previewUrl ? (
+                    // Ảnh thay đúng chỗ hai dòng hướng dẫn: khung giữ nguyên, ảnh fit bên trong.
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={previewUrl} alt={file.name} className="mx-auto max-h-[140px] w-full object-contain" />
+                  ) : (
+                    <div className="text-[#2F6B63]">
+                      <FileImage className="w-8 h-8 mx-auto mb-2" />
+                      <p className="text-xs font-semibold break-all">{file.name}</p>
+                      <p className="text-[11px] text-[#746A5F] mt-1">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                    </div>
+                  )
                 ) : (
                   <>
                     <Upload className="w-8 h-8 mx-auto text-[#3B4C86] mb-2 animate-bounce" />
@@ -162,7 +179,7 @@ export default function SubmitMilestoneModal({
             <button
               onClick={handleUpload}
               disabled={isUploading || !file}
-              className="px-5 py-2 rounded-xl text-xs font-semibold bg-gradient-to-r from-[#3B4C86] to-[#5F3F86] text-[#241F1A] shadow-lg shadow-[#3B4C86] hover:scale-[1.02] transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="btn-theme-primary px-5 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-2 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isUploading ? (
                 <span>Uploading...</span>

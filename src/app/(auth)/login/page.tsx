@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { ArrowRight, Eye, EyeOff, KeyRound, Lock, Mail } from 'lucide-react';
+import { ArrowRight, Eye, EyeOff, Info, KeyRound, Lock, Mail } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { authService } from '@/services/auth.service';
 import { useLanguage } from '@/context/language-context';
@@ -34,16 +34,14 @@ interface LoginFormValues {
 }
 
 /**
- * Tài khoản seed, dùng cho nút "Đăng nhập nhanh (Dev)".
+ * Tài khoản seed, dùng cho khối "Test mode (development only)".
  *
  * Danh sách này phải khớp dữ liệu seed thật của backend — thiếu một role nghĩa là
- * không ai đăng nhập được role đó khi demo. Bốn role đang có trong DB:
- * client / creator / admin / nghệ sĩ giữ cả hai vai (Linh).
+ * không ai đăng nhập được role đó khi demo. Ba role đang dùng: client / creator / admin.
  */
 const seedAccounts = [
   { label: 'Client', email: 'client.demo@dillustration.test', password: 'Demo@123456' },
   { label: 'Creator', email: 'creator.demo@dillustration.test', password: 'Demo@123456' },
-  { label: 'Client + Creator', email: 'linh.nguyen@dillustration.vn', password: 'Demo@123456' },
   { label: 'Admin', email: 'admin.demo@dillustration.local', password: 'Seed123!' },
 ] as const;
 
@@ -282,7 +280,7 @@ export default function LoginPage() {
         />
       ) : !twoFactorTicket ? (
         <>
-          <header className="mb-7">
+          <header className="mb-6">
             <h1 className="font-h1 text-[clamp(1.85rem,3vw,2.4rem)] font-normal leading-[1.1] text-[#241F1A]">
               {isEng ? 'Sign In' : 'Đăng nhập'}
             </h1>
@@ -293,28 +291,7 @@ export default function LoginPage() {
             </p>
           </header>
 
-          {/* Dev-only: điền nhanh tài khoản seed theo role */}
-          {process.env.NODE_ENV !== 'production' && (
-            <div className="mb-6 space-y-2 rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] px-4 py-3">
-              <p className="text-center text-[10px] font-semibold uppercase tracking-widest text-[#746A5F]">
-                {isEng ? 'Dev quick login' : 'Đăng nhập nhanh (Dev)'}
-              </p>
-              <div className="flex flex-wrap justify-center gap-2">
-                {seedAccounts.map((account) => (
-                  <button
-                    key={account.email}
-                    type="button"
-                    onClick={() => fillSeedAccount(account)}
-                    className="cursor-pointer rounded-full border border-[#221E1A]/10 bg-[#FFFCF6] px-3.5 py-1.5 text-xs font-medium text-[#B24A26] transition-colors hover:border-[#B24A26]/40 hover:bg-[#F0E7D8] hover:text-[#241F1A]"
-                  >
-                    {account.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>
+          <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
             {/* Email / Username */}
             <div className="space-y-1.5">
               <label className={AUTH_LABEL_CLASS} htmlFor="emailOrUsername">
@@ -398,7 +375,7 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <div className="mt-7 space-y-5 border-t border-[#221E1A]/10 pt-6">
+          <div className="mt-6 space-y-4 border-t border-[#221E1A]/10 pt-5">
             <div className="flex items-center gap-4">
               <div className="h-px flex-1 bg-[#F0E7D8]" />
               <span className="text-[0.75rem] uppercase tracking-[0.10em] text-[#746A5F]">
@@ -415,6 +392,28 @@ export default function LoginPage() {
                 {isEng ? 'Create an account' : 'Đăng ký ngay'}
               </Link>
             </p>
+
+            {/* Dev-only: bấm vào mới xổ ra, điền nhanh tài khoản seed theo role */}
+            {process.env.NODE_ENV !== 'production' && (
+              <details className="devbox">
+                <summary>
+                  <Info className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                  {isEng ? 'Test mode (development only)' : 'Chế độ test (chỉ môi trường dev)'}
+                </summary>
+                <div className="devbox__grid">
+                  {seedAccounts.map((account) => (
+                    <button
+                      key={account.email}
+                      type="button"
+                      onClick={() => fillSeedAccount(account)}
+                      
+                    >
+                      {account.label}
+                    </button>
+                  ))}
+                </div>
+              </details>
+            )}
           </div>
         </>
       ) : (

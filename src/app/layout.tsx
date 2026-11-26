@@ -1,5 +1,6 @@
 import { BugReportFloatingButton } from '@/components/feedback/BugReportFloatingButton';
 import { FloatingUtilitiesDock } from '@/components/feedback/FloatingUtilitiesDock';
+import { UploadProgressStack } from '@/components/feedback/upload-progress';
 import type { Metadata } from "next";
 import { Be_Vietnam_Pro, Fraunces, Playfair_Display } from "next/font/google";
 import { GoogleOAuthProvider } from "@react-oauth/google";
@@ -86,6 +87,7 @@ export default function RootLayout({
               <AiAssistantLauncher />
               <BugReportFloatingButton />
             </FloatingUtilitiesDock>
+            <UploadProgressStack />
             <AppToaster />
           </LanguageProvider>
         </GoogleOAuthProvider>

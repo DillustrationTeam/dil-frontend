@@ -12,6 +12,7 @@ import {
   type SearchSuggestionsDto,
 } from '../services/categories.service';
 import { ArtworkDetailModal } from './artwork-detail';
+import { SkeletonCardGrid } from '@/components/feedback/skeleton';
 
 type FeedTab = 'recommended' | 'following';
 type SortKey = 'newest' | 'views' | 'price-asc' | 'price-desc';
@@ -860,7 +861,10 @@ export function ArtDiscovery({
         </div>
 
         {loading ? (
-          <div className="rounded-3xl border border-[#221E1A]/10 bg-[#FFFCF6] p-12 text-center text-sm text-[#6E6459]"> Đang tải chợ tranh... </div>
+          <div aria-busy="true" aria-live="polite">
+            <span className="sr-only">Đang tải chợ tranh…</span>
+            <SkeletonCardGrid count={8} />
+          </div>
         ) : displayed.length ? (
           <>
           <div className="wall wall--grid">

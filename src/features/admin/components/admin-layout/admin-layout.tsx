@@ -8,6 +8,7 @@ import TopNavbar from '@/components/navigation/TopNavbar';
 import { DEFAULT_ADMIN_NAV_SECTIONS, VerticalNavbar } from '../vertical-navbar';
 import { AdminNavItem, AdminNavSection } from '../vertical-navbar/types';
 import { adminDisputeService } from '../../services/dispute.service';
+import { AccessDenied } from '@/components/feedback/access-denied';
 
 export interface AdminLayoutProps {
   children: React.ReactNode;
@@ -108,17 +109,9 @@ export function AdminLayout({
     setIsMobileNavOpen(false);
   };
 
-if (!authenticated || (!administrator && (!moderator || adminOnly))) {
-    return (
-      <div className="min-h-screen bg-[#F7F2E9] px-6 py-24 text-center text-[#241F1A]">
-        <h1 className="font-h1 text-2xl">
-          {authenticated ? 'Bạn không có quyền truy cập trang này' : 'Đăng nhập để mở trang quản trị'}
-        </h1>
-        <Link href={authenticated ? '/' : '/login'} className="mt-6 inline-block text-[#B24A26] underline">
-          {authenticated ? 'Về trang chủ' : 'Đăng nhập'}
-        </Link>
-      </div>
-    );
+// Không đủ quyền: dùng chung khung báo lỗi của site thay vì một trang trắng.
+  if (!authenticated || (!administrator && (!moderator || adminOnly))) {
+    return <AccessDenied authenticated={authenticated} />;
   }
 
   const handleRoleChange = (role: 'client' | 'creator' | 'admin') => {
