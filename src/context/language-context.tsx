@@ -4,6 +4,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { engToVieMap, engToVieRegex } from './translations/eng-to-vie';
 import { extraVieToEngMap, extraVieToEngRegex } from './translations/vie-to-eng';
+import { riskAuctionVieToEngMap, translateRiskSentence } from './translations/risk-auction-i18n';
 
 export type Language = 'VIE' | 'ENG';
 
@@ -1056,6 +1057,7 @@ const translationMap: Record<string, string> = {
 const mergedTranslationMap: Record<string, string> = {
   ...translationMap,
   ...extraVieToEngMap,
+  ...riskAuctionVieToEngMap,
 };
 
 // Case-insensitive lookup dictionaries built automatically
@@ -1182,6 +1184,13 @@ function translateString(text: string): string {
   // Direct match
   if (mergedTranslationMap[trimmed]) {
     return text.replace(trimmed, mergedTranslationMap[trimmed]);
+  }
+
+  // Câu do backend sinh ra (bằng chứng, tóm tắt, thông báo có số liệu): tra từ điển không bao giờ
+  // khớp vì mỗi câu có số/tên khác nhau, nên phải dịch theo mẫu TRƯỚC khi thử regex chung.
+  const sentence = translateRiskSentence(trimmed);
+  if (sentence) {
+    return text.replace(trimmed, sentence);
   }
 
   // Case-insensitive match
