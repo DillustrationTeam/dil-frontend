@@ -236,20 +236,27 @@ export function AdminRiskQueue() {
       toast.success(
         t(
           reviewMode === 'Confirmed'
-            ? 'Đã xác nhận gian lận: phiên tạm dừng nhận giá, đã báo cho người bán và người tham gia.'
-            : 'Đã bỏ qua cảnh báo của phiên.',
+            ? 'Đã xác nhận gian lận: phiên bị huỷ, tiền cọc đã hoàn về ví người tham gia và người bán đã được báo.'
+            : 'Đã bỏ qua cảnh báo: phiên tiếp tục nhận đặt giá và người bán đã được báo.',
         ),
       );
       setReviewMode(null);
-      setDrawerOpen(false);
       setNote('');
+
+      // Giữ drawer mở và đọc lại phiếu: kiểm duyệt viên phải thấy NGAY hệ quả (phiên đã huỷ,
+      // cọc đã hoàn) thay vì chỉ một toast rồi drawer tự đóng — trước đây đóng luôn nên không ai
+      // đọc được dòng hệ quả của quyết định.
+      if (activeAssessmentId) {
+        await refreshSheet(activeAuctionId, activeAssessmentId);
+      }
+
       await load(false);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : t('Không lưu được quyết định.'));
     } finally {
       setSubmitting(false);
     }
-  }, [activeAuctionId, reviewMode, note, load, t]);
+  }, [activeAuctionId, activeAssessmentId, reviewMode, note, load, refreshSheet, t]);
 
   // Identity ổn định: drawer giữ các handler này trong effect; arrow inline sẽ làm effect chạy lại.
   const closeDrawer = useCallback(() => setDrawerOpen(false), []);

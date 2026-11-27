@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { AlertTriangle } from 'lucide-react';
 import { useLanguage } from '@/context/language-context';
+import { useAuthStore } from '@/features/auth/store/use-auth-store';
 import { auctionRiskService } from '../services/auction-risk.service';
 import type { AuctionRiskAssessmentDto } from '../types/auction-risk.types';
 import { RiskBadge } from './risk-badge';
@@ -11,15 +12,23 @@ import { RiskBadge } from './risk-badge';
  * One-line risk strip on the auction detail page for operators.
  *
  * Mirrors the existing `role="status"` notice strips on that page (same rounded-2xl border, same
- * mb-6 rhythm). Non-operators never see it: the API answers 403 and the component renders nothing
- * rather than an empty box.
+ * mb-6 rhythm). Non-operators never see it — and, quan trọng hơn, KHÔNG gọi API: trước đây ai vào
+ * trang chi tiết cũng bắn request tới endpoint chỉ dành cho kiểm duyệt viên, nhận 403 rồi mới ẩn
+ * mình. Người mua thường thấy 2 dòng đỏ "Failed to load resource: 403" trong console.
  */
 export function RiskDetailStrip({ auctionId }: { auctionId: string }) {
   const { t } = useLanguage();
+  const roles = useAuthStore((state) => state.roles);
+  const isOperator = roles.includes('Administrator') || roles.includes('Moderator');
   const [assessment, setAssessment] = useState<AuctionRiskAssessmentDto | null>(null);
   const [hidden, setHidden] = useState(false);
 
   useEffect(() => {
+    if (!isOperator) {
+      setHidden(true);
+      return;
+    }
+
     let ignore = false;
 
     void (async () => {
@@ -29,7 +38,7 @@ export function RiskDetailStrip({ auctionId }: { auctionId: string }) {
           setAssessment(data);
         }
       } catch {
-        // 403/401/404: the strip is an operator-only extra, so it simply does not render.
+        // 403/401/404: quyền có thể vừa bị thu hồi — ẩn strip, không hiện hộp rỗng.
         if (!ignore) setHidden(true);
       }
     })();
@@ -37,7 +46,7 @@ export function RiskDetailStrip({ auctionId }: { auctionId: string }) {
     return () => {
       ignore = true;
     };
-  }, [auctionId]);
+  }, [auctionId, isOperator]);
 
   if (hidden || !assessment) return null;
   if (!['High', 'Critical'].includes(String(assessment.riskLevel))) return null;

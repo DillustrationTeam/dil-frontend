@@ -673,7 +673,9 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
         <div role="alert" className="mb-6 flex items-start gap-2.5 rounded-2xl border border-[#A8321C]/40 bg-[#A8321C]/10 p-4 text-sm text-[#A8321C]">
           <ShieldAlert size={18} className="mt-0.5 shrink-0" aria-hidden />
           <div>
-            <p className="font-semibold">Phiên tạm dừng nhận giá</p>
+            <p className="font-semibold">
+              {auction.auctionStatus === 'Cancelled' ? 'Phiên đã bị huỷ' : 'Phiên tạm dừng nhận giá'}
+            </p>
             <p className="mt-1 text-xs leading-relaxed">
               {auction.biddingBlockedReason
                 || 'Kiểm duyệt đang xử lý vi phạm của phiên này. Bạn chưa thể đặt giá.'}

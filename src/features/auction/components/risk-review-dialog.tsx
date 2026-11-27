@@ -52,8 +52,8 @@ export function RiskReviewDialog({
             <p className="risk-dialog__body">
               {t(
                 isConfirm
-                  ? 'Phiên sẽ được ghi nhận là gian lận và chuyển sang bước xử lý tiếp theo. Quyết định lưu kèm tên bạn.'
-                  : 'Cảnh báo sẽ đóng lại và phiên tiếp tục bình thường. Lý do bạn ghi sẽ được lưu để người sau đọc.',
+                  ? 'Phiên sẽ bị huỷ và toàn bộ tiền cọc đang giữ của người tham gia được hoàn về ví. Quyết định lưu kèm tên bạn.'
+                  : 'Cảnh báo sẽ đóng lại, phiên tiếp tục nhận đặt giá bình thường và người bán được thông báo. Lý do bạn ghi sẽ được lưu để người sau đọc.',
               )}
             </p>
           </div>
