@@ -179,14 +179,14 @@ export function CreatorProfileScreen({ id }: { id: string }) {
               disabled={busy}
               aria-pressed={following}
               onClick={() => void toggleFollow()}
-              className="w-full rounded-xl bg-[#B24A26] px-4 py-2.5 text-sm font-semibold text-[#F7F2E9] disabled:opacity-50 cursor-pointer transition hover:bg-[#8C3718]"
+              className="creator-follow-btn w-full rounded-xl px-4 py-2.5 text-sm font-semibold disabled:opacity-50 cursor-pointer transition"
             >
               {busy ? 'Đang cập nhật…' : following ? 'Đang theo dõi' : 'Theo dõi'}
             </button>
           ) : (
             <Link
               href="/login"
-              className="inline-flex w-full justify-center rounded-xl bg-[#B24A26] px-4 py-2.5 text-sm font-semibold text-[#F7F2E9]"
+              className="creator-follow-btn inline-flex w-full justify-center rounded-xl px-4 py-2.5 text-sm font-semibold transition"
             > Đăng nhập để theo dõi </Link>
           )}
 

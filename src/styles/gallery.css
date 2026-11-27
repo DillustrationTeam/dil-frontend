@@ -3699,6 +3699,36 @@ html[data-theme="ink"] .creator-dir-cat-pill {
   color: #F4F1EA !important;
 }
 
+.creator-follow-btn {
+  background-color: var(--petrol);
+  border: 1px solid transparent;
+  color: #F7F2E9 !important;
+}
+.creator-follow-btn:hover {
+  background-color: #25554E;
+}
+.creator-follow-btn[aria-pressed="true"] {
+  background-color: var(--petrol-soft);
+  border-color: rgba(47, 107, 99, 0.35);
+  color: var(--petrol) !important;
+}
+.creator-follow-btn[aria-pressed="true"]:hover {
+  background-color: rgba(47, 107, 99, 0.2);
+}
+html[data-theme="ink"] .creator-follow-btn {
+  background-color: var(--petrol-soft);
+  border: 1px solid rgba(127, 209, 190, 0.35);
+  color: var(--petrol) !important;
+}
+html[data-theme="ink"] .creator-follow-btn:hover {
+  background-color: rgba(127, 209, 190, 0.22);
+}
+html[data-theme="ink"] .creator-follow-btn[aria-pressed="true"] {
+  background-color: rgba(127, 209, 190, 0.08);
+  border-color: rgba(127, 209, 190, 0.25);
+  color: var(--petrol) !important;
+}
+
 .creator-trade-btn {
   background-color: rgba(178, 74, 38, 0.12);
   border: 1px solid rgba(178, 74, 38, 0.35);
