@@ -206,11 +206,7 @@ export function CreatorProfileScreen({ id }: { id: string }) {
                 }
                 void toggleFollow();
               }}
-              className={`w-full rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors cursor-pointer disabled:opacity-50 ${
-                following
-                  ? 'border border-[#A8321C] bg-[#FFFCF6] text-[#A8321C] hover:bg-[#A8321C]/10'
-                  : 'bg-[#A8321C] text-[#FFFCF6] hover:bg-[#8C3718] [html[data-theme=ink]_&]:text-[#f08a6e] [html[data-theme=ink]_&]:hover:brightness-125'
-              }`}
+              className="creator-follow-btn w-full rounded-xl px-4 py-2.5 text-sm font-semibold disabled:opacity-50 cursor-pointer transition"
             >
               {busy
                 ? (isVie ? 'Đang cập nhật…' : 'Updating…')
@@ -221,7 +217,7 @@ export function CreatorProfileScreen({ id }: { id: string }) {
           ) : (
             <Link
               href="/login"
-              className="inline-flex w-full justify-center rounded-xl bg-[#B24A26] px-4 py-2.5 text-sm font-semibold text-[#F7F2E9]"
+              className="creator-follow-btn inline-flex w-full justify-center rounded-xl px-4 py-2.5 text-sm font-semibold transition"
             > {isVie ? 'Đăng nhập để theo dõi' : 'Sign in to follow'} </Link>
           )}
 
