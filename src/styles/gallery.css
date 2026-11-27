@@ -31,6 +31,9 @@
   --cinnabar-soft: rgba(168, 50, 28, 0.1);
   --gold: #E5D8C2;
   --gold-soft: rgba(138, 106, 31, 0.1);
+  /* Trạng thái "đang xem": --gold ở theme sáng chỉ là màu giấy (1.26:1) nên cần token chữ riêng. */
+  --reviewing: #6b520f;
+  --reviewing-soft: rgba(107, 82, 15, 0.12);
   --petrol: #2f6b63;
   --petrol-soft: rgba(47, 107, 99, 0.12);
 
@@ -2404,6 +2407,8 @@ html[data-theme="ink"] {
   --cinnabar-soft: rgba(217, 80, 46, 0.18);
   --gold: #c9a96a;
   --gold-soft: rgba(201, 169, 106, 0.15);
+  --reviewing: #c9a96a;
+  --reviewing-soft: rgba(201, 169, 106, 0.15);
   --petrol: #7fd1be;
   --petrol-soft: rgba(127, 209, 190, 0.16);
 
@@ -4814,3 +4819,107 @@ html[data-theme="ink"] .badge--ok {
 .risk-sheet { padding-bottom: 0.5rem; }
 .risk-sheet__foot { margin-top: 0.75rem; }
 .risk-sheet__group:last-of-type { margin-bottom: 0.5rem; }
+/* ============================================================
+   Phiếu rủi ro theo TRẠNG THÁI: mở (quyết định) vs đã đóng (hồ sơ)
+   ============================================================ */
+.risk-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.18rem 0.5rem;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--hair-2);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+.risk-status--open { color: var(--lumen); border-color: color-mix(in srgb, var(--lumen) 45%, transparent); background: var(--lumen-soft); }
+.risk-status--reviewing { color: var(--reviewing); border-color: color-mix(in srgb, var(--reviewing) 45%, transparent); background: var(--reviewing-soft); }
+.risk-status--dismissed { color: var(--petrol); border-color: color-mix(in srgb, var(--petrol) 45%, transparent); background: var(--petrol-soft); }
+.risk-status--confirmed { color: var(--cinnabar-text); border-color: color-mix(in srgb, var(--cinnabar) 45%, transparent); background: var(--cinnabar-soft); }
+
+/* Viền trái theo trạng thái: quét hàng chờ bằng mắt là biết phiếu nào đã đóng */
+.risk-sheet { border-left: 3px solid transparent; }
+.risk-sheet--open { border-left-color: var(--lumen); }
+.risk-sheet--reviewing { border-left-color: var(--reviewing); }
+.risk-sheet--dismissed { border-left-color: var(--petrol); }
+.risk-sheet--confirmed { border-left-color: var(--cinnabar); }
+
+/* Khối kết luận: chỉ xuất hiện khi phiếu đã đóng */
+.risk-decision {
+  display: flex;
+  gap: 0.7rem;
+  padding: 0.85rem 0.95rem;
+  border-radius: var(--r-md);
+  border: 1px solid var(--hair);
+  background: var(--ink-3);
+}
+.risk-decision__icon {
+  display: grid;
+  place-items: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  flex-shrink: 0;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--hair-2);
+}
+.risk-sheet--confirmed .risk-decision__icon { color: var(--cinnabar-text); background: var(--cinnabar-soft); }
+.risk-sheet--dismissed .risk-decision__icon { color: var(--petrol); background: var(--petrol-soft); }
+.risk-decision__title { margin: 0; font-family: var(--font-display); font-size: 1rem; color: var(--ivory); }
+.risk-decision__meta { margin: 0.1rem 0 0; font-size: 0.75rem; color: var(--ash-dim); }
+.risk-decision__note {
+  margin: 0.4rem 0 0;
+  font-size: 0.8125rem;
+  color: var(--ash);
+  line-height: 1.5;
+  border-left: 2px solid var(--hair-2);
+  padding-left: 0.6rem;
+}
+
+/* Hệ quả của quyết định (huỷ phiên + hoàn cọc / phiên tiếp tục) — nhỏ hơn ghi chú, không viền. */
+.risk-decision__effect {
+  margin: 0.45rem 0 0;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--ash-dim);
+}
+.risk-sheet--confirmed .risk-decision__effect { color: var(--cinnabar-text); }
+.risk-sheet--dismissed .risk-decision__effect { color: var(--petrol); }
+
+/* Bằng chứng của phiếu đã đóng: giữ nguyên nhưng lùi xuống hàng thứ hai */
+.risk-signals--closed .risk-signal { background: var(--ink-3); border-color: var(--hair); }
+.risk-signals--closed .risk-signal__name { color: var(--ash); }
+
+.risk-sheet__closed {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--ash-dim);
+}
+/* Hàng chờ: viền trái theo trạng thái để phân biệt phiếu mở / đã đóng */
+.auc-riskrow { border-left: 3px solid transparent; }
+.auc-riskrow--open { border-left-color: var(--lumen); }
+.auc-riskrow--reviewing { border-left-color: var(--reviewing); }
+.auc-riskrow--dismissed { border-left-color: var(--petrol); }
+.auc-riskrow--confirmed { border-left-color: var(--cinnabar); }
+.auc-riskcard { border-left-width: 3px; }
+.auc-riskcard--open { border-left-color: var(--lumen); }
+.auc-riskcard--reviewing { border-left-color: var(--reviewing); }
+.auc-riskcard--dismissed { border-left-color: var(--petrol); }
+.auc-riskcard--confirmed { border-left-color: var(--cinnabar); }
+/* Phiếu đang được nhận (UnderReview) */
+.risk-claim {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.7rem 0.9rem;
+  border-radius: var(--r-md);
+  border: 1px solid color-mix(in srgb, var(--reviewing) 40%, transparent);
+  background: var(--reviewing-soft);
+}
+.risk-claim__title { margin: 0; font-size: 0.8125rem; font-weight: 600; color: var(--ivory); }
+.risk-claim__meta { margin: 0.15rem 0 0; font-size: 0.7rem; color: var(--ash); }

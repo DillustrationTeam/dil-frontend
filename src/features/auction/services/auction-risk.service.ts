@@ -42,7 +42,9 @@ export const auctionRiskService = {
   async list(filters: RiskAlertFilters = {}): Promise<RiskAlertPage> {
     const { data, meta } = await call<RiskAlertListItemDto[]>('get', '/auctions/risk-alerts', undefined, {
       level: filters.level && filters.level !== 'All' ? filters.level : undefined,
-      status: filters.status && filters.status !== 'All' ? filters.status : undefined,
+      // Gửi NGUYÊN giá trị, kể cả 'All': backend hiểu 'All' = không lọc. Trước đây FE bỏ 'All'
+      // thành undefined nên tab Tất cả chỉ trả về phiếu đang mở.
+      status: filters.status ?? undefined,
       cursor: filters.cursor ?? undefined,
       limit: filters.limit ?? 20,
     });
@@ -56,8 +58,14 @@ export const auctionRiskService = {
     };
   },
 
-  async get(auctionId: string): Promise<AuctionRiskAssessmentDto> {
-    const { data } = await call<AuctionRiskAssessmentDto>('get', `/auctions/${auctionId}/risk`);
+  /**
+   * `assessmentId` pinpoints the exact sheet when one auction has several (dismissed, confirmed,
+   * and a newer open one). Without it the API returns the newest sheet of that auction.
+   */
+  async get(auctionId: string, assessmentId?: string): Promise<AuctionRiskAssessmentDto> {
+    const { data } = await call<AuctionRiskAssessmentDto>('get', `/auctions/${auctionId}/risk`, undefined, {
+      assessmentId,
+    });
     return data;
   },
 
@@ -71,7 +79,8 @@ export const auctionRiskService = {
 
   async review(
     auctionId: string,
-    payload: { status: Exclude<AuctionRiskAssessmentStatus, 'Open' | 'UnderReview'>; note?: string },
+    // UnderReview = nhận phiếu, Open = nhả phiếu, Dismissed/Confirmed = quyết định.
+    payload: { status: AuctionRiskAssessmentStatus; note?: string },
   ): Promise<AuctionRiskAssessmentDto> {
     const { data } = await call<AuctionRiskAssessmentDto>(
       'post',

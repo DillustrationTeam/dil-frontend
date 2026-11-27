@@ -19,7 +19,8 @@ export type RiskSignalCode =
   | 'WinNoPaymentRate'
   | 'SelfOutbidLoop'
   | 'AutoBidWall'
-  | 'NewAccountBurst';
+  | 'NewAccountBurst'
+  | 'BidBurstCluster';
 
 export interface RiskSignalDto {
   signalId: string;
@@ -46,9 +47,15 @@ export interface AuctionRiskAssessmentDto {
   summary: string;
   detectedAt: string;
   lastRiskScanAt?: string | null;
+  claimedByUserId?: string | null;
+  claimedByName?: string | null;
+  claimedAt?: string | null;
   reviewedByUserId?: string | null;
+  reviewedByName?: string | null;
   reviewedAt?: string | null;
   decisionNote?: string | null;
+  /** Trạng thái hiện tại của phiên — xác nhận gian lận sẽ huỷ phiên, nên phiếu phải nói được điều đó. */
+  auctionStatus?: string | null;
   signals: RiskSignalDto[];
 }
 

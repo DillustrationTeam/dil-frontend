@@ -23,6 +23,7 @@ import {
   LoaderCircle,
   PackageCheck,
   RefreshCw,
+  ShieldAlert,
   ShieldCheck,
   User,
   Users,
@@ -297,6 +298,14 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
     }
     if (auction?.auctionStatus !== 'Active') {
       setError('Phiên đấu giá chưa bắt đầu hoặc đã kết thúc, hiện không nhận lượt đặt giá mới.');
+      return;
+    }
+    // Kiểm duyệt đã xác nhận gian lận: chặn ngay ở client, không gửi request chắc chắn bị 400.
+    if (auction?.biddingBlocked) {
+      setError(
+        auction.biddingBlockedReason
+          || 'Phiên đang tạm dừng nhận giá do kiểm duyệt xác nhận có dấu hiệu gian lận.',
+      );
       return;
     }
 
@@ -658,6 +667,20 @@ export function AuctionDetailScreen({ auctionId, userId }: { auctionId: string; 
           {watching ? 'Đang theo dõi' : 'Theo dõi phiên'}
         </button>
       </div>
+
+      {/* Kiểm duyệt đã xác nhận gian lận: công khai trạng thái tạm dừng, không nêu điểm/dấu hiệu */}
+      {auction.biddingBlocked && (
+        <div role="alert" className="mb-6 flex items-start gap-2.5 rounded-2xl border border-[#A8321C]/40 bg-[#A8321C]/10 p-4 text-sm text-[#A8321C]">
+          <ShieldAlert size={18} className="mt-0.5 shrink-0" aria-hidden />
+          <div>
+            <p className="font-semibold">Phiên tạm dừng nhận giá</p>
+            <p className="mt-1 text-xs leading-relaxed">
+              {auction.biddingBlockedReason
+                || 'Kiểm duyệt đang xử lý vi phạm của phiên này. Bạn chưa thể đặt giá.'}
+            </p>
+          </div>
+        </div>
+      )}
 
       {extendedNotice && (
         <div role="status" className="mb-6 flex items-center gap-2 rounded-2xl border border-[#8A6A1F]/40 bg-[#8A6A1F]/15 p-4 text-sm text-[#8A6A1F] motion-reduce:animate-none animate-bounce">

@@ -1,12 +1,14 @@
 'use client';
 
-import { useEffect, useMemo, useRef } from 'react';
-import { RefreshCw, ShieldAlert, X } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Ban, CheckCircle2, Clock3, Hand, RefreshCw, RotateCcw, ShieldAlert, X } from 'lucide-react';
 import { useLanguage } from '@/context/language-context';
 import type { AuctionRiskAssessmentDto, RiskSignalDto } from '../types/auction-risk.types';
 import type { BidDto } from '../types/auction.types';
 import { RiskBadge, RiskScore } from './risk-badge';
 import { formatVnd } from './auction-card';
+
+const MIN_NOTE_LENGTH = 10;
 
 /** 26/11/2026 22:51 — one format everywhere in the sheet, tabular so rows line up. */
 function formatDateTime(iso: string | null | undefined) {
@@ -56,14 +58,12 @@ function groupSignals(signals: RiskSignalDto[]): SignalGroup[] {
 /**
  * Evidence sheet of one risky auction.
  *
- * Redesign notes:
- *   - every colour comes from a token, so the same sheet is legible in "paper" and "ink" without a
- *     second stylesheet;
- *   - the verdict (score + level) is one block at the top instead of a badge floating next to a
- *     number, so severity is read before the evidence list;
- *   - signals are grouped per rule: the same rule hitting three accounts is one finding with three
- *     evidence lines, which is how a moderator reasons about it;
- *   - the note lives here (the confirm dialog only echoes it back).
+ * The sheet is **state-aware**: an Open sheet is a decision form (note + actions), a dismissed or
+ * confirmed sheet is a closed record (decision, reviewer, reason, evidence, no actions). Same
+ * component, different composition and accent — a moderator must be able to tell at a glance
+ * whether they are deciding or reading history.
+ *
+ * Colours come from tokens, so both "paper" and "ink" themes work without a second stylesheet.
  */
 export function RiskDetailDrawer({
   open,
@@ -72,9 +72,14 @@ export function RiskDetailDrawer({
   error,
   note,
   bids = [],
+  claimWarning = null,
+  currentUserId = null,
+  claiming = false,
   onNoteChange,
   onClose,
   onReview,
+  onClaim,
+  onRelease,
   onRescan,
   rescanning,
 }: {
@@ -84,19 +89,56 @@ export function RiskDetailDrawer({
   error: string | null;
   note: string;
   bids?: BidDto[];
+  claimWarning?: string | null;
+  currentUserId?: string | null;
+  claiming?: boolean;
+  onClaim?: () => void;
   onNoteChange: (value: string) => void;
   onClose: () => void;
   onReview: (status: 'Dismissed' | 'Confirmed') => void;
+  onRelease?: () => void;
   onRescan: () => void;
   rescanning: boolean;
 }) {
   const { t } = useLanguage();
   const closeRef = useRef<HTMLButtonElement | null>(null);
+  const noteRef = useRef<HTMLTextAreaElement | null>(null);
   const restoreRef = useRef<HTMLElement | null>(null);
+  const [noteTouched, setNoteTouched] = useState(false);
 
   const groups = useMemo(() => groupSignals(assessment?.signals ?? []), [assessment]);
-  const decided = assessment != null && ['Dismissed', 'Confirmed'].includes(assessment.status);
-  const noteTooShort = note.trim().length < 10;
+  const status = assessment?.status ?? 'Open';
+  const isDismissed = status === 'Dismissed';
+  const isConfirmed = status === 'Confirmed';
+  const isReviewing = status === 'UnderReview';
+  const decided = isDismissed || isConfirmed;
+
+  const tone = isConfirmed ? 'confirmed' : isDismissed ? 'dismissed' : isReviewing ? 'reviewing' : 'open';
+  const statusLabel = isConfirmed
+    ? t('Đã xác nhận gian lận')
+    : isDismissed
+      ? t('Đã bỏ qua')
+      : isReviewing
+        ? t('Đang xem')
+        : t('Chờ xem');
+
+  const claimedByMe =
+    isReviewing &&
+    Boolean(currentUserId) &&
+    assessment?.claimedByUserId === currentUserId;
+
+  const noteTooShort = note.trim().length < MIN_NOTE_LENGTH;
+  const showNoteError = noteTooShort && noteTouched;
+  const reviewer = assessment?.reviewedByName?.trim() || t('Người kiểm duyệt');
+
+  // `onClose` is usually an inline arrow in the parent, so its identity changes on every parent
+  // render - including the render caused by typing in the note. Keeping it in a ref lets the focus
+  // effect depend on `open` alone; otherwise every keystroke yanked the caret back to the close
+  // button.
+  const onCloseRef = useRef(onClose);
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
 
   useEffect(() => {
     if (!open) return;
@@ -107,7 +149,7 @@ export function RiskDetailDrawer({
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         event.preventDefault();
-        onClose();
+        onCloseRef.current();
       }
     };
 
@@ -116,7 +158,8 @@ export function RiskDetailDrawer({
       document.removeEventListener('keydown', onKeyDown);
       restoreRef.current?.focus?.();
     };
-  }, [open, onClose]);
+    // Intentionally depends on `open` only: this is an open/close side effect, not a re-render one.
+  }, [open]);
 
   if (!open) return null;
 
@@ -124,7 +167,7 @@ export function RiskDetailDrawer({
     <>
       <div className="drawer__scrim" onClick={onClose} aria-hidden="true" />
       <aside
-        className="drawer__panel risk-sheet"
+        className={`drawer__panel risk-sheet risk-sheet--${tone}`}
         role="dialog"
         aria-modal="true"
         aria-label={t('Phiếu kiểm duyệt rủi ro')}
@@ -177,10 +220,69 @@ export function RiskDetailDrawer({
 
         {assessment && !loading && (
           <>
+            {/* Kết luận quyết định đứng TRƯỚC bằng chứng khi phiếu đã đóng */}
+            {decided && (
+              <div className="risk-decision">
+                <div className="risk-decision__icon">
+                  {isConfirmed ? <ShieldAlert size={18} aria-hidden /> : <Ban size={18} aria-hidden />}
+                </div>
+                <div>
+                  <p className="risk-decision__title">
+                    {isConfirmed ? t('Đã xác nhận gian lận') : t('Đã bỏ qua cảnh báo')}
+                  </p>
+                  <p className="risk-decision__meta">
+                    {reviewer} · {formatDateTime(assessment.reviewedAt)}
+                  </p>
+                  <p className="risk-decision__note">{assessment.decisionNote || t('Không có ghi chú.')}</p>
+                  {isConfirmed && (
+                    <p className="risk-decision__effect">
+                      {assessment.auctionStatus === 'Cancelled'
+                        ? t('Phiên đã bị huỷ và toàn bộ tiền cọc đã hoàn về ví người tham gia.')
+                        : t('Phiên đã kết thúc trước quyết định này nên không huỷ lại; cọc xử lý theo quy trình khiếu nại.')}
+                    </p>
+                  )}
+                  {isDismissed && (
+                    <p className="risk-decision__effect">
+                      {t('Người bán đã được thông báo phiên tiếp tục bình thường và không có vi phạm.')}
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {isReviewing && (
+              <div className="risk-claim">
+                <div>
+                  <p className="risk-claim__title">
+                    {claimedByMe
+                      ? t('Bạn đang xem phiếu này')
+                      : `${t('Đang xem bởi')} ${assessment.claimedByName?.trim() || t('một kiểm duyệt viên')}`}
+                  </p>
+                  <p className="risk-claim__meta">
+                    {t('Phiếu tự nhả về hàng chờ nếu không có quyết định trong 30 phút')}
+                    {assessment.claimedAt ? ` · ${formatDateTime(assessment.claimedAt)}` : ''}
+                  </p>
+                </div>
+                {claimedByMe && onRelease && (
+                  <button type="button" className="btn btn--ghost btn--sm" onClick={onRelease} disabled={claiming}>
+                    <RotateCcw size={14} aria-hidden />
+                    {t(claiming ? 'Đang nhả…' : 'Nhả phiếu')}
+                  </button>
+                )}
+              </div>
+            )}
+
+            {claimWarning && (
+              <p role="alert" className="risk-sheet__alert">
+                {claimWarning}
+              </p>
+            )}
+
             <div className="risk-verdict">
               <div className="risk-verdict__row">
                 <RiskScore score={assessment.score} />
                 <RiskBadge level={assessment.riskLevel} label={assessment.riskLevelLabel} />
+                <span className={`risk-status risk-status--${tone}`}>{statusLabel}</span>
                 <span className="risk-verdict__count">
                   {assessment.signalCount} {t('dấu hiệu')}
                 </span>
@@ -192,11 +294,13 @@ export function RiskDetailDrawer({
             </div>
 
             <section className="risk-sheet__group">
-              <h3 className="risk-sheet__label">{t('Vì sao bị gắn cờ')}</h3>
+              <h3 className="risk-sheet__label">
+                {decided ? t('Bằng chứng đã ghi nhận') : t('Vì sao bị gắn cờ')}
+              </h3>
               {groups.length === 0 ? (
                 <p className="risk-sheet__empty">{t('Chưa ghi nhận dấu hiệu nào.')}</p>
               ) : (
-                <ul className="risk-signals">
+                <ul className={`risk-signals${decided ? ' risk-signals--closed' : ''}`}>
                   {groups.map((group) => (
                     <li key={group.code} className="risk-signal">
                       <div className="risk-signal__head">
@@ -243,15 +347,28 @@ export function RiskDetailDrawer({
                   <dt>{t('Quét gần nhất')}</dt>
                   <dd>{formatDateTime(assessment.lastRiskScanAt)}</dd>
                 </div>
+                {decided && (
+                  <div>
+                    <dt>{t('Xử lý')}</dt>
+                    <dd>{formatDateTime(assessment.reviewedAt)}</dd>
+                  </div>
+                )}
               </dl>
             </section>
 
             {decided ? (
-              <section className="risk-sheet__group">
-                <h3 className="risk-sheet__label">{t('Đã xử lý')}</h3>
-                <p className="risk-verdict__summary">{assessment.decisionNote || t('Không có ghi chú.')}</p>
-                <p className="risk-meta__stamp">{formatDateTime(assessment.reviewedAt)}</p>
-              </section>
+              // Phiếu đã đóng: chỉ đọc. Không có hành động nào để tránh sửa lịch sử.
+              <div className="risk-sheet__foot risk-sheet__foot--closed">
+                <p className="risk-sheet__closed">
+                  <Clock3 size={14} aria-hidden />
+                  {t('Phiếu đã đóng. Mở lại phiên sẽ tạo phiếu mới nếu có dấu hiệu mới.')}
+                </p>
+                <div className="risk-sheet__actions">
+                  <button type="button" className="btn btn--outline btn--sm" onClick={onClose}>
+                    {t('Đóng')}
+                  </button>
+                </div>
+              </div>
             ) : (
               <div className="risk-sheet__foot">
                 <label className="risk-sheet__label" htmlFor="risk-note">
@@ -259,30 +376,64 @@ export function RiskDetailDrawer({
                 </label>
                 <textarea
                   id="risk-note"
+                  ref={noteRef}
                   className="risk-sheet__note"
                   value={note}
                   onChange={(event) => onNoteChange(event.target.value)}
+                  onBlur={() => setNoteTouched(true)}
                   placeholder={t('Ví dụ: hai tài khoản dùng chung IP văn phòng, đã xác minh với người bán.')}
-                  aria-describedby={noteTooShort ? 'risk-note-hint' : undefined}
+                  aria-invalid={showNoteError}
+                  aria-describedby="risk-note-hint"
                 />
-                <p id="risk-note-hint" className="risk-sheet__hint">
-                  {t('Bắt buộc khi xác nhận gian lận (ít nhất 10 ký tự).')}
+                <p
+                  id="risk-note-hint"
+                  className={showNoteError ? 'err' : 'risk-sheet__hint'}
+                  role={showNoteError ? 'alert' : undefined}
+                >
+                  {showNoteError
+                    ? t(`Ghi chú cần ít nhất ${MIN_NOTE_LENGTH} ký tự — còn thiếu ${MIN_NOTE_LENGTH - note.trim().length}.`)
+                    : t('Bắt buộc khi xác nhận gian lận (ít nhất 10 ký tự).')}
                 </p>
 
                 <div className="risk-sheet__actions">
-                  <button
-                    type="button"
-                    className="btn btn--outline btn--sm"
-                    onClick={() => onReview('Dismissed')}
-                    disabled={rescanning}
-                  >
-                    {t('Bỏ qua phiên này')}
-                  </button>
+                    {/* Nhận phiếu là hành động tường minh: chưa ai giữ thì mới hiện. */}
+                    {!isReviewing && onClaim && (
+                      <button
+                        type="button"
+                        className="btn btn--ghost btn--sm"
+                        onClick={onClaim}
+                        disabled={claiming || rescanning}
+                      >
+                        <Hand size={14} aria-hidden />
+                        {t(claiming ? 'Đang nhận…' : 'Nhận phiếu')}
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      className="btn btn--outline btn--sm"
+                      onClick={() => onReview('Dismissed')}
+                      disabled={rescanning}
+                    >
+                      {t('Bỏ qua phiên này')}
+                    </button>
+                  {/*
+                    Không dùng `disabled` cho nút xác nhận: nút bị khoá im lặng khiến người dùng
+                    tưởng nút hỏng. Giữ bấm được, thiếu ghi chú thì focus về ô ghi chú + hiện lỗi.
+                  */}
                   <button
                     type="button"
                     className="btn btn--danger btn--sm"
-                    onClick={() => onReview('Confirmed')}
-                    disabled={rescanning || noteTooShort}
+                    onClick={() => {
+                      if (noteTooShort) {
+                        setNoteTouched(true);
+                        noteRef.current?.focus();
+                        return;
+                      }
+
+                      onReview('Confirmed');
+                    }}
+                    disabled={rescanning}
+                    aria-describedby="risk-note-hint"
                   >
                     <ShieldAlert size={14} aria-hidden />
                     {t('Xác nhận gian lận')}
