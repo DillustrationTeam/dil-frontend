@@ -4764,3 +4764,53 @@ html[data-theme="ink"] .badge--ok {
 }
 .risk-sheet__headtools { display: flex; align-items: center; gap: 0.35rem; }
 .risk-sheet__actions .btn { flex: 1 1 auto; justify-content: center; }
+
+/* Diễn biến đặt giá trong phiếu rủi ro */
+.risk-bids { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.3rem; }
+.risk-bid {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 0.6rem;
+  align-items: baseline;
+  font-size: 0.75rem;
+  color: var(--ash);
+  padding: 0.3rem 0.5rem;
+  border-radius: var(--r-sm);
+  background: var(--ink-3);
+}
+.risk-bid--leading { color: var(--ivory); box-shadow: inset 2px 0 0 var(--lumen); }
+.risk-bid__who { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.risk-bid__amount { font-variant-numeric: tabular-nums; font-weight: 600; }
+.risk-bid__time { font-variant-numeric: tabular-nums; color: var(--ash-dim); }
+/* Thông báo trung tính cho người bán: phiên đang được xem xét */
+.seller-flag {
+  margin-bottom: 1.5rem;
+  padding: 1rem 1.15rem;
+  border: 1px solid var(--hair);
+  border-radius: var(--r-md);
+  background: var(--ink-3);
+  display: grid;
+  gap: 0.5rem;
+}
+.seller-flag__head { display: flex; align-items: center; gap: 0.5rem; color: var(--petrol); }
+.seller-flag__title { margin: 0; font-family: var(--font-display); font-size: 1rem; color: var(--ivory); }
+.seller-flag__body { margin: 0; font-size: 0.8125rem; color: var(--ash); line-height: 1.5; }
+.seller-flag__list { list-style: none; margin: 0.25rem 0 0; padding: 0; display: grid; gap: 0.3rem; }
+.seller-flag__link {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.5rem 0.65rem;
+  border-radius: var(--r-sm);
+  background: var(--ink-2);
+  font-size: 0.8125rem;
+  color: var(--ivory);
+}
+.seller-flag__link:hover { background: var(--ink-4); }
+.seller-flag__name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.seller-flag__meta { color: var(--ash-dim); font-size: 0.75rem; white-space: nowrap; }
+/* Chừa chỗ cho footer dính để nội dung cuối không bị che khi cuộn hết phiếu */
+.risk-sheet { padding-bottom: 0.5rem; }
+.risk-sheet__foot { margin-top: 0.75rem; }
+.risk-sheet__group:last-of-type { margin-bottom: 0.5rem; }

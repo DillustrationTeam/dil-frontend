@@ -4,7 +4,9 @@ import { useEffect, useMemo, useRef } from 'react';
 import { RefreshCw, ShieldAlert, X } from 'lucide-react';
 import { useLanguage } from '@/context/language-context';
 import type { AuctionRiskAssessmentDto, RiskSignalDto } from '../types/auction-risk.types';
+import type { BidDto } from '../types/auction.types';
 import { RiskBadge, RiskScore } from './risk-badge';
+import { formatVnd } from './auction-card';
 
 /** 26/11/2026 22:51 — one format everywhere in the sheet, tabular so rows line up. */
 function formatDateTime(iso: string | null | undefined) {
@@ -12,6 +14,12 @@ function formatDateTime(iso: string | null | undefined) {
   const value = new Date(iso);
   const pad = (n: number) => String(n).padStart(2, '0');
   return `${pad(value.getDate())}/${pad(value.getMonth() + 1)}/${value.getFullYear()} ${pad(value.getHours())}:${pad(value.getMinutes())}`;
+}
+
+function formatTime(iso: string) {
+  const value = new Date(iso);
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${pad(value.getHours())}:${pad(value.getMinutes())}:${pad(value.getSeconds())}`;
 }
 
 type SignalGroup = {
@@ -63,6 +71,7 @@ export function RiskDetailDrawer({
   loading,
   error,
   note,
+  bids = [],
   onNoteChange,
   onClose,
   onReview,
@@ -74,6 +83,7 @@ export function RiskDetailDrawer({
   loading: boolean;
   error: string | null;
   note: string;
+  bids?: BidDto[];
   onNoteChange: (value: string) => void;
   onClose: () => void;
   onReview: (status: 'Dismissed' | 'Confirmed') => void;
@@ -203,6 +213,24 @@ export function RiskDetailDrawer({
                 </ul>
               )}
             </section>
+
+            {bids.length > 0 && (
+              <section className="risk-sheet__group">
+                <h3 className="risk-sheet__label">{t('Diễn biến đặt giá')}</h3>
+                <ol className="risk-bids">
+                  {bids.slice(0, 12).map((bid) => (
+                    <li
+                      key={bid.bidId}
+                      className={`risk-bid${bid.bidStatus === 'Leading' ? ' risk-bid--leading' : ''}`}
+                    >
+                      <span className="risk-bid__who">{bid.bidder?.fullName || t('Người đấu giá')}</span>
+                      <span className="risk-bid__amount">{formatVnd(bid.amount)}</span>
+                      <span className="risk-bid__time">{formatTime(bid.placedAt)}</span>
+                    </li>
+                  ))}
+                </ol>
+              </section>
+            )}
 
             <section className="risk-sheet__group">
               <h3 className="risk-sheet__label">{t('Dấu thời gian')}</h3>

@@ -15,8 +15,15 @@ export interface RecommendedAuctionDto {
 
 export type RecommendationSurface = 'auction-list' | 'detail-similar' | 'my-auctions';
 
+/** What the client actually rendered, so CTR can be joined with the ranking position later. */
+export interface RecommendationImpressionItem {
+  auctionId: string;
+  score?: number;
+  rank?: number;
+}
+
 export interface RecommendationImpressionPayload {
-  auctionIds: string[];
+  items: RecommendationImpressionItem[];
   surface?: RecommendationSurface;
   clicked?: boolean;
 }

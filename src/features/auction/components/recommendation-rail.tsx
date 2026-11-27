@@ -82,7 +82,8 @@ export function RecommendationRail({
     };
   }, [userId]);
 
-  // Impression logging: one batch per render, only for cards that were actually seen.
+  // Impression logging: one batch per render, only for cards that were actually seen, carrying the
+  // score + rank the card was rendered with.
   useEffect(() => {
     if (loading || visible.length === 0) return;
     const track = trackRef.current;
@@ -99,8 +100,13 @@ export function RecommendationRail({
         if (seen.length === 0) return;
         seen.forEach((id) => loggedRef.current.add(id));
 
+        const items = seen.slice(0, 30).map((id) => {
+          const index = visible.findIndex((item) => item.auction.auctionId === id);
+          return { auctionId: id, score: visible[index]?.score, rank: index + 1 };
+        });
+
         void auctionRecommendationService
-          .logImpressions({ auctionIds: seen.slice(0, 30), surface: 'auction-list' })
+          .logImpressions({ items, surface: 'auction-list' })
           .catch(() => undefined);
       },
       { threshold: 0.5 },
@@ -110,6 +116,21 @@ export function RecommendationRail({
     return () => observer.disconnect();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [items, loading, visibleKey]);
+
+  /** A click on a shelf card is the strongest CTR signal: record it before the navigation. */
+  const logClick = useCallback(
+    (auctionId: string) => {
+      const index = visible.findIndex((item) => item.auction.auctionId === auctionId);
+      void auctionRecommendationService
+        .logImpressions({
+          items: [{ auctionId, score: visible[index]?.score, rank: index + 1 }],
+          surface: 'auction-list',
+          clicked: true,
+        })
+        .catch(() => undefined);
+    },
+    [visible],
+  );
 
   const toggleCollapsed = useCallback(() => {
     setCollapsed((previous) => {
@@ -170,7 +191,12 @@ export function RecommendationRail({
       {!collapsed && (
         <ul className={`rec-rail__track${visible.length <= 4 ? ' rec-rail__track--fill' : ''}`} ref={trackRef}>
           {visible.map((item, index) => (
-            <li key={item.auction.auctionId} data-auction-id={item.auction.auctionId} className="rec-rail__item">
+            <li
+              key={item.auction.auctionId}
+              data-auction-id={item.auction.auctionId}
+              className="rec-rail__item"
+              onClickCapture={() => logClick(item.auction.auctionId)}
+            >
               {/* A cold-start reason ("Đang được chú ý") says nothing about the card itself - only
                   render a reason that is actually backed by a matching signal. */}
               <AuctionCard

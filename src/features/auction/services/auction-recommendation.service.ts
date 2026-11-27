@@ -33,9 +33,12 @@ export const auctionRecommendationService = {
     return Array.isArray(data) ? data : [];
   },
 
-  /** Telemetry only; failures are swallowed by the caller. */
+  /**
+   * Telemetry only; failures are swallowed by the caller. `items` carries the score/rank each card
+   * was rendered with, so a later CTR query can ask "does position 1 actually win?".
+   */
   async logImpressions(payload: RecommendationImpressionPayload): Promise<void> {
-    if (payload.auctionIds.length === 0) return;
+    if (payload.items.length === 0) return;
     await call<{ recorded: number }>('post', '/auctions/recommendations/impressions', payload);
   },
 

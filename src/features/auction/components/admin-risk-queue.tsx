@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import { RefreshCw, ShieldAlert } from 'lucide-react';
 import { useLanguage } from '@/context/language-context';
 import { auctionRiskService } from '../services/auction-risk.service';
+import { auctionService } from '../services/auction.service';
 import { formatVnd } from './auction-card';
 import { RiskBadge, RiskScore } from './risk-badge';
 import { RiskDetailDrawer } from './risk-detail-drawer';
@@ -14,6 +15,7 @@ import type {
   RiskAlertListItemDto,
   RiskAlertPage,
 } from '../types/auction-risk.types';
+import type { BidDto } from '../types/auction.types';
 
 const STATUS_TABS = [
   { key: 'Open', label: 'Chờ xem' },
@@ -60,6 +62,7 @@ export function AdminRiskQueue() {
 
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [assessment, setAssessment] = useState<AuctionRiskAssessmentDto | null>(null);
+  const [recentBids, setRecentBids] = useState<BidDto[]>([]);
   const [detailLoading, setDetailLoading] = useState(false);
   const [detailError, setDetailError] = useState<string | null>(null);
   const [activeAuctionId, setActiveAuctionId] = useState<string | null>(null);
@@ -104,6 +107,22 @@ export function AdminRiskQueue() {
     void load(false);
   }, [load]);
 
+  // The detector writes in the background, so the queue refreshes itself instead of asking the
+  // moderator to hammer the refresh button. Pauses while the tab is hidden to spare the API.
+  useEffect(() => {
+    const refreshIfVisible = () => {
+      if (document.visibilityState === 'visible') void load(false);
+    };
+
+    const timer = window.setInterval(refreshIfVisible, 60_000);
+    document.addEventListener('visibilitychange', refreshIfVisible);
+
+    return () => {
+      window.clearInterval(timer);
+      document.removeEventListener('visibilitychange', refreshIfVisible);
+    };
+  }, [load]);
+
   const rows = useMemo(() => {
     const sorted = [...page.items].sort((a, b) => (sortDesc ? b.score - a.score : a.score - b.score));
     return sorted;
@@ -116,8 +135,18 @@ export function AdminRiskQueue() {
     setDetailError(null);
     setAssessment(null);
 
+    setRecentBids([]);
+
     try {
-      setAssessment(await auctionRiskService.get(auctionId));
+      // The sheet and the bid trail come from two endpoints; the trail is a nice-to-have, so a
+      // failure there must not blank the evidence sheet.
+      const [sheet, detail] = await Promise.all([
+        auctionRiskService.get(auctionId),
+        auctionService.detail(auctionId).catch(() => null),
+      ]);
+
+      setAssessment(sheet);
+      setRecentBids(detail?.recentBids ?? []);
     } catch (err) {
       setDetailError(err instanceof Error ? err.message : t('Không tải được phiếu rủi ro.'));
     } finally {
@@ -372,6 +401,7 @@ export function AdminRiskQueue() {
         loading={detailLoading}
         error={detailError}
         note={note}
+        bids={recentBids}
         onNoteChange={setNote}
         onClose={() => setDrawerOpen(false)}
         onReview={(nextStatus) => setReviewMode(nextStatus)}
