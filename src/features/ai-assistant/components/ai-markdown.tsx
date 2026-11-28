@@ -1,3 +1,5 @@
+import Link from 'next/link';
+import { ArrowUpRight } from 'lucide-react';
 import React from 'react';
 
 interface AiMarkdownProps {
@@ -159,14 +161,22 @@ function renderRegularMarkdown(text: string): React.ReactNode[] {
       continue;
     }
 
-    // Danh sách đầu dòng (- hoặc *)
+    // Danh sách đầu dòng (- hoặc *), hỗ trợ thụt lề làm mục con
     if (/^[-*]\s+/.test(trimmed)) {
       const listItems: React.ReactNode[] = [];
       while (lineIdx < lines.length && /^[-*]\s+/.test(lines[lineIdx].trim())) {
-        const itemText = lines[lineIdx].trim().replace(/^[-*]\s+/, '');
+        const rawLine = lines[lineIdx];
+        const isNested = /^(\s{2,}|\t+)[-*]\s+/.test(rawLine);
+        const itemText = rawLine.trim().replace(/^[-*]\s+/, '');
         listItems.push(
-          <li key={`li-${lineIdx}`} className="flex items-start gap-2">
-            <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-brand-periwinkle" />
+          <li key={`li-${lineIdx}`} className={`flex items-start gap-2 ${isNested ? 'pl-5 text-[11px] opacity-90' : ''}`}>
+            <span
+              className={
+                isNested
+                  ? 'mt-1.5 size-1 shrink-0 rounded-full border border-brand-periwinkle/70'
+                  : 'mt-1.5 size-1.5 shrink-0 rounded-full bg-brand-periwinkle'
+              }
+            />
             <span className="flex-1">{renderInlineFormatting(itemText)}</span>
           </li>
         );
@@ -180,25 +190,44 @@ function renderRegularMarkdown(text: string): React.ReactNode[] {
       continue;
     }
 
-    // Danh sách đánh số (1. 2. 3.)
+    // Danh sách đánh số (1. 2. 3.), hỗ trợ mục con thụt lề bên dưới
     if (/^\d+\.\s+/.test(trimmed)) {
       const listItems: React.ReactNode[] = [];
       while (lineIdx < lines.length && /^\d+\.\s+/.test(lines[lineIdx].trim())) {
         const itemMatch = lines[lineIdx].trim().match(/^(\d+)\.\s+(.*)/);
+        const itemKey = lineIdx;
+        lineIdx++;
+
+        const subItems: React.ReactNode[] = [];
+        while (lineIdx < lines.length && /^(\s{2,}|\t+)[-*]\s+/.test(lines[lineIdx])) {
+          const subText = lines[lineIdx].trim().replace(/^[-*]\s+/, '');
+          subItems.push(
+            <li key={`sli-${lineIdx}`} className="flex items-start gap-2 text-[11px] opacity-90">
+              <span className="mt-1.5 size-1 shrink-0 rounded-full border border-brand-periwinkle/70" />
+              <span className="flex-1">{renderInlineFormatting(subText)}</span>
+            </li>
+          );
+          lineIdx++;
+        }
+
         if (itemMatch) {
           listItems.push(
-            <li key={`oli-${lineIdx}`} className="flex items-start gap-2">
+            <li key={`oli-${itemKey}`} className="flex items-start gap-2">
               <span className="font-mono text-[11px] font-bold text-brand-periwinkle shrink-0 mt-0.5">
                 {itemMatch[1]}.
               </span>
-              <span className="flex-1">{renderInlineFormatting(itemMatch[2])}</span>
+              <div className="flex-1">
+                <div>{renderInlineFormatting(itemMatch[2])}</div>
+                {subItems.length > 0 && (
+                  <ul className="mt-1 space-y-1 pl-1">{subItems}</ul>
+                )}
+              </div>
             </li>
           );
         }
-        lineIdx++;
       }
       elements.push(
-        <ol key={`ol-${lineIdx}`} className="my-2 space-y-1 pl-1">
+        <ol key={`ol-${lineIdx}`} className="my-2 space-y-2 pl-1">
           {listItems}
         </ol>
       );
@@ -219,17 +248,33 @@ function renderRegularMarkdown(text: string): React.ReactNode[] {
 
 function renderInlineFormatting(text: string): React.ReactNode {
   // Biểu thức chính quy tách:
-  // 1. In đậm: **text**
-  // 2. In nghiêng: *text*
-  // 3. Inline code: `text`
-  const regex = /(\*\*.*?\*\*|\*.*?\*|`.*?`)/g;
+  // 1. Link nội bộ Markdown: [label](/path)
+  // 2. In đậm: **text**
+  // 3. In nghiêng: *text*
+  // 4. Inline code: `text`
+  const regex = /(\[[^[\]]+\]\(\/[^\s)]+\)|\*\*.*?\*\*|\*.*?\*|`.*?`)/g;
   const parts = text.split(regex);
 
   return parts.map((part, index) => {
+    const linkMatch = /^\[([^[\]]+)\]\((\/[^\s)]+)\)$/.exec(part);
+    if (linkMatch) {
+      const label = linkMatch[1].replace(/^\*\*|\*\*$/g, '');
+      const href = linkMatch[2];
+      return (
+        <Link
+          key={index}
+          href={href}
+          className="ai-link-pill inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 font-semibold transition"
+        >
+          <span>{label}</span>
+          <ArrowUpRight className="h-3 w-3 shrink-0" aria-hidden="true" />
+        </Link>
+      );
+    }
     if (part.startsWith('**') && part.endsWith('**') && part.length >= 4) {
       return (
         <strong key={index} className="font-bold text-[#241F1A]">
-          {part.slice(2, -2)}
+          {renderInlineFormatting(part.slice(2, -2))}
         </strong>
       );
     }
