@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 function parseReviewComment(raw?: string | null) {
   if (!raw) return { userComment: '', tags: [] as string[] };

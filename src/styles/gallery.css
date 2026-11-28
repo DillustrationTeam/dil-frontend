@@ -4220,6 +4220,25 @@ html[data-theme="ink"] .creator-trade-btn:hover {
   background-color: var(--lumen-hi);
 }
 
+.ai-link-pill {
+  background-color: rgba(178, 74, 38, 0.1);
+  border: 1px solid rgba(178, 74, 38, 0.3);
+  color: #B24A26;
+}
+.ai-link-pill:hover {
+  background-color: rgba(178, 74, 38, 0.2);
+}
+html[data-theme="ink"] .ai-link-pill {
+  background-color: rgba(167, 172, 217, 0.14);
+  border-color: rgba(167, 172, 217, 0.4);
+  color: var(--lumen);
+}
+html[data-theme="ink"] .ai-link-pill:hover {
+  background-color: rgba(167, 172, 217, 0.24);
+  border-color: rgba(167, 172, 217, 0.6);
+  color: var(--ivory);
+}
+
 html[data-theme="ink"] .admin-cat-control {
   background-color: var(--ink-2) !important;
   border-color: rgba(244, 241, 234, 0.22) !important;
