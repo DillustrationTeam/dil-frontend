@@ -240,7 +240,7 @@ export function PublicHeader() {
                             setSearchFocused(false);
                             router.push(`/explore?tag=${encodeURIComponent(tag.name)}`);
                           }}
-                          className="cursor-pointer rounded-full border border-[#221E1A]/10 px-2.5 py-1 text-[11px] text-[#6E6459] transition hover:border-[#B24A26]/50 hover:text-[#8C3718]"
+                          className="cursor-pointer rounded-full border border-[#221E1A]/10 px-2.5 py-1 text-[11px] text-[#6E6459] transition hover:border-[#B24A26] hover:text-[#241F1A]"
                         >
                           #{tag.name}
                         </button>

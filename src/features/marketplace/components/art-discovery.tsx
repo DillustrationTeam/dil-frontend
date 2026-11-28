@@ -577,7 +577,7 @@ export function ArtDiscovery({
               onClick={() => setSelectedCategory('')}
               className={`chip shrink-0 cursor-pointer ${
                 !selectedCategory
-                  ? '!border-[#B24A26] !bg-[#B24A26] !text-[#FFFCF6] font-semibold'
+                  ? 'explore-chip--active font-semibold'
                   : 'border-[#221E1A]/10 bg-[#FFFCF6] text-[#6E6459] hover:border-[#B24A26]/40 hover:text-[#241F1A]'
               }`}
             > Tất cả danh mục </button>
@@ -592,7 +592,7 @@ export function ArtDiscovery({
                   onClick={() => setSelectedCategory(active ? '' : cat.slug)}
                   className={`chip shrink-0 cursor-pointer ${
                     active
-                      ? '!border-[#B24A26] !bg-[#B24A26] !text-[#FFFCF6] font-semibold'
+                      ? 'explore-chip--active font-semibold'
                       : 'border-[#221E1A]/10 bg-[#FFFCF6] text-[#6E6459] hover:border-[#B24A26]/40 hover:text-[#241F1A]'
                   }`}
                 >
@@ -600,7 +600,7 @@ export function ArtDiscovery({
                   {cat.artworkCount > 0 && (
                     <span
                       className={`rounded-full px-1.5 py-0.5 text-[10px] ${
-                        active ? 'bg-[#F7F2E9]/20 text-[#F7F2E9]' : 'bg-[#F0E7D8] text-[#746A5F]'
+                        active ? 'bg-white/20 text-current' : 'bg-[#F0E7D8] text-[#746A5F]'
                       }`}
                     >
                       {cat.artworkCount}

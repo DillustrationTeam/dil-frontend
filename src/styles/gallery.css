@@ -422,6 +422,8 @@ h1, h2, h3, h4, .font-h1 {
   box-shadow: 0 16px 28px -18px rgba(178, 74, 38, 0.9);
 }
 .btn--primary:hover { background: var(--lumen-hi); box-shadow: 0 20px 34px -18px rgba(140, 55, 24, 0.9); }
+html[data-theme="ink"] .btn--primary { box-shadow: 0 16px 28px -18px rgba(167, 172, 217, 0.45); }
+html[data-theme="ink"] .btn--primary:hover { box-shadow: 0 20px 34px -18px rgba(167, 172, 217, 0.6); }
 .btn--outline { border-color: var(--hair-2); color: var(--ivory); background: var(--ink-2); }
 .btn--outline:hover { border-color: var(--lumen); color: var(--lumen-hi); background: var(--ink-2); }
 .btn--ghost { color: var(--ash); padding-inline: 0.85rem; }
@@ -2464,14 +2466,17 @@ html[data-theme="ink"] [class~="bg-[#F7F2E9]"] { background-color: var(--ink) !i
 html[data-theme="ink"] [class~="bg-[#F0E7D8]"] { background-color: var(--ink-3) !important; }
 html[data-theme="ink"] [class~="bg-[#E5D8C2]"] { background-color: var(--ink-4) !important; }
 html[data-theme="ink"] [class~="bg-[#221E1A]"] { background-color: var(--ink-3) !important; }
-html[data-theme="ink"] [class~="bg-[#B24A26]"] { background-color: var(--lumen-soft) !important; }
+html[data-theme="ink"] [class~="bg-[#B24A26]"],
+html[data-theme="ink"] [class~="bg-[#8C3718]"] { background-color: var(--lumen-soft) !important; }
 html[data-theme="ink"] [class~="bg-[#8A6A1F]"] { background-color: var(--gold-soft) !important; }
 html[data-theme="ink"] [class~="bg-[#2F6B63]"] { background-color: var(--petrol-soft) !important; }
 html[data-theme="ink"] [class~="bg-[#A8321C]"] { background-color: var(--cinnabar-soft) !important; }
 html[data-theme="ink"] [class~="bg-[#5F3F86]"] { background-color: rgba(167, 172, 217, 0.16) !important; }
 
+html[data-theme="ink"] [class~="text-[#FFFCF6]"] { color: var(--ivory) !important; }
 html[data-theme="ink"] [class~="text-[#241F1A]"] { color: var(--ivory) !important; }
-html[data-theme="ink"] [class~="text-[#6E6459]"] { color: var(--ash) !important; }
+html[data-theme="ink"] [class~="text-[#6E6459]"],
+html[data-theme="ink"] [class~="text-[#5f574d]"] { color: var(--ash) !important; }
 html[data-theme="ink"] [class~="text-[#746A5F]"] { color: var(--ash-dim) !important; }
 html[data-theme="ink"] [class~="text-[#4A423A]"] { color: var(--ash) !important; }
 html[data-theme="ink"] [class~="text-[#3F382F]"] { color: var(--body) !important; }
@@ -2496,6 +2501,12 @@ html[data-theme="ink"] [class~="border-[#A8321C]"] { border-color: rgba(240, 138
 html[data-theme="ink"] [class*="bg-[#FFFCF6]/"] { background-color: color-mix(in srgb, var(--ink-2) 90%, transparent) !important; }
 html[data-theme="ink"] [class*="bg-[#F7F2E9]/"] { background-color: color-mix(in srgb, var(--ink) 90%, transparent) !important; }
 html[data-theme="ink"] [class*="bg-[#F0E7D8]/"] { background-color: color-mix(in srgb, var(--ink-3) 90%, transparent) !important; }
+html[data-theme="ink"] [class*="bg-[#B24A26]/"],
+html[data-theme="ink"] [class*="bg-[#8C3718]/"] { background-color: var(--lumen-soft) !important; }
+html[data-theme="ink"] [class*="bg-[#8A6A1F]/"] { background-color: var(--gold-soft) !important; }
+html[data-theme="ink"] [class*="bg-[#2F6B63]/"] { background-color: var(--petrol-soft) !important; }
+html[data-theme="ink"] [class*="border-[#B24A26]/"],
+html[data-theme="ink"] [class*="border-[#8C3718]/"] { border-color: rgba(167, 172, 217, 0.35) !important; }
 
 /* Trạng thái hover/focus: map riêng, KHÔNG áp vĩnh viễn như trước */
 html[data-theme="ink"] .hover\:bg-\[\#F0E7D8\]:hover { background-color: var(--ink-3) !important; }
@@ -3281,16 +3292,26 @@ body,
     rgba(247, 242, 233, 0) 40%
   );
 }
-html[data-theme="ink"] .home-banner__img { opacity: 0.45; }
+html[data-theme="ink"] .home-banner__img { opacity: 0.35; }
 html[data-theme="ink"] .home-banner__scrim {
   background: linear-gradient(
     90deg,
-    rgba(13, 16, 28, 0.97) 0%,
-    rgba(13, 16, 28, 0.94) 24%,
-    rgba(13, 16, 28, 0.62) 32%,
-    rgba(13, 16, 28, 0.24) 37%,
-    rgba(13, 16, 28, 0) 40%
+    rgba(13, 16, 28, 0.96) 0%,
+    rgba(13, 16, 28, 0.88) 38%,
+    rgba(13, 16, 28, 0.58) 72%,
+    rgba(13, 16, 28, 0.38) 100%
   );
+}
+
+.explore-chip--active {
+  border-color: var(--lumen) !important;
+  background-color: var(--lumen) !important;
+  color: #FFFCF6 !important;
+}
+html[data-theme="ink"] .explore-chip--active {
+  border-color: rgba(167, 172, 217, 0.55) !important;
+  background-color: var(--lumen-soft) !important;
+  color: var(--ivory) !important;
 }
 
 /* Nhãn nhỏ trên cụm tranh cạnh phòng sự kiện (trang chủ) — chiếm cả hàng lưới */
