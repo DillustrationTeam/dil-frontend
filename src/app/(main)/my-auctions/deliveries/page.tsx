@@ -12,10 +12,9 @@ export default function MyDeliveriesPage() {
     <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <Link
         href="/my-auctions"
-        className="mb-5 inline-flex items-center gap-1.5 text-xs text-outline hover:text-white"
+        className="mb-5 inline-flex items-center gap-1.5 text-xs text-outline hover:text-[#241F1A]"
       >
-        <ArrowLeft size={14} /> Về phiên đấu giá của tôi
-      </Link>
+        <ArrowLeft size={14} /> Về phiên đấu giá của tôi </Link>
       <PhysicalDeliveryManager />
     </div>
   );

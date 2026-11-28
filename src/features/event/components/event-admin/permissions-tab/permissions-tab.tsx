@@ -10,7 +10,11 @@ import { PermissionsTable, JuryPermissionMember } from './permissions-table';
 import { InviteJuryCard } from './invite-jury-card';
 import { juryService } from '../../../services/jury.service';
 import { eventService } from '../../../services/event.service';
-import type { EventListItemDto } from '../../../types/event.types';
+import {
+  getEventStatusLabel,
+  normalizeEventStatus,
+  type EventListItemDto,
+} from '../../../types/event.types';
 
 
 
@@ -51,6 +55,24 @@ export interface ContestSearchSelectProps {
   selectedEventId: string;
   onSelectEvent: (eventId: string) => void;
   showAllOption?: boolean;
+}
+
+function getContestStatusBadgeClass(normStatus: string): string {
+  switch (normStatus) {
+    case 'All':
+      return 'bg-brand-periwinkle/15 text-brand-periwinkle border border-brand-periwinkle/35';
+    case 'Upcoming':
+      return 'bg-[#2C6A86]/20 text-[#2C6A86] border border-[#2C6A86]/40';
+    case 'Open':
+      return 'bg-[#2F6B63]/20 text-[#2F6B63] border border-[#2F6B63]/40';
+    case 'Judging':
+      return 'bg-[#8A6A1F]/20 text-[#8A6A1F] border border-[#8A6A1F]/40';
+    case 'Ended':
+      return 'bg-[#746A5F]/20 text-[#746A5F] border border-[#746A5F]/40';
+    case 'Draft':
+    default:
+      return 'bg-[#5F3F86]/20 text-[#5F3F86] border border-[#5F3F86]/40';
+  }
 }
 
 export function ContestSearchSelect({
@@ -127,7 +149,7 @@ export function ContestSearchSelect({
     const q = query.trim().toLowerCase();
     if (!q) return true;
     const titleStr = String(evt.title || '').toLowerCase();
-    const statusStr = String(evt.status || '').toLowerCase();
+    const statusStr = (evt.id === 'all' ? 'All' : normalizeEventStatus(evt.status)).toLowerCase();
     return titleStr.includes(q) || statusStr.includes(q);
   });
 
@@ -153,23 +175,23 @@ export function ContestSearchSelect({
             updateCoords();
           }}
           placeholder={selectedEvent ? selectedEvent.title : (isVie ? 'Nhập để tìm cuộc thi...' : 'Type to search contest...')}
-          className="w-full h-10 pl-9 pr-24 bg-[#090b12] border border-white/20 rounded-xl text-xs text-white font-medium placeholder:text-slate-400 focus:outline-none focus:border-brand-periwinkle focus:ring-1 focus:ring-brand-periwinkle/30 transition-all cursor-text"
+          className="w-full h-10 pl-9 pr-24 bg-[#E5D8C2] border border-[#221E1A]/20 rounded-xl text-xs text-[#241F1A] font-medium placeholder:text-[#746A5F] focus:outline-none focus:border-brand-periwinkle focus:ring-1 focus:ring-brand-periwinkle/30 transition-all cursor-text"
         />
 
         <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none">
-          {selectedEvent?.status && !isOpen && (
-            <span
-              className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                selectedEvent.status === 'Judging' || selectedEvent.status === 'Ended'
-                  ? 'bg-amber-500/20 text-amber-300 border border-amber-400/30'
-                  : 'bg-emerald-500/20 text-emerald-300 border border-emerald-400/30'
-              }`}
-            >
-              {selectedEvent.status}
-            </span>
-          )}
+          {selectedEvent?.status !== undefined && selectedEvent?.status !== null && !isOpen && (() => {
+            const normStatus = selectedEvent.id === 'all' ? 'All' : normalizeEventStatus(selectedEvent.status);
+            const statusText = selectedEvent.id === 'all' ? (isVie ? 'Tất cả' : 'All') : getEventStatusLabel(selectedEvent.status, isVie);
+            return (
+              <span
+                className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${getContestStatusBadgeClass(normStatus)}`}
+              >
+                {statusText}
+              </span>
+            );
+          })()}
           <ChevronDown
-            className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${
+            className={`w-4 h-4 text-[#746A5F] transition-transform duration-200 ${
               isOpen ? 'rotate-180 text-brand-periwinkle' : ''
             }`}
           />
@@ -185,14 +207,14 @@ export function ContestSearchSelect({
             left: `${coords.left}px`,
             width: `${coords.width}px`,
           }}
-          className="contest-dropdown-portal z-[99999] max-h-60 overflow-y-auto rounded-xl border border-white/20 bg-[#121622] shadow-[0_25px_60px_rgba(0,0,0,0.98)] p-1.5 space-y-1 text-left animate-in fade-in zoom-in-95 duration-150"
+          className="contest-dropdown-portal z-[99999] max-h-60 overflow-y-auto rounded-xl border border-[#221E1A]/20 bg-[#FFFCF6] shadow-[0_25px_60px_rgba(0,0,0,0.98)] p-1.5 space-y-1 text-left animate-in fade-in zoom-in-95 duration-150"
         >
           {filteredEvents.length === 0 ? (
-            <div className="p-3 text-center text-xs text-slate-400">
+            <div className="p-3 text-center text-xs text-[#746A5F]">
               {isVie ? (
-                <>Không tìm thấy cuộc thi phù hợp &ldquo;<span className="text-white">{query}</span>&rdquo;</>
+                <>Không tìm thấy cuộc thi phù hợp &ldquo;<span className="text-[#241F1A]">{query}</span>&rdquo;</>
               ) : (
-                <>No contests found matching &ldquo;<span className="text-white">{query}</span>&rdquo;</>
+                <>No contests found matching &ldquo;<span className="text-[#241F1A]">{query}</span>&rdquo;</>
               )}
             </div>
           ) : (
@@ -212,21 +234,23 @@ export function ContestSearchSelect({
                   }}
                   className={`w-full text-left px-3 py-2.5 rounded-lg text-xs flex items-center justify-between transition-colors cursor-pointer ${
                     isSelected
-                      ? 'bg-brand-periwinkle/30 text-white font-bold border border-brand-periwinkle/50'
-                      : 'hover:bg-white/10 text-slate-200'
+                      ? 'bg-brand-periwinkle/30 text-[#241F1A] font-bold border border-brand-periwinkle/50'
+                      : 'hover:bg-[#F0E7D8] text-[#6E6459]'
                   }`}
                 >
                   <span className="truncate pr-2 font-semibold">{evt.title}</span>
                   <div className="flex items-center gap-2 shrink-0">
-                    <span
-                      className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                        evt.status === 'Judging' || evt.status === 'Ended'
-                          ? 'bg-amber-500/20 text-amber-300 border border-amber-400/30'
-                          : 'bg-emerald-500/20 text-emerald-300 border border-emerald-400/30'
-                      }`}
-                    >
-                      {evt.status || 'Active'}
-                    </span>
+                    {(() => {
+                      const normStatus = evt.id === 'all' ? 'All' : normalizeEventStatus(evt.status);
+                      const statusText = evt.id === 'all' ? (isVie ? 'Tất cả' : 'All') : getEventStatusLabel(evt.status, isVie);
+                      return (
+                        <span
+                          className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${getContestStatusBadgeClass(normStatus)}`}
+                        >
+                          {statusText}
+                        </span>
+                      );
+                    })()}
                     {isSelected && <Check className="w-3.5 h-3.5 text-brand-periwinkle" />}
                   </div>
                 </button>
@@ -255,9 +279,10 @@ export function PermissionsTab() {
   const selectedEvent = allEvents.find((e) => matchesEventId(e.id, selectedEventId));
 
   // Check if judging phase has started / active
+  const selectedStatus = selectedEvent ? normalizeEventStatus(selectedEvent.status) : null;
   const isJudgingPhaseActive = selectedEvent
-    ? selectedEvent.status === 'Judging' ||
-      selectedEvent.status === 'Ended' ||
+    ? selectedStatus === 'Judging' ||
+      selectedStatus === 'Ended' ||
       (selectedEvent.judgingStartAt ? new Date() >= new Date(selectedEvent.judgingStartAt) : false)
     : false;
 
@@ -389,9 +414,9 @@ export function PermissionsTab() {
   return (
     <div>
       {/* Event Selector & Status Banner */}
-      <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl border border-white/10 bg-[#161926]/80 backdrop-blur-xl mb-6">
+      <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6]/80 backdrop-blur-xl mb-6">
         <div className="flex flex-wrap items-center gap-3">
-          <label className="text-xs font-semibold text-[#A7ACD9] uppercase tracking-wider shrink-0">
+          <label className="text-xs font-semibold text-[#B24A26] uppercase tracking-wider shrink-0">
             {isVie ? 'Cuộc thi mục tiêu:' : 'Target Contest:'}
           </label>
           <ContestSearchSelect
@@ -407,8 +432,8 @@ export function PermissionsTab() {
           <span
             className={`px-3 py-1 rounded-full text-xs font-bold ${
               isJudgingPhaseActive
-                ? 'bg-amber-500/20 text-amber-300 border border-amber-400/30'
-                : 'bg-emerald-500/20 text-emerald-300 border border-emerald-400/30'
+                ? 'bg-[#8A6A1F]/20 text-[#8A6A1F] border border-[#8A6A1F]/40'
+                : 'bg-[#2F6B63]/20 text-[#2F6B63] border border-[#2F6B63]/40'
             }`}
           >
             {isJudgingPhaseActive

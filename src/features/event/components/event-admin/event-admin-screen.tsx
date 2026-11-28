@@ -206,20 +206,20 @@ export function EventAdminScreen() {
   };
 
   return (
-    <div className="mx-auto w-full max-w-7xl px-4 pb-20 pt-6 sm:px-6 text-[#e4e1e5]">
+    <div className="mx-auto w-full max-w-7xl px-4 pb-20 pt-6 sm:px-6 text-[#241F1A]">
       {/* 1. Header Title Section */}
-      <div className="mb-6 flex flex-wrap items-end justify-between gap-4 border-b border-white/10 pb-6">
+      <div className="mb-6 flex flex-wrap items-end justify-between gap-4 border-b border-[#221E1A]/10 pb-6">
         <div>
           <div className="mb-2.5 inline-flex items-center gap-2 rounded-full border border-brand-periwinkle/30 bg-brand-periwinkle/10 px-3.5 py-1 text-xs font-semibold text-brand-periwinkle">
-            <Trophy size={13} className="text-amber-300" />
+            <Trophy size={13} className="text-[#8A6A1F]" />
             <span>Admin Center · Event Operations</span>
           </div>
 
-          <h1 className="font-h1 text-3xl sm:text-4xl font-extrabold tracking-tight text-white leading-tight">
+          <h1 className="font-h1 text-3xl sm:text-4xl font-extrabold tracking-tight text-[#241F1A] leading-tight">
             Illustration Contests & Events
           </h1>
 
-          <p className="mt-2 text-sm text-[#A7ACD9] leading-relaxed max-w-3xl">
+          <p className="mt-2 text-sm text-[#B24A26] leading-relaxed max-w-3xl">
             Manage platform illustration contests, configure submission rules, assign jury panel permissions, and publish verified contest results.
           </p>
         </div>
@@ -231,7 +231,7 @@ export function EventAdminScreen() {
               void refreshEvents();
             }}
             disabled={loading}
-            className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3.5 py-2 text-xs font-semibold text-white transition hover:border-white/20 hover:bg-white/10 active:scale-95 cursor-pointer"
+            className="flex items-center gap-2 rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-3.5 py-2 text-xs font-semibold text-[#241F1A] transition hover:border-[#221E1A]/20 hover:bg-[#F0E7D8] active:scale-95 cursor-pointer"
             title="Refresh contest list"
           >
             <RefreshCw size={14} className={loading ? 'animate-spin text-brand-periwinkle' : 'text-brand-periwinkle'} />
@@ -243,90 +243,95 @@ export function EventAdminScreen() {
       {/* 2. Executive Overview KPI Cards (Consistent with System Overview) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-5 mb-8">
         {/* Card 1: Total Events */}
-        <div className="glass-container rounded-[24px] p-5 space-y-2 shadow-lg border border-white/10">
+        <div className="glass-container rounded-[24px] p-5 space-y-2 shadow-lg border border-[#221E1A]/10">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] text-[#8A8FA9] font-bold uppercase tracking-wider font-h1">
-              TOTAL CONTESTS & EVENTS
+            <span className="text-[10px] text-[#6E6459] font-bold uppercase tracking-wider font-h1">
+              {isVie ? 'TỔNG CUỘC THI & SỰ KIỆN' : 'TOTAL CONTESTS & EVENTS'}
             </span>
-            <div className="p-1.5 rounded-lg bg-[#C5C9F8]/10 text-[#C5C9F8]">
+            <div className="p-1.5 rounded-lg bg-[#8C3718]/10 text-[#8C3718]">
               <Trophy className="w-4 h-4" />
             </div>
           </div>
-          <h3 className="font-h1 text-2xl font-extrabold text-[#C5C9F8] tracking-tight">
+          <h3 className="font-h1 text-2xl font-extrabold text-[#8C3718] tracking-tight">
             {stats.totalEventsCount || events.length}
           </h3>
-          <p className="text-[11px] text-[#8A8FA9]">
-            <span className="font-h1 font-bold text-white/90">{stats.openEventsCount}</span> Đang mở nhận bài thi
+          <p className="text-[11px] text-[#6E6459]">
+            <span className="font-h1 font-bold text-[#241F1A]/90">{stats.openEventsCount}</span>{' '}
+            {isVie ? 'Đang mở nhận bài thi' : 'Open for submissions'}
           </p>
         </div>
 
         {/* Card 2: Open Submissions */}
-        <div className="glass-container rounded-[24px] p-5 space-y-2 shadow-lg border border-white/10">
+        <div className="glass-container rounded-[24px] p-5 space-y-2 shadow-lg border border-[#221E1A]/10">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] text-[#8A8FA9] font-bold uppercase tracking-wider font-h1">
-              TOTAL SUBMISSIONS
+            <span className="text-[10px] text-[#6E6459] font-bold uppercase tracking-wider font-h1">
+              {isVie ? 'TỔNG BÀI DỰ THI' : 'TOTAL SUBMISSIONS'}
             </span>
-            <div className="p-1.5 rounded-lg bg-emerald-400/10 text-emerald-400">
+            <div className="p-1.5 rounded-lg bg-[#2F6B63]/10 text-[#2F6B63]">
               <Layers className="w-4 h-4" />
             </div>
           </div>
-          <h3 className="font-h1 text-2xl font-extrabold text-emerald-400 tracking-tight">
+          <h3 className="font-h1 text-2xl font-extrabold text-[#2F6B63] tracking-tight">
             {stats.totalSubmissionsCount}
           </h3>
-          <p className="text-[11px] text-[#8A8FA9]">
-            Bài dự thi đã nộp trên toàn sàn
+          <p className="text-[11px] text-[#6E6459]">
+            {isVie ? 'Bài dự thi đã nộp trên toàn sàn' : 'Total submissions across platform'}
           </p>
         </div>
 
         {/* Card 3: Prize Pool */}
-        <div className="glass-container rounded-[24px] p-5 space-y-2 shadow-lg border border-white/10">
+        <div className="glass-container rounded-[24px] p-5 space-y-2 shadow-lg border border-[#221E1A]/10">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] text-[#8A8FA9] font-bold uppercase tracking-wider font-h1">
-              TOTAL PRIZE POOL
+            <span className="text-[10px] text-[#6E6459] font-bold uppercase tracking-wider font-h1">
+              {isVie ? 'TỔNG GIẢI THƯỞNG' : 'TOTAL PRIZE POOL'}
             </span>
-            <div className="p-1.5 rounded-lg bg-amber-400/10 text-amber-400">
-              <Trophy className="w-4 h-4 text-amber-400" />
+            <div className="p-1.5 rounded-lg bg-[#8A6A1F]/10 text-[#8A6A1F]">
+              <Trophy className="w-4 h-4 text-[#8A6A1F]" />
             </div>
           </div>
-          <h3 className="font-h1 text-2xl font-extrabold text-amber-300 tracking-tight">
+          <h3 className="font-h1 text-2xl font-extrabold text-[#8A6A1F] tracking-tight">
             {stats.formattedTotalPrizePool || '0 ₫'}
           </h3>
-          <p className="text-[11px] text-amber-400/80 font-medium">
-            Quỹ giải thưởng cam kết bảo chứng
+          <p className="text-[11px] text-[#8A6A1F] font-medium">
+            {isVie ? 'Quỹ giải thưởng cam kết bảo chứng' : 'Escrow-backed committed prize pool'}
           </p>
         </div>
 
         {/* Card 4: Open Disputes / Jury Pending */}
-        <div className="glass-container rounded-[24px] p-5 space-y-2 shadow-lg border border-white/10">
+        <div className="glass-container rounded-[24px] p-5 space-y-2 shadow-lg border border-[#221E1A]/10">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] text-[#8A8FA9] font-bold uppercase tracking-wider font-h1">
-              DISPUTES & FLAGS
+            <span className="text-[10px] text-[#6E6459] font-bold uppercase tracking-wider font-h1">
+              {isVie ? 'KHIẾU NẠI & CỜ BÁO' : 'DISPUTES & FLAGS'}
             </span>
-            <div className="p-1.5 rounded-lg bg-rose-500/10 text-rose-400">
+            <div className="p-1.5 rounded-lg bg-[#A8321C]/10 text-[#A8321C]">
               <AlertTriangle className="w-4 h-4" />
             </div>
           </div>
-          <h3 className="font-h1 text-2xl font-extrabold text-rose-400 tracking-tight">
+          <h3 className="font-h1 text-2xl font-extrabold text-[#A8321C] tracking-tight">
             {openDisputesCount}
           </h3>
-          <p className="text-[11px] text-[#8A8FA9]">
+          <p className="text-[11px] text-[#6E6459]">
             {openDisputesCount > 0 ? (
-              <span className="text-rose-400 font-medium">Khiếu nại bài thi cần phân xử</span>
+              <span className="text-[#A8321C] font-medium">
+                {isVie ? 'Khiếu nại bài thi cần phân xử' : 'Submission disputes pending ruling'}
+              </span>
             ) : (
-              <span className="text-emerald-400 font-medium">Không có tranh chấp tồn đọng</span>
+              <span className="text-[#2F6B63] font-medium">
+                {isVie ? 'Không có tranh chấp tồn đọng' : 'No pending disputes'}
+              </span>
             )}
           </p>
         </div>
       </div>
 
       {/* 3. Navigation Tabs Bar (Directly under Illustration Contests & Events title) */}
-      <nav className="glass-container rounded-2xl p-1.5 backdrop-blur-xl bg-[#121620]/90 flex gap-1.5 overflow-x-auto mb-6">
+      <nav className="glass-container rounded-2xl p-1.5 backdrop-blur-xl bg-[#FFFCF6]/90 flex gap-1.5 overflow-x-auto mb-6">
         <button
           onClick={() => setActiveTab('create')}
           className={`px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
             activeTab === 'create'
-              ? 'bg-brand-periwinkle text-brand-navy shadow-[inset_0_1px_0_rgba(255,255,255,0.5),0_0_20px_rgba(167,172,217,0.25)]'
-              : 'text-[#aaa8b3] hover:text-white hover:bg-white/5'
+              ? 'bg-brand-periwinkle text-[#FFFCF6] shadow-[inset_0_1px_0_rgba(255,255,255,0.5),0_0_20px_rgba(167,172,217,0.25)]'
+              : 'text-[#746A5F] hover:text-[#241F1A] hover:bg-[#FFFCF6]'
           }`}
         >
           Event Management
@@ -335,8 +340,8 @@ export function EventAdminScreen() {
           onClick={() => setActiveTab('permissions')}
           className={`px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
             activeTab === 'permissions'
-              ? 'bg-brand-periwinkle text-brand-navy shadow-[inset_0_1px_0_rgba(255,255,255,0.5),0_0_20px_rgba(167,172,217,0.25)]'
-              : 'text-[#aaa8b3] hover:text-white hover:bg-white/5'
+              ? 'bg-brand-periwinkle text-[#FFFCF6] shadow-[inset_0_1px_0_rgba(255,255,255,0.5),0_0_20px_rgba(167,172,217,0.25)]'
+              : 'text-[#746A5F] hover:text-[#241F1A] hover:bg-[#FFFCF6]'
           }`}
         >
           Jury Permissions
@@ -345,8 +350,8 @@ export function EventAdminScreen() {
           onClick={() => setActiveTab('disputes')}
           className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
             activeTab === 'disputes'
-              ? 'bg-brand-periwinkle text-brand-navy shadow-[inset_0_1px_0_rgba(255,255,255,0.5),0_0_20px_rgba(167,172,217,0.25)]'
-              : 'text-[#aaa8b3] hover:text-white hover:bg-white/5'
+              ? 'bg-brand-periwinkle text-[#FFFCF6] shadow-[inset_0_1px_0_rgba(255,255,255,0.5),0_0_20px_rgba(167,172,217,0.25)]'
+              : 'text-[#746A5F] hover:text-[#241F1A] hover:bg-[#FFFCF6]'
           }`}
         >
           <span>Dispute Resolution</span>
@@ -354,8 +359,8 @@ export function EventAdminScreen() {
             <span
               className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-extrabold leading-none ${
                 activeTab === 'disputes'
-                  ? 'bg-brand-navy/20 text-brand-navy border border-brand-navy/30'
-                  : 'bg-amber-500/20 text-amber-300 border border-amber-400/40 animate-pulse'
+                  ? 'bg-brand-navy/20 text-[#241F1A] border border-brand-navy/30'
+                  : 'bg-[#8A6A1F]/20 text-[#8A6A1F] border border-[#8A6A1F]/40 animate-pulse'
               }`}
               title={`${openDisputesCount} open submission dispute(s) awaiting review`}
             >
@@ -367,8 +372,8 @@ export function EventAdminScreen() {
           onClick={() => setActiveTab('publish')}
           className={`px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
             activeTab === 'publish'
-              ? 'bg-brand-periwinkle text-brand-navy shadow-[inset_0_1px_0_rgba(255,255,255,0.5),0_0_20px_rgba(167,172,217,0.25)]'
-              : 'text-[#aaa8b3] hover:text-white hover:bg-white/5'
+              ? 'bg-brand-periwinkle text-[#FFFCF6] shadow-[inset_0_1px_0_rgba(255,255,255,0.5),0_0_20px_rgba(167,172,217,0.25)]'
+              : 'text-[#746A5F] hover:text-[#241F1A] hover:bg-[#FFFCF6]'
           }`}
         >
           Publish Results
@@ -377,18 +382,18 @@ export function EventAdminScreen() {
 
       {/* Pending Disputes Signal Banner (visible on other tabs so admins never miss new disputes) */}
       {openDisputesCount > 0 && activeTab !== 'disputes' && (
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-amber-400/30 bg-amber-500/10 px-4 py-3 text-xs text-amber-200">
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#8A6A1F]/40 bg-[#8A6A1F]/10 px-4 py-3 text-xs text-[#8A6A1F]">
           <div className="flex items-center gap-2.5">
-            <span className="flex h-7 w-7 items-center justify-center rounded-xl bg-amber-500/20 text-amber-300 shrink-0">
+            <span className="flex h-7 w-7 items-center justify-center rounded-xl bg-[#8A6A1F]/20 text-[#8A6A1F] shrink-0">
               <BellRing className="w-4 h-4" />
             </span>
             <div>
-              <p className="font-bold text-amber-100">
+              <p className="font-bold text-[#8A6A1F]">
                 {isVie
                   ? `Có ${openDisputesCount} khiếu nại bài dự thi đang chờ quản trị viên xử lý`
                   : `${openDisputesCount} pending submission dispute${openDisputesCount > 1 ? 's' : ''} require admin moderation`}
               </p>
-              <p className="text-[11px] text-amber-200/80">
+              <p className="text-[11px] text-[#8A6A1F]">
                 {isVie
                   ? 'Báo cáo mới hoặc chưa giải quyết từ người dùng đã được đưa vào hàng đợi tab Xử lý khiếu nại.'
                   : 'New or unresolved client reports have been queued in the Dispute Resolution tab.'}
@@ -398,7 +403,7 @@ export function EventAdminScreen() {
           <button
             type="button"
             onClick={() => setActiveTab('disputes')}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-amber-400 px-3.5 py-2 text-xs font-bold text-slate-950 transition hover:bg-amber-300 cursor-pointer shrink-0"
+            className="admin-dispute-queue-btn inline-flex items-center gap-1.5 rounded-xl border border-[#8A6A1F]/35 bg-[#8A6A1F]/20 px-3.5 py-2 text-xs font-bold text-[#241F1A] transition hover:bg-[#8A6A1F]/30 cursor-pointer shrink-0"
           >
             <span>{isVie ? 'Mở hàng đợi khiếu nại' : 'Open Dispute Queue'}</span>
             <ArrowRight className="w-3.5 h-3.5" />
@@ -411,7 +416,7 @@ export function EventAdminScreen() {
         {activeTab === 'create' && (
           <div className="space-y-6">
             {/* Filter Bar - ONLY present in Event Management Tab */}
-            <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl border border-white/10 bg-[#161926]/80 backdrop-blur-xl mb-6">
+            <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6]/80 backdrop-blur-xl mb-6">
               <div className="relative flex-1 min-w-[220px]">
                 <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-periwinkle" />
                 <input
@@ -419,7 +424,7 @@ export function EventAdminScreen() {
                   value={keyword}
                   onChange={(e) => setKeyword(e.target.value)}
                   placeholder="Search contests..."
-                  className="w-full h-10 pl-9 pr-4 bg-[#090b12]/70 border border-white/10 rounded-xl text-xs text-white placeholder-slate-400 focus:outline-none focus:border-brand-periwinkle"
+                  className="w-full h-10 pl-9 pr-4 bg-[#E5D8C2] border border-[#221E1A]/10 rounded-xl text-xs text-[#241F1A] text-[#746A5F] focus:outline-none focus:border-brand-periwinkle"
                 />
               </div>
 
@@ -431,14 +436,14 @@ export function EventAdminScreen() {
                     setStatus(e.target.value);
                     setPage(1);
                   }}
-                  className="h-10 px-3.5 bg-[#090b12]/70 border border-white/10 rounded-xl text-xs text-white focus:outline-none focus:border-brand-periwinkle cursor-pointer"
+                  className="h-10 px-3.5 bg-[#E5D8C2] border border-[#221E1A]/10 rounded-xl text-xs text-[#241F1A] focus:outline-none focus:border-brand-periwinkle cursor-pointer"
                 >
-                  <option value="" className="bg-[#1f2335]">All Statuses</option>
-                  <option value="Upcoming" className="bg-[#1f2335]">Waiting to Open</option>
-                  <option value="Open" className="bg-[#1f2335]">Open</option>
-                  <option value="Judging" className="bg-[#1f2335]">Judging</option>
-                  <option value="Ended" className="bg-[#1f2335]">Ended</option>
-                  <option value="Draft" className="bg-[#1f2335]">Draft</option>
+                  <option value="" className="bg-[#F7F2E9]">All Statuses</option>
+                  <option value="Upcoming" className="bg-[#F7F2E9]">Waiting to Open</option>
+                  <option value="Open" className="bg-[#F7F2E9]">Open</option>
+                  <option value="Judging" className="bg-[#F7F2E9]">Judging</option>
+                  <option value="Ended" className="bg-[#F7F2E9]">Ended</option>
+                  <option value="Draft" className="bg-[#F7F2E9]">Draft</option>
                 </select>
 
                 {/* Sort By Dropdown */}
@@ -448,19 +453,19 @@ export function EventAdminScreen() {
                     setSortBy(e.target.value as EventSortOption);
                     setPage(1);
                   }}
-                  className="h-10 px-3.5 bg-[#090b12]/70 border border-white/10 rounded-xl text-xs text-white focus:outline-none focus:border-brand-periwinkle cursor-pointer"
+                  className="h-10 px-3.5 bg-[#E5D8C2] border border-[#221E1A]/10 rounded-xl text-xs text-[#241F1A] focus:outline-none focus:border-brand-periwinkle cursor-pointer"
                 >
-                  <option value="latest" className="bg-[#1f2335]">Latest Created</option>
-                  <option value="title_asc" className="bg-[#1f2335]">Title (A-Z)</option>
-                  <option value="most_submissions" className="bg-[#1f2335]">Most Submissions</option>
-                  <option value="ending_soon" className="bg-[#1f2335]">Ending Soon</option>
+                  <option value="latest" className="bg-[#F7F2E9]">Latest Created</option>
+                  <option value="title_asc" className="bg-[#F7F2E9]">Title (A-Z)</option>
+                  <option value="most_submissions" className="bg-[#F7F2E9]">Most Submissions</option>
+                  <option value="ending_soon" className="bg-[#F7F2E9]">Ending Soon</option>
                 </select>
 
                 {/* "+ Create Event" Button - Navigates to /admin/events/create */}
                 <button
                   type="button"
                   onClick={() => router.push('/admin/events/create')}
-                  className="h-10 px-4 rounded-xl bg-gradient-to-r from-[#a7acd9] to-[#7fd5e8] text-brand-navy font-bold text-xs hover:brightness-110 transition-all shadow-[0_0_20px_rgba(167,172,217,0.3)] flex items-center gap-1.5 shrink-0 cursor-pointer"
+                  className="h-10 px-4 rounded-xl bg-gradient-to-r from-[#B24A26] to-[#2F6B63] text-[#241F1A] font-bold text-xs hover:brightness-110 transition-all shadow-[0_0_20px_rgba(167,172,217,0.3)] flex items-center gap-1.5 shrink-0 cursor-pointer"
                 >
                   <PlusCircle className="w-4 h-4" />
                   <span>{isVie ? '+ Tạo sự kiện' : '+ Create Event'}</span>
@@ -472,25 +477,25 @@ export function EventAdminScreen() {
             {loadError ? (
               <div
                 role="alert"
-                className="rounded-2xl border border-red-500/35 bg-red-500/10 p-8 text-center"
+                className="rounded-2xl border border-[#A8321C]/40 bg-[#A8321C]/10 p-8 text-center"
               >
-                <AlertTriangle className="mx-auto h-10 w-10 text-red-400 mb-3" />
-                <p className="text-base font-bold text-white">Không thể tải danh sách sự kiện</p>
-                <p className="mt-1 text-xs text-red-200 max-w-xl mx-auto">{loadError}</p>
+                <AlertTriangle className="mx-auto h-10 w-10 text-[#A8321C] mb-3" />
+                <p className="text-base font-bold text-[#241F1A]">Không thể tải danh sách sự kiện</p>
+                <p className="mt-1 text-xs text-[#A8321C] max-w-xl mx-auto">{loadError}</p>
                 <button
                   type="button"
                   onClick={() => void refreshEvents()}
-                  className="mt-4 inline-flex items-center gap-2 rounded-xl bg-red-500/25 border border-red-400/40 px-4 py-2 text-xs font-bold text-white hover:bg-red-500/35 transition cursor-pointer"
+                  className="mt-4 inline-flex items-center gap-2 rounded-xl bg-[#A8321C]/20 border border-[#A8321C]/40 px-4 py-2 text-xs font-bold text-[#241F1A] hover:bg-[#A8321C]/20 transition cursor-pointer"
                 >
                   <RefreshCw size={14} />
                   <span>Thử tải lại</span>
                 </button>
               </div>
             ) : events.length === 0 ? (
-              <div className="rounded-2xl border border-white/10 bg-[#161926]/50 p-12 text-center text-outline">
+              <div className="rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6]/50 p-12 text-center text-outline">
                 <Layers className="mx-auto h-12 w-12 text-brand-periwinkle/40 mb-3" />
-                <p className="text-base font-semibold text-white">No contests found</p>
-                <p className="mt-1 text-xs text-[#8A8FA9]">Try adjusting your search query or filter options.</p>
+                <p className="text-base font-semibold text-[#241F1A]">No contests found</p>
+                <p className="mt-1 text-xs text-[#6E6459]">Try adjusting your search query or filter options.</p>
               </div>
             ) : (
               <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -518,19 +523,19 @@ export function EventAdminScreen() {
 
       {/* Delete Event Confirmation Modal */}
       {mounted && eventToDelete && createPortal(
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 overflow-y-auto">
-          <div className="w-full max-w-md rounded-2xl border border-red-500/30 bg-[#161926] p-6 shadow-2xl relative animate-in fade-in zoom-in-95 duration-200 text-left m-auto">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#E5D8C2] backdrop-blur-sm p-4 overflow-y-auto">
+          <div className="w-full max-w-md rounded-2xl border border-[#A8321C]/40 bg-[#FFFCF6] p-6 shadow-2xl relative animate-in fade-in zoom-in-95 duration-200 text-left m-auto">
             <div className="flex items-center gap-3 mb-3">
-              <div className="p-2.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400">
+              <div className="p-2.5 rounded-xl bg-[#A8321C]/10 border border-[#A8321C]/30 text-[#A8321C]">
                 <AlertTriangle className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-white font-h1">Delete Event</h3>
-                <p className="text-xs text-red-400 font-medium">Irreversible Action</p>
+                <h3 className="text-lg font-bold text-[#241F1A] font-h1">Delete Event</h3>
+                <p className="text-xs text-[#A8321C] font-medium">Irreversible Action</p>
               </div>
             </div>
-            <p className="text-xs text-slate-300 leading-relaxed">
-              Are you sure you want to delete <span className="font-bold text-white">&ldquo;{eventToDelete.title}&rdquo;</span>? All associated submissions, votes, and panel assignments will be permanently removed.
+            <p className="text-xs text-[#746A5F] leading-relaxed">
+              Are you sure you want to delete <span className="font-bold text-[#241F1A]">&ldquo;{eventToDelete.title}&rdquo;</span>? All associated submissions, votes, and panel assignments will be permanently removed.
             </p>
 
             <div className="mt-6 flex justify-end gap-3">
@@ -538,7 +543,7 @@ export function EventAdminScreen() {
                 type="button"
                 onClick={() => setEventToDelete(null)}
                 disabled={isDeleting}
-                className="px-4 py-2 rounded-xl border border-white/10 text-xs font-semibold text-slate-300 hover:bg-white/5 transition-all cursor-pointer disabled:opacity-50"
+                className="px-4 py-2 rounded-xl border border-[#221E1A]/10 text-xs font-semibold text-[#746A5F] hover:bg-[#FFFCF6] transition-all cursor-pointer disabled:opacity-50"
               >
                 Cancel
               </button>
@@ -546,7 +551,7 @@ export function EventAdminScreen() {
                 type="button"
                 onClick={handleConfirmDeleteEvent}
                 disabled={isDeleting}
-                className="px-4 py-2 rounded-xl bg-red-500 hover:bg-red-600 text-white text-xs font-bold transition-all shadow-[0_0_15px_rgba(239,68,68,0.3)] cursor-pointer disabled:opacity-50 flex items-center gap-2"
+                className="px-4 py-2 rounded-xl bg-[#A8321C]/12 hover:bg-[#A8321C]/12 text-[#241F1A] text-xs font-bold transition-all shadow-[0_0_15px_rgba(239,68,68,0.3)] cursor-pointer disabled:opacity-50 flex items-center gap-2"
               >
                 {isDeleting ? 'Deleting...' : 'Delete Event'}
               </button>

@@ -1,12 +1,10 @@
-import { apiClient } from '@/lib/api-client';
+import { hubUrl } from '@/lib/realtime-url';
 
 /**
  * URL hub SignalR của Notification Center (UC45).
- *
- * Suy ra từ `apiClient` để chỉ có MỘT nguồn cấu hình backend trong app
- * (xem `src/lib/api-client.ts`); hub nằm ở gốc host nên bỏ hậu tố `/api/v1`.
+ * WebSocket không proxy qua Next được → dùng `NEXT_PUBLIC_SIGNALR_URL`.
+ * Trả chuỗi rỗng khi chưa cấu hình để hook bỏ qua kết nối.
  */
 export function notificationHubUrl(): string {
-  const baseUrl = String(apiClient.defaults.baseURL ?? '');
-  return `${baseUrl.replace(/\/api\/v1\/?$/, '')}/hubs/notifications`;
+  return hubUrl('/hubs/notifications');
 }

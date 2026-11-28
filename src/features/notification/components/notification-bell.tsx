@@ -15,17 +15,17 @@ function getIcon(type: string, size = 15) {
   switch (type) {
     case 'OutbidAlert':
     case 'AuctionWon':
-      return <Gavel size={size} className="text-amber-400" />;
+      return <Gavel size={size} className="text-[#8A6A1F]" />;
     case 'AuctionEndingSoon':
-      return <Clock size={size} className="text-amber-400" />;
+      return <Clock size={size} className="text-[#8A6A1F]" />;
     case 'DeadlineRiskWarning':
-      return <Clock size={size} className="text-red-400" />;
+      return <Clock size={size} className="text-[#A8321C]" />;
     case 'PaymentSucceeded':
       return <Wallet size={size} className="text-brand-periwinkle" />;
     case 'PayoutStatusChanged':
-      return <Wallet size={size} className="text-sky-400" />;
+      return <Wallet size={size} className="text-[#2C6A86]" />;
     case 'UserSanctionAlert':
-      return <ShieldAlert size={size} className="text-red-400" />;
+      return <ShieldAlert size={size} className="text-[#A8321C]" />;
     case 'BugReportReplied':
       return <Bug size={size} className="text-brand-periwinkle" />;
     case 'PromotionAnnouncement':
@@ -35,15 +35,15 @@ function getIcon(type: string, size = 15) {
     case 'WorkroomMessage':
       return <MessageSquare size={size} className="text-brand-periwinkle" />;
     case 'EscrowStatusChanged':
-      return <LockKeyhole size={size} className="text-emerald-400" />;
+      return <LockKeyhole size={size} className="text-[#2F6B63]" />;
     case 'DisputeStatusChanged':
-      return <Scale size={size} className="text-amber-400" />;
+      return <Scale size={size} className="text-[#8A6A1F]" />;
     case 'TradeDisputeCreated':
-      return <Scale size={size} className="text-rose-400" />;
+      return <Scale size={size} className="text-[#A8321C]" />;
     case 'TradeDisputeResolved':
-      return <Scale size={size} className="text-emerald-400" />;
+      return <Scale size={size} className="text-[#2F6B63]" />;
     case 'SubmissionDisputeCreated':
-      return <Scale size={size} className="text-amber-400" />;
+      return <Scale size={size} className="text-[#8A6A1F]" />;
     case 'ArtTradeProposed':
     case 'ArtTradeAccepted':
     case 'ArtTradeArtworkSubmitted':
@@ -51,13 +51,13 @@ function getIcon(type: string, size = 15) {
       return <ArrowLeftRight size={size} className="text-brand-periwinkle" />;
     case 'ArtTradeDeclined':
     case 'ArtTradeCancelled':
-      return <ArrowLeftRight size={size} className="text-rose-400" />;
+      return <ArrowLeftRight size={size} className="text-[#A8321C]" />;
     case 'InvitationReceived':
-      return <Award size={size} className="text-amber-400" />;
+      return <Award size={size} className="text-[#8A6A1F]" />;
     case 'InvitationAccepted':
-      return <Award size={size} className="text-emerald-400" />;
+      return <Award size={size} className="text-[#2F6B63]" />;
     case 'InvitationDeclined':
-      return <Award size={size} className="text-rose-400" />;
+      return <Award size={size} className="text-[#A8321C]" />;
     case 'InvitationCanceled':
     case 'InvitationExpired':
       return <Award size={size} className="text-outline" />;
@@ -314,13 +314,15 @@ export function NotificationBell({
         }
       >
         {iconSet === 'material' ? (
-          <span className="material-symbols-outlined text-xl">notifications</span>
+          <Bell size={20} aria-hidden />
         ) : (
           <Bell size={20} />
         )}
 
         {unreadCount > 0 && (
-          <span className="absolute -right-0.5 -top-0.5 flex min-w-[18px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold leading-[18px] text-white ring-2 ring-[#1F2335]">
+          /* Pill đặc màu nhấn + viền cùng màu nền trang để "khoét" khỏi nút tròn.
+             `--lumen` đổi theo theme nên không còn quầng sáng sai màu như bản ring giấy cũ. */
+          <span className="absolute -right-1 -top-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full border-2 border-[var(--ink)] bg-[var(--lumen)] px-1.5 text-[10px] font-bold leading-none tabular-nums text-[var(--ink-2)]">
             {badge}
           </span>
         )}
@@ -330,12 +332,12 @@ export function NotificationBell({
         <div
           role="dialog"
           aria-label={isEng ? 'Notification list' : 'Danh sách thông báo'}
-          className={`absolute z-50 mt-2 w-[22rem] max-w-[calc(100vw-2rem)] overflow-hidden rounded-3xl border border-white/10 bg-[#1F2335] shadow-2xl ${
+          className={`notif-panel absolute z-50 mt-2 w-[22rem] max-w-[calc(100vw-2rem)] overflow-hidden rounded-3xl border border-[#221E1A]/10 bg-[#F7F2E9] shadow-2xl ${
             align === 'right' ? 'right-0' : 'left-0'
           }`}
         >
           {/* Tiêu đề + hành động nhanh */}
-          <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
+          <div className="flex items-center justify-between border-b border-[#221E1A]/10 px-4 py-3">
             <h2 className="font-h1 text-sm font-bold text-on-surface">{isEng ? 'Notifications' : 'Thông báo'}</h2>
             {unreadCount > 0 && (
               <button
@@ -359,11 +361,11 @@ export function NotificationBell({
             ) : loading ? (
               <div className="space-y-2 p-3">
                 {[1, 2, 3].map((i) => (
-                  <div key={i} className="h-16 animate-pulse rounded-2xl border border-white/5 bg-white/[0.02]" />
+                  <div key={i} className="h-16 animate-pulse rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6]" />
                 ))}
               </div>
             ) : error ? (
-              <div className="flex items-start gap-2 px-4 py-6 text-xs text-red-200">
+              <div className="flex items-start gap-2 px-4 py-6 text-xs text-[#A8321C]">
                 <CircleAlert size={14} className="mt-0.5 shrink-0" />
                 <span>{error}</span>
               </div>
@@ -373,13 +375,13 @@ export function NotificationBell({
                 <p className="text-xs text-on-surface-variant">{isEng ? 'You have no notifications yet.' : 'Bạn chưa có thông báo nào.'}</p>
               </div>
             ) : (
-              <ul className="divide-y divide-white/5">
+              <ul className="divide-y divide-[#221E1A]/10">
                 {items.map((item) => {
                   const isInv = item.refType?.toLowerCase() === 'invitation' && !!item.refId;
                   const isInvReceived = item.notificationType === 'InvitationReceived';
 
                   return (
-                    <li key={item.notificationId} className="group transition hover:bg-white/5">
+                    <li key={item.notificationId} className="group transition hover:bg-[#FFFCF6]">
                       <div
                         role="button"
                         tabIndex={0}
@@ -414,7 +416,7 @@ export function NotificationBell({
                                 type="button"
                                 disabled={replyingInvId === item.refId}
                                 onClick={(e) => handleQuickAccept(e, item)}
-                                className="inline-flex items-center gap-1 rounded-lg border border-emerald-500/40 bg-emerald-500/20 px-2.5 py-1 text-[11px] font-semibold text-emerald-300 transition hover:bg-emerald-500/30 active:scale-95 disabled:opacity-50"
+                                className="inline-flex items-center gap-1 rounded-lg border border-[#2F6B63]/40 bg-[#2F6B63]/20 px-2.5 py-1 text-[11px] font-semibold text-[#2F6B63] transition hover:bg-[#2F6B63]/20 active:scale-95 disabled:opacity-50"
                               >
                                 {replyingInvId === item.refId ? (
                                   <RefreshCw size={10} className="animate-spin" />
@@ -427,7 +429,7 @@ export function NotificationBell({
                                 type="button"
                                 disabled={replyingInvId === item.refId}
                                 onClick={(e) => handleQuickDecline(e, item)}
-                                className="inline-flex items-center gap-1 rounded-lg border border-rose-500/30 bg-rose-500/10 px-2 py-1 text-[11px] text-rose-300 transition hover:bg-rose-500/20 active:scale-95 disabled:opacity-50"
+                                className="inline-flex items-center gap-1 rounded-lg border border-[#A8321C]/40 bg-[#A8321C]/10 px-2 py-1 text-[11px] text-[#A8321C] transition hover:bg-[#A8321C]/20 active:scale-95 disabled:opacity-50"
                               >
                                 <X size={11} />
                                 {isEng ? 'Decline' : 'Từ chối'}
@@ -436,19 +438,19 @@ export function NotificationBell({
                           )}
 
                           {isInv && item.notificationType === 'InvitationAccepted' && (
-                            <span className="mt-1.5 inline-flex items-center gap-1 font-semibold text-[10px] text-emerald-400">
+                            <span className="mt-1.5 inline-flex items-center gap-1 font-semibold text-[10px] text-[#2F6B63]">
                               <Check size={11} /> {isEng ? 'Invitation accepted' : 'Đã chấp nhận lời mời'}
                             </span>
                           )}
 
                           {isInv && item.notificationType === 'InvitationDeclined' && (
-                            <span className="mt-1.5 inline-flex items-center gap-1 font-semibold text-[10px] text-rose-400">
+                            <span className="mt-1.5 inline-flex items-center gap-1 font-semibold text-[10px] text-[#A8321C]">
                               <X size={11} /> {isEng ? 'Invitation declined' : 'Đã từ chối lời mời'}
                             </span>
                           )}
 
                           <span className="mt-1.5 flex items-center gap-2 text-[10px] text-outline">
-                            <span className="rounded-full border border-white/10 px-1.5 py-px">
+                            <span className="rounded-full border border-[#221E1A]/10 px-1.5 py-px">
                               {typeLabels[item.notificationType] ?? item.notificationType}
                             </span>
                             <span>{formatRelativeTime(item.createdAt, isEng)}</span>
@@ -466,7 +468,7 @@ export function NotificationBell({
           <Link
             href="/notifications"
             onClick={() => setOpen(false)}
-            className="flex items-center justify-center gap-1.5 border-t border-white/10 px-4 py-3 text-xs font-semibold text-brand-periwinkle transition hover:bg-brand-periwinkle/10"
+            className="flex items-center justify-center gap-1.5 border-t border-[#221E1A]/10 px-4 py-3 text-xs font-semibold text-brand-periwinkle transition hover:bg-brand-periwinkle/10"
           >
             {isEng ? 'View all notifications' : 'Xem tất cả thông báo'} <ArrowRight size={14} />
           </Link>

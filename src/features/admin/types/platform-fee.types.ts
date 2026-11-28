@@ -15,6 +15,12 @@ export interface PlatformFeePolicyDto {
   /** Thời gian hết hạn của AWS S3 / Cloudinary Presigned URL (phút, mặc định 15 phút theo BR-39) */
   presignedUrlExpirationMinutes: number;
 
+  /** % giảm giá đơn toàn sàn khi khách gắn ảnh AI phác thảo làm reference (0% - 30%, mặc định 0%) */
+  aiReferenceSketchDiscountPercent: number;
+
+  /** Giới hạn số lượt sinh ảnh AI phác thảo bố cục mỗi (khách, creator) trong 24 giờ (1 - 10 lượt, mặc định 3) */
+  aiReferenceSketchMaxGenerationsPerWindow: number;
+
   /** Thời điểm cập nhật cấu hình lần cuối */
   updatedAt?: string | null;
 }
@@ -31,6 +37,12 @@ export interface UpdatePlatformFeePolicyRequest {
 
   /** Thời gian hết hạn của AWS S3 / Cloudinary Presigned URL (phút, 5 - 1440 phút) */
   presignedUrlExpirationMinutes: number;
+
+  /** % giảm giá đơn toàn sàn khi khách gắn ảnh AI phác thảo làm reference (0 - 30) */
+  aiReferenceSketchDiscountPercent: number;
+
+  /** Giới hạn số lượt sinh ảnh AI phác thảo bố cục mỗi (khách, creator) trong 24 giờ (1 - 10) */
+  aiReferenceSketchMaxGenerationsPerWindow: number;
 }
 
 export const DEFAULT_PLATFORM_FEE_POLICY: UpdatePlatformFeePolicyRequest = {
@@ -38,4 +50,6 @@ export const DEFAULT_PLATFORM_FEE_POLICY: UpdatePlatformFeePolicyRequest = {
   milestoneAutoApprovalDays: 7,
   defaultFreeRevisionLimit: 2,
   presignedUrlExpirationMinutes: 15,
+  aiReferenceSketchDiscountPercent: 0,
+  aiReferenceSketchMaxGenerationsPerWindow: 3,
 };

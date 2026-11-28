@@ -14,7 +14,7 @@ export const chatService = {
   async getRoom(roomId: string): Promise<ChatRoomDto> {
     const res = await apiClient.get<ApiResponse<ChatRoomDto>>(`/chat/rooms/${roomId}`);
     if (res.data.error || !res.data.data) {
-      throw new Error(res.data.error?.details?.join(' · ') || res.data.error?.title || 'Không tải được thông tin phòng chat.');
+      throw new Error(res.data.error?.details?.join(' · ') || res.data.error?.title || 'Không tải được thông tin phòng trò chuyện.');
     }
     return res.data.data;
   },

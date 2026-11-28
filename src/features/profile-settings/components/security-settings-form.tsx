@@ -12,7 +12,7 @@ import { useGoogleLink } from '@/features/auth/hooks/use-google-link';
 import { TwoFactorSettingsForm } from '@/features/profile-settings/components/two-factor-settings-form';
 
 const inputClass =
-  'w-full border-0 border-b-2 border-white/30 bg-transparent px-1 py-3 text-white outline-none transition focus:border-brand-periwinkle';
+  'w-full border-0 border-b-2 border-[#221E1A]/20 bg-transparent px-1 py-3 text-[#241F1A] outline-none transition focus:border-brand-periwinkle';
 const sectionTitleClass = 'text-2xl font-extrabold uppercase tracking-wide text-brand-periwinkle';
 // Tạm ẩn mục Tài khoản liên kết — dữ liệu linkedProviders đang không khớp với tài khoản đăng nhập Google thực tế.
 const SHOW_LINKED_ACCOUNTS = false;
@@ -414,8 +414,7 @@ export function SecuritySettingsForm() {
     <div className="mx-auto max-w-3xl space-y-8">
       <section className="glass-container space-y-4 rounded-[32px] p-6 md:p-8">
         <p className={sectionTitleClass}>Đổi Username</p>
-        <p className="text-sm text-outline">
-          Username hiện tại: <span className="text-white">{originalUsername ?? 'Chưa đặt'}</span>
+        <p className="text-sm text-outline"> Username hiện tại: <span className="text-[#241F1A]">{originalUsername ?? 'Chưa đặt'}</span>
         </p>
         <div>
           <div className="relative">
@@ -423,7 +422,7 @@ export function SecuritySettingsForm() {
               value={username}
               onChange={(event) => setUsername(event.target.value)}
               onBlur={() => setUsernameTouched(true)}
-              className={`${inputClass} pr-10 ${usernameError ? 'border-red-400' : ''}`}
+              className={`${inputClass} pr-10 ${usernameError ? 'border-[#A8321C]/30' : ''}`}
               placeholder="vd: nguyenvanan"
             />
             {username.trim() && USERNAME_REGEX.test(username.trim()) && (
@@ -431,16 +430,16 @@ export function SecuritySettingsForm() {
                 {isCheckingUsername ? (
                   <span className="text-outline">...</span>
                 ) : usernameAvailable === true ? (
-                  <span className="text-emerald-400">✓</span>
+                  <span className="text-[#2F6B63]">✓</span>
                 ) : usernameAvailable === false ? (
-                  <span className="text-red-400">✗</span>
+                  <span className="text-[#A8321C]">✗</span>
                 ) : null}
               </span>
             )}
           </div>
-          {usernameError && <p className="mt-1 text-xs text-red-400">{usernameError}</p>}
+          {usernameError && <p className="mt-1 text-xs text-[#A8321C]">{usernameError}</p>}
           {!usernameError && !isCheckingUsername && usernameAvailable === false && (
-            <p className="mt-1 text-xs text-red-400">Username này đã có người dùng hoặc không thể sử dụng.</p>
+            <p className="mt-1 text-xs text-[#A8321C]">Username này đã có người dùng hoặc không thể sử dụng.</p>
           )}
         </div>
 
@@ -451,10 +450,10 @@ export function SecuritySettingsForm() {
               value={currentPasswordForUsername}
               onChange={(event) => setCurrentPasswordForUsername(event.target.value)}
               onBlur={() => setUsernamePasswordTouched(true)}
-              className={`${inputClass} ${usernamePasswordError ? 'border-red-400' : ''}`}
+              className={`${inputClass} ${usernamePasswordError ? 'border-[#A8321C]/30' : ''}`}
               placeholder="Mật khẩu hiện tại (để xác nhận đổi username)"
             />
-            {usernamePasswordError && <p className="mt-1 text-xs text-red-400">{usernamePasswordError}</p>}
+            {usernamePasswordError && <p className="mt-1 text-xs text-[#A8321C]">{usernamePasswordError}</p>}
           </div>
         )}
 
@@ -470,24 +469,19 @@ export function SecuritySettingsForm() {
 
       <section className="glass-container space-y-4 rounded-[32px] p-6 md:p-8">
         <p className={sectionTitleClass}>Đổi Email</p>
-        <p className="text-sm text-on-surface-variant">
-          Email hiện tại: <span className="text-white">{user?.email ? maskEmail(user.email) : ''}</span>
+        <p className="text-sm text-on-surface-variant"> Email hiện tại: <span className="text-[#241F1A]">{user?.email ? maskEmail(user.email) : ''}</span>
         </p>
 
         {emailStep === 'idle' && linkedAccounts && !linkedAccounts.hasPassword && (
           <div className="space-y-3">
-            <p className="text-xs text-outline">
-              Tài khoản của bạn đăng nhập bằng Google, chưa có mật khẩu. Để đổi email, cần xác thực lại qua email
-              hiện tại trước.
-            </p>
+            <p className="text-xs text-outline"> Tài khoản của bạn đăng nhập bằng Google, chưa có mật khẩu. Để đổi email, cần xác thực lại qua email
+ hiện tại trước. </p>
             <button
               type="button"
               onClick={handleRequestEmailReauth}
               disabled={isEmailSubmitting}
               className="rounded-xl border border-brand-periwinkle/30 bg-brand-periwinkle/15 px-4 py-2.5 text-sm font-bold text-brand-periwinkle transition hover:bg-brand-periwinkle/25 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              Gửi mã xác thực tới email hiện tại
-            </button>
+            > Gửi mã xác thực tới email hiện tại </button>
           </div>
         )}
 
@@ -515,7 +509,7 @@ export function SecuritySettingsForm() {
                   value={newEmail}
                   onChange={(event) => setNewEmail(event.target.value)}
                   onBlur={() => markEmailTouched('newEmail')}
-                  className={`${inputClass} ${emailErrors.newEmail ? 'border-red-400' : ''}`}
+                  className={`${inputClass} ${emailErrors.newEmail ? 'border-[#A8321C]/30' : ''}`}
                   placeholder="Email mới"
                 />
                 <button
@@ -523,11 +517,9 @@ export function SecuritySettingsForm() {
                   onClick={handleRequestCode}
                   disabled={isEmailSubmitting}
                   className="shrink-0 rounded-xl border border-brand-periwinkle/30 bg-brand-periwinkle/15 px-4 text-sm font-bold text-brand-periwinkle transition hover:bg-brand-periwinkle/25 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  Gửi mã
-                </button>
+                > Gửi mã </button>
               </div>
-              {emailErrors.newEmail && <p className="mt-1 text-xs text-red-400">{emailErrors.newEmail}</p>}
+              {emailErrors.newEmail && <p className="mt-1 text-xs text-[#A8321C]">{emailErrors.newEmail}</p>}
             </div>
           </div>
         )}
@@ -548,7 +540,7 @@ export function SecuritySettingsForm() {
                   value={newEmail}
                   onChange={(event) => setNewEmail(event.target.value)}
                   onBlur={() => markEmailTouched('newEmail')}
-                  className={`${inputClass} ${emailErrors.newEmail ? 'border-red-400' : ''}`}
+                  className={`${inputClass} ${emailErrors.newEmail ? 'border-[#A8321C]/30' : ''}`}
                   placeholder="Email mới"
                 />
                 <button
@@ -556,15 +548,11 @@ export function SecuritySettingsForm() {
                   onClick={handleRequestCode}
                   disabled={isEmailSubmitting}
                   className="shrink-0 rounded-xl border border-brand-periwinkle/30 bg-brand-periwinkle/15 px-4 text-sm font-bold text-brand-periwinkle transition hover:bg-brand-periwinkle/25 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  Gửi mã
-                </button>
+                > Gửi mã </button>
               </div>
-              {emailErrors.newEmail && <p className="mt-1 text-xs text-red-400">{emailErrors.newEmail}</p>}
+              {emailErrors.newEmail && <p className="mt-1 text-xs text-[#A8321C]">{emailErrors.newEmail}</p>}
             </div>
-            <button type="button" onClick={resetEmailFlow} className="text-xs text-outline hover:text-white">
-              Hủy
-            </button>
+            <button type="button" onClick={resetEmailFlow} className="text-xs text-outline hover:text-[#241F1A]"> Hủy </button>
           </div>
         )}
 
@@ -578,7 +566,7 @@ export function SecuritySettingsForm() {
                   onChange={(event) => setEmailCode(event.target.value)}
                   onBlur={() => markEmailTouched('code')}
                   maxLength={6}
-                  className={`${inputClass} ${emailErrors.code ? 'border-red-400' : ''}`}
+                  className={`${inputClass} ${emailErrors.code ? 'border-[#A8321C]/30' : ''}`}
                   placeholder="Mã 6 số"
                 />
                 <button
@@ -586,15 +574,11 @@ export function SecuritySettingsForm() {
                   onClick={handleConfirmEmail}
                   disabled={isEmailSubmitting}
                   className="shrink-0 rounded-xl border border-brand-periwinkle/30 bg-brand-periwinkle/15 px-4 text-sm font-bold text-brand-periwinkle transition hover:bg-brand-periwinkle/25 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  Xác nhận
-                </button>
+                > Xác nhận </button>
               </div>
-              {emailErrors.code && <p className="mt-1 text-xs text-red-400">{emailErrors.code}</p>}
+              {emailErrors.code && <p className="mt-1 text-xs text-[#A8321C]">{emailErrors.code}</p>}
             </div>
-            <button type="button" onClick={resetEmailFlow} className="text-xs text-outline hover:text-white">
-              Hủy
-            </button>
+            <button type="button" onClick={resetEmailFlow} className="text-xs text-outline hover:text-[#241F1A]"> Hủy </button>
           </div>
         )}
       </section>
@@ -604,10 +588,8 @@ export function SecuritySettingsForm() {
           {linkedAccounts?.hasPassword ? 'Đổi mật khẩu' : 'Đặt mật khẩu'}
         </p>
         {linkedAccounts && !linkedAccounts.hasPassword && (
-          <p className="text-xs text-outline">
-            Tài khoản của bạn đang đăng nhập bằng Google, chưa có mật khẩu. Đặt mật khẩu để có thể đăng nhập bằng
-            email/mật khẩu.
-          </p>
+          <p className="text-xs text-outline"> Tài khoản của bạn đang đăng nhập bằng Google, chưa có mật khẩu. Đặt mật khẩu để có thể đăng nhập bằng
+ email/mật khẩu. </p>
         )}
         {linkedAccounts?.hasPassword && (
           <div>
@@ -618,12 +600,12 @@ export function SecuritySettingsForm() {
               onBlur={() => markPasswordTouched('currentPassword')}
               disabled={passwordStep === 'code'}
               className={`${inputClass} disabled:cursor-not-allowed disabled:opacity-50 ${
-                passwordErrors.currentPassword ? 'border-red-400' : ''
+                passwordErrors.currentPassword ? 'border-[#A8321C]/30' : ''
               }`}
               placeholder="Mật khẩu hiện tại"
             />
             {passwordErrors.currentPassword && (
-              <p className="mt-1 text-xs text-red-400">{passwordErrors.currentPassword}</p>
+              <p className="mt-1 text-xs text-[#A8321C]">{passwordErrors.currentPassword}</p>
             )}
           </div>
         )}
@@ -635,11 +617,11 @@ export function SecuritySettingsForm() {
             onBlur={() => markPasswordTouched('newPassword')}
             disabled={passwordStep === 'code'}
             className={`${inputClass} disabled:cursor-not-allowed disabled:opacity-50 ${
-              passwordErrors.newPassword ? 'border-red-400' : ''
+              passwordErrors.newPassword ? 'border-[#A8321C]/30' : ''
             }`}
             placeholder="Mật khẩu mới"
           />
-          {passwordErrors.newPassword && <p className="mt-1 text-xs text-red-400">{passwordErrors.newPassword}</p>}
+          {passwordErrors.newPassword && <p className="mt-1 text-xs text-[#A8321C]">{passwordErrors.newPassword}</p>}
         </div>
         <div>
           <input
@@ -649,12 +631,12 @@ export function SecuritySettingsForm() {
             onBlur={() => markPasswordTouched('confirmPassword')}
             disabled={passwordStep === 'code'}
             className={`${inputClass} disabled:cursor-not-allowed disabled:opacity-50 ${
-              passwordErrors.confirmPassword ? 'border-red-400' : ''
+              passwordErrors.confirmPassword ? 'border-[#A8321C]/30' : ''
             }`}
             placeholder="Xác nhận mật khẩu mới"
           />
           {passwordErrors.confirmPassword && (
-            <p className="mt-1 text-xs text-red-400">{passwordErrors.confirmPassword}</p>
+            <p className="mt-1 text-xs text-[#A8321C]">{passwordErrors.confirmPassword}</p>
           )}
         </div>
 
@@ -664,9 +646,7 @@ export function SecuritySettingsForm() {
             onClick={handleSendPasswordOtp}
             disabled={isPasswordSubmitting}
             className="w-full rounded-xl border border-brand-periwinkle/30 bg-brand-periwinkle/15 py-3 text-sm font-bold text-brand-periwinkle transition hover:bg-brand-periwinkle/25 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            Gửi mã xác minh
-          </button>
+          > Gửi mã xác minh </button>
         ) : (
           <div className="space-y-3">
             <p className="text-xs text-outline">Mã xác minh đã gửi tới email {user?.email}.</p>
@@ -675,10 +655,10 @@ export function SecuritySettingsForm() {
               onChange={(event) => setPasswordOtpCode(event.target.value)}
               onBlur={() => setPasswordOtpTouched(true)}
               maxLength={6}
-              className={`${inputClass} ${passwordOtpError ? 'border-red-400' : ''}`}
+              className={`${inputClass} ${passwordOtpError ? 'border-[#A8321C]/30' : ''}`}
               placeholder="Mã 6 số"
             />
-            {passwordOtpError && <p className="mt-1 text-xs text-red-400">{passwordOtpError}</p>}
+            {passwordOtpError && <p className="mt-1 text-xs text-[#A8321C]">{passwordOtpError}</p>}
             <button
               type="button"
               onClick={handleConfirmChangePassword}
@@ -690,10 +670,8 @@ export function SecuritySettingsForm() {
             <button
               type="button"
               onClick={handleCancelPasswordOtp}
-              className="text-xs text-outline hover:text-white"
-            >
-              Hủy
-            </button>
+              className="text-xs text-outline hover:text-[#241F1A]"
+            > Hủy </button>
           </div>
         )}
       </section>
@@ -705,19 +683,17 @@ export function SecuritySettingsForm() {
             linkedAccounts.linkedProviders.map((provider) => (
               <div
                 key={provider}
-                className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-3"
+                className="flex items-center justify-between rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-4 py-3"
               >
-                <span className="flex items-center gap-2 text-sm text-white">
+                <span className="flex items-center gap-2 text-sm text-[#241F1A]">
                   <ShieldCheck className="h-4 w-4 text-brand-periwinkle" />
                   {provider}
                 </span>
                 <button
                   type="button"
                   onClick={() => handleUnlink(provider)}
-                  className="text-xs font-semibold text-red-400 hover:underline"
-                >
-                  Gỡ liên kết
-                </button>
+                  className="text-xs font-semibold text-[#A8321C] hover:underline"
+                > Gỡ liên kết </button>
               </div>
             ))
           ) : (
@@ -727,10 +703,8 @@ export function SecuritySettingsForm() {
             <button
               type="button"
               onClick={triggerGoogleLink}
-              className="w-full rounded-xl border border-white/10 bg-white/5 py-3 text-sm font-semibold text-white transition hover:border-brand-periwinkle hover:text-brand-periwinkle"
-            >
-              Liên kết Google
-            </button>
+              className="w-full rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] py-3 text-sm font-semibold text-[#241F1A] transition hover:border-brand-periwinkle hover:text-brand-periwinkle"
+            > Liên kết Google </button>
           )}
         </section>
       )}
@@ -741,17 +715,15 @@ export function SecuritySettingsForm() {
           <button
             type="button"
             onClick={handleRevokeOthers}
-            className="text-xs font-semibold text-red-400 hover:underline"
-          >
-            Đăng xuất tất cả thiết bị khác
-          </button>
+            className="text-xs font-semibold text-[#A8321C] hover:underline"
+          > Đăng xuất tất cả thiết bị khác </button>
         </div>
         {isLoadingSessions ? (
           <p className="text-sm text-outline">Đang tải...</p>
         ) : sessions.length === 0 ? (
           <p className="text-sm text-outline">Không có phiên nào.</p>
         ) : (
-          <div className="divide-y divide-white/10">
+          <div className="divide-y divide-[#221E1A]/10">
             {sessions.map((session) => (
               <div
                 key={session.id}
@@ -760,12 +732,10 @@ export function SecuritySettingsForm() {
                 <div className="flex items-start gap-2.5">
                   <Laptop className="mt-0.5 h-4 w-4 shrink-0 text-brand-periwinkle" />
                   <div>
-                    <p className="text-sm text-white">
+                    <p className="text-sm text-[#241F1A]">
                       {session.userAgent ? session.userAgent.slice(0, 60) : 'Thiết bị không xác định'}
                       {session.isCurrent && (
-                        <span className="ml-2 rounded-full bg-brand-periwinkle/15 px-2 py-0.5 text-[10px] text-brand-periwinkle">
-                          Thiết bị này
-                        </span>
+                        <span className="ml-2 rounded-full bg-brand-periwinkle/15 px-2 py-0.5 text-[10px] text-brand-periwinkle"> Thiết bị này </span>
                       )}
                     </p>
                     <p className="text-xs text-outline">
@@ -778,7 +748,7 @@ export function SecuritySettingsForm() {
                   <button
                     type="button"
                     onClick={() => handleRevokeSession(session.id)}
-                    className="shrink-0 rounded-full p-2 text-on-surface-variant transition hover:bg-white/10 hover:text-red-400"
+                    className="shrink-0 rounded-full p-2 text-on-surface-variant transition hover:bg-[#F0E7D8] hover:text-[#A8321C]"
                     aria-label="Đăng xuất thiết bị này"
                   >
                     <Trash2 className="h-4 w-4" />

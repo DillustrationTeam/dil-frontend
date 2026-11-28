@@ -71,8 +71,14 @@ export function useAuctionHub(
         await getSignalRAccessToken();
         if (!active) return;
 
-        const hubConnection: HubConnection = new HubConnectionBuilder()
-          .withUrl(auctionHubUrl(), { accessTokenFactory: getSignalRAccessToken })
+        const hubUrl = auctionHubUrl();
+    // Chưa cấu hình NEXT_PUBLIC_SIGNALR_URL → bỏ qua, không spam 404 /hubs/...
+    if (!hubUrl) {
+      return;
+    }
+
+    const hubConnection: HubConnection = new HubConnectionBuilder()
+          .withUrl(hubUrl, { accessTokenFactory: getSignalRAccessToken })
           .withAutomaticReconnect()
           .configureLogging(LogLevel.Warning)
           .build();

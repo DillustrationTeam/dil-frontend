@@ -15,6 +15,7 @@ import {
   DisputeArbitrationDetailDto,
   ResolveDisputeArbitrationRequest,
 } from '@/features/admin/types/dispute-arbitration.types';
+import { useLanguage } from '@/context/language-context';
 
 interface DisputeSettlementFormProps {
   dispute: DisputeArbitrationDetailDto;
@@ -27,6 +28,8 @@ export function DisputeSettlementForm({
   isSubmitting,
   onResolve,
 }: DisputeSettlementFormProps) {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
   const isResolved = dispute.status === 'Resolved';
   const totalEscrow = dispute.escrowHeldAmount ?? dispute.finalPrice;
   const totalSettledAmount =
@@ -100,16 +103,16 @@ export function DisputeSettlementForm({
     <div className="glass-card p-6 space-y-6 flex flex-col justify-between h-full">
       <div className="space-y-6">
         {/* Title & Section Badge */}
-        <div className="flex items-center justify-between pb-3 border-b border-white/10">
+        <div className="flex items-center justify-between pb-3 border-b border-[#221E1A]/10">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-purple-500/20 border border-purple-500/40 flex items-center justify-center text-purple-300">
+            <div className="w-8 h-8 rounded-xl bg-[#5F3F86]/20 border border-[#5F3F86]/40 flex items-center justify-center text-[#5F3F86]">
               <Gavel className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="font-h1 font-bold text-white text-sm">
+              <h3 className="font-h1 font-bold text-[#241F1A] text-sm">
                 Admin Arbitration &amp; Refund Settlement
               </h3>
-              <p className="text-[11px] text-[#8A8FA9]">
+              <p className="text-[11px] text-[#6E6459]">
                 Arbitration Protocol • Atomic Escrow Ledger
               </p>
             </div>
@@ -118,8 +121,8 @@ export function DisputeSettlementForm({
           <span
             className={`px-3 py-1 text-[11px] font-bold rounded-full border ${
               isResolved
-                ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
-                : 'bg-red-500/20 text-red-300 border-red-500/30 animate-pulse'
+                ? 'bg-[#2F6B63]/20 text-[#2F6B63] border-[#2F6B63]/40'
+                : 'bg-[#A8321C]/20 text-[#A8321C] border-[#A8321C]/40 animate-pulse'
             }`}
           >
             {isResolved ? 'SETTLED' : 'DISPUTED'}
@@ -128,30 +131,30 @@ export function DisputeSettlementForm({
 
         {/* Resolved Banner if ticket is already closed */}
         {isResolved && (
-          <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 space-y-2">
-            <div className="flex items-center gap-2 text-emerald-400 font-bold text-xs">
+          <div className="p-4 rounded-2xl bg-[#2F6B63]/10 border border-[#2F6B63]/40 space-y-2">
+            <div className="flex items-center gap-2 text-[#2F6B63] font-bold text-xs">
               <CheckCircle2 className="w-4 h-4" />
               <span>Dispute Dossier Closed &amp; Arbitrated</span>
             </div>
-            <p className="text-[11px] text-emerald-200/90 leading-relaxed">
+            <p className="text-[11px] text-[#2F6B63] leading-relaxed">
               This dispute was resolved on{' '}
               {dispute.resolvedAt
                 ? new Date(dispute.resolvedAt).toLocaleString('vi-VN')
                 : 'N/A'}{' '}
-              by Moderator <strong className="text-white">@{dispute.moderatorName || 'Admin'}</strong>.
+              by Moderator <strong className="text-[#241F1A]">@{dispute.moderatorName || 'Admin'}</strong>.
             </p>
-            <div className="pt-2 border-t border-emerald-500/20 text-[11px] flex justify-between font-mono">
-              <span className="text-emerald-300">
+            <div className="pt-2 border-t border-[#2F6B63]/30 text-[11px] flex justify-between font-mono">
+              <span className="text-[#2F6B63]">
                 Client Refund: {resolvedClientPercent}% (
                 {(dispute.clientRefundAmount ?? clientAmount).toLocaleString('vi-VN')} ₫)
               </span>
-              <span className="text-[#C5C9F8]">
+              <span className="text-[#8C3718]">
                 Creator Payout: {resolvedCreatorPercent}% (
                 {(dispute.artistPayAmount ?? creatorAmount).toLocaleString('vi-VN')} ₫)
               </span>
             </div>
             {dispute.adminNote && (
-              <div className="pt-2 text-[11px] text-[#C5C9F8] italic">
+              <div className="pt-2 text-[11px] text-[#8C3718] italic">
                 &ldquo;{dispute.adminNote}&rdquo;
               </div>
             )}
@@ -159,64 +162,68 @@ export function DisputeSettlementForm({
         )}
 
         {/* Escrow Pool Summary Box */}
-        <div className="p-4 rounded-2xl bg-black/40 border border-white/10 space-y-3">
+        <div className="p-4 rounded-2xl bg-[#F0E7D8] border border-[#221E1A]/10 space-y-3">
           <div className="flex items-center justify-between text-[11px]">
-            <span className="text-[#8A8FA9] flex items-center gap-1.5 font-medium">
-              <Lock className="w-3.5 h-3.5 text-amber-400" />
+            <span className="text-[#6E6459] flex items-center gap-1.5 font-medium">
+              <Lock className="w-3.5 h-3.5 text-[#8A6A1F]" />
               Locked Escrow Pool
             </span>
-            <span className="font-mono font-bold text-white text-sm">
+            <span className="font-mono font-bold text-[#241F1A] text-sm">
               {totalEscrow.toLocaleString('vi-VN')} ₫
             </span>
           </div>
 
-          <div className="flex items-center justify-between text-[10px] text-[#8A8FA9] border-t border-white/5 pt-2">
+          <div className="flex items-center justify-between text-[10px] text-[#6E6459] border-t border-[#221E1A]/10 pt-2">
             <span>Commission Total: {dispute.finalPrice.toLocaleString('vi-VN')} ₫</span>
             <span>Disbursed so far: {dispute.disbursedAmount.toLocaleString('vi-VN')} ₫</span>
           </div>
         </div>
 
         {/* Atomic Escrow Refund Distribution Slider & Live Calculator */}
-        <div className="space-y-4 bg-black/40 p-5 rounded-2xl border border-white/10">
+        <div className="space-y-4 bg-[#F0E7D8] p-5 rounded-2xl border border-[#221E1A]/10">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] text-[#8A8FA9] font-bold uppercase tracking-wider block">
-              {isResolved ? 'SETTLEMENT RESULT' : `ESCROW REFUND SPLIT (${totalEscrow.toLocaleString('vi-VN')} VND)`}
+            <span className="text-[10px] text-[#6E6459] font-bold uppercase tracking-wider block">
+              {isResolved
+                ? (isVie ? 'KẾT QUẢ PHÂN XỬ' : 'SETTLEMENT RESULT')
+                : (isVie ? `CHIA KÝ QUỸ (${totalEscrow.toLocaleString('vi-VN')} VND)` : `ESCROW REFUND SPLIT (${totalEscrow.toLocaleString('vi-VN')} VND)`)}
             </span>
-            <span className="text-[10px] font-mono text-purple-300 font-bold bg-purple-500/10 px-2 py-0.5 rounded border border-purple-500/30">
+            <span className="text-[10px] font-mono text-[#5F3F86] font-bold bg-[#5F3F86]/10 px-2 py-0.5 rounded border border-[#5F3F86]/40">
               {clientRefundPercent}% / {100 - clientRefundPercent}%
             </span>
           </div>
 
           {/* Real-time calculated amounts */}
-          <div className="grid grid-cols-2 gap-3 p-3 rounded-xl bg-white/[0.03] border border-white/5">
+          <div className="grid grid-cols-2 gap-3 p-3 rounded-xl bg-[#FFFCF6] border border-[#221E1A]/10">
             <div className="space-y-0.5">
-              <div className="text-[10px] text-emerald-400 font-bold flex items-center gap-1">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 inline-block" />
-                Client Refund ({clientRefundPercent}%)
+              <div className="text-[10px] text-[#2F6B63] font-bold flex items-center gap-1">
+                <span className="w-2 h-2 rounded-full bg-[#2F6B63]/10 inline-block" />
+                {isVie ? `Hoàn Khách (${clientRefundPercent}%)` : `Client Refund (${clientRefundPercent}%)`}
               </div>
-              <div className="font-mono text-base font-bold text-white">
+              <div className="font-mono text-base font-bold text-[#241F1A]">
                 {clientAmount.toLocaleString('vi-VN')} ₫
               </div>
-              <div className="text-[10px] text-[#8A8FA9] truncate">
-                To @{dispute.client.userName}
+              <div className="text-[10px] text-[#6E6459] truncate">
+                {isVie ? `Tới @${dispute.client.userName}` : `To @${dispute.client.userName}`}
               </div>
             </div>
 
             <div className="space-y-0.5 text-right">
-              <div className="text-[10px] text-[#C5C9F8] font-bold flex items-center justify-end gap-1">
-                Creator Payout ({100 - clientRefundPercent}%)
-                <span className="w-2 h-2 rounded-full bg-[#C5C9F8] inline-block" />
+              <div className="text-[10px] text-[#8C3718] font-bold flex items-center justify-end gap-1">
+                {isVie ? `Trả Họa sĩ (${100 - clientRefundPercent}%)` : `Creator Payout (${100 - clientRefundPercent}%)`}
+                <span className="w-2 h-2 rounded-full bg-[#8C3718] inline-block" />
               </div>
-              <div className="font-mono text-base font-bold text-white">
+              <div className="font-mono text-base font-bold text-[#241F1A]">
                 {creatorAmount.toLocaleString('vi-VN')} ₫
               </div>
               {!isResolved && platformFee > 0 && (
-                <div className="text-[10px] text-amber-300/80 font-medium">
-                  (Đã trừ 10% phí: {platformFee.toLocaleString('vi-VN')} ₫)
+                <div className="text-[10px] text-[#8A6A1F] font-medium">
+                  {isVie
+                    ? `(Đã trừ 10% phí: ${platformFee.toLocaleString('vi-VN')} ₫)`
+                    : `(After 10% fee: ${platformFee.toLocaleString('vi-VN')} ₫)`}
                 </div>
               )}
-              <div className="text-[10px] text-[#8A8FA9] truncate">
-                To @{dispute.creator.userName}
+              <div className="text-[10px] text-[#6E6459] truncate">
+                {isVie ? `Tới @${dispute.creator.userName}` : `To @${dispute.creator.userName}`}
               </div>
             </div>
           </div>
@@ -231,10 +238,10 @@ export function DisputeSettlementForm({
               disabled={isResolved || isSubmitting}
               value={clientRefundPercent}
               onChange={(e) => setClientRefundPercent(Number(e.target.value))}
-              className="w-full h-2 bg-gradient-to-r from-emerald-500 via-purple-500 to-indigo-500 rounded-lg appearance-none cursor-pointer accent-white disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full h-2 bg-gradient-to-r from-[#2F6B63] via-[#5F3F86] to-[#3B4C86] rounded-lg appearance-none cursor-pointer accent-white disabled:opacity-50 disabled:cursor-not-allowed"
             />
 
-            <div className="flex justify-between text-[10px] text-[#8A8FA9] font-mono">
+            <div className="flex justify-between text-[10px] text-[#6E6459] font-mono">
               <span>0% (100% Creator)</span>
               <span>50 / 50 Equal</span>
               <span>100% (100% Client)</span>
@@ -243,8 +250,8 @@ export function DisputeSettlementForm({
 
           {/* Quick Preset Buttons */}
           {!isResolved && (
-            <div className="pt-2 border-t border-white/5 flex items-center gap-2">
-              <span className="text-[10px] text-[#8A8FA9] font-medium shrink-0">Presets:</span>
+            <div className="pt-2 border-t border-[#221E1A]/10 flex items-center gap-2">
+              <span className="text-[10px] text-[#6E6459] font-medium shrink-0">Presets:</span>
               <div className="flex items-center gap-1.5 flex-wrap">
                 <button
                   type="button"
@@ -252,8 +259,8 @@ export function DisputeSettlementForm({
                   onClick={() => setClientRefundPercent(100)}
                   className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all border ${
                     clientRefundPercent === 100
-                      ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 shadow-sm'
-                      : 'bg-white/5 text-[#8A8FA9] border-white/5 hover:bg-white/10 hover:text-white'
+                      ? 'bg-[#2F6B63]/20 text-[#2F6B63] border-[#2F6B63]/40 shadow-sm'
+                      : 'bg-[#FFFCF6] text-[#6E6459] border-[#221E1A]/10 hover:bg-[#F0E7D8] hover:text-[#241F1A]'
                   }`}
                 >
                   100% Client
@@ -265,8 +272,8 @@ export function DisputeSettlementForm({
                   onClick={() => setClientRefundPercent(50)}
                   className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all border ${
                     clientRefundPercent === 50
-                      ? 'bg-purple-500/20 text-purple-300 border-purple-500/40 shadow-sm'
-                      : 'bg-white/5 text-[#8A8FA9] border-white/5 hover:bg-white/10 hover:text-white'
+                      ? 'bg-[#5F3F86]/20 text-[#5F3F86] border-[#5F3F86]/40 shadow-sm'
+                      : 'bg-[#FFFCF6] text-[#6E6459] border-[#221E1A]/10 hover:bg-[#F0E7D8] hover:text-[#241F1A]'
                   }`}
                 >
                   50 / 50 Split
@@ -278,8 +285,8 @@ export function DisputeSettlementForm({
                   onClick={() => setClientRefundPercent(0)}
                   className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all border ${
                     clientRefundPercent === 0
-                      ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40 shadow-sm'
-                      : 'bg-white/5 text-[#8A8FA9] border-white/5 hover:bg-white/10 hover:text-white'
+                      ? 'bg-[#3B4C86]/20 text-[#3B4C86] border-[#3B4C86]/40 shadow-sm'
+                      : 'bg-[#FFFCF6] text-[#6E6459] border-[#221E1A]/10 hover:bg-[#F0E7D8] hover:text-[#241F1A]'
                   }`}
                 >
                   100% Creator
@@ -292,12 +299,12 @@ export function DisputeSettlementForm({
         {/* Form: Admin Arbitration Note & Reason */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="flex items-center justify-between font-bold text-white text-xs mb-2">
+            <label className="flex items-center justify-between font-bold text-[#241F1A] text-xs mb-2">
               <span className="flex items-center gap-1.5">
-                <FileText className="w-3.5 h-3.5 text-red-400" />
+                <FileText className="w-3.5 h-3.5 text-[#A8321C]" />
                 Admin Arbitration Reason &amp; Audit Note
               </span>
-              <span className="text-[10px] text-[#8A8FA9] font-normal">
+              <span className="text-[10px] text-[#6E6459] font-normal">
                 Required for Audit Log
               </span>
             </label>
@@ -308,13 +315,13 @@ export function DisputeSettlementForm({
               value={adminNote}
               onChange={(e) => setAdminNote(e.target.value)}
               placeholder="e.g. Partitioning escrow 50/50 based on partial deliverable completion and mutual communication breakdown..."
-              className="w-full px-3.5 py-2.5 bg-black/40 rounded-xl border border-white/10 text-white text-xs placeholder:text-[#8A8FA9]/60 focus:outline-none focus:border-red-400 focus:ring-1 focus:ring-red-400/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed resize-none"
+              className="w-full px-3.5 py-2.5 bg-[#F0E7D8] rounded-xl border border-[#221E1A]/10 text-[#241F1A] text-xs placeholder:text-[#6E6459] focus:outline-none focus:border-[#A8321C]/30 focus:ring-1 focus:ring-[#A8321C]/40 transition-all disabled:opacity-50 disabled:cursor-not-allowed resize-none"
             />
           </div>
 
           {/* Operational Safety Warning */}
-          <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-start gap-2.5 text-[11px] text-amber-200/90 leading-relaxed">
-            <ShieldAlert className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+          <div className="p-3 rounded-xl bg-[#8A6A1F]/10 border border-[#8A6A1F]/30 flex items-start gap-2.5 text-[11px] text-[#8A6A1F] leading-relaxed">
+            <ShieldAlert className="w-4 h-4 text-[#8A6A1F] shrink-0 mt-0.5" />
             <span>
               <strong>Atomic Settlement:</strong> Upon execution, locked escrow funds are
               instantly distributed to user digital wallets and the commission status is set to
@@ -327,7 +334,7 @@ export function DisputeSettlementForm({
             <button
               type="submit"
               disabled={isSubmitting || !adminNote.trim()}
-              className="w-full py-4 bg-gradient-to-r from-red-500 via-purple-600 to-indigo-600 hover:from-red-400 hover:to-indigo-500 text-white font-extrabold rounded-2xl text-xs transition-all shadow-[0_4px_25px_rgba(239,68,68,0.25)] hover:shadow-[0_4px_30px_rgba(239,68,68,0.4)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
+              className="w-full py-4 bg-gradient-to-r from-[#A8321C] via-[#5F3F86] to-[#3B4C86] hover:from-[#A8321C] hover:to-[#3B4C86] text-[#241F1A] font-extrabold rounded-2xl text-xs transition-all shadow-[0_4px_25px_rgba(239,68,68,0.25)] hover:shadow-[0_4px_30px_rgba(239,68,68,0.4)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
             >
               {isSubmitting ? (
                 <>
@@ -342,7 +349,7 @@ export function DisputeSettlementForm({
               )}
             </button>
           ) : (
-            <div className="text-center py-3 text-xs text-[#8A8FA9] bg-white/5 rounded-xl border border-white/5">
+            <div className="text-center py-3 text-xs text-[#6E6459] bg-[#FFFCF6] rounded-xl border border-[#221E1A]/10">
               Dispute ticket is already settled and locked.
             </div>
           )}
@@ -351,43 +358,43 @@ export function DisputeSettlementForm({
 
       {/* Confirmation Modal */}
       {confirmModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-fadeIn">
-          <div className="w-full max-w-md p-6 rounded-3xl bg-[#161926] border border-red-500/30 shadow-[0_20px_50px_rgba(0,0,0,0.8)] space-y-5 animate-scaleUp">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#F0E7D8]/75 backdrop-blur-sm animate-fadeIn">
+          <div className="w-full max-w-md p-6 rounded-3xl bg-[#FFFCF6] border border-[#A8321C]/40 shadow-[0_20px_50px_rgba(0,0,0,0.8)] space-y-5 animate-scaleUp">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-red-500/20 border border-red-500/40 flex items-center justify-center text-red-400">
+              <div className="w-10 h-10 rounded-2xl bg-[#A8321C]/20 border border-[#A8321C]/40 flex items-center justify-center text-[#A8321C]">
                 <AlertTriangle className="w-5 h-5" />
               </div>
               <div>
-                <h4 className="font-h1 font-bold text-white text-base">
+                <h4 className="font-h1 font-bold text-[#241F1A] text-base">
                   Confirm Escrow Execution
                 </h4>
-                <p className="text-[11px] text-[#8A8FA9]">
+                <p className="text-[11px] text-[#6E6459]">
                   Ticket #{dispute.disputeId.substring(0, 8)}
                 </p>
               </div>
             </div>
 
-            <div className="p-4 rounded-2xl bg-black/40 border border-white/10 space-y-2 text-xs">
+            <div className="p-4 rounded-2xl bg-[#F0E7D8] border border-[#221E1A]/10 space-y-2 text-xs">
               <div className="flex justify-between">
-                <span className="text-[#8A8FA9]">Total Escrow:</span>
-                <span className="font-mono font-bold text-white">
+                <span className="text-[#6E6459]">Total Escrow:</span>
+                <span className="font-mono font-bold text-[#241F1A]">
                   {totalEscrow.toLocaleString('vi-VN')} ₫
                 </span>
               </div>
-              <div className="flex justify-between text-emerald-400 font-semibold">
+              <div className="flex justify-between text-[#2F6B63] font-semibold">
                 <span>Client Refund ({clientRefundPercent}%):</span>
                 <span className="font-mono font-bold">
                   {clientAmount.toLocaleString('vi-VN')} ₫
                 </span>
               </div>
-              <div className="flex justify-between text-indigo-300 font-semibold">
+              <div className="flex justify-between text-[#3B4C86] font-semibold">
                 <span>Creator Payout ({100 - clientRefundPercent}% - 10% phí):</span>
                 <span className="font-mono font-bold">
                   {creatorAmount.toLocaleString('vi-VN')} ₫
                 </span>
               </div>
               {platformFee > 0 && (
-                <div className="flex justify-between text-amber-400/90 text-[11px]">
+                <div className="flex justify-between text-[#8A6A1F] text-[11px]">
                   <span>Platform Fee (10%):</span>
                   <span className="font-mono font-bold">
                     {platformFee.toLocaleString('vi-VN')} ₫
@@ -396,9 +403,9 @@ export function DisputeSettlementForm({
               )}
             </div>
 
-            <div className="text-[11px] text-[#8A8FA9] leading-relaxed">
-              <strong className="text-white block mb-1">Arbitration Note:</strong>
-              <div className="p-2.5 rounded-xl bg-white/[0.03] border border-white/5 text-white/90 italic">
+            <div className="text-[11px] text-[#6E6459] leading-relaxed">
+              <strong className="text-[#241F1A] block mb-1">Arbitration Note:</strong>
+              <div className="p-2.5 rounded-xl bg-[#FFFCF6] border border-[#221E1A]/10 text-[#241F1A]/90 italic">
                 &ldquo;{adminNote}&rdquo;
               </div>
             </div>
@@ -408,7 +415,7 @@ export function DisputeSettlementForm({
                 type="button"
                 disabled={isSubmitting}
                 onClick={() => setConfirmModalOpen(false)}
-                className="flex-1 py-3 bg-white/10 hover:bg-white/15 text-white font-bold rounded-xl text-xs transition-all cursor-pointer"
+                className="flex-1 py-3 bg-[#F0E7D8] hover:bg-[#F0E7D8] text-[#241F1A] font-bold rounded-xl text-xs transition-all cursor-pointer"
               >
                 Cancel
               </button>
@@ -416,7 +423,7 @@ export function DisputeSettlementForm({
                 type="button"
                 disabled={isSubmitting}
                 onClick={handleConfirmExecution}
-                className="flex-1 py-3 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl text-xs transition-all flex items-center justify-center gap-2 shadow-lg shadow-red-600/30 cursor-pointer"
+                className="flex-1 py-3 bg-[#A8321C]/12 hover:bg-[#A8321C]/12 text-[#241F1A] font-bold rounded-xl text-xs transition-all flex items-center justify-center gap-2 shadow-lg shadow-[#A8321C] cursor-pointer"
               >
                 {isSubmitting ? (
                   <>

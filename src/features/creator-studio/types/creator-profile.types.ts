@@ -8,6 +8,7 @@ export interface CreatorProfileDto {
   location?: string | null;
   websiteUrl?: string | null;
   bannerUrl?: string | null;
+  avatarUrl?: string | null;
   isAcceptingOrders: boolean;
   isApproved: boolean;
   ratingAverage: number;
@@ -83,6 +84,7 @@ export interface CreatorTermsDto {
   cancellationPolicy?: string | null;
   extended?: CreatorExtendedTermsDto | null;
   updatedAt?: string | null;
+  allowAiReferenceSketch?: boolean;
 }
 
 export interface UpdateCreatorTermsRequest {
@@ -90,6 +92,7 @@ export interface UpdateCreatorTermsRequest {
   revisionPolicy?: string | null;
   cancellationPolicy?: string | null;
   extended?: CreatorExtendedTermsDto | null;
+  allowAiReferenceSketch: boolean;
 }
 
 export interface AutoReplySettingDto {

@@ -1,4 +1,29 @@
 export { AuctionListScreen } from './components/auction-list-screen';
+export { AuctionCard, formatVnd } from './components/auction-card';
+export { RecommendationRail } from './components/recommendation-rail';
+export { SimilarAuctionsRail } from './components/similar-auctions-rail';
+export { AdminRiskQueue } from './components/admin-risk-queue';
+export { RiskBadge, RiskScore } from './components/risk-badge';
+export { RiskDetailDrawer } from './components/risk-detail-drawer';
+export { RiskDetailStrip } from './components/risk-detail-strip';
+export { auctionRiskService } from './services/auction-risk.service';
+export { auctionRecommendationService } from './services/auction-recommendation.service';
+export { riskLevelLabels, riskStatusLabels, riskLevelBadgeClass } from './types/auction-risk.types';
+export type {
+  AuctionRiskAssessmentDto,
+  AuctionRiskLevel,
+  AuctionRiskAssessmentStatus,
+  RiskAlertListItemDto,
+  RiskAlertPage,
+  RiskAlertFilters,
+  RiskSignalDto,
+  MyAuctionRiskFlagDto,
+} from './types/auction-risk.types';
+export type {
+  RecommendedAuctionDto,
+  RecommendationSurface,
+  RecommendationImpressionPayload,
+} from './types/auction-recommendation.types';
 export { AuctionDetailScreen } from './components/auction-detail-screen';
 export { AuctionEditScreen } from './components/auction-edit-screen';
 export { MyPenaltiesScreen } from './components/my-penalties-screen';

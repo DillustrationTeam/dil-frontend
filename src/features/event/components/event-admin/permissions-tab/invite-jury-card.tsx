@@ -127,7 +127,7 @@ export function InviteJuryCard({
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
 
   return (
-    <aside className="glass-container rounded-2xl p-5 sm:p-6 h-fit border border-white/10 bg-[#161926]/90 backdrop-blur-xl flex flex-col gap-4">
+    <aside className="glass-container rounded-2xl p-5 sm:p-6 h-fit border border-[#221E1A]/10 bg-[#FFFCF6]/90 backdrop-blur-xl flex flex-col gap-4">
       <div>
         <div className="flex items-center gap-2 mb-1">
           <UserPlus className="w-5 h-5 text-brand-periwinkle" />
@@ -143,8 +143,8 @@ export function InviteJuryCard({
       </div>
 
       {/* Role to Invite Toggle */}
-      <div className="rounded-xl border border-white/10 bg-[#090b12]/60 p-2.5 flex flex-col gap-1.5">
-        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+      <div className="rounded-xl border border-[#221E1A]/10 bg-[#E5D8C2] p-2.5 flex flex-col gap-1.5">
+        <span className="text-[10px] font-bold uppercase tracking-wider text-[#746A5F]">
           {isVie ? 'Vai trò mời' : 'Invitation Role'}
         </span>
         <div className="grid grid-cols-2 gap-2">
@@ -153,8 +153,8 @@ export function InviteJuryCard({
             onClick={() => setInviteAsHeadJury(false)}
             className={`flex items-center justify-center gap-1.5 py-1.5 px-2.5 rounded-lg text-xs font-bold border transition-all cursor-pointer ${
               !inviteAsHeadJury
-                ? 'border-brand-periwinkle bg-brand-periwinkle/20 text-white'
-                : 'border-white/10 bg-white/5 text-slate-400 hover:bg-white/10'
+                ? 'border-brand-periwinkle bg-brand-periwinkle/20 text-[#241F1A]'
+                : 'border-[#221E1A]/10 bg-[#FFFCF6] text-[#746A5F] hover:bg-[#F0E7D8]'
             }`}
           >
             <UserCheck className="w-3.5 h-3.5 text-brand-periwinkle" />
@@ -171,13 +171,13 @@ export function InviteJuryCard({
             }
             className={`flex items-center justify-center gap-1.5 py-1.5 px-2.5 rounded-lg text-xs font-bold border transition-all ${
               hasHeadJury
-                ? 'border-white/5 bg-white/[0.02] text-slate-600 cursor-not-allowed'
+                ? 'border-[#221E1A]/10 bg-[#FFFCF6] text-[#241F1A] cursor-not-allowed'
                 : inviteAsHeadJury
-                  ? 'border-amber-400 bg-amber-500/20 text-amber-300 cursor-pointer'
-                  : 'border-white/10 bg-white/5 text-slate-400 hover:bg-white/10 cursor-pointer'
+                  ? 'border-[#8A6A1F]/30 bg-[#8A6A1F]/20 text-[#8A6A1F] cursor-pointer'
+                  : 'border-[#221E1A]/10 bg-[#FFFCF6] text-[#746A5F] hover:bg-[#F0E7D8] cursor-pointer'
             }`}
           >
-            <Crown className="w-3.5 h-3.5 text-amber-300" />
+            <Crown className="w-3.5 h-3.5 text-[#8A6A1F]" />
             {isVie ? 'Trưởng ban' : 'Head Jury'}
           </button>
         </div>
@@ -186,19 +186,19 @@ export function InviteJuryCard({
       {/* Search + Role Filter Pills */}
       <div className="space-y-2.5">
         <div className="relative">
-          <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+          <Search className="w-3.5 h-3.5 text-[#746A5F] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder={isVie ? 'Tìm theo tên, username hoặc email...' : 'Search name, username or email...'}
-            className="w-full h-9 pl-8 pr-8 rounded-xl border border-white/10 bg-[#090b12]/70 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-brand-periwinkle focus:ring-1 focus:ring-brand-periwinkle/30 transition-all"
+            className="w-full h-9 pl-8 pr-8 rounded-xl border border-[#221E1A]/10 bg-[#E5D8C2] text-xs text-[#241F1A] placeholder:text-[#746A5F] focus:outline-none focus:border-brand-periwinkle focus:ring-1 focus:ring-brand-periwinkle/30 transition-all"
           />
           {search && (
             <button
               type="button"
               onClick={() => setSearch('')}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white cursor-pointer"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#746A5F] hover:text-[#241F1A] cursor-pointer"
               title={isVie ? 'Xóa tìm kiếm' : 'Clear search'}
             >
               <X className="w-3.5 h-3.5" />
@@ -218,8 +218,8 @@ export function InviteJuryCard({
               onClick={() => setRoleFilter(tab.id)}
               className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all cursor-pointer border ${
                 roleFilter === tab.id
-                  ? 'border-brand-periwinkle/50 bg-brand-periwinkle/20 text-white'
-                  : 'border-white/10 bg-white/5 text-slate-400 hover:text-white hover:bg-white/10'
+                  ? 'border-brand-periwinkle/50 bg-brand-periwinkle/20 text-[#241F1A]'
+                  : 'border-[#221E1A]/10 bg-[#FFFCF6] text-[#746A5F] hover:text-[#241F1A] hover:bg-[#F0E7D8]'
               }`}
             >
               {tab.label}
@@ -231,17 +231,17 @@ export function InviteJuryCard({
       {/* Candidate Directory List */}
       <div className="space-y-2 max-h-[420px] overflow-y-auto pr-0.5">
         {isLoading ? (
-          <div className="py-10 text-center text-xs text-slate-400 flex flex-col items-center gap-2">
+          <div className="py-10 text-center text-xs text-[#746A5F] flex flex-col items-center gap-2">
             <Users className="w-5 h-5 text-brand-periwinkle animate-pulse" />
             <span>{isVie ? 'Đang tải người dùng...' : 'Loading platform users...'}</span>
           </div>
         ) : loadError ? (
-          <div className="p-3 rounded-xl border border-red-500/30 bg-red-500/10 text-xs text-red-300 flex items-start gap-2">
+          <div className="p-3 rounded-xl border border-[#A8321C]/40 bg-[#A8321C]/10 text-xs text-[#A8321C] flex items-start gap-2">
             <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
             <span>{loadError}</span>
           </div>
         ) : candidates.length === 0 ? (
-          <div className="py-10 text-center text-xs text-outline border border-dashed border-white/10 rounded-xl px-3">
+          <div className="py-10 text-center text-xs text-outline border border-dashed border-[#221E1A]/10 rounded-xl px-3">
             {isVie ? 'Không tìm thấy người dùng phù hợp với bộ lọc này.' : 'No matching users found for this filter.'}
           </div>
         ) : (
@@ -252,38 +252,38 @@ export function InviteJuryCard({
             return (
               <div
                 key={candidate.userId}
-                className="rounded-xl border border-white/10 bg-[#090b12]/60 p-3 flex flex-col gap-2 hover:border-white/20 transition-colors"
+                className="rounded-xl border border-[#221E1A]/10 bg-[#E5D8C2] p-3 flex flex-col gap-2 hover:border-[#221E1A]/20 transition-colors"
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-1.5 flex-wrap">
-                      <span className="text-xs font-bold text-white truncate">
+                      <span className="text-xs font-bold text-[#241F1A] truncate">
                         {candidate.displayName}
                       </span>
                       <span
                         className={`px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide border ${
                           isCreator
                             ? 'bg-brand-periwinkle/15 text-brand-periwinkle border-brand-periwinkle/30'
-                            : 'bg-slate-800/80 text-slate-400 border-white/10'
+                            : 'bg-[#F0E7D8] text-[#746A5F] border-[#221E1A]/10'
                         }`}
                       >
                         {isCreator ? (isVie ? 'Tác giả' : 'Creator') : candidate.roles[0] || (isVie ? 'Khách hàng' : 'Client')}
                       </span>
                     </div>
                     {candidate.email && (
-                      <p className="text-[11px] text-slate-400 font-mono truncate mt-0.5">
+                      <p className="text-[11px] text-[#746A5F] font-mono truncate mt-0.5">
                         {candidate.email}
                       </p>
                     )}
                   </div>
 
                   {candidate.isAlreadyJury ? (
-                    <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-emerald-500/15 border border-emerald-500/25 text-[10px] font-bold text-emerald-300 shrink-0">
+                    <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-[#2F6B63]/15 border border-[#2F6B63]/35 text-[10px] font-bold text-[#2F6B63] shrink-0">
                       <CheckCircle2 className="w-3 h-3" />
                       {isVie ? 'Giám khảo' : 'Jury'}
                     </span>
                   ) : candidate.hasPendingInvitation ? (
-                    <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-amber-500/15 border border-amber-500/25 text-[10px] font-bold text-amber-300 shrink-0">
+                    <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-[#8A6A1F]/15 border border-[#8A6A1F]/35 text-[10px] font-bold text-[#8A6A1F] shrink-0">
                       <Clock className="w-3 h-3" />
                       {isVie ? 'Chờ xác nhận' : 'Pending'}
                     </span>
@@ -295,8 +295,8 @@ export function InviteJuryCard({
                       title={candidate.ineligibleReason || (isVie ? 'Gửi lời mời tham gia Ban giám khảo' : 'Send jury invitation')}
                       className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-bold transition-all shrink-0 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
                         candidate.canInvite
-                          ? 'bg-gradient-to-r from-[#a7acd9] to-[#7fd5e8] text-brand-navy hover:brightness-110 shadow-[0_0_12px_rgba(167,172,217,0.25)]'
-                          : 'border border-white/10 bg-white/5 text-slate-300 hover:bg-white/10'
+                          ? 'bg-gradient-to-r from-[#B24A26] to-[#2F6B63] text-[#241F1A] hover:brightness-110 shadow-[0_0_12px_rgba(167,172,217,0.25)]'
+                          : 'border border-[#221E1A]/10 bg-[#FFFCF6] text-[#746A5F] hover:bg-[#F0E7D8]'
                       }`}
                     >
                       <Send className={`w-3 h-3 ${isInviting ? 'animate-spin' : ''}`} />
@@ -306,7 +306,7 @@ export function InviteJuryCard({
                 </div>
 
                 {candidate.ineligibleReason && !candidate.isAlreadyJury && !candidate.hasPendingInvitation && (
-                  <p className="text-[10px] text-amber-300/90 leading-snug">
+                  <p className="text-[10px] text-[#8A6A1F] leading-snug">
                     {candidate.ineligibleReason}
                   </p>
                 )}
@@ -318,16 +318,16 @@ export function InviteJuryCard({
 
       {/* Pagination Footer */}
       {totalCount > pageSize && (
-        <div className="pt-2 border-t border-white/10 flex items-center justify-between text-[11px] text-slate-400">
+        <div className="pt-2 border-t border-[#221E1A]/10 flex items-center justify-between text-[11px] text-[#746A5F]">
           <span>
-            {isVie ? 'Trang' : 'Page'} <strong className="text-white">{page}</strong> / {totalPages} ({totalCount})
+            {isVie ? 'Trang' : 'Page'} <strong className="text-[#241F1A]">{page}</strong> / {totalPages} ({totalCount})
           </span>
           <div className="flex items-center gap-1.5">
             <button
               type="button"
               disabled={page <= 1 || isLoading}
               onClick={() => setPage((p) => Math.max(1, p - 1))}
-              className="p-1.5 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 disabled:opacity-40 cursor-pointer"
+              className="p-1.5 rounded-lg border border-[#221E1A]/10 bg-[#FFFCF6] hover:bg-[#F0E7D8] disabled:opacity-40 cursor-pointer"
             >
               <ChevronLeft className="w-3.5 h-3.5" />
             </button>
@@ -335,7 +335,7 @@ export function InviteJuryCard({
               type="button"
               disabled={page >= totalPages || isLoading}
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-              className="p-1.5 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 disabled:opacity-40 cursor-pointer"
+              className="p-1.5 rounded-lg border border-[#221E1A]/10 bg-[#FFFCF6] hover:bg-[#F0E7D8] disabled:opacity-40 cursor-pointer"
             >
               <ChevronRight className="w-3.5 h-3.5" />
             </button>

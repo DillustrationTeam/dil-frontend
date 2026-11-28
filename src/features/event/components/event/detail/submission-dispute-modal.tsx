@@ -131,23 +131,23 @@ export function SubmissionDisputeModal({
     <div
       role="dialog"
       aria-modal="true"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#F0E7D8]/75 backdrop-blur-sm animate-in fade-in duration-200"
       onClick={(e) => {
         if (e.target === e.currentTarget && !submitting) onClose();
       }}
     >
-      <div className="relative w-full max-w-xl max-h-[90vh] overflow-y-auto rounded-3xl border border-white/10 bg-[#161926] p-6 shadow-2xl sm:p-7">
+      <div className="relative w-full max-w-xl max-h-[90vh] overflow-y-auto rounded-3xl border border-[#221E1A]/10 bg-[#FFFCF6] p-6 shadow-2xl sm:p-7">
         {/* Header */}
-        <div className="flex items-start justify-between gap-4 border-b border-white/10 pb-4">
+        <div className="flex items-start justify-between gap-4 border-b border-[#221E1A]/10 pb-4">
           <div className="flex items-center gap-3">
-            <div className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-[#8A6A1F]/10 text-[#8A6A1F] border border-[#8A6A1F]/30">
               <ShieldAlert size={20} />
             </div>
             <div>
-              <h3 className="font-h1 text-lg font-bold text-white sm:text-xl">
+              <h3 className="font-h1 text-lg font-bold text-[#241F1A] sm:text-xl">
                 {isVie ? 'Khiếu nại bài dự thi' : 'File a Dispute'}
               </h3>
-              <p className="text-xs text-[#8A8FA9]">
+              <p className="text-xs text-[#6E6459]">
                 {isVie
                   ? `Báo cáo bài dự thi #${submission.id.slice(0, 8)} để xem xét`
                   : `Report submission #${submission.id.slice(0, 8)} for review`}
@@ -158,23 +158,23 @@ export function SubmissionDisputeModal({
             type="button"
             onClick={onClose}
             disabled={submitting}
-            className="rounded-xl border border-white/10 bg-white/5 p-2 text-[#8A8FA9] hover:bg-white/10 hover:text-white transition disabled:opacity-50 cursor-pointer"
+            className="rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] p-2 text-[#6E6459] hover:bg-[#F0E7D8] hover:text-[#241F1A] transition disabled:opacity-50 cursor-pointer"
           >
             <X size={16} />
           </button>
         </div>
 
         {/* Target Submission Summary */}
-        <div className="my-5 flex items-center gap-3.5 rounded-2xl border border-white/5 bg-white/[0.03] p-3.5">
+        <div className="my-5 flex items-center gap-3.5 rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] p-3.5">
           {submission.artworkImageUrl || submission.artworkThumbnailUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={submission.artworkImageUrl || submission.artworkThumbnailUrl}
               alt={submission.title}
-              className="size-14 shrink-0 rounded-xl object-cover border border-white/10"
+              className="size-14 shrink-0 rounded-xl object-cover border border-[#221E1A]/10"
             />
           ) : (
-            <div className="size-14 shrink-0 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-xs text-[#8A8FA9]">
+            <div className="size-14 shrink-0 rounded-xl bg-[#FFFCF6] border border-[#221E1A]/10 flex items-center justify-center text-xs text-[#6E6459]">
               {isVie ? 'Không có ảnh' : 'No img'}
             </div>
           )}
@@ -182,8 +182,8 @@ export function SubmissionDisputeModal({
             <p className="text-xs text-brand-periwinkle font-medium">
               {isVie ? 'Bài dự thi' : 'Contest Submission'}
             </p>
-            <h4 className="truncate text-sm font-bold text-white">{submission.title}</h4>
-            <p className="truncate text-xs text-[#8A8FA9]">
+            <h4 className="truncate text-sm font-bold text-[#241F1A]">{submission.title}</h4>
+            <p className="truncate text-xs text-[#6E6459]">
               {isVie ? 'Tác giả:' : 'Artist:'}{' '}
               <span className="text-[#D6D9FF]">@{submission.submitterName || (isVie ? 'Họa sĩ' : 'Artist')}</span>
             </p>
@@ -195,8 +195,8 @@ export function SubmissionDisputeModal({
 
           {/* Reason */}
           <div>
-            <label className="mb-1.5 block text-xs font-semibold text-white">
-              {isVie ? 'Lý do / Tóm tắt' : 'Reason / Summary'} <span className="text-rose-400">*</span>
+            <label className="mb-1.5 block text-xs font-semibold text-[#241F1A]">
+              {isVie ? 'Lý do / Tóm tắt' : 'Reason / Summary'} <span className="text-[#A8321C]">*</span>
             </label>
             <input
               type="text"
@@ -205,17 +205,17 @@ export function SubmissionDisputeModal({
               placeholder={isVie ? 'Ví dụ: Tác phẩm đạo nhái tranh gốc trên ArtStation' : 'e.g. Artwork plagiarized from original art on ArtStation'}
               maxLength={200}
               required
-              className="w-full rounded-xl border border-white/10 bg-white/5 px-3.5 py-2.5 text-xs text-white placeholder-[#8A8FA9] focus:border-brand-periwinkle focus:outline-none"
+              className="w-full rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-3.5 py-2.5 text-xs text-[#241F1A] placeholder-[#6E6459] focus:border-brand-periwinkle focus:outline-none"
             />
           </div>
 
           {/* Dispute Content Category */}
           <div>
             <div className="flex items-center justify-between gap-2 mb-1.5">
-              <label className="block text-xs font-semibold text-white">
-                {isVie ? 'Phân loại khiếu nại' : 'Dispute Category'} <span className="text-rose-400">*</span>
+              <label className="block text-xs font-semibold text-[#241F1A]">
+                {isVie ? 'Phân loại khiếu nại' : 'Dispute Category'} <span className="text-[#A8321C]">*</span>
               </label>
-              <span className="text-[10px] text-[#8A8FA9]">
+              <span className="text-[10px] text-[#6E6459]">
                 {isVie ? 'Mức độ ưu tiên tự động gán theo phân loại' : 'Priority is auto-assigned by category'}
               </span>
             </div>
@@ -229,14 +229,14 @@ export function SubmissionDisputeModal({
                     onClick={() => setCategory(opt.value)}
                     className={`rounded-xl px-3 py-2 text-left border transition cursor-pointer ${
                       active
-                        ? 'border-brand-periwinkle bg-brand-periwinkle/20 text-white'
-                        : 'border-white/10 bg-white/5 text-[#8A8FA9] hover:bg-white/10 hover:text-white'
+                        ? 'border-brand-periwinkle bg-brand-periwinkle/20 text-[#241F1A]'
+                        : 'border-[#221E1A]/10 bg-[#FFFCF6] text-[#6E6459] hover:bg-[#F0E7D8] hover:text-[#241F1A]'
                     }`}
                   >
-                    <span className={`block text-xs font-semibold ${active ? 'text-brand-periwinkle' : 'text-white'}`}>
+                    <span className={`block text-xs font-semibold ${active ? 'text-brand-periwinkle' : 'text-[#241F1A]'}`}>
                       {isVie ? opt.labelVie : opt.label}
                     </span>
-                    <span className="block text-[10px] text-[#8A8FA9] mt-0.5 line-clamp-1">
+                    <span className="block text-[10px] text-[#6E6459] mt-0.5 line-clamp-1">
                       {isVie ? opt.hintVie : opt.hint}
                     </span>
                   </button>
@@ -247,7 +247,7 @@ export function SubmissionDisputeModal({
 
           {/* Detailed Description */}
           <div>
-            <label className="mb-1.5 block text-xs font-semibold text-white">
+            <label className="mb-1.5 block text-xs font-semibold text-[#241F1A]">
               {isVie ? 'Mô tả chi tiết (tùy chọn)' : 'Detailed Description (optional)'}
             </label>
             <textarea
@@ -256,14 +256,14 @@ export function SubmissionDisputeModal({
               placeholder={isVie ? 'Cung cấp thêm ngữ cảnh hoặc ghi chú cho ban giám khảo / kiểm duyệt viên...' : 'Provide more context or notes for the jury/moderator...'}
               rows={3}
               maxLength={1000}
-              className="w-full rounded-xl border border-white/10 bg-white/5 p-3 text-xs text-white placeholder-[#8A8FA9] focus:border-brand-periwinkle focus:outline-none"
+              className="w-full rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] p-3 text-xs text-[#241F1A] placeholder-[#6E6459] focus:border-brand-periwinkle focus:outline-none"
             />
           </div>
 
           {/* Evidence URLs */}
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label className="text-xs font-semibold text-white">
+              <label className="text-xs font-semibold text-[#241F1A]">
                 {isVie ? 'Liên kết bằng chứng (tùy chọn)' : 'Evidence Links (optional)'}
               </label>
               {evidenceInputs.length < 5 && (
@@ -280,20 +280,20 @@ export function SubmissionDisputeModal({
               {evidenceInputs.map((url, idx) => (
                 <div key={idx} className="flex items-center gap-2">
                   <div className="relative flex-1">
-                    <LinkIcon size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8A8FA9]" />
+                    <LinkIcon size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6E6459]" />
                     <input
                       type="url"
                       value={url}
                       onChange={(e) => handleEvidenceChange(idx, e.target.value)}
                       placeholder={isVie ? 'https://example.com/link-bang-chung-hoac-tranh-goc' : 'https://example.com/evidence-or-original-link'}
-                      className="w-full rounded-xl border border-white/10 bg-white/5 py-2 pl-8 pr-3 text-xs text-white placeholder-[#8A8FA9] focus:border-brand-periwinkle focus:outline-none"
+                      className="w-full rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] py-2 pl-8 pr-3 text-xs text-[#241F1A] placeholder-[#6E6459] focus:border-brand-periwinkle focus:outline-none"
                     />
                   </div>
                   {evidenceInputs.length > 1 && (
                     <button
                       type="button"
                       onClick={() => handleRemoveEvidence(idx)}
-                      className="rounded-xl border border-white/10 bg-white/5 p-2 text-[#8A8FA9] hover:text-rose-400 hover:border-rose-400/30 transition cursor-pointer"
+                      className="rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] p-2 text-[#6E6459] hover:text-[#A8321C] hover:border-[#A8321C]/40 transition cursor-pointer"
                       title={isVie ? 'Xóa liên kết' : 'Remove link'}
                     >
                       <Trash2 size={13} />
@@ -305,8 +305,8 @@ export function SubmissionDisputeModal({
           </div>
 
           {/* Caution Note */}
-          <div className="flex items-start gap-2.5 rounded-xl border border-amber-500/20 bg-amber-500/5 p-3 text-[11px] text-amber-200/90 leading-relaxed">
-            <AlertTriangle size={14} className="shrink-0 mt-0.5 text-amber-400" />
+          <div className="flex items-start gap-2.5 rounded-xl border border-[#8A6A1F]/30 bg-[#8A6A1F]/5 p-3 text-[11px] text-[#8A6A1F] leading-relaxed">
+            <AlertTriangle size={14} className="shrink-0 mt-0.5 text-[#8A6A1F]" />
             <span>
               {isVie
                 ? 'Khiếu nại sai sự thật hoặc mang tính phá hoại có thể dẫn đến xử phạt tài khoản. Vui lòng cung cấp thông tin trung thực.'
@@ -315,19 +315,19 @@ export function SubmissionDisputeModal({
           </div>
 
           {/* Footer Actions */}
-          <div className="flex items-center justify-end gap-3 pt-3 border-t border-white/10">
+          <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#221E1A]/10">
             <button
               type="button"
               onClick={onClose}
               disabled={submitting}
-              className="rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-xs font-semibold text-[#8A8FA9] hover:bg-white/10 hover:text-white transition disabled:opacity-50 cursor-pointer"
+              className="rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-4 py-2.5 text-xs font-semibold text-[#6E6459] hover:bg-[#F0E7D8] hover:text-[#241F1A] transition disabled:opacity-50 cursor-pointer"
             >
               {isVie ? 'Hủy bỏ' : 'Cancel'}
             </button>
             <button
               type="submit"
               disabled={submitting || !reason.trim()}
-              className="inline-flex items-center gap-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-brand-navy px-5 py-2.5 text-xs font-bold transition active:scale-95 disabled:opacity-50 disabled:pointer-events-none cursor-pointer shadow-lg shadow-amber-500/20"
+              className="inline-flex items-center gap-2 rounded-xl bg-[#8A6A1F]/12 hover:bg-[#8A6A1F]/10 text-[#241F1A] px-5 py-2.5 text-xs font-bold transition active:scale-95 disabled:opacity-50 disabled:pointer-events-none cursor-pointer shadow-lg shadow-[#8A6A1F]"
             >
               {submitting ? (
                 <>

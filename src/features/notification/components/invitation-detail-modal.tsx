@@ -119,11 +119,11 @@ export function InvitationDetailModal({
     <div
       role="dialog"
       aria-modal="true"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#E5D8C2] backdrop-blur-sm animate-in fade-in duration-200"
       onClick={onClose}
     >
       <div
-        className="glass-container relative w-full max-w-lg overflow-hidden rounded-3xl border border-white/15 bg-[#181B29] p-0 text-on-surface shadow-2xl animate-in zoom-in-95 duration-200"
+        className="glass-container relative w-full max-w-lg overflow-hidden rounded-3xl border border-[#221E1A]/10 bg-[#F0E7D8] p-0 text-on-surface shadow-2xl animate-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header / Banner area */}
@@ -136,17 +136,17 @@ export function InvitationDetailModal({
               className="object-cover opacity-60"
             />
           ) : (
-            <div className="flex h-full w-full items-center justify-center bg-white/[0.02]">
-              <Award size={48} className="text-white/20" />
+            <div className="flex h-full w-full items-center justify-center bg-[#FFFCF6]">
+              <Award size={48} className="text-[#241F1A]/20" />
             </div>
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-[#181B29] via-[#181B29]/60 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#F0E7D8] via-[#F0E7D8]/60 to-transparent" />
 
           {/* Close button */}
           <button
             type="button"
             onClick={onClose}
-            className="absolute right-4 top-4 rounded-full border border-white/20 bg-black/40 p-1.5 text-white/80 transition hover:bg-black/60 hover:text-white"
+            className="absolute right-4 top-4 rounded-full border border-[#221E1A]/20 bg-[#F0E7D8] p-1.5 text-[#241F1A]/80 transition hover:bg-[#E5D8C2] hover:text-[#241F1A]"
             title="Đóng"
           >
             <X size={18} />
@@ -157,41 +157,33 @@ export function InvitationDetailModal({
             <span
               className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold tracking-wide uppercase shadow-lg ${
                 invitation?.isHeadJury
-                  ? 'border border-amber-400/50 bg-amber-500/20 text-amber-300'
+                  ? 'border border-[#8A6A1F]/40 bg-[#8A6A1F]/20 text-[#8A6A1F]'
                   : 'border border-brand-periwinkle/40 bg-brand-periwinkle/20 text-brand-periwinkle'
               }`}
             >
               {invitation?.isHeadJury ? (
                 <>
-                  <Crown size={14} className="text-amber-400" /> Trưởng ban giám khảo
-                </>
+                  <Crown size={14} className="text-[#8A6A1F]" /> Trưởng ban giám khảo </>
               ) : (
                 <>
-                  <Award size={14} /> Ban giám khảo
-                </>
+                  <Award size={14} /> Ban giám khảo </>
               )}
             </span>
 
             {/* Status badge */}
             {isPending && (
-              <span className="inline-flex items-center rounded-full border border-amber-400/40 bg-amber-500/15 px-2.5 py-0.5 text-xs font-semibold text-amber-300">
-                Chờ phản hồi
-              </span>
+              <span className="inline-flex items-center rounded-full border border-[#8A6A1F]/40 bg-[#8A6A1F]/15 px-2.5 py-0.5 text-xs font-semibold text-[#8A6A1F]"> Chờ phản hồi </span>
             )}
             {isAccepted && (
-              <span className="inline-flex items-center gap-1 rounded-full border border-emerald-400/40 bg-emerald-500/15 px-2.5 py-0.5 text-xs font-semibold text-emerald-400">
-                <Check size={12} /> Đã chấp nhận
-              </span>
+              <span className="inline-flex items-center gap-1 rounded-full border border-[#2F6B63]/40 bg-[#2F6B63]/15 px-2.5 py-0.5 text-xs font-semibold text-[#2F6B63]">
+                <Check size={12} /> Đã chấp nhận </span>
             )}
             {isDeclined && (
-              <span className="inline-flex items-center gap-1 rounded-full border border-rose-400/40 bg-rose-500/15 px-2.5 py-0.5 text-xs font-semibold text-rose-400">
-                <X size={12} /> Đã từ chối
-              </span>
+              <span className="inline-flex items-center gap-1 rounded-full border border-[#A8321C]/40 bg-[#A8321C]/15 px-2.5 py-0.5 text-xs font-semibold text-[#A8321C]">
+                <X size={12} /> Đã từ chối </span>
             )}
             {isCanceled && (
-              <span className="inline-flex items-center rounded-full border border-white/20 bg-white/10 px-2.5 py-0.5 text-xs font-medium text-outline">
-                Đã hủy
-              </span>
+              <span className="inline-flex items-center rounded-full border border-[#221E1A]/20 bg-[#F0E7D8] px-2.5 py-0.5 text-xs font-medium text-outline"> Đã hủy </span>
             )}
           </div>
         </div>
@@ -204,7 +196,7 @@ export function InvitationDetailModal({
               <p className="text-xs text-outline">Đang tải thông tin lời mời...</p>
             </div>
           ) : error ? (
-            <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-200">
+            <div className="rounded-2xl border border-[#A8321C]/40 bg-[#A8321C]/10 p-4 text-sm text-[#A8321C]">
               <div className="flex items-center gap-2">
                 <CircleAlert size={18} className="shrink-0" />
                 <span>{error}</span>
@@ -213,12 +205,12 @@ export function InvitationDetailModal({
           ) : invitation ? (
             <div className="space-y-4">
               <div>
-                <h3 className="font-h1 text-xl font-bold text-white">
+                <h3 className="font-h1 text-xl font-bold text-[#241F1A]">
                   {invitation.eventTitle || 'Lời mời tham gia sự kiện'}
                 </h3>
                 <p className="mt-1 text-xs text-on-surface-variant">
                   Bạn nhận được lời mời tham gia với vai trò{' '}
-                  <span className="font-semibold text-white">
+                  <span className="font-semibold text-[#241F1A]">
                     {invitation.isHeadJury ? 'Trưởng ban giám khảo' : 'Giám khảo'}
                   </span>{' '}
                   cho sự kiện này.
@@ -226,29 +218,26 @@ export function InvitationDetailModal({
               </div>
 
               {/* Meta information card */}
-              <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 text-xs space-y-2.5">
+              <div className="rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] p-4 text-xs space-y-2.5">
                 <div className="flex items-center justify-between text-on-surface-variant">
                   <span className="flex items-center gap-1.5 text-outline">
-                    <User size={14} /> Người gửi:
-                  </span>
-                  <span className="font-medium text-white">
-                    {invitation.sentFromAdminName || 'Ban tổ chức / Admin'}
+                    <User size={14} /> Người gửi: </span>
+                  <span className="font-medium text-[#241F1A]">
+                    {invitation.sentFromAdminName || 'Ban tổ chức / quản trị viên'}
                   </span>
                 </div>
                 <div className="flex items-center justify-between text-on-surface-variant">
                   <span className="flex items-center gap-1.5 text-outline">
-                    <Calendar size={14} /> Ngày gửi:
-                  </span>
-                  <span className="font-medium text-white">
+                    <Calendar size={14} /> Ngày gửi: </span>
+                  <span className="font-medium text-[#241F1A]">
                     {new Date(invitation.createdAt).toLocaleString('vi-VN')}
                   </span>
                 </div>
                 {invitation.respondedAt && (
                   <div className="flex items-center justify-between text-on-surface-variant">
                     <span className="flex items-center gap-1.5 text-outline">
-                      <Check size={14} /> Thời gian phản hồi:
-                    </span>
-                    <span className="font-medium text-white">
+                      <Check size={14} /> Thời gian phản hồi: </span>
+                    <span className="font-medium text-[#241F1A]">
                       {new Date(invitation.respondedAt).toLocaleString('vi-VN')}
                     </span>
                   </div>
@@ -264,20 +253,18 @@ export function InvitationDetailModal({
                   </p>
                 )}
                 {isAccepted && (
-                  <p className="text-emerald-300">
+                  <p className="text-[#2F6B63]">
                     ✓ Bạn đã chấp nhận lời mời này. Bạn có thể vào xem trang sự kiện và các bài dự thi
                     khi đến giai đoạn chấm bài.
                   </p>
                 )}
                 {isDeclined && (
-                  <p className="text-rose-300">
+                  <p className="text-[#A8321C]">
                     ✕ Bạn đã từ chối lời mời tham gia sự kiện này.
                   </p>
                 )}
                 {isCanceled && (
-                  <p className="text-outline">
-                    Lời mời này đã được Ban tổ chức hủy bỏ.
-                  </p>
+                  <p className="text-outline"> Lời mời này đã được Ban tổ chức hủy bỏ. </p>
                 )}
               </div>
 
@@ -288,7 +275,7 @@ export function InvitationDetailModal({
                     type="button"
                     disabled={actionLoading !== null}
                     onClick={handleAccept}
-                    className="flex-1 inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 px-5 py-2.5 text-xs font-bold text-white shadow-lg shadow-emerald-500/20 transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-50"
+                    className="flex-1 inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#2F6B63] to-[#2F6B63] px-5 py-2.5 text-xs font-bold text-[#241F1A] shadow-lg shadow-[#2F6B63] transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-50"
                   >
                     {actionLoading === 'accept' ? (
                       <Loader2 size={15} className="animate-spin" />
@@ -302,28 +289,23 @@ export function InvitationDetailModal({
                     type="button"
                     disabled={actionLoading !== null}
                     onClick={() => setConfirmDecline(true)}
-                    className="inline-flex items-center justify-center gap-1.5 rounded-2xl border border-rose-500/30 bg-rose-500/10 px-4 py-2.5 text-xs font-semibold text-rose-300 transition hover:bg-rose-500/20 disabled:opacity-50"
+                    className="inline-flex items-center justify-center gap-1.5 rounded-2xl border border-[#A8321C]/40 bg-[#A8321C]/10 px-4 py-2.5 text-xs font-semibold text-[#A8321C] transition hover:bg-[#A8321C]/20 disabled:opacity-50"
                   >
-                    <X size={15} /> Từ chối
-                  </button>
+                    <X size={15} /> Từ chối </button>
                 </div>
               )}
 
               {/* Inline decline confirmation */}
               {isPending && confirmDecline && (
-                <div className="rounded-2xl border border-rose-500/30 bg-rose-500/10 p-3.5 text-xs animate-in fade-in">
-                  <p className="font-semibold text-rose-200">
-                    Bạn có chắc chắn muốn từ chối lời mời này?
-                  </p>
-                  <p className="mt-1 text-[11px] text-rose-300/80">
-                    Hành động này không thể hoàn tác sau khi xác nhận.
-                  </p>
+                <div className="rounded-2xl border border-[#A8321C]/40 bg-[#A8321C]/10 p-3.5 text-xs animate-in fade-in">
+                  <p className="font-semibold text-[#A8321C]"> Bạn có chắc chắn muốn từ chối lời mời này? </p>
+                  <p className="mt-1 text-[11px] text-[#A8321C]"> Hành động này không thể hoàn tác sau khi xác nhận. </p>
                   <div className="mt-3 flex items-center gap-2">
                     <button
                       type="button"
                       disabled={actionLoading !== null}
                       onClick={handleDecline}
-                      className="inline-flex items-center gap-1.5 rounded-xl bg-rose-500 px-3.5 py-1.5 text-xs font-bold text-white transition hover:bg-rose-600 disabled:opacity-50"
+                      className="inline-flex items-center gap-1.5 rounded-xl bg-[#A8321C]/12 px-3.5 py-1.5 text-xs font-bold text-[#241F1A] transition hover:bg-[#A8321C]/12 disabled:opacity-50"
                     >
                       {actionLoading === 'decline' ? (
                         <Loader2 size={13} className="animate-spin" />
@@ -335,10 +317,8 @@ export function InvitationDetailModal({
                     <button
                       type="button"
                       onClick={() => setConfirmDecline(false)}
-                      className="rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-on-surface-variant hover:text-white"
-                    >
-                      Hủy
-                    </button>
+                      className="rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-3 py-1.5 text-xs text-on-surface-variant hover:text-[#241F1A]"
+                    > Hủy </button>
                   </div>
                 </div>
               )}
@@ -350,8 +330,7 @@ export function InvitationDetailModal({
                     href={`/events/${invitation.eventId}`}
                     target="_blank"
                     className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand-periwinkle hover:underline"
-                  >
-                    Xem trang chi tiết cuộc thi <ExternalLink size={13} />
+                  > Xem trang chi tiết cuộc thi <ExternalLink size={13} />
                   </Link>
                 </div>
               )}

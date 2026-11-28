@@ -33,3 +33,8 @@ docs/design-suite/
 .agents/
 skills-lock.json
 CLAUDE.md
+
+# thư mục tạm / ảnh chụp phiên làm việc
+/.tmp/
+/.impeccable/
+/_critique/

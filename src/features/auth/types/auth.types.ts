@@ -4,6 +4,11 @@ export interface UserDto {
   fullName: string;
   isVerified: boolean;
   createdAt: string;
+  // Cùng bộ field với `@/types/auth.types`.UserDto — /auth/login và /auth/me đều trả về.
+  avatarUrl?: string | null;
+  coverUrl?: string | null;
+  bio?: string | null;
+  socialLinks?: string[];
 }
 
 export interface TokenDto {

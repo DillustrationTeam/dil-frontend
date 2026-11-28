@@ -2,6 +2,7 @@ import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { useAuthStore } from '@/store/use-auth-store';
 import { ApiResponse } from '@/types/api.types';
 import { AuthResponseDto } from '@/types/auth.types';
+import { finishUpload, trackUpload } from '@/components/feedback/upload-progress';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5075/api/v1';
 
@@ -10,12 +11,30 @@ export const apiClient = axios.create({
 });
 
 // Request Interceptor: Attach JWT Bearer Token
+type TrackedConfig = InternalAxiosRequestConfig & { __uploadId?: string };
+
+/**
+ * Mọi request gửi `FormData` (upload ảnh/tệp) được gắn `onUploadProgress` để hiện thanh
+ * tiến trình dùng chung (`components/feedback/upload-progress.tsx`) — không phải sửa từng
+ * màn hình upload.
+ */
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const accessToken = useAuthStore.getState().accessToken;
     if (accessToken && config.headers) {
       config.headers.Authorization = `Bearer ${accessToken}`;
     }
+
+    if (typeof FormData !== 'undefined' && config.data instanceof FormData) {
+      const tracker = trackUpload(config.url);
+      (config as TrackedConfig).__uploadId = tracker.id;
+      const previous = config.onUploadProgress;
+      config.onUploadProgress = (event) => {
+        tracker.onProgress({ loaded: event.loaded, total: event.total });
+        previous?.(event);
+      };
+    }
+
     return config;
   },
   (error: AxiosError) => Promise.reject(error)
@@ -303,3 +322,21 @@ export function extractErrorMessage(error: unknown, fallbackMessage = 'Yêu cầ
 
   return fallbackMessage;
 }
+
+/**
+ * Đóng task tiến trình khi request upload kết thúc (thành công hay lỗi đều phải đóng,
+ * nếu không thanh sẽ treo lại trên màn hình).
+ */
+apiClient.interceptors.response.use(
+  (response) => {
+    const id = (response.config as TrackedConfig).__uploadId;
+    if (id) finishUpload(id);
+    return response;
+  },
+  (error: AxiosError) => {
+    const id = (error.config as TrackedConfig | undefined)?.__uploadId;
+    if (id) finishUpload(id);
+    return Promise.reject(error);
+  },
+);
+

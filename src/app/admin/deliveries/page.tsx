@@ -35,7 +35,7 @@ export default function AdminDeliveriesPage() {
 
   return (
     <div className="w-full">
-      <div role="tablist" aria-label="Giao nhận và án phạt" className="mb-6 flex gap-2 border-b border-white/10 pb-3">
+      <div role="tablist" aria-label="Giao nhận và án phạt" className="mb-6 flex gap-2 border-b border-[#221E1A]/10 pb-3">
         <button
           type="button"
           role="tab"
@@ -43,8 +43,8 @@ export default function AdminDeliveriesPage() {
           onClick={() => selectTab('deliveries')}
           className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-semibold transition ${
             tab === 'deliveries'
-              ? 'bg-brand-periwinkle text-brand-navy shadow-sm'
-              : 'text-outline hover:bg-white/5 hover:text-white'
+              ? 'bg-brand-periwinkle text-[#FFFCF6] shadow-sm'
+              : 'text-outline hover:bg-[#FFFCF6] hover:text-[#241F1A]'
           }`}
         >
           <Truck size={14} /> Đơn giao nhận &amp; ký quỹ
@@ -56,12 +56,11 @@ export default function AdminDeliveriesPage() {
           onClick={() => selectTab('penalties')}
           className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-semibold transition ${
             tab === 'penalties'
-              ? 'bg-rose-500/20 text-rose-200 shadow-sm ring-1 ring-rose-400/40'
-              : 'text-outline hover:bg-white/5 hover:text-white'
+              ? 'bg-[#A8321C]/20 text-[#A8321C] shadow-sm ring-1 ring-[#A8321C]/40'
+              : 'text-outline hover:bg-[#FFFCF6] hover:text-[#241F1A]'
           }`}
         >
-          <ShieldAlert size={14} /> Án phạt người bán
-        </button>
+          <ShieldAlert size={14} /> Án phạt người bán </button>
       </div>
 
       {tab === 'deliveries' ? <AdminDeliveryDashboard /> : <AuctionPenaltyConsole />}

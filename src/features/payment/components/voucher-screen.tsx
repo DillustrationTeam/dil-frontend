@@ -6,6 +6,7 @@ import { ArrowLeft, CheckCircle2, CircleAlert, Plus, RefreshCw, Tag, Trash2 } fr
 import { paymentService } from '../services/payment.service';
 import type { VoucherDto, VoucherRequest } from '../types/payment.types';
 import { VoucherApplyPanel } from './voucher-apply-panel';
+import { useLanguage } from '@/context/language-context';
 import { PageLoader } from '@/features/navigation';
 
 function formatVnd(value: number) {
@@ -13,6 +14,8 @@ function formatVnd(value: number) {
 }
 
 export function VoucherScreen({ userId, mode = 'client' }: { userId: string | null; mode?: 'client' | 'creator' }) {
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
   const [vouchers, setVouchers] = useState<VoucherDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -135,34 +138,30 @@ export function VoucherScreen({ userId, mode = 'client' }: { userId: string | nu
       {mode === 'creator' && <>
         <div className="mb-6 flex items-center justify-between">
           <Link href="/wallet" className="inline-flex items-center gap-2 text-sm text-brand-periwinkle hover:underline">
-            <ArrowLeft size={16} /> Quay lại ví
-          </Link>
+            <ArrowLeft size={16} /> Quay lại ví </Link>
           {userId && (
           <button
             type="button"
             onClick={() => setShowCreate(!showCreate)}
-            className="inline-flex items-center gap-2 rounded-full bg-brand-periwinkle px-5 py-2 font-h1 text-xs font-bold text-brand-navy shadow hover:brightness-110"
+            className="inline-flex items-center gap-2 rounded-full bg-brand-periwinkle px-5 py-2 font-h1 text-xs font-bold text-[#FFFCF6] shadow hover:brightness-110"
           >
-            <Plus size={16} /> Tạo mã giảm giá mới
-          </button>
+            <Plus size={16} /> Tạo mã giảm giá mới </button>
           )}
         </div>
 
         <h1 className="mb-2 font-h1 text-2xl font-bold">Trung tâm mã giảm giá</h1>
-        <p className="mb-6 text-sm text-on-surface-variant">
-          Khám phá mã ưu đãi áp dụng cho đặt tranh hoa hồng nghệ thuật và các phiên đấu giá độc quyền.
-        </p>
+        <p className="mb-6 text-sm text-on-surface-variant"> Khám phá mã ưu đãi áp dụng cho đặt tranh hoa hồng nghệ thuật và các phiên đấu giá độc quyền. </p>
       </>}
 
       {error && (
-        <div role="alert" className="mb-6 flex items-center gap-2 rounded-2xl border border-red-400/30 bg-red-500/10 p-4 text-sm text-red-200">
+        <div role="alert" className="mb-6 flex items-center gap-2 rounded-2xl border border-[#A8321C]/40 bg-[#A8321C]/10 p-4 text-sm text-[#A8321C]">
           <CircleAlert size={18} className="shrink-0" />
           <span>{error}</span>
         </div>
       )}
 
       {success && (
-        <div role="status" className="mb-6 flex items-center gap-2 rounded-2xl border border-emerald-400/30 bg-emerald-500/10 p-4 text-sm text-emerald-200">
+        <div role="status" className="mb-6 flex items-center gap-2 rounded-2xl border border-[#2F6B63]/40 bg-[#2F6B63]/10 p-4 text-sm text-[#2F6B63]">
           <CheckCircle2 size={18} className="shrink-0" />
           <span>{success}</span>
         </div>
@@ -181,7 +180,7 @@ export function VoucherScreen({ userId, mode = 'client' }: { userId: string | nu
                 value={createForm.voucherCode}
                 onChange={(e) => setCreateForm({ ...createForm, voucherCode: e.target.value })}
                 placeholder="VD: DILCHAOHAY"
-                className="w-full rounded-xl border border-white/10 bg-brand-navy px-3 py-2 font-mono uppercase text-on-surface"
+                className="w-full rounded-xl border border-[#221E1A]/10 bg-brand-navy px-3 py-2 font-mono uppercase text-on-surface"
               />
             </div>
             <div>
@@ -191,7 +190,7 @@ export function VoucherScreen({ userId, mode = 'client' }: { userId: string | nu
                 value={createForm.name || ''}
                 onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })}
                 placeholder="VD: Chào bạn mới giảm 10%"
-                className="w-full rounded-xl border border-white/10 bg-brand-navy px-3 py-2 text-on-surface"
+                className="w-full rounded-xl border border-[#221E1A]/10 bg-brand-navy px-3 py-2 text-on-surface"
               />
             </div>
             <div>
@@ -199,10 +198,10 @@ export function VoucherScreen({ userId, mode = 'client' }: { userId: string | nu
               <select
                 value={createForm.discountType}
                 onChange={(e) => setCreateForm({ ...createForm, discountType: e.target.value as 'Percent' | 'Fixed' })}
-                className="w-full rounded-xl border border-white/10 bg-brand-navy px-3 py-2 text-on-surface"
+                className="w-full rounded-xl border border-[#221E1A]/10 bg-brand-navy px-3 py-2 text-on-surface"
               >
-                <option value="Percent">Theo phần trăm (%)</option>
-                <option value="Fixed">Số tiền cố định (₫)</option>
+                <option value="Percent">{isVie ? 'Theo phần trăm (%)' : 'Percentage (%)'}</option>
+                <option value="Fixed">{isVie ? 'Số tiền cố định (₫)' : 'Fixed amount (₫)'}</option>
               </select>
             </div>
             <div>
@@ -213,7 +212,7 @@ export function VoucherScreen({ userId, mode = 'client' }: { userId: string | nu
                 required
                 value={createForm.discountValue}
                 onChange={(e) => setCreateForm({ ...createForm, discountValue: Number(e.target.value) || 0 })}
-                className="w-full rounded-xl border border-white/10 bg-brand-navy px-3 py-2 font-bold text-on-surface"
+                className="w-full rounded-xl border border-[#221E1A]/10 bg-brand-navy px-3 py-2 font-bold text-on-surface"
               />
             </div>
             <div>
@@ -224,7 +223,7 @@ export function VoucherScreen({ userId, mode = 'client' }: { userId: string | nu
                 step="1000"
                 value={createForm.minOrderAmount}
                 onChange={(e) => setCreateForm({ ...createForm, minOrderAmount: Number(e.target.value) || 0 })}
-                className="w-full rounded-xl border border-white/10 bg-brand-navy px-3 py-2 text-on-surface"
+                className="w-full rounded-xl border border-[#221E1A]/10 bg-brand-navy px-3 py-2 text-on-surface"
               />
             </div>
             <div>
@@ -236,7 +235,7 @@ export function VoucherScreen({ userId, mode = 'client' }: { userId: string | nu
                 value={createForm.maxDiscountAmount ?? ''}
                 onChange={(e) => setCreateForm({ ...createForm, maxDiscountAmount: e.target.value ? Number(e.target.value) : null })}
                 placeholder="VD: 100000"
-                className="w-full rounded-xl border border-white/10 bg-brand-navy px-3 py-2 text-on-surface"
+                className="w-full rounded-xl border border-[#221E1A]/10 bg-brand-navy px-3 py-2 text-on-surface"
               />
             </div>
             <div>
@@ -246,7 +245,7 @@ export function VoucherScreen({ userId, mode = 'client' }: { userId: string | nu
                 required
                 value={createForm.startDate}
                 onChange={(e) => setCreateForm({ ...createForm, startDate: e.target.value })}
-                className="w-full rounded-xl border border-white/10 bg-brand-navy px-3 py-2 text-on-surface"
+                className="w-full rounded-xl border border-[#221E1A]/10 bg-brand-navy px-3 py-2 text-on-surface"
               />
             </div>
             <div>
@@ -256,7 +255,7 @@ export function VoucherScreen({ userId, mode = 'client' }: { userId: string | nu
                 required
                 value={createForm.endDate}
                 onChange={(e) => setCreateForm({ ...createForm, endDate: e.target.value })}
-                className="w-full rounded-xl border border-white/10 bg-brand-navy px-3 py-2 text-on-surface"
+                className="w-full rounded-xl border border-[#221E1A]/10 bg-brand-navy px-3 py-2 text-on-surface"
               />
             </div>
             <div>
@@ -266,21 +265,19 @@ export function VoucherScreen({ userId, mode = 'client' }: { userId: string | nu
                 min="1"
                 value={createForm.usageLimit ?? 100}
                 onChange={(e) => setCreateForm({ ...createForm, usageLimit: Number(e.target.value) || null })}
-                className="w-full rounded-xl border border-white/10 bg-brand-navy px-3 py-2 text-on-surface"
+                className="w-full rounded-xl border border-[#221E1A]/10 bg-brand-navy px-3 py-2 text-on-surface"
               />
             </div>
             <div className="flex items-end justify-end gap-3 sm:col-span-2 md:col-span-3">
               <button
                 type="button"
                 onClick={() => setShowCreate(false)}
-                className="rounded-full px-5 py-2 text-xs font-semibold text-outline hover:text-white"
-              >
-                Hủy
-              </button>
+                className="rounded-full px-5 py-2 text-xs font-semibold text-outline hover:text-[#241F1A]"
+              > Hủy </button>
               <button
                 type="submit"
                 disabled={submitting}
-                className="rounded-full bg-brand-periwinkle px-6 py-2 font-h1 text-xs font-bold text-brand-navy shadow"
+                className="rounded-full bg-brand-periwinkle px-6 py-2 font-h1 text-xs font-bold text-[#FFFCF6] shadow"
               >
                 {submitting ? 'Đang lưu...' : 'Lưu mã giảm giá'}
               </button>
@@ -299,47 +296,40 @@ export function VoucherScreen({ userId, mode = 'client' }: { userId: string | nu
             type="button"
             onClick={() => setStatusFilter('')}
             className={`rounded-full px-4 py-1.5 font-semibold transition ${
-              statusFilter === '' ? 'bg-brand-periwinkle text-brand-navy' : 'border border-white/10 bg-white/5 text-on-surface-variant'
+              statusFilter === '' ? 'bg-brand-periwinkle text-[#FFFCF6]' : 'border border-[#221E1A]/10 bg-[#FFFCF6] text-on-surface-variant'
             }`}
-          >
-            Tất cả
-          </button>
+          > Tất cả </button>
           <button
             type="button"
             onClick={() => setStatusFilter('Active')}
             className={`rounded-full px-4 py-1.5 font-semibold transition ${
-              statusFilter === 'Active' ? 'bg-brand-periwinkle text-brand-navy' : 'border border-white/10 bg-white/5 text-on-surface-variant'
+              statusFilter === 'Active' ? 'bg-brand-periwinkle text-[#FFFCF6]' : 'border border-[#221E1A]/10 bg-[#FFFCF6] text-on-surface-variant'
             }`}
-          >
-            Đang hiệu lực
-          </button>
+          > Đang hiệu lực </button>
           <button
             type="button"
             onClick={() => setStatusFilter('Expired')}
             className={`rounded-full px-4 py-1.5 font-semibold transition ${
-              statusFilter === 'Expired' ? 'bg-brand-periwinkle text-brand-navy' : 'border border-white/10 bg-white/5 text-on-surface-variant'
+              statusFilter === 'Expired' ? 'bg-brand-periwinkle text-[#FFFCF6]' : 'border border-[#221E1A]/10 bg-[#FFFCF6] text-on-surface-variant'
             }`}
-          >
-            Hết hạn
-          </button>
+          > Hết hạn </button>
         </div>
         <button
           type="button"
           onClick={loadVouchers}
           disabled={loading}
-          className="inline-flex items-center gap-1.5 text-xs text-outline hover:text-white"
+          className="inline-flex items-center gap-1.5 text-xs text-outline hover:text-[#241F1A]"
         >
-          <RefreshCw size={14} className={loading ? 'animate-spin' : ''} /> Làm mới
-        </button>
+          <RefreshCw size={14} className={loading ? 'animate-spin' : ''} /> Làm mới </button>
       </div>
 
       {/* Danh sách thẻ voucher */}
       {loading ? (
-        <div className="glass-container rounded-3xl border border-white/10">
+        <div className="glass-container rounded-3xl border border-[#221E1A]/10">
           <PageLoader label="Đang tải danh sách mã giảm giá…" />
         </div>
       ) : !Array.isArray(vouchers) || vouchers.length === 0 ? (
-        <div className="glass-container rounded-3xl border border-white/10 p-12 text-center">
+        <div className="glass-container rounded-3xl border border-[#221E1A]/10 p-12 text-center">
           <Tag size={40} className="mx-auto mb-3 text-outline" />
           <p className="text-on-surface-variant">Hiện chưa có mã giảm giá nào phù hợp với bộ lọc.</p>
         </div>
@@ -351,7 +341,7 @@ export function VoucherScreen({ userId, mode = 'client' }: { userId: string | nu
             return (
               <div
                 key={v.voucherId}
-                className="glass-container relative flex flex-col justify-between overflow-hidden rounded-3xl border border-white/10 p-5 transition hover:border-brand-periwinkle/40"
+                className="glass-container relative flex flex-col justify-between overflow-hidden rounded-3xl border border-[#221E1A]/10 p-5 transition hover:border-brand-periwinkle/40"
               >
                 <div>
                   <div className="mb-3 flex items-center justify-between">
@@ -360,8 +350,8 @@ export function VoucherScreen({ userId, mode = 'client' }: { userId: string | nu
                     </span>
                     <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${
                       isExpired
-                        ? 'border-amber-400/30 bg-amber-500/10 text-amber-300'
-                        : 'border-emerald-400/30 bg-emerald-500/10 text-emerald-300'
+                        ? 'border-[#8A6A1F]/40 bg-[#8A6A1F]/10 text-[#8A6A1F]'
+                        : 'border-[#2F6B63]/40 bg-[#2F6B63]/10 text-[#2F6B63]'
                     }`}>
                       {isExpired ? 'Hết hạn' : 'Đang hoạt động'}
                     </span>
@@ -379,14 +369,13 @@ export function VoucherScreen({ userId, mode = 'client' }: { userId: string | nu
                 </div>
 
                 {mode === 'creator' && v.isMine && (
-                  <div className="mt-4 flex justify-end border-t border-white/5 pt-3">
+                  <div className="mt-4 flex justify-end border-t border-[#221E1A]/10 pt-3">
                     <button
                       type="button"
                       onClick={() => handleDelete(v.voucherId)}
-                      className="inline-flex items-center gap-1 text-xs text-outline hover:text-red-300"
+                      className="inline-flex items-center gap-1 text-xs text-outline hover:text-[#A8321C]"
                     >
-                      <Trash2 size={14} /> Xóa mã
-                    </button>
+                      <Trash2 size={14} /> Xóa mã </button>
                   </div>
                 )}
               </div>

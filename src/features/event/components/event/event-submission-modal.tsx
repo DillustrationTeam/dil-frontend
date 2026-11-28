@@ -280,8 +280,8 @@ function EventSubmissionModalInner({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="relative w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden rounded-3xl border border-white/15 bg-[#161926] shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#E5D8C2] backdrop-blur-md animate-in fade-in duration-200">
+      <div className="relative w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden rounded-3xl border border-[#221E1A]/10 bg-[#FFFCF6] shadow-2xl">
         {/* Header */}
         <SubmissionModalHeader isEditing={isEditing} eventTitle={eventTitle} onClose={onClose} />
 
@@ -291,20 +291,20 @@ function EventSubmissionModalInner({
         {/* Scrollable Form Body */}
         <form onSubmit={handleSubmit} className="p-6 space-y-5 overflow-y-auto flex-1">
           {!isCreator && (
-            <div className="rounded-2xl border border-amber-400/30 bg-amber-500/10 p-4 flex items-start gap-3">
-              <AlertCircle size={18} className="text-amber-400 shrink-0 mt-0.5" />
+            <div className="rounded-2xl border border-[#8A6A1F]/40 bg-[#8A6A1F]/10 p-4 flex items-start gap-3">
+              <AlertCircle size={18} className="text-[#8A6A1F] shrink-0 mt-0.5" />
               <div className="space-y-1">
-                <p className="text-xs font-bold text-amber-300">
+                <p className="text-xs font-bold text-[#8A6A1F]">
                   {isVie ? 'Yêu cầu có hồ sơ Họa sĩ' : 'Creator Profile Required'}
                 </p>
-                <p className="text-xs text-amber-200/90 leading-relaxed">
+                <p className="text-xs text-[#8A6A1F] leading-relaxed">
                   {isVie
-                    ? 'Bài dự thi cuộc thi chỉ dành riêng cho các Họa sĩ (Creator). Vui lòng hoàn tất hồ sơ họa sĩ để nộp tranh.'
+                    ? 'Bài dự thi cuộc thi chỉ dành riêng cho các Họa sĩ. Vui lòng hoàn tất hồ sơ họa sĩ để nộp tranh.'
                     : 'Contest submissions are exclusively reserved for verified Creators. Please complete your creator profile to submit artwork.'}
                 </p>
                 <Link
                   href="/creator-setup"
-                  className="inline-block text-xs font-bold text-brand-periwinkle underline mt-1 hover:text-white"
+                  className="inline-block text-xs font-bold text-brand-periwinkle underline mt-1 hover:text-[#241F1A]"
                 >
                   {isVie ? 'Thiết lập hồ sơ Họa sĩ →' : 'Set up Creator Profile →'}
                 </Link>
@@ -348,8 +348,8 @@ function EventSubmissionModalInner({
 
           {/* Submission Details */}
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-[#A7ACD9] mb-1.5">
-              {isVie ? 'Tiêu đề tác phẩm' : 'Artwork Title'} <span className="text-rose-400">*</span>
+            <label className="block text-xs font-semibold uppercase tracking-wider text-[#B24A26] mb-1.5">
+              {isVie ? 'Tiêu đề tác phẩm' : 'Artwork Title'} <span className="text-[#A8321C]">*</span>
             </label>
             <input
               type="text"
@@ -357,12 +357,12 @@ function EventSubmissionModalInner({
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder={isVie ? 'Ví dụ: Hộ Thần Tinh Tú xứ Sài Gòn' : 'e.g. Celestial Guardian of Neo-Saigon'}
-              className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-[#8A8FA9] focus:border-brand-periwinkle focus:outline-none"
+              className="w-full rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-4 py-2.5 text-sm text-[#241F1A] placeholder-[#6E6459] focus:border-brand-periwinkle focus:outline-none"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-[#A7ACD9] mb-1.5">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-[#B24A26] mb-1.5">
               {isVie ? 'Tuyên ngôn nghệ thuật / Câu chuyện tác phẩm' : 'Artist Statement / Lore'}
             </label>
             <textarea
@@ -370,15 +370,15 @@ function EventSubmissionModalInner({
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder={isVie ? 'Mô tả quá trình sáng tác, kỹ thuật, thông điệp hoặc công cụ sử dụng...' : 'Describe your creative process, technique, storytelling, or tools used...'}
-              className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-[#8A8FA9] focus:border-brand-periwinkle focus:outline-none"
+              className="w-full rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-4 py-2.5 text-sm text-[#241F1A] placeholder-[#6E6459] focus:border-brand-periwinkle focus:outline-none"
             />
           </div>
 
           {/* Originality Confirmation */}
-          <div className="rounded-2xl border border-amber-400/20 bg-amber-500/5 p-4 space-y-2">
+          <div className="rounded-2xl border border-[#8A6A1F]/30 bg-[#8A6A1F]/5 p-4 space-y-2">
             <div className="flex items-start gap-2.5">
-              <ShieldAlert size={18} className="text-amber-400 shrink-0 mt-0.5" />
-              <div className="text-xs text-amber-200/90 leading-relaxed">
+              <ShieldAlert size={18} className="text-[#8A6A1F] shrink-0 mt-0.5" />
+              <div className="text-xs text-[#8A6A1F] leading-relaxed">
                 {isVie
                   ? 'Khi tham gia cuộc thi này, bạn xác nhận rằng tác phẩm này là tác phẩm nguyên bản 100% do chính bạn tạo ra, tuân thủ nghiêm ngặt thể lệ cuộc thi và các quy định về bản quyền.'
                   : 'By entering this contest, you certify that this artwork is 100% original work created by you, adhering strictly to contest rules and copyright regulations.'}
@@ -390,9 +390,9 @@ function EventSubmissionModalInner({
                 type="checkbox"
                 checked={agreed}
                 onChange={(e) => setAgreed(e.target.checked)}
-                className="size-4 rounded border-white/20 bg-white/5 text-brand-periwinkle focus:ring-0 cursor-pointer"
+                className="size-4 rounded border-[#221E1A]/20 bg-[#FFFCF6] text-brand-periwinkle focus:ring-0 cursor-pointer"
               />
-              <span className="text-xs font-medium text-white">
+              <span className="text-xs font-medium text-[#241F1A]">
                 {isVie
                   ? 'Tôi xác nhận đây là tác phẩm nguyên bản của tôi và chấp nhận thể lệ chính thức của cuộc thi.'
                   : 'I verify this is my original work and accept the official competition rules.'}
@@ -405,7 +405,7 @@ function EventSubmissionModalInner({
             <button
               type="button"
               onClick={onClose}
-              className="rounded-xl border border-white/10 px-5 py-2.5 text-xs font-semibold text-[#A7ACD9] hover:bg-white/5 hover:text-white transition cursor-pointer"
+              className="rounded-xl border border-[#221E1A]/10 px-5 py-2.5 text-xs font-semibold text-[#B24A26] hover:bg-[#FFFCF6] hover:text-[#241F1A] transition cursor-pointer"
             >
               {isVie ? 'Hủy bỏ' : 'Cancel'}
             </button>
@@ -413,7 +413,7 @@ function EventSubmissionModalInner({
             <button
               type="submit"
               disabled={submitting || !isCreator}
-              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-brand-periwinkle to-[#c2c7f6] px-6 py-2.5 text-xs font-bold text-brand-navy shadow-lg transition hover:brightness-110 active:scale-95 disabled:opacity-50 cursor-pointer"
+              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-brand-periwinkle to-[#8C3718] px-6 py-2.5 text-xs font-bold text-[#241F1A] shadow-lg transition hover:brightness-110 active:scale-95 disabled:opacity-50 cursor-pointer"
             >
               {submitting ? (
                 <>

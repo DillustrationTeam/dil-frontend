@@ -37,10 +37,10 @@ export function getJudgingLockMessage(event: EventPhaseInput, nowMs: number): st
 
   const statusVal = String(event.status ?? '').trim().toLowerCase();
   if (statusVal === 'draft' || statusVal === '1') {
-    return 'Chấm điểm bị khóa vì sự kiện đang ở trạng thái Bản nháp (Draft).';
+    return 'Chấm điểm bị khóa vì sự kiện đang ở trạng thái Bản nháp.';
   }
   if (statusVal === 'ended' || statusVal === '4') {
-    return 'Chấm điểm đã khóa vì sự kiện đã kết thúc (Ended).';
+    return 'Chấm điểm đã khóa vì sự kiện đã kết thúc.';
   }
 
   if (event.judgingStartAt) {
@@ -58,7 +58,7 @@ export function getJudgingLockMessage(event: EventPhaseInput, nowMs: number): st
     }
   }
 
-  return 'Chấm điểm tạm thời bị khóa cho tới khi sự kiện bước vào giai đoạn Chấm điểm (Judging).';
+  return 'Chấm điểm tạm thời bị khóa cho tới khi sự kiện bước vào giai đoạn Chấm điểm.';
 }
 
 export function getRubricMaxTotal(criteria: ReadonlyArray<{ maxScore: number }>): number {

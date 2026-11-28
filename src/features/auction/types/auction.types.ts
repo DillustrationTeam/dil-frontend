@@ -2,7 +2,7 @@ export const auctionStatusLabels: Record<string, string> = {
   Scheduled: 'Sắp diễn ra',
   Active: 'Đang diễn ra',
   Ended: 'Đã kết thúc',
-  Settled: 'Đã chốt (File số)',
+  Settled: 'Đã chốt (tệp số)',
   Cancelled: 'Đã hủy',
   Expired: 'Hết hạn thanh toán',
   AwaitingPhysical: 'Chờ xác nhận tranh vật lý',
@@ -56,6 +56,9 @@ export interface AuctionDetailDto extends AuctionListItemDto {
   serverTime?: string;
   participants: AuctionParticipantDto[];
   requiresPhysicalDelivery?: boolean | null;
+  /** Kiểm duyệt đã xác nhận gian lận: chặn nhận giá mới, hiện banner cho mọi người. */
+  biddingBlocked?: boolean;
+  biddingBlockedReason?: string | null;
   physicalChoiceDeadline?: string | null;
   delivery?: AuctionDeliveryDto | null;
   receipts?: AuctionReceiptDto[] | null;
@@ -136,6 +139,9 @@ export interface PhysicalDeliveryListItemDto {  auctionId: string;
   physicalDescription?: string | null;
   physicalChoiceDeadline?: string | null;
   requiresPhysicalDelivery?: boolean | null;
+  /** Kiểm duyệt đã xác nhận gian lận: chặn nhận giá mới, hiện banner cho mọi người. */
+  biddingBlocked?: boolean;
+  biddingBlockedReason?: string | null;
   delivery?: AuctionDeliveryDto | null;
   escrowStatus: string;
   /** Ho so nghe si cua nguoi ban — dung cho form danh gia sau khieu nai. */

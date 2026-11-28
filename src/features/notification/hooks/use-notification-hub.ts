@@ -48,8 +48,15 @@ export function useNotificationHub(
       return;
     }
 
+    const hubUrl = notificationHubUrl();
+    if (!hubUrl) return;
+    // Chưa cấu hình NEXT_PUBLIC_SIGNALR_URL → bỏ qua, không spam 404 /hubs/...
+    if (!hubUrl) {
+      return;
+    }
+
     const connection: HubConnection = new HubConnectionBuilder()
-      .withUrl(notificationHubUrl(), { accessTokenFactory: () => ensureFreshAccessToken() })
+      .withUrl(hubUrl, { accessTokenFactory: () => ensureFreshAccessToken() })
       .withAutomaticReconnect()
       .configureLogging(LogLevel.Warning)
       .build();

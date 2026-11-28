@@ -72,8 +72,14 @@ export function useChatHub(roomId: string, callbacks: ChatHubCallbacks): ChatHub
       return;
     }
 
-    const connection = new HubConnectionBuilder()
-      .withUrl(chatHubUrl(), { accessTokenFactory: () => ensureFreshAccessToken() })
+    const hubUrl = chatHubUrl();
+    // Chưa cấu hình NEXT_PUBLIC_SIGNALR_URL → bỏ qua, không spam 404 /hubs/...
+    if (!hubUrl) {
+      return;
+    }
+
+    const connection: HubConnection = new HubConnectionBuilder()
+      .withUrl(hubUrl, { accessTokenFactory: () => ensureFreshAccessToken() })
       .withAutomaticReconnect()
       .configureLogging(LogLevel.Warning)
       .build();

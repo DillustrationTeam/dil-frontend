@@ -29,61 +29,61 @@ export function CreatorApplicationDetail({ application }: CreatorApplicationDeta
     <div className="space-y-6">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="space-y-1">
-          <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#A7ACD9]">
+          <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#B24A26]">
             {isVie ? 'Mã đơn đăng ký' : 'Application ID'}
           </span>
-          <p className="font-mono text-xs text-[#E4E1E5] break-all">{application.id || '—'}</p>
+          <p className="font-mono text-xs text-[#241F1A] break-all">{application.id || '—'}</p>
         </div>
 
         <div className="space-y-1">
-          <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#A7ACD9]">
+          <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#B24A26]">
             {isVie ? 'Trạng thái' : 'Status'}
           </span>
           <div>
-            <span className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-xs font-medium text-[#A7ACD9]">
+            <span className="inline-flex items-center rounded-full border border-[#221E1A]/10 bg-[#FFFCF6] px-2.5 py-0.5 text-xs font-medium text-[#B24A26]">
               {formatStatus(application.applicationStatus)}
             </span>
           </div>
         </div>
 
         <div className="space-y-1">
-          <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#A7ACD9]">
+          <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#B24A26]">
             {isVie ? 'Họ và tên' : 'Full Name'}
           </span>
-          <p className="text-sm font-medium text-white">{application.fullName || '—'}</p>
+          <p className="text-sm font-medium text-[#241F1A]">{application.fullName || '—'}</p>
         </div>
 
         <div className="space-y-1">
-          <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#A7ACD9]">
+          <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#B24A26]">
             Email
           </span>
-          <p className="text-sm text-[#E4E1E5]">{application.email || '—'}</p>
+          <p className="text-sm text-[#241F1A]">{application.email || '—'}</p>
         </div>
 
         <div className="space-y-1">
-          <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#A7ACD9]">
+          <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#B24A26]">
             {isVie ? 'Gửi lúc' : 'Submitted At'}
           </span>
-          <p className="text-sm text-[#C7C5CF]">{application.submittedAt || '—'}</p>
+          <p className="text-sm text-[#6E6459]">{application.submittedAt || '—'}</p>
         </div>
       </div>
 
-      <div className="space-y-2 border-t border-white/10 pt-4">
-        <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#A7ACD9]">
+      <div className="space-y-2 border-t border-[#221E1A]/10 pt-4">
+        <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#B24A26]">
           {isVie ? 'Lời giới thiệu nghệ sĩ' : 'Artist Statement'}
         </span>
-        <p className="rounded-xl border border-white/10 bg-[#0e0e11]/40 p-4 text-sm leading-relaxed text-[#E4E1E5] whitespace-pre-line">
+        <p className="rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6]/40 p-4 text-sm leading-relaxed text-[#241F1A] whitespace-pre-line">
           {application.statement || (isVie ? 'Không có lời giới thiệu.' : 'No statement provided.')}
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 border-t border-white/10 pt-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 border-t border-[#221E1A]/10 pt-4">
         <div className="space-y-2">
-          <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#A7ACD9]">
+          <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#B24A26]">
             {isVie ? 'CCCD / Giấy tờ tùy thân' : 'ID Card'}
           </span>
           {application.idCardUrl ? (
-            <div className="overflow-hidden rounded-xl border border-white/10 bg-black/20">
+            <div className="overflow-hidden rounded-xl border border-[#221E1A]/10 bg-[#F0E7D8]">
               <Image
                 src={application.idCardUrl}
                 alt="ID Card"
@@ -94,18 +94,18 @@ export function CreatorApplicationDetail({ application }: CreatorApplicationDeta
               />
             </div>
           ) : (
-            <div className="flex h-32 items-center justify-center rounded-xl border border-dashed border-white/10 text-xs text-[#919099]">
+            <div className="flex h-32 items-center justify-center rounded-xl border border-dashed border-[#221E1A]/10 text-xs text-[#746A5F]">
               {isVie ? 'Chưa tải lên CCCD' : 'No ID card uploaded'}
             </div>
           )}
         </div>
 
         <div className="space-y-2">
-          <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#A7ACD9]">
+          <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#B24A26]">
             Portfolio
           </span>
           {application.portfolioUrl ? (
-            <div className="overflow-hidden rounded-xl border border-white/10 bg-black/20">
+            <div className="overflow-hidden rounded-xl border border-[#221E1A]/10 bg-[#F0E7D8]">
               <Image
                 src={application.portfolioUrl}
                 alt="Portfolio"
@@ -116,8 +116,8 @@ export function CreatorApplicationDetail({ application }: CreatorApplicationDeta
               />
             </div>
           ) : (
-            <div className="flex h-32 items-center justify-center rounded-xl border border-dashed border-white/10 text-xs text-[#919099]">
-              {isVie ? 'Chưa có ảnh Portfolio' : 'No portfolio image uploaded'}
+            <div className="flex h-32 items-center justify-center rounded-xl border border-dashed border-[#221E1A]/10 text-xs text-[#746A5F]">
+              {isVie ? 'Chưa có ảnh hồ sơ tác phẩm' : 'No portfolio image uploaded'}
             </div>
           )}
         </div>

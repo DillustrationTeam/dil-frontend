@@ -79,7 +79,7 @@ export function PermissionsTable({ members, onUpdateRole, onRemoveMember, isJudg
   });
 
   return (
-    <div className="glass-container rounded-2xl p-6 border border-white/10 bg-[#161926]/90 backdrop-blur-xl">
+    <div className="glass-container rounded-2xl p-6 border border-[#221E1A]/10 bg-[#FFFCF6]/90 backdrop-blur-xl">
       {/* 1. Header Title & Description */}
       <div className="mb-4">
         <h2 className="text-xl font-bold font-h1 text-on-surface">Jury Panel Permissions</h2>
@@ -90,19 +90,19 @@ export function PermissionsTable({ members, onUpdateRole, onRemoveMember, isJudg
       <div className="flex flex-wrap items-center gap-3 mb-5">
         {/* Searchbar */}
         <div className="relative flex-1 min-w-[220px]">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#746A5F] pointer-events-none" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search jury member by name or email..."
-            className="w-full h-10 pl-10 pr-9 bg-[#090b12]/80 border border-white/10 rounded-xl text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-brand-periwinkle focus:ring-1 focus:ring-brand-periwinkle/30 transition-all"
+            className="w-full h-10 pl-10 pr-9 bg-[#E5D8C2] border border-[#221E1A]/10 rounded-xl text-xs text-[#241F1A] placeholder:text-[#746A5F] focus:outline-none focus:border-brand-periwinkle focus:ring-1 focus:ring-brand-periwinkle/30 transition-all"
           />
           {searchQuery && (
             <button
               type="button"
               onClick={() => setSearchQuery('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white p-0.5 cursor-pointer"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-[#746A5F] hover:text-[#241F1A] p-0.5 cursor-pointer"
               title="Clear search"
             >
               <X className="w-3.5 h-3.5" />
@@ -115,11 +115,11 @@ export function PermissionsTable({ members, onUpdateRole, onRemoveMember, isJudg
           <select
             value={roleFilter}
             onChange={(e) => setRoleFilter(e.target.value as 'All' | 'Head Jury' | 'Jury')}
-            className="h-10 px-3.5 pr-8 bg-[#090b12]/80 border border-white/10 rounded-xl text-xs text-white focus:outline-none focus:border-brand-periwinkle focus:ring-1 focus:ring-brand-periwinkle/30 transition-all cursor-pointer font-medium"
+            className="h-10 px-3.5 pr-8 bg-[#E5D8C2] border border-[#221E1A]/10 rounded-xl text-xs text-[#241F1A] focus:outline-none focus:border-brand-periwinkle focus:ring-1 focus:ring-brand-periwinkle/30 transition-all cursor-pointer font-medium"
           >
-            <option value="All" className="bg-[#161926]">{isVie ? 'Tất cả vai trò' : 'All Roles'}</option>
-            <option value="Head Jury" className="bg-[#161926]">{isVie ? 'Trưởng ban' : 'Head Jury'}</option>
-            <option value="Jury" className="bg-[#161926]">{isVie ? 'Giám khảo' : 'Jury'}</option>
+            <option value="All" className="bg-[#FFFCF6]">{isVie ? 'Tất cả vai trò' : 'All Roles'}</option>
+            <option value="Head Jury" className="bg-[#FFFCF6]">{isVie ? 'Trưởng ban' : 'Head Jury'}</option>
+            <option value="Jury" className="bg-[#FFFCF6]">{isVie ? 'Giám khảo' : 'Jury'}</option>
           </select>
         </div>
       </div>
@@ -127,14 +127,14 @@ export function PermissionsTable({ members, onUpdateRole, onRemoveMember, isJudg
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse min-w-[550px]">
           <thead>
-            <tr className="border-b border-white/10 text-[11px] font-bold text-outline uppercase tracking-wider">
+            <tr className="border-b border-[#221E1A]/10 text-[11px] font-bold text-outline uppercase tracking-wider">
               <th className="pb-3 px-3">{isVie ? 'Thành viên' : 'Member'}</th>
               <th className="pb-3 px-3">{isVie ? 'Vai trò' : 'Role'}</th>
               <th className="pb-3 px-3">{isVie ? 'Trạng thái' : 'Status'}</th>
               <th className="pb-3 px-3 text-right">{isVie ? 'Thao tác' : 'Actions'}</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-white/5 text-sm">
+          <tbody className="divide-y divide-[#221E1A]/10 text-sm">
             {filteredMembers.length === 0 ? (
               <tr>
                 <td colSpan={4} className="py-8 text-center text-xs text-outline">
@@ -149,7 +149,7 @@ export function PermissionsTable({ members, onUpdateRole, onRemoveMember, isJudg
               </tr>
             ) : (
               filteredMembers.map((member) => (
-                <tr key={member.id} className="hover:bg-white/[0.02] transition-colors">
+                <tr key={member.id} className="hover:bg-[#FFFCF6] transition-colors">
                   <td className="py-3.5 px-3 font-semibold text-on-surface">
                     {member.name}
                     {member.email && (
@@ -162,7 +162,7 @@ export function PermissionsTable({ members, onUpdateRole, onRemoveMember, isJudg
                     <span
                       className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold ${
                         member.role === 'Head Jury'
-                          ? 'bg-amber-950/70 border border-amber-400/30 text-amber-300'
+                          ? 'bg-[#8A6A1F]/20 border border-[#8A6A1F]/40 text-[#8A6A1F]'
                           : 'bg-brand-periwinkle/15 border border-brand-periwinkle/30 text-brand-periwinkle'
                       }`}
                     >
@@ -178,8 +178,8 @@ export function PermissionsTable({ members, onUpdateRole, onRemoveMember, isJudg
                     <span
                       className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium ${
                         member.status === 'Confirmed'
-                          ? 'text-emerald-300 bg-emerald-950/40 border border-emerald-500/20'
-                          : 'text-amber-300 bg-amber-950/40 border border-amber-500/20'
+                          ? 'text-[#2F6B63] bg-[#2F6B63]/20 border border-[#2F6B63]/30'
+                          : 'text-[#8A6A1F] bg-[#8A6A1F]/20 border border-[#8A6A1F]/30'
                       }`}
                     >
                       {member.status === 'Confirmed' ? (
@@ -196,7 +196,7 @@ export function PermissionsTable({ members, onUpdateRole, onRemoveMember, isJudg
                         <button
                           type="button"
                           onClick={() => handleOpenEdit(member)}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-xs text-white transition-all cursor-pointer"
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-[#221E1A]/10 bg-[#FFFCF6] hover:bg-[#F0E7D8] text-xs text-[#241F1A] transition-all cursor-pointer"
                         >
                           <Edit2 className="w-3 h-3 text-brand-periwinkle" />
                           <span>{isVie ? 'Đổi vai trò' : 'Edit Role'}</span>
@@ -205,10 +205,10 @@ export function PermissionsTable({ members, onUpdateRole, onRemoveMember, isJudg
                       <button
                         type="button"
                         onClick={() => handleOpenRemove(member)}
-                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 text-xs text-red-400 transition-all cursor-pointer"
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-[#A8321C]/40 bg-[#A8321C]/10 hover:bg-[#A8321C]/20 text-xs text-[#A8321C] transition-all cursor-pointer"
                         title={member.status === 'Pending' ? (isVie ? 'Hủy lời mời' : 'Cancel Invitation') : (isVie ? 'Xóa thành viên' : 'Remove Member')}
                       >
-                        <UserX className="w-3 h-3 text-red-400" />
+                        <UserX className="w-3 h-3 text-[#A8321C]" />
                         <span>{member.status === 'Pending' ? (isVie ? 'Hủy mời' : 'Cancel Invite') : (isVie ? 'Xóa' : 'Remove')}</span>
                       </button>
                     </div>
@@ -222,33 +222,33 @@ export function PermissionsTable({ members, onUpdateRole, onRemoveMember, isJudg
 
       {/* Edit Role Modal Portaled to document.body */}
       {mounted && editingMember && createPortal(
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 overflow-y-auto">
-          <form onSubmit={handleSaveRole} className="w-full max-w-md rounded-2xl border border-white/15 bg-[#161926] p-6 shadow-2xl relative animate-in fade-in zoom-in-95 duration-200 text-left m-auto max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#E5D8C2] backdrop-blur-sm p-4 overflow-y-auto">
+          <form onSubmit={handleSaveRole} className="w-full max-w-md rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] p-6 shadow-2xl relative animate-in fade-in zoom-in-95 duration-200 text-left m-auto max-h-[90vh] overflow-y-auto">
             <button
               type="button"
               onClick={() => setEditingMember(null)}
-              className="absolute top-4 right-4 p-1 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white"
+              className="absolute top-4 right-4 p-1 rounded-lg hover:bg-[#F0E7D8] text-[#746A5F] hover:text-[#241F1A]"
             >
               <X className="w-4 h-4" />
             </button>
-            <h3 className="text-lg font-bold text-white font-h1">
+            <h3 className="text-lg font-bold text-[#241F1A] font-h1">
               {isVie ? 'Chỉnh sửa vai trò Giám khảo' : 'Edit Jury Role'}
             </h3>
             <p className="text-xs text-outline mt-1">
               {isVie ? (
-                <>Thay đổi quyền hạn cho <span className="font-semibold text-white">{editingMember.name}</span> ({editingMember.email || 'Không có email'}).</>
+                <>Thay đổi quyền hạn cho <span className="font-semibold text-[#241F1A]">{editingMember.name}</span> ({editingMember.email || 'Không có email'}).</>
               ) : (
-                <>Change permissions for <span className="font-semibold text-white">{editingMember.name}</span> ({editingMember.email || 'No email'}).</>
+                <>Change permissions for <span className="font-semibold text-[#241F1A]">{editingMember.name}</span> ({editingMember.email || 'No email'}).</>
               )}
             </p>
 
-            <div className="mt-4 p-3 rounded-xl border border-blue-500/20 bg-blue-500/10 flex items-start gap-2.5 text-xs text-blue-300">
-              <Info className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
+            <div className="mt-4 p-3 rounded-xl border border-[#2C5A86]/30 bg-[#2C5A86]/10 flex items-start gap-2.5 text-xs text-[#2C5A86]">
+              <Info className="w-4 h-4 text-[#2C5A86] shrink-0 mt-0.5" />
               <span>
                 {isVie ? (
-                  <>Chỉ được phép thay đổi vai trò trước khi giai đoạn chấm thi bắt đầu (<code className="text-white">JudgingStartAt</code>).</>
+                  <>Chỉ được phép thay đổi vai trò trước khi giai đoạn chấm thi bắt đầu (<code className="text-[#241F1A]">JudgingStartAt</code>).</>
                 ) : (
-                  <>Role changes are allowed only before the judging phase starts (<code className="text-white">JudgingStartAt</code>).</>
+                  <>Role changes are allowed only before the judging phase starts (<code className="text-[#241F1A]">JudgingStartAt</code>).</>
                 )}
               </span>
             </div>
@@ -265,8 +265,8 @@ export function PermissionsTable({ members, onUpdateRole, onRemoveMember, isJudg
                     onClick={() => setEditRole('Jury')}
                     className={`flex items-center justify-center gap-2 p-3 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
                       editRole === 'Jury'
-                        ? 'border-brand-periwinkle bg-brand-periwinkle/20 text-white shadow-[0_0_15px_rgba(167,172,217,0.2)]'
-                        : 'border-white/10 bg-white/5 text-slate-400 hover:bg-white/10'
+                        ? 'border-brand-periwinkle bg-brand-periwinkle/20 text-[#241F1A] shadow-[0_0_15px_rgba(167,172,217,0.2)]'
+                        : 'border-[#221E1A]/10 bg-[#FFFCF6] text-[#746A5F] hover:bg-[#F0E7D8]'
                     }`}
                   >
                     <UserCheck className="w-4 h-4 text-brand-periwinkle" />
@@ -277,11 +277,11 @@ export function PermissionsTable({ members, onUpdateRole, onRemoveMember, isJudg
                     onClick={() => setEditRole('Head Jury')}
                     className={`flex items-center justify-center gap-2 p-3 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
                       editRole === 'Head Jury'
-                        ? 'border-amber-400 bg-amber-500/20 text-amber-300 shadow-[0_0_15px_rgba(251,191,36,0.2)]'
-                        : 'border-white/10 bg-white/5 text-slate-400 hover:bg-white/10'
+                        ? 'border-[#8A6A1F]/30 bg-[#8A6A1F]/20 text-[#8A6A1F] shadow-[0_0_15px_rgba(251,191,36,0.2)]'
+                        : 'border-[#221E1A]/10 bg-[#FFFCF6] text-[#746A5F] hover:bg-[#F0E7D8]'
                     }`}
                   >
-                    <Crown className="w-4 h-4 text-amber-300" />
+                    <Crown className="w-4 h-4 text-[#8A6A1F]" />
                     {isVie ? 'Trưởng ban' : 'Head Jury'}
                   </button>
                 </div>
@@ -292,13 +292,13 @@ export function PermissionsTable({ members, onUpdateRole, onRemoveMember, isJudg
               <button
                 type="button"
                 onClick={() => setEditingMember(null)}
-                className="px-4 py-2 rounded-xl border border-white/10 text-xs font-semibold text-slate-300 hover:bg-white/5 transition-all cursor-pointer"
+                className="px-4 py-2 rounded-xl border border-[#221E1A]/10 text-xs font-semibold text-[#746A5F] hover:bg-[#FFFCF6] transition-all cursor-pointer"
               >
                 {isVie ? 'Hủy' : 'Cancel'}
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#a7acd9] to-[#7fd5e8] text-brand-navy text-xs font-bold hover:brightness-110 transition-all cursor-pointer"
+                className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#B24A26] to-[#2F6B63] text-[#241F1A] text-xs font-bold hover:brightness-110 transition-all cursor-pointer"
               >
                 {isVie ? 'Lưu thay đổi' : 'Save Changes'}
               </button>
@@ -310,9 +310,9 @@ export function PermissionsTable({ members, onUpdateRole, onRemoveMember, isJudg
 
       {/* Remove Member Confirmation Modal Portaled to document.body */}
       {mounted && memberToRemove && createPortal(
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 overflow-y-auto">
-          <div className="w-full max-w-md rounded-2xl border border-red-500/30 bg-[#161926] p-6 shadow-2xl relative animate-in fade-in zoom-in-95 duration-200 text-left m-auto">
-            <h3 className="text-lg font-bold text-white font-h1">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#E5D8C2] backdrop-blur-sm p-4 overflow-y-auto">
+          <div className="w-full max-w-md rounded-2xl border border-[#A8321C]/40 bg-[#FFFCF6] p-6 shadow-2xl relative animate-in fade-in zoom-in-95 duration-200 text-left m-auto">
+            <h3 className="text-lg font-bold text-[#241F1A] font-h1">
               {memberToRemove.status === 'Pending'
                 ? isVie
                   ? 'Hủy lời mời Giám khảo'
@@ -321,26 +321,23 @@ export function PermissionsTable({ members, onUpdateRole, onRemoveMember, isJudg
                   ? 'Xóa khỏi Ban giám khảo'
                   : 'Remove Jury Member'}
             </h3>
-            <p className="text-xs text-slate-300 mt-2 leading-relaxed">
+            <p className="text-xs text-[#746A5F] mt-2 leading-relaxed">
               {memberToRemove.status === 'Pending' ? (
                 isVie ? (
                   <>
                     Bạn có chắc chắn muốn hủy lời mời tham gia ban giám khảo gửi tới{' '}
-                    <span className="font-bold text-white">{memberToRemove.name}</span> không?
-                  </>
+                    <span className="font-bold text-[#241F1A]">{memberToRemove.name}</span> không? </>
                 ) : (
                   <>
                     Are you sure you want to cancel the pending jury invitation sent to{' '}
-                    <span className="font-bold text-white">{memberToRemove.name}</span>?
+                    <span className="font-bold text-[#241F1A]">{memberToRemove.name}</span>?
                   </>
                 )
               ) : isVie ? (
-                <>
-                  Bạn có chắc chắn muốn xóa <span className="font-bold text-white">{memberToRemove.name}</span> khỏi Ban giám khảo không? Thành viên này sẽ không còn quyền truy cập nhiệm vụ chấm thi cho sự kiện này.
-                </>
+                <> Bạn có chắc chắn muốn xóa <span className="font-bold text-[#241F1A]">{memberToRemove.name}</span> khỏi Ban giám khảo không? Thành viên này sẽ không còn quyền truy cập nhiệm vụ chấm thi cho sự kiện này. </>
               ) : (
                 <>
-                  Are you sure you want to remove <span className="font-bold text-white">{memberToRemove.name}</span> from the Jury Panel? They will no longer have access to evaluation tasks for this event.
+                  Are you sure you want to remove <span className="font-bold text-[#241F1A]">{memberToRemove.name}</span> from the Jury Panel? They will no longer have access to evaluation tasks for this event.
                 </>
               )}
             </p>
@@ -349,14 +346,14 @@ export function PermissionsTable({ members, onUpdateRole, onRemoveMember, isJudg
               <button
                 type="button"
                 onClick={() => setMemberToRemove(null)}
-                className="px-4 py-2 rounded-xl border border-white/10 text-xs font-semibold text-slate-300 hover:bg-white/5 transition-all cursor-pointer"
+                className="px-4 py-2 rounded-xl border border-[#221E1A]/10 text-xs font-semibold text-[#746A5F] hover:bg-[#FFFCF6] transition-all cursor-pointer"
               >
                 {isVie ? 'Giữ lại' : 'Keep'}
               </button>
               <button
                 type="button"
                 onClick={handleConfirmRemove}
-                className="px-4 py-2 rounded-xl bg-red-500 hover:bg-red-600 text-white text-xs font-bold transition-all shadow-[0_0_15px_rgba(239,68,68,0.3)] cursor-pointer"
+                className="px-4 py-2 rounded-xl bg-[#A8321C]/12 hover:bg-[#A8321C]/12 text-[#241F1A] text-xs font-bold transition-all shadow-[0_0_15px_rgba(239,68,68,0.3)] cursor-pointer"
               >
                 {memberToRemove.status === 'Pending'
                   ? isVie

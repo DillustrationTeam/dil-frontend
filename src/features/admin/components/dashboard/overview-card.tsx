@@ -8,10 +8,10 @@ interface OverviewCardProps {
 export function OverviewCard({ title, value }: OverviewCardProps) {
   return (
     <div className="glass-container rounded-[28px] p-5 periwinkle-glow">
-      <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#A7ACD9]">
+      <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#B24A26]">
         {title}
       </span>
-      <p className="font-h1 mt-3 text-3xl font-bold text-white">{value}</p>
+      <p className="font-h1 mt-3 text-3xl font-bold text-[#241F1A]">{value}</p>
     </div>
   );
 }

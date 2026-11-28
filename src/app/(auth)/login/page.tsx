@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { ArrowRight, Eye, EyeOff, KeyRound, Lock, Mail } from 'lucide-react';
+import { ArrowRight, Eye, EyeOff, Info, KeyRound, Lock, Mail } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { authService } from '@/services/auth.service';
 import { useLanguage } from '@/context/language-context';
@@ -33,6 +33,12 @@ interface LoginFormValues {
   remember?: boolean;
 }
 
+/**
+ * Tài khoản seed, dùng cho khối "Test mode (development only)".
+ *
+ * Danh sách này phải khớp dữ liệu seed thật của backend — thiếu một role nghĩa là
+ * không ai đăng nhập được role đó khi demo. Ba role đang dùng: client / creator / admin.
+ */
 const seedAccounts = [
   { label: 'Client', email: 'client.demo@dillustration.test', password: 'Demo@123456' },
   { label: 'Creator', email: 'creator.demo@dillustration.test', password: 'Demo@123456' },
@@ -199,13 +205,13 @@ export default function LoginPage() {
         <AccountPasswordSetupForm
           introText={
             <>
-              <p className="text-sm text-[#C7C5CF]">
+              <p className="text-sm text-[#6E6459]">
                 {isEng ? 'Welcome back' : 'Chào mừng trở lại'}
                 {passwordSetup.fullName ? `, ${passwordSetup.fullName}` : ''}!{' '}
                 {isEng ? 'Signed in as' : 'Đăng nhập với'}{' '}
-                <span className="font-medium text-white">{passwordSetup.email}</span>.
+                <span className="font-medium text-[#241F1A]">{passwordSetup.email}</span>.
               </p>
-              <p className="mt-2 text-sm text-[#C7C5CF]">
+              <p className="mt-2 text-sm text-[#6E6459]">
                 {isEng
                   ? "This account doesn't have a username and password yet — set them now before continuing."
                   : 'Tài khoản này chưa có tên đăng nhập và mật khẩu — hãy thiết lập ngay trước khi tiếp tục.'}
@@ -238,13 +244,13 @@ export default function LoginPage() {
         <AccountPasswordSetupForm
           introText={
             <>
-              <p className="text-sm text-[#C7C5CF]">
+              <p className="text-sm text-[#6E6459]">
                 {isEng ? 'Welcome' : 'Chào mừng'}
                 {googleRegistration.fullName ? `, ${googleRegistration.fullName}` : ''}!{' '}
                 {isEng ? 'Signed in with Google as' : 'Đăng nhập Google bằng'}{' '}
-                <span className="font-medium text-white">{googleRegistration.email}</span>.
+                <span className="font-medium text-[#241F1A]">{googleRegistration.email}</span>.
               </p>
-              <p className="mt-2 text-sm text-[#C7C5CF]">
+              <p className="mt-2 text-sm text-[#6E6459]">
                 {isEng
                   ? "Google accounts don't come with a password here — choose a username and password to finish creating your account."
                   : 'Tài khoản Google cần thiết lập tên đăng nhập và mật khẩu để hoàn tất tạo tài khoản.'}
@@ -274,49 +280,28 @@ export default function LoginPage() {
         />
       ) : !twoFactorTicket ? (
         <>
-          <header className="mb-7">
-            <h1 className="font-h1 text-2xl font-bold text-white sm:text-3xl">
+          <header className="mb-6">
+            <h1 className="font-h1 text-[clamp(1.85rem,3vw,2.4rem)] font-normal leading-[1.1] text-[#241F1A]">
               {isEng ? 'Sign In' : 'Đăng nhập'}
             </h1>
-            <p className="mt-1.5 text-sm text-[#C7C5CF]">
+            <p className="mt-2 text-[0.9375rem] text-[#6E6459]">
               {isEng
                 ? 'Welcome back to the DILLUSTRATION digital art gallery.'
                 : 'Chào mừng bạn quay lại phòng trưng bày và giao dịch tranh số.'}
             </p>
           </header>
 
-          {/* Dev-only: điền nhanh tài khoản seed theo role */}
-          {process.env.NODE_ENV !== 'production' && (
-            <div className="mb-6 space-y-2 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3">
-              <p className="text-center text-[10px] font-semibold uppercase tracking-widest text-[#919099]">
-                {isEng ? 'Dev quick login' : 'Đăng nhập nhanh (Dev)'}
-              </p>
-              <div className="flex flex-wrap justify-center gap-2">
-                {seedAccounts.map((account) => (
-                  <button
-                    key={account.email}
-                    type="button"
-                    onClick={() => fillSeedAccount(account)}
-                    className="cursor-pointer rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5 text-xs font-medium text-[#A7ACD9] transition-colors hover:border-[#A7ACD9]/40 hover:bg-white/10 hover:text-white"
-                  >
-                    {account.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>
+          <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
             {/* Email / Username */}
             <div className="space-y-1.5">
               <label className={AUTH_LABEL_CLASS} htmlFor="emailOrUsername">
                 {isEng ? 'Email or Username' : 'Email hoặc Tên đăng nhập'}
               </label>
               <div className={AUTH_INPUT_WRAP_CLASS}>
-                <Mail className="pointer-events-none ml-3.5 h-4 w-4 shrink-0 text-[#919099]" aria-hidden />
+                <Mail className="pointer-events-none ml-3.5 h-4 w-4 shrink-0 text-[#746A5F]" aria-hidden />
                 <input
                   {...register('emailOrUsername')}
-                  className={`${AUTH_INPUT_CLASS} px-3.5`}
+                  className={`${AUTH_INPUT_CLASS} px-3.5 !h-11`}
                   id="emailOrUsername"
                   placeholder={isEng ? 'name@example.com or username' : 'name@example.com hoặc tên đăng nhập'}
                   type="text"
@@ -325,7 +310,7 @@ export default function LoginPage() {
                 />
               </div>
               {errors.emailOrUsername && (
-                <p className="text-xs text-red-400">{errors.emailOrUsername.message}</p>
+                <p className="text-xs text-[#A8321C]">{errors.emailOrUsername.message}</p>
               )}
             </div>
 
@@ -336,17 +321,17 @@ export default function LoginPage() {
                   {isEng ? 'Password' : 'Mật khẩu'}
                 </label>
                 <Link
-                  className="text-xs font-medium text-[#A7ACD9] transition-colors hover:text-white"
+                  className="text-xs font-medium text-[#B24A26] transition-colors hover:text-[#241F1A]"
                   href="/forgot-password"
                 >
                   {isEng ? 'Forgot Password?' : 'Quên mật khẩu?'}
                 </Link>
               </div>
               <div className={AUTH_INPUT_WRAP_CLASS}>
-                <Lock className="pointer-events-none ml-3.5 h-4 w-4 shrink-0 text-[#919099]" aria-hidden />
+                <Lock className="pointer-events-none ml-3.5 h-4 w-4 shrink-0 text-[#746A5F]" aria-hidden />
                 <input
                   {...register('password')}
-                  className={`${AUTH_INPUT_CLASS} pl-3.5 pr-11`}
+                  className={`${AUTH_INPUT_CLASS} !h-11 pl-3.5 pr-11`}
                   id="password"
                   placeholder="••••••••••••"
                   type={showPassword ? 'text' : 'password'}
@@ -354,7 +339,7 @@ export default function LoginPage() {
                   disabled={isLoading}
                 />
                 <button
-                  className="absolute right-3.5 cursor-pointer text-[#919099] transition-colors hover:text-white"
+                  className="absolute right-3.5 cursor-pointer text-[#746A5F] transition-colors hover:text-[#241F1A]"
                   type="button"
                   onClick={() => setShowPassword((prev) => !prev)}
                   aria-label={isEng ? 'Toggle password visibility' : 'Hiện/ẩn mật khẩu'}
@@ -366,18 +351,18 @@ export default function LoginPage() {
                   )}
                 </button>
               </div>
-              {errors.password && <p className="text-xs text-red-400">{errors.password.message}</p>}
+              {errors.password && <p className="text-xs text-[#A8321C]">{errors.password.message}</p>}
             </div>
 
             {/* Remember */}
             <div className="flex items-center gap-2.5 pt-0.5">
               <input
                 {...register('remember')}
-                className="h-4 w-4 cursor-pointer rounded border-white/15 bg-[#141724] text-[#A7ACD9] focus:ring-[#A7ACD9]"
+                className="h-5 w-5 cursor-pointer appearance-none rounded-[6px] border border-[#221E1A]/20 bg-[#FFFCF6] checked:border-[#B24A26] checked:bg-[#B24A26] focus:ring-2 focus:ring-[#B24A26]/30"
                 id="remember"
                 type="checkbox"
               />
-              <label className="cursor-pointer select-none text-xs text-[#C7C5CF]" htmlFor="remember">
+              <label className="cursor-pointer select-none text-[0.875rem] text-[#6E6459]" htmlFor="remember">
                 {isEng ? 'Keep me signed in' : 'Ghi nhớ đăng nhập'}
               </label>
             </div>
@@ -390,40 +375,62 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <div className="mt-7 space-y-5 border-t border-white/10 pt-6">
+          <div className="mt-6 space-y-4 border-t border-[#221E1A]/10 pt-5">
             <div className="flex items-center gap-4">
-              <div className="h-px flex-1 bg-white/10" />
-              <span className="text-[10px] uppercase tracking-widest text-[#919099]">
+              <div className="h-px flex-1 bg-[#F0E7D8]" />
+              <span className="text-[0.75rem] uppercase tracking-[0.10em] text-[#746A5F]">
                 {isEng ? 'Or continue with' : 'Hoặc tiếp tục với'}
               </span>
-              <div className="h-px flex-1 bg-white/10" />
+              <div className="h-px flex-1 bg-[#F0E7D8]" />
             </div>
 
             <GoogleAuthButton onClick={() => googleLogin()} />
 
-            <p className="text-center text-xs text-[#C7C5CF]">
+            <p className="text-center text-[0.9375rem] text-[#6E6459]">
               {isEng ? 'New to DILLUSTRATION?' : 'Chưa có tài khoản?'}{' '}
-              <Link className="font-bold text-[#A7ACD9] transition-colors hover:text-white hover:underline" href="/register">
+              <Link className="font-bold text-[#B24A26] transition-colors hover:text-[#241F1A] hover:underline" href="/register">
                 {isEng ? 'Create an account' : 'Đăng ký ngay'}
               </Link>
             </p>
+
+            {/* Dev-only: bấm vào mới xổ ra, điền nhanh tài khoản seed theo role */}
+            {process.env.NODE_ENV !== 'production' && (
+              <details className="devbox">
+                <summary>
+                  <Info className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                  {isEng ? 'Test mode (development only)' : 'Chế độ test (chỉ môi trường dev)'}
+                </summary>
+                <div className="devbox__grid">
+                  {seedAccounts.map((account) => (
+                    <button
+                      key={account.email}
+                      type="button"
+                      onClick={() => fillSeedAccount(account)}
+                      
+                    >
+                      {account.label}
+                    </button>
+                  ))}
+                </div>
+              </details>
+            )}
           </div>
         </>
       ) : (
         <div className="space-y-5">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#A7ACD9]/30 bg-[#A7ACD9]/15 text-[#A7ACD9]">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#B24A26]/30 bg-[#B24A26]/15 text-[#B24A26]">
               <KeyRound className="h-5 w-5" aria-hidden />
             </div>
             <div>
-              <h2 className="font-h1 text-lg font-bold text-white">
+              <h2 className="font-h1 text-lg font-bold text-[#241F1A]">
                 {isEng ? 'Two-Factor Verification' : 'Xác thực hai lớp (2FA)'}
               </h2>
-              <p className="text-xs text-[#919099]">{pendingEmail}</p>
+              <p className="text-xs text-[#746A5F]">{pendingEmail}</p>
             </div>
           </div>
 
-          <p className="text-sm text-[#C7C5CF]">
+          <p className="text-sm text-[#6E6459]">
             {isEng
               ? 'Enter the 6-digit code from your authenticator app or a recovery code (XXXXX-XXXXX).'
               : 'Nhập mã 6 chữ số từ ứng dụng xác thực hoặc mã khôi phục (định dạng XXXXX-XXXXX).'}
@@ -458,7 +465,7 @@ export default function LoginPage() {
           <button
             type="button"
             onClick={handleCancelTwoFactor}
-            className="w-full cursor-pointer text-center text-xs font-medium text-[#919099] transition-colors hover:text-white"
+            className="w-full cursor-pointer text-center text-xs font-medium text-[#746A5F] transition-colors hover:text-[#241F1A]"
           >
             {isEng ? 'Back to sign in' : 'Quay lại đăng nhập'}
           </button>

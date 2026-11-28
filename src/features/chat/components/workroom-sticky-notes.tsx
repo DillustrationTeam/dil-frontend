@@ -360,19 +360,19 @@ export const WorkroomStickyNotes: React.FC<WorkroomStickyNotesProps> = ({
   return (
     <>
       {/* Mini Controls Pill on Canvas Top Right Corner */}
-      <div className="absolute top-2.5 right-2.5 z-30 flex items-center gap-1.5 p-1 rounded-xl bg-[#181A28]/95 border border-purple-500/30 shadow-lg backdrop-blur-md text-xs select-none">
+      <div className="absolute top-2.5 right-2.5 z-30 flex items-center gap-1.5 p-1 rounded-xl bg-[#FFFCF6]/95 border border-[#B24A26]/40 shadow-lg backdrop-blur-md text-xs select-none">
         {allNotesVisible && (
           <>
-            {/* Nút 1: Thêm Note mới (Creator) */}
+            {/* Nút 1: Thêm ghi chú mới (Creator) */}
             {isCreator && (
               <button
                 type="button"
                 onClick={handleAddManualNote}
-                className="h-[22px] px-2.5 rounded-lg font-bold text-[10px] flex items-center justify-center gap-1 bg-gradient-to-r from-fuchsia-500 to-purple-600 hover:from-fuchsia-400 hover:to-purple-500 text-white border border-fuchsia-400/40 shadow-xs transition"
-                title="Dán một note ghi chú mới lên tranh"
+                className="h-[22px] px-2.5 rounded-lg font-bold text-[10px] flex items-center justify-center gap-1 bg-[#B24A26] hover:bg-[#8C3718] text-[#FFFCF6] border border-[#B24A26]/40 shadow-xs transition"
+                title="Dán một ghi chú ghi chú mới lên tranh"
               >
                 <Plus size={11} />
-                <span>Thêm Note</span>
+                <span>Thêm ghi chú</span>
               </button>
             )}
 
@@ -381,8 +381,8 @@ export const WorkroomStickyNotes: React.FC<WorkroomStickyNotesProps> = ({
               <button
                 type="button"
                 onClick={handleResetPositions}
-                className="h-[22px] w-[22px] flex items-center justify-center rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-slate-400 hover:text-white transition"
-                title="Sắp xếp lại vị trí các note"
+                className="h-[22px] w-[22px] flex items-center justify-center rounded-lg bg-[#FFFCF6] hover:bg-[#F0E7D8] border border-[#221E1A]/10 text-[#746A5F] hover:text-[#241F1A] transition"
+                title="Sắp xếp lại vị trí các ghi chú"
               >
                 <RotateCcw size={10} />
               </button>
@@ -393,8 +393,8 @@ export const WorkroomStickyNotes: React.FC<WorkroomStickyNotesProps> = ({
               <span
                 className={`h-[22px] px-2 flex items-center justify-center rounded-lg text-[9px] font-bold border ${
                   doneCount === totalCount
-                    ? 'bg-emerald-500/20 text-emerald-300 border-emerald-400/40'
-                    : 'bg-purple-500/20 text-purple-200 border-purple-500/30'
+                    ? 'bg-[#2F6B63]/20 text-[#2F6B63] border-[#2F6B63]/40'
+                    : 'bg-[#B24A26]/20 text-[#B24A26] border-[#B24A26]/40'
                 }`}
               >
                 {doneCount === totalCount ? '✓ Xong hết ♡' : `${doneCount}/${totalCount} xong`}
@@ -409,10 +409,10 @@ export const WorkroomStickyNotes: React.FC<WorkroomStickyNotesProps> = ({
           onClick={() => setAllNotesVisible((v) => !v)}
           className={`h-[22px] px-2.5 rounded-lg font-bold text-[10px] flex items-center justify-center gap-1 transition border ${
             allNotesVisible
-              ? 'bg-fuchsia-500/20 text-fuchsia-300 border-fuchsia-500/40 shadow-xs'
-              : 'bg-white/5 text-slate-400 hover:text-white border-white/10'
+              ? 'bg-[#8C3718]/20 text-[#8C3718] border-[#8C3718]/40 shadow-xs'
+              : 'bg-[#FFFCF6] text-[#746A5F] hover:text-[#241F1A] border-[#221E1A]/10'
           }`}
-          title={allNotesVisible ? 'Ẩn tạm các note trên tranh' : 'Hiện lại các note'}
+          title={allNotesVisible ? 'Ẩn tạm các ghi chú trên tranh' : 'Hiện lại các ghi chú'}
         >
           {allNotesVisible ? <Eye size={11} /> : <EyeOff size={11} />}
           <span>{allNotesVisible ? `Notes (${totalCount})` : 'Hiện Notes'}</span>
@@ -429,23 +429,23 @@ export const WorkroomStickyNotes: React.FC<WorkroomStickyNotesProps> = ({
 
             let badgeText = 'Ghi chú';
             let badgeBg = 'bg-[#EC4899]';
-            let washiClass = 'bg-amber-200/90';
+            let washiClass = 'bg-[#8A6A1F]/20';
             let stickerIcon = '✏️';
 
             if (note.type === 'revision') {
               badgeText = `Sửa mốc #${displayedMilestone?.sequence ?? ''}`;
               badgeBg = 'bg-[#EE60D0]';
-              washiClass = 'bg-pink-200/90';
+              washiClass = 'bg-[#A8321C]/20';
               stickerIcon = '✏️';
             } else if (note.type === 'addon') {
               badgeText = 'Gói Add-on';
-              badgeBg = 'bg-[#9333EA]';
-              washiClass = 'bg-purple-200/90';
+              badgeBg = 'bg-[#E5D8C2]';
+              washiClass = 'bg-[#B24A26]/20';
               stickerIcon = '✨';
             } else {
-              badgeText = 'Note riêng';
+              badgeText = 'Ghi chú riêng';
               badgeBg = 'bg-[#059669]';
-              washiClass = 'bg-emerald-200/90';
+              washiClass = 'bg-[#2F6B63]/20';
               stickerIcon = '🌿';
             }
 
@@ -468,7 +468,7 @@ export const WorkroomStickyNotes: React.FC<WorkroomStickyNotesProps> = ({
                 {!note.isCollapsed ? (
                   /* ================= COMPACT MEMO CARD VIEW ================= */
                   <div
-                    className="relative rounded-xl p-2.5 pt-3 border-2 border-purple-200/90 shadow-[0_8px_20px_rgba(0,0,0,0.4)] w-[190px] sm:w-[215px] text-slate-800 transition-all duration-200"
+                    className="relative rounded-xl p-2.5 pt-3 border-2 border-[#B24A26]/40 shadow-[0_8px_20px_rgba(0,0,0,0.4)] w-[190px] sm:w-[215px] text-[#241F1A] transition-all duration-200"
                     style={{
                       backgroundColor: '#FFFFFF',
                       backgroundImage:
@@ -478,7 +478,7 @@ export const WorkroomStickyNotes: React.FC<WorkroomStickyNotesProps> = ({
                   >
                     {/* Washi Tape Strip on Top Center (Compact) */}
                     <div
-                      className={`absolute -top-2 left-1/2 -translate-x-1/2 w-14 h-3 rounded-xs shadow-xs backdrop-blur-xs border-l-2 border-r-2 border-dashed border-white/70 ${washiClass}`}
+                      className={`absolute -top-2 left-1/2 -translate-x-1/2 w-14 h-3 rounded-xs shadow-xs backdrop-blur-xs border-l-2 border-r-2 border-dashed border-[#221E1A]/10 ${washiClass}`}
                       style={{
                         transform: `translateX(-50%) rotate(${idx % 2 === 0 ? '-1.5deg' : '1.5deg'})`,
                       }}
@@ -492,7 +492,7 @@ export const WorkroomStickyNotes: React.FC<WorkroomStickyNotesProps> = ({
                     {/* Header: Tag + Actions */}
                     <div className="flex items-center justify-between mb-1.5">
                       <span
-                        className={`px-2 py-0.5 rounded-md text-[9px] font-extrabold uppercase tracking-wide text-white shadow-xs ${badgeBg}`}
+                        className={`px-2 py-0.5 rounded-md text-[9px] font-extrabold uppercase tracking-wide text-[#241F1A] shadow-xs ${badgeBg}`}
                       >
                         {badgeText}
                       </span>
@@ -502,8 +502,8 @@ export const WorkroomStickyNotes: React.FC<WorkroomStickyNotesProps> = ({
                           <button
                             type="button"
                             onClick={() => handleEditManualNote(note)}
-                            title="Sửa note"
-                            className="size-4 rounded-full hover:bg-purple-100 text-purple-400 hover:text-purple-700 flex items-center justify-center transition"
+                            title="Sửa ghi chú"
+                            className="size-4 rounded-full hover:bg-[#B24A26]/10 text-[#B24A26] hover:text-[#B24A26] flex items-center justify-center transition"
                           >
                             <Pencil size={9} />
                           </button>
@@ -512,7 +512,7 @@ export const WorkroomStickyNotes: React.FC<WorkroomStickyNotesProps> = ({
                           type="button"
                           onClick={() => handleToggleCollapse(note.id)}
                           title="Thu nhỏ thành tem ghim"
-                          className="size-4 rounded-full hover:bg-purple-100 text-purple-400 hover:text-purple-700 flex items-center justify-center transition"
+                          className="size-4 rounded-full hover:bg-[#B24A26]/10 text-[#B24A26] hover:text-[#B24A26] flex items-center justify-center transition"
                         >
                           <Minus size={9} />
                         </button>
@@ -520,8 +520,8 @@ export const WorkroomStickyNotes: React.FC<WorkroomStickyNotesProps> = ({
                           <button
                             type="button"
                             onClick={() => handleRemoveNote(note.id)}
-                            title="Gỡ note"
-                            className="size-4 rounded-full hover:bg-rose-100 text-rose-400 hover:text-rose-600 flex items-center justify-center transition"
+                            title="Gỡ ghi chú"
+                            className="size-4 rounded-full hover:bg-[#A8321C]/10 text-[#A8321C] hover:text-[#A8321C] flex items-center justify-center transition"
                           >
                             <X size={9} />
                           </button>
@@ -541,22 +541,22 @@ export const WorkroomStickyNotes: React.FC<WorkroomStickyNotesProps> = ({
                           checked={note.isDone}
                           disabled={!isCreator}
                           onChange={() => handleToggleDone(note.id)}
-                          className={`mt-0.5 size-3.5 rounded-full border-2 border-purple-300 text-fuchsia-500 focus:ring-0 ${
+                          className={`mt-0.5 size-3.5 rounded-full border-2 border-[#B24A26]/30 text-[#8C3718] focus:ring-0 ${
                             isCreator ? 'cursor-pointer' : 'cursor-default pointer-events-none'
                           }`}
                         />
                         <span
-                          className={`text-[11px] text-slate-800 leading-tight font-bold ${
+                          className={`text-[11px] text-[#241F1A] leading-tight font-bold ${
                             !isContentExpanded ? 'line-clamp-2' : ''
                           } ${note.isDone ? 'line-through opacity-50' : ''}`}
                         >
-                          {note.title} <span className="text-fuchsia-500 font-normal">♡</span>
+                          {note.title} <span className="text-[#8C3718] font-normal">♡</span>
                         </span>
                       </label>
 
                       {note.subtitle && (
                         <div
-                          className={`text-[10px] text-slate-600 pl-5 leading-tight italic ${
+                          className={`text-[10px] text-[#241F1A] pl-5 leading-tight italic ${
                             isContentExpanded
                               ? 'max-h-[120px] overflow-y-auto pr-1 scrollbar-thin'
                               : 'line-clamp-2'
@@ -568,12 +568,12 @@ export const WorkroomStickyNotes: React.FC<WorkroomStickyNotesProps> = ({
 
                       {/* Expand / Collapse Action & Redline shortcut for long notes */}
                       {(isLongText || (note.type === 'revision' && displayedMilestone?.revisionFeedbackImageUrl)) && (
-                        <div className="flex items-center justify-between pl-5 pt-1 mt-1 border-t border-purple-100/80">
+                        <div className="flex items-center justify-between pl-5 pt-1 mt-1 border-t border-[#B24A26]/40">
                           {isLongText ? (
                             <button
                               type="button"
                               onClick={(e) => handleToggleExpandContent(note.id, e)}
-                              className="inline-flex items-center gap-0.5 text-[9px] font-bold text-purple-600 hover:text-purple-800 transition py-0.5"
+                              className="inline-flex items-center gap-0.5 text-[9px] font-bold text-[#B24A26] hover:text-[#B24A26] transition py-0.5"
                             >
                               <span>{isContentExpanded ? 'Thu gọn' : 'Xem thêm'}</span>
                               {isContentExpanded ? <ChevronUp size={10} /> : <ChevronDown size={10} />}
@@ -587,7 +587,7 @@ export const WorkroomStickyNotes: React.FC<WorkroomStickyNotesProps> = ({
                                 e.stopPropagation();
                                 onOpenApprovalModal();
                               }}
-                              className="inline-flex items-center gap-1 text-[9px] font-bold text-amber-700 hover:text-amber-900 bg-amber-100 hover:bg-amber-200 px-1.5 py-0.5 rounded transition shadow-2xs"
+                              className="inline-flex items-center gap-1 text-[9px] font-bold text-[#8A6A1F] hover:text-[#8A6A1F] bg-[#8A6A1F]/10 hover:bg-[#8A6A1F]/10 px-1.5 py-0.5 rounded transition shadow-2xs"
                               title="Mở xem ảnh khoanh vùng sửa (Redline) phóng to"
                             >
                               <Maximize2 size={8} />
@@ -604,11 +604,11 @@ export const WorkroomStickyNotes: React.FC<WorkroomStickyNotesProps> = ({
                     onClick={() => handleToggleCollapse(note.id)}
                     className="cursor-pointer flex items-center gap-1.5 group"
                   >
-                    <div className="relative size-7 rounded-xl bg-white border-2 border-fuchsia-400 text-fuchsia-600 font-extrabold text-[11px] flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
-                      <span className="absolute -top-1 left-1/2 -translate-x-1/2 w-3 h-1 bg-pink-300/80 rounded-xs" />
-                      {note.isDone ? <Check size={11} className="text-emerald-500" /> : idx + 1}
+                    <div className="relative size-7 rounded-xl bg-[#F0E7D8] border-2 border-[#8C3718]/30 text-[#8C3718] font-extrabold text-[11px] flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
+                      <span className="absolute -top-1 left-1/2 -translate-x-1/2 w-3 h-1 bg-[#A8321C]/20 rounded-xs" />
+                      {note.isDone ? <Check size={11} className="text-[#2F6B63]" /> : idx + 1}
                     </div>
-                    <div className="hidden group-hover:flex items-center px-2 py-0.5 rounded-lg bg-white text-slate-800 border-2 border-purple-200 text-[10px] shadow-lg font-bold whitespace-nowrap">
+                    <div className="hidden group-hover:flex items-center px-2 py-0.5 rounded-lg bg-[#F0E7D8] text-[#241F1A] border-2 border-[#B24A26]/30 text-[10px] shadow-lg font-bold whitespace-nowrap">
                       {stickerIcon} {note.title.slice(0, 18)}...
                     </div>
                   </div>
@@ -621,23 +621,23 @@ export const WorkroomStickyNotes: React.FC<WorkroomStickyNotesProps> = ({
 
       {noteModal && typeof document !== 'undefined' && createPortal(
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-xs"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-[#E5D8C2] p-4 backdrop-blur-xs"
           onMouseDown={(e) => {
             if (e.target === e.currentTarget) setNoteModal(null);
           }}
         >
           <form
             onSubmit={handleSaveNoteModal}
-            className="w-full max-w-md rounded-2xl border border-white/15 bg-[#191d2d] p-5 text-white shadow-2xl"
+            className="w-full max-w-md rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] p-5 text-[#241F1A] shadow-2xl"
           >
-            <div className="flex items-center justify-between gap-3 border-b border-white/10 pb-3">
+            <div className="flex items-center justify-between gap-3 border-b border-[#221E1A]/10 pb-3">
               <h3 className="font-h1 text-base font-bold">
                 {noteModal.mode === 'create' ? 'Thêm ghi chú lên tranh' : 'Chỉnh sửa ghi chú'}
               </h3>
               <button
                 type="button"
                 onClick={() => setNoteModal(null)}
-                className="rounded-lg p-1 text-slate-400 hover:bg-white/5 hover:text-white"
+                className="rounded-lg p-1 text-[#746A5F] hover:bg-[#FFFCF6] hover:text-[#241F1A]"
                 aria-label="Đóng"
               >
                 <X size={16} />
@@ -646,8 +646,7 @@ export const WorkroomStickyNotes: React.FC<WorkroomStickyNotesProps> = ({
 
             <div className="mt-4 space-y-3">
               <div>
-                <label htmlFor="sticky-note-title" className="mb-1.5 block text-xs font-semibold text-slate-300">
-                  Tiêu đề ngắn <span className="text-rose-400">*</span>
+                <label htmlFor="sticky-note-title" className="mb-1.5 block text-xs font-semibold text-[#746A5F]"> Tiêu đề ngắn <span className="text-[#A8321C]">*</span>
                 </label>
                 <input
                   id="sticky-note-title"
@@ -660,13 +659,12 @@ export const WorkroomStickyNotes: React.FC<WorkroomStickyNotesProps> = ({
                     if (noteModalError) setNoteModalError('');
                   }}
                   placeholder="VD: Lưu ý vẽ thêm phụ kiện..."
-                  className="w-full rounded-xl border border-white/15 bg-[#10131f] px-3 py-2 text-sm text-white placeholder:text-slate-500 outline-none focus:border-[#A7ACD9]"
+                  className="w-full rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-3 py-2 text-sm text-[#241F1A] placeholder:text-[#746A5F] outline-none focus:border-[#B24A26]"
                 />
               </div>
 
               <div>
-                <label htmlFor="sticky-note-subtitle" className="mb-1.5 block text-xs font-semibold text-slate-300">
-                  Chi tiết ghi chú <span className="font-normal text-slate-500">(không bắt buộc)</span>
+                <label htmlFor="sticky-note-subtitle" className="mb-1.5 block text-xs font-semibold text-[#746A5F]"> Chi tiết ghi chú <span className="font-normal text-[#746A5F]">(không bắt buộc)</span>
                 </label>
                 <textarea
                   id="sticky-note-subtitle"
@@ -676,13 +674,13 @@ export const WorkroomStickyNotes: React.FC<WorkroomStickyNotesProps> = ({
                   onChange={(e) =>
                     setNoteModal((prev) => (prev ? { ...prev, subtitle: e.target.value } : null))
                   }
-                  placeholder="Nhập mô tả chi tiết hoặc checklist cần nhớ..."
-                  className="w-full rounded-xl border border-white/15 bg-[#10131f] px-3 py-2 text-sm text-white placeholder:text-slate-500 outline-none focus:border-[#A7ACD9]"
+                  placeholder="Nhập mô tả chi tiết hoặc danh mục cần kiểm cần nhớ..."
+                  className="w-full rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-3 py-2 text-sm text-[#241F1A] placeholder:text-[#746A5F] outline-none focus:border-[#B24A26]"
                 />
               </div>
 
               {noteModalError && (
-                <p role="alert" className="text-xs text-rose-300">
+                <p role="alert" className="text-xs text-[#A8321C]">
                   {noteModalError}
                 </p>
               )}
@@ -692,13 +690,11 @@ export const WorkroomStickyNotes: React.FC<WorkroomStickyNotesProps> = ({
               <button
                 type="button"
                 onClick={() => setNoteModal(null)}
-                className="rounded-xl border border-white/15 px-4 py-2 text-xs font-semibold text-slate-300 hover:bg-white/5"
-              >
-                Huỷ
-              </button>
+                className="rounded-xl border border-[#221E1A]/10 px-4 py-2 text-xs font-semibold text-[#746A5F] hover:bg-[#FFFCF6]"
+              > Huỷ </button>
               <button
                 type="submit"
-                className="rounded-xl bg-[#A7ACD9] px-4 py-2 text-xs font-bold text-[#151725] transition hover:bg-[#c0c4ea]"
+                className="rounded-xl bg-[#B24A26] px-4 py-2 text-xs font-bold text-[#FFFCF6] transition hover:bg-[#c0c4ea]"
               >
                 {noteModal.mode === 'create' ? 'Dán ghi chú' : 'Lưu thay đổi'}
               </button>

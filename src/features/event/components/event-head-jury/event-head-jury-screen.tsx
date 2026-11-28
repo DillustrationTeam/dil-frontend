@@ -650,8 +650,8 @@ export function EventHeadJuryScreen({ eventId }: EventHeadJuryScreenProps) {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-3 text-[#9695a1]">
-        <RefreshCw className="w-8 h-8 text-[#A7ACD9] animate-spin" />
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-3 text-[#746A5F]">
+        <RefreshCw className="w-8 h-8 text-[#B24A26] animate-spin" />
         <p className="text-sm">
           {isVie ? 'Đang tải Phòng điều hành Trưởng ban giám khảo...' : 'Loading Head Jury Control Room...'}
         </p>
@@ -662,15 +662,15 @@ export function EventHeadJuryScreen({ eventId }: EventHeadJuryScreenProps) {
   if (!isHeadJury) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] px-4 py-12 text-center">
-        <div className="size-16 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 flex items-center justify-center mx-auto mb-5 shadow-inner">
+        <div className="size-16 rounded-2xl bg-[#A8321C]/10 border border-[#A8321C]/30 text-[#A8321C] flex items-center justify-center mx-auto mb-5 shadow-inner">
           <Lock className="w-8 h-8" />
         </div>
-        <h2 className="font-sora text-xl sm:text-2xl font-bold text-white">
+        <h2 className="font-sora text-xl sm:text-2xl font-bold text-[#241F1A]">
           {isVie ? 'Truy cập bị từ chối' : 'Access Denied'}
         </h2>
-        <p className="mt-2 text-sm text-[#9695a1] max-w-md mx-auto leading-relaxed">
+        <p className="mt-2 text-sm text-[#746A5F] max-w-md mx-auto leading-relaxed">
           {isVie
-            ? 'Bạn không có quyền Trưởng ban giám khảo (Head Jury) cho sự kiện này. Chỉ Trưởng ban giám khảo được bổ nhiệm chính thức mới có quyền truy cập không gian này.'
+            ? 'Bạn không có quyền Trưởng ban giám khảo cho sự kiện này. Chỉ Trưởng ban giám khảo được bổ nhiệm chính thức mới có quyền truy cập không gian này.'
             : 'You do not have Head Jury privileges for this event. Only officially appointed Head Jury members have access to this room.'}
         </p>
         <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
@@ -683,7 +683,7 @@ export function EventHeadJuryScreen({ eventId }: EventHeadJuryScreenProps) {
           </Link>
           <Link
             href={`/events/${eventId}`}
-            className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-6 py-2.5 text-xs font-semibold text-[#9695a1] hover:text-white hover:bg-white/10 transition"
+            className="inline-flex items-center gap-2 rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-6 py-2.5 text-xs font-semibold text-[#746A5F] hover:text-[#241F1A] hover:bg-[#F0E7D8] transition"
           >
             <ChevronLeft size={16} />
             <span>{isVie ? 'Quay lại chi tiết sự kiện' : 'Back to Event Details'}</span>
@@ -696,10 +696,10 @@ export function EventHeadJuryScreen({ eventId }: EventHeadJuryScreenProps) {
   if (!event) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] px-4 py-12 text-center">
-        <h2 className="font-sora text-xl sm:text-2xl font-bold text-white">
+        <h2 className="font-sora text-xl sm:text-2xl font-bold text-[#241F1A]">
           {isVie ? 'Không tìm thấy sự kiện' : 'Event Not Found'}
         </h2>
-        <p className="mt-2 text-sm text-[#9695a1] max-w-md mx-auto leading-relaxed">
+        <p className="mt-2 text-sm text-[#746A5F] max-w-md mx-auto leading-relaxed">
           {isVie
             ? 'Sự kiện này không tồn tại hoặc đã bị xóa khỏi hệ thống.'
             : 'This event does not exist or has been removed from the platform.'}
@@ -707,7 +707,7 @@ export function EventHeadJuryScreen({ eventId }: EventHeadJuryScreenProps) {
         <div className="mt-6">
           <Link
             href="/events"
-            className="inline-flex items-center gap-2 rounded-xl bg-white/10 hover:bg-white/15 px-6 py-2.5 text-xs font-semibold text-white transition"
+            className="inline-flex items-center gap-2 rounded-xl bg-[#F0E7D8] hover:bg-[#F0E7D8] px-6 py-2.5 text-xs font-semibold text-[#241F1A] transition"
           >
             <span>{isVie ? 'Tất cả cuộc thi' : 'All Events'}</span>
           </Link>
@@ -718,14 +718,14 @@ export function EventHeadJuryScreen({ eventId }: EventHeadJuryScreenProps) {
 
   const eventTitle = event.title;
   const statusStr = event.status != null ? normalizeEventStatus(event.status) : 'Judging';
-  const statusColor = eventStatusBadgeStyles[statusStr] || 'border-white/10 bg-white/5 text-[#9695a1]';
+  const statusColor = eventStatusBadgeStyles[statusStr] || 'border-[#221E1A]/10 bg-[#FFFCF6] text-[#746A5F]';
   const statusLabel = getEventStatusLabel(statusStr, isVie);
   const deadlineFormatted = event.judgingEndAt
     ? new Date(event.judgingEndAt).toLocaleDateString(isVie ? 'vi-VN' : 'en-US', { month: 'short', day: 'numeric', year: 'numeric' })
     : (isVie ? 'Chưa xác định' : 'To be determined');
 
   return (
-    <div className="mx-auto w-full max-w-7xl px-4 pb-20 pt-6 sm:px-6 lg:pt-8 min-h-screen text-[#e4e1e5] space-y-6">
+    <div className="mx-auto w-full max-w-7xl px-4 pb-20 pt-6 sm:px-6 lg:pt-8 min-h-screen text-[#241F1A] space-y-6">
       {/* Lightbox Modal */}
       {activeSubmission && (
         <JuryArtworkLightbox
@@ -741,23 +741,23 @@ export function EventHeadJuryScreen({ eventId }: EventHeadJuryScreenProps) {
 
       {/* Top Breadcrumb & Switcher */}
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center gap-2 text-xs text-[#9695a1]">
-          <Link href="/creator/commissions" className="hover:text-white transition-colors">
+        <div className="flex items-center gap-2 text-xs text-[#746A5F]">
+          <Link href="/creator/commissions" className="hover:text-[#241F1A] transition-colors">
             Creator Studio
           </Link>
           <span>/</span>
-          <Link href="/creator/events/jury" className="hover:text-white transition-colors">
+          <Link href="/creator/events/jury" className="hover:text-[#241F1A] transition-colors">
             Event Jury
           </Link>
           <span>/</span>
-          <span className="text-[#A7ACD9] font-medium">{eventTitle} (Head Jury)</span>
+          <span className="text-[#B24A26] font-medium">{eventTitle} (Head Jury)</span>
         </div>
 
         <div className="flex items-center gap-2.5">
           <button
             type="button"
             onClick={() => setIsRulesModalOpen(true)}
-            className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold text-[#A7ACD9] transition hover:border-white/20 hover:text-white cursor-pointer"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-3 py-1.5 text-xs font-semibold text-[#B24A26] transition hover:border-[#221E1A]/20 hover:text-[#241F1A] cursor-pointer"
           >
             <FileText size={14} />
             <span>{isVie ? 'Thể lệ & Quy chế' : 'Rules & Guidelines'}</span>
@@ -765,42 +765,42 @@ export function EventHeadJuryScreen({ eventId }: EventHeadJuryScreenProps) {
 
           <Link
             href={`/creator/events/${eventId}/jury`}
-            className="px-3 py-1.5 rounded-xl border border-white/10 hover:border-white/20 bg-white/5 text-xs text-white transition-colors flex items-center gap-1.5"
+            className="px-3 py-1.5 rounded-xl border border-[#221E1A]/10 hover:border-[#221E1A]/20 bg-[#FFFCF6] text-xs text-[#241F1A] transition-colors flex items-center gap-1.5"
           >
-            <Gavel className="w-3.5 h-3.5 text-[#A7ACD9]" />
+            <Gavel className="w-3.5 h-3.5 text-[#B24A26]" />
             <span>{isVie ? 'Xem giao diện GK' : 'Standard Jury View'}</span>
           </Link>
 
           <Link
             href={`/events/${eventId}`}
-            className="px-3 py-1.5 rounded-xl border border-white/10 hover:border-white/20 bg-white/5 text-xs text-white transition-colors flex items-center gap-1.5"
+            className="px-3 py-1.5 rounded-xl border border-[#221E1A]/10 hover:border-[#221E1A]/20 bg-[#FFFCF6] text-xs text-[#241F1A] transition-colors flex items-center gap-1.5"
           >
-            <ExternalLink className="w-3.5 h-3.5 text-[#A7ACD9]" />
+            <ExternalLink className="w-3.5 h-3.5 text-[#B24A26]" />
             <span>{isVie ? 'Trang cuộc thi' : 'Public Event Page'}</span>
           </Link>
         </div>
       </div>
 
       {/* Hero Banner Section */}
-      <section className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-[#161926] shadow-2xl mb-8">
-        <div className="relative aspect-[21/9] w-full min-h-[220px] sm:min-h-[260px] max-h-[360px] overflow-hidden bg-black/50">
+      <section className="relative overflow-hidden rounded-[2.5rem] border border-[#221E1A]/10 bg-[#FFFCF6] shadow-2xl mb-8">
+        <div className="relative aspect-[21/9] w-full min-h-[220px] sm:min-h-[260px] max-h-[360px] overflow-hidden bg-[#E5D8C2]">
           {event?.bannerUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={event.bannerUrl} alt={eventTitle} className="size-full object-cover" />
           ) : (
-            <div className="flex size-full items-center justify-center bg-gradient-to-r from-[#1b1f36] to-[#121420]">
-              <Sparkles size={48} className="text-[#A7ACD9]/30" />
+            <div className="flex size-full items-center justify-center bg-gradient-to-r from-[#FFFCF6] to-[#FFFCF6]">
+              <Sparkles size={48} className="text-[#B24A26]/30" />
             </div>
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-[#161926] via-[#161926]/60 to-black/30" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#FFFCF6] via-[#FFFCF6]/60 to-[#F7F2E9]/85" />
 
           <div className="absolute left-6 top-6 flex flex-wrap items-center gap-2.5">
             <span className={`rounded-full border px-3.5 py-1 text-xs font-bold backdrop-blur-md ${statusColor}`}>
               {statusLabel}
             </span>
             {event?.isFeatured && (
-              <span className="flex items-center gap-1.5 rounded-full border border-amber-400/40 bg-amber-500/20 px-3.5 py-1 text-xs font-bold text-amber-300 backdrop-blur-md">
-                <Flame size={13} className="text-amber-400" />
+              <span className="flex items-center gap-1.5 rounded-full border border-[#8A6A1F]/40 bg-[#8A6A1F]/20 px-3.5 py-1 text-xs font-bold text-[#8A6A1F] backdrop-blur-md">
+                <Flame size={13} className="text-[#8A6A1F]" />
                 {isVie ? 'Cuộc thi Nổi bật' : 'Featured Contest'}
               </span>
             )}
@@ -809,9 +809,9 @@ export function EventHeadJuryScreen({ eventId }: EventHeadJuryScreenProps) {
 
         <div className="p-6 sm:p-8 lg:p-10 space-y-6 -mt-14 relative z-10">
           <div className="space-y-3">
-            <div className="flex items-center gap-2 text-xs text-[#8A8FA9]">
-              <span className="flex items-center gap-1 font-semibold text-white">
-                <CheckCircle2 size={15} className="text-[#A7ACD9]" />
+            <div className="flex items-center gap-2 text-xs text-[#6E6459]">
+              <span className="flex items-center gap-1 font-semibold text-[#241F1A]">
+                <CheckCircle2 size={15} className="text-[#B24A26]" />
                 {event?.createdByAdminName || (isVie ? 'Ban tổ chức Dillustration' : 'Dillustration Committee')}
               </span>
               <span>•</span>
@@ -822,36 +822,36 @@ export function EventHeadJuryScreen({ eventId }: EventHeadJuryScreenProps) {
                   : '01/10/2026'}
               </span>
               <span>•</span>
-              <span className="text-amber-300 font-medium">
+              <span className="text-[#8A6A1F] font-medium">
                 {isVie ? 'Hạn chót chấm điểm:' : 'Jury Due:'} {deadlineFormatted}
               </span>
             </div>
 
-            <h1 className="font-sora text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white leading-tight">
+            <h1 className="font-sora text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#241F1A] leading-tight">
               {eventTitle}
             </h1>
 
-            <p className="text-sm text-[#A7ACD9] leading-relaxed max-w-4xl">
+            <p className="text-sm text-[#B24A26] leading-relaxed max-w-4xl">
               {event?.description || (isVie ? 'Cuộc thi minh họa và nghệ thuật thị giác thường niên trên Dillustration.' : 'Annual visual arts and illustration competition on Dillustration.')}
             </p>
           </div>
 
-          <div className="rounded-3xl border border-amber-400/30 bg-gradient-to-r from-amber-500/15 via-amber-500/5 to-transparent p-5 sm:p-6 backdrop-blur-xl shadow-[0_4px_30px_rgba(251,191,36,0.1)]">
+          <div className="rounded-3xl border border-[#8A6A1F]/40 bg-gradient-to-r from-[#8A6A1F] via-[#8A6A1F] to-transparent p-5 sm:p-6 backdrop-blur-xl shadow-[0_4px_30px_rgba(251,191,36,0.1)]">
             <div className="flex flex-col sm:flex-row sm:items-start gap-4">
-              <div className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 text-slate-950 shadow-[0_0_30px_rgba(251,191,36,0.4)]">
+              <div className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#8A6A1F] to-[#8A6A1F] text-[#241F1A] shadow-[0_0_30px_rgba(251,191,36,0.4)]">
                 <Trophy size={28} />
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-                  <span className="text-xs font-extrabold uppercase tracking-widest text-amber-300">
+                  <span className="text-xs font-extrabold uppercase tracking-widest text-[#8A6A1F]">
                     {isVie ? 'Cơ cấu giải thưởng & Vinh danh' : 'Official Prize Pool & Honors'}
                   </span>
-                  <span className="size-1.5 rounded-full bg-amber-400" />
-                  <span className="text-[11px] text-amber-300/80 font-medium">
+                  <span className="size-1.5 rounded-full bg-[#8A6A1F]/10" />
+                  <span className="text-[11px] text-[#8A6A1F] font-medium">
                     {isVie ? 'Cam kết trao giải đầy đủ' : 'Guaranteed Distribution'}
                   </span>
                 </div>
-                <div className="font-sora text-xl sm:text-2xl font-extrabold text-white leading-relaxed break-words whitespace-pre-line">
+                <div className="font-sora text-xl sm:text-2xl font-extrabold text-[#241F1A] leading-relaxed break-words whitespace-pre-line">
                   {event?.prize || (isVie ? '50.000.000 VNĐ + Kỷ niệm chương Vinh danh' : '50,000,000 VND + Certified Art Honor Trophy')}
                 </div>
               </div>
@@ -862,16 +862,16 @@ export function EventHeadJuryScreen({ eventId }: EventHeadJuryScreenProps) {
 
       {/* Events Head Jury Workspace Section */}
       <section id="head-jury-workspace" className="space-y-6 pt-2">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/10">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#221E1A]/10">
           <div>
-            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#A7ACD9]">
-              <Crown className="w-4 h-4 text-amber-400" />
+            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#B24A26]">
+              <Crown className="w-4 h-4 text-[#8A6A1F]" />
               <span>{isVie ? 'Phòng điều hành Trưởng ban giám khảo' : 'Events Head Jury Workspace'}</span>
             </div>
-            <h2 className="text-xl sm:text-2xl font-extrabold text-white font-sora mt-1">
+            <h2 className="text-xl sm:text-2xl font-extrabold text-[#241F1A] font-sora mt-1">
               {isVie ? 'Giám sát Hội đồng & Phê duyệt kết quả' : 'Head Jury Control Room & Panel Oversight'}
             </h2>
-            <p className="text-xs sm:text-sm text-[#9695a1] mt-0.5">
+            <p className="text-xs sm:text-sm text-[#746A5F] mt-0.5">
               {isVie
                 ? 'Đánh giá toàn diện, theo dõi tiến độ ban giám khảo, biểu quyết tái thẩm định và phê duyệt kết quả chung cuộc.'
                 : 'Comprehensive evaluation, jury panel monitoring, arbitration voting, and final results approval.'}
@@ -881,19 +881,19 @@ export function EventHeadJuryScreen({ eventId }: EventHeadJuryScreenProps) {
 
         <div className="space-y-3">
           {!isJudgingPhase && (
-            <div className="p-4 border border-amber-500/30 rounded-2xl bg-amber-500/10 text-xs sm:text-sm text-amber-200 flex items-start gap-3">
-              <Lock className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+            <div className="p-4 border border-[#8A6A1F]/40 rounded-2xl bg-[#8A6A1F]/10 text-xs sm:text-sm text-[#8A6A1F] flex items-start gap-3">
+              <Lock className="w-5 h-5 text-[#8A6A1F] shrink-0 mt-0.5" />
               <div>
-                <strong className="text-amber-300 font-semibold block sm:inline">
+                <strong className="text-[#8A6A1F] font-semibold block sm:inline">
                   {isVie ? 'Chấm điểm tạm thời bị khóa: ' : 'Grading Temporarily Locked: '}
                 </strong>
-                {judgingLockMessage} ({isVie ? 'trạng thái hiện tại' : 'current status'}: <span className="font-semibold text-white">{statusLabel}</span>).
+                {judgingLockMessage} ({isVie ? 'trạng thái hiện tại' : 'current status'}: <span className="font-semibold text-[#241F1A]">{statusLabel}</span>).
               </div>
             </div>
           )}
 
-          <div className="p-4 border border-[#A7ACD9]/30 rounded-2xl bg-[#A7ACD9]/10 text-xs sm:text-sm text-[#c8cbed] flex items-start gap-3">
-            <Info className="w-5 h-5 text-[#A7ACD9] shrink-0 mt-0.5" />
+          <div className="p-4 border border-[#B24A26]/30 rounded-2xl bg-[#B24A26]/10 text-xs sm:text-sm text-[#241F1A] flex items-start gap-3">
+            <Info className="w-5 h-5 text-[#B24A26] shrink-0 mt-0.5" />
             <div>
               <strong>{isVie ? 'Thẩm quyền của Trưởng ban giám khảo:' : 'Head Jury Authority:'}</strong>{' '}
               {isVie
@@ -904,13 +904,13 @@ export function EventHeadJuryScreen({ eventId }: EventHeadJuryScreenProps) {
         </div>
 
         {/* Workspace Navigation Tabs */}
-        <nav className="flex gap-1.5 overflow-x-auto p-1.5 rounded-2xl border border-white/10 bg-[#121620]/90 backdrop-blur-xl sticky top-20 z-20">
+        <nav className="flex gap-1.5 overflow-x-auto p-1.5 rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6]/90 backdrop-blur-xl sticky top-20 z-20">
           <button
             type="button"
             onClick={() => setActiveTab('score')}
             className={`px-4 py-2 rounded-xl font-sora font-bold text-xs whitespace-nowrap transition-all cursor-pointer ${activeTab === 'score'
-                ? 'bg-[#A7ACD9] text-[#1F2335] shadow-lg shadow-[#A7ACD9]/20'
-                : 'text-[#9695a1] hover:text-white hover:bg-white/5'
+                ? 'bg-[#B24A26] text-[#F7F2E9] shadow-lg shadow-[#B24A26]/20'
+                : 'text-[#746A5F] hover:text-[#241F1A] hover:bg-[#FFFCF6]'
               }`}
           >
             {isVie ? 'Chấm điểm' : 'Scoring'}
@@ -919,8 +919,8 @@ export function EventHeadJuryScreen({ eventId }: EventHeadJuryScreenProps) {
             type="button"
             onClick={() => setActiveTab('progress')}
             className={`px-4 py-2 rounded-xl font-sora font-bold text-xs whitespace-nowrap transition-all cursor-pointer ${activeTab === 'progress'
-                ? 'bg-[#A7ACD9] text-[#1F2335] shadow-lg shadow-[#A7ACD9]/20'
-                : 'text-[#9695a1] hover:text-white hover:bg-white/5'
+                ? 'bg-[#B24A26] text-[#F7F2E9] shadow-lg shadow-[#B24A26]/20'
+                : 'text-[#746A5F] hover:text-[#241F1A] hover:bg-[#FFFCF6]'
               }`}
           >
             {isVie ? 'Tiến độ hội đồng' : 'Overall Progress'}
@@ -929,8 +929,8 @@ export function EventHeadJuryScreen({ eventId }: EventHeadJuryScreenProps) {
             type="button"
             onClick={() => setActiveTab('scores')}
             className={`px-4 py-2 rounded-xl font-sora font-bold text-xs whitespace-nowrap transition-all cursor-pointer ${activeTab === 'scores'
-                ? 'bg-[#A7ACD9] text-[#1F2335] shadow-lg shadow-[#A7ACD9]/20'
-                : 'text-[#9695a1] hover:text-white hover:bg-white/5'
+                ? 'bg-[#B24A26] text-[#F7F2E9] shadow-lg shadow-[#B24A26]/20'
+                : 'text-[#746A5F] hover:text-[#241F1A] hover:bg-[#FFFCF6]'
               }`}
           >
             {isVie ? 'Bảng điểm & Xếp hạng' : 'Leaderboard & Scores'}
@@ -939,8 +939,8 @@ export function EventHeadJuryScreen({ eventId }: EventHeadJuryScreenProps) {
             type="button"
             onClick={() => setActiveTab('arbitration')}
             className={`px-4 py-2 rounded-xl font-sora font-bold text-xs whitespace-nowrap transition-all cursor-pointer ${activeTab === 'arbitration'
-                ? 'bg-[#A7ACD9] text-[#1F2335] shadow-lg shadow-[#A7ACD9]/20'
-                : 'text-[#9695a1] hover:text-white hover:bg-white/5'
+                ? 'bg-[#B24A26] text-[#F7F2E9] shadow-lg shadow-[#B24A26]/20'
+                : 'text-[#746A5F] hover:text-[#241F1A] hover:bg-[#FFFCF6]'
               }`}
           >
             {isVie ? 'Tái thẩm định & Tranh chấp' : 'Arbitration Voting'}
@@ -949,8 +949,8 @@ export function EventHeadJuryScreen({ eventId }: EventHeadJuryScreenProps) {
             type="button"
             onClick={() => setActiveTab('approve')}
             className={`px-4 py-2 rounded-xl font-sora font-bold text-xs whitespace-nowrap transition-all cursor-pointer ${activeTab === 'approve'
-                ? 'bg-[#A7ACD9] text-[#1F2335] shadow-lg shadow-[#A7ACD9]/20'
-                : 'text-[#9695a1] hover:text-white hover:bg-white/5'
+                ? 'bg-[#B24A26] text-[#F7F2E9] shadow-lg shadow-[#B24A26]/20'
+                : 'text-[#746A5F] hover:text-[#241F1A] hover:bg-[#FFFCF6]'
               }`}
           >
             {isVie ? 'Phê duyệt kết quả' : 'Approve Results'}
@@ -1053,38 +1053,38 @@ export function EventHeadJuryScreen({ eventId }: EventHeadJuryScreenProps) {
 
       {/* Rules Modal */}
       {isRulesModalOpen && event && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
-          <div className="relative w-full max-w-xl rounded-3xl border border-white/10 bg-[#161926] p-6 shadow-2xl space-y-5">
-            <div className="flex items-center justify-between border-b border-white/10 pb-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#E5D8C2] backdrop-blur-md animate-in fade-in duration-200">
+          <div className="relative w-full max-w-xl rounded-3xl border border-[#221E1A]/10 bg-[#FFFCF6] p-6 shadow-2xl space-y-5">
+            <div className="flex items-center justify-between border-b border-[#221E1A]/10 pb-4">
               <div className="flex items-center gap-2">
-                <FileText className="text-[#A7ACD9]" size={20} />
-                <h3 className="font-sora text-lg font-bold text-white">
+                <FileText className="text-[#B24A26]" size={20} />
+                <h3 className="font-sora text-lg font-bold text-[#241F1A]">
                   {isVie ? 'Thể lệ & Quy chế cuộc thi' : 'Contest Rules & Guidelines'}
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setIsRulesModalOpen(false)}
-                className="flex size-8 items-center justify-center rounded-xl bg-white/5 text-[#A7ACD9] hover:bg-white/10 hover:text-white transition cursor-pointer"
+                className="flex size-8 items-center justify-center rounded-xl bg-[#FFFCF6] text-[#B24A26] hover:bg-[#F0E7D8] hover:text-[#241F1A] transition cursor-pointer"
               >
                 <X size={18} />
               </button>
             </div>
 
-            <div className="rounded-2xl border border-amber-400/25 bg-amber-500/5 p-5">
-              <h4 className="font-sora text-sm font-bold text-amber-300 mb-2 flex items-center gap-2">
+            <div className="rounded-2xl border border-[#8A6A1F]/35 bg-[#8A6A1F]/5 p-5">
+              <h4 className="font-sora text-sm font-bold text-[#8A6A1F] mb-2 flex items-center gap-2">
                 <Trophy size={16} /> {isVie ? 'Cơ cấu giải thưởng chính thức' : 'Official Prizes & Rewards'}
               </h4>
-              <p className="font-sora text-base font-semibold text-white leading-relaxed whitespace-pre-line break-words">
+              <p className="font-sora text-base font-semibold text-[#241F1A] leading-relaxed whitespace-pre-line break-words">
                 {event.prize || (isVie ? 'Cơ cấu giải thưởng chi tiết sẽ do ban tổ chức thông báo.' : 'Official prize breakdown will be announced by the organizing committee.')}
               </p>
             </div>
 
-            <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-5">
-              <h4 className="font-sora text-sm font-bold text-[#A7ACD9] mb-2 flex items-center gap-2">
+            <div className="rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] p-5">
+              <h4 className="font-sora text-sm font-bold text-[#B24A26] mb-2 flex items-center gap-2">
                 <AlertCircle size={16} /> {isVie ? 'Thể lệ & Quy định chính thức' : 'Official Rules & Guidelines'}
               </h4>
-              <p className="text-xs sm:text-sm text-[#A7ACD9] leading-relaxed whitespace-pre-line break-words">
+              <p className="text-xs sm:text-sm text-[#B24A26] leading-relaxed whitespace-pre-line break-words">
                 {event.rules ||
                   (isVie
                     ? 'Tất cả các tác phẩm tham gia phải là sáng tác nguyên bản của chính thí sinh nộp bài. Đạo nhái, vi phạm bản quyền hoặc sử dụng AI trái phép sẽ bị truất quyền thi đấu ngay lập tức.'
@@ -1096,7 +1096,7 @@ export function EventHeadJuryScreen({ eventId }: EventHeadJuryScreenProps) {
               <button
                 type="button"
                 onClick={() => setIsRulesModalOpen(false)}
-                className="rounded-xl bg-[#A7ACD9] px-6 py-2.5 text-xs font-bold text-[#1F2335] cursor-pointer hover:brightness-110"
+                className="rounded-xl bg-[#B24A26] px-6 py-2.5 text-xs font-bold text-[#F7F2E9] cursor-pointer hover:brightness-110"
               >
                 {isVie ? 'Đã hiểu' : 'Understood'}
               </button>

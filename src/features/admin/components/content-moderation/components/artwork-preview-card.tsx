@@ -48,23 +48,23 @@ export function ArtworkPreviewCard({ artwork }: ArtworkPreviewCardProps) {
   };
 
   return (
-    <div className="glass-container bg-[#161926]/85 backdrop-blur-[32px] border border-white/10 rounded-[28px] p-6 space-y-5">
+    <div className="glass-container bg-[#FFFCF6]/85 backdrop-blur-[32px] border border-[#221E1A]/10 rounded-[28px] p-6 space-y-5">
       {/* Title & Header */}
       <div className="flex items-center justify-between">
         <div>
-          <span className="text-[10px] font-mono text-[#8A8FA9] uppercase font-bold tracking-wider block">
+          <span className="text-[10px] font-mono text-[#6E6459] uppercase font-bold tracking-wider block">
             {isVie ? 'Chi tiết Kiểm tra' : 'Detailed Inspection'}
           </span>
-          <h3 className="font-h1 font-bold text-white text-base flex items-center gap-2">
+          <h3 className="font-h1 font-bold text-[#241F1A] text-base flex items-center gap-2">
             <span>{isVie ? 'Kiểm tra Tác phẩm' : 'Artwork Inspection'}</span>
-            <span className="font-mono text-[#C5C9F8]">
+            <span className="font-mono text-[#8C3718]">
               {formatShortId(artwork.artworkId)}
             </span>
           </h3>
         </div>
 
         {artwork.isAiGenerated && (
-          <span className="px-2.5 py-1 rounded-full bg-purple-500/20 text-purple-300 text-[10px] font-bold border border-purple-500/30 flex items-center gap-1">
+          <span className="px-2.5 py-1 rounded-full bg-[#5F3F86]/20 text-[#5F3F86] text-[10px] font-bold border border-[#5F3F86]/40 flex items-center gap-1">
             <Bot className="w-3 h-3" />
             <span>{isVie ? 'Được đánh dấu là ảnh AI' : 'Marked as AI Generated'}</span>
           </span>
@@ -72,7 +72,7 @@ export function ArtworkPreviewCard({ artwork }: ArtworkPreviewCardProps) {
       </div>
 
       {/* Main Image Container */}
-      <div className="w-full h-72 sm:h-80 bg-black/60 rounded-2xl border border-white/10 relative overflow-hidden group">
+      <div className="w-full h-72 sm:h-80 bg-[#E5D8C2] rounded-2xl border border-[#221E1A]/10 relative overflow-hidden group">
         {artwork.imageUrl && !imageError ? (
           <>
             <Image
@@ -85,11 +85,11 @@ export function ArtworkPreviewCard({ artwork }: ArtworkPreviewCardProps) {
               onError={() => setImageError(true)}
             />
             {/* Hover overlay with zoom button */}
-            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+            <div className="absolute inset-0 bg-[#F0E7D8] opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
               <button
                 type="button"
                 onClick={() => setShowLightbox(true)}
-                className="px-4 py-2 rounded-xl bg-black/70 backdrop-blur-md text-white font-bold text-xs flex items-center gap-2 border border-white/20 hover:bg-black/90 transition-all cursor-pointer"
+                className="px-4 py-2 rounded-xl bg-[#E5D8C2] backdrop-blur-md text-[#241F1A] font-bold text-xs flex items-center gap-2 border border-[#221E1A]/20 hover:bg-[#F0E7D8]/90 transition-all cursor-pointer"
               >
                 <Maximize2 className="w-3.5 h-3.5" />
                 <span>{isVie ? 'Xem ảnh độ phân giải gốc' : 'View Full Resolution'}</span>
@@ -97,23 +97,23 @@ export function ArtworkPreviewCard({ artwork }: ArtworkPreviewCardProps) {
             </div>
           </>
         ) : (
-          <div className="w-full h-full flex flex-col items-center justify-center text-red-400/90 space-y-2 p-4 text-center">
+          <div className="w-full h-full flex flex-col items-center justify-center text-[#A8321C] space-y-2 p-4 text-center">
             {imageError ? (
               <>
-                <ImageOff className="w-8 h-8 opacity-75 text-red-400" />
-                <span className="text-xs font-semibold text-red-300">
+                <ImageOff className="w-8 h-8 opacity-75 text-[#A8321C]" />
+                <span className="text-xs font-semibold text-[#A8321C]">
                   {isVie
                     ? 'Hình ảnh bị hỏng hoặc liên kết không truy cập được'
                     : 'Image corrupted or inaccessible URL'}
                 </span>
-                <span className="text-[10px] text-[#8A8FA9] max-w-xs truncate">
+                <span className="text-[10px] text-[#6E6459] max-w-xs truncate">
                   {artwork.imageUrl}
                 </span>
               </>
             ) : (
               <>
-                <Sparkles className="w-8 h-8 opacity-50 text-[#C5C9F8]" />
-                <span className="text-xs text-[#C5C9F8]">
+                <Sparkles className="w-8 h-8 opacity-50 text-[#8C3718]" />
+                <span className="text-xs text-[#8C3718]">
                   {isVie ? 'Không có ảnh xem trước' : 'No image preview available'}
                 </span>
               </>
@@ -122,7 +122,7 @@ export function ArtworkPreviewCard({ artwork }: ArtworkPreviewCardProps) {
         )}
 
         {/* Resolution & File Size overlay badge */}
-        <div className="absolute bottom-3 left-3 px-3 py-1 bg-black/75 backdrop-blur-md rounded-full text-[10px] text-white font-mono border border-white/15 flex items-center gap-2 shadow-lg">
+        <div className="absolute bottom-3 left-3 px-3 py-1 bg-[#F0E7D8]/75 backdrop-blur-md rounded-full text-[10px] text-[#241F1A] font-mono border border-[#221E1A]/10 flex items-center gap-2 shadow-lg">
           <span>{isVie ? 'Độ phân giải:' : 'Res:'} {artwork.resolution?.trim() || (isVie ? 'Chưa có' : 'N/A')}</span>
           <span>•</span>
           <span>{isVie ? 'Kích thước:' : 'Size:'} {formatFileSize(artwork.fileSizeBytes)}</span>
@@ -131,18 +131,18 @@ export function ArtworkPreviewCard({ artwork }: ArtworkPreviewCardProps) {
 
       {/* Artwork Meta: Title & Description */}
       <div className="space-y-1">
-        <h4 className="font-h1 font-bold text-white text-sm">{artwork.title}</h4>
+        <h4 className="font-h1 font-bold text-[#241F1A] text-sm">{artwork.title}</h4>
         {artwork.description && (
-          <p className="text-xs text-[#8A8FA9] leading-relaxed line-clamp-2">
+          <p className="text-xs text-[#6E6459] leading-relaxed line-clamp-2">
             {artwork.description}
           </p>
         )}
       </div>
 
       {/* Creator Profile snippet */}
-      <div className="flex items-center justify-between p-3 rounded-xl bg-black/30 border border-white/5 text-xs">
+      <div className="flex items-center justify-between p-3 rounded-xl bg-[#F0E7D8] border border-[#221E1A]/10 text-xs">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full bg-red-500/20 border border-red-500/30 overflow-hidden relative shrink-0 flex items-center justify-center text-red-400">
+          <div className="w-9 h-9 rounded-full bg-[#A8321C]/20 border border-[#A8321C]/40 overflow-hidden relative shrink-0 flex items-center justify-center text-[#A8321C]">
             {artwork.creatorAvatarUrl ? (
               <Image
                 src={artwork.creatorAvatarUrl}
@@ -157,16 +157,16 @@ export function ArtworkPreviewCard({ artwork }: ArtworkPreviewCardProps) {
             )}
           </div>
           <div>
-            <span className="font-bold text-white block font-body">
+            <span className="font-bold text-[#241F1A] block font-body">
               {artwork.creatorName}
             </span>
-            <span className="text-[10px] text-[#8A8FA9] block">
+            <span className="text-[10px] text-[#6E6459] block">
               @{artwork.creatorUsername || 'creator'}
             </span>
           </div>
         </div>
 
-        <div className="text-right text-[10px] text-[#8A8FA9]">
+        <div className="text-right text-[10px] text-[#6E6459]">
           <span className="flex items-center gap-1 justify-end">
             <Calendar className="w-3 h-3" />
             <span>
@@ -176,7 +176,7 @@ export function ArtworkPreviewCard({ artwork }: ArtworkPreviewCardProps) {
             </span>
           </span>
           {(artwork.categoryName || artwork.style) && (
-            <span className="inline-block mt-1 px-2 py-0.5 rounded-full bg-[#A7ACD9]/15 border border-[#A7ACD9]/30 font-semibold text-[#C5C9F8] text-[10px]">
+            <span className="inline-block mt-1 px-2 py-0.5 rounded-full bg-[#B24A26]/15 border border-[#B24A26]/30 font-semibold text-[#8C3718] text-[10px]">
               {artwork.categoryName || artwork.style}
             </span>
           )}
@@ -184,8 +184,8 @@ export function ArtworkPreviewCard({ artwork }: ArtworkPreviewCardProps) {
       </div>
 
       {/* Stored artwork tags do not include AI provenance. */}
-      <div className="space-y-2 pt-1 border-t border-white/10">
-        <div className="flex items-center gap-1.5 text-[10px] text-[#8A8FA9] font-bold uppercase tracking-wider">
+      <div className="space-y-2 pt-1 border-t border-[#221E1A]/10">
+        <div className="flex items-center gap-1.5 text-[10px] text-[#6E6459] font-bold uppercase tracking-wider">
           <Tag className="w-3 h-3" />
           <span>{isVie ? 'Tags của tác phẩm' : 'Artwork Tags'}</span>
         </div>
@@ -195,25 +195,29 @@ export function ArtworkPreviewCard({ artwork }: ArtworkPreviewCardProps) {
             artwork.tags.map((tag) => (
               <span
                 key={tag.tagId || tag.name}
-                className="px-3 py-1 rounded-full bg-[#C5C9F8]/15 text-[#C5C9F8] font-bold border border-[#C5C9F8]/20 hover:bg-[#C5C9F8]/25 transition-colors"
+                className="px-3 py-1 rounded-full bg-[#8C3718]/15 text-[#8C3718] font-bold border border-[#8C3718]/20 hover:bg-[#8C3718]/25 transition-colors"
               >
                 #{tag.name}
               </span>
             ))
           ) : (
-            <span className="text-[#8A8FA9]">{isVie ? 'Chưa gắn tag' : 'No tags assigned'}</span>
+            <span className="text-[#6E6459]">{isVie ? 'Chưa gắn tag' : 'No tags assigned'}</span>
           )}
 
           {/* AI generated status pill */}
           <span
             className={`px-3 py-1 rounded-full font-bold border text-[10px] flex items-center gap-1 ${
               artwork.isAiGenerated
-                ? 'bg-purple-500/20 text-purple-300 border-purple-500/30'
-                : 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
+                ? 'bg-[#5F3F86]/20 text-[#5F3F86] border-[#5F3F86]/40'
+                : 'bg-[#2F6B63]/20 text-[#2F6B63] border-[#2F6B63]/40'
             }`}
           >
             <Bot className="w-3 h-3" />
-            <span>{artwork.isAiGenerated ? 'Được đánh dấu là ảnh AI' : 'Chưa đánh dấu là ảnh AI'}</span>
+            <span>
+              {artwork.isAiGenerated
+                ? (isVie ? 'Được đánh dấu là ảnh AI' : 'Flagged as AI-generated')
+                : (isVie ? 'Chưa đánh dấu là ảnh AI' : 'Not flagged as AI')}
+            </span>
           </span>
         </div>
       </div>
@@ -221,13 +225,13 @@ export function ArtworkPreviewCard({ artwork }: ArtworkPreviewCardProps) {
       {/* Fullscreen Lightbox Modal */}
       {showLightbox && (
         <div
-          className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200"
+          className="fixed inset-0 z-50 bg-[#F0E7D8]/90 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200"
           onClick={() => setShowLightbox(false)}
         >
           <button
             type="button"
             onClick={() => setShowLightbox(false)}
-            className="absolute top-6 right-6 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors cursor-pointer"
+            className="absolute top-6 right-6 w-10 h-10 rounded-full bg-[#F0E7D8] hover:bg-[#F0E7D8] text-[#241F1A] flex items-center justify-center transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>

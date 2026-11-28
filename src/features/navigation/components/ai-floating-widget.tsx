@@ -141,10 +141,10 @@ export function AiFloatingWidget({ userId }: { userId: string | null }) {
           ref={panelRef}
           role="dialog"
           aria-label="Cửa sổ trợ lý AI"
-          className="fixed bottom-24 right-4 z-50 flex h-[30rem] w-[24rem] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-3xl border border-white/12 bg-[#1F2335] shadow-2xl sm:right-6"
+          className="fixed bottom-24 right-4 z-50 flex h-[30rem] w-[24rem] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-3xl border border-[#221E1A]/10 bg-[#F7F2E9] shadow-2xl sm:right-6"
         >
           {/* Đầu cửa sổ */}
-          <div className="flex items-center justify-between border-b border-white/10 bg-white/[0.03] px-4 py-3">
+          <div className="flex items-center justify-between border-b border-[#221E1A]/10 bg-[#FFFCF6] px-4 py-3">
             <div className="flex items-center gap-2">
               <span className="flex size-8 items-center justify-center rounded-xl bg-brand-periwinkle/15 text-brand-periwinkle">
                 <Bot size={16} aria-hidden />
@@ -162,7 +162,7 @@ export function AiFloatingWidget({ userId }: { userId: string | null }) {
                 href="/ai"
                 onClick={() => setOpen(false)}
                 title="Mở trang trợ lý đầy đủ"
-                className="rounded-full p-1.5 text-outline transition hover:bg-white/10 hover:text-brand-periwinkle"
+                className="rounded-full p-1.5 text-outline transition hover:bg-[#F0E7D8] hover:text-brand-periwinkle"
               >
                 <Maximize2 size={14} aria-hidden />
               </Link>
@@ -171,7 +171,7 @@ export function AiFloatingWidget({ userId }: { userId: string | null }) {
                 onClick={loadConversation}
                 disabled={loading}
                 title="Tải lại hội thoại"
-                className="rounded-full p-1.5 text-outline transition hover:bg-white/10 hover:text-white disabled:opacity-50"
+                className="rounded-full p-1.5 text-outline transition hover:bg-[#F0E7D8] hover:text-[#241F1A] disabled:opacity-50"
               >
                 <RefreshCw size={14} className={loading ? 'animate-spin' : ''} aria-hidden />
               </button>
@@ -179,7 +179,7 @@ export function AiFloatingWidget({ userId }: { userId: string | null }) {
                 type="button"
                 onClick={() => setOpen(false)}
                 title="Đóng"
-                className="rounded-full p-1.5 text-outline transition hover:bg-white/10 hover:text-white"
+                className="rounded-full p-1.5 text-outline transition hover:bg-[#F0E7D8] hover:text-[#241F1A]"
               >
                 <X size={14} aria-hidden />
               </button>
@@ -187,7 +187,7 @@ export function AiFloatingWidget({ userId }: { userId: string | null }) {
           </div>
 
           {error && (
-            <div role="alert" className="flex items-start gap-2 border-b border-red-400/20 bg-red-500/10 px-4 py-2 text-[11px] text-red-200">
+            <div role="alert" className="flex items-start gap-2 border-b border-[#A8321C]/30 bg-[#A8321C]/10 px-4 py-2 text-[11px] text-[#A8321C]">
               <CircleAlert size={13} className="mt-0.5 shrink-0" aria-hidden />
               <span>{error}</span>
             </div>
@@ -202,7 +202,7 @@ export function AiFloatingWidget({ userId }: { userId: string | null }) {
                 <Link
                   href="/login"
                   onClick={() => setOpen(false)}
-                  className="mt-4 rounded-full bg-brand-periwinkle px-5 py-2 text-xs font-bold text-brand-navy"
+                  className="mt-4 rounded-full bg-brand-periwinkle px-5 py-2 text-xs font-bold text-[#FFFCF6]"
                 >
                   {isEng ? 'Sign In' : 'Đăng nhập'}
                 </Link>
@@ -210,7 +210,7 @@ export function AiFloatingWidget({ userId }: { userId: string | null }) {
             ) : loading && messages.length === 0 ? (
               <div className="space-y-2">
                 {[1, 2, 3].map((i) => (
-                  <div key={i} className="h-12 animate-pulse rounded-2xl bg-white/[0.03]" />
+                  <div key={i} className="h-12 animate-pulse rounded-2xl bg-[#FFFCF6]" />
                 ))}
               </div>
             ) : messages.length === 0 ? (
@@ -221,7 +221,7 @@ export function AiFloatingWidget({ userId }: { userId: string | null }) {
                     key={question}
                     type="button"
                     onClick={() => handleSend(question)}
-                    className="w-full rounded-2xl border border-white/10 bg-white/[0.02] p-2.5 text-left text-[11px] text-on-surface-variant transition hover:border-brand-periwinkle/30 hover:text-brand-periwinkle"
+                    className="w-full rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] p-2.5 text-left text-[11px] text-on-surface-variant transition hover:border-brand-periwinkle/30 hover:text-brand-periwinkle"
                   >
                     {question}
                   </button>
@@ -235,8 +235,8 @@ export function AiFloatingWidget({ userId }: { userId: string | null }) {
                     <div
                       className={`max-w-[88%] rounded-2xl px-3 py-2 text-[11px] leading-relaxed ${
                         isUser
-                          ? 'rounded-tr-none bg-brand-periwinkle text-brand-navy'
-                          : 'rounded-tl-none border border-white/10 bg-white/5 text-on-surface'
+                          ? 'rounded-tr-none bg-brand-periwinkle text-[#FFFCF6]'
+                          : 'rounded-tl-none border border-[#221E1A]/10 bg-[#FFFCF6] text-on-surface'
                       }`}
                     >
                       {isUser ? <p className="whitespace-pre-wrap">{message.content}</p> : <AiMarkdown content={message.content} />}
@@ -254,7 +254,7 @@ export function AiFloatingWidget({ userId }: { userId: string | null }) {
           </div>
 
           {/* Chân: nhập câu hỏi + lối vào trang đầy đủ */}
-          <div className="border-t border-white/10 p-3">
+          <div className="border-t border-[#221E1A]/10 p-3">
             <form
               onSubmit={(event) => {
                 event.preventDefault();
@@ -268,13 +268,13 @@ export function AiFloatingWidget({ userId }: { userId: string | null }) {
                 disabled={!userId}
                 onChange={(event) => setInput(event.target.value)}
                 placeholder={userId ? (isEng ? 'Ask a question...' : 'Nhập câu hỏi...') : (isEng ? 'Sign in required' : 'Cần đăng nhập')}
-                className="min-w-0 flex-1 rounded-2xl border border-white/15 bg-brand-navy/80 px-3 py-2 text-[11px] text-on-surface placeholder:text-outline focus:border-brand-periwinkle focus:outline-none disabled:opacity-50"
+                className="min-w-0 flex-1 rounded-2xl border border-[#221E1A]/10 bg-brand-navy/80 px-3 py-2 text-[11px] text-on-surface placeholder:text-outline focus:border-brand-periwinkle focus:outline-none disabled:opacity-50"
               />
               <button
                 type="submit"
                 disabled={!input.trim() || sending || !userId}
                 title="Gửi câu hỏi"
-                className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-brand-periwinkle text-brand-navy transition hover:brightness-110 disabled:opacity-50"
+                className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-brand-periwinkle text-[#FFFCF6] transition hover:brightness-110 disabled:opacity-50"
               >
                 <Send size={13} aria-hidden />
               </button>
@@ -297,11 +297,11 @@ export function AiFloatingWidget({ userId }: { userId: string | null }) {
         onClick={() => setOpen((prev) => !prev)}
         aria-expanded={open}
         aria-label={open ? (isEng ? 'Close AI assistant' : 'Đóng trợ lý AI') : (isEng ? 'Open AI assistant' : 'Mở trợ lý AI')}
-        className="fixed bottom-6 right-4 z-50 flex size-14 items-center justify-center rounded-full bg-brand-periwinkle text-brand-navy shadow-[0_8px_30px_rgba(167,172,217,0.45)] transition hover:brightness-110 active:scale-95 sm:right-6"
+        className="fixed bottom-6 right-4 z-50 flex size-14 items-center justify-center rounded-full bg-brand-periwinkle text-[#FFFCF6] shadow-[0_8px_30px_rgba(167,172,217,0.45)] transition hover:brightness-110 active:scale-95 sm:right-6"
       >
         {open ? <X size={22} aria-hidden /> : <Sparkles size={22} aria-hidden />}
         {!open && (
-          <span className="absolute -right-0.5 -top-0.5 size-3 rounded-full border-2 border-[#1F2335] bg-emerald-400" />
+          <span className="absolute -right-0.5 -top-0.5 size-3 rounded-full border-2 border-[#F7F2E9] bg-[#2F6B63]/10" />
         )}
       </button>
     </>

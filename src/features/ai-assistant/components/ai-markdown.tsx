@@ -1,3 +1,5 @@
+import Link from 'next/link';
+import { ArrowUpRight } from 'lucide-react';
 import React from 'react';
 
 interface AiMarkdownProps {
@@ -30,10 +32,10 @@ export function AiMarkdown({ content }: AiMarkdownProps) {
     parts.push(
       <div
         key={`code-${blockKey++}`}
-        className="my-3 overflow-hidden rounded-2xl border border-white/10 bg-[#13141f]"
+        className="my-3 overflow-hidden rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6]"
       >
         {language && (
-          <div className="flex items-center justify-between border-b border-white/10 bg-white/[0.03] px-3 py-1.5 font-mono text-[11px] text-brand-periwinkle">
+          <div className="flex items-center justify-between border-b border-[#221E1A]/10 bg-[#FFFCF6] px-3 py-1.5 font-mono text-[11px] text-brand-periwinkle">
             <span>{language}</span>
           </div>
         )}
@@ -94,7 +96,7 @@ function renderRegularMarkdown(text: string): React.ReactNode[] {
     }
     if (trimmed.startsWith('## ')) {
       elements.push(
-        <h2 key={`h2-${lineIdx}`} className="font-h1 text-base font-bold text-white mt-5 mb-2 border-b border-white/10 pb-1">
+        <h2 key={`h2-${lineIdx}`} className="font-h1 text-base font-bold text-[#241F1A] mt-5 mb-2 border-b border-[#221E1A]/10 pb-1">
           {renderInlineFormatting(trimmed.slice(3))}
         </h2>
       );
@@ -103,7 +105,7 @@ function renderRegularMarkdown(text: string): React.ReactNode[] {
     }
     if (trimmed.startsWith('# ')) {
       elements.push(
-        <h1 key={`h1-${lineIdx}`} className="font-h1 text-lg font-bold text-white mt-5 mb-2 border-b border-white/10 pb-1.5">
+        <h1 key={`h1-${lineIdx}`} className="font-h1 text-lg font-bold text-[#241F1A] mt-5 mb-2 border-b border-[#221E1A]/10 pb-1.5">
           {renderInlineFormatting(trimmed.slice(2))}
         </h1>
       );
@@ -113,7 +115,7 @@ function renderRegularMarkdown(text: string): React.ReactNode[] {
 
     // Đường kẻ ngang: ---
     if (trimmed === '---' || trimmed === '***') {
-      elements.push(<hr key={`hr-${lineIdx}`} className="my-3 border-white/10" />);
+      elements.push(<hr key={`hr-${lineIdx}`} className="my-3 border-[#221E1A]/10" />);
       lineIdx++;
       continue;
     }
@@ -159,14 +161,22 @@ function renderRegularMarkdown(text: string): React.ReactNode[] {
       continue;
     }
 
-    // Danh sách đầu dòng (- hoặc *)
+    // Danh sách đầu dòng (- hoặc *), hỗ trợ thụt lề làm mục con
     if (/^[-*]\s+/.test(trimmed)) {
       const listItems: React.ReactNode[] = [];
       while (lineIdx < lines.length && /^[-*]\s+/.test(lines[lineIdx].trim())) {
-        const itemText = lines[lineIdx].trim().replace(/^[-*]\s+/, '');
+        const rawLine = lines[lineIdx];
+        const isNested = /^(\s{2,}|\t+)[-*]\s+/.test(rawLine);
+        const itemText = rawLine.trim().replace(/^[-*]\s+/, '');
         listItems.push(
-          <li key={`li-${lineIdx}`} className="flex items-start gap-2">
-            <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-brand-periwinkle" />
+          <li key={`li-${lineIdx}`} className={`flex items-start gap-2 ${isNested ? 'pl-5 text-[11px] opacity-90' : ''}`}>
+            <span
+              className={
+                isNested
+                  ? 'mt-1.5 size-1 shrink-0 rounded-full border border-brand-periwinkle/70'
+                  : 'mt-1.5 size-1.5 shrink-0 rounded-full bg-brand-periwinkle'
+              }
+            />
             <span className="flex-1">{renderInlineFormatting(itemText)}</span>
           </li>
         );
@@ -180,25 +190,44 @@ function renderRegularMarkdown(text: string): React.ReactNode[] {
       continue;
     }
 
-    // Danh sách đánh số (1. 2. 3.)
+    // Danh sách đánh số (1. 2. 3.), hỗ trợ mục con thụt lề bên dưới
     if (/^\d+\.\s+/.test(trimmed)) {
       const listItems: React.ReactNode[] = [];
       while (lineIdx < lines.length && /^\d+\.\s+/.test(lines[lineIdx].trim())) {
         const itemMatch = lines[lineIdx].trim().match(/^(\d+)\.\s+(.*)/);
+        const itemKey = lineIdx;
+        lineIdx++;
+
+        const subItems: React.ReactNode[] = [];
+        while (lineIdx < lines.length && /^(\s{2,}|\t+)[-*]\s+/.test(lines[lineIdx])) {
+          const subText = lines[lineIdx].trim().replace(/^[-*]\s+/, '');
+          subItems.push(
+            <li key={`sli-${lineIdx}`} className="flex items-start gap-2 text-[11px] opacity-90">
+              <span className="mt-1.5 size-1 shrink-0 rounded-full border border-brand-periwinkle/70" />
+              <span className="flex-1">{renderInlineFormatting(subText)}</span>
+            </li>
+          );
+          lineIdx++;
+        }
+
         if (itemMatch) {
           listItems.push(
-            <li key={`oli-${lineIdx}`} className="flex items-start gap-2">
+            <li key={`oli-${itemKey}`} className="flex items-start gap-2">
               <span className="font-mono text-[11px] font-bold text-brand-periwinkle shrink-0 mt-0.5">
                 {itemMatch[1]}.
               </span>
-              <span className="flex-1">{renderInlineFormatting(itemMatch[2])}</span>
+              <div className="flex-1">
+                <div>{renderInlineFormatting(itemMatch[2])}</div>
+                {subItems.length > 0 && (
+                  <ul className="mt-1 space-y-1 pl-1">{subItems}</ul>
+                )}
+              </div>
             </li>
           );
         }
-        lineIdx++;
       }
       elements.push(
-        <ol key={`ol-${lineIdx}`} className="my-2 space-y-1 pl-1">
+        <ol key={`ol-${lineIdx}`} className="my-2 space-y-2 pl-1">
           {listItems}
         </ol>
       );
@@ -219,17 +248,33 @@ function renderRegularMarkdown(text: string): React.ReactNode[] {
 
 function renderInlineFormatting(text: string): React.ReactNode {
   // Biểu thức chính quy tách:
-  // 1. In đậm: **text**
-  // 2. In nghiêng: *text*
-  // 3. Inline code: `text`
-  const regex = /(\*\*.*?\*\*|\*.*?\*|`.*?`)/g;
+  // 1. Link nội bộ Markdown: [label](/path)
+  // 2. In đậm: **text**
+  // 3. In nghiêng: *text*
+  // 4. Inline code: `text`
+  const regex = /(\[[^[\]]+\]\(\/[^\s)]+\)|\*\*.*?\*\*|\*.*?\*|`.*?`)/g;
   const parts = text.split(regex);
 
   return parts.map((part, index) => {
+    const linkMatch = /^\[([^[\]]+)\]\((\/[^\s)]+)\)$/.exec(part);
+    if (linkMatch) {
+      const label = linkMatch[1].replace(/^\*\*|\*\*$/g, '');
+      const href = linkMatch[2];
+      return (
+        <Link
+          key={index}
+          href={href}
+          className="ai-link-pill inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 font-semibold transition"
+        >
+          <span>{label}</span>
+          <ArrowUpRight className="h-3 w-3 shrink-0" aria-hidden="true" />
+        </Link>
+      );
+    }
     if (part.startsWith('**') && part.endsWith('**') && part.length >= 4) {
       return (
-        <strong key={index} className="font-bold text-white">
-          {part.slice(2, -2)}
+        <strong key={index} className="font-bold text-[#241F1A]">
+          {renderInlineFormatting(part.slice(2, -2))}
         </strong>
       );
     }
@@ -244,7 +289,7 @@ function renderInlineFormatting(text: string): React.ReactNode {
       return (
         <code
           key={index}
-          className="rounded-md border border-white/10 bg-black/30 px-1.5 py-0.5 font-mono text-[11px] text-brand-periwinkle"
+          className="rounded-md border border-[#221E1A]/10 bg-[#F0E7D8] px-1.5 py-0.5 font-mono text-[11px] text-brand-periwinkle"
         >
           {part.slice(1, -1)}
         </code>
@@ -286,15 +331,15 @@ function renderTable(tableLines: string[], key: string): React.ReactNode {
     alignments[index] === 'center' ? 'text-center' : alignments[index] === 'right' ? 'text-right' : 'text-left';
 
   return (
-    <div key={key} className="my-3 overflow-x-auto rounded-2xl border border-white/10">
+    <div key={key} className="my-3 overflow-x-auto rounded-2xl border border-[#221E1A]/10">
       <table className="w-full min-w-[20rem] border-collapse text-xs">
         <thead>
-          <tr className="bg-white/[0.05]">
+          <tr className="bg-[#FFFCF6]">
             {headers.map((header, columnIndex) => (
               <th
                 key={columnIndex}
                 scope="col"
-                className={`border-b border-white/15 px-3 py-2 font-bold text-brand-periwinkle ${alignClass(columnIndex)}`}
+                className={`border-b border-[#221E1A]/10 px-3 py-2 font-bold text-brand-periwinkle ${alignClass(columnIndex)}`}
               >
                 {renderInlineFormatting(header)}
               </th>
@@ -303,12 +348,12 @@ function renderTable(tableLines: string[], key: string): React.ReactNode {
         </thead>
         <tbody>
           {bodyRows.map((row, rowIndex) => (
-            <tr key={rowIndex} className={rowIndex % 2 === 1 ? 'bg-white/[0.02]' : undefined}>
+            <tr key={rowIndex} className={rowIndex % 2 === 1 ? 'bg-[#FFFCF6]' : undefined}>
               {/* Ô thiếu thì để trống, ô thừa thì cắt bỏ — luôn khớp số cột tiêu đề. */}
               {headers.map((_, columnIndex) => (
                 <td
                   key={columnIndex}
-                  className={`border-b border-white/5 px-3 py-2 align-top text-on-surface ${alignClass(columnIndex)}`}
+                  className={`border-b border-[#221E1A]/10 px-3 py-2 align-top text-on-surface ${alignClass(columnIndex)}`}
                 >
                   {renderInlineFormatting(row[columnIndex] ?? '')}
                 </td>

@@ -1,4 +1,8 @@
 'use client';
+import { normalizeEventStatus, getEventStatusLabel } from '@/features/event/types/event.types';
+
+import Link from 'next/link';
+import Image from 'next/image';
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
@@ -10,9 +14,10 @@ import {
   Flame,
   HelpCircle,
   ChevronLeft,
+  ArrowRight,
   ChevronRight,
 } from 'lucide-react';
-import type { EventListItemDto, EventFilters, EventSortOption, EventStatsDto } from '../../types/event.types';
+import type {  EventListItemDto, EventFilters, EventSortOption, EventStatsDto } from '../../types/event.types';
 import { eventService, isFeaturedCarouselEvent, sortEventItems } from '../../services/event.service';
 import { EventCard } from './event-card';
 import { EventSpotlightHero } from './event-spotlight-hero';
@@ -153,103 +158,89 @@ export function EventListScreen({}: EventListScreenProps) {
   };
 
   return (
-    <div className="mx-auto w-full max-w-7xl px-4 pb-20 pt-8 sm:px-6 lg:pt-12 text-[#e4e1e5]">
-      {/* 1. Header & Page Intro */}
-      <div className="mb-10 flex flex-wrap items-end justify-between gap-6 border-b border-white/10 pb-8">
-        <div className="max-w-3xl">
-          <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-brand-periwinkle/30 bg-brand-periwinkle/10 px-3.5 py-1 text-xs font-semibold text-brand-periwinkle">
-            <Trophy size={13} className="text-amber-300" />
-            <span>{isVie ? 'Cuộc thi Nghệ thuật & Sân chơi Sáng tạo' : 'Art Competitions & Creative Showcase'}</span>
-          </div>
-
-          <h1 className="font-h1 text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white leading-tight">
-            {isVie ? 'Cuộc thi & Sự kiện Minh họa' : 'Illustration Contests & Events'}
-          </h1>
-
-          <p className="mt-3 text-sm sm:text-base text-[#A7ACD9] leading-relaxed">
+    <div className="mx-auto w-full max-w-7xl px-4 pb-20 pt-8 sm:px-6 lg:pt-12 text-[#241F1A]">
+      {/* 1. Header */}
+      <header className="page-head">
+        <div>
+          <p className="eyebrow">{isVie ? 'Cuộc thi & sự kiện' : 'Competitions & events'}</p>
+          <h1>{isVie ? 'Sân chơi minh hoạ' : 'Illustration contests'}</h1>
+          <p className="page-head__sub">
             {isVie
-              ? 'Tỏa sáng tài năng nghệ thuật cùng cộng đồng họa sĩ hàng đầu. Nộp tác phẩm nguyên bản, nhận đánh giá chuyên môn từ ban giám khảo và tranh tài giành giải thưởng giá trị.'
-              : 'Showcase your artistic talent with our premier creator community. Submit original artworks, receive professional jury reviews, and compete for prestigious prizes.'}
+              ? 'Nộp tác phẩm nguyên bản, nhận đánh giá từ hội đồng và tranh giải. Mỗi sự kiện là một căn phòng mở.'
+              : 'Submit original work, get jury feedback, compete for prizes. Every event is an open room.'}
           </p>
         </div>
-
-        <div className="flex items-center gap-3">
+        <div className="page-head__actions">
           <button
             type="button"
-            onClick={() => {
-              void loadEvents();
-              void loadFeaturedEvents();
-              void loadStats();
-            }}
+            onClick={() => { void loadEvents(); void loadFeaturedEvents(); void loadStats(); }}
             disabled={loading}
-            className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-xs font-semibold text-white transition hover:border-white/20 hover:bg-white/10 active:scale-95 cursor-pointer"
-            title={isVie ? 'Làm mới danh sách cuộc thi' : 'Refresh contest list'}
+            className="btn btn--outline btn--sm"
           >
-            <RefreshCw size={14} className={loading ? 'animate-spin text-brand-periwinkle' : 'text-brand-periwinkle'} />
-            <span className="hidden sm:inline">{isVie ? 'Làm mới' : 'Refresh'}</span>
+            <RefreshCw size={14} className={loading ? 'animate-spin' : ''} aria-hidden />
+            {isVie ? 'Làm mới' : 'Refresh'}
           </button>
         </div>
-      </div>
+      </header>
 
       {/* 2. Quick Highlight Ticker */}
-      <div className="mb-12 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:gap-5">
-        <div className="glass-container rounded-2xl border border-white/10 p-4 sm:p-5">
-          <div className="flex items-center gap-2 text-xs text-amber-300">
-            <Award size={16} />
-            <span className="font-bold uppercase tracking-wider text-[10px]">
-              {isVie ? 'Tổng giải thưởng' : 'Total Prize Pool'}
+      <div className="mb-12 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:gap-4">
+        <div className="rounded-[var(--r-md)] border border-[var(--hair)] bg-[var(--ink-2)] p-4 shadow-[var(--shadow-card)]">
+          <div className="flex items-center gap-1.5 text-[var(--lumen)]">
+            <Award size={14} aria-hidden />
+            <span className="text-[10px] font-semibold uppercase tracking-[0.12em]">
+              {isVie ? 'Tổng giải thưởng' : 'Total prize pool'}
             </span>
           </div>
-          <p className="mt-2 font-h1 text-xl sm:text-2xl font-extrabold text-white">
-            {stats.formattedTotalPrizePool}
-          </p>
-          <span className="mt-1 block text-[11px] text-[#8A8FA9]">
-            {isVie ? 'Giải thưởng tiền mặt & hợp đồng độc quyền' : 'Cash prizes & exclusive contracts'}
+          <p className="font-h1 mt-2 text-xl text-[var(--ivory)] sm:text-2xl">{stats.formattedTotalPrizePool}</p>
+          <span className="mt-1 block text-[11px] leading-snug text-[var(--ash-dim)]">
+            {isVie ? 'Tiền mặt & hợp đồng độc quyền' : 'Cash prizes & exclusive contracts'}
           </span>
         </div>
 
-        <div className="glass-container rounded-2xl border border-white/10 p-4 sm:p-5">
-          <div className="flex items-center gap-2 text-xs text-brand-periwinkle">
-            <Flame size={16} />
-            <span className="font-bold uppercase tracking-wider text-[10px]">
-              {isVie ? 'Đang mở nộp bài' : 'Open for Submissions'}
+        <div className="rounded-[var(--r-md)] border border-[var(--hair)] bg-[var(--ink-2)] p-4 shadow-[var(--shadow-card)]">
+          <div className="flex items-center gap-1.5 text-[var(--lumen)]">
+            <Flame size={14} aria-hidden />
+            <span className="text-[10px] font-semibold uppercase tracking-[0.12em]">
+              {isVie ? 'Đang mở nộp bài' : 'Open for submissions'}
             </span>
           </div>
-          <p className="mt-2 font-h1 text-xl sm:text-2xl font-extrabold text-white">
-            {stats.openEventsCount} {isVie ? 'Cuộc thi' : 'Contests'}
+          <p className="font-h1 mt-2 text-xl text-[var(--ivory)] sm:text-2xl">
+            {stats.openEventsCount} <span className="text-[var(--ash)]">{isVie ? 'cuộc thi' : 'contests'}</span>
           </p>
-          <span className="mt-1 block text-[11px] text-[#8A8FA9]">
-            {isVie ? 'Đang trong thời hạn nhận bài' : 'Active submission windows'}
+          <span className="mt-1 block text-[11px] leading-snug text-[var(--ash-dim)]">
+            {isVie ? 'Trong thời hạn nhận bài' : 'Active submission windows'}
           </span>
         </div>
 
-        <div className="glass-container rounded-2xl border border-white/10 p-4 sm:p-5">
-          <div className="flex items-center gap-2 text-xs text-emerald-300">
-            <Sparkles size={16} />
-            <span className="font-bold uppercase tracking-wider text-[10px]">
-              {isVie ? 'Bài dự thi' : 'Submitted Artworks'}
+        <div className="rounded-[var(--r-md)] border border-[var(--hair)] bg-[var(--ink-2)] p-4 shadow-[var(--shadow-card)]">
+          <div className="flex items-center gap-1.5 text-[var(--petrol)]">
+            <Sparkles size={14} aria-hidden />
+            <span className="text-[10px] font-semibold uppercase tracking-[0.12em]">
+              {isVie ? 'Bài dự thi' : 'Submitted artworks'}
             </span>
           </div>
-          <p className="mt-2 font-h1 text-xl sm:text-2xl font-extrabold text-white">
-            {stats.totalSubmissionsCount.toLocaleString('en-US')} {isVie ? 'Tác phẩm' : 'Artworks'}
+          <p className="font-h1 mt-2 text-xl text-[var(--ivory)] sm:text-2xl">
+            {stats.totalSubmissionsCount.toLocaleString('en-US')}{' '}
+            <span className="text-[var(--ash)]">{isVie ? 'tác phẩm' : 'artworks'}</span>
           </p>
-          <span className="mt-1 block text-[11px] text-[#8A8FA9]">
-            {isVie ? 'Được kiểm tra quét bản quyền AI' : 'Verified by AI scan'}
+          <span className="mt-1 block text-[11px] leading-snug text-[var(--ash-dim)]">
+            {isVie ? 'Đã quét kiểm bản quyền AI' : 'AI copyright screened'}
           </span>
         </div>
 
-        <div className="glass-container rounded-2xl border border-white/10 p-4 sm:p-5">
-          <div className="flex items-center gap-2 text-xs text-[#A7ACD9]">
-            <ShieldCheck size={16} />
-            <span className="font-bold uppercase tracking-wider text-[10px]">
-              {isVie ? 'Minh bạch & Công bằng' : 'Fair & Transparent'}
+        <div className="rounded-[var(--r-md)] border border-[var(--hair)] bg-[var(--ink-2)] p-4 shadow-[var(--shadow-card)]">
+          <div className="flex items-center gap-1.5 text-[var(--petrol)]">
+            <ShieldCheck size={14} aria-hidden />
+            <span className="text-[10px] font-semibold uppercase tracking-[0.12em]">
+              {isVie ? 'Minh bạch & công bằng' : 'Fair & transparent'}
             </span>
           </div>
-          <p className="mt-2 font-h1 text-xl sm:text-2xl font-extrabold text-white">
-            {isVie ? '100% Nguyên bản' : '100% Original'}
+          <p className="font-h1 mt-2 text-xl text-[var(--ivory)] sm:text-2xl">
+            {isVie ? '100% nguyên bản' : '100% original'}
           </p>
-          <span className="mt-1 block text-[11px] text-[#8A8FA9]">
-            {isVie ? 'Ban giám khảo chấm + Cộng đồng bình chọn' : 'Jury evaluation + Public voting'}
+          <span className="mt-1 block text-[11px] leading-snug text-[var(--ash-dim)]">
+            {isVie ? 'Giám khảo chấm + cộng đồng bình chọn' : 'Jury scoring + public voting'}
           </span>
         </div>
       </div>
@@ -279,46 +270,61 @@ export function EventListScreen({}: EventListScreenProps) {
 
       {/* 5. Error Alert if any */}
       {error && (
-        <div role="alert" className="mb-8 rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-200">
+        <div role="alert" className="mb-8 rounded-2xl border border-[#A8321C]/40 bg-[#A8321C]/10 p-4 text-sm text-[#A8321C]">
           {error}
         </div>
       )}
 
       {/* 6. Event Cards Grid */}
       {loading ? (
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-          {[1, 2, 3, 4, 5, 6].map((n) => (
-            <div key={n} className="animate-pulse rounded-[2rem] border border-white/10 bg-white/5 p-4 space-y-4">
-              <div className="aspect-[16/10] w-full rounded-2xl bg-white/10" />
-              <div className="h-6 w-3/4 rounded-lg bg-white/10" />
-              <div className="h-4 w-full rounded bg-white/5" />
-              <div className="h-10 w-full rounded-xl bg-white/10" />
-            </div>
+        <ul className="ev-index">
+          {(events.length ? events : []).map((item) => (
+            <li key={item.id}>
+              <Link href={`/events/${item.id}`}>
+                <span className="ev-index__thumb">
+                  {item.bannerUrl ? (
+                    <Image src={item.bannerUrl} alt={item.title} fill unoptimized sizes="90px" className="object-cover" />
+                  ) : null}
+                </span>
+                <span className="min-w-0">
+                  <span className="ev-index__title block">{item.title}</span>
+                  <span className="ev-index__meta">
+                    <span>{item.submissionCount} {isVie ? 'bài dự thi' : 'entries'}</span>
+                    <span>{isVie ? 'Hạn nộp' : 'Closes'} {new Date(item.submissionEndAt).toLocaleDateString('vi-VN')}</span>
+                    {item.prize ? <span>{item.prize}</span> : null}
+                  </span>
+                </span>
+                <span className={`badge ${normalizeEventStatus(item.status) === 'Open' ? 'badge--live' : normalizeEventStatus(item.status) === 'Judging' ? 'badge--soon' : 'badge--done'}`}>
+                  {getEventStatusLabel(item.status, isVie)}
+                </span>
+                <span className="ev-index__arrow" aria-hidden="true"><ArrowRight size={16} /></span>
+              </Link>
+            </li>
           ))}
-        </div>
+        </ul>
       ) : error && events.length === 0 ? (
-        <div className="my-12 rounded-3xl border border-red-500/30 bg-red-500/10 p-10 text-center">
-          <Trophy size={42} className="mx-auto text-red-400/80 mb-3" />
-          <h3 className="font-h1 text-xl font-bold text-white">
+        <div className="my-12 rounded-3xl border border-[#A8321C]/40 bg-[#A8321C]/10 p-10 text-center">
+          <Trophy size={42} className="mx-auto text-[#A8321C] mb-3" />
+          <h3 className="font-h1 text-xl font-bold text-[#241F1A]">
             {isVie ? 'Không thể tải danh sách cuộc thi' : 'Unable to Load Contests'}
           </h3>
-          <p className="mt-1 text-sm text-red-200 max-w-lg mx-auto">{error}</p>
+          <p className="mt-1 text-sm text-[#A8321C] max-w-lg mx-auto">{error}</p>
           <button
             type="button"
             onClick={() => void loadEvents()}
-            className="mt-5 inline-flex items-center gap-2 rounded-2xl bg-red-500/25 border border-red-400/40 px-6 py-2.5 text-xs font-bold text-white cursor-pointer transition hover:bg-red-500/35"
+            className="mt-5 inline-flex items-center gap-2 rounded-2xl bg-[#A8321C]/20 border border-[#A8321C]/40 px-6 py-2.5 text-xs font-bold text-[#241F1A] cursor-pointer transition hover:bg-[#A8321C]/20"
           >
             <RefreshCw size={14} />
             <span>{isVie ? 'Thử tải lại' : 'Retry Loading'}</span>
           </button>
         </div>
       ) : events.length === 0 ? (
-        <div className="my-16 rounded-3xl border border-dashed border-white/15 p-12 text-center">
+        <div className="my-16 rounded-3xl border border-dashed border-[#221E1A]/10 p-12 text-center">
           <Trophy size={42} className="mx-auto text-outline/50 mb-3" />
-          <h3 className="font-h1 text-xl font-bold text-white">
+          <h3 className="font-h1 text-xl font-bold text-[#241F1A]">
             {isVie ? 'Không tìm thấy cuộc thi phù hợp' : 'No matching contests found'}
           </h3>
-          <p className="mt-1 text-sm text-[#8A8FA9] max-w-md mx-auto">
+          <p className="mt-1 text-sm text-[#6E6459] max-w-md mx-auto">
             {isVie
               ? 'Hiện không có sự kiện nào khớp với tiêu chí tìm kiếm. Hãy thử chuyển sang "Tất cả" hoặc xóa từ khóa tìm kiếm.'
               : 'There are currently no events matching your criteria. Try switching to "All (Default)" or clearing your search query.'}
@@ -330,7 +336,7 @@ export function EventListScreen({}: EventListScreenProps) {
               setKeyword('');
               setPage(1);
             }}
-            className="mt-5 rounded-2xl bg-brand-periwinkle px-6 py-2.5 text-xs font-bold text-brand-navy cursor-pointer transition hover:opacity-90"
+            className="mt-5 rounded-2xl bg-brand-periwinkle px-6 py-2.5 text-xs font-bold text-[#FFFCF6] cursor-pointer transition hover:opacity-90"
           >
             {isVie ? 'Xem tất cả cuộc thi' : 'View All Contests'}
           </button>
@@ -345,19 +351,17 @@ export function EventListScreen({}: EventListScreenProps) {
 
       {/* 7. Pagination Controls (9 items per page default) */}
       {!loading && totalPages > 1 && (
-        <div className="mt-12 flex flex-wrap items-center justify-between gap-4 border-t border-white/10 pt-6">
-          <p className="text-xs text-[#8A8FA9]">
+        <div className="mt-12 flex flex-wrap items-center justify-between gap-4 border-t border-[#221E1A]/10 pt-6">
+          <p className="text-xs text-[#6E6459]">
             {isVie ? (
-              <>
-                Hiển thị <span className="font-semibold text-white">{Math.min((page - 1) * pageSize + 1, totalCount)}</span> -{' '}
-                <span className="font-semibold text-white">{Math.min(page * pageSize, totalCount)}</span> trên{' '}
-                <span className="font-semibold text-white">{totalCount}</span> cuộc thi
-              </>
+              <> Hiển thị <span className="font-semibold text-[#241F1A]">{Math.min((page - 1) * pageSize + 1, totalCount)}</span> -{' '}
+                <span className="font-semibold text-[#241F1A]">{Math.min(page * pageSize, totalCount)}</span> trên{' '}
+                <span className="font-semibold text-[#241F1A]">{totalCount}</span> cuộc thi </>
             ) : (
               <>
-                Showing <span className="font-semibold text-white">{Math.min((page - 1) * pageSize + 1, totalCount)}</span> -{' '}
-                <span className="font-semibold text-white">{Math.min(page * pageSize, totalCount)}</span> of{' '}
-                <span className="font-semibold text-white">{totalCount}</span> contests
+                Showing <span className="font-semibold text-[#241F1A]">{Math.min((page - 1) * pageSize + 1, totalCount)}</span> -{' '}
+                <span className="font-semibold text-[#241F1A]">{Math.min(page * pageSize, totalCount)}</span> of{' '}
+                <span className="font-semibold text-[#241F1A]">{totalCount}</span> contests
               </>
             )}
           </p>
@@ -367,7 +371,7 @@ export function EventListScreen({}: EventListScreenProps) {
               type="button"
               onClick={() => handlePageChange(Math.max(1, page - 1))}
               disabled={page <= 1}
-              className="flex h-9 items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-3.5 text-xs font-semibold text-[#c7c5cf] transition hover:border-white/20 hover:bg-white/10 hover:text-white disabled:pointer-events-none disabled:opacity-40 cursor-pointer"
+              className="flex h-9 items-center gap-1.5 rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-3.5 text-xs font-semibold text-[#6E6459] transition hover:border-[#221E1A]/20 hover:bg-[#F0E7D8] hover:text-[#241F1A] disabled:pointer-events-none disabled:opacity-40 cursor-pointer"
             >
               <ChevronLeft size={15} />
               <span>{isVie ? 'Trước' : 'Previous'}</span>
@@ -385,7 +389,7 @@ export function EventListScreen({}: EventListScreenProps) {
                 }, [])
                 .map((item, idx) =>
                   item === '...' ? (
-                    <span key={`ellipsis-${idx}`} className="px-2 text-xs text-[#8A8FA9]">
+                    <span key={`ellipsis-${idx}`} className="px-2 text-xs text-[#6E6459]">
                       ...
                     </span>
                   ) : (
@@ -395,8 +399,8 @@ export function EventListScreen({}: EventListScreenProps) {
                       onClick={() => handlePageChange(Number(item))}
                       className={`h-9 min-w-9 rounded-xl px-3 text-xs font-bold transition cursor-pointer ${
                         page === item
-                          ? 'bg-brand-periwinkle text-brand-navy shadow-[0_4px_15px_rgba(167,172,217,0.3)]'
-                          : 'border border-white/10 bg-white/5 text-[#c7c5cf] hover:border-white/20 hover:bg-white/10 hover:text-white'
+                          ? 'bg-brand-periwinkle text-[#FFFCF6] shadow-[0_4px_15px_rgba(167,172,217,0.3)]'
+                          : 'border border-[#221E1A]/10 bg-[#FFFCF6] text-[#6E6459] hover:border-[#221E1A]/20 hover:bg-[#F0E7D8] hover:text-[#241F1A]'
                       }`}
                     >
                       {item}
@@ -409,7 +413,7 @@ export function EventListScreen({}: EventListScreenProps) {
               type="button"
               onClick={() => handlePageChange(Math.min(totalPages, page + 1))}
               disabled={page >= totalPages}
-              className="flex h-9 items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-3.5 text-xs font-semibold text-[#c7c5cf] transition hover:border-white/20 hover:bg-white/10 hover:text-white disabled:pointer-events-none disabled:opacity-40 cursor-pointer"
+              className="flex h-9 items-center gap-1.5 rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-3.5 text-xs font-semibold text-[#6E6459] transition hover:border-[#221E1A]/20 hover:bg-[#F0E7D8] hover:text-[#241F1A] disabled:pointer-events-none disabled:opacity-40 cursor-pointer"
             >
               <span>{isVie ? 'Tiếp' : 'Next'}</span>
               <ChevronRight size={15} />
@@ -419,16 +423,16 @@ export function EventListScreen({}: EventListScreenProps) {
       )}
 
       {/* 8. Information & Rules Guide Section */}
-      <section className="mt-20 rounded-[2.5rem] border border-white/10 bg-gradient-to-r from-[#161926]/90 via-[#1F2335]/90 to-[#161926]/90 p-8 sm:p-12 backdrop-blur-2xl">
+      <section className="mt-20 rounded-[2.5rem] border border-[#221E1A]/10 bg-gradient-to-r from-[#FFFCF6]/90 via-[#F7F2E9]/90 to-[#FFFCF6]/90 p-8 sm:p-12 backdrop-blur-2xl">
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
           <div className="lg:col-span-5 space-y-3">
             <span className="text-xs font-bold uppercase tracking-wider text-brand-periwinkle flex items-center gap-1.5">
               <HelpCircle size={15} /> {isVie ? 'Hướng dẫn tham gia cho Họa sĩ' : 'Artist Participation Guide'}
             </span>
-            <h2 className="font-h1 text-2xl sm:text-3xl font-extrabold text-white">
+            <h2 className="font-h1 text-2xl sm:text-3xl font-extrabold text-[#241F1A]">
               {isVie ? 'Quy chế, Thể lệ & Hệ thống Đánh giá' : 'Rules, Guidelines & Evaluation System'}
             </h2>
-            <p className="text-xs text-[#8A8FA9] leading-relaxed">
+            <p className="text-xs text-[#6E6459] leading-relaxed">
               {isVie
                 ? 'Các cuộc thi Dillustration được tổ chức thường xuyên nhằm tôn vinh sự sáng tạo, trao quyền cho họa sĩ và kết nối các nhà sáng tạo với nhà sưu tập và các dự án thương mại lớn.'
                 : 'Dillustration competitions are hosted regularly to celebrate creativity, empower artists, and connect creators with collectors and major commercial projects.'}
@@ -436,48 +440,48 @@ export function EventListScreen({}: EventListScreenProps) {
           </div>
 
           <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 space-y-2">
-              <div className="flex items-center gap-2 font-bold text-white text-sm">
+            <div className="rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] p-5 space-y-2">
+              <div className="flex items-center gap-2 font-bold text-[#241F1A] text-sm">
                 <span className="flex size-6 items-center justify-center rounded-lg bg-brand-periwinkle/20 text-brand-periwinkle font-mono text-xs">1</span>
                 {isVie ? 'Chỉ chấp nhận tác phẩm nguyên bản' : 'Original Artworks Only'}
               </div>
-              <p className="text-[#8A8FA9] leading-relaxed">
+              <p className="text-[#6E6459] leading-relaxed">
                 {isVie
                   ? 'Bài dự thi phải là 100% tác phẩm do chính bạn sáng tác. Các tác phẩm được tự động xác minh tính xác thực bản quyền và ngưỡng can thiệp của AI.'
                   : 'Your submission must be 100% your own creation. Works are automatically verified for copyright authenticity and AI intervention thresholds.'}
               </p>
             </div>
 
-            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 space-y-2">
-              <div className="flex items-center gap-2 font-bold text-white text-sm">
-                <span className="flex size-6 items-center justify-center rounded-lg bg-amber-400/20 text-amber-300 font-mono text-xs">2</span>
+            <div className="rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] p-5 space-y-2">
+              <div className="flex items-center gap-2 font-bold text-[#241F1A] text-sm">
+                <span className="flex size-6 items-center justify-center rounded-lg bg-[#8A6A1F]/20 text-[#8A6A1F] font-mono text-xs">2</span>
                 {isVie ? 'Đánh giá chuyên môn BGK' : 'Jury Technical Review'}
               </div>
-              <p className="text-[#8A8FA9] leading-relaxed">
+              <p className="text-[#6E6459] leading-relaxed">
                 {isVie
                   ? 'Hội đồng giám khảo chuyên môn chấm điểm bài thi dựa trên tính sáng tạo, kỹ thuật thực hiện, bố cục màu sắc và tính độc bản.'
                   : 'Our professional jury panel evaluates submissions across creativity, technical execution, color composition, and originality.'}
               </p>
             </div>
 
-            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 space-y-2">
-              <div className="flex items-center gap-2 font-bold text-white text-sm">
-                <span className="flex size-6 items-center justify-center rounded-lg bg-emerald-400/20 text-emerald-300 font-mono text-xs">3</span>
+            <div className="rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] p-5 space-y-2">
+              <div className="flex items-center gap-2 font-bold text-[#241F1A] text-sm">
+                <span className="flex size-6 items-center justify-center rounded-lg bg-[#2F6B63]/20 text-[#2F6B63] font-mono text-xs">3</span>
                 {isVie ? 'Bình chọn cộng đồng' : 'Community Voting'}
               </div>
-              <p className="text-[#8A8FA9] leading-relaxed">
+              <p className="text-[#6E6459] leading-relaxed">
                 {isVie
                   ? 'Mỗi thành viên cộng đồng đã xác minh nhận được lượt bình chọn cố định để ủng hộ nghệ sĩ yêu thích cho giải thưởng Bình chọn Cộng đồng.'
                   : 'Every verified community member receives fixed votes to support their favorite artists for the Community Choice Award.'}
               </p>
             </div>
 
-            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 space-y-2">
-              <div className="flex items-center gap-2 font-bold text-white text-sm">
+            <div className="rounded-2xl border border-[#221E1A]/10 bg-[#FFFCF6] p-5 space-y-2">
+              <div className="flex items-center gap-2 font-bold text-[#241F1A] text-sm">
                 <span className="flex size-6 items-center justify-center rounded-lg bg-brand-periwinkle/20 text-brand-periwinkle font-mono text-xs">4</span>
                 {isVie ? 'Giải thưởng & Hợp đồng' : 'Awards & Contracts'}
               </div>
-              <p className="text-[#8A8FA9] leading-relaxed">
+              <p className="text-[#6E6459] leading-relaxed">
                 {isVie
                   ? 'Giải thưởng được giải ngân trực tiếp vào ví Dillustration hoặc tài khoản ngân hàng liên kết của bạn, kèm chứng nhận bản quyền có thể xác thực.'
                   : 'Prizes are disbursed directly into your Dillustration wallet or linked bank account, accompanied by verifiable copyright certificates.'}

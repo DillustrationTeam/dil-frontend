@@ -12,6 +12,7 @@ import {
   RefreshCw,
   Search,
   ShieldCheck,
+  Sparkles,
 } from 'lucide-react';
 
 import { chatService } from '../services/chat.service';
@@ -19,8 +20,10 @@ import type { WorkroomUnreadCountDto } from '../types/chat.types';
 import { useNotificationHub } from '@/features/notification/hooks/use-notification-hub';
 import { commissionService } from '@/services/commission.service';
 import type { Commission, CommissionStatus } from '@/types/commission.types';
+import { Reveal } from '@/components/motion';
 
 import { extractErrorMessage } from '@/lib/api-client';
+import { useLanguage } from '@/context/language-context';
 
 /** Trạng thái KHÔNG còn phòng làm việc hoạt động (chưa nhận đơn / đã huỷ). */
 const NO_WORKROOM_STATUSES: CommissionStatus[] = ['PendingAcceptance', 'Negotiating'];
@@ -36,19 +39,20 @@ const STATUS_LABEL: Record<CommissionStatus, string> = {
   Disputed: 'Đang khiếu nại',
 };
 
+/** Badge theo hệ màu giấy: "live" là đỏ son, "ok" là petrol, "done" là mực nhạt. */
 const STATUS_TONE: Record<CommissionStatus, string> = {
-  PendingAcceptance: 'border-amber-300/30 bg-amber-300/10 text-amber-200',
-  InProgress: 'border-brand-periwinkle/40 bg-brand-periwinkle/15 text-brand-periwinkle',
-  Negotiating: 'border-amber-300/30 bg-amber-300/10 text-amber-200',
-  SubmittedFinal: 'border-sky-300/30 bg-sky-300/10 text-sky-200',
-  Delivered: 'border-sky-300/30 bg-sky-300/10 text-sky-200',
-  Completed: 'border-emerald-300/30 bg-emerald-300/10 text-emerald-200',
-  Cancelled: 'border-white/15 bg-white/5 text-outline',
-  Disputed: 'border-red-400/30 bg-red-400/10 text-red-200',
+  PendingAcceptance: 'badge--soon',
+  InProgress: 'badge--info',
+  Negotiating: 'badge--soon',
+  SubmittedFinal: 'badge--info',
+  Delivered: 'badge--info',
+  Completed: 'badge--ok',
+  Cancelled: 'badge--done',
+  Disputed: 'badge--live',
 };
 
 function money(value?: number | null): string {
-  return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value ?? 0);
+  return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 }).format(value ?? 0);
 }
 
 function lastActivity(iso?: string | null): string {
@@ -96,6 +100,8 @@ export function WorkroomListScreen({ userId }: { userId: string | null }) {
   const [deadlineFilter, setDeadlineFilter] = useState<DeadlineFilterKey>('all');
   const [sortBy, setSortBy] = useState<SortKey>('newest');
   const [keyword, setKeyword] = useState('');
+  const { lang } = useLanguage();
+  const isVie = lang === 'VIE';
 
   const load = useCallback(async () => {
     if (!userId) return;
@@ -243,8 +249,6 @@ export function WorkroomListScreen({ userId }: { userId: string | null }) {
       if (filter === 'disputed' && status !== 'Disputed') return false;
       if (filter === 'done' && status !== 'Completed') return false;
       if (filter === 'cancelled' && status !== 'Cancelled') return false;
-      if (filter === 'disputed' && status !== 'Disputed') return false;
-      if (filter === 'done' && status !== 'Completed') return false;
 
       if (roleFilter !== 'all' && row.viewerRole !== roleFilter) return false;
 
@@ -286,20 +290,18 @@ export function WorkroomListScreen({ userId }: { userId: string | null }) {
     };
   }, [rows]);
 
+  const unreadRooms = rows.filter(
+    (r) => r.unreadCount > 0 && r.commission.status !== 'Completed' && r.commission.status !== 'Cancelled',
+  );
+
   if (!userId) {
     return (
-      <div className="mx-auto max-w-4xl px-1 py-10">
-        <div className="glass-container rounded-3xl border border-white/10 p-10 text-center">
-          <CircleAlert size={40} className="mx-auto mb-4 text-brand-periwinkle" aria-hidden />
-          <h1 className="font-h1 text-xl font-bold text-on-surface">Cần đăng nhập để xem phòng làm việc</h1>
-          <p className="mt-2 text-sm text-on-surface-variant">
-            Phòng làm việc chỉ hiển thị với chủ sở hữu đơn hàng.
-          </p>
-          <Link
-            href="/login"
-            className="commission-primary mt-6 inline-flex items-center gap-2 rounded-xl px-6 py-2.5 text-xs font-bold"
-          >
-            Đăng nhập <ArrowRight size={15} aria-hidden />
+      <div className="wrap max-w-4xl py-10">
+        <div className="pane text-center">
+          <CircleAlert size={40} className="mx-auto mb-4 text-[#B24A26]" aria-hidden />
+          <h1 className="text-2xl text-[#241F1A]">Cần đăng nhập để xem phòng làm việc</h1>
+          <p className="mt-2 text-sm text-[#6E6459]">Phòng làm việc chỉ hiển thị với chủ sở hữu đơn hàng.</p>
+          <Link href="/login" className="btn btn--primary mt-6"> Đăng nhập <ArrowRight size={15} aria-hidden />
           </Link>
         </div>
       </div>
@@ -307,157 +309,153 @@ export function WorkroomListScreen({ userId }: { userId: string | null }) {
   }
 
   return (
-    <div className="mx-auto w-full max-w-6xl space-y-6 text-on-surface">
-      <header className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+    <div className="wrap w-full max-w-6xl">
+      <header className="page-head">
         <div>
+          <p className="eyebrow">Phòng làm việc</p>
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="font-h1 text-2xl font-bold">Phòng làm việc</h1>
-            {rows.some((r) => r.unreadCount > 0 && r.commission.status !== 'Completed' && r.commission.status !== 'Cancelled') && (
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-[#A7ACD9] bg-[#A7ACD9] px-3 py-1 text-xs font-extrabold text-[#1F2335] shadow-md shadow-[#A7ACD9]/25">
-                <span className="h-2 w-2 animate-ping rounded-full bg-[#1F2335]" />
-                {rows.filter((r) => r.unreadCount > 0 && r.commission.status !== 'Completed' && r.commission.status !== 'Cancelled').length} phòng có tin mới
+            <h1>Trao đổi &amp; duyệt tiến độ</h1>
+            {unreadRooms.length > 0 && (
+              <span className="unread-pill">
+                <span className="unread-pill__dot" />
+                {unreadRooms.length} phòng có tin mới
               </span>
             )}
           </div>
-          <p className="mt-1 text-sm text-on-surface-variant">
-            Trao đổi phác thảo, duyệt tiến độ và nhận tệp hoàn thiện cho từng đơn.
-          </p>
+          <p className="page-head__sub"> Phác thảo, mốc thanh toán và tệp hoàn thiện của từng đơn — tất cả trong một phòng. </p>
         </div>
-        <button
-          type="button"
-          onClick={() => void load()}
-          disabled={loading}
-          className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-xs font-semibold text-on-surface transition hover:bg-white/10 disabled:opacity-50"
-        >
-          <RefreshCw size={14} className={loading ? 'animate-spin' : ''} aria-hidden /> Làm mới
-        </button>
+        <div className="page-head__actions">
+          <button type="button" onClick={() => void load()} disabled={loading} className="btn btn--outline btn--sm">
+            <RefreshCw size={14} className={loading ? 'animate-spin' : ''} aria-hidden /> Làm mới </button>
+        </div>
       </header>
 
-      <div className="grid grid-cols-1 gap-3 text-xs sm:grid-cols-3">
-        <MetricCard label="Phòng đang hoạt động" value={`${metrics.active} phòng`} />
-        <MetricCard label="Tiền đang ký quỹ" value={money(metrics.escrow)} />
-        <MetricCard label="Đã hoàn tất" value={`${metrics.completed} đơn`} />
+      {/* Ba con số thành một dòng lặng lẽ, không phải ba cái thẻ */}
+      <div className="statsline">
+        <span>
+          <b>
+            {metrics.active.toLocaleString('vi-VN')}
+          </b> phòng đang hoạt động </span>
+        <span>
+          <b>
+            {money(metrics.escrow)}
+          </b> đang ký quỹ </span>
+        <span>
+          <b>
+            {metrics.completed.toLocaleString('vi-VN')}
+          </b> đơn đã hoàn tất </span>
       </div>
 
-      <section className="rounded-2xl border border-white/10 bg-white/[0.035] p-5 sm:p-6">
-        <div className="flex flex-col gap-3 border-b border-white/10 pb-4">
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-            <div className="inline-flex flex-wrap rounded-xl border border-white/10 bg-black/20 p-1">
-              {([
-                ['all', 'Tất cả'],
-                ['active', 'Đang làm'],
-                ['disputed', 'Đang khiếu nại'],
-                ['done', 'Hoàn tất'],
-                ['cancelled', 'Đã hủy'],
-              ] as const).map(([key, label]) => (
-                <button
-                  key={key}
-                  type="button"
-                  onClick={() => setFilter(key)}
-                  className={`rounded-lg px-3.5 py-1.5 text-[11px] font-bold transition ${filter === key ? 'bg-brand-periwinkle text-brand-navy' : 'text-on-surface-variant hover:text-on-surface'}`}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-
-            <div className="relative w-full lg:w-72">
-              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-outline" aria-hidden />
-              <input
-                value={keyword}
-                onChange={(event) => setKeyword(event.target.value)}
-                placeholder="Tìm theo tên đơn, mã hoặc đối tác…"
-                className="w-full rounded-xl border border-white/10 bg-black/20 py-2.5 pl-9 pr-3 text-xs text-on-surface outline-none transition placeholder:text-outline focus:border-brand-periwinkle"
-              />
-            </div>
+      <section className="pane room-panel mt-6">
+        <div className="room-filters">
+          <div className="filterbar__tabs" role="tablist" aria-label="Lọc phòng làm việc">
+            {([
+              ['all', 'Tất cả'],
+              ['active', 'Đang làm'],
+              ['disputed', 'Khiếu nại'],
+              ['done', 'Hoàn tất'],
+              ['cancelled', 'Đã huỷ'],
+            ] as const).map(([key, label]) => (
+              <button
+                key={key}
+                type="button"
+                role="tab"
+                aria-selected={filter === key}
+                onClick={() => setFilter(key)}
+                className="fpill"
+              >
+                {label}
+              </button>
+            ))}
           </div>
 
-          <div className="flex flex-wrap items-center gap-2.5">
-            <select
-              aria-label="Lọc theo vai trò"
-              value={roleFilter}
-              onChange={(event) => setRoleFilter(event.target.value as RoleFilterKey)}
-              className="rounded-xl border border-white/10 bg-[#161926] px-3 py-2 text-xs text-on-surface outline-none transition focus:border-brand-periwinkle"
-            >
-              <option value="all">Tất cả vai trò</option>
-              <option value="Client">Bạn là Khách hàng</option>
-              <option value="Creator">Bạn là Họa sĩ</option>
-            </select>
-
-            <select
-              aria-label="Lọc theo hạn chót và ký quỹ"
-              value={deadlineFilter}
-              onChange={(event) => setDeadlineFilter(event.target.value as DeadlineFilterKey)}
-              className="rounded-xl border border-white/10 bg-[#161926] px-3 py-2 text-xs text-on-surface outline-none transition focus:border-brand-periwinkle"
-            >
-              <option value="all">Mọi hạn chót</option>
-              <option value="overdue">Quá hạn</option>
-              <option value="due_soon">Sắp đến hạn (≤ 3 ngày)</option>
-              <option value="escrow">Đang có ký quỹ</option>
-            </select>
-
-            <select
-              aria-label="Sắp xếp phòng làm việc"
-              value={sortBy}
-              onChange={(event) => setSortBy(event.target.value as SortKey)}
-              className="rounded-xl border border-white/10 bg-[#161926] px-3 py-2 text-xs text-on-surface outline-none transition focus:border-brand-periwinkle"
-            >
-              <option value="newest">Mới nhất</option>
-              <option value="deadline">Hạn chót gần nhất</option>
-              <option value="escrow">Ký quỹ cao nhất</option>
-            </select>
-
-            {(filter !== 'all' || roleFilter !== 'all' || deadlineFilter !== 'all' || sortBy !== 'newest' || keyword.trim() !== '') && (
-              <button
-                type="button"
-                onClick={() => {
-                  setFilter('all');
-                  setRoleFilter('all');
-                  setDeadlineFilter('all');
-                  setSortBy('newest');
-                  setKeyword('');
-                }}
-                className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-[11px] font-semibold text-on-surface-variant transition hover:bg-white/10 hover:text-on-surface"
-              >
-                Xóa bộ lọc
-              </button>
-            )}
+          <div className="input-wrap room-search">
+            <Search aria-hidden />
+            <input
+              value={keyword}
+              onChange={(event) => setKeyword(event.target.value)}
+              placeholder={isVie ? 'Tìm theo tên đơn, mã hoặc đối tác…' : 'Search by order, code, or partner…'}
+              aria-label={isVie ? 'Tìm phòng làm việc' : 'Search workrooms'}
+              className="input min-h-11 text-sm"
+            />
           </div>
         </div>
-        {loading ? (
-          <div className="flex min-h-48 items-center justify-center text-sm text-on-surface-variant">
-            <LoaderCircle className="mr-2 h-4 w-4 animate-spin" aria-hidden /> Đang tải phòng làm việc…
-          </div>
-        ) : error ? (
-          <div className="py-12 text-center">
-            <p className="text-sm text-red-300">{error}</p>
+
+        <div className="room-filters room-filters--low">
+          <select
+            aria-label={isVie ? 'Lọc theo vai trò' : 'Filter by role'}
+            value={roleFilter}
+            onChange={(event) => setRoleFilter(event.target.value as RoleFilterKey)}
+            className="input"
+          >
+            <option value="all">{isVie ? 'Tất cả vai trò' : 'All roles'}</option>
+            <option value="Client">{isVie ? 'Bạn là Khách hàng' : 'You are the Client'}</option>
+            <option value="Creator">{isVie ? 'Bạn là Họa sĩ' : 'You are the Creator'}</option>
+          </select>
+
+          <select
+            aria-label={isVie ? 'Lọc theo hạn chót và ký quỹ' : 'Filter by deadline and escrow'}
+            value={deadlineFilter}
+            onChange={(event) => setDeadlineFilter(event.target.value as DeadlineFilterKey)}
+            className="input"
+          >
+            <option value="all">{isVie ? 'Mọi hạn chót' : 'All deadlines'}</option>
+            <option value="overdue">{isVie ? 'Quá hạn' : 'Overdue'}</option>
+            <option value="due_soon">{isVie ? 'Sắp đến hạn (≤ 3 ngày)' : 'Due soon (≤ 3 days)'}</option>
+            <option value="escrow">{isVie ? 'Đang có ký quỹ' : 'Escrow funded'}</option>
+          </select>
+
+          <select
+            aria-label={isVie ? 'Sắp xếp phòng làm việc' : 'Sort workrooms'}
+            value={sortBy}
+            onChange={(event) => setSortBy(event.target.value as SortKey)}
+            className="input"
+          >
+            <option value="newest">{isVie ? 'Mới nhất' : 'Newest'}</option>
+            <option value="deadline">{isVie ? 'Hạn chót gần nhất' : 'Closest deadline'}</option>
+            <option value="escrow">{isVie ? 'Ký quỹ cao nhất' : 'Highest escrow'}</option>
+          </select>
+
+          {(filter !== 'all' || roleFilter !== 'all' || deadlineFilter !== 'all' || sortBy !== 'newest' || keyword.trim() !== '') && (
             <button
               type="button"
-              onClick={() => void load()}
-              className="mt-4 rounded-xl border border-white/15 bg-white/5 px-4 py-2 text-xs font-semibold transition hover:bg-white/10"
-            >
-              Thử lại
-            </button>
+              onClick={() => {
+                setFilter('all');
+                setRoleFilter('all');
+                setDeadlineFilter('all');
+                setSortBy('newest');
+                setKeyword('');
+              }}
+              className="btn btn--ghost btn--sm"
+            > {isVie ? 'Xoá bộ lọc' : 'Clear filters'} </button>
+          )}
+        </div>
+
+        {loading ? (
+          <div className="rooms" aria-busy="true" aria-live="polite">
+            {[0, 1, 2].map((i) => (
+              <div key={i} className="skeleton h-[6.5rem]" />
+            ))}
+            <p className="mt-2 flex items-center gap-2 text-sm text-[#6E6459]">
+              <LoaderCircle className="h-4 w-4 animate-spin" aria-hidden /> Đang tải phòng làm việc… </p>
+          </div>
+        ) : error ? (
+          <div className="py-10 text-center">
+            <p className="text-sm text-[#A8321C]">{error}</p>
+            <button type="button" onClick={() => void load()} className="btn btn--outline btn--sm mt-4"> Thử lại </button>
           </div>
         ) : visibleRows.length === 0 ? (
           <EmptyState hasRows={rows.length > 0} />
         ) : (
-          <div className="mt-5 grid gap-4">
-            {visibleRows.map((row) => (
-              <WorkroomCard key={row.commission.id} row={row} />
+          <div className="rooms">
+            {visibleRows.map((row, index) => (
+              <Reveal key={row.commission.id} delay={Math.min(index, 8) * 45}>
+                <WorkroomCard row={row} />
+              </Reveal>
             ))}
           </div>
         )}
       </section>
-    </div>
-  );
-}
-
-function MetricCard({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-2xl border border-white/10 bg-white/[0.035] p-4">
-      <p className="text-[11px] font-medium text-outline">{label}</p>
-      <p className="mt-2 font-h1 text-lg font-bold text-on-surface">{value}</p>
     </div>
   );
 }
@@ -472,81 +470,62 @@ function WorkroomCard({ row }: { row: WorkroomRow }) {
   const hasUnread = unreadCount > 0 && !isEnded;
 
   return (
-    <article
-      className={`rounded-2xl border p-4 transition sm:p-5 ${
-        hasUnread
-          ? 'border-[#A7ACD9]/70 bg-[#A7ACD9]/[0.08] ring-1 ring-[#A7ACD9]/25 hover:border-[#A7ACD9]'
-          : 'border-white/10 bg-black/20 hover:border-brand-periwinkle/40'
-      }`}
-    >
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="font-mono text-[11px] font-bold text-brand-periwinkle">
-              #CMD-{commission.id.slice(0, 8).toUpperCase()}
-            </span>
-            <span
-              className={`rounded-full border px-2 py-0.5 text-[10px] font-bold ${STATUS_TONE[commission.status]}`}
-            >
-              {STATUS_LABEL[commission.status]}
-            </span>
-            <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] font-semibold text-on-surface-variant">
-              Bạn là {viewerRole === 'Client' ? 'Khách hàng' : 'Họa sĩ'}
-            </span>
-            {hasUnread && (
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-[#A7ACD9] bg-[#A7ACD9] px-3 py-0.5 text-[11px] font-extrabold text-[#1F2335] shadow-md shadow-[#A7ACD9]/25">
-                <span className="relative flex h-2 w-2">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#1F2335] opacity-75" />
-                  <span className="relative inline-flex h-2 w-2 rounded-full bg-[#1F2335]" />
-                </span>
-                {unreadCount} tin nhắn mới
-              </span>
-            )}
-          </div>
-
-          <h2 className="mt-2 truncate text-sm font-bold text-on-surface">{commission.title}</h2>
-
-          <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[11px] text-on-surface-variant">
-            <span className="inline-flex items-center gap-1.5">
-              <MessageSquare size={12} aria-hidden /> {partnerName}
-            </span>
-            <span className="inline-flex items-center gap-1.5">
-              <ShieldCheck size={12} className="text-brand-periwinkle" aria-hidden /> Ký quỹ {money(escrowHeld)}
-            </span>
-            {totalMilestones > 0 && (
-              <span>
-                Tiến độ {approved}/{totalMilestones} mốc
-              </span>
-            )}
-            {remainingDays !== null && (
-              <span
-                className={`inline-flex items-center gap-1.5 ${
-                  remainingDays < 0 ? 'text-red-300' : remainingDays <= 2 ? 'text-amber-200' : ''
-                }`}
-              >
-                <CalendarClock size={12} aria-hidden />
-                {remainingDays < 0
-                  ? `Quá hạn ${Math.abs(remainingDays)} ngày`
-                  : remainingDays === 0
-                    ? 'Hạn hôm nay'
-                    : `Còn ${remainingDays} ngày`}
-              </span>
-            )}
-            <span>Cập nhật {lastActivity(lastMessageAt || commission.createdAt)}</span>
-          </div>
-        </div>
-
-        <Link
-          href={`/workroom/${commission.id}`}
-          className="commission-primary relative inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl px-5 py-2.5 text-xs font-bold"
-        >
-          Mở phòng làm việc
+    <article className={`wcard ${hasUnread ? 'wcard--unread' : ''}`}>
+      <div className="wcard__main">
+        <div className="wcard__top">
+          <span className="wcard__code">#CMD-{commission.id.slice(0, 8).toUpperCase()}</span>
+          <span className={`badge ${STATUS_TONE[commission.status]}`}>{STATUS_LABEL[commission.status]}</span>
+          <span className="badge">
+            Bạn là {viewerRole === 'Client' ? 'Khách hàng' : 'Họa sĩ'}
+          </span>
           {hasUnread && (
-            <span className="ml-0.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-[#1F2335] px-1.5 text-[11px] font-extrabold text-[#A7ACD9]">
-              {unreadCount}
+            <span className="wcard__ping">
+              <span />
+              {unreadCount} tin mới
             </span>
           )}
-          <ArrowRight size={15} aria-hidden />
+        </div>
+
+        <h2 className="wcard__title">{commission.title}</h2>
+
+        <div className="wcard__facts">
+          <span>
+            <MessageSquare aria-hidden /> {partnerName}
+          </span>
+          <span>
+            <ShieldCheck aria-hidden /> Ký quỹ {money(escrowHeld)}
+          </span>
+          {totalMilestones > 0 && (
+            <span>
+              <Sparkles aria-hidden /> Tiến độ {approved}/{totalMilestones} mốc
+            </span>
+          )}
+          {remainingDays !== null && (
+            <span className={remainingDays < 0 ? 'text-[#A8321C]' : remainingDays <= 2 ? 'text-[#8A6A1F]' : ''}>
+              <CalendarClock aria-hidden />
+              {remainingDays < 0
+                ? `Quá hạn ${Math.abs(remainingDays)} ngày`
+                : remainingDays === 0
+                  ? 'Hạn hôm nay'
+                  : `Còn ${remainingDays} ngày`}
+            </span>
+          )}
+        </div>
+
+        <p className="wcard__last">
+          <MessageSquare aria-hidden /> Cập nhật {lastActivity(lastMessageAt || commission.createdAt)}
+        </p>
+      </div>
+
+      <div className="wcard__action">
+        {/* `commission.price` không tồn tại trong DTO commission nên luôn = 0. */}
+        <span className="wcard__when" title="Giá chốt của đơn">
+          {money(commission.finalPrice ?? commission.totalPrice ?? 0)}
+        </span>
+        <Link href={`/workroom/${commission.id}`} className="btn btn--primary btn--sm">
+          Mở phòng
+          {hasUnread && <span className="rounded-full bg-[#FFFCF6]/25 px-1.5 text-[11px] font-bold">{unreadCount}</span>}
+          <ArrowRight size={14} aria-hidden />
         </Link>
       </div>
     </article>
@@ -555,30 +534,19 @@ function WorkroomCard({ row }: { row: WorkroomRow }) {
 
 function EmptyState({ hasRows }: { hasRows: boolean }) {
   return (
-    <div className="py-14 text-center">
-      <MessageSquare size={40} className="mx-auto mb-3 text-brand-periwinkle" aria-hidden />
-      <h2 className="font-h1 text-base font-bold text-on-surface">
-        {hasRows ? 'Không có phòng nào khớp bộ lọc' : 'Chưa có phòng làm việc nào'}
-      </h2>
-      <p className="mx-auto mt-1 max-w-md text-sm text-on-surface-variant">
+    <div className="empty mt-6">
+      <MessageSquare size={40} className="empty__art" aria-hidden />
+      <h2>{hasRows ? 'Không có phòng nào khớp bộ lọc' : 'Chưa có phòng làm việc nào'}</h2>
+      <p>
         {hasRows
           ? 'Thử đổi bộ lọc hoặc xoá từ khoá tìm kiếm.'
           : 'Phòng làm việc được mở tự động khi họa sĩ nhận đơn đặt vẽ. Bạn cũng có thể mở phòng từ một phiên đấu giá đã thắng.'}
       </p>
       {!hasRows && (
-        <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-          <Link
-            href="/auctions"
-            className="commission-primary inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-xs font-bold"
-          >
-            <Gavel size={15} aria-hidden /> Mở từ sàn đấu giá
-          </Link>
-          <Link
-            href="/client/commissions"
-            className="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/5 px-5 py-2.5 text-xs font-semibold text-on-surface transition hover:bg-white/10"
-          >
-            Xem đơn đặt vẽ
-          </Link>
+        <div className="empty__actions">
+          <Link href="/auctions" className="btn btn--primary btn--sm">
+            <Gavel size={15} aria-hidden /> Mở từ sàn đấu giá </Link>
+          <Link href="/client/commissions" className="btn btn--outline btn--sm"> Xem đơn đặt vẽ </Link>
         </div>
       )}
     </div>

@@ -2,118 +2,13 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { ArrowUpRight, Clock, Eye, Frame, Gavel, Plus, RefreshCw, Search } from 'lucide-react';
+import { Gavel, Plus, RefreshCw, Search } from 'lucide-react';
 import { useLanguage } from '@/context/language-context';
 import { auctionService, auctionError } from '../services/auction.service';
-import { useAuctionClock } from '../hooks/use-auction-clock';
-import { auctionStatusLabels, type AuctionFilters, type AuctionListItemDto } from '../types/auction.types';
-
-function formatVnd(value: number) {
-  return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 }).format(value);
-}
-
-const statusBadgeColors: Record<string, string> = {
-  Active: 'border-emerald-300/30 bg-emerald-950/70 text-emerald-200',
-  Scheduled: 'border-white/15 bg-brand-navy/75 text-on-surface',
-  Ended: 'border-white/15 bg-brand-navy/75 text-on-surface-variant',
-  Settled: 'border-brand-periwinkle/40 bg-brand-periwinkle/15 text-brand-periwinkle',
-  Cancelled: 'border-red-400/40 bg-red-500/15 text-red-300',
-  Expired: 'border-white/20 bg-white/5 text-outline',
-  Disputed: 'border-rose-400/40 bg-rose-500/15 text-rose-200',
-  AwaitingPhysical: 'border-amber-400/40 bg-amber-500/15 text-amber-200',
-  InTransit: 'border-sky-400/40 bg-sky-500/15 text-sky-200',
-  Completed: 'border-emerald-400/40 bg-emerald-500/15 text-emerald-200',
-};
-
-function AuctionCard({ item }: { item: AuctionListItemDto }) {
-  const { lang, t } = useLanguage();
-  const isScheduled = item.auctionStatus === 'Scheduled';
-  const isFinished = ['Settled', 'Ended', 'Cancelled', 'Expired', 'AwaitingPhysical', 'InTransit', 'Completed', 'Disputed'].includes(item.auctionStatus);
-  const targetTime = isScheduled ? item.startAt : item.endAt;
-  const clock = useAuctionClock({ endAt: targetTime });
-  const hasEnded = isFinished || (!isScheduled && clock.isEnded);
-  const displayStatus = (!isFinished && hasEnded && item.auctionStatus === 'Active') ? 'Ended' : item.auctionStatus;
-  const statusText = t(hasEnded && item.auctionStatus === 'Active'
-    ? 'Chờ chốt kết quả'
-    : auctionStatusLabels[displayStatus] || displayStatus);
-  const statusColor = statusBadgeColors[displayStatus] || 'border-white/10 bg-white/5 text-outline';
-  const actionText = t(hasEnded || item.auctionStatus === 'Settled' ? 'Xem kết quả' : 'Xem phiên đấu giá');
-
-  return (
-    <article className="group flex min-h-full flex-col justify-between overflow-hidden rounded-[1.75rem] border border-white/10 bg-white/[0.035] shadow-[0_24px_70px_rgba(6,8,18,0.28)] transition duration-300 hover:-translate-y-1 hover:border-brand-periwinkle/35 hover:bg-white/[0.055]">
-      <div>
-        {/* Khung ảnh tác phẩm */}
-        <div className="relative aspect-[5/4] w-full overflow-hidden bg-black/40">
-          {item.artwork?.thumbnailUrl || item.artwork?.imageUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={item.artwork.thumbnailUrl || item.artwork.imageUrl || '/weblogo.png'}
-              alt={item.artwork.artworkTitle || t('Tranh đấu giá')}
-              className="size-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.035]"
-            />
-          ) : (
-            <div className="flex size-full items-center justify-center text-xs text-outline">
-              {t('Chưa có ảnh xem trước')}
-            </div>
-          )}
-          <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#151827]/80 to-transparent" aria-hidden="true" />
-          <span className={`absolute left-4 top-4 rounded-full border px-3 py-1 text-[11px] font-semibold backdrop-blur-md ${statusColor}`}>
-            {statusText}
-          </span>
-          {item.hasPhysicalCopy && (
-            <span className="absolute left-4 top-13 inline-flex items-center gap-1 rounded-full border border-amber-500/40 bg-amber-950/60 px-2.5 py-0.5 text-[10px] font-semibold text-amber-300 backdrop-blur-md">
-              <Frame size={11} className="shrink-0" aria-hidden /> {t('Có bản vật lý')}
-            </span>
-          )}
-          <span className="absolute bottom-4 right-4 flex items-center gap-1.5 rounded-full border border-white/10 bg-[#11131d]/80 px-3 py-1.5 font-mono text-[11px] tabular-nums text-white backdrop-blur-md">
-            <Clock size={12} className="text-brand-periwinkle" />
-            {isFinished
-              ? (item.auctionStatus === 'Settled' ? t('Đã chốt') : item.auctionStatus === 'Cancelled' ? t('Đã hủy') : t('Đã kết thúc'))
-              : isScheduled 
-                ? (clock.isEnded ? t('Đang mở...') : clock.formatted)
-                : (clock.isEnded ? t('Đã kết thúc') : clock.formatted)}
-          </span>
-        </div>
-
-        {/* Thông tin chi tiết */}
-        <div className="p-6 pb-5">
-          <h3 className="line-clamp-1 font-h1 text-lg font-semibold tracking-[-0.02em] text-on-surface transition-colors group-hover:text-brand-periwinkle">
-            {item.artwork?.artworkTitle || t('Tác phẩm độc bản')}
-          </h3>
-          <p className="mt-1.5 text-xs text-outline">
-            {item.artwork?.style || t('Kỹ thuật số')} · {t('Bản gốc được xác thực')}
-          </p>
-
-          <div className="mt-5 flex items-end justify-between border-t border-white/8 pt-4">
-            <div>
-              <span className="text-[11px] font-medium tracking-wide text-outline">{t('Giá hiện tại')}</span>
-              <p className="mt-1 font-h1 text-xl font-semibold tabular-nums text-brand-periwinkle">
-                {formatVnd(item.currentPrice)}
-              </p>
-            </div>
-            <div className="space-y-1 text-right text-xs text-outline">
-              <span className="block font-medium text-on-surface-variant">
-                {lang === 'VIE' ? `${item.bidCount} lượt trả giá` : `${item.bidCount} bid${item.bidCount === 1 ? '' : 's'}`}
-              </span>
-              <span className="inline-flex items-center gap-1.5 text-[11px]">
-                <Eye size={12} /> {lang === 'VIE' ? `${item.watchCount} người theo dõi` : `${item.watchCount} watcher${item.watchCount === 1 ? '' : 's'}`}
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="px-6 pb-6">
-        <Link
-          href={`/auctions/${item.auctionId}`}
-          className="flex w-full items-center justify-between rounded-2xl border border-white/10 bg-white/[0.045] px-4 py-3 text-sm font-medium text-on-surface transition duration-200 hover:border-brand-periwinkle/40 hover:bg-brand-periwinkle hover:text-brand-navy active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-periwinkle"
-        >
-          {actionText} <ArrowUpRight size={16} />
-        </Link>
-      </div>
-    </article>
-  );
-}
+import type { AuctionFilters, AuctionListItemDto } from '../types/auction.types';
+import { Magnetic, Words } from '@/components/motion';
+import { AuctionCard } from './auction-card';
+import { RecommendationRail } from './recommendation-rail';
 
 export function AuctionListScreen({ userId }: { userId: string | null }) {
   const { t } = useLanguage();
@@ -167,129 +62,154 @@ export function AuctionListScreen({ userId }: { userId: string | null }) {
     ? auctions.filter((a) => (a.artwork?.artworkTitle || '').toLowerCase().includes(keyword.trim().toLowerCase()))
     : auctions;
 
+  // Shelf ids come from the recommendation rail. The grid hides exactly those, so one auction never
+  // appears twice on the page. The rail also caps itself (`maxShelf`) to leave at least 2 for the grid.
+  const [shelfIds, setShelfIds] = useState<string[]>([]);
+  const gridItems = shelfIds.length
+    ? filteredAuctions.filter((item) => !shelfIds.includes(item.auctionId))
+    : filteredAuctions;
+
   return (
-    <div className="mx-auto w-full max-w-7xl px-4 pb-16 pt-10 text-on-surface sm:px-6 lg:pt-14">
+    <div className="wrap page">
       {/* Tiêu đề & Nút tạo */}
-      <div className="mb-10 flex flex-wrap items-end justify-between gap-6">
-        <div className="max-w-2xl">
-          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-brand-periwinkle">{t('Đấu giá tuyển chọn')}</p>
-          <h1 className="text-wrap-balance font-h1 text-3xl font-semibold leading-tight tracking-[-0.035em] sm:text-4xl">
-            {t('Đấu giá tác phẩm nghệ thuật')}
+      <header className="page-head">
+        <div>
+          <p className="eyebrow">{t('Đấu giá tuyển chọn')}</p>
+          <h1>
+            <Words>{t('Đấu giá tác phẩm nghệ thuật')}</Words>
           </h1>
-          <p className="mt-2 text-sm text-on-surface-variant">
+          <p className="page-head__sub">
             {t('Theo dõi phiên đấu giá, sở hữu tác phẩm độc bản.')}
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="page-head__actions">
           {userId && (
-            <Link
-              href="/auctions/create"
-              className="inline-flex items-center gap-2 rounded-2xl bg-brand-periwinkle px-5 py-3 text-sm font-semibold text-brand-navy shadow-[0_12px_30px_rgba(167,172,217,0.18)] transition duration-200 hover:-translate-y-0.5 hover:bg-white active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
-            >
-              <Plus size={17} /> {t('Đăng tác phẩm đấu giá')}
-            </Link>
+            <Magnetic>
+              <Link href="/auctions/create" className="btn btn--primary">
+                <Plus size={17} aria-hidden /> {t('Đăng tác phẩm đấu giá')}
+              </Link>
+            </Magnetic>
           )}
           <button
             type="button"
             onClick={() => loadAuctions(true)}
             disabled={loading}
-            className="rounded-2xl border border-white/10 bg-white/5 p-3 text-outline transition hover:border-white/20 hover:bg-white/10 hover:text-white active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-periwinkle"
+            className="icon-btn"
             title={t('Làm mới danh sách')}
+            aria-label={t('Làm mới danh sách')}
           >
             <RefreshCw size={15} className={loading ? 'animate-spin' : ''} />
           </button>
         </div>
-      </div>
+      </header>
 
-      {/* Thanh bộ lọc */}
-      <div className="mb-8 flex flex-wrap items-center justify-between gap-5 border-y border-white/10 py-4">
-        <div className="flex flex-wrap gap-2 text-xs">
+      {/* Thanh công cụ: trạng thái + tìm kiếm + sắp xếp trên CÙNG một hàng, dính dưới header */}
+      <div className="auc-tools">
+        <div className="auc-seg" role="tablist" aria-label={t('Trạng thái phiên đấu giá')}>
           {[
             { label: 'Đang diễn ra', value: 'Active' },
             { label: 'Sắp diễn ra', value: 'Scheduled' },
             { label: 'Đã hoàn tất', value: 'Settled' },
-            { label: 'Tất cả trạng thái', value: '' },
+            { label: 'Tất cả', value: '' },
           ].map((tab) => (
             <button
               key={tab.value}
               type="button"
+              role="tab"
+              aria-selected={status === tab.value}
               onClick={() => setStatus(tab.value)}
-              className={`rounded-full px-4 py-1.5 font-semibold transition ${
-                status === tab.value
-                  ? 'bg-brand-periwinkle text-brand-navy shadow-[0_6px_18px_rgba(167,172,217,0.14)]'
-                  : 'text-on-surface-variant hover:bg-white/[0.06] hover:text-white'
-              }`}
+              className="auc-seg__item"
             >
               {t(tab.label)}
             </button>
           ))}
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="relative">
-            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-outline" />
+        <div className="auc-tools__right">
+          <label className="auc-search">
+            <Search size={15} aria-hidden />
             <input
-              type="text"
+              type="search"
               value={keyword}
               onChange={(e) => setKeyword(e.target.value)}
-              placeholder={t('Tìm theo tên tranh...')}
-              className="w-56 rounded-xl border border-white/10 bg-white/[0.035] py-2 pl-9 pr-4 text-xs text-on-surface placeholder:text-outline focus:border-brand-periwinkle focus:outline-none focus:ring-2 focus:ring-brand-periwinkle/20"
+              placeholder={t('Tìm theo tên tranh')}
+              aria-label={t('Tìm theo tên tranh')}
             />
-          </div>
+          </label>
 
-          <select
-            value={sort}
-            onChange={(e) => setSort(e.target.value)}
-            className="rounded-xl border border-white/10 bg-brand-navy/80 px-3 py-2 text-xs text-on-surface focus:border-brand-periwinkle focus:outline-none focus:ring-2 focus:ring-brand-periwinkle/20"
-          >
-            <option value="ending_soon">{t('Sắp kết thúc')}</option>
-            <option value="price_desc">{t('Giá cao nhất')}</option>
-            <option value="price_asc">{t('Giá thấp nhất')}</option>
-            {/* Không có option "Nhiều lượt đặt giá": backend chưa hỗ trợ sort theo bidCount,
-                chọn xong thứ tự không đổi nên gây hiểu nhầm là bộ lọc hỏng. */}
-            <option value="newest">{t('Mới nhất')}</option>
-          </select>
+          <label className="auc-sort">
+            <span className="sr-only">{t('Sắp xếp')}</span>
+            <select value={sort} onChange={(e) => setSort(e.target.value)} aria-label={t('Sắp xếp')}>
+              <option value="ending_soon">{t('Sắp kết thúc')}</option>
+              <option value="price_desc">{t('Giá cao nhất')}</option>
+              <option value="price_asc">{t('Giá thấp nhất')}</option>
+              {/* Không có option "Nhiều lượt đặt giá": backend chưa hỗ trợ sort theo bidCount,
+                  chọn xong thứ tự không đổi nên gây hiểu nhầm là bộ lọc hỏng. */}
+              <option value="newest">{t('Mới nhất')}</option>
+            </select>
+          </label>
         </div>
       </div>
 
       {error && (
-        <div role="alert" className="mb-6 rounded-2xl border border-red-400/30 bg-red-500/10 p-4 text-sm text-red-200">
+        <div role="alert" className="auc-alert">
           {error}
         </div>
       )}
 
-      {/* Grid danh sách */}
+      {/* Kệ gợi ý: kệ giữ các phiên của mình, lưới bên dưới bỏ qua đúng những phiên đó.
+          maxShelf giữ lại tối thiểu 2 phiên cho lưới để trang không bị "kệ nuốt hết". */}
+      <RecommendationRail
+        userId={userId}
+        statusFilter={status}
+        onVisibleChange={setShelfIds}
+        maxShelf={Math.max(0, Math.min(3, filteredAuctions.length - 2))}
+      />
+
+      <div className="auc-markethead">
+        <h2 className="auc-markethead__title">
+          {status === 'Scheduled'
+            ? t('Sắp mở')
+            : status === 'Settled'
+              ? t('Đã hoàn tất')
+              : status === ''
+                ? t('Tất cả phiên')
+                : t('Đang diễn ra')}
+        </h2>
+        <p className="auc-markethead__meta">
+          {loading ? t('Đang tải…') : `${gridItems.length} ${t('phiên')}`}
+        </p>
+      </div>
+
+      {/* Lưới chợ */}
       {loading ? (
-        <div className="grid gap-7 sm:grid-cols-2 lg:grid-cols-3">
-          {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-[30rem] animate-pulse rounded-[1.75rem] border border-white/5 bg-white/[0.025]" />
+        <div className="auction-grid" aria-busy="true" aria-live="polite">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <div key={i} className="skeleton h-[27rem] rounded-[24px]" />
           ))}
         </div>
-      ) : filteredAuctions.length === 0 ? (
-        <div className="glass-container rounded-3xl border border-white/10 p-16 text-center">
-          <Gavel size={44} className="mx-auto mb-3 text-outline" />
-          <h2 className="font-h1 text-lg font-bold text-on-surface">{t('Không tìm thấy phiên đấu giá nào')}</h2>
-          <p className="mt-1 text-sm text-on-surface-variant">
-            {t('Hãy thử thay đổi bộ lọc trạng thái hoặc mở phiên đấu giá mới ngay hôm nay.')}
-          </p>
-          <Link
-            href="/auctions/create"
-            className="mt-6 inline-flex items-center gap-2 rounded-full bg-brand-periwinkle px-5 py-2 font-h1 text-xs font-bold text-brand-navy"
-          >
-            <Plus size={14} /> {t('Mở phiên đấu giá mới')}
-          </Link>
+      ) : gridItems.length === 0 ? (
+        <div className="empty">
+          <Gavel size={44} className="empty__art" aria-hidden />
+          <h2>{t('Không tìm thấy phiên đấu giá nào')}</h2>
+          <p>{t('Hãy thử thay đổi bộ lọc trạng thái hoặc mở phiên đấu giá mới ngay hôm nay.')}</p>
+          <div className="empty__actions">
+            <Link href="/auctions/create" className="btn btn--primary btn--sm">
+              <Plus size={14} aria-hidden /> {t('Mở phiên đấu giá mới')}
+            </Link>
+          </div>
         </div>
       ) : (
-        <div className="grid gap-7 sm:grid-cols-2 lg:grid-cols-3">
-          {filteredAuctions.map((item) => (
-            <AuctionCard key={item.auctionId} item={item} />
+        <div className="auction-grid">
+          {gridItems.map((item, index) => (
+            <AuctionCard key={item.auctionId} item={item} index={index} />
           ))}
         </div>
       )}
 
       {/* Phân trang xem thêm */}
       {nextCursor && (
-        <div className="mt-10 text-center">
+        <div className="loadmore">
           <button
             type="button"
             disabled={loadingMore}
@@ -297,7 +217,7 @@ export function AuctionListScreen({ userId }: { userId: string | null }) {
               setLoadingMore(true);
               loadAuctions(false);
             }}
-            className="rounded-full border border-white/15 px-6 py-2.5 font-h1 text-xs font-bold text-on-surface hover:bg-white/10 disabled:opacity-50"
+            className="btn btn--outline"
           >
             {t(loadingMore ? 'Đang tải thêm...' : 'Tải thêm phiên đấu giá')}
           </button>
