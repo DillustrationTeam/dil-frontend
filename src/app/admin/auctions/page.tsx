@@ -216,13 +216,23 @@ export default function AdminAuctionsPage() {
           </div>
         </div>
 
-        <button
-          type="button"
-          onClick={() => void fetchAuctions()}
-          disabled={loading}
-          className="inline-flex items-center gap-2 self-start rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-4 py-2.5 text-xs font-bold text-[#241F1A] transition-colors hover:bg-[#F0E7D8] active:scale-95 disabled:opacity-50"
-        >
-          <RefreshCw className={`h-4 w-4 text-[#B24A26] ${loading ? 'animate-spin' : ''}`} /> Làm mới </button>
+        <div className="flex flex-wrap items-center gap-2 self-start">
+          {/* Lối vào hàng chờ rủi ro: cùng kiểu nút phụ, không thêm mục sidebar mới */}
+          <Link
+            href="/admin/auctions/risk"
+            className="inline-flex items-center gap-2 rounded-xl border border-[#A8321C]/40 bg-[#A8321C]/10 px-4 py-2.5 text-xs font-bold text-[#A8321C] transition-colors hover:bg-[#A8321C]/15 active:scale-95"
+          >
+            <ShieldAlert className="h-4 w-4" /> Hàng chờ rủi ro
+          </Link>
+
+          <button
+            type="button"
+            onClick={() => void fetchAuctions()}
+            disabled={loading}
+            className="inline-flex items-center gap-2 rounded-xl border border-[#221E1A]/10 bg-[#FFFCF6] px-4 py-2.5 text-xs font-bold text-[#241F1A] transition-colors hover:bg-[#F0E7D8] active:scale-95 disabled:opacity-50"
+          >
+            <RefreshCw className={`h-4 w-4 text-[#B24A26] ${loading ? 'animate-spin' : ''}`} /> Làm mới </button>
+        </div>
       </div>
 
       {/* Executive Overview KPI Cards (Consistent with System Overview) */}

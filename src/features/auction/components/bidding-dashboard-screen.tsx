@@ -19,6 +19,7 @@ import {
   Truck,
 } from 'lucide-react';
 import { auctionService, auctionError } from '../services/auction.service';
+import { SellerRiskFlagsCard } from './seller-risk-flags';
 import { useAuctionClock } from '../hooks/use-auction-clock';
 import type { AuctionListItemDto, MyActiveBidDto, MyActiveBidsMeta } from '../types/auction.types';
 import { PageLoader } from '@/features/navigation';
@@ -355,6 +356,9 @@ export function BiddingDashboardScreen({ initialTab = 'all' }: { initialTab?: Da
             <RefreshCw size={14} className={loading ? 'animate-spin' : ''} /> Cập nhật </button>
         </div>
       </div>
+
+      {/* Người bán chỉ thấy thông báo trung tính: phiên đang được xem xét thêm, không có điểm/dấu hiệu */}
+      <SellerRiskFlagsCard />
 
       {error && (
         <div role="alert" className="mb-6 rounded-2xl border border-[#A8321C]/40 bg-[#A8321C]/10 p-4 text-sm text-[#A8321C]">

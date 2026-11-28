@@ -4,6 +4,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { engToVieMap, engToVieRegex } from './translations/eng-to-vie';
 import { extraVieToEngMap, extraVieToEngRegex } from './translations/vie-to-eng';
+import { riskAuctionVieToEngMap, translateRiskSentence } from './translations/risk-auction-i18n';
 
 export type Language = 'VIE' | 'ENG';
 
@@ -153,6 +154,23 @@ const translationMap: Record<string, string> = {
   'BẢN QUYỀN': 'LICENSING',
   'Họa sĩ còn lượt': 'Artist has open slots',
   'Dành cho bạn': 'For You',
+  'Đang được chú ý': 'Getting attention',
+  'Sắp kết thúc, xếp theo lượt theo dõi': 'Ending soon, ordered by watchers',
+  'Chọn theo phong cách và creator bạn từng quan tâm': 'Picked from styles and creators you engaged with',
+  'Những phiên đang được nhiều người theo dõi nhất': 'The auctions with the most watchers right now',
+  'Ẩn gợi ý': 'Hide picks',
+  'Hiện gợi ý': 'Show picks',
+  'Sắp mở': 'Opening soon',
+  'Tất cả phiên': 'All auctions',
+  'phiên': 'auctions',
+  'Đang tải…': 'Loading…',
+  'Lượt đặt giá · Người theo dõi': 'Bids · Watchers',
+  'Bản vật lý': 'Physical copy',
+  'Xem phiên': 'View auction',
+  'Từ creator bạn theo dõi': 'From a creator you follow',
+  'Cùng tầm giá bạn thường đấu': 'In the price range you usually bid',
+  'Có thể bạn quan tâm': 'You might like this',
+  'Sắp kết thúc trong chưa đầy 1 giờ': 'Ends in less than an hour',
   'Đang theo dõi': 'Following',
   'tác phẩm phù hợp': 'matching artworks',
   'Tất cả đánh giá': 'All Ratings',
@@ -334,7 +352,6 @@ const translationMap: Record<string, string> = {
   'Tác phẩm độc bản': 'Exclusive Artwork',
   'Tranh đấu giá': 'Auction artwork',
   'Kỹ thuật số': 'Digital',
-  'Bản gốc được xác thực': 'Verified original',
   'Chờ chốt kết quả': 'Awaiting results',
   'Xem kết quả': 'View results',
   'Xem phiên đấu giá': 'View auction',
@@ -1040,6 +1057,7 @@ const translationMap: Record<string, string> = {
 const mergedTranslationMap: Record<string, string> = {
   ...translationMap,
   ...extraVieToEngMap,
+  ...riskAuctionVieToEngMap,
 };
 
 // Case-insensitive lookup dictionaries built automatically
@@ -1166,6 +1184,13 @@ function translateString(text: string): string {
   // Direct match
   if (mergedTranslationMap[trimmed]) {
     return text.replace(trimmed, mergedTranslationMap[trimmed]);
+  }
+
+  // Câu do backend sinh ra (bằng chứng, tóm tắt, thông báo có số liệu): tra từ điển không bao giờ
+  // khớp vì mỗi câu có số/tên khác nhau, nên phải dịch theo mẫu TRƯỚC khi thử regex chung.
+  const sentence = translateRiskSentence(trimmed);
+  if (sentence) {
+    return text.replace(trimmed, sentence);
   }
 
   // Case-insensitive match
